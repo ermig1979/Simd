@@ -63,9 +63,9 @@ namespace Simd
             void * _where;
         };
 
-        template<class Ch> class XmlNode;
-        template<class Ch> class XmlAttribute;
-        template<class Ch> class XmlDocument;
+        template<class Ch> class Node;
+        template<class Ch> class Attribute;
+        template<class Ch> class Document;
 
         enum NodeType
         {
@@ -110,7 +110,7 @@ namespace Simd
             {
                 static const unsigned char upcase[256] =
                 {
-                    // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  A   B   C   D   E   F
+                 // 0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  A   B   C   D   E   F
                     0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15,   // 0
                     16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,   // 1
                     32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47,   // 2
@@ -164,10 +164,10 @@ namespace Simd
                 Clear();
             }
 
-            XmlNode<Ch> * AllocateNode(NodeType type, const Ch *name = 0, const Ch *value = 0, size_t nameSize = 0, size_t valueSize = 0)
+            Node<Ch> * AllocateNode(NodeType type, const Ch *name = 0, const Ch *value = 0, size_t nameSize = 0, size_t valueSize = 0)
             {
-                void * memory = AllocateAligned(sizeof(XmlNode<Ch>));
-                XmlNode<Ch> *node = new(memory) XmlNode<Ch>(type);
+                void * memory = AllocateAligned(sizeof(Node<Ch>));
+                Node<Ch> *node = new(memory) Node<Ch>(type);
                 if (name)
                 {
                     if (nameSize > 0)
@@ -185,10 +185,10 @@ namespace Simd
                 return node;
             }
 
-            XmlAttribute<Ch> * AllocateAttribute(const Ch * name = 0, const Ch * value = 0, size_t nameSize = 0, size_t valueSize = 0)
+            Attribute<Ch> * AllocateAttribute(const Ch * name = 0, const Ch * value = 0, size_t nameSize = 0, size_t valueSize = 0)
             {
-                void * memory = AllocateAligned(sizeof(XmlAttribute<Ch>));
-                XmlAttribute<Ch> * attribute = new(memory) XmlAttribute<Ch>;
+                void * memory = AllocateAligned(sizeof(Attribute<Ch>));
+                Attribute<Ch> * attribute = new(memory) Attribute<Ch>;
                 if (name)
                 {
                     if (nameSize > 0)
@@ -218,7 +218,7 @@ namespace Simd
                 return result;
             }
 
-            XmlNode<Ch> * CloneNode(const XmlNode<Ch> *source, XmlNode<Ch> *result = 0)
+            Node<Ch> * CloneNode(const Node<Ch> *source, Node<Ch> *result = 0)
             {
                 if (result)
                 {
@@ -230,9 +230,9 @@ namespace Simd
                     result = AllocateNode(source->Type());
                 result->Name(source->Name(), source->NameSize());
                 result->Value(source->Value(), source->ValueSize());
-                for (XmlNode<Ch> *child = source->FirstNode(); child; child = child->NextSibling())
+                for (Node<Ch> *child = source->FirstNode(); child; child = child->NextSibling())
                     result->AppendNode(CloneNode(child));
-                for (XmlAttribute<Ch> *attr = source->FirstAttribute(); attr; attr = attr->NextAttribute())
+                for (Attribute<Ch> *attr = source->FirstAttribute(); attr; attr = attr->NextAttribute())
                     result->AppendAttribute(AllocateAttribute(attr->Name(), attr->Value(), attr->NameSize(), attr->ValueSize()));
                 return result;
             }
@@ -273,7 +273,7 @@ namespace Simd
 
             char * Align(char * ptr)
             {
-                size_t alignment = ((ALIGNMENT - (size_t(ptr) & (ALIGNMENT - 1))) & (ALIGNMENT - 1));
+                size_t alignment = ((Alignment - (size_t(ptr) & (Alignment - 1))) & (Alignment - 1));
                 return ptr + alignment;
             }
 
@@ -320,10 +320,10 @@ namespace Simd
             FreeFunc *_freeFunc;
         };
 
-        template<class Ch = char> class XmlBase
+        template<class Ch = char> class Base
         {
         public:
-            XmlBase()
+            Base()
                 : _name(0)
                 , _value(0)
                 , _parent(0)
@@ -372,7 +372,7 @@ namespace Simd
                 this->Value(value, Detail::Measure(value));
             }
 
-            XmlNode<Ch> * Parent() const
+            Node<Ch> * Parent() const
             {
                 return _parent;
             }
@@ -388,36 +388,36 @@ namespace Simd
             Ch * _value;
             size_t _nameSize;
             size_t _valueSize;
-            XmlNode<Ch> * _parent;
+            Node<Ch> * _parent;
         };
 
-        template<class Ch = char> class XmlAttribute : public XmlBase<Ch>
+        template<class Ch = char> class Attribute : public Base<Ch>
         {
-            friend class XmlNode<Ch>;
+            friend class Node<Ch>;
         public:
-            XmlAttribute()
+            Attribute()
             {
             }
 
-            XmlDocument<Ch> * GetDocument() const
+            Xml::Document<Ch> * Document() const
             {
-                if (XmlNode<Ch> * node = this->parent())
+                if (Node<Ch> * node = this->parent())
                 {
                     while (node->parent())
                         node = node->parent();
-                    return node->Type() == NodeDocument ? static_cast<XmlDocument<Ch> *>(node) : 0;
+                    return node->Type() == NodeDocument ? static_cast<Xml::Document<Ch> *>(node) : 0;
                 }
                 else
                     return 0;
             }
 
-            XmlAttribute<Ch> * PreviousAttribute(const Ch * name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Attribute<Ch> * PreviousAttribute(const Ch * name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlAttribute<Ch> * attribute = _prevAttribute; attribute; attribute = attribute->_prevAttribute)
+                    for (Attribute<Ch> * attribute = _prevAttribute; attribute; attribute = attribute->_prevAttribute)
                         if (Detail::Compare(attribute->Name(), attribute->NameSize(), name, nameSize, caseSensitive))
                             return attribute;
                     return 0;
@@ -426,13 +426,13 @@ namespace Simd
                     return this->_parent ? _prevAttribute : 0;
             }
 
-            XmlAttribute<Ch> * NextAttribute(const Ch * name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Attribute<Ch> * NextAttribute(const Ch * name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlAttribute<Ch> * attribute = _nextAttribute; attribute; attribute = attribute->_nextAttribute)
+                    for (Attribute<Ch> * attribute = _nextAttribute; attribute; attribute = attribute->_nextAttribute)
                         if (Detail::Compare(attribute->Name(), attribute->NameSize(), name, nameSize, caseSensitive))
                             return attribute;
                     return 0;
@@ -442,15 +442,14 @@ namespace Simd
             }
 
         private:
-            XmlAttribute<Ch> *_prevAttribute;
-            XmlAttribute<Ch> *_nextAttribute;
+            Attribute<Ch> *_prevAttribute;
+            Attribute<Ch> *_nextAttribute;
         };
 
-        template<class Ch = char>
-        class XmlNode : public XmlBase<Ch>
+        template<class Ch = char> class Node : public Base<Ch>
         {
         public:
-            XmlNode(NodeType type)
+            Node(NodeType type)
                 : _type(type)
                 , _firstNode(0)
                 , _firstAttribute(0)
@@ -462,21 +461,21 @@ namespace Simd
                 return _type;
             }
 
-            XmlDocument<Ch> * Document() const
+            Xml::Document<Ch> * Document() const
             {
-                XmlNode<Ch> *node = const_cast<XmlNode<Ch> *>(this);
+                Node<Ch> *node = const_cast<Node<Ch> *>(this);
                 while (node->parent())
                     node = node->parent();
-                return node->Type() == NodeDocument ? static_cast<XmlDocument<Ch> *>(node) : 0;
+                return node->Type() == NodeDocument ? static_cast<Xml::Document<Ch> *>(node) : 0;
             }
 
-            XmlNode<Ch> * FirstNode(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Node<Ch> * FirstNode(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlNode<Ch> *child = _firstNode; child; child = child->NextSibling())
+                    for (Node<Ch> *child = _firstNode; child; child = child->NextSibling())
                         if (Detail::Compare(child->Name(), child->NameSize(), name, nameSize, caseSensitive))
                             return child;
                     return 0;
@@ -485,14 +484,14 @@ namespace Simd
                     return _firstNode;
             }
 
-            XmlNode<Ch> * LastNode(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Node<Ch> * LastNode(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 assert(_firstNode);
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlNode<Ch> *child = _lastNode; child; child = child->PreviousSibling())
+                    for (Node<Ch> *child = _lastNode; child; child = child->PreviousSibling())
                         if (Detail::Compare(child->Name(), child->NameSize(), name, nameSize, caseSensitive))
                             return child;
                     return 0;
@@ -501,14 +500,14 @@ namespace Simd
                     return _lastNode;
             }
 
-            XmlNode<Ch> * PreviousSibling(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Node<Ch> * PreviousSibling(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 assert(this->_parent);
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlNode<Ch> *sibling = _prevSibling; sibling; sibling = sibling->_prevSibling)
+                    for (Node<Ch> *sibling = _prevSibling; sibling; sibling = sibling->_prevSibling)
                         if (Detail::Compare(sibling->Name(), sibling->NameSize(), name, nameSize, caseSensitive))
                             return sibling;
                     return 0;
@@ -517,14 +516,14 @@ namespace Simd
                     return _prevSibling;
             }
 
-            XmlNode<Ch> * NextSibling(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Node<Ch> * NextSibling(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 assert(this->_parent);
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlNode<Ch> *sibling = _nextSibling; sibling; sibling = sibling->_nextSibling)
+                    for (Node<Ch> *sibling = _nextSibling; sibling; sibling = sibling->_nextSibling)
                         if (Detail::Compare(sibling->Name(), sibling->NameSize(), name, nameSize, caseSensitive))
                             return sibling;
                     return 0;
@@ -533,13 +532,13 @@ namespace Simd
                     return _nextSibling;
             }
 
-            XmlAttribute<Ch> *FirstAttribute(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Attribute<Ch> *FirstAttribute(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlAttribute<Ch> *attribute = _firstAttribute; attribute; attribute = attribute->_nextAttribute)
+                    for (Attribute<Ch> *attribute = _firstAttribute; attribute; attribute = attribute->_nextAttribute)
                         if (Detail::Compare(attribute->Name(), attribute->NameSize(), name, nameSize, caseSensitive))
                             return attribute;
                     return 0;
@@ -548,13 +547,13 @@ namespace Simd
                     return _firstAttribute;
             }
 
-            XmlAttribute<Ch> * LastAttribute(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
+            Attribute<Ch> * LastAttribute(const Ch *name = 0, size_t nameSize = 0, bool caseSensitive = true) const
             {
                 if (name)
                 {
                     if (nameSize == 0)
                         nameSize = Detail::Measure(name);
-                    for (XmlAttribute<Ch> *attribute = _lastAttribute; attribute; attribute = attribute->_prevAttribute)
+                    for (Attribute<Ch> *attribute = _lastAttribute; attribute; attribute = attribute->_prevAttribute)
                         if (Detail::Compare(attribute->Name(), attribute->NameSize(), name, nameSize, caseSensitive))
                             return attribute;
                     return 0;
@@ -568,7 +567,7 @@ namespace Simd
                 _type = type;
             }
 
-            void PrependNode(XmlNode<Ch> *child)
+            void PrependNode(Node<Ch> *child)
             {
                 assert(child && !child->parent() && child->Type() != NodeDocument);
                 if (FirstNode())
@@ -586,7 +585,7 @@ namespace Simd
                 child->_prevSibling = 0;
             }
 
-            void AppendNode(XmlNode<Ch> *child)
+            void AppendNode(Node<Ch> *child)
             {
                 assert(child && !child->Parent() && child->Type() != NodeDocument);
                 if (FirstNode())
@@ -604,7 +603,7 @@ namespace Simd
                 child->_nextSibling = 0;
             }
 
-            void InsertNode(XmlNode<Ch> * where, XmlNode<Ch> * child)
+            void InsertNode(Node<Ch> * where, Node<Ch> * child)
             {
                 assert(!where || where->parent() == this);
                 assert(child && !child->parent() && child->Type() != NodeDocument);
@@ -625,7 +624,7 @@ namespace Simd
             void RemoveFirstNode()
             {
                 assert(FirstNode());
-                XmlNode<Ch> *child = _firstNode;
+                Node<Ch> *child = _firstNode;
                 _firstNode = child->_nextSibling;
                 if (child->_nextSibling)
                     child->_nextSibling->_prevSibling = 0;
@@ -637,7 +636,7 @@ namespace Simd
             void RemoveLastNode()
             {
                 assert(FirstNode());
-                XmlNode<Ch> *child = _lastNode;
+                Node<Ch> *child = _lastNode;
                 if (child->_prevSibling)
                 {
                     _lastNode = child->_prevSibling;
@@ -648,7 +647,7 @@ namespace Simd
                 child->_parent = 0;
             }
 
-            void RemoveNode(XmlNode<Ch> *where)
+            void RemoveNode(Node<Ch> *where)
             {
                 assert(where && where->parent() == this);
                 assert(FirstNode());
@@ -666,12 +665,12 @@ namespace Simd
 
             void RemoveAllNodes()
             {
-                for (XmlNode<Ch> *node = FirstNode(); node; node = node->_nextSibling)
+                for (Node<Ch> *node = FirstNode(); node; node = node->_nextSibling)
                     node->_parent = 0;
                 _firstNode = 0;
             }
 
-            void PrependAttribute(XmlAttribute<Ch> *attribute)
+            void PrependAttribute(Attribute<Ch> *attribute)
             {
                 assert(attribute && !attribute->parent());
                 if (FirstAttribute())
@@ -689,7 +688,7 @@ namespace Simd
                 attribute->_prevAttribute = 0;
             }
 
-            void AppendAttribute(XmlAttribute<Ch> *attribute)
+            void AppendAttribute(Attribute<Ch> *attribute)
             {
                 assert(attribute && !attribute->Parent());
                 if (FirstAttribute())
@@ -707,7 +706,7 @@ namespace Simd
                 attribute->_nextAttribute = 0;
             }
 
-            void InsertAttribute(XmlAttribute<Ch> *where, XmlAttribute<Ch> *attribute)
+            void InsertAttribute(Attribute<Ch> *where, Attribute<Ch> *attribute)
             {
                 assert(!where || where->parent() == this);
                 assert(attribute && !attribute->parent());
@@ -728,7 +727,7 @@ namespace Simd
             void RemoveFirstAttribute()
             {
                 assert(FirstAttribute());
-                XmlAttribute<Ch> *attribute = _firstAttribute;
+                Attribute<Ch> *attribute = _firstAttribute;
                 if (attribute->_nextAttribute)
                 {
                     attribute->_nextAttribute->_prevAttribute = 0;
@@ -742,7 +741,7 @@ namespace Simd
             void RemoveLastAttribute()
             {
                 assert(FirstAttribute());
-                XmlAttribute<Ch> *attribute = _lastAttribute;
+                Attribute<Ch> *attribute = _lastAttribute;
                 if (attribute->_prevAttribute)
                 {
                     attribute->_prevAttribute->_nextAttribute = 0;
@@ -753,7 +752,7 @@ namespace Simd
                 attribute->_parent = 0;
             }
 
-            void RemoveAttribute(XmlAttribute<Ch> *where)
+            void RemoveAttribute(Attribute<Ch> *where)
             {
                 assert(FirstAttribute() && where->parent() == this);
                 if (where == _firstAttribute)
@@ -770,29 +769,29 @@ namespace Simd
 
             void RemoveAllAttributes()
             {
-                for (XmlAttribute<Ch> *attribute = FirstAttribute(); attribute; attribute = attribute->_nextAttribute)
+                for (Attribute<Ch> *attribute = FirstAttribute(); attribute; attribute = attribute->_nextAttribute)
                     attribute->_parent = 0;
                 _firstAttribute = 0;
             }
 
         private:
-            XmlNode(const XmlNode &);
-            void operator =(const XmlNode &);
+            Node(const Node &);
+            void operator =(const Node &);
 
             NodeType _type;
-            XmlNode<Ch> *_firstNode;
-            XmlNode<Ch> *_lastNode;
-            XmlAttribute<Ch> *_firstAttribute;
-            XmlAttribute<Ch> *_lastAttribute;
-            XmlNode<Ch> *_prevSibling;
-            XmlNode<Ch> *_nextSibling;
+            Node<Ch> *_firstNode;
+            Node<Ch> *_lastNode;
+            Attribute<Ch> *_firstAttribute;
+            Attribute<Ch> *_lastAttribute;
+            Node<Ch> *_prevSibling;
+            Node<Ch> *_nextSibling;
         };
 
-        template<class Ch = char> class XmlDocument : public XmlNode<Ch>, public MemoryPool<Ch>
+        template<class Ch = char> class Document : public Node<Ch>, public MemoryPool<Ch>
         {
         public:
-            XmlDocument()
-                : XmlNode<Ch>(NodeDocument)
+            Document()
+                : Node<Ch>(NodeDocument)
             {
             }
 
@@ -811,7 +810,7 @@ namespace Simd
                     if (*text == Ch('<'))
                     {
                         ++text;
-                        if (XmlNode<Ch> *node = ParseNode<Flags>(text))
+                        if (Node<Ch> *node = ParseNode<Flags>(text))
                             this->AppendNode(node);
                     }
                     else
@@ -862,7 +861,7 @@ namespace Simd
                 {
                     static const unsigned char data[256] =
                     {
-                        // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+                     // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
                         0,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  1,  1,  0,  1,  1,  // 0
                         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // 1
                         0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  // 2
@@ -890,7 +889,7 @@ namespace Simd
                 {
                     static const unsigned char data[256] =
                     {
-                        // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+                     // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
                         0,  1,  1,  1,  1,  1,  1,  1,  1,  0,  0,  1,  1,  0,  1,  1,  // 0
                         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // 1
                         0,  0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  0,  // 2
@@ -946,7 +945,7 @@ namespace Simd
                 {
                     static const unsigned char data[256] =
                     {
-                        // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
+                     // 0   1   2   3   4   5   6   7   8   9   A   B   C   D   E   F
                         0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // 0
                         1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // 1
                         1,  1,  1,  1,  1,  1,  0,  1,  1,  1,  1,  1,  1,  1,  1,  1,  // 2
@@ -1110,7 +1109,7 @@ namespace Simd
                         255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,  // 0
                         255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,  // 1
                         255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,  // 2
-                        0,  1,  2,  3,  4,  5,  6,  7,  8,  9,255,255,255,255,255,255,  // 3
+                          0,  1,  2,  3,  4,  5,  6,  7,  8,  9,255,255,255,255,255,255,  // 3
                         255, 10, 11, 12, 13, 14, 15,255,255,255,255,255,255,255,255,255,  // 4
                         255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,  // 5
                         255, 10, 11, 12, 13, 14, 15,255,255,255,255,255,255,255,255,255,  // 6
@@ -1308,7 +1307,7 @@ namespace Simd
                 }
             }
 
-            template<int Flags> XmlNode<Ch> *ParseXmlDeclaration(Ch *&text)
+            template<int Flags> Node<Ch> *ParseXmlDeclaration(Ch *&text)
             {
                 if (!(Flags & ParseDeclarationNode))
                 {
@@ -1321,7 +1320,7 @@ namespace Simd
                     text += 2;
                     return 0;
                 }
-                XmlNode<Ch> *declaration = this->AllocateNode(NodeDeclaration);
+                Node<Ch> *declaration = this->AllocateNode(NodeDeclaration);
                 Skip<Whitespace, Flags>(text);
                 ParseNodeAttributes<Flags>(text, declaration);
                 if (text[0] != Ch('?') || text[1] != Ch('>'))
@@ -1330,7 +1329,7 @@ namespace Simd
                 return declaration;
             }
 
-            template<int Flags> XmlNode<Ch> * ParseComment(Ch *&text)
+            template<int Flags> Node<Ch> * ParseComment(Ch *&text)
             {
                 if (!(Flags & ParseCommentNodes))
                 {
@@ -1350,7 +1349,7 @@ namespace Simd
                         throw ParseError("unexpected end of data", text);
                     ++text;
                 }
-                XmlNode<Ch> *comment = this->AllocateNode(NodeComment);
+                Node<Ch> *comment = this->AllocateNode(NodeComment);
                 comment->Value(value, text - value);
                 if (!(Flags & ParseNoStringTerminators))
                     *text = Ch('\0');
@@ -1358,7 +1357,7 @@ namespace Simd
                 return comment;
             }
 
-            template<int Flags> XmlNode<Ch> *ParseDocType(Ch *&text)
+            template<int Flags> Node<Ch> *ParseDocType(Ch *&text)
             {
                 Ch *value = text;
                 while (*text != Ch('>'))
@@ -1390,7 +1389,7 @@ namespace Simd
 
                 if (Flags & ParseDocTypeNode)
                 {
-                    XmlNode<Ch> *doctype = this->AllocateNode(NodeDocType);
+                    Node<Ch> *doctype = this->AllocateNode(NodeDocType);
                     doctype->Value(value, text - value);
                     if (!(Flags & ParseNoStringTerminators))
                         *text = Ch('\0');
@@ -1404,11 +1403,11 @@ namespace Simd
                 }
             }
 
-            template<int Flags> XmlNode<Ch> * ParsePi(Ch *&text)
+            template<int Flags> Node<Ch> * ParsePi(Ch *&text)
             {
                 if (Flags & ParsePiNodes)
                 {
-                    XmlNode<Ch> *pi = this->AllocateNode(NodePi);
+                    Node<Ch> *pi = this->AllocateNode(NodePi);
 
                     Ch *name = text;
                     Skip<NodeName, Flags>(text);
@@ -1450,7 +1449,7 @@ namespace Simd
                 }
             }
 
-            template<int Flags> Ch ParseAndAppendData(XmlNode<Ch> *node, Ch *&text, Ch *contents_start)
+            template<int Flags> Ch ParseAndAppendData(Node<Ch> *node, Ch *&text, Ch *contents_start)
             {
                 if (!(Flags & ParseTrimWhitespace))
                     text = contents_start;
@@ -1477,7 +1476,7 @@ namespace Simd
 
                 if (!(Flags & ParseNoDataNodes))
                 {
-                    XmlNode<Ch> *data = this->AllocateNode(NodeData);
+                    Node<Ch> *data = this->AllocateNode(NodeData);
                     data->Value(value, end - value);
                     node->AppendNode(data);
                 }
@@ -1496,7 +1495,7 @@ namespace Simd
                 return *text;
             }
 
-            template<int Flags> XmlNode<Ch> *ParseCData(Ch *&text)
+            template<int Flags> Node<Ch> *ParseCData(Ch *&text)
             {
                 if (Flags & ParseNoDataNodes)
                 {
@@ -1516,7 +1515,7 @@ namespace Simd
                         throw ParseError("unexpected end of data", text);
                     ++text;
                 }
-                XmlNode<Ch> *cdata = this->AllocateNode(NodeCData);
+                Node<Ch> *cdata = this->AllocateNode(NodeCData);
                 cdata->Value(value, text - value);
                 if (!(Flags & ParseNoStringTerminators))
                     *text = Ch('\0');
@@ -1524,9 +1523,9 @@ namespace Simd
                 return cdata;
             }
 
-            template<int Flags> XmlNode<Ch> * ParseElement(Ch *&text)
+            template<int Flags> Node<Ch> * ParseElement(Ch *&text)
             {
-                XmlNode<Ch> *element = this->AllocateNode(NodeElement);
+                Node<Ch> *element = this->AllocateNode(NodeElement);
                 Ch *name = text;
                 Skip<NodeName, Flags>(text);
                 if (text == name)
@@ -1553,7 +1552,7 @@ namespace Simd
                 return element;
             }
 
-            template<int Flags> XmlNode<Ch> * ParseNode(Ch *&text)
+            template<int Flags> Node<Ch> * ParseNode(Ch *&text)
             {
                 switch (text[0])
                 {
@@ -1611,15 +1610,15 @@ namespace Simd
                 }
             }
 
-            template<int Flags> void ParseNodeContents(Ch *&text, XmlNode<Ch> * node)
+            template<int Flags> void ParseNodeContents(Ch *&text, Node<Ch> * node)
             {
                 while (1)
                 {
-                    Ch *contents_start = text;
+                    Ch * contentsStart = text;
                     Skip<Whitespace, Flags>(text);
-                    Ch next_char = *text;
-                after_data_node:
-                    switch (next_char)
+                    Ch nextChar = * text;
+                afterDataNode:
+                    switch (nextChar)
                     {
                     case Ch('<'):
                         if (text[1] == Ch('/'))
@@ -1627,9 +1626,9 @@ namespace Simd
                             text += 2;
                             if (Flags & ParseValidateClosingTags)
                             {
-                                Ch *closing_name = text;
+                                Ch *closingName = text;
                                 Skip<NodeName, Flags>(text);
-                                if (!Detail::Compare(node->Name(), node->NameSize(), closing_name, text - closing_name, true))
+                                if (!Detail::Compare(node->Name(), node->NameSize(), closingName, text - closingName, true))
                                     throw ParseError("invalid closing tag name", text);
                             }
                             else
@@ -1645,20 +1644,20 @@ namespace Simd
                         else
                         {
                             ++text;
-                            if (XmlNode<Ch> *child = ParseNode<Flags>(text))
+                            if (Node<Ch> *child = ParseNode<Flags>(text))
                                 node->AppendNode(child);
                         }
                         break;
                     case Ch('\0'):
                         throw ParseError("unexpected end of data", text);
                     default:
-                        next_char = ParseAndAppendData<Flags>(node, text, contents_start);
-                        goto after_data_node;
+                        nextChar = ParseAndAppendData<Flags>(node, text, contentsStart);
+                        goto afterDataNode;
                     }
                 }
             }
 
-            template<int Flags> void ParseNodeAttributes(Ch *&text, XmlNode<Ch> *node)
+            template<int Flags> void ParseNodeAttributes(Ch *&text, Node<Ch> *node)
             {
                 while (AttributeName::Test(*text))
                 {
@@ -1667,7 +1666,7 @@ namespace Simd
                     Skip<AttributeName, Flags>(text);
                     if (text == name)
                         throw ParseError("expected attribute name", name);
-                    XmlAttribute<Ch> *attribute = this->AllocateAttribute();
+                    Attribute<Ch> *attribute = this->AllocateAttribute();
                     attribute->Name(name, text - name);
                     node->AppendAttribute(attribute);
                     Skip<Whitespace, Flags>(text);
@@ -1701,9 +1700,9 @@ namespace Simd
         template<class Ch> class NodeIterator
         {
         public:
-            typedef XmlNode<Ch> value_type;
-            typedef XmlNode<Ch> & reference;
-            typedef XmlNode<Ch> * pointer;
+            typedef Node<Ch> value_type;
+            typedef Node<Ch> & reference;
+            typedef Node<Ch> * pointer;
             typedef std::ptrdiff_t difference_type;
             typedef std::bidirectional_iterator_tag iterator_category;
 
@@ -1712,7 +1711,7 @@ namespace Simd
             {
             }
 
-            NodeIterator(XmlNode<Ch> *node)
+            NodeIterator(Node<Ch> *node)
                 : _node(node->FirstNode())
             {
             }
@@ -1769,16 +1768,16 @@ namespace Simd
 
         private:
 
-            XmlNode<Ch> *_node;
+            Node<Ch> *_node;
 
         };
 
         template<class Ch> class AttributeIterator
         {
         public:
-            typedef XmlAttribute<Ch> value_type;
-            typedef XmlAttribute<Ch> &reference;
-            typedef XmlAttribute<Ch> *pointer;
+            typedef Attribute<Ch> value_type;
+            typedef Attribute<Ch> &reference;
+            typedef Attribute<Ch> *pointer;
             typedef std::ptrdiff_t difference_type;
             typedef std::bidirectional_iterator_tag iterator_category;
 
@@ -1787,7 +1786,7 @@ namespace Simd
             {
             }
 
-            AttributeIterator(XmlNode<Ch> *node)
+            AttributeIterator(Node<Ch> *node)
                 : _attribute(node->FirstAttribute())
             {
             }
@@ -1844,7 +1843,7 @@ namespace Simd
 
         private:
 
-            XmlAttribute<Ch> *_attribute;
+            Attribute<Ch> *_attribute;
 
         };
 
@@ -1910,18 +1909,18 @@ namespace Simd
                 return false;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent);
+            template<class OutIt, class Ch> inline OutIt PrintNode(OutIt out, const Node<Ch> *node, int flags, int indent);
 
-            template<class OutIt, class Ch> inline OutIt PrintChildren(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintChildren(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
-                for (XmlNode<Ch> *child = node->FirstNode(); child; child = child->NextSibling())
+                for (Node<Ch> *child = node->FirstNode(); child; child = child->NextSibling())
                     out = PrintNode(out, child, flags, indent);
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintAttributes(OutIt out, const XmlNode<Ch> *node, int flags)
+            template<class OutIt, class Ch> inline OutIt PrintAttributes(OutIt out, const Node<Ch> *node, int flags)
             {
-                for (XmlAttribute<Ch> *attribute = node->FirstAttribute(); attribute; attribute = attribute->NextAttribute())
+                for (Attribute<Ch> *attribute = node->FirstAttribute(); attribute; attribute = attribute->NextAttribute())
                 {
                     if (attribute->Name() && attribute->Value())
                     {
@@ -1945,7 +1944,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintDataNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintDataNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 assert(node->Type() == NodeData);
                 if (!(flags & PrintNoIndenting))
@@ -1954,7 +1953,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintCDataNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintCDataNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 assert(node->Type() == NodeCData);
                 if (!(flags & PrintNoIndenting))
@@ -1975,7 +1974,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintElementNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintElementNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 assert(node->Type() == NodeElement);
                 if (!(flags & PrintNoIndenting))
@@ -1991,7 +1990,7 @@ namespace Simd
                 else
                 {
                     *out = Ch('>'), ++out;
-                    XmlNode<Ch> *child = node->FirstNode();
+                    Node<Ch> *child = node->FirstNode();
                     if (!child)
                     {
                         out = CopyAndExpandChars(node->Value(), node->Value() + node->ValueSize(), Ch(0), out);
@@ -2016,7 +2015,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintDeclarationNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintDeclarationNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 if (!(flags & PrintNoIndenting))
                     out = FillChars(out, indent, Ch('\t'));
@@ -2031,7 +2030,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintCommentNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintCommentNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 assert(node->Type() == NodeComment);
                 if (!(flags & PrintNoIndenting))
@@ -2047,7 +2046,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintDocTypeNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintDocTypeNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 assert(node->Type() == NodeDocType);
                 if (!(flags & PrintNoIndenting))
@@ -2067,7 +2066,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintPiNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintPiNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 assert(node->Type() == NodePi);
                 if (!(flags & PrintNoIndenting))
@@ -2082,7 +2081,7 @@ namespace Simd
                 return out;
             }
 
-            template<class OutIt, class Ch> inline OutIt PrintNode(OutIt out, const XmlNode<Ch> *node, int flags, int indent)
+            template<class OutIt, class Ch> inline OutIt PrintNode(OutIt out, const Node<Ch> *node, int flags, int indent)
             {
                 switch (node->Type())
                 {
@@ -2120,18 +2119,18 @@ namespace Simd
             }
         }
 
-        template<class OutIt, class Ch> inline OutIt Print(OutIt out, const XmlNode<Ch> &node, int flags = 0)
+        template<class OutIt, class Ch> inline OutIt Print(OutIt out, const Node<Ch> &node, int flags = 0)
         {
             return Detail::PrintNode(out, &node, flags, 0);
         }
 
-        template<class Ch> inline std::basic_ostream<Ch> & Print(std::basic_ostream<Ch> &out, const XmlNode<Ch> &node, int flags = 0)
+        template<class Ch> inline std::basic_ostream<Ch> & Print(std::basic_ostream<Ch> &out, const Node<Ch> &node, int flags = 0)
         {
             Print(std::ostream_iterator<Ch>(out), node, flags);
             return out;
         }
 
-        template<class Ch> inline std::basic_ostream<Ch> & operator <<(std::basic_ostream<Ch> & out, const XmlNode<Ch> & node)
+        template<class Ch> inline std::basic_ostream<Ch> & operator <<(std::basic_ostream<Ch> & out, const Node<Ch> & node)
         {
             return Print(out, node);
         }
@@ -2192,9 +2191,9 @@ namespace Simd
             std::vector<Ch> _data;
         };
 
-        template<class Ch> inline size_t CountChildren(XmlNode<Ch> * node)
+        template<class Ch> inline size_t CountChildren(Node<Ch> * node)
         {
-            XmlNode<Ch> *child = node->FirstNode();
+            Node<Ch> *child = node->FirstNode();
             size_t count = 0;
             while (child)
             {
@@ -2204,9 +2203,9 @@ namespace Simd
             return count;
         }
 
-        template<class Ch> inline size_t CountAttributes(XmlNode<Ch> * node)
+        template<class Ch> inline size_t CountAttributes(Node<Ch> * node)
         {
-            XmlAttribute<Ch> *attr = node->FirstAttribute();
+            Attribute<Ch> *attr = node->FirstAttribute();
             size_t count = 0;
             while (attr)
             {

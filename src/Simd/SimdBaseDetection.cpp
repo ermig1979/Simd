@@ -44,9 +44,9 @@ namespace Simd
     {
         namespace Xml
         {
-			typedef Simd::Xml::File<char> File;
-			typedef Simd::Xml::XmlDocument<char> Doc;
-			typedef Simd::Xml::XmlNode<char> Node;
+            typedef Simd::Xml::File<char> File;
+            typedef Simd::Xml::Document<char> Document;
+            typedef Simd::Xml::Node<char> Node;
 
             template <class T> T FromString(const std::string & s)
             {
@@ -78,7 +78,7 @@ namespace Simd
             {
                 if (parent == NULL)
                     SIMD_EX("Invalid element!");
-				Node * child = parent->FirstNode();
+                Node * child = parent->FirstNode();
                 if (child == NULL)
                     SIMD_EX("Invalid node!");
                 return FromString<T>(child->Value());
@@ -95,7 +95,7 @@ namespace Simd
             {
                 if (parent == NULL)
                     SIMD_EX("Invalid element!");
-				Node * child = parent->FirstNode();
+                Node * child = parent->FirstNode();
                 if (child == NULL)
                     SIMD_EX("Invalid node!");
                 std::stringstream ss(child->Value());
@@ -118,7 +118,7 @@ namespace Simd
 
             inline size_t GetSize(Node * parent)
             {
-				return Simd::Xml::CountChildren(parent);
+                return Simd::Xml::CountChildren(parent);
             }
         }
 
@@ -155,18 +155,18 @@ namespace Simd
             Data * data = NULL;
             try
             {
-				Xml::File file;
-				if(!file.Open(path))
-					SIMD_EX("Can't load XML file '" << path << "'!");
+                Xml::File file;
+                if (!file.Open(path))
+                    SIMD_EX("Can't load XML file '" << path << "'!");
 
-                Xml::Doc doc;
-				doc.Parse<0>(file.Data());
+                Xml::Document doc;
+                doc.Parse<0>(file.Data());
 
                 Xml::Node * root = doc.FirstNode();
                 if (root == NULL)
                     SIMD_EX("Invalid format of XML file '" << path << "'!");
 
-				Xml::Node * cascade = root->FirstNode(Names::cascade);
+                Xml::Node * cascade = root->FirstNode(Names::cascade);
                 if (cascade == NULL)
                     return data;
 
@@ -177,35 +177,35 @@ namespace Simd
                 data->stageType = 0;
 
                 std::string featureType = Xml::GetValue<std::string>(cascade, Names::featureType);
-				if (featureType == Names::HAAR)
-					data->featureType = SimdDetectionInfoFeatureHaar;
-				else if (featureType == Names::LBP)
-					data->featureType = SimdDetectionInfoFeatureLbp;
-				else if (featureType == Names::HOG)
-					SIMD_EX("HOG feature type is not supported!")
-				else
-					SIMD_EX("Invalid cascade feature type!");
+                if (featureType == Names::HAAR)
+                    data->featureType = SimdDetectionInfoFeatureHaar;
+                else if (featureType == Names::LBP)
+                    data->featureType = SimdDetectionInfoFeatureLbp;
+                else if (featureType == Names::HOG)
+                    SIMD_EX("HOG feature type is not supported!")
+                else
+                    SIMD_EX("Invalid cascade feature type!");
 
                 data->origWinSize.x = Xml::GetValue<int>(cascade, Names::width);
                 data->origWinSize.y = Xml::GetValue<int>(cascade, Names::height);
-				if (data->origWinSize.x <= 0 || data->origWinSize.y <= 0)
-					SIMD_EX("Invalid cascade width or height!");
+                if (data->origWinSize.x <= 0 || data->origWinSize.y <= 0)
+                    SIMD_EX("Invalid cascade width or height!");
 
-				Xml::Node * stageParams = cascade->FirstNode(Names::stageParams);
+                Xml::Node * stageParams = cascade->FirstNode(Names::stageParams);
                 if (stageParams && stageParams->FirstNode(Names::maxDepth))
                     data->isStumpBased = Xml::GetValue<int>(stageParams, Names::maxDepth) == 1 ? true : false;
                 else
                     data->isStumpBased = true;
 
                 if (!data->isStumpBased)
-					SIMD_EX("Tree classifier cascades are not supported!");
+                    SIMD_EX("Tree classifier cascades are not supported!");
 
-				Xml::Node * featureParams = cascade->FirstNode(Names::featureParams);
+                Xml::Node * featureParams = cascade->FirstNode(Names::featureParams);
                 data->ncategories = Xml::GetValue<int>(featureParams, Names::maxCatCount);
                 int subsetSize = (data->ncategories + 31) / 32;
                 int nodeStep = 3 + (data->ncategories > 0 ? subsetSize : 1);
 
-				Xml::Node * stages = cascade->FirstNode(Names::stages);
+                Xml::Node * stages = cascade->FirstNode(Names::stages);
                 if (stages == NULL)
                     SIMD_EX("Invalid stages count!");
                 data->stages.reserve(Xml::GetSize(stages));
@@ -215,7 +215,7 @@ namespace Simd
                     Data::Stage stage;
                     stage.threshold = Xml::GetValue<float>(stageNode, Names::stageThreshold) - THRESHOLD_EPS;
 
-					Xml::Node * weakClassifiers = stageNode->FirstNode(Names::weakClassifiers);
+                    Xml::Node * weakClassifiers = stageNode->FirstNode(Names::weakClassifiers);
                     if (weakClassifiers == NULL)
                         SIMD_EX("Invalid weak classifiers count!");
                     stage.ntrees = (int)Xml::GetSize(weakClassifiers);
@@ -263,7 +263,7 @@ namespace Simd
                     }
                 }
 
-				Xml::Node * featureNodes = cascade->FirstNode(Names::features);
+                Xml::Node * featureNodes = cascade->FirstNode(Names::features);
                 if (data->featureType == SimdDetectionInfoFeatureHaar)
                 {
                     data->hasTilted = false;
@@ -272,7 +272,7 @@ namespace Simd
                     {
                         Data::HaarFeature feature;
                         int rectIndex = 0;
-						Xml::Node * rectsNode = featureNode->FirstNode(Names::rects);
+                        Xml::Node * rectsNode = featureNode->FirstNode(Names::rects);
                         for (Xml::Node * rectNode = rectsNode->FirstNode(); rectNode != NULL; rectNode = rectNode->NextSibling(), rectIndex++)
                         {
                             std::vector<double> values = Xml::GetValues<double>(rectNode);
