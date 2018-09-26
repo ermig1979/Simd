@@ -177,10 +177,30 @@ namespace Test
         }
     }
 
-    void FillRandom32f(Buffer32f & buffer, float lo, float hi)
+    void FillRandom(float * data, size_t size, float lo, float hi)
     {
-        for (size_t i = 0; i < buffer.size(); ++i)
-            buffer[i] = lo + (hi - lo)*(float)Random();
+        bool fast = size > 100000;
+        float boost = (hi - lo) / 255;
+        if (fast)
+        {
+            for (size_t i = 0; i < size; i += INT16_MAX)
+            {
+                size_t n = std::min<size_t>(INT16_MAX, size - i);
+                const uint8_t * src = Rand();
+                for (size_t j = 0; j < n; ++j)
+                    data[i + j] = lo + boost * src[j];
+            }
+        }
+        else
+        {
+            for (size_t i = 0; i < size; ++i)
+                data[i] = lo + (hi - lo)*(float)Random();
+        }
+    }
+
+    void FillRandom(Buffer32f & buffer, float lo, float hi)
+    {
+        FillRandom(buffer.data(), buffer.size(), lo, hi);
     }
 
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle,

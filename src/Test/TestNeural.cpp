@@ -1858,10 +1858,10 @@ namespace Test
         Vector dstDst2(dstIndex.Volume());
         Vector buffer(dstIndex.Area()*srcIndex.depth*kernel.x*kernel.y * 2 + dstIndex.Area() * 2);
 
-        FillRandom32f(src, 0, 1);
-        FillRandom32f(weight, -1, 1);
+        FillRandom(src, 0, 1);
+        FillRandom(weight, -1, 1);
         const float level = 100;
-        FillRandom32f(dstSrc, level, level);
+        FillRandom(dstSrc, level, level);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcIndex, weight, kernel, pad, stride, dilation, buffer, dstSrc, dstDst1, dstIndex, add));
 
@@ -2708,9 +2708,9 @@ namespace Test
 
         if (create)
         {
-            FillRandom32f(src, 0, 1);
-            FillRandom32f(weight, -1, 1);
-            FillRandom32f(dstSrc, -1000, 1000);
+            FillRandom(src, 0, 1);
+            FillRandom(weight, -1, 1);
+            FillRandom(dstSrc, -1000, 1000);
 
             TEST_SAVE(src);
             TEST_SAVE(weight);

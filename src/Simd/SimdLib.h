@@ -1566,6 +1566,69 @@ extern "C"
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup synet
+
+        \fn void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+        
+        \short Initilizes convolution algorithm.
+
+        \param [in] srcC - a number of input channels.
+        \param [in] srcH - an input height.
+        \param [in] srcW - an input width.
+        \param [in] dstC - a number of output channels.
+        \param [in] kernelY - a height of the convolution kernel.
+        \param [in] kernelX - a width of the convolution kernel.
+        \param [in] dilationY - a y-dilation of the convolution.
+        \param [in] dilationX - a x-dilation of the convolution.
+        \param [in] strideY - a y-stride of the convolution.
+        \param [in] strideX - a x-stride of the convolution.
+        \param [in] padY - a pad to the top of the input image.
+        \param [in] padX - a pad to the left of the input image.
+        \param [in] padH - a pad to the bottom of the input image.
+        \param [in] padW - a pad to the right of the input image.
+        \param [in] group - a size of convolution group.
+        \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetWeight and ::SimdConvolutionForward.
+    */
+    SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, 
+        size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdConvolutionBufferSize(const void * convolution);
+
+        \short Gets size of external buffer required for convolution algorithm.
+
+        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease. 
+        \return size of external buffer required for convolution algorithm.
+    */
+    SIMD_API size_t SimdConvolutionBufferSize(const void * convolution);
+
+    /*! @ingroup synet
+
+        \fn void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias);
+
+        \short Sets weights and beases required for convolution algorithm.
+
+        \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to convolution weights.
+        \param [in] bias - a pointer to bias. Can be NULL.
+    */
+    SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias);
+
+    /*! @ingroup synet
+
+        \fn void SimdConvolutionForward(const void * convolution, const float * src, float * buf, float * dst);
+
+        \short Performs forward propagation of convolution algorithm.
+
+        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input image.
+        \param [out] buf - a pointer to temporary buffer. The size of the temporary buffer is determined by function ::SimdConvolutionBufferSize(). Can be NULL.
+        \param [out] dst - a pointer to output image.
+    */
+    SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);
+
     /*! @ingroup other_conversion
 
         \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);

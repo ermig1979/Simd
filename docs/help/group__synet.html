@@ -64,6 +64,15 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:gaa02fc06fc41f0a9c45189057846349dc"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc">SimdConvolutionInit</a> (size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)</td></tr>
+<tr class="memdesc:gaa02fc06fc41f0a9c45189057846349dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes convolution algorithm.  <a href="#gaa02fc06fc41f0a9c45189057846349dc">More...</a><br /></td></tr>
+<tr class="separator:gaa02fc06fc41f0a9c45189057846349dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga0e92e65935c1e5d128ddbd912839e830"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830">SimdConvolutionBufferSize</a> (const void *convolution)</td></tr>
+<tr class="memdesc:ga0e92e65935c1e5d128ddbd912839e830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of external buffer required for convolution algorithm.  <a href="#ga0e92e65935c1e5d128ddbd912839e830">More...</a><br /></td></tr>
+<tr class="separator:ga0e92e65935c1e5d128ddbd912839e830"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga44c6d63e9fc0f72db580c7f1890c15a7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga44c6d63e9fc0f72db580c7f1890c15a7">SimdConvolutionSetWeight</a> (void *convolution, const float *weight, const float *bias)</td></tr>
+<tr class="memdesc:ga44c6d63e9fc0f72db580c7f1890c15a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights and beases required for convolution algorithm.  <a href="#ga44c6d63e9fc0f72db580c7f1890c15a7">More...</a><br /></td></tr>
+<tr class="separator:ga44c6d63e9fc0f72db580c7f1890c15a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga28d0b4f1155c7d9ec0ae3d5af65bde0e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga28d0b4f1155c7d9ec0ae3d5af65bde0e">SimdSynetAddBias</a> (const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:ga28d0b4f1155c7d9ec0ae3d5af65bde0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a bias to given vector.  <a href="#ga28d0b4f1155c7d9ec0ae3d5af65bde0e">More...</a><br /></td></tr>
 <tr class="separator:ga28d0b4f1155c7d9ec0ae3d5af65bde0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -79,6 +88,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga25ebb50f7aed1f7a456141fed188109f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga25ebb50f7aed1f7a456141fed188109f">SimdWinograd2x3iSetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, int pad)</td></tr>
 <tr class="memdesc:ga25ebb50f7aed1f7a456141fed188109f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 2x3 interleaved convolution algorithm.  <a href="#ga25ebb50f7aed1f7a456141fed188109f">More...</a><br /></td></tr>
 <tr class="separator:ga25ebb50f7aed1f7a456141fed188109f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9af32d55900df8fb3d4adbdfbad7ba5d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9af32d55900df8fb3d4adbdfbad7ba5d">SimdWinograd2x3iSetOutput</a> (const float *src, float *dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)</td></tr>
+<tr class="memdesc:ga9af32d55900df8fb3d4adbdfbad7ba5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for output image conversion in Winograd 2x3 interleaved convolution algorithm.  <a href="#ga9af32d55900df8fb3d4adbdfbad7ba5d">More...</a><br /></td></tr>
+<tr class="separator:ga9af32d55900df8fb3d4adbdfbad7ba5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab845dac91ff445403dd028b92c7011dd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gab845dac91ff445403dd028b92c7011dd">SimdWinograd2x3pSetFilter</a> (const float *src, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gab845dac91ff445403dd028b92c7011dd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for filter conversion in Winograd 2x3 planar convolution algorithm.  <a href="#gab845dac91ff445403dd028b92c7011dd">More...</a><br /></td></tr>
 <tr class="separator:gab845dac91ff445403dd028b92c7011dd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -127,6 +139,206 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="gaa02fc06fc41f0a9c45189057846349dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa02fc06fc41f0a9c45189057846349dc">&#9670;&nbsp;</a></span>SimdConvolutionInit()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * SimdConvolutionInit </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dilationY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dilationX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>group</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Initilizes convolution algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstC</td><td>- a number of output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the convolution kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the convolution kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilationY</td><td>- a y-dilation of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dilationX</td><td>- a x-dilation of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the convolution. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padH</td><td>- a pad to the bottom of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padW</td><td>- a pad to the right of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>- a size of convolution group. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830" title="Gets size of external buffer required for convolution algorithm. ">SimdConvolutionBufferSize</a>, <a class="el" href="group__synet.html#ga44c6d63e9fc0f72db580c7f1890c15a7" title="Sets weights and beases required for convolution algorithm. ">SimdConvolutionSetWeight</a> and ::SimdConvolutionForward. </dd></dl>
+
+</div>
+</div>
+<a id="ga0e92e65935c1e5d128ddbd912839e830"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga0e92e65935c1e5d128ddbd912839e830">&#9670;&nbsp;</a></span>SimdConvolutionBufferSize()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">size_t SimdConvolutionBufferSize </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>convolution</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets size of external buffer required for convolution algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>size of external buffer required for convolution algorithm. </dd></dl>
+
+</div>
+</div>
+<a id="ga44c6d63e9fc0f72db580c7f1890c15a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga44c6d63e9fc0f72db580c7f1890c15a7">&#9670;&nbsp;</a></span>SimdConvolutionSetWeight()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdConvolutionSetWeight </td>
+          <td>(</td>
+          <td class="paramtype">void *&#160;</td>
+          <td class="paramname"><em>convolution</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>weight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bias</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets weights and beases required for convolution algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to convolution weights. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga28d0b4f1155c7d9ec0ae3d5af65bde0e"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga28d0b4f1155c7d9ec0ae3d5af65bde0e">&#9670;&nbsp;</a></span>SimdSynetAddBias()</h2>
 
@@ -473,6 +685,65 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output array with converted image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pad</td><td>- a flag to signalize padding. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga9af32d55900df8fb3d4adbdfbad7ba5d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9af32d55900df8fb3d4adbdfbad7ba5d">&#9670;&nbsp;</a></span>SimdWinograd2x3iSetOutput()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdWinograd2x3iSetOutput </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstChannels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstHeight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstWidth</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for output image conversion in Winograd 2x3 interleaved convolution algorithm. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstChannels</td><td>- a number of output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
   </table>
   </dd>
 </dl>

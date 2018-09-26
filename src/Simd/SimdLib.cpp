@@ -53,6 +53,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdLog.h"
 
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdConvolution.h"
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
@@ -1401,6 +1402,27 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
                            size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride)
 {
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
+}
+
+SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX,
+    size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
+{
+    return Base::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+}
+
+SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)
+{
+    return ((Convolution*)convolution)->BufferSize();
+}
+
+SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias)
+{
+    ((Convolution*)convolution)->SetWeight(weight, bias);
+}
+
+SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst)
+{
+    ((Convolution*)convolution)->Forward(src, buf, dst);
 }
 
 SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,

@@ -25,6 +25,8 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
+#include "Simd/SimdResizer.h"
+
 namespace Test
 {
     namespace
@@ -180,7 +182,7 @@ namespace Test
                 void * resizer = func(src.width / channels, src.height, dst.width / channels, dst.height, channels, type, method);
                 {
                     TEST_PERFORMANCE_TEST(description);
-                    ((Simd::Resizer*)resizer)->Run(src.data, src.stride, dst.data, dst.stride);
+                    SimdResizerRun(resizer, src.data, src.stride, dst.data, dst.stride);
                 }
                 SimdRelease(resizer);
             }

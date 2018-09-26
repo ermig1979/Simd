@@ -55,7 +55,6 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdResizer.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
@@ -105,6 +104,14 @@ namespace Test
 
     extern String ROOT_PATH;
     extern String SOURCE;
+
+    enum DifferenceType
+    {
+        DifferenceAbsolute,
+        DifferenceRelative,
+        DifferenceBoth,
+        DifferenceAny,
+    };
 }
 
 #endif//__TestConfig_h__

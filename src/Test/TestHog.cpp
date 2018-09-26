@@ -336,8 +336,8 @@ namespace Test
         FillRandom32f(src, -10.0f, 10.0f);
 
         Buffer32f col(colSize), row(rowSize);
-        FillRandom32f(col, -1.0f, 1.0f);
-        FillRandom32f(row, -1.0f, 1.0f);
+        FillRandom(col, -1.0f, 1.0f);
+        FillRandom(row, -1.0f, 1.0f);
 
         View dstSrc(width - rowSize + 1, height - colSize + 1, View::Float, NULL, TEST_ALIGN(width));
         FillRandom32f(dstSrc, -10.0f, 10.0f);
@@ -574,8 +574,8 @@ namespace Test
         if (create)
         {
             FillRandom32f(src, -10.0f, 10.0f);
-            FillRandom32f(col, -1.0f, 1.0f);
-            FillRandom32f(row, -1.0f, 1.0f);
+            FillRandom(col, -1.0f, 1.0f);
+            FillRandom(row, -1.0f, 1.0f);
             FillRandom32f(dstSrc, -10.0f, 10.0f);
 
             TEST_SAVE(src);

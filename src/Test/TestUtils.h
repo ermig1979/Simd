@@ -48,7 +48,9 @@ namespace Test
 
     void FillRandom32f(View & view, float lo = 0, float hi = 4096.0f);
 
-    void FillRandom32f(Buffer32f & buffer, float lo = 0, float hi = 4096.0f);
+    void FillRandom(Buffer32f & buffer, float lo = 0, float hi = 4096.0f);
+
+    void FillRandom(float * data, size_t size, float lo = 0, float hi = 4096.0f);
 
     bool Compare(const View & a, const View & b,
         int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0,
@@ -64,14 +66,6 @@ namespace Test
         int differenceMax = 0, bool printError = false, int errorCountMax = 0, const String & description = "");
 
     bool Compare(const Rect & a, const Rect & b, bool printError = false);
-
-    enum DifferenceType
-    {
-        DifferenceAbsolute,
-        DifferenceRelative,
-        DifferenceBoth,
-        DifferenceAny,
-    };
 
     bool Compare(const Buffer32f & a, const Buffer32f & b, float differenceMax,
         bool printError, int errorCountMax, DifferenceType differenceType, const String & description = "");
