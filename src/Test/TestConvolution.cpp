@@ -135,10 +135,25 @@ namespace Test
 
         result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Base::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Sse::ConvolutionInit), FUNC_C(SimdConvolutionInit));
-//#endif 
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Sse::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Avx::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Avx2::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Avx512f::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+#endif
 
         return result;
     }

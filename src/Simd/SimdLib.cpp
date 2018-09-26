@@ -1407,7 +1407,27 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
 SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX,
     size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
 {
-    return Base::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+#ifdef SIMD_AVX512F_ENABLE
+    if (Avx512f::Enable)
+        return Avx512f::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable)
+        return Avx2::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+    else
+#endif
+#ifdef SIMD_AVX_ENABLE
+    if (Avx::Enable)
+        return Avx::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+    else
+#endif
+#ifdef SIMD_SSE_ENABLE
+    if (Sse::Enable)
+        return Sse::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+    else
+#endif
+        return Base::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
 }
 
 SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)

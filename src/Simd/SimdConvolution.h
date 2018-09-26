@@ -25,7 +25,6 @@
 #define __SimdConvolution_h__
 
 #include "Simd/SimdArray.h"
-#include "Simd/SimdBase.h"
 
 #ifdef _N
 #define _N_OLD _N
@@ -69,23 +68,12 @@ namespace Simd
     class Convolution : Deletable
     {
     public:
-        Convolution(const ConvParam & p)
-            : _param(p)
-        {
-        }
-
-        const ConvParam & Param() const
-        {
-            return _param;
-        }
-
+        Convolution(const ConvParam & p) : _param(p) {}
         virtual size_t BufferSize() const = 0;
-
         virtual void SetWeight(const float * weight, const float * bias) = 0;
-
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
-    private:
+    protected:
         ConvParam _param;
     };
 
@@ -94,60 +82,77 @@ namespace Simd
         class ConvolutionGemm : public Convolution
         {
         public:
-            ConvolutionGemm(const ConvParam & p)
-                : Convolution(p)
-                , _is1x1(p.Is1x1())
-                , _0(0.0f)
-                , _1(1.0f)
-            {
-                _M = p.dstC / p.group;
-                _N = p.dstH  * p.dstW;
-                _K = p.srcC * p.kernelY * p.kernelX / p.group;
-                _weightStep = p.dstC * _K / p.group;
-                _srcStep = _K * _N;
-                _dstStep = p.dstC * _N / p.group;
-            }
-
-            virtual size_t BufferSize() const
-            {
-                const ConvParam & p = Param();
-                return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
-            };
-
-            virtual void SetWeight(const float * weight, const float * bias)
-            {
-                _weight = weight;
-                _bias = bias;
-            }
-
-            virtual void Forward(const float * src, float * buf, float * dst)
-            {
-                const ConvParam & p = Param();
-                if (!_is1x1)
-                {
-                    ImgToCol(src, p, buf);
-                    src = buf;
-                }
-                for (size_t g = 0; g < p.group; ++g)
-                    Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-
-                if (_bias)
-                    Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
-            }
-
+            ConvolutionGemm(const ConvParam & p);
+            virtual size_t BufferSize() const;
+            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void Forward(const float * src, float * buf, float * dst);
             static void ImgToCol(const float * src, const ConvParam & p, float * dst);
 
         protected:
             bool _is1x1;
             float _0, _1;
-            const float * _weight;
-            const float * _bias;
+            const float * _weight, * _bias;
             size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
-
     }
+
+#ifdef SIMD_SSE_ENABLE    
+    namespace Sse
+    {
+        class ConvolutionGemm : public Base::ConvolutionGemm
+        {
+        public:
+            ConvolutionGemm(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+    }
+#endif//SIMD_SSE_ENABLE
+
+#ifdef SIMD_AVX_ENABLE    
+    namespace Avx
+    {
+        class ConvolutionGemm : public Sse::ConvolutionGemm
+        {
+        public:
+            ConvolutionGemm(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+}
+#endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class ConvolutionGemm : public Avx::ConvolutionGemm
+        {
+        public:
+            ConvolutionGemm(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+}
+#endif//SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512F_ENABLE    
+    namespace Avx512f
+    {
+        class ConvolutionGemm : public Avx2::ConvolutionGemm
+        {
+        public:
+            ConvolutionGemm(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+    }
+#endif//SIMD_AVX512F_ENABLE
 }
 
 #ifdef _N_OLD

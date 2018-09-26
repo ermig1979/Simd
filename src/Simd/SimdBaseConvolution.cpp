@@ -22,11 +22,53 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
     namespace Base
     {
+        ConvolutionGemm::ConvolutionGemm(const ConvParam & p)
+            : Convolution(p)
+            , _is1x1(p.Is1x1())
+            , _0(0.0f)
+            , _1(1.0f)
+        {
+            _M = p.dstC / p.group;
+            _N = p.dstH  * p.dstW;
+            _K = p.srcC * p.kernelY * p.kernelX / p.group;
+            _weightStep = p.dstC * _K / p.group;
+            _srcStep = _K * _N;
+            _dstStep = p.dstC * _N / p.group;
+        }
+
+        size_t ConvolutionGemm::BufferSize() const
+        {
+            const ConvParam & p = _param;
+            return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+        };
+
+        void ConvolutionGemm::SetWeight(const float * weight, const float * bias)
+        {
+            _weight = weight;
+            _bias = bias;
+        }
+
+        void ConvolutionGemm::Forward(const float * src, float * buf, float * dst)
+        {
+            const ConvParam & p = _param;
+            if (!_is1x1)
+            {
+                ImgToCol(src, p, buf);
+                src = buf;
+            }
+            for (size_t g = 0; g < p.group; ++g)
+                Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
+
+            if (_bias)
+                Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+        }
+
         void ConvolutionGemm::ImgToCol(const float * src, const ConvParam & p, float * dst)
         {
             size_t srcSize = p.srcW * p.srcH;
@@ -128,6 +170,8 @@ namespace Simd
                 }
             }
         }
+
+        //---------------------------------------------------------------------
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
