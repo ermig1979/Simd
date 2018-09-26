@@ -100,10 +100,11 @@ namespace Simd
                 , _0(0.0f)
                 , _1(1.0f)
             {
-                _N = p.dstH*p.dstW;
-                _K = p.srcC*p.kernelY*p.kernelX / p.group;
-                _weightStep = p.dstC * p.kernelY*p.kernelX / p.group;
-                _srcStep = p.kernelY*p.kernelX*_N;
+                _M = p.dstC / p.group;
+                _N = p.dstH  * p.dstW;
+                _K = p.srcC * p.kernelY * p.kernelX / p.group;
+                _weightStep = p.dstC * _K / p.group;
+                _srcStep = _K * _N;
                 _dstStep = p.dstC * _N / p.group;
             }
 
@@ -128,10 +129,10 @@ namespace Simd
                     src = buf;
                 }
                 for (size_t g = 0; g < p.group; ++g)
-                    Base::Gemm32fNN(p.dstC / p.group, _N, p.kernelY*p.kernelX, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
+                    Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
 
                 if (_bias)
-                    Base::SynetAddBias(_weight, p.dstC, p.dstH*p.dstW, dst);
+                    Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
             }
 
             static void ImgToCol(const float * src, const ConvParam & p, float * dst);
@@ -141,7 +142,7 @@ namespace Simd
             float _0, _1;
             const float * _weight;
             const float * _bias;
-            size_t _weightStep, _srcStep, _dstStep, _N, _K;
+            size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
