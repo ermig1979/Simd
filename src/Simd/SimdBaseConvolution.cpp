@@ -30,10 +30,8 @@ namespace Simd
     {
         ConvolutionGemm::ConvolutionGemm(const ConvParam & p)
             : Convolution(p)
-            , _is1x1(p.Is1x1())
-            , _0(0.0f)
-            , _1(1.0f)
         {
+            _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
             _M = p.dstC / p.group;
             _N = p.dstH  * p.dstW;
             _K = p.srcC * p.kernelY * p.kernelX / p.group;
@@ -44,8 +42,13 @@ namespace Simd
 
         size_t ConvolutionGemm::BufferSize() const
         {
-            const ConvParam & p = _param;
-            return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+            if (_is1x1)
+                return 1;
+            else
+            {
+                const ConvParam & p = _param;
+                return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+            }
         };
 
         void ConvolutionGemm::SetWeight(const float * weight, const float * bias)
@@ -56,15 +59,20 @@ namespace Simd
 
         void ConvolutionGemm::Forward(const float * src, float * buf, float * dst)
         {
-            const ConvParam & p = _param;
             if (!_is1x1)
             {
-                ImgToCol(src, p, buf);
+                buf = Buffer(buf);
+                ImgToCol(src, _param, buf);
                 src = buf;
             }
+            GemmAndBias(src, dst);
+        }
+
+        void ConvolutionGemm::GemmAndBias(const float * src, float * dst)
+        {
+            const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-
             if (_bias)
                 Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
         }
@@ -173,10 +181,62 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
+            : Convolution(p)
+            , _block(2)
+        {
+            _count = Simd::Square(_block + p.kernelX - 1);
+            _tileH = (p.dstH + _block - 1) / _block;
+            _tileW = (p.dstW + _block - 1) / _block;
+            _strideW = p.srcC * p.dstC;
+            _strideS = p.srcC * _tileH * _tileW;
+            _strideD = p.dstC * _tileH * _tileW;
+            _M = p.dstC;
+            _N = _tileW * _tileH;
+            _K = p.srcC;
+            _pad = (int)p.padX;
+        }
+        
+        size_t ConvolutionWinograd2x3p::BufferSize() const
+        {
+            return (_strideS + _strideD)*_count;
+        }
+        
+        void ConvolutionWinograd2x3p::SetWeight(const float * weight, const float * bias)
+        {
+            const ConvParam & p = _param;
+            _weight.Resize(_strideW*_count);
+            Base::Winograd2x3pSetFilter(weight, p.srcC*p.dstC, _weight.data);
+            _bias = bias;
+        }
+        
+        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
+        {
+            const ConvParam & p = _param;
+            float * bufS = Buffer(buf);
+            float * bufD = bufS + _strideS * _count;
+            Base::Winograd2x3pSetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad);
+            for (size_t i = 0; i < _count; ++i)
+                Base::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+            Base::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
+            if (_bias)
+                Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+        }
+
+        bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
+        {
+            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 16 && p.srcH >= 8 && p.srcW >= 8;
+        }
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            return new ConvolutionGemm(param);
+            if(ConvolutionWinograd2x3p::Preferable(param))
+                return new ConvolutionWinograd2x3p(param);
+            else
+                return new ConvolutionGemm(param);
         }
     }
 }

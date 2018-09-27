@@ -118,7 +118,7 @@ namespace Simd
             {
                 if (dstH == dstH2)
                     dstH2 -= 2;
-                if (dstW2 == dstW2)
+                if (dstW == dstW2)
                     dstW2 -= 2;
                 src -= srcWidth + 1;
             }

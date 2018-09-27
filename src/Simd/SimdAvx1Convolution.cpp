@@ -34,17 +34,31 @@ namespace Simd
         {
         }
 
-        void ConvolutionGemm::Forward(const float * src, float * buf, float * dst)
+        void ConvolutionGemm::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
-            if (!_is1x1)
-            {
-                ImgToCol(src, p, buf);
-                src = buf;
-            }
             for (size_t g = 0; g < p.group; ++g)
                 Avx::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
+            if (_bias)
+                Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+        }
 
+        //---------------------------------------------------------------------
+
+        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
+            : Sse::ConvolutionWinograd2x3p(p)
+        {
+        }
+
+        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
+        {
+            const ConvParam & p = _param;
+            float * bufS = Buffer(buf);
+            float * bufD = bufS + _strideS * _count;
+            Avx::Winograd2x3pSetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad);
+            for (size_t i = 0; i < _count; ++i)
+                Avx::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+            Avx::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
             if (_bias)
                 Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
         }
@@ -54,7 +68,10 @@ namespace Simd
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            return new ConvolutionGemm(param);
+            if (ConvolutionWinograd2x3p::Preferable(param))
+                return new ConvolutionWinograd2x3p(param);
+            else
+                return new ConvolutionGemm(param);
         }
     }
 #endif//SIMD_AVX_ENABLE

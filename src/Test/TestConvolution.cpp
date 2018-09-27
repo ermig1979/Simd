@@ -59,7 +59,8 @@ namespace Test
                 std::stringstream ss;
                 ss << description;
                 ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
-                ss << "-" << p.dstC << "-" << p.kernelX << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padW) << "-" << p.group;
+                ss << "-" << p.dstC << "x" << p.kernelY << "x" << p.kernelX;
+                ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padW) << "-" << p.group;
                 ss << "]";
                 description = ss.str();
             }
@@ -73,7 +74,7 @@ namespace Test
                     TEST_PERFORMANCE_TEST(description);
                     ::SimdConvolutionForward(convolution, src.Data(), buf.Data(), dst.Data());
                 }
-               ::SimdRelease(convolution);
+                ::SimdRelease(convolution);
             }
         };
     }
@@ -93,7 +94,7 @@ namespace Test
         Tensor32f src({ p.srcC, p.srcH, p.srcW });
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
 
-        Tensor32f weight({p.dstC, p.srcC/p.group, p.kernelY, p.kernelX });
+        Tensor32f weight({ p.dstC, p.srcC / p.group, p.kernelY, p.kernelX });
         FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
         Tensor32f bias({ p.dstC });
@@ -123,8 +124,33 @@ namespace Test
 
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _5(5, 5), _7(7, 7);
 
-        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(32, 150, 150, 32, _3, _1, _1, _1, _1, 32), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1), f1, f2);
+
+        //result = result && ConvolutionForwardAutoTest(Param(32, 150, 150, 32, _3, _1, _1, _1, _1, 32), f1, f2);
+
+        //result = result && ConvolutionForwardAutoTest(Param(48, 256, 256, 48, _1, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(96, 128, 128, 96, _1, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(192, 64, 64, 192, _1, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(384, 32, 32, 384, _1, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(768, 16, 16, 768, _1, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(1536, 8, 8, 1536, _1, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(3072, 4, 4, 3072, _1, _1, _1, _0, _0, 1), f1, f2);//slow
+
+        result = result && ConvolutionForwardAutoTest(Param(16, 256, 256, 16, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 128, 128, 32, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(64, 64, 64, 64, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(128, 32, 32, 128, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(256, 16, 16, 256, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(512, 8, 8, 512, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(1024, 4, 4, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
+
+        //result = result && ConvolutionForwardAutoTest(Param(10, 256, 256, 10, _5, _1, _1, _2, _2, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(20, 128, 128, 20, _5, _1, _1, _2, _2, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(40, 64, 64, 40, _5, _1, _1, _2, _2, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(80, 32, 32, 80, _5, _1, _1, _2, _2, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(160, 16, 16, 160, _5, _1, _1, _2, _2, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(320, 8, 8, 320, _5, _1, _1, _2, _2, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1), f1, f2);
 
         return result;
     }

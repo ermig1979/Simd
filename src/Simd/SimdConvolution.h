@@ -59,22 +59,50 @@ namespace Simd
             this->group = group;
         }
 
-        bool Is1x1() const
+        SIMD_INLINE bool IsKernel(size_t value) const
         {
-            return kernelY == 1 && kernelX == 1 && dilationY == 1 && dilationX == 1 && strideY == 1 && strideX == 1 && padY == 0 && padX == 0 && padH == 0 && padW == 0;
+            return kernelY == value && kernelX == value;
+        }
+
+        SIMD_INLINE bool IsDilation(size_t value) const
+        {
+            return dilationY == value && dilationX == value;
+        }
+
+        SIMD_INLINE bool IsStride(size_t value) const
+        {
+            return strideY == value && strideX == value;
+        }
+
+        SIMD_INLINE bool IsPad(size_t value) const
+        {
+            return padY == value && padX == value && padH == value && padW == value;
         }
     };
 
-    class Convolution : Deletable
+    class Convolution : public Deletable
     {
     public:
-        Convolution(const ConvParam & p) : _param(p) {}
+        Convolution(const ConvParam & p) : _param(p), _0(0.0f), _1(1.0f) {}
         virtual size_t BufferSize() const = 0;
         virtual void SetWeight(const float * weight, const float * bias) = 0;
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
+        float * Buffer(float * buffer)
+        {
+            if (buffer)
+                return buffer;
+            else
+            {
+                _buffer.Resize(BufferSize());
+                return _buffer.data;
+            }
+        }
+
     protected:
         ConvParam _param;
+        Array32f _buffer;
+        float _0, _1;
     };
 
     namespace Base
@@ -86,13 +114,32 @@ namespace Simd
             virtual size_t BufferSize() const;
             virtual void SetWeight(const float * weight, const float * bias);
             virtual void Forward(const float * src, float * buf, float * dst);
-            static void ImgToCol(const float * src, const ConvParam & p, float * dst);
 
         protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+
+            static void ImgToCol(const float * src, const ConvParam & p, float * dst);
+
             bool _is1x1;
-            float _0, _1;
             const float * _weight, * _bias;
             size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
+        };
+
+        class ConvolutionWinograd2x3p : public Convolution
+        {
+        public:
+            ConvolutionWinograd2x3p(const ConvParam & p);
+            virtual size_t BufferSize() const;
+            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void Forward(const float * src, float * buf, float * dst);
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K;
+            int _pad;
+            Array32f _weight;
+            const float * _bias;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -105,6 +152,15 @@ namespace Simd
         {
         public:
             ConvolutionGemm(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionWinograd2x3p : public Base::ConvolutionWinograd2x3p
+        {
+        public:
+            ConvolutionWinograd2x3p(const ConvParam & p);
+            virtual void SetWeight(const float * weight, const float * bias);
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -119,6 +175,14 @@ namespace Simd
         {
         public:
             ConvolutionGemm(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionWinograd2x3p : public Sse::ConvolutionWinograd2x3p
+        {
+        public:
+            ConvolutionWinograd2x3p(const ConvParam & p);
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -133,6 +197,14 @@ namespace Simd
         {
         public:
             ConvolutionGemm(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionWinograd2x3p : public Avx::ConvolutionWinograd2x3p
+        {
+        public:
+            ConvolutionWinograd2x3p(const ConvParam & p);
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -147,6 +219,14 @@ namespace Simd
         {
         public:
             ConvolutionGemm(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionWinograd2x3p : public Avx2::ConvolutionWinograd2x3p
+        {
+        public:
+            ConvolutionWinograd2x3p(const ConvParam & p);
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 

@@ -1812,13 +1812,14 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << srcIndex.width << "x" << srcIndex.height << "x" << srcIndex.depth;
+                ss << "[" << srcIndex.depth << "x" << srcIndex.height << "x" << srcIndex.width;
 #if 0
                 ss << "-" << kernel.x << "x" << kernel.y << "-" << pad.x << "x" << pad.y;
                 ss << "-" << stride.x << "x" << stride.y << "-" << dilation.x << "x" << dilation.y;
                 ss << "-" << dstIndex.width << "x" << dstIndex.height << "x" << dstIndex.depth << "]-" << add;
 #else
-                ss << "-" << kernel.x << "x" << kernel.y << "-" << pad.x << "-" << stride.x << "]";
+                ss << "-" << dstIndex.depth << "x" << kernel.y << "x" << kernel.x;
+                ss << "-" << stride.x << "-" << pad.x << "-1]";
 #endif
                 description = ss.str();
             }
@@ -1878,36 +1879,31 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _5(5, 5), _7(7, 7);
 
 #ifdef NDEBUG
-        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 96), _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 192), _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 384), _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 768), _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 1536), _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 3072), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 48), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 96), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 192), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 384), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 768), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 1536), _1, _0, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 3072), _1, _0, _1, _1, 1, eps, f1, f2);
 
         result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 16), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 32), _3, _1, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(127, 129, 31), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 64), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 128), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 256), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 512), _3, _1, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 1024), _3, _1, _1, _1, 1, eps, f1, f2);
 
-        result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _2, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _2, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 40), _5, _2, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 80), _5, _2, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 160), _5, _2, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(256, 256, 10), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(64, 64, 40), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 80), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 160), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(8, 8, 320), _5, _2, _1, _1, 1, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
 #else
         result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 64), _1, _0, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 3), _7, _2, _2, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), _5, _2, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(128, 128, 20), _5, _2, _1, _1, 1, eps, f1, f2);
-        //result = result && NeuralConvolutionForwardAutoTest(Index(15, 17, 5), _3, _1, _1, _1, 1, eps, f1, f2);
 #endif        
 
         return result;
