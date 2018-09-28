@@ -29,12 +29,12 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        ConvolutionGemm::ConvolutionGemm(const ConvParam & p)
-            : Base::ConvolutionGemm(p)
+        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
+            : Base::ConvolutionImgToCol(p)
         {
         }
 
-        void ConvolutionGemm::GemmAndBias(const float * src, float * dst)
+        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
@@ -79,7 +79,7 @@ namespace Simd
             if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
             else
-                return new ConvolutionGemm(param);
+                return new ConvolutionImgToCol(param);
         }
     }
 #endif//SIMD_SSE_ENABLE

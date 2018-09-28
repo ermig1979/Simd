@@ -22,61 +22,31 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConvolution.h"
-#include "Simd/SimdAvx512f.h"
+#include "Simd/SimdSse1.h"
+#include "Simd/SimdSse3.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_SSE3_ENABLE    
+    namespace Sse3
     {
-        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
-            : Avx2::ConvolutionImgToCol(p)
-        {
-        }
-
-        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
-                Avx512f::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Avx512f::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
-        }
-
-        //---------------------------------------------------------------------
-
         ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
-            : Avx2::ConvolutionImgToRow(p)
+            : Base::ConvolutionImgToRow(p)
         {
+        }
+
+        bool ConvolutionImgToRow::Preferable(const ConvParam & p)
+        {
+            return p.srcH < 16 && p.srcW < 16 && p.group == 1;
         }
 
         void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
-                Avx512f::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
+                Sse3::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
             if (_bias)
-                Avx512f::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
-        }
-
-        //---------------------------------------------------------------------
-
-        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
-            : Avx2::ConvolutionWinograd2x3p(p)
-        {
-        }
-
-        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
-        {
-            const ConvParam & p = _param;
-            float * bufS = Buffer(buf);
-            float * bufD = bufS + _strideS * _count;
-            Avx512f::Winograd2x3pSetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad);
-            for (size_t i = 0; i < _count; ++i)
-                Avx512f::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
-            Avx512f::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            if (_bias)
-                Avx512f::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+                Sse::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
         }
 
         //---------------------------------------------------------------------
@@ -85,12 +55,12 @@ namespace Simd
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
             if (ConvolutionWinograd2x3p::Preferable(param))
-                return new ConvolutionWinograd2x3p(param);
+                return new Sse::ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);
             else
-                return new ConvolutionImgToCol(param);
+                return new Sse::ConvolutionImgToCol(param);
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif//SIMD_SSE3_ENABLE
 }

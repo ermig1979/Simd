@@ -107,10 +107,10 @@ namespace Simd
 
     namespace Base
     {
-        class ConvolutionGemm : public Convolution
+        class ConvolutionImgToCol : public Convolution
         {
         public:
-            ConvolutionGemm(const ConvParam & p);
+            ConvolutionImgToCol(const ConvParam & p);
             virtual size_t BufferSize() const;
             virtual void SetWeight(const float * weight, const float * bias);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -122,6 +122,25 @@ namespace Simd
 
             bool _is1x1;
             const float * _weight, * _bias;
+            size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
+        };
+
+        class ConvolutionImgToRow : public Convolution
+        {
+        public:
+            ConvolutionImgToRow(const ConvParam & p);
+            virtual size_t BufferSize() const;
+            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void Forward(const float * src, float * buf, float * dst);
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+
+            static void ImgToRow(const float * src, const ConvParam & p, float * dst);
+
+            const float * _weight, *_bias;
             size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
         };
 
@@ -148,10 +167,10 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        class ConvolutionGemm : public Base::ConvolutionGemm
+        class ConvolutionImgToCol : public Base::ConvolutionImgToCol
         {
         public:
-            ConvolutionGemm(const ConvParam & p);
+            ConvolutionImgToCol(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -168,13 +187,39 @@ namespace Simd
     }
 #endif//SIMD_SSE_ENABLE
 
+#ifdef SIMD_SSE3_ENABLE    
+    namespace Sse3
+    {
+        class ConvolutionImgToRow : public Base::ConvolutionImgToRow
+        {
+        public:
+            ConvolutionImgToRow(const ConvParam & p);
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
+    }
+#endif//SIMD_SSE3_ENABLE
+
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class ConvolutionGemm : public Sse::ConvolutionGemm
+        class ConvolutionImgToCol : public Sse::ConvolutionImgToCol
         {
         public:
-            ConvolutionGemm(const ConvParam & p);
+            ConvolutionImgToCol(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionImgToRow : public Sse3::ConvolutionImgToRow
+        {
+        public:
+            ConvolutionImgToRow(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -193,10 +238,18 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class ConvolutionGemm : public Avx::ConvolutionGemm
+        class ConvolutionImgToCol : public Avx::ConvolutionImgToCol
         {
         public:
-            ConvolutionGemm(const ConvParam & p);
+            ConvolutionImgToCol(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionImgToRow : public Avx::ConvolutionImgToRow
+        {
+        public:
+            ConvolutionImgToRow(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -215,10 +268,18 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        class ConvolutionGemm : public Avx2::ConvolutionGemm
+        class ConvolutionImgToCol : public Avx2::ConvolutionImgToCol
         {
         public:
-            ConvolutionGemm(const ConvParam & p);
+            ConvolutionImgToCol(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        class ConvolutionImgToRow : public Avx2::ConvolutionImgToRow
+        {
+        public:
+            ConvolutionImgToRow(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };

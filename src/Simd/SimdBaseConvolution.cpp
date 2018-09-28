@@ -28,7 +28,7 @@ namespace Simd
 {
     namespace Base
     {
-        ConvolutionGemm::ConvolutionGemm(const ConvParam & p)
+        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
             : Convolution(p)
         {
             _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
@@ -40,7 +40,7 @@ namespace Simd
             _dstStep = p.dstC * _N / p.group;
         }
 
-        size_t ConvolutionGemm::BufferSize() const
+        size_t ConvolutionImgToCol::BufferSize() const
         {
             if (_is1x1)
                 return 1;
@@ -51,13 +51,13 @@ namespace Simd
             }
         };
 
-        void ConvolutionGemm::SetWeight(const float * weight, const float * bias)
+        void ConvolutionImgToCol::SetWeight(const float * weight, const float * bias)
         {
             _weight = weight;
             _bias = bias;
         }
 
-        void ConvolutionGemm::Forward(const float * src, float * buf, float * dst)
+        void ConvolutionImgToCol::Forward(const float * src, float * buf, float * dst)
         {
             if (!_is1x1)
             {
@@ -68,7 +68,7 @@ namespace Simd
             GemmAndBias(src, dst);
         }
 
-        void ConvolutionGemm::GemmAndBias(const float * src, float * dst)
+        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
@@ -77,7 +77,7 @@ namespace Simd
                 Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
         }
 
-        void ConvolutionGemm::ImgToCol(const float * src, const ConvParam & p, float * dst)
+        void ConvolutionImgToCol::ImgToCol(const float * src, const ConvParam & p, float * dst)
         {
             size_t srcSize = p.srcW * p.srcH;
             if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
@@ -181,6 +181,138 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
+            : Convolution(p)
+        {
+            _M = p.dstC / p.group;
+            _N = p.dstH  * p.dstW;
+            _K = p.srcC * p.kernelY * p.kernelX / p.group;
+            _weightStep = p.dstC * _K / p.group;
+            _srcStep = _K * _N;
+            _dstStep = p.dstC * _N / p.group;
+        }
+
+        size_t ConvolutionImgToRow::BufferSize() const
+        {
+            const ConvParam & p = _param;
+            return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+        };
+
+        void ConvolutionImgToRow::SetWeight(const float * weight, const float * bias)
+        {
+            _weight = weight;
+            _bias = bias;
+        }
+
+        void ConvolutionImgToRow::Forward(const float * src, float * buf, float * dst)
+        {
+            buf = Buffer(buf);
+            ImgToRow(src, _param, buf);
+            GemmAndBias(buf, dst);
+        }
+
+        bool ConvolutionImgToRow::Preferable(const ConvParam & p)
+        {
+            return p.srcH < 8 && p.srcW < 8 && p.group == 1;
+        }
+
+        void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
+        {
+            const ConvParam & p = _param;
+            for (size_t g = 0; g < p.group; ++g)
+                Base::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
+            if (_bias)
+                Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+        }
+
+        void ConvolutionImgToRow::ImgToRow(const float * src, const ConvParam & p, float * dst)
+        {
+            const size_t K = p.kernelX * p.kernelY*p.srcC, N = p.dstH * p.dstW;
+            if (p.IsDilation(1) && p.IsStride(1))
+            {
+                if (p.IsKernel(1))
+                {
+                    for (size_t i = 0; i < N; ++i)
+                    {
+                        for (size_t k = 0; k < K; ++k)
+                            *(dst++) = src[k*N + i];
+                    }
+                }
+                else
+                {
+                    for (size_t dstRow = 0; dstRow < p.dstH; ++dstRow)
+                    {
+                        size_t srcRow0 = dstRow - p.padY;
+                        for (size_t dstCol = 0; dstCol < p.dstW; ++dstCol)
+                        {
+                            size_t srcCol0 = dstCol - p.padX;
+                            for (size_t channel = 0; channel < p.srcC; ++channel)
+                            {
+                                for (size_t kernelRow = 0; kernelRow < p.kernelY; ++kernelRow)
+                                {
+                                    size_t srcRow = srcRow0 + kernelRow;
+                                    if (srcRow < p.srcH)
+                                    {
+                                        const float * psrc = src + (channel*p.srcH + srcRow)*p.srcW;
+                                        for (size_t kernelCol = 0; kernelCol < p.kernelX; ++kernelCol)
+                                        {
+                                            size_t srcCol = srcCol0 + kernelCol;
+                                            if (srcCol < p.srcW)
+                                                *(dst++) = psrc[srcCol];
+                                            else
+                                                *(dst++) = 0;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        for (size_t kernelCol = 0; kernelCol < p.kernelX; ++kernelCol)
+                                            *(dst++) = 0;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                for (size_t dstRow = 0; dstRow < p.dstH; ++dstRow)
+                {
+                    size_t srcRow0 = dstRow * p.strideY - p.padY;
+                    for (size_t dstCol = 0; dstCol < p.dstW; ++dstCol)
+                    {
+                        size_t srcCol0 = dstCol * p.strideX - p.padX;
+                        for (size_t channel = 0; channel < p.srcC; ++channel)
+                        {
+                            for (size_t kernelRow = 0; kernelRow < p.kernelY; ++kernelRow)
+                            {
+                                size_t srcRow = srcRow0 + kernelRow * p.dilationY;
+                                if (srcRow < p.srcH)
+                                {
+                                    const float * psrc = src + (channel*p.srcH + srcRow)*p.srcW;
+                                    for (size_t kernelCol = 0; kernelCol < p.kernelX; ++kernelCol)
+                                    {
+                                        size_t srcCol = srcCol0 + kernelCol * p.dilationX;
+                                        if (srcCol < p.srcW)
+                                            *(dst++) = psrc[srcCol];
+                                        else
+                                            *(dst++) = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    for (size_t kernelCol = 0; kernelCol < p.kernelX; ++kernelCol)
+                                        *(dst++) = 0;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
             : Convolution(p)
             , _block(2)
@@ -235,8 +367,10 @@ namespace Simd
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
             if(ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
+            else if (ConvolutionImgToRow::Preferable(param))
+                return new ConvolutionImgToRow(param);
             else
-                return new ConvolutionGemm(param);
+                return new ConvolutionImgToCol(param);
         }
     }
 }

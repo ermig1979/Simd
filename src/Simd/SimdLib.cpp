@@ -1422,6 +1422,11 @@ SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_
         return Avx::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
     else
 #endif
+#ifdef SIMD_SSE3_ENABLE
+    if (Sse3::Enable)
+        return Sse3::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+    else
+#endif
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable)
         return Sse::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);

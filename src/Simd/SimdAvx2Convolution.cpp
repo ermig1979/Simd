@@ -30,16 +30,32 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        ConvolutionGemm::ConvolutionGemm(const ConvParam & p)
-            : Avx::ConvolutionGemm(p)
+        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
+            : Avx::ConvolutionImgToCol(p)
         {
         }
 
-        void ConvolutionGemm::GemmAndBias(const float * src, float * dst)
+        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
+            if (_bias)
+                Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+        }
+
+        //---------------------------------------------------------------------
+
+        ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
+            : Avx::ConvolutionImgToRow(p)
+        {
+        }
+
+        void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
+        {
+            const ConvParam & p = _param;
+            for (size_t g = 0; g < p.group; ++g)
+                Avx2::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
             if (_bias)
                 Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
         }
@@ -71,8 +87,10 @@ namespace Simd
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
             if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
+            else if (ConvolutionImgToRow::Preferable(param))
+                return new ConvolutionImgToRow(param);
             else
-                return new ConvolutionGemm(param);
+                return new ConvolutionImgToCol(param);
         }
     }
 #endif//SIMD_AVX2_ENABLE
