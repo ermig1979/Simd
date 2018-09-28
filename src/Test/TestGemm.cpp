@@ -112,6 +112,7 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 0, 1024, 169, 11520, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 425, 169, 1024, f1, f2);
 
+        result = result && Gemm32fAutoTest(0, 0, 1280, 100, 256, f1, f2);
         result = result && Gemm32fAutoTest(0, 0, 512, 25, 256, f1, f2);
         result = result && Gemm32fAutoTest(0, 0, 256, 4, 128, f1, f2);
  
@@ -151,6 +152,7 @@ namespace Test
     {
         bool result = true;
 
+        result = result && Gemm32fAutoTest(0, 1, 1280, 100, 256, f1, f2);
         result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
         result = result && Gemm32fAutoTest(0, 1, 256, 4, 128, f1, f2);
 
@@ -166,6 +168,21 @@ namespace Test
 #ifdef SIMD_SSE3_ENABLE
         if (Simd::Sse3::Enable)
             result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Sse3::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Avx::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Avx2::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Avx512f::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
 #endif 
 
         return result;

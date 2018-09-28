@@ -316,6 +316,7 @@ namespace Simd
             size_t M3 = Simd::AlignLoAny(M, 3);
             size_t N4 = Simd::AlignLo(N, 4);
             size_t i = 0;
+#ifdef SIMD_X64_ENABLE
             for (; i < M3; i += 3)
             {
                 const float * pA = A + i * lda;
@@ -327,7 +328,7 @@ namespace Simd
                 for (; j < N; ++j)
                     Kernel3x1x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
             }
-            if (M - M3 == 2)
+            for (; i < M3 - 1; i += 2)
             {
                 const float * pA = A + i * lda;
                 float * pC = C + i * ldc;
@@ -338,7 +339,8 @@ namespace Simd
                 for (; j < N; ++j)
                     Kernel2x1x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
             }
-            if (M - M3 == 1)
+#endif
+            for (; i < M; i++)
             {
                 const float * pA = A + i * lda;
                 float * pC = C + i * ldc;
