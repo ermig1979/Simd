@@ -156,6 +156,13 @@ namespace Simd
         PackB _packB;
     };
 
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+    }
+#endif//SIMD_SSE_ENABLE
+
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {

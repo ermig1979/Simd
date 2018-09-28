@@ -44,5 +44,25 @@ namespace Simd
                 }
             }
         }
+
+        void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
+        {
+            float b = beta[0];
+            for (size_t i = 0; i < M; ++i)
+            {
+                float * pC = C + i * ldc;
+                for (size_t j = 0; j < N; ++j)
+                    pC[j] = b * pC[j];
+                for (size_t j = 0; j < N; ++j)
+                {
+                    const float * pA = A + i * K;
+                    const float * pB = B + j * K;
+                    float sum = 0;
+                    for (size_t k = 0; k < K; ++k)
+                        sum += pA[k] * pB[k];
+                    pC[j] += sum*alpha[0];
+                }
+            }
+        }
     }
 }

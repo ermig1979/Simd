@@ -38,11 +38,11 @@ namespace Test
 
             FuncGemm32f(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(float alpha, const View & A, const View & B, float beta, const View & srcC, View & dstC) const
+            void Call(size_t M, size_t N, size_t K, float alpha, const View & A, const View & B, float beta, const View & srcC, View & dstC) const
             {
                 Simd::Copy(srcC, dstC);
                 TEST_PERFORMANCE_TEST(description);
-                func(A.height, B.width, A.width, &alpha, (float*)A.data, A.stride / sizeof(float), 
+                func(M, N, K, &alpha, (float*)A.data, A.stride / sizeof(float), 
                     (float*)B.data, B.stride / sizeof(float), &beta, (float*)dstC.data, dstC.stride / sizeof(float));
             }
 
@@ -58,7 +58,7 @@ namespace Test
 
 #define FUNC_GEMM32F(function) FuncGemm32f(function, #function)
 
-    bool Gemm32fAutoTest(size_t M, size_t N, size_t K, FuncGemm32f f1, FuncGemm32f f2)
+    bool Gemm32fAutoTest(int transA, int transB, size_t M, size_t N, size_t K, FuncGemm32f f1, FuncGemm32f f2)
     {
         bool result = true;
 
@@ -67,8 +67,8 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << M << ", " << N << ", " << K << "].");
 
-        View A(K, M, View::Float, NULL, TEST_ALIGN(1));
-        View B(N, K, View::Float, NULL, TEST_ALIGN(1));
+        View A(transA ? M : K, transA ? K : M, View::Float, NULL, TEST_ALIGN(1));
+        View B(transB ? K : N, transB ? N : K, View::Float, NULL, TEST_ALIGN(1));
         View dstC1(N, M, View::Float, NULL, TEST_ALIGN(1));
         View dstC2(N, M, View::Float, NULL, TEST_ALIGN(1));
         View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
@@ -78,39 +78,42 @@ namespace Test
         FillRandom32f(B, -1.0f, 1.0f);
         FillRandom32f(srcC, -1.0f, 1.0f);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(alpha, A, B, beta, srcC, dstC1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(M, N, K, alpha, A, B, beta, srcC, dstC1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(alpha, A, B, beta, srcC, dstC2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(M, N, K, alpha, A, B, beta, srcC, dstC2));
 
         result = result && Compare(dstC1, dstC2, EPS, true, 32, DifferenceBoth);
 
         return result;
     }
 
-    bool Gemm32fAutoTest(const FuncGemm32f & f1, const FuncGemm32f & f2)
+    bool Gemm32fNNAutoTest(const FuncGemm32f & f1, const FuncGemm32f & f2)
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(666, 666, 666, f1, f2);
-        result = result && Gemm32fAutoTest(555, 555, 555, f1, f2);
-        result = result && Gemm32fAutoTest(999, 999, 999, f1, f2);
-        result = result && Gemm32fAutoTest(333, 333, 333, f1, f2);
-        result = result && Gemm32fAutoTest(999, 399, 379, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 333, 333, 333, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 999, 399, 379, f1, f2);
 
-        result = result && Gemm32fAutoTest(32, 173056, 27, f1, f2);
-        result = result && Gemm32fAutoTest(64, 43264, 288, f1, f2);
-        result = result && Gemm32fAutoTest(128, 10816, 576, f1, f2);
-        result = result && Gemm32fAutoTest(64, 10816, 128, f1, f2);
-        result = result && Gemm32fAutoTest(256, 2704, 1152, f1, f2);
-        result = result && Gemm32fAutoTest(256, 2704, 128, f1, f2);
-        result = result && Gemm32fAutoTest(512, 676, 2304, f1, f2);
-        result = result && Gemm32fAutoTest(256, 676, 512, f1, f2);
-        result = result && Gemm32fAutoTest(1024, 169, 4608, f1, f2);
-        result = result && Gemm32fAutoTest(512, 169, 1024, f1, f2);
-        result = result && Gemm32fAutoTest(1024, 169, 9216, f1, f2);
-        result = result && Gemm32fAutoTest(64, 676, 512, f1, f2);
-        result = result && Gemm32fAutoTest(1024, 169, 11520, f1, f2);
-        result = result && Gemm32fAutoTest(425, 169, 1024, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 32, 173056, 27, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 64, 43264, 288, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 128, 10816, 576, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 64, 10816, 128, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 256, 2704, 1152, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 256, 2704, 128, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 512, 676, 2304, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 256, 676, 512, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 1024, 169, 4608, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 512, 169, 1024, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 1024, 169, 9216, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 64, 676, 512, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 1024, 169, 11520, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 425, 169, 1024, f1, f2);
+
+        result = result && Gemm32fAutoTest(0, 0, 512, 25, 256, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 256, 4, 128, f1, f2);
  
         return result;
     }
@@ -119,34 +122,58 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+        result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Sse::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+            result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Sse::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Avx::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+            result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Avx::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Avx2::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+            result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Avx2::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && Gemm32fAutoTest(FUNC_GEMM32F(Simd::Avx512f::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+            result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Avx512f::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 #endif
+
+        return result;
+    }
+
+    bool Gemm32fNTAutoTest(const FuncGemm32f & f1, const FuncGemm32f & f2)
+    {
+        bool result = true;
+
+        result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 256, 4, 128, f1, f2);
+
+        return result;
+    }
+
+    bool Gemm32fNTAutoTest()
+    {
+        bool result = true;
+
+        result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+
+#ifdef SIMD_SSE3_ENABLE
+        if (Simd::Sse3::Enable)
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Sse3::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#endif 
 
         return result;
     }
 
     //-----------------------------------------------------------------------
 
-    bool Gemm32fDataTest(bool create, size_t M, size_t N, size_t K, const FuncGemm32f & f)
+    bool Gemm32fDataTest(bool create, int transA, int transB, size_t M, size_t N, size_t K, const FuncGemm32f & f)
     {
         bool result = true;
 
@@ -154,11 +181,11 @@ namespace Test
 
         TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << M << ", " << N << ", " << K << "].");
 
-        View A(K, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View B(N, K, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View A(transA ? M : K, transA ? K : M, View::Float, NULL, TEST_ALIGN(1));
+        View B(transB ? K : N, transB ? N : K, View::Float, NULL, TEST_ALIGN(1));
+        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(1));
+        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(1));
         View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
         const float alpha = 1.5f, beta = 0.5f;
 
@@ -172,7 +199,7 @@ namespace Test
             TEST_SAVE(B);
             TEST_SAVE(srcC);
 
-            f.Call(alpha, A, B, beta, srcC, dstC1);
+            f.Call(M, N, K, alpha, A, B, beta, srcC, dstC1);
 
             TEST_SAVE(dstC1);
         }
@@ -184,7 +211,7 @@ namespace Test
 
             TEST_LOAD(dstC1);
 
-            f.Call(alpha, A, B, beta, srcC, dstC2);
+            f.Call(M, N, K, alpha, A, B, beta, srcC, dstC2);
 
             TEST_SAVE(dstC2);
 
@@ -196,6 +223,11 @@ namespace Test
 
     bool Gemm32fNNDataTest(bool create)
     {
-        return Gemm32fDataTest(create, 16, 18, 20, FUNC_GEMM32F(SimdGemm32fNN));
+        return Gemm32fDataTest(create, 0, 0, 16, 18, 20, FUNC_GEMM32F(SimdGemm32fNN));
+    }
+
+    bool Gemm32fNTDataTest(bool create)
+    {
+        return Gemm32fDataTest(create, 0, 1, 16, 18, 20, FUNC_GEMM32F(SimdGemm32fNT));
     }
 }
