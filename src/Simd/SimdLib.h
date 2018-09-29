@@ -1618,13 +1618,13 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdConvolutionForward(const void * convolution, const float * src, float * buf, float * dst);
+        \fn void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);
 
         \short Performs forward propagation of convolution algorithm.
 
         \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to temporary buffer. The size of the temporary buffer is determined by function ::SimdConvolutionBufferSize(). Can be NULL.
+        \param [out] buf - a pointer to temporary buffer. The size of the temporary buffer is determined by function ::SimdConvolutionBufferSize. Can be NULL.
         \param [out] dst - a pointer to output image.
     */
     SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);
