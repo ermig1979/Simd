@@ -40,7 +40,7 @@ namespace Simd
             _mm512_mask_storeu_ps(ptr, mask, _mm512_fmadd_ps(value, alpha, _mm512_maskz_loadu_ps(mask, ptr)));
         }
 
-        static void Kernel4x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel4x48nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -100,7 +100,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32, mask);
         }
 
-        static void Kernel4x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel4x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -147,7 +147,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31, mask);
         }
 
-        static void Kernel4x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c0 = _mm512_setzero_ps();
             __m512 c1 = _mm512_setzero_ps();
@@ -174,7 +174,7 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3, mask);
         }
 
-        static void Kernel6x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel6x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -239,7 +239,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51, mask);
         }
 
-        static void Kernel6x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -285,7 +285,7 @@ namespace Simd
             AddProduct(C + 0 * F, _alpha, c50, mask);
         }
 
-        static void Kernel8x48(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel8x48nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c01 = _mm512_setzero_ps();
@@ -393,7 +393,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c72, mask);
         }
 
-        static void Kernel8x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc,  __mmask16 mask)
+        static void Kernel8x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc,  __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c01 = _mm512_setzero_ps();
@@ -476,7 +476,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c71, mask);
         }
 
-        static void Kernel8x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel8x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -534,7 +534,7 @@ namespace Simd
             AddProduct(C + 0 * F, _alpha, c70, mask);
         }
 
-        static void Kernel12x32(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel12x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -653,7 +653,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, cB1, mask);
         }
 
-        static void Kernel12x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void Kernel12x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
             __m512 c00 = _mm512_setzero_ps();
             __m512 c10 = _mm512_setzero_ps();
@@ -735,7 +735,7 @@ namespace Simd
             AddProduct(C + 0 * F, _alpha, cB0, mask);
         }
 
-        static void KernelMx48(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void KernelMx48nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
             __m512 c[8][3];
@@ -776,7 +776,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx32(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void KernelMx32nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
             __m512 c[12][2];
@@ -813,7 +813,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx16(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        static void KernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
 #if SIMD_ZMM_COUNT == 32
             __m512 c[12];
@@ -1003,20 +1003,20 @@ namespace Simd
                 microM = 12;
                 microN = 32;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Kernel12x32;
-                kernelMT = tail > F ? Kernel12x32 : Kernel12x16;
-                kernelTM = KernelMx32;
-                kernelTT = tail > F ? KernelMx32 : KernelMx16;
+                kernelMM = Kernel12x32nn;
+                kernelMT = tail > F ? Kernel12x32nn : Kernel12x16nn;
+                kernelTM = KernelMx32nn;
+                kernelTT = tail > F ? KernelMx32nn : KernelMx16nn;
             }
             else
             {
                 microM = 8;
                 microN = 48;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Kernel8x48;
-                kernelMT = tail > DF ? Kernel8x48 : (tail > F ? Kernel8x32 : Kernel8x16);
-                kernelTM = KernelMx48;
-                kernelTT = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
+                kernelMM = Kernel8x48nn;
+                kernelMT = tail > DF ? Kernel8x48nn : (tail > F ? Kernel8x32nn : Kernel8x16nn);
+                kernelTM = KernelMx48nn;
+                kernelTT = tail > DF ? KernelMx48nn : (tail > F ? KernelMx32nn : KernelMx16nn);
             }
 #elif SIMD_ZMM_COUNT == 16
             if (K > 4096)
@@ -1024,28 +1024,28 @@ namespace Simd
                 microM = 6;
                 microN = 32;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Kernel6x32;
-                kernelMT = tail > F ? Kernel6x32 : Kernel6x16;
-                kernelTM = KernelMx32;
-                kernelTT = tail > F ? KernelMx32 : KernelMx16;
+                kernelMM = Kernel6x32nn;
+                kernelMT = tail > F ? Kernel6x32nn : Kernel6x16nn;
+                kernelTM = KernelMx32nn;
+                kernelTT = tail > F ? KernelMx32nn : KernelMx16nn;
             }
             else
             {
                 microM = 4;
                 microN = 48;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Kernel4x48;
-                kernelMT = tail > DF ? Kernel4x48 : (tail > F ? Kernel4x32 : Kernel4x16);
-                kernelTM = KernelMx48;
-                kernelTT = tail > DF ? KernelMx48 : (tail > F ? KernelMx32 : KernelMx16);
+                kernelMM = Kernel4x48nn;
+                kernelMT = tail > DF ? Kernel4x48nn : (tail > F ? Kernel4x32nn : Kernel4x16nn);
+                kernelTM = KernelMx48nn;
+                kernelTT = tail > DF ? KernelMx48nn : (tail > F ? KernelMx32nn : KernelMx16nn);
             }
 #else
             microM = 4;
             microN = 16;
-            kernelMM = Kernel4x16;
-            kernelMT = Kernel4x16;
-            kernelTM = KernelMx16;
-            kernelTT = KernelMx16;
+            kernelMM = Kernel4x16nn;
+            kernelMT = Kernel4x16nn;
+            kernelTM = KernelMx16nn;
+            kernelTT = KernelMx16nn;
 #endif
             GemmNN gemmNN(M, N, K, microM, microN, CACHE_L2_SIZE, CACHE_L3_SIZE, CACHE_L3_SIZE, F,
                 kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::ScaleC, Avx512f::PackB, TailMask16);
@@ -1064,7 +1064,7 @@ namespace Simd
             _mm_storeu_ps(dst, _mm_fmadd_ps(alpha, sum128, _mm_loadu_ps(dst)));
         }
 
-        static void Kernel1x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel1x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1080,6 +1080,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 b0 = _mm512_maskz_loadu_ps(tail, B0 + k);
                 c00 = _mm512_fmadd_ps(a0, b0, c00);
@@ -1087,7 +1088,7 @@ namespace Simd
             C[0] += alpha * Avx512f::ExtractSum(c00);
         }
 
-        static void Kernel1x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel1x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1115,6 +1116,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 b0 = _mm512_maskz_loadu_ps(tail, B0 + k);
                 c00 = _mm512_fmadd_ps(a0, b0, c00);
@@ -1129,7 +1131,7 @@ namespace Simd
             Add4ExtractedSums(c00, c01, c02, c03, _alpha, C + 0 * ldc);
         }
 
-        static void Kernel2x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel2x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1149,6 +1151,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 a1 = _mm512_maskz_loadu_ps(tail, A1 + k);
                 b0 = _mm512_maskz_loadu_ps(tail, B0 + k);
@@ -1159,7 +1162,7 @@ namespace Simd
             C[1 * ldc] += alpha * Avx512f::ExtractSum(c10);
         }
 
-        static void Kernel2x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel2x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~16);
             const float * A0 = A + 0 * lda;
@@ -1197,6 +1200,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 a1 = _mm512_maskz_loadu_ps(tail, A1 + k);
                 b0 = _mm512_maskz_loadu_ps(tail, B0 + k);
@@ -1217,7 +1221,7 @@ namespace Simd
             Add4ExtractedSums(c10, c11, c12, c13, _alpha, C + 1 * ldc);
         }
 
-        static void Kernel3x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel3x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1241,6 +1245,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 a1 = _mm512_maskz_loadu_ps(tail, A1 + k);
                 a2 = _mm512_maskz_loadu_ps(tail, A2 + k);
@@ -1254,7 +1259,7 @@ namespace Simd
             C[2 * ldc] += alpha * Avx512f::ExtractSum(c20);
         }
 
-        static void Kernel3x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel3x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1302,6 +1307,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 a1 = _mm512_maskz_loadu_ps(tail, A1 + k);
                 a2 = _mm512_maskz_loadu_ps(tail, A2 + k);
@@ -1328,7 +1334,7 @@ namespace Simd
             Add4ExtractedSums(c20, c21, c22, c23, _alpha, C + 2 * ldc);
         }
 
-        static void Kernel6x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel6x1x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1364,6 +1370,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 a1 = _mm512_maskz_loadu_ps(tail, A1 + k);
                 a2 = _mm512_maskz_loadu_ps(tail, A2 + k);
@@ -1386,7 +1393,7 @@ namespace Simd
             C[5 * ldc] += alpha * Avx512f::ExtractSum(c50);
         }
 
-        static void Kernel6x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 tail)
+        static void Kernel6x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K16 = K & (~15);
             const float * A0 = A + 0 * lda;
@@ -1464,6 +1471,7 @@ namespace Simd
             }
             if (k < K)
             {
+                __mmask16 tail = __mmask16(-1) >> (16 + k - K);
                 a0 = _mm512_maskz_loadu_ps(tail, A0 + k);
                 a1 = _mm512_maskz_loadu_ps(tail, A1 + k);
                 a2 = _mm512_maskz_loadu_ps(tail, A2 + k);
@@ -1510,59 +1518,21 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            __mmask16 tail = TailMask16(K - AlignLo(K, 16));
-            size_t M6 = Simd::AlignLoAny(M, 6);
-            size_t M3 = Simd::AlignLoAny(M, 3);
-            size_t N4 = Simd::AlignLo(N, 4);
-            size_t i = 0;
+            const size_t CACHE_L1_SIZE = 32 * 1024;
+            const size_t CACHE_L2_SIZE = 256 * 1024;
+            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            typedef Simd::GemmNT<float> GemmNT;
 #if SIMD_ZMM_COUNT == 32
-            for (; i < M6; i += 6)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx512f::ScaleC(6, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel6x4x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-                for (; j < N; ++j)
-                    Kernel6x1x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-            }
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Avx::GemmScaleC,
+                Kernel1x1x16nt, Kernel1x4x16nt, Kernel2x1x16nt, Kernel2x4x16nt, Kernel3x1x16nt, Kernel3x4x16nt, Kernel6x1x16nt, Kernel6x4x16nt);
+#elif defined(SIMD_X64_ENABLE)
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Avx::GemmScaleC,
+                Kernel1x1x16nt, Kernel1x4x16nt, Kernel2x1x16nt, Kernel2x4x16nt, Kernel3x1x16nt, Kernel3x4x16nt, NULL, NULL);
+#else
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Sse::GemmScaleC,
+                Kernel1x1x16nt, Kernel1x4x16nt, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
-#ifdef SIMD_X64_ENABLE
-            for (; i < M3; i += 3)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx512f::ScaleC(3, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel3x4x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-                for (; j < N; ++j)
-                    Kernel3x1x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-            }
-            for (; i < M3 - 1; i += 2)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx512f::ScaleC(2, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel2x4x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-                for (; j < N; ++j)
-                    Kernel2x1x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-            }
-#endif
-            for (; i < M; i++)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx512f::ScaleC(1, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel1x4x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-                for (; j < N; ++j)
-                    Kernel1x1x16nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc, tail);
-            }
+            gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
 #endif// SIMD_AVX512F_ENABLE

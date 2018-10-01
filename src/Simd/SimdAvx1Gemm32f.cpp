@@ -48,7 +48,7 @@ namespace Simd
             }
         }
 
-        static void Kernel4x24(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void Kernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -108,7 +108,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32, tail);
         }
 
-        static void Kernel4x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void Kernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -155,7 +155,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31, tail);
         }
 
-        static void Kernel4x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void Kernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c0 = _mm256_setzero_ps();
             __m256 c1 = _mm256_setzero_ps();
@@ -182,7 +182,7 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3, tail);
         }
 
-        static void Kernel6x16(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void Kernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -247,7 +247,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51, tail);
         }
 
-        static void Kernel6x8(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void Kernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -293,7 +293,7 @@ namespace Simd
             AddProduct(C + 0 * F, _alpha, c50, tail);
         }
 
-        static void KernelMx24(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void KernelMx24nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[4][3];
             const float * a[4];
@@ -329,7 +329,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx16(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void KernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[6][2];
             const float * a[6];
@@ -361,7 +361,7 @@ namespace Simd
             }
         }
 
-        static void KernelMx8(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        static void KernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
 #ifdef SIMD_X64_ENABLE
             __m256 c[6];
@@ -594,20 +594,20 @@ namespace Simd
                 microM = 6;
                 microN = 16;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Kernel6x16;
-                kernelMT = tail > F ? Kernel6x16 : Kernel6x8;
-                kernelTM = KernelMx16;
-                kernelTT = tail > F ? KernelMx16 : KernelMx8;
+                kernelMM = Kernel6x16nn;
+                kernelMT = tail > F ? Kernel6x16nn : Kernel6x8nn;
+                kernelTM = KernelMx16nn;
+                kernelTT = tail > F ? KernelMx16nn : KernelMx8nn;
             }
             else
             {
                 microM = 4;
                 microN = 24;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Kernel4x24;
-                kernelMT = tail > DF ? Kernel4x24 : (tail > F ? Kernel4x16 : Kernel4x8);
-                kernelTM = KernelMx24;
-                kernelTT = tail > DF ? KernelMx24 : (tail > F ? KernelMx16 : KernelMx8);
+                kernelMM = Kernel4x24nn;
+                kernelMT = tail > DF ? Kernel4x24nn : (tail > F ? Kernel4x16nn : Kernel4x8nn);
+                kernelTM = KernelMx24nn;
+                kernelTT = tail > DF ? KernelMx24nn : (tail > F ? KernelMx16nn : KernelMx8nn);
             }
 #else
             microM = 4;
@@ -911,44 +911,18 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            size_t M3 = Simd::AlignLoAny(M, 3);
-            size_t N4 = Simd::AlignLo(N, 4);
-            size_t i = 0;
+            const size_t CACHE_L1_SIZE = 32 * 1024;
+            const size_t CACHE_L2_SIZE = 256 * 1024;
+            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            typedef Simd::GemmNT<float> GemmNT;
 #ifdef SIMD_X64_ENABLE
-            for (; i < M3; i += 3)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx::GemmScaleC(3, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel3x4x8nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-                for (; j < N; ++j)
-                    Kernel3x1x8nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-            }
-            for (; i < M3 - 1; i += 2)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx::GemmScaleC(2, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel2x4x8nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-                for (; j < N; ++j)
-                    Kernel2x1x8nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-            }
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Avx::GemmScaleC,
+                Kernel1x1x8nt, Kernel1x4x8nt, Kernel2x1x8nt, Kernel2x4x8nt, Kernel3x1x8nt, Kernel3x4x8nt, NULL, NULL);
+#else
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Sse::GemmScaleC,
+                Kernel1x1x8nt, Kernel1x4x8nt, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
-            for (; i < M; i++)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Avx::GemmScaleC(1, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel1x4x8nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-                for (; j < N; ++j)
-                    Kernel1x1x8nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-            }
+            gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
 #endif// SIMD_AVX_ENABLE

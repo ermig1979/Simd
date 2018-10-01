@@ -313,44 +313,18 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            size_t M3 = Simd::AlignLoAny(M, 3);
-            size_t N4 = Simd::AlignLo(N, 4);
-            size_t i = 0;
+            const size_t CACHE_L1_SIZE = 32 * 1024;
+            const size_t CACHE_L2_SIZE = 256 * 1024;
+            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            typedef Simd::GemmNT<float> GemmNT;
 #ifdef SIMD_X64_ENABLE
-            for (; i < M3; i += 3)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Sse::GemmScaleC(3, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel3x4x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-                for (; j < N; ++j)
-                    Kernel3x1x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-            }
-            for (; i < M3 - 1; i += 2)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Sse::GemmScaleC(2, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel2x4x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-                for (; j < N; ++j)
-                    Kernel2x1x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-            }
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Sse::GemmScaleC,
+                Kernel1x1x4nt, Kernel1x4x4nt, Kernel2x1x4nt, Kernel2x4x4nt, Kernel3x1x4nt, Kernel3x4x4nt, NULL, NULL);
+#else
+            GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Sse::GemmScaleC,
+                Kernel1x1x4nt, Kernel1x4x4nt, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
-            for (; i < M; i++)
-            {
-                const float * pA = A + i * lda;
-                float * pC = C + i * ldc;
-                Sse::GemmScaleC(1, N, beta[0], pC, ldc);
-                size_t j = 0;
-                for (; j < N4; j += 4)
-                    Kernel1x4x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-                for (; j < N; ++j)
-                    Kernel1x1x4nt(K, alpha[0], pA, lda, B + j * K, ldb, pC + j, ldc);
-            }
+            gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
 #endif// SIMD_SSE3_ENABLE

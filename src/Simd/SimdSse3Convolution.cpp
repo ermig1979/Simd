@@ -37,7 +37,7 @@ namespace Simd
 
         bool ConvolutionImgToRow::Preferable(const ConvParam & p)
         {
-            return p.srcH < 16 && p.srcW < 16 && p.group == 1;
+            return p.srcH < 6 && p.srcW < 6 && p.group == 1;
         }
 
         void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)

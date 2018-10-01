@@ -91,7 +91,7 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 333, 333, 333, f1, f2);
@@ -152,9 +152,13 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(0, 1, 1280, 100, 256, f1, f2);
-        result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 666, 666, 666, f1, f2);
+
+        //result = result && Gemm32fAutoTest(0, 1, 1280, 100, 256, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
         result = result && Gemm32fAutoTest(0, 1, 256, 4, 128, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 16, 1, 1152, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 16, 25, 4608, f1, f2);
 
         return result;
     }
