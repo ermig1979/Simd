@@ -91,7 +91,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 333, 333, 333, f1, f2);
@@ -112,9 +112,14 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 0, 1024, 169, 11520, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 425, 169, 1024, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 0, 1280, 100, 256, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 512, 25, 256, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 256, 4, 128, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 1280, 100, 256, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 512, 25, 256, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 256, 4, 128, f1, f2);
+
+        //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 728, 192, 728, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 728, 4, 728, f1, f2);
  
         return result;
     }
@@ -156,9 +161,13 @@ namespace Test
 
         //result = result && Gemm32fAutoTest(0, 1, 1280, 100, 256, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
-        result = result && Gemm32fAutoTest(0, 1, 256, 4, 128, f1, f2);
-        result = result && Gemm32fAutoTest(0, 1, 16, 1, 1152, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 256, 4, 128, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 16, 1, 1152, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 16, 25, 4608, f1, f2);
+
+        result = result && Gemm32fAutoTest(0, 1, 728, 196, 728, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 728, 192, 728, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 728, 4, 728, f1, f2);
 
         return result;
     }

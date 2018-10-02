@@ -357,9 +357,169 @@ namespace Simd
 
         bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
         {
-            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 16 && p.srcH >= 8 && p.srcW >= 8;
+            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 16 && p.srcH >= 6 && p.srcW >= 6;
         }
 
+        //---------------------------------------------------------------------
+
+        ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
+            : Convolution(p)
+        {
+            _srcC = p.srcC / p.group;
+            _srcH = p.padY + p.srcH + p.padH;
+            _srcW = p.padX + p.srcW + p.padW;
+            _dstC = p.dstC / p.group;
+            _weightStep = _srcC * _dstC * p.kernelY * p.kernelX;
+            _srcStep = _srcC * p.srcH * p.srcW;
+            _dstStep = _dstC * p.dstH  * p.dstW;
+            _pad = p.IsPad(0) ? 0 : 1;
+        }
+
+        size_t ConvolutionDirect::BufferSize() const
+        {
+            if (_pad)
+                return _srcC*_srcH*_srcW;
+            else
+                return 1;
+        }
+
+        void ConvolutionDirect::SetWeight(const float * weight, const float * bias)
+        {
+            _weight = weight;
+            _bias = bias;
+        }
+
+        void ConvolutionDirect::Forward(const float * src, float * buf, float * dst)
+        {
+            const ConvParam & p = _param;
+            const float * weight = _weight;
+            const float * bias = _bias;
+            if(_pad)
+                buf = Buffer(buf);
+            for (size_t g = 0; g < p.group; ++g)
+            {
+                if (_bias)
+                    SetBias(bias, dst);
+                else
+                    memset(dst, 0, _dstStep*sizeof(float));
+                if (_pad)
+                {
+                    Pad(src, buf);
+                    AddConvolution(buf, weight, dst);
+                }
+                else
+                    AddConvolution(src, weight, dst);
+                weight += _weightStep;
+                bias += _dstC;
+                src += _srcStep;
+                dst += _dstStep;
+            }
+        }
+
+        bool ConvolutionDirect::Preferable(const ConvParam & p)
+        {
+            return p.IsDilation(1) && p.srcC <= p.group * 16;
+        }
+
+        void ConvolutionDirect::Pad(const float * src, float * dst) const
+        {
+            const ConvParam & p = _param;
+            for (size_t c = 0; c < _srcC; ++c)
+            {
+                if (p.padY)
+                {
+                    memset(dst, 0, p.padY*_srcW * sizeof(float));
+                    dst += p.padY*_srcW;
+                }
+                for (size_t row = 0; row < p.srcH; ++row)
+                {
+                    for (size_t col = 0; col < p.padX; ++col)
+                        *dst++ = 0;
+                    memcpy(dst, src, p.srcW * sizeof(float));
+                    dst += p.srcW;
+                    src += p.srcW;
+                    for (size_t col = 0; col < p.padW; ++col)
+                        *dst++ = 0;
+                }
+                if (p.padH)
+                {
+                    memset(dst, 0, p.padH*_srcW * sizeof(float));
+                    dst += p.padH*_srcW;
+                }
+            }
+        }
+
+        void ConvolutionDirect::SetBias(const float * bias, float * dst)
+        {
+            const ConvParam & p = _param;
+            size_t size = p.dstH*p.dstW;
+            for (size_t i = 0; i < _dstC; ++i)
+            {
+                float value = bias[i];
+                for (size_t j = 0; j < size; ++j)
+                    *dst++ = value;
+            }
+        }
+
+        SIMD_INLINE float Convolution1x3(const float * src, const float * weight)
+        {
+            return src[0] * weight[0] + src[1] * weight[1] + src[2] * weight[2];
+        }
+
+        SIMD_INLINE float Convolution3x3(const float * src, size_t srcW, const float * weight)
+        {
+            return
+                Convolution1x3(src, weight) +
+                Convolution1x3(src + srcW, weight + 3) +
+                Convolution1x3(src + 2 * srcW, weight + 6);
+        }
+
+        static void AddConvolution3x3(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
+        {
+            for (size_t dy = 0; dy < dstH; ++dy)
+            {
+                for (size_t dx = 0, sx = 0; dx < dstW; ++dx, sx += strideX)
+                    dst[dx] += Convolution3x3(src + sx, srcW, weight);
+                src += srcW* strideY;
+                dst += dstW;
+            }
+        }
+
+        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
+        {
+            const ConvParam & p = _param;
+            for (size_t dc = 0; dc < _dstC; ++dc)
+            {
+                for (size_t sc = 0; sc < _srcC; ++sc)
+                {
+                    const float * ps = src + sc * _srcW * _srcH;
+                    const float * pw = weight + (dc*_srcC + sc)*p.kernelX*p.kernelY;
+                    float * pd = dst + dc * p.dstW * p.dstH;
+                    if (p.IsKernel(3))
+                        AddConvolution3x3(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
+                    else
+                    {
+                        for (size_t dy = 0; dy < p.dstH; ++dy)
+                        {
+                            for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += p.strideX)
+                            {
+                                float sum = 0;
+                                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                                {
+                                    const float * s = ps + ky * _srcW + sx;
+                                    const float * w = pw + p.kernelX*ky;
+                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                        sum += s[kx] * w[kx];
+                                }
+                                pd[dx] += sum;
+                            }
+                            ps += _srcW * p.strideY;
+                            pd += p.dstW;
+                        }
+                    }
+                }
+            }
+        }
         //---------------------------------------------------------------------
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
@@ -369,6 +529,8 @@ namespace Simd
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);
+            else if (ConvolutionDirect::Preferable(param))
+                return new ConvolutionDirect(param);
             else
                 return new ConvolutionImgToCol(param);
         }

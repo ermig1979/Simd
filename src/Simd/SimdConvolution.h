@@ -161,6 +161,26 @@ namespace Simd
             const float * _bias;
         };
 
+        class ConvolutionDirect : public Convolution
+        {
+        public:
+            ConvolutionDirect(const ConvParam & p);
+            virtual size_t BufferSize() const;
+            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void Forward(const float * src, float * buf, float * dst);
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+           void Pad(const float * src, float * dst) const;
+           virtual void SetBias(const float * bias, float * dst);
+           virtual void AddConvolution(const float * src, const float * weight, float * dst);
+
+            size_t _weightStep, _srcStep, _dstStep, _srcC, _srcH, _srcW, _dstC;
+            int _pad;
+            const float * _weight, * _bias;
+        };
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
     }
 
