@@ -212,6 +212,7 @@ namespace Simd
             virtual void SetBias(const float * bias, float * dst);
             virtual void AddConvolution(const float * src, const float * weight, float * dst);
             void AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst);
+            void AddConvolutionKernel3x3Stride2x2(const float * src, const float * weight, float * dst);
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -262,6 +263,17 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
+        class ConvolutionDirect : public Sse::ConvolutionDirect
+        {
+        public:
+            ConvolutionDirect(const ConvParam & p);
+
+        protected:
+            virtual void SetBias(const float * bias, float * dst);
+            virtual void AddConvolution(const float * src, const float * weight, float * dst);
+            void AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst);
+        };
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
 }
 #endif//SIMD_AVX_ENABLE
@@ -292,6 +304,17 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
+        class ConvolutionDirect : public Avx::ConvolutionDirect
+        {
+        public:
+            ConvolutionDirect(const ConvParam & p);
+
+        protected:
+            virtual void AddConvolution(const float * src, const float * weight, float * dst);
+            void AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst);
+            void AddConvolutionKernel3x3Stride2x2(const float * src, const float * weight, float * dst);
+        };
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
 }
 #endif//SIMD_AVX2_ENABLE
@@ -320,6 +343,18 @@ namespace Simd
         public:
             ConvolutionWinograd2x3p(const ConvParam & p);
             virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        class ConvolutionDirect : public Avx2::ConvolutionDirect
+        {
+        public:
+            ConvolutionDirect(const ConvParam & p);
+
+        protected:
+            virtual void SetBias(const float * bias, float * dst);
+            virtual void AddConvolution(const float * src, const float * weight, float * dst);
+            void AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst);
+            void AddConvolutionKernel3x3Stride2x2(const float * src, const float * weight, float * dst);
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);

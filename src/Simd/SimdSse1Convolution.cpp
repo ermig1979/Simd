@@ -99,6 +99,17 @@ namespace Simd
             }
         }
 
+        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
+        {
+            const ConvParam & p = _param;
+            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
+                AddConvolutionKernel3x3Stride1x1(src, weight, dst);
+            else if (p.dstW >= F && p.IsKernel(3) && p.IsStride(2))
+                AddConvolutionKernel3x3Stride2x2(src, weight, dst);
+            else
+                Base::ConvolutionDirect::AddConvolution(src, weight, dst);
+        }
+
         template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m128 * dst)
         {
             for (size_t i = 0; i < size; ++i)
@@ -118,17 +129,8 @@ namespace Simd
                 _mm_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
                     ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
             _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), Masked<masked>(convolution, mask)));
-        }
-
-        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
-        {
-            const ConvParam & p = _param;
-            if (p.dstW >= F && p.IsStride(1) && p.IsStride(3))
-                AddConvolutionKernel3x3Stride1x1(src, weight, dst);
-            else
-                Base::ConvolutionDirect::AddConvolution(src, weight, dst);
-        }
-
+        }       
+        
         void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
         {
             const ConvParam & p = _param;
@@ -144,12 +146,57 @@ namespace Simd
                     LoadWeight<9>(weight, _weight);
                     for (size_t y = 0; y < p.dstH; ++y)
                     {
-                        size_t x = 0;
-                        for (; x < dstWF; x += F)
+                        for (size_t x = 0; x < dstWF; x += F)
                             Sse::AddConvolutionKernel3x3Stride1x1<false>(ps + x, _srcW, _weight, pd + x, tail);
                         if (dstWF < p.dstW)
                             Sse::AddConvolutionKernel3x3Stride1x1<true>(ps + p.dstW - F, _srcW, _weight, pd + p.dstW - F, tail);
                         ps += _srcW;
+                        pd += p.dstW;
+                    }
+                    weight += p.kernelX*p.kernelY;
+                }
+            }
+        }
+
+        SIMD_INLINE __m128 ConvolutionKernel3Stride2(const float * src, const __m128 * weight)
+        {
+            __m128 s00 = _mm_loadu_ps(src);
+            __m128 s10 = _mm_loadu_ps(src + F);
+            __m128 s02 = _mm_loadu_ps(src + 2);
+            __m128 s12 = _mm_loadu_ps(src + 2 + F);
+            return _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s00, s10, 0x88), weight[0]),
+                _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s00, s10, 0xDD), weight[1]),
+                    _mm_mul_ps(_mm_shuffle_ps(s02, s12, 0x88), weight[2])));
+        }
+
+        template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride2x2(const float * src, size_t srcW, const __m128  * weight, float * dst, const __m128 & mask)
+        {
+            __m128 convolution = _mm_add_ps(ConvolutionKernel3Stride2(src, weight),
+                _mm_add_ps(ConvolutionKernel3Stride2(src + srcW, weight + 3),
+                    ConvolutionKernel3Stride2(src + 2 * srcW, weight + 6)));
+            _mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), Masked<masked>(convolution, mask)));
+        }
+
+        void ConvolutionDirect::AddConvolutionKernel3x3Stride2x2(const float * src, const float * weight, float * dst)
+        {
+            const ConvParam & p = _param;
+            __m128 _weight[9];
+            size_t dstWF = Simd::AlignLo(p.dstW, F);
+            __m128 tail = RightNotZero(p.dstW - dstWF);
+            for (size_t dc = 0; dc < _dstC; ++dc)
+            {
+                for (size_t sc = 0; sc < _srcC; ++sc)
+                {
+                    const float * ps = src + sc * _srcW * _srcH;
+                    float * pd = dst + dc * p.dstW * p.dstH;
+                    LoadWeight<9>(weight, _weight);
+                    for (size_t y = 0; y < p.dstH; ++y)
+                    {
+                        for (size_t x = 0; x < dstWF; x += F)
+                            Sse::AddConvolutionKernel3x3Stride2x2<false>(ps + 2*x, _srcW, _weight, pd + x, tail);
+                        if (dstWF < p.dstW)
+                            Sse::AddConvolutionKernel3x3Stride2x2<true>(ps + 2*(p.dstW - F), _srcW, _weight, pd + p.dstW - F, tail);
+                        ps += _srcW*2;
                         pd += p.dstW;
                     }
                     weight += p.kernelX*p.kernelY;

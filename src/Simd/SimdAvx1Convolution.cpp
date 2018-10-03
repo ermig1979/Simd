@@ -81,6 +81,91 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
+            : Sse::ConvolutionDirect(p)
+        {
+        }
+
+        void ConvolutionDirect::SetBias(const float * bias, float * dst)
+        {
+            const ConvParam & p = _param;
+            if (p.dstW < F)
+            {
+                Sse::ConvolutionDirect::SetBias(bias, dst);
+                return;
+            }
+            size_t size = p.dstH*p.dstW;
+            size_t sizeF = AlignLo(size, F);
+            for (size_t i = 0; i < _dstC; ++i)
+            {
+                __m256 value = _mm256_set1_ps(bias[i]);
+                for (size_t j = 0; j < sizeF; j += F)
+                    _mm256_storeu_ps(dst + j, value);
+                if (sizeF < size)
+                    _mm256_storeu_ps(dst + size - F, value);
+                dst += size;
+            }
+        }
+
+        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
+        {
+            const ConvParam & p = _param;
+            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
+                AddConvolutionKernel3x3Stride1x1(src, weight, dst);
+            else
+                Sse::ConvolutionDirect::AddConvolution(src, weight, dst);
+        }
+
+        template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m256 * dst)
+        {
+            for (size_t i = 0; i < size; ++i)
+                dst[i] = _mm256_set1_ps(src[i]);
+        }
+
+        SIMD_INLINE __m256 ConvolutionKernel3Stride1(const float * src, const __m256 * weight)
+        {
+            return _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src), weight[0]),
+                _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 1), weight[1]),
+                    _mm256_mul_ps(_mm256_loadu_ps(src + 2), weight[2])));
+        }
+
+        template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride1x1(const float * src, size_t srcW, const __m256  * weight, float * dst, const __m256 & mask)
+        {
+            __m256 convolution = _mm256_add_ps(ConvolutionKernel3Stride1(src, weight),
+                _mm256_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
+                    ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
+            _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), Masked<masked>(convolution, mask)));
+        }
+
+        void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
+        {
+            const ConvParam & p = _param;
+            __m256 _weight[9];
+            size_t dstWF = Simd::AlignLo(p.dstW, F);
+            __m256 tail = RightNotZero(p.dstW - dstWF);
+            for (size_t dc = 0; dc < _dstC; ++dc)
+            {
+                for (size_t sc = 0; sc < _srcC; ++sc)
+                {
+                    const float * ps = src + sc * _srcW * _srcH;
+                    float * pd = dst + dc * p.dstW * p.dstH;
+                    LoadWeight<9>(weight, _weight);
+                    for (size_t y = 0; y < p.dstH; ++y)
+                    {
+                        for (size_t x = 0; x < dstWF; x += F)
+                            Avx::AddConvolutionKernel3x3Stride1x1<false>(ps + x, _srcW, _weight, pd + x, tail);
+                        if (dstWF < p.dstW)
+                            Avx::AddConvolutionKernel3x3Stride1x1<true>(ps + p.dstW - F, _srcW, _weight, pd + p.dstW - F, tail);
+                        ps += _srcW;
+                        pd += p.dstW;
+                    }
+                    weight += p.kernelX*p.kernelY;
+                }
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
@@ -89,7 +174,7 @@ namespace Simd
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);
             else if (Base::ConvolutionDirect::Preferable(param))
-                return new Sse::ConvolutionDirect(param);
+                return new Avx::ConvolutionDirect(param);
             else
                 return new ConvolutionImgToCol(param);
         }
