@@ -418,7 +418,7 @@ namespace Simd
 
         bool ConvolutionDirect::Preferable(const ConvParam & p)
         {
-            return p.IsDilation(1) && p.srcC <= p.group * 16;
+            return p.IsDilation(1) && p.srcC <= p.group * 16 && !p.IsKernel(1);
         }
 
         void ConvolutionDirect::Pad(const float * src, float * dst) const
@@ -461,25 +461,25 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE float Convolution1x3(const float * src, const float * weight)
+        SIMD_INLINE float ConvolutionKernel3(const float * src, const float * weight)
         {
             return src[0] * weight[0] + src[1] * weight[1] + src[2] * weight[2];
         }
 
-        SIMD_INLINE float Convolution3x3(const float * src, size_t srcW, const float * weight)
+        SIMD_INLINE float ConvolutionKernel3x3(const float * src, size_t srcW, const float * weight)
         {
             return
-                Convolution1x3(src, weight) +
-                Convolution1x3(src + srcW, weight + 3) +
-                Convolution1x3(src + 2 * srcW, weight + 6);
+                ConvolutionKernel3(src, weight) +
+                ConvolutionKernel3(src + srcW, weight + 3) +
+                ConvolutionKernel3(src + 2 * srcW, weight + 6);
         }
 
-        static void AddConvolution3x3(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
+        static void AddConvolutionKernel3x3(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
         {
             for (size_t dy = 0; dy < dstH; ++dy)
             {
                 for (size_t dx = 0, sx = 0; dx < dstW; ++dx, sx += strideX)
-                    dst[dx] += Convolution3x3(src + sx, srcW, weight);
+                    dst[dx] += ConvolutionKernel3x3(src + sx, srcW, weight);
                 src += srcW* strideY;
                 dst += dstW;
             }
@@ -496,7 +496,7 @@ namespace Simd
                     const float * pw = weight + (dc*_srcC + sc)*p.kernelX*p.kernelY;
                     float * pd = dst + dc * p.dstW * p.dstH;
                     if (p.IsKernel(3))
-                        AddConvolution3x3(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
+                        AddConvolutionKernel3x3(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
                     else
                     {
                         for (size_t dy = 0; dy < p.dstH; ++dy)

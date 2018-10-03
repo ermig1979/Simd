@@ -58,6 +58,8 @@ namespace Simd
                 return new Sse::ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);
+            else if (Base::ConvolutionDirect::Preferable(param))
+                return new Sse::ConvolutionDirect(param);
             else
                 return new Sse::ConvolutionImgToCol(param);
         }
