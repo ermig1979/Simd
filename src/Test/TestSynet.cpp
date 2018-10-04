@@ -295,6 +295,83 @@ namespace Test
 
     namespace
     {
+        struct FuncRR
+        {
+            typedef void(*FuncPtr)(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncRR(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Call(const View & src, float lower, float upper, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, src.width, &lower, &upper, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_RR(function) FuncRR(function, #function)
+
+    bool SynetRestrictRangeAutoTest(size_t size, const FuncRR & f1, const FuncRR & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        const float lower = -1.0f, upper = 1.0f;
+        FillRandom32f(src, 2.0f*lower, 2.0f*upper);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, lower, upper, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, lower, upper, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetRestrictRangeAutoTest(const FuncRR & f1, const FuncRR & f2)
+    {
+        bool result = true;
+
+        result = result && SynetRestrictRangeAutoTest(H*W, f1, f2);
+        result = result && SynetRestrictRangeAutoTest(H*W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetRestrictRangeAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetRestrictRangeAutoTest(FUNC_RR(Simd::Base::SynetRestrictRange), FUNC_RR(SimdSynetRestrictRange));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetRestrictRangeAutoTest(FUNC_RR(Simd::Sse::SynetRestrictRange), FUNC_RR(SimdSynetRestrictRange));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetRestrictRangeAutoTest(FUNC_RR(Simd::Avx::SynetRestrictRange), FUNC_RR(SimdSynetRestrictRange));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetRestrictRangeAutoTest(FUNC_RR(Simd::Avx512f::SynetRestrictRange), FUNC_RR(SimdSynetRestrictRange));
+#endif 
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncSLF
         {
             typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);

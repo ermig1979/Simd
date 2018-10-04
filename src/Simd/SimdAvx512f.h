@@ -113,6 +113,8 @@ namespace Simd
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
 
+        void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
 
         void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);

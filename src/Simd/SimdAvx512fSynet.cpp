@@ -275,6 +275,42 @@ namespace Simd
                 SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
         }
 
+        template <bool align> void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            assert(lower[0] <= upper[0]);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            float min = *lower;
+            float max = *upper;
+            __m512 _min = _mm512_set1_ps(min);
+            __m512 _max = _mm512_set1_ps(max);
+            size_t sizeF = Simd::AlignLo(size, F);
+            size_t sizeQF = Simd::AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                Store<align>(dst + i + 0 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
+                Store<align>(dst + i + 1 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
+                Store<align>(dst + i + 2 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
+                Store<align>(dst + i + 3 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
+            }
+            for (; i < sizeF; i += F)
+                Store<align>(dst + i, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i)), _max));
+            if(i < size)
+            {
+                __mmask16 tail = TailMask16(size - i);
+                Store<align, true>(dst + i, _mm512_min_ps(_mm512_max_ps(_min, (Load<align, true>(src + i, tail))), _max), tail);
+            }
+        }
+
+        void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetRestrictRange<true>(src, size, lower, upper, dst);
+            else
+                SynetRestrictRange<false>(src, size, lower, upper, dst);
+        }
+
         template <bool align, bool mask> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m512 & scale, const __m512 & bias, float * dst, size_t offset, __mmask16 tail = -1)
         {
             Store<align, mask>(dst + offset, _mm512_fmadd_ps((Load<align, mask>(src + offset, tail)), scale, bias), tail);

@@ -5262,6 +5262,29 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+
+        \short This function is used in order to restrict range for given array.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = Min(Max(lower, src[i]), upper);
+        }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] lower - a pointer to lower restrict bound.
+        \param [in] upper - a pointer to upper restrict bound.
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
 
         \short This function is used for forward propagation of ScaleLayer.

@@ -159,6 +159,14 @@ namespace Simd
             }
         }
 
+        void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            float min = *lower;
+            float max = *upper;
+            for (size_t i = 0; i < size; ++i)
+                 *dst++ = Simd::RestrictRange(*src++, min, max);
+        }
+
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);
