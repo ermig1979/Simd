@@ -1999,6 +1999,14 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
         Base::FillPixel(dst, stride, width, height, pixel, pixelSize);
 }
 
+typedef void(*SimdFill32fPtr) (float * dst, size_t size, const float * value);
+SimdFill32fPtr simdFill32f = SIMD_FUNC3(Fill32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
+{
+    simdFill32f(dst, size, value);
+}
+
 SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)
 {
 #ifdef SIMD_AVX512BW_ENABLE

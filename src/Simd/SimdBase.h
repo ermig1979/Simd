@@ -225,6 +225,8 @@ namespace Simd
 
         void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
+        void Fill32f(float * dst, size_t size, const float * value);
+
         void Float32ToFloat16(const float * src, size_t size, uint16_t * dst);
 
         void Float16ToFloat32(const uint16_t * src, size_t size, float * dst);

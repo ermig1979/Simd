@@ -2222,6 +2222,18 @@ extern "C"
     */
     SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
 
+    /*! @ingroup filling
+
+        \fn void SimdFill32f(float * dst, size_t size, const float * value);
+
+        \short Fills 32-bit float array by given value.
+
+        \param [out] dst - a pointer to 32-bit float array.
+        \param [in] size - a size of the array.
+        \param [in] value - a pointer to value to fill. Can be NULL (filling value is assumed to be equal to zero).
+    */
+    SIMD_API void SimdFill32f(float * dst, size_t size, const float * value);
+
     /*! @ingroup float16
 
         \fn void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);

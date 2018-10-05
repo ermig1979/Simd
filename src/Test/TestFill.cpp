@@ -433,6 +433,81 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncFill32f
+        {
+            typedef void(*FuncPtr)(float * dst, size_t size, const float * value);
+
+            FuncPtr func;
+            String description;
+
+            FuncFill32f(const FuncPtr & f, const String & d) : func(f), description(d) {}
+
+            void Call(View & dst, float value) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)dst.data, dst.width, &value);
+            }
+        };
+    }
+
+#define FUNC_32F(function) FuncFill32f(function, std::string(#function))
+
+    bool Fill32fAutoTest(size_t size, const FuncFill32f & f1, const FuncFill32f & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        const float value = 3.5f;
+
+        View d1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View d2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(d1, value));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(d2, value));
+
+        result = result && Compare(d1, d2, EPS, true, 32);
+
+        return result;
+    }
+
+    bool Fill32fAutoTest(const FuncFill32f & f1, const FuncFill32f & f2)
+    {
+        bool result = true;
+
+        result = result && Fill32fAutoTest(W*H, f1, f2);
+        result = result && Fill32fAutoTest(W*H + O, f1, f2);
+
+        return result;
+    }
+
+    bool Fill32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && Fill32fAutoTest(FUNC_32F(Simd::Base::Fill32f), FUNC_32F(SimdFill32f));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse::Fill32f), FUNC_32F(SimdFill32f));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx::Fill32f), FUNC_32F(SimdFill32f));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx512f::Fill32f), FUNC_32F(SimdFill32f));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool FillDataTest(bool create, View::Format format, int width, int height, const Func & f)
