@@ -46,13 +46,13 @@ namespace Simd
                 __m256 _v = _mm256_set1_ps(v);
                 for (; dst < endQF; dst += QF)
                 {
-                    _mm256_store_ps(dst + 0 * F, _v);
-                    _mm256_store_ps(dst + 1 * F, _v);
-                    _mm256_store_ps(dst + 2 * F, _v);
-                    _mm256_store_ps(dst + 3 * F, _v);
+                    _mm256_storeu_ps(dst + 0 * F, _v);
+                    _mm256_storeu_ps(dst + 1 * F, _v);
+                    _mm256_storeu_ps(dst + 2 * F, _v);
+                    _mm256_storeu_ps(dst + 3 * F, _v);
                 }
                 for (; dst < endF; dst += F)
-                    _mm256_store_ps(dst, _v);
+                    _mm256_storeu_ps(dst, _v);
                 for (; dst < end;)
                     *dst++ = v;
             }

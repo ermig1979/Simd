@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -398,19 +398,16 @@ namespace Simd
                 buf = Buffer(buf);
             for (size_t g = 0; g < p.group; ++g)
             {
-                if (_bias)
-                    SetBias(bias, dst);
-                else
-                    memset(dst, 0, _dstStep * sizeof(float));
                 if (_pad)
                 {
                     Pad(src, buf);
-                    AddConvolution(buf, weight, dst);
+                    ConvolutionAndBias(buf, weight, bias, dst);
                 }
                 else
-                    AddConvolution(src, weight, dst);
+                    ConvolutionAndBias(src, weight, bias, dst);
                 weight += _weightStep;
-                bias += _dstC;
+                if(bias)
+                    bias += _dstC;
                 src += _srcStep;
                 dst += _dstStep;
             }
@@ -449,18 +446,6 @@ namespace Simd
             }
         }
 
-        void ConvolutionDirect::SetBias(const float * bias, float * dst)
-        {
-            const ConvParam & p = _param;
-            size_t size = p.dstH*p.dstW;
-            for (size_t i = 0; i < _dstC; ++i)
-            {
-                float value = bias[i];
-                for (size_t j = 0; j < size; ++j)
-                    *dst++ = value;
-            }
-        }
-
         SIMD_INLINE float ConvolutionKernel3(const float * src, const float * weight)
         {
             return src[0] * weight[0] + src[1] * weight[1] + src[2] * weight[2];
@@ -485,16 +470,17 @@ namespace Simd
             }
         }
 
-        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
+        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
         {
             const ConvParam & p = _param;
             for (size_t dc = 0; dc < _dstC; ++dc)
             {
+                Fill32f(dst, p.dstW * p.dstH, bias ? bias + dc : NULL);
                 for (size_t sc = 0; sc < _srcC; ++sc)
                 {
                     const float * ps = src + sc * _srcW * _srcH;
                     const float * pw = weight + (dc*_srcC + sc)*p.kernelX*p.kernelY;
-                    float * pd = dst + dc * p.dstW * p.dstH;
+                    float * pd = dst;
                     if (p.IsKernel(3))
                         AddConvolutionKernel3x3(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
                     else
@@ -518,6 +504,7 @@ namespace Simd
                         }
                     }
                 }
+                dst += p.dstW * p.dstH;
             }
         }
         //---------------------------------------------------------------------

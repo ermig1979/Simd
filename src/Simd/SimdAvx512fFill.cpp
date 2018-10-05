@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -46,13 +46,13 @@ namespace Simd
                 __m512 _v = _mm512_set1_ps(v);
                 for (; dst < endQF; dst += QF)
                 {
-                    _mm512_store_ps(dst + 0 * F, _v);
-                    _mm512_store_ps(dst + 1 * F, _v);
-                    _mm512_store_ps(dst + 2 * F, _v);
-                    _mm512_store_ps(dst + 3 * F, _v);
+                    _mm512_storeu_ps(dst + 0 * F, _v);
+                    _mm512_storeu_ps(dst + 1 * F, _v);
+                    _mm512_storeu_ps(dst + 2 * F, _v);
+                    _mm512_storeu_ps(dst + 3 * F, _v);
                 }
                 for (; dst < endF; dst += F)
-                    _mm512_store_ps(dst, _v);
+                    _mm512_storeu_ps(dst, _v);
                 for (; dst < end;)
                     *dst++ = v;
             }

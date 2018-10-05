@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -87,143 +87,125 @@ namespace Simd
         {
         }
 
-        void ConvolutionDirect::SetBias(const float * bias, float * dst)
-        {
-            const ConvParam & p = _param;
-            size_t dstC = _dstC;
-            size_t size = p.dstH*p.dstW;
-            size_t sizeF = AlignLo(size, F);
-            size_t sizeQF = AlignLo(size, QF);
-            __mmask16 tail = TailMask16(size - sizeF);
-            for (size_t i = 0; i < dstC; ++i)
-            {
-                __m512 value = _mm512_set1_ps(bias[i]);
-                size_t j = 0;
-                for (; j < sizeQF; j += QF)
-                {
-                    _mm512_storeu_ps(dst + j + 0 * F, value);
-                    _mm512_storeu_ps(dst + j + 1 * F, value);
-                    _mm512_storeu_ps(dst + j + 2 * F, value);
-                    _mm512_storeu_ps(dst + j + 3 * F, value);
-                }
-                for (; j < sizeF; j += F)
-                    _mm512_storeu_ps(dst + j, value);
-                if (j < size)
-                    _mm512_mask_storeu_ps(dst + j, tail, value);
-                dst += size;
-            }
-        }
-
-        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
-        {
-            const ConvParam & p = _param;
-            if (p.dstW >= DF && p.IsKernel(3) && p.IsStride(1))
-                AddConvolutionKernel3x3Stride1x1(src, weight, dst);
-            else if (p.dstW >= DF && p.IsKernel(3) && p.IsStride(2))
-                AddConvolutionKernel3x3Stride2x2(src, weight, dst);
-            else
-                Avx2::ConvolutionDirect::AddConvolution(src, weight, dst);
-        }
-
         template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m512 * dst)
         {
             for (size_t i = 0; i < size; ++i)
                 dst[i] = _mm512_set1_ps(src[i]);
         }
 
-        SIMD_INLINE __m512 ConvolutionKernel3Stride1(const float * src, const __m512 * weight)
+        template<int kernel, int stride> struct Kernel
         {
-            return _mm512_fmadd_ps(_mm512_loadu_ps(src), weight[0],
-                _mm512_fmadd_ps(_mm512_loadu_ps(src + 1), weight[1],
-                    _mm512_mul_ps(_mm512_loadu_ps(src + 2), weight[2])));
-        }
+            static __m512 Convolution(const float * src, size_t step, const __m512  * weight);
+        };
 
-        template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride1x1(const float * src, size_t srcW, const __m512  * weight, float * dst, __mmask16 tail)
+        template<> struct Kernel<3, 1>
         {
-            __m512 _dst = Load<false, masked>(dst, tail);
-            __m512 convolution = _mm512_add_ps(ConvolutionKernel3Stride1(src, weight),
-                _mm512_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
-                    ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
-            Store<false, masked>(dst, _mm512_add_ps(_dst, convolution), tail);
-        }
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                return _mm512_fmadd_ps(_mm512_loadu_ps(src), weight[0],
+                    _mm512_fmadd_ps(_mm512_loadu_ps(src + 1), weight[1],
+                        _mm512_mul_ps(_mm512_loadu_ps(src + 2), weight[2])));
+            }
 
-        void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_add_ps(RowConv(src, weight),
+                    _mm512_add_ps(RowConv(src + step, weight + 3),
+                        RowConv(src + 2 * step, weight + 6)));
+            }
+        };
+
+        template<> struct Kernel<3, 2>
         {
-            const ConvParam & p = _param;
-            __m512 _weight[9];
-            size_t srcH = _srcH;
-            size_t srcW = _srcW;
-            size_t dstW = p.dstW;
-            size_t dstH = p.dstH;
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                __m512 s00 = _mm512_loadu_ps(src);
+                __m512 s10 = _mm512_loadu_ps(src + F);
+                __m512 s02 = _mm512_loadu_ps(src + 2);
+                __m512 s12 = _mm512_loadu_ps(src + 2 + F);
+                return _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0x88), weight[0],
+                    _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0xDD), weight[1],
+                        _mm512_mul_ps(_mm512_shuffle_ps(s02, s12, 0x88), weight[2])));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight),
+                    _mm512_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6))));
+            }
+        };
+
+        template<int kernel, int stride> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
+            const float * weight, const float * bias, float * dst, size_t dstC, size_t dstH, size_t dstW)
+        {
+            __m512 _weight[kernel*kernel];
             size_t dstWF = Simd::AlignLo(dstW, F);
             __mmask16 tail = TailMask16(dstW - dstWF);
-            for (size_t dc = 0; dc < _dstC; ++dc)
+            for (size_t dc = 0; dc < dstC; ++dc)
             {
-                for (size_t sc = 0; sc < _srcC; ++sc)
+                size_t sc = 0;
+                for (; sc < 1; ++sc)
                 {
-                    const float * ps = src + sc * srcW * srcH;
-                    float * pd = dst + dc * dstW * dstH;
-                    LoadWeight<9>(weight, _weight);
+                    const float * ps = src;
+                    float * pd = dst;
+                    LoadWeight<kernel*kernel>(weight, _weight);
+                    __m512 _bias = bias ? _mm512_set1_ps(bias[dc]) : _mm512_setzero_ps();
                     for (size_t y = 0; y < dstH; ++y)
                     {
                         size_t x = 0;
                         for (; x < dstWF; x += F)
-                            Avx512f::AddConvolutionKernel3x3Stride1x1<false>(ps + x, srcW, _weight, pd + x, tail);
+                        {
+                            __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm512_storeu_ps(pd + x, _mm512_add_ps(_bias, conv));
+                        }
                         if (x < dstW)
-                            Avx512f::AddConvolutionKernel3x3Stride1x1<true>(ps + x, srcW, _weight, pd + x, tail);
-                        ps += srcW;
+                        {
+                            __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm512_mask_storeu_ps(pd + x, tail, _mm512_add_ps(_bias, conv));
+                        }
+                        ps += srcW * stride;
                         pd += dstW;
                     }
-                    weight += 9;
+                    weight += kernel * kernel;
                 }
-            }
-        }
-
-        SIMD_INLINE __m512 ConvolutionKernel3Stride2(const float * src, const __m512 * weight)
-        {
-            __m512 s00 = _mm512_loadu_ps(src);
-            __m512 s10 = _mm512_loadu_ps(src + F);
-            __m512 s02 = _mm512_loadu_ps(src + 2);
-            __m512 s12 = _mm512_loadu_ps(src + 2 + F);
-            return _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0x88), weight[0],
-                _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0xDD), weight[1],
-                    _mm512_mul_ps(_mm512_shuffle_ps(s02, s12, 0x88), weight[2])));
-        }
-
-        template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride2x2(const float * src, size_t srcW, const __m512  * weight, float * dst, __mmask16 tail)
-        {
-            __m512 convolution = _mm512_add_ps(ConvolutionKernel3Stride2(src, weight),
-                _mm512_add_ps(ConvolutionKernel3Stride2(src + srcW, weight + 3),
-                    ConvolutionKernel3Stride2(src + 2 * srcW, weight + 6)));
-            Store<false, masked>(dst, _mm512_add_ps((Load<false, masked>(dst, tail)), _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, convolution)), tail);
-        }
-
-        void ConvolutionDirect::AddConvolutionKernel3x3Stride2x2(const float * src, const float * weight, float * dst)
-        {
-            const ConvParam & p = _param;
-            __m512 _weight[9];
-            size_t dstWF = Simd::AlignLo(p.dstW, F);
-            __mmask16 tail = TailMask16(p.dstW - dstWF);
-            for (size_t dc = 0; dc < _dstC; ++dc)
-            {
-                for (size_t sc = 0; sc < _srcC; ++sc)
+                for (; sc < srcC; ++sc)
                 {
-                    const float * ps = src + sc * _srcW * _srcH;
-                    float * pd = dst + dc * p.dstW * p.dstH;
-                    LoadWeight<9>(weight, _weight);
-                    for (size_t y = 0; y < p.dstH; ++y)
+                    const float * ps = src + sc * srcW * srcH;
+                    float * pd = dst;
+                    LoadWeight<kernel*kernel>(weight, _weight);
+                    for (size_t y = 0; y < dstH; ++y)
                     {
                         size_t x = 0;
                         for (; x < dstWF; x += F)
-                            Avx512f::AddConvolutionKernel3x3Stride2x2<false>(ps + 2 * x, _srcW, _weight, pd + x, tail);
-                        if (x < p.dstW)
-                            Avx512f::AddConvolutionKernel3x3Stride2x2<true>(ps + 2 * x, _srcW, _weight, pd + x, tail);
-                        ps += _srcW * 2;
-                        pd += p.dstW;
+                        {
+                            __m512 _dst = _mm512_loadu_ps(pd + x);
+                            __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm512_storeu_ps(pd + x, _mm512_add_ps(_dst, conv));
+                        }
+                        if (x < dstW)
+                        {
+                            __m512 _dst = _mm512_maskz_loadu_ps(tail, pd + x);
+                            __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm512_mask_storeu_ps(pd + x, tail, _mm512_add_ps(_dst, conv));
+                        }
+                        ps += srcW * stride;
+                        pd += dstW;
                     }
-                    weight += p.kernelX*p.kernelY;
+                    weight += kernel * kernel;
                 }
+                dst += dstH * dstW;
             }
+        }
+
+        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
+        {
+            const ConvParam & p = _param;
+            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
+                Avx512f::ConvolutionAndBias<3, 1>(src, p.srcC, p.srcH, p.srcW, weight, bias, dst, p.dstC, p.dstH, p.dstW);
+            else if (p.dstW >= F && p.IsKernel(3) && p.IsStride(2))
+                Avx512f::ConvolutionAndBias<3, 2>(src, p.srcC, p.srcH, p.srcW, weight, bias, dst, p.dstC, p.dstH, p.dstW);
+            else
+                Avx2::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
         }
 
         //---------------------------------------------------------------------

@@ -46,13 +46,13 @@ namespace Simd
                 __m128 _v = _mm_set1_ps(v);
                 for (; dst < endQF; dst += QF)
                 {
-                    _mm_store_ps(dst + 0 * F, _v);
-                    _mm_store_ps(dst + 1 * F, _v);
-                    _mm_store_ps(dst + 2 * F, _v);
-                    _mm_store_ps(dst + 3 * F, _v);
+                    _mm_storeu_ps(dst + 0 * F, _v);
+                    _mm_storeu_ps(dst + 1 * F, _v);
+                    _mm_storeu_ps(dst + 2 * F, _v);
+                    _mm_storeu_ps(dst + 3 * F, _v);
                 }
                 for (; dst < endF; dst += F)
-                    _mm_store_ps(dst, _v);
+                    _mm_storeu_ps(dst, _v);
                 for (; dst < end;)
                     *dst++ = v;
             }

@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -86,93 +86,104 @@ namespace Simd
         {
         }
 
-        void ConvolutionDirect::SetBias(const float * bias, float * dst)
-        {
-            const ConvParam & p = _param;
-            size_t dstC = _dstC;
-            size_t size = p.dstH*p.dstW;
-            size_t sizeF = AlignLo(size, F);
-            size_t sizeQF = AlignLo(size, QF);
-            for (size_t i = 0; i < dstC; ++i)
-            {
-                float value = bias[i];
-                __m256 _value = _mm256_set1_ps(value);
-                size_t j = 0;
-                for (; j < sizeQF; j += QF)
-                {
-                    _mm256_storeu_ps(dst + j + 0 * F, _value);
-                    _mm256_storeu_ps(dst + j + 1 * F, _value);
-                    _mm256_storeu_ps(dst + j + 2 * F, _value);
-                    _mm256_storeu_ps(dst + j + 3 * F, _value);
-                }
-                for (; j < sizeF; j += F)
-                    _mm256_storeu_ps(dst + j, _value);
-                for (; j < size; ++j)
-                    dst[j] = value;
-                dst += size;
-            }
-        }
-
-        void ConvolutionDirect::AddConvolution(const float * src, const float * weight, float * dst)
-        {
-            const ConvParam & p = _param;
-            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
-                AddConvolutionKernel3x3Stride1x1(src, weight, dst);
-            else
-                Sse::ConvolutionDirect::AddConvolution(src, weight, dst);
-        }
-
         template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m256 * dst)
         {
             for (size_t i = 0; i < size; ++i)
                 dst[i] = _mm256_set1_ps(src[i]);
         }
 
-        SIMD_INLINE __m256 ConvolutionKernel3Stride1(const float * src, const __m256 * weight)
+        template<int kernel, int stride> struct Kernel
         {
-            return _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src), weight[0]),
-                _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 1), weight[1]),
-                    _mm256_mul_ps(_mm256_loadu_ps(src + 2), weight[2])));
-        }
+            static __m256 Convolution(const float * src, size_t step, const __m256  * weight);
+        };
 
-        template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride1x1(const float * src, size_t srcW, const __m256  * weight, float * dst, const __m256 & mask)
+        template<> struct Kernel<3, 1>
         {
-            __m256 _dst = _mm256_loadu_ps(dst);
-            __m256 convolution = _mm256_add_ps(ConvolutionKernel3Stride1(src, weight),
-                _mm256_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
-                    ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
-            _mm256_storeu_ps(dst, _mm256_add_ps(_dst, Masked<masked>(convolution, mask)));
-        }
+            static SIMD_INLINE __m256 RowConv(const float * src, const __m256  * weight)
+            {
+                return _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src), weight[0]),
+                    _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 1), weight[1]),
+                        _mm256_mul_ps(_mm256_loadu_ps(src + 2), weight[2])));
+            }
 
-        void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
+            static SIMD_INLINE __m256 Convolution(const float * src, size_t step, const __m256  * weight)
+            {
+                return _mm256_add_ps(RowConv(src, weight),
+                    _mm256_add_ps(RowConv(src + step, weight + 3),
+                        RowConv(src + 2 * step, weight + 6)));
+            }
+        };
+
+        template<int kernel, int stride> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
+            const float * weight, const float * bias, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
-            const ConvParam & p = _param;
-            __m256 _weight[9];
-            size_t srcH = _srcH;
-            size_t srcW = _srcW;
-            size_t dstW = p.dstW;
-            size_t dstH = p.dstH;
+            __m256 _weight[kernel*kernel];
             size_t dstWF = Simd::AlignLo(dstW, F);
             __m256 tail = RightNotZero(dstW - dstWF);
-            for (size_t dc = 0; dc < _dstC; ++dc)
+            for (size_t dc = 0; dc < dstC; ++dc)
             {
-                for (size_t sc = 0; sc < _srcC; ++sc)
+                size_t sc = 0;
+                for (; sc < 1; ++sc)
                 {
-                    const float * ps = src + sc * srcW * srcH;
-                    float * pd = dst + dc * dstW * dstH;
-                    LoadWeight<9>(weight, _weight);
+                    const float * ps = src;
+                    float * pd = dst;
+                    LoadWeight<kernel*kernel>(weight, _weight);
+                    __m256 _bias = bias ? _mm256_set1_ps(bias[dc]) : _mm256_setzero_ps();
                     for (size_t y = 0; y < dstH; ++y)
                     {
                         for (size_t x = 0; x < dstWF; x += F)
-                            Avx::AddConvolutionKernel3x3Stride1x1<false>(ps + x, srcW, _weight, pd + x, tail);
+                        {
+                            __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm256_storeu_ps(pd + x, _mm256_add_ps(_bias, conv));
+                        }
                         if (dstWF < dstW)
-                            Avx::AddConvolutionKernel3x3Stride1x1<true>(ps + dstW - F, srcW, _weight, pd + dstW - F, tail);
-                        ps += srcW;
+                        {
+                            size_t x = dstW - F;
+                            __m256 _dst = _mm256_loadu_ps(pd + x);
+                            __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, _mm256_add_ps(_bias, conv), tail));
+                        }
+                        ps += srcW * stride;
                         pd += dstW;
                     }
-                    weight += 9;
+                    weight += kernel * kernel;
                 }
+                for (; sc < srcC; ++sc)
+                {
+                    const float * ps = src + sc * srcW * srcH;
+                    float * pd = dst;
+                    LoadWeight<kernel*kernel>(weight, _weight);
+                    for (size_t y = 0; y < dstH; ++y)
+                    {
+                        for (size_t x = 0; x < dstWF; x += F)
+                        {
+                            __m256 _dst = _mm256_loadu_ps(pd + x);
+                            __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm256_storeu_ps(pd + x, _mm256_add_ps(_dst, conv));
+                        }
+                        if (dstWF < dstW)
+                        {
+                            size_t x = dstW - F;
+                            __m256 _dst = _mm256_loadu_ps(pd + x);
+                            __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            _mm256_storeu_ps(pd + x, _mm256_add_ps(_dst, _mm256_and_ps(conv, tail)));
+                        }
+                        ps += srcW * stride;
+                        pd += dstW;
+                    }
+                    weight += kernel * kernel;
+                }
+                dst += dstH * dstW;
             }
+        }
+
+        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
+        {
+            const ConvParam & p = _param;
+            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
+                Avx::ConvolutionAndBias<3, 1>(src, p.srcC, p.srcH, p.srcW, weight, bias, dst, p.dstC, p.dstH, p.dstW);
+            else
+                Sse::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
         }
 
         //---------------------------------------------------------------------
