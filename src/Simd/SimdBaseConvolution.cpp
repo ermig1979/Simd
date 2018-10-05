@@ -415,7 +415,7 @@ namespace Simd
 
         bool ConvolutionDirect::Preferable(const ConvParam & p)
         {
-            return p.IsDilation(1) && p.srcC <= p.group * 16 && !p.IsKernel(1);
+            return p.IsDilation(1) && p.srcC <= p.group * 16 && p.IsKernel(3);
         }
 
         void ConvolutionDirect::Pad(const float * src, float * dst) const
