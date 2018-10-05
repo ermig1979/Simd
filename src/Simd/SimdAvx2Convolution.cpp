@@ -113,37 +113,43 @@ namespace Simd
 
         template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride1x1(const float * src, size_t srcW, const __m256  * weight, float * dst, const __m256 & mask)
         {
+            __m256 _dst = _mm256_loadu_ps(dst);
             __m256 convolution = _mm256_add_ps(ConvolutionKernel3Stride1(src, weight),
                 _mm256_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
                     ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
-            _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), Masked<masked>(convolution, mask)));
+            _mm256_storeu_ps(dst, _mm256_add_ps(_dst, Masked<masked>(convolution, mask)));
         }
 
         void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
         {
             const ConvParam & p = _param;
             __m256 _weight[9];
-            size_t dstWF = Simd::AlignLo(p.dstW, F);
-            __m256 tail = RightNotZero(p.dstW - dstWF);
+            size_t srcH = _srcH;
+            size_t srcW = _srcW;
+            size_t dstW = p.dstW;
+            size_t dstH = p.dstH;
+            size_t dstWF = Simd::AlignLo(dstW, F);
+            __m256 tail = RightNotZero(dstW - dstWF);
             for (size_t dc = 0; dc < _dstC; ++dc)
             {
                 for (size_t sc = 0; sc < _srcC; ++sc)
                 {
-                    const float * ps = src + sc * _srcW * _srcH;
-                    float * pd = dst + dc * p.dstW * p.dstH;
+                    const float * ps = src + sc * srcW * srcH;
+                    float * pd = dst + dc * dstW * dstH;
                     LoadWeight<9>(weight, _weight);
-                    for (size_t y = 0; y < p.dstH; ++y)
+                    for (size_t y = 0; y < dstH; ++y)
                     {
                         for (size_t x = 0; x < dstWF; x += F)
-                            Avx2::AddConvolutionKernel3x3Stride1x1<false>(ps + x, _srcW, _weight, pd + x, tail);
-                        if (dstWF < p.dstW)
-                            Avx2::AddConvolutionKernel3x3Stride1x1<true>(ps + p.dstW - F, _srcW, _weight, pd + p.dstW - F, tail);
-                        ps += _srcW;
-                        pd += p.dstW;
+                            Avx2::AddConvolutionKernel3x3Stride1x1<false>(ps + x, srcW, _weight, pd + x, tail);
+                        if (dstWF < dstW)
+                            Avx2::AddConvolutionKernel3x3Stride1x1<true>(ps + dstW - F, srcW, _weight, pd + dstW - F, tail);
+                        ps += srcW;
+                        pd += dstW;
                     }
-                    weight += p.kernelX*p.kernelY;
+                    weight += 9;
                 }
             }
+            //Avx2::NeuralConvolutionForward(src, p.srcW, p.srcH, p.srcC, weight, 3, 3, p.padX, p.padY, 1, 1, 1, 1, 0, 0, dst, p.dstW, p.dstH, p.dstC, 1);
         }
 
         SIMD_INLINE __m256 ConvolutionKernel3Stride2(const float * src, const __m256 * weight)

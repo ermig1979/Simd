@@ -90,13 +90,22 @@ namespace Simd
         void ConvolutionDirect::SetBias(const float * bias, float * dst)
         {
             const ConvParam & p = _param;
+            size_t dstC = _dstC;
             size_t size = p.dstH*p.dstW;
             size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
             __mmask16 tail = TailMask16(size - sizeF);
-            for (size_t i = 0; i < _dstC; ++i)
+            for (size_t i = 0; i < dstC; ++i)
             {
                 __m512 value = _mm512_set1_ps(bias[i]);
                 size_t j = 0;
+                for (; j < sizeQF; j += QF)
+                {
+                    _mm512_storeu_ps(dst + j + 0 * F, value);
+                    _mm512_storeu_ps(dst + j + 1 * F, value);
+                    _mm512_storeu_ps(dst + j + 2 * F, value);
+                    _mm512_storeu_ps(dst + j + 3 * F, value);
+                }
                 for (; j < sizeF; j += F)
                     _mm512_storeu_ps(dst + j, value);
                 if (j < size)
@@ -131,36 +140,41 @@ namespace Simd
 
         template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride1x1(const float * src, size_t srcW, const __m512  * weight, float * dst, __mmask16 tail)
         {
+            __m512 _dst = Load<false, masked>(dst, tail);
             __m512 convolution = _mm512_add_ps(ConvolutionKernel3Stride1(src, weight),
                 _mm512_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
                     ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
-            Store<false, masked>(dst, _mm512_add_ps((Load<false, masked>(dst, tail)), convolution), tail);
+            Store<false, masked>(dst, _mm512_add_ps(_dst, convolution), tail);
         }
 
         void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
         {
             const ConvParam & p = _param;
             __m512 _weight[9];
-            size_t dstWF = Simd::AlignLo(p.dstW, F);
-            __mmask16 tail = TailMask16(p.dstW - dstWF);
+            size_t srcH = _srcH;
+            size_t srcW = _srcW;
+            size_t dstW = p.dstW;
+            size_t dstH = p.dstH;
+            size_t dstWF = Simd::AlignLo(dstW, F);
+            __mmask16 tail = TailMask16(dstW - dstWF);
             for (size_t dc = 0; dc < _dstC; ++dc)
             {
                 for (size_t sc = 0; sc < _srcC; ++sc)
                 {
-                    const float * ps = src + sc * _srcW * _srcH;
-                    float * pd = dst + dc * p.dstW * p.dstH;
+                    const float * ps = src + sc * srcW * srcH;
+                    float * pd = dst + dc * dstW * dstH;
                     LoadWeight<9>(weight, _weight);
-                    for (size_t y = 0; y < p.dstH; ++y)
+                    for (size_t y = 0; y < dstH; ++y)
                     {
                         size_t x = 0;
                         for (; x < dstWF; x += F)
-                            Avx512f::AddConvolutionKernel3x3Stride1x1<false>(ps + x, _srcW, _weight, pd + x, tail);
-                        if (x < p.dstW)
-                            Avx512f::AddConvolutionKernel3x3Stride1x1<true>(ps + x, _srcW, _weight, pd + x, tail);
-                        ps += _srcW;
-                        pd += p.dstW;
+                            Avx512f::AddConvolutionKernel3x3Stride1x1<false>(ps + x, srcW, _weight, pd + x, tail);
+                        if (x < dstW)
+                            Avx512f::AddConvolutionKernel3x3Stride1x1<true>(ps + x, srcW, _weight, pd + x, tail);
+                        ps += srcW;
+                        pd += dstW;
                     }
-                    weight += p.kernelX*p.kernelY;
+                    weight += 9;
                 }
             }
         }

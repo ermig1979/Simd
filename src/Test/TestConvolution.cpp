@@ -97,8 +97,8 @@ namespace Test
         Tensor32f weight({ p.dstC, p.srcC / p.group, p.kernelY, p.kernelX });
         FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
-        Tensor32f bias({ p.dstC }, 0);
-        //FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
+        Tensor32f bias({ p.dstC });
+        FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
 
         Tensor32f buf;
 
@@ -125,6 +125,12 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _5(5, 5), _7(7, 7);
 
 #ifdef NDEBUG
+#if 1
+        result = result && ConvolutionForwardAutoTest(Param(3, 180, 320, 10, _3, _1, _1, _0, _0, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(10, 89, 159, 16, _3, _1, _1, _0, _0, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 87, 157, 32, _3, _1, _1, _0, _0, 1), f1, f2);
+#endif
+#if 0
         result = result && ConvolutionForwardAutoTest(Param(32, 150, 150, 16, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(96, 75, 75, 24, _1, _1, _1, _0, _0, 1), f1, f2);
@@ -178,7 +184,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(128, 5, 5, 128, _3, _1, _2, _1, _1, 128), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(128, 3, 3, 128, _3, _1, _2, _1, _1, 128), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 2, 2, 64, _3, _1, _2, _0, _1, 64), f1, f2);
-
+#endif
 #if 0
         result = result && ConvolutionForwardAutoTest(Param(48, 256, 256, 48, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(96, 128, 128, 96, _1, _1, _1, _0, _0, 1), f1, f2);
@@ -205,7 +211,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 180, 320, 10, _3, _1, _1, _0, _0, 1), f1, f2);
 #endif
         return result;
     }

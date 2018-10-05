@@ -1880,6 +1880,11 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
+        result = result && NeuralConvolutionForwardAutoTest(Index(320, 180, 3), 10, _3, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(159, 89, 10), 16, _3, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(157, 87, 16), 32, _3, _0, _1, _1, 0, eps, f1, f2);
+#endif
+#if 0
         result = result && NeuralConvolutionForwardAutoTest(Index(10, 10, 576), 160, _1, _0, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(10, 10, 160), 960, _1, _0, _1, _1, 1, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(10, 10, 960), 160, _1, _0, _1, _1, 1, eps, f1, f2);
@@ -1921,8 +1926,7 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), 640, _5, _2, _1, _1, 1, eps, f1, f2);
 #endif
 #else
-        //result = result && NeuralConvolutionForwardAutoTest(Index(32, 32, 64), 64, _1, _0, _1, _1, 1, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(10, 10, 576), 160, _1, _0, _1, _1, 1, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(320, 180, 3), 10, _3, _0, _1, _1, 0, eps, f1, f2);
 #endif        
 
         return result;

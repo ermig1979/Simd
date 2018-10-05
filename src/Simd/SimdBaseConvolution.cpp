@@ -357,7 +357,7 @@ namespace Simd
 
         bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
         {
-            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 16 && p.srcH >= 6 && p.srcW >= 6;
+            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && p.srcH >= 6 && p.srcW >= 6;
         }
 
         //---------------------------------------------------------------------
@@ -401,7 +401,7 @@ namespace Simd
                 if (_bias)
                     SetBias(bias, dst);
                 else
-                    memset(dst, 0, _dstStep*sizeof(float));
+                    memset(dst, 0, _dstStep * sizeof(float));
                 if (_pad)
                 {
                     Pad(src, buf);
@@ -474,13 +474,13 @@ namespace Simd
                 ConvolutionKernel3(src + 2 * srcW, weight + 6);
         }
 
-        static void AddConvolutionKernel3x3(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
+        SIMD_INLINE void AddConvolutionKernel3x3(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
         {
             for (size_t dy = 0; dy < dstH; ++dy)
             {
                 for (size_t dx = 0, sx = 0; dx < dstW; ++dx, sx += strideX)
                     dst[dx] += ConvolutionKernel3x3(src + sx, srcW, weight);
-                src += srcW* strideY;
+                src += srcW * strideY;
                 dst += dstW;
             }
         }

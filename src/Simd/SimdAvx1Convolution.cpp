@@ -89,20 +89,26 @@ namespace Simd
         void ConvolutionDirect::SetBias(const float * bias, float * dst)
         {
             const ConvParam & p = _param;
-            if (p.dstW < F)
-            {
-                Sse::ConvolutionDirect::SetBias(bias, dst);
-                return;
-            }
+            size_t dstC = _dstC;
             size_t size = p.dstH*p.dstW;
             size_t sizeF = AlignLo(size, F);
-            for (size_t i = 0; i < _dstC; ++i)
+            size_t sizeQF = AlignLo(size, QF);
+            for (size_t i = 0; i < dstC; ++i)
             {
-                __m256 value = _mm256_set1_ps(bias[i]);
-                for (size_t j = 0; j < sizeF; j += F)
-                    _mm256_storeu_ps(dst + j, value);
-                if (sizeF < size)
-                    _mm256_storeu_ps(dst + size - F, value);
+                float value = bias[i];
+                __m256 _value = _mm256_set1_ps(value);
+                size_t j = 0;
+                for (; j < sizeQF; j += QF)
+                {
+                    _mm256_storeu_ps(dst + j + 0 * F, _value);
+                    _mm256_storeu_ps(dst + j + 1 * F, _value);
+                    _mm256_storeu_ps(dst + j + 2 * F, _value);
+                    _mm256_storeu_ps(dst + j + 3 * F, _value);
+                }
+                for (; j < sizeF; j += F)
+                    _mm256_storeu_ps(dst + j, _value);
+                for (; j < size; ++j)
+                    dst[j] = value;
                 dst += size;
             }
         }
@@ -131,35 +137,40 @@ namespace Simd
 
         template<bool masked> SIMD_INLINE void AddConvolutionKernel3x3Stride1x1(const float * src, size_t srcW, const __m256  * weight, float * dst, const __m256 & mask)
         {
+            __m256 _dst = _mm256_loadu_ps(dst);
             __m256 convolution = _mm256_add_ps(ConvolutionKernel3Stride1(src, weight),
                 _mm256_add_ps(ConvolutionKernel3Stride1(src + srcW, weight + 3),
                     ConvolutionKernel3Stride1(src + 2 * srcW, weight + 6)));
-            _mm256_storeu_ps(dst, _mm256_add_ps(_mm256_loadu_ps(dst), Masked<masked>(convolution, mask)));
+            _mm256_storeu_ps(dst, _mm256_add_ps(_dst, Masked<masked>(convolution, mask)));
         }
 
         void ConvolutionDirect::AddConvolutionKernel3x3Stride1x1(const float * src, const float * weight, float * dst)
         {
             const ConvParam & p = _param;
             __m256 _weight[9];
-            size_t dstWF = Simd::AlignLo(p.dstW, F);
-            __m256 tail = RightNotZero(p.dstW - dstWF);
+            size_t srcH = _srcH;
+            size_t srcW = _srcW;
+            size_t dstW = p.dstW;
+            size_t dstH = p.dstH;
+            size_t dstWF = Simd::AlignLo(dstW, F);
+            __m256 tail = RightNotZero(dstW - dstWF);
             for (size_t dc = 0; dc < _dstC; ++dc)
             {
                 for (size_t sc = 0; sc < _srcC; ++sc)
                 {
-                    const float * ps = src + sc * _srcW * _srcH;
-                    float * pd = dst + dc * p.dstW * p.dstH;
+                    const float * ps = src + sc * srcW * srcH;
+                    float * pd = dst + dc * dstW * dstH;
                     LoadWeight<9>(weight, _weight);
-                    for (size_t y = 0; y < p.dstH; ++y)
+                    for (size_t y = 0; y < dstH; ++y)
                     {
                         for (size_t x = 0; x < dstWF; x += F)
-                            Avx::AddConvolutionKernel3x3Stride1x1<false>(ps + x, _srcW, _weight, pd + x, tail);
-                        if (dstWF < p.dstW)
-                            Avx::AddConvolutionKernel3x3Stride1x1<true>(ps + p.dstW - F, _srcW, _weight, pd + p.dstW - F, tail);
-                        ps += _srcW;
-                        pd += p.dstW;
+                            Avx::AddConvolutionKernel3x3Stride1x1<false>(ps + x, srcW, _weight, pd + x, tail);
+                        if (dstWF < dstW)
+                            Avx::AddConvolutionKernel3x3Stride1x1<true>(ps + dstW - F, srcW, _weight, pd + dstW - F, tail);
+                        ps += srcW;
+                        pd += dstW;
                     }
-                    weight += p.kernelX*p.kernelY;
+                    weight += 9;
                 }
             }
         }
