@@ -202,9 +202,9 @@ namespace Simd
         {
             const ConvParam & p = _param;
             if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
-                Avx2::ConvolutionAndBias<3, 1>(src, p.srcC, p.srcH, p.srcW, weight, bias, dst, p.dstC, p.dstH, p.dstW);
+                Avx2::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
             else if (p.dstW >= F && p.IsKernel(3) && p.IsStride(2))
-                Avx2::ConvolutionAndBias<3, 2>(src, p.srcC, p.srcH, p.srcW, weight, bias, dst, p.dstC, p.dstH, p.dstW);
+                Avx2::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
             else
                 Sse::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
         }
