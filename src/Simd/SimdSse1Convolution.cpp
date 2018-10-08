@@ -89,6 +89,43 @@ namespace Simd
             static __m128 Convolution(const float * src, size_t step, const __m128  * weight);
         };
 
+        template<> struct Kernel<1, 1>
+        {
+            static SIMD_INLINE __m128 Convolution(const float * src, size_t step, const __m128  * weight)
+            {
+                return _mm_mul_ps(_mm_loadu_ps(src), weight[0]);
+            }
+        };
+
+        template<> struct Kernel<2, 1>
+        {
+            static SIMD_INLINE __m128 RowConv(const float * src, const __m128  * weight)
+            {
+                return _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src + 0), weight[0]), _mm_mul_ps(_mm_loadu_ps(src + 1), weight[1]));
+            }
+
+            static SIMD_INLINE __m128 Convolution(const float * src, size_t step, const __m128  * weight)
+            {
+                return _mm_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2));
+            }
+        };
+
+        template<> struct Kernel<2, 2>
+        {
+            static SIMD_INLINE __m128 RowConv(const float * src, const __m128  * weight)
+            {
+                __m128 s0 = _mm_loadu_ps(src + 0);
+                __m128 s1 = _mm_loadu_ps(src + F);
+                return _mm_add_ps(_mm_mul_ps(_mm_shuffle_ps(s0, s1, 0x88), weight[0]), 
+                    _mm_mul_ps(_mm_shuffle_ps(s0, s1, 0xDD), weight[1]));
+            }
+
+            static SIMD_INLINE __m128 Convolution(const float * src, size_t step, const __m128  * weight)
+            {
+                return _mm_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2));
+            }
+        };
+
         template<> struct Kernel<3, 1>
         {
             static SIMD_INLINE __m128 RowConv(const float * src, const __m128  * weight)
@@ -190,15 +227,43 @@ namespace Simd
             }
         }
 
+        bool ConvolutionDirect::Preferable(const ConvParam & p)
+        {
+            if (!p.IsDilation(1))
+                return false;
+            if (!(p.IsStride(1) || p.IsStride(2)))
+                return false;
+            double k = double(p.srcC) / p.group * p.strideX * p.strideY;
+            return k <= 16.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3));
+        }
+
         void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
         {
             const ConvParam & p = _param;
-            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
-                Sse::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
-            else if (p.dstW >= F && p.IsKernel(3) && p.IsStride(2))
-                Sse::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
-            else
-                Base::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
+            if (p.dstW >= F)
+            {
+                switch (p.kernelX)
+                {
+                case 1:
+                    Sse::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 2:
+                    if (p.IsStride(2))
+                        Sse::ConvolutionAndBias<2, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    else
+                        Sse::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 3:
+                    if (p.IsStride(2))
+                        Sse::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    else
+                        Sse::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                default:
+                    break;
+                };
+            }
+            Base::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
         }
 
         //---------------------------------------------------------------------

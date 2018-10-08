@@ -415,7 +415,12 @@ namespace Simd
 
         bool ConvolutionDirect::Preferable(const ConvParam & p)
         {
-            return p.IsDilation(1) && p.srcC <= p.group * 16 && p.IsKernel(3);
+            if (!p.IsDilation(1))
+                return false;
+            if (!(p.IsStride(1) || p.IsStride(2)))
+                return false;
+            double k = double(p.srcC) / p.group * p.strideX * p.strideY;
+            return k <= 16.0 && (p.IsKernel(2) || p.IsKernel(3));
         }
 
         void ConvolutionDirect::Pad(const float * src, float * dst) const
@@ -443,6 +448,40 @@ namespace Simd
                     memset(dst, 0, p.padH*_srcW * sizeof(float));
                     dst += p.padH*_srcW;
                 }
+            }
+        }
+
+        SIMD_INLINE void AddConvolutionKernel1x1(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
+        {
+            for (size_t dy = 0; dy < dstH; ++dy)
+            {
+                for (size_t dx = 0, sx = 0; dx < dstW; ++dx, sx += strideX)
+                    dst[dx] += src[sx]*weight[0];
+                src += srcW * strideY;
+                dst += dstW;
+            }
+        }
+
+        SIMD_INLINE float ConvolutionKernel2(const float * src, const float * weight)
+        {
+            return src[0] * weight[0] + src[1] * weight[1];
+        }
+
+        SIMD_INLINE float ConvolutionKernel2x2(const float * src, size_t srcW, const float * weight)
+        {
+            return
+                ConvolutionKernel2(src, weight) +
+                ConvolutionKernel2(src + srcW, weight + 2);
+        }
+
+        SIMD_INLINE void AddConvolutionKernel2x2(const float * src, size_t srcW, size_t strideY, size_t strideX, const float * weight, float * dst, size_t dstH, size_t dstW)
+        {
+            for (size_t dy = 0; dy < dstH; ++dy)
+            {
+                for (size_t dx = 0, sx = 0; dx < dstW; ++dx, sx += strideX)
+                    dst[dx] += ConvolutionKernel2x2(src + sx, srcW, weight);
+                src += srcW * strideY;
+                dst += dstW;
             }
         }
 
@@ -481,7 +520,11 @@ namespace Simd
                     const float * ps = src + sc * _srcW * _srcH;
                     const float * pw = weight + (dc*_srcC + sc)*p.kernelX*p.kernelY;
                     float * pd = dst;
-                    if (p.IsKernel(3))
+                    if (p.IsKernel(1))
+                        AddConvolutionKernel1x1(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
+                    else if (p.IsKernel(2))
+                        AddConvolutionKernel2x2(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
+                    else if (p.IsKernel(3))
                         AddConvolutionKernel3x3(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
                     else
                     {

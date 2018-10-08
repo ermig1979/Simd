@@ -97,6 +97,27 @@ namespace Simd
             static __m256 Convolution(const float * src, size_t step, const __m256  * weight);
         };
 
+        template<> struct Kernel<1, 1>
+        {
+            static SIMD_INLINE __m256 Convolution(const float * src, size_t step, const __m256  * weight)
+            {
+                return _mm256_mul_ps(_mm256_loadu_ps(src), weight[0]);
+            }
+        };
+
+        template<> struct Kernel<2, 1>
+        {
+            static SIMD_INLINE __m256 RowConv(const float * src, const __m256  * weight)
+            {
+                return _mm256_add_ps(_mm256_mul_ps(_mm256_loadu_ps(src + 0), weight[0]), _mm256_mul_ps(_mm256_loadu_ps(src + 1), weight[1]));
+            }
+
+            static SIMD_INLINE __m256 Convolution(const float * src, size_t step, const __m256  * weight)
+            {
+                return _mm256_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2));
+            }
+        };
+
         template<> struct Kernel<3, 1>
         {
             static SIMD_INLINE __m256 RowConv(const float * src, const __m256  * weight)
@@ -180,10 +201,24 @@ namespace Simd
         void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
         {
             const ConvParam & p = _param;
-            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
-                Avx::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
-            else
-                Sse::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
+            if (p.dstW >= F && p.IsStride(1))
+            {
+                switch (p.kernelX)
+                {
+                case 1:
+                    Avx::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 2:
+                    Avx::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 3:
+                    Avx::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                default:
+                    break;
+                };
+            }
+            Sse::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
         }
 
         //---------------------------------------------------------------------
@@ -195,7 +230,7 @@ namespace Simd
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);
-            else if (Base::ConvolutionDirect::Preferable(param))
+            else if (ConvolutionDirect::Preferable(param))
                 return new Avx::ConvolutionDirect(param);
             else
                 return new ConvolutionImgToCol(param);

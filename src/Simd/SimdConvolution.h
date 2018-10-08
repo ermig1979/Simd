@@ -207,6 +207,8 @@ namespace Simd
         public:
             ConvolutionDirect(const ConvParam & p);
 
+            static bool Preferable(const ConvParam & p);
+
         protected:
             virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;
         };
@@ -341,6 +343,8 @@ namespace Simd
         {
         public:
             ConvolutionDirect(const ConvParam & p);
+
+            static bool Preferable(const ConvParam & p);
 
         protected:
             virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;

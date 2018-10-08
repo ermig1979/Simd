@@ -98,6 +98,54 @@ namespace Simd
             static __m512 Convolution(const float * src, size_t step, const __m512  * weight);
         };
 
+        template<> struct Kernel<1, 1>
+        {
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_mul_ps(_mm512_loadu_ps(src), weight[0]);
+            }
+        };
+
+        template<> struct Kernel<1, 2>
+        {
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                __m512 s0 = _mm512_loadu_ps(src + 0);
+                __m512 s1 = _mm512_loadu_ps(src + F);
+                return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_mul_ps(_mm512_shuffle_ps(s0, s1, 0x88), weight[0]));
+            }
+        };
+
+        template<> struct Kernel<2, 1>
+        {
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                return _mm512_fmadd_ps(_mm512_loadu_ps(src), weight[0],
+                    _mm512_mul_ps(_mm512_loadu_ps(src + 1), weight[1]));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2));
+            }
+        };
+
+        template<> struct Kernel<2, 2>
+        {
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                __m512 s0 = _mm512_loadu_ps(src + 0);
+                __m512 s1 = _mm512_loadu_ps(src + F);
+                return _mm512_fmadd_ps(_mm512_shuffle_ps(s0, s1, 0x88), weight[0],
+                    _mm512_mul_ps(_mm512_shuffle_ps(s0, s1, 0xDD), weight[1]));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2)));
+            }
+        };
+
         template<> struct Kernel<3, 1>
         {
             static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
@@ -132,6 +180,79 @@ namespace Simd
             {
                 return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight),
                     _mm512_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6))));
+            }
+        };
+
+        template<> struct Kernel<4, 1>
+        {
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                return _mm512_fmadd_ps(_mm512_loadu_ps(src), weight[0], _mm512_fmadd_ps(_mm512_loadu_ps(src + 1), weight[1],
+                        _mm512_fmadd_ps(_mm512_loadu_ps(src + 2), weight[2], _mm512_mul_ps(_mm512_loadu_ps(src + 3), weight[3]))));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 4),
+                    _mm512_add_ps(RowConv(src + 2 * step, weight + 8), RowConv(src + 3 * step, weight + 12))));
+            }
+        };
+
+        template<> struct Kernel<4, 2>
+        {
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                __m512 s00 = _mm512_loadu_ps(src);
+                __m512 s10 = _mm512_loadu_ps(src + F);
+                __m512 s02 = _mm512_loadu_ps(src + 2);
+                __m512 s12 = _mm512_loadu_ps(src + 2 + F);
+                return _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0x88), weight[0], _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0xDD), weight[1],
+                    _mm512_fmadd_ps(_mm512_shuffle_ps(s02, s12, 0x88), weight[2], _mm512_mul_ps(_mm512_shuffle_ps(s02, s12, 0xDD), weight[3]))));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight),
+                    _mm512_add_ps(RowConv(src + step, weight + 4), _mm512_add_ps(RowConv(src + 2 * step, weight + 8), RowConv(src + 3 * step, weight + 12)))));
+            }
+        };
+
+        template<> struct Kernel<5, 1>
+        {
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                return _mm512_fmadd_ps(_mm512_loadu_ps(src), weight[0], _mm512_fmadd_ps(_mm512_loadu_ps(src + 1), weight[1],
+                    _mm512_fmadd_ps(_mm512_loadu_ps(src + 2), weight[2], _mm512_fmadd_ps(_mm512_loadu_ps(src + 3), weight[3],
+                        _mm512_mul_ps(_mm512_loadu_ps(src + 4), weight[4])))));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 5),
+                    _mm512_add_ps(RowConv(src + 2 * step, weight + 10), _mm512_add_ps(RowConv(src + 3 * step, weight + 15), 
+                        RowConv(src + 4 * step, weight + 20)))));
+            }
+        };
+
+        template<> struct Kernel<5, 2>
+        {
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                __m512 s00 = _mm512_loadu_ps(src);
+                __m512 s10 = _mm512_loadu_ps(src + F);
+                __m512 s02 = _mm512_loadu_ps(src + 2);
+                __m512 s12 = _mm512_loadu_ps(src + 2 + F);
+                __m512 s04 = _mm512_loadu_ps(src + 4);
+                __m512 s14 = _mm512_loadu_ps(src + 4 + F);
+                return _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0x88), weight[0], _mm512_fmadd_ps(_mm512_shuffle_ps(s00, s10, 0xDD), weight[1],
+                    _mm512_fmadd_ps(_mm512_shuffle_ps(s02, s12, 0x88), weight[2], _mm512_fmadd_ps(_mm512_shuffle_ps(s02, s12, 0xDD), weight[3],
+                        _mm512_mul_ps(_mm512_shuffle_ps(s04, s14, 0x88), weight[4])))));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 5), 
+                    _mm512_add_ps(RowConv(src + 2 * step, weight + 10), _mm512_add_ps(RowConv(src + 3 * step, weight + 15), RowConv(src + 4 * step, weight + 20))))));
             }
         };
 
@@ -197,15 +318,59 @@ namespace Simd
             }
         }
 
+        bool ConvolutionDirect::Preferable(const ConvParam & p)
+        {
+            if (!p.IsDilation(1))
+                return false;
+            if (!(p.IsStride(1) || p.IsStride(2)))
+                return false;
+            double k = double(p.srcC) / p.group * p.strideX * p.strideY;
+            return k <= 16.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)
+#if SIMD_ZMM_COUNT == 32
+                    || p.IsKernel(4) || p.IsKernel(5)
+#endif
+                    );
+        }
+
         void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
         {
             const ConvParam & p = _param;
-            if (p.dstW >= F && p.IsKernel(3) && p.IsStride(1))
-                Avx512f::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
-            else if (p.dstW >= F && p.IsKernel(3) && p.IsStride(2))
-                Avx512f::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
-            else
-                Avx2::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
+            if (p.dstW >= F)
+            {
+                switch (p.kernelX)
+                {
+                case 1:
+                    Avx512f::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 2:
+                    if (p.IsStride(2))
+                        Avx512f::ConvolutionAndBias<2, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    else
+                        Avx512f::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 3:
+                    if (p.IsStride(2))
+                        Avx512f::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    else
+                        Avx512f::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 4:
+                    if (p.IsStride(2))
+                        Avx512f::ConvolutionAndBias<4, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    else
+                        Avx512f::ConvolutionAndBias<4, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                case 5:
+                    if (p.IsStride(2))
+                        Avx512f::ConvolutionAndBias<5, 2>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    else
+                        Avx512f::ConvolutionAndBias<5, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    return;
+                default:
+                    break;
+                };
+            }
+            Avx2::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
         }
 
         //---------------------------------------------------------------------
@@ -217,7 +382,7 @@ namespace Simd
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);
-            else if (Base::ConvolutionDirect::Preferable(param))
+            else if (ConvolutionDirect::Preferable(param))
                 return new Avx512f::ConvolutionDirect(param);
             else
                 return new ConvolutionImgToCol(param);
