@@ -1617,6 +1617,39 @@ extern "C"
     SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias);
 
     /*! @ingroup synet
+        Describes type of activation function used in ::SimdConvolutionSetActivation.
+    */
+    typedef enum
+    {
+        /*! 
+            Identity (activation function is absent). 
+        */
+        SimdConvolutionActivationIdentity = 0,
+        /*! 
+            ReLU activation function. 
+            It has one parameter: slope (params[0]).
+        */
+        SimdConvolutionActivationRelu,
+        /*!
+            The activation function restricts range. 
+            It has two parameters: lower (params[0]) and upper (params[1]) bound. 
+        */
+        SimdConvolutionActivationRestrictRange,
+    } SimdConvolutionActivationType;
+
+    /*! @ingroup synet
+
+        \fn void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias);
+
+        \short Sets weights and beases required for convolution algorithm.
+
+        \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
+        \param [in] type - a type of activation function.
+        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+    */
+    SIMD_API void SimdConvolutionSetActivation(void * convolution, SimdConvolutionActivationType type, const float * params);
+
+    /*! @ingroup synet
 
         \fn void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);
 

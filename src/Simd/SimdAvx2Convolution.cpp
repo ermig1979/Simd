@@ -40,8 +40,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------
@@ -56,8 +55,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------
@@ -76,8 +74,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Avx::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            if (_bias)
-                Avx::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------

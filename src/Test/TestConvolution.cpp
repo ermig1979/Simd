@@ -65,11 +65,14 @@ namespace Test
                 description = ss.str();
             }
 
-            void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
+            void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, 
+                ::SimdConvolutionActivationType activation, const float * params,
+                const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
                 void * convolution = func(p.srcC, p.srcH, p.srcW, p.dstC, p.kernelY, p.kernelX, p.dilationY, p.dilationX, p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.group);
                 buf.Extend({ ::SimdConvolutionBufferSize(convolution) });
                 ::SimdConvolutionSetWeight(convolution, weight.Data(), bias.Data());
+                ::SimdConvolutionSetActivation(convolution, activation, params);
                 {
                     TEST_PERFORMANCE_TEST(description);
                     ::SimdConvolutionForward(convolution, src.Data(), buf.Data(), dst.Data());
@@ -107,11 +110,14 @@ namespace Test
         Tensor32f dst1({ p.dstC, dstH, dstW });
         Tensor32f dst2({ p.dstC, dstH, dstW });
 
+        const ::SimdConvolutionActivationType activation = ::SimdConvolutionActivationRestrictRange;
+        float params[2] = { 0.0f, 6.0f };
+
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, weight, bias, src, buf, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, weight, bias, activation, params, src, buf, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, weight, bias, src, buf, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, weight, bias, activation, params, src, buf, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
 

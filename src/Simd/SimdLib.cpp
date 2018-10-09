@@ -1445,6 +1445,11 @@ SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight,
     ((Convolution*)convolution)->SetWeight(weight, bias);
 }
 
+SIMD_API void SimdConvolutionSetActivation(void * convolution, SimdConvolutionActivationType type, const float * params)
+{
+    ((Convolution*)convolution)->SetActivation(type, params);
+}
+
 SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst)
 {
     ((Convolution*)convolution)->Forward(src, buf, dst);

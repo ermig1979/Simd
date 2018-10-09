@@ -28,6 +28,65 @@ namespace Simd
 {
     namespace Base
     {
+        static void BiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, float * dst)
+        {
+            if (type == ::SimdConvolutionActivationIdentity)
+            {
+                if(bias)
+                    SynetAddBias(bias, count, size, dst);
+            }
+            else if (type == ::SimdConvolutionActivationRelu)
+            {
+                float slope = params[0];
+                assert(slope >= 0.0f && slope <= 1.0f);
+                if (bias)
+                {
+                    if (slope == 0)
+                    { 
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = Simd::Max(0.0f, dst[j] + shift);
+                            dst += size;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            for (size_t j = 0; j < size; ++j)
+                            {
+                                float value = dst[j] + shift;
+                                dst[j] = Simd::Max(value*slope, value);
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    NeuralRelu(dst, size*count, &slope, dst);
+            }
+            else if (type == ::SimdConvolutionActivationRestrictRange)
+            {
+                float lower = params[0];
+                float upper = params[1];
+                if (bias)
+                {
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float shift = bias[i];
+                        for (size_t j = 0; j < size; ++j)
+                            dst[j] = Simd::RestrictRange(dst[j] + shift, lower, upper);
+                        dst += size;
+                    }
+                }
+                else
+                    SynetRestrictRange(dst, size*count, &lower, &upper, dst);
+            }
+        }
+
         ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
             : Convolution(p)
         {
@@ -73,8 +132,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         void ConvolutionImgToCol::ImgToCol(const float * src, const ConvParam & p, float * dst)
@@ -221,8 +279,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Base::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         void ConvolutionImgToRow::ImgToRow(const float * src, const ConvParam & p, float * dst)
@@ -351,8 +408,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Base::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Base::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            if (_bias)
-                Base::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)

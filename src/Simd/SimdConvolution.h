@@ -83,10 +83,29 @@ namespace Simd
     class Convolution : public Deletable
     {
     public:
-        Convolution(const ConvParam & p) : _param(p), _0(0.0f), _1(1.0f) {}
+        Convolution(const ConvParam & p) 
+            : _param(p)
+            , _0(0.0f)
+            , _1(1.0f)
+            , _activationType(::SimdConvolutionActivationIdentity) 
+        {
+        }
+
         virtual size_t BufferSize() const = 0;
         virtual void SetWeight(const float * weight, const float * bias) = 0;
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
+
+        void SetActivation(::SimdConvolutionActivationType type, const float * params)
+        {
+            _activationType = type;
+            if (_activationType == ::SimdConvolutionActivationRelu)
+                _activationParams[0] = params[0];
+            if (_activationType == ::SimdConvolutionActivationRestrictRange)
+            {
+                _activationParams[0] = params[0];
+                _activationParams[1] = params[1];
+            }
+        }
 
         float * Buffer(float * buffer)
         {
@@ -103,6 +122,8 @@ namespace Simd
         ConvParam _param;
         Array32f _buffer;
         float _0, _1;
+        ::SimdConvolutionActivationType _activationType;
+        float _activationParams[2];
     };
 
     namespace Base
@@ -186,6 +207,8 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, float * dst);
+
         class ConvolutionImgToCol : public Base::ConvolutionImgToCol
         {
         public:
@@ -238,6 +261,8 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, float * dst);
+
         class ConvolutionImgToCol : public Sse::ConvolutionImgToCol
         {
         public:

@@ -45,8 +45,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Sse3::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Sse::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------

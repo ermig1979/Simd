@@ -29,6 +29,94 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, float * dst)
+        {
+            if (type == ::SimdConvolutionActivationIdentity)
+            {
+                if (bias)
+                    SynetAddBias(bias, count, size, dst);
+            }
+            else if (type == ::SimdConvolutionActivationRelu)
+            {
+                float slope = params[0];
+                assert(slope >= 0.0f && slope <= 1.0f);
+                if (bias)
+                {
+                    size_t aligned = AlignLo(size, F);
+                    if (slope == 0.0f)
+                    {
+                        __m128 _0 = _mm_set1_ps(0.0f);
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            __m128 _shift = _mm_set1_ps(shift);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m128 _dst = _mm_loadu_ps(dst + j);
+                                _mm_storeu_ps(dst + j, _mm_max_ps(_0, _mm_add_ps(_dst, _shift)));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Simd::Max(0.0f, dst[j] + shift);
+                            dst += size;
+                        }
+                    }
+                    else
+                    {
+                        __m128 _slope = _mm_set1_ps(slope);
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            __m128 _shift = _mm_set1_ps(shift);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m128 value = _mm_add_ps(_mm_loadu_ps(dst + j), _shift);
+                                _mm_storeu_ps(dst + j, _mm_max_ps(_mm_mul_ps(_slope, value), value));
+                            }
+                            for (; j < size; ++j)
+                            {
+                                float value = dst[j] + shift;
+                                dst[j] = Simd::Max(value*slope, value);
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    NeuralRelu(dst, size*count, &slope, dst);
+            }
+            else if (type == ::SimdConvolutionActivationRestrictRange)
+            {
+                float lower = params[0];
+                float upper = params[1];
+                if (bias)
+                {
+                    size_t aligned = AlignLo(size, F);
+                    __m128 _lower = _mm_set1_ps(lower);
+                    __m128 _upper = _mm_set1_ps(upper);
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float shift = bias[i];
+                        __m128 _shift = _mm_set1_ps(shift);
+                        size_t j = 0;
+                        for (; j < aligned; j += F)
+                        {
+                            __m128 value = _mm_add_ps(_mm_loadu_ps(dst + j), _shift);
+                            _mm_storeu_ps(dst + j, _mm_min_ps(_mm_max_ps(_lower, value), _upper));
+                        }
+                        for (; j < size; ++j)
+                            dst[j] = Simd::RestrictRange(dst[j] + shift, lower, upper);
+                        dst += size;
+                    }
+                }
+                else
+                    SynetRestrictRange(dst, size*count, &lower, &upper, dst);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
             : Base::ConvolutionImgToCol(p)
         {
@@ -39,8 +127,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Sse::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Sse::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------
@@ -67,8 +154,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Sse::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Sse::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            if (_bias)
-                Sse::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------

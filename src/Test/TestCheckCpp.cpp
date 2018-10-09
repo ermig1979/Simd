@@ -119,7 +119,7 @@ namespace Test
 
     void CheckCpp()
     {
-        //TestCpuInfo();
+        TestCpuInfo();
 
         TestPoint();
 

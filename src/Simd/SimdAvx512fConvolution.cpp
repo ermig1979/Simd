@@ -30,6 +30,103 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
+        static void BiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, float * dst)
+        {
+            if (type == ::SimdConvolutionActivationIdentity)
+            {
+                if (bias)
+                    SynetAddBias(bias, count, size, dst);
+            }
+            else if (type == ::SimdConvolutionActivationRelu)
+            {
+                float slope = params[0];
+                assert(slope >= 0.0f && slope <= 1.0f);
+                if (bias)
+                {
+                    size_t aligned = AlignLo(size, F);
+                    __mmask16 tail = __mmask16(-1) >> (F + aligned - size);
+                    if (slope == 0.0f)
+                    {
+                        __m512 _0 = _mm512_set1_ps(0.0f);
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            __m512 _shift = _mm512_set1_ps(shift);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m512 _dst = _mm512_loadu_ps(dst + j);
+                                _mm512_storeu_ps(dst + j, _mm512_max_ps(_0, _mm512_add_ps(_dst, _shift)));
+                            }
+                            if (j < size)
+                            {
+                                __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + j);
+                                _mm512_mask_storeu_ps(dst + j, tail, _mm512_max_ps(_0, _mm512_add_ps(_dst, _shift)));
+
+                            }
+                            dst += size;
+                        }
+                    }
+                    else
+                    {
+                        __m512 _slope = _mm512_set1_ps(slope);
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            __m512 _shift = _mm512_set1_ps(shift);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _shift);
+                                _mm512_storeu_ps(dst + j, _mm512_max_ps(_mm512_mul_ps(_slope, value), value));
+                            }
+                            if (j < size)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _shift);
+                                _mm512_mask_storeu_ps(dst + j, tail, _mm512_max_ps(_mm512_mul_ps(_slope, value), value));
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    NeuralRelu(dst, size*count, &slope, dst);
+            }
+            else if (type == ::SimdConvolutionActivationRestrictRange)
+            {
+                float lower = params[0];
+                float upper = params[1];
+                if (bias)
+                {
+                    size_t aligned = AlignLo(size, F);
+                    __mmask16 tail = __mmask16(-1) >> (F + aligned - size);
+                    __m512 _lower = _mm512_set1_ps(lower);
+                    __m512 _upper = _mm512_set1_ps(upper);
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float shift = bias[i];
+                        __m512 _shift = _mm512_set1_ps(shift);
+                        size_t j = 0;
+                        for (; j < aligned; j += F)
+                        {
+                            __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _shift);
+                            _mm512_storeu_ps(dst + j, _mm512_min_ps(_mm512_max_ps(_lower, value), _upper));
+                        }
+                        if (j < size)
+                        {
+                            __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _shift);
+                            _mm512_mask_storeu_ps(dst + j, tail, _mm512_min_ps(_mm512_max_ps(_lower, value), _upper));
+                        }
+                        dst += size;
+                    }
+                }
+                else
+                    SynetRestrictRange(dst, size*count, &lower, &upper, dst);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
             : Avx2::ConvolutionImgToCol(p)
         {
@@ -40,8 +137,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx512f::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Avx512f::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Avx512f::BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------
@@ -56,8 +152,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx512f::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            if (_bias)
-                Avx512f::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Avx512f::BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------
@@ -76,8 +171,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Avx512f::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Avx512f::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            if (_bias)
-                Avx512f::SynetAddBias(_bias, p.dstC, p.dstH*p.dstW, dst);
+            Avx512f::BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
         //---------------------------------------------------------------------
