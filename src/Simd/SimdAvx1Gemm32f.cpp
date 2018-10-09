@@ -612,10 +612,10 @@ namespace Simd
 #else
             microM = 4;
             microN = 8;
-            kernelMM = Kernel4x8;
-            kernelMT = Kernel4x8;
-            kernelTM = KernelMx8;
-            kernelTT = KernelMx8;
+            kernelMM = Kernel4x8nn;
+            kernelMT = Kernel4x8nn;
+            kernelTM = KernelMx8nn;
+            kernelTT = KernelMx8nn;
 #endif
             L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
             L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;

@@ -272,7 +272,7 @@ namespace Simd
                 _originalIndent.x = LoadValue(data, size);
                 _originalIndent.y = LoadValue(data, size);
                 _originalSymbols.resize(_symbolMax - _symbolMin);
-                for (size_t s = _symbolMin; s < _symbolMax; ++s)
+                for (char s = _symbolMin; s < _symbolMax; ++s)
                 {
                     Symbol & symbol = _originalSymbols[s - _symbolMin];
                     symbol.value = LoadValue(data, size);

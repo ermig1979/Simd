@@ -2164,7 +2164,7 @@ namespace Simd
                     return false;
                 ifs.unsetf(std::ios::skipws);
                 ifs.seekg(0, std::ios::end);
-                size_t size = ifs.tellg();
+                size_t size = (size_t)ifs.tellg();
                 ifs.seekg(0);
                 _data.resize(size + 1);
                 ifs.read(_data.data(), (std::streamsize)size);

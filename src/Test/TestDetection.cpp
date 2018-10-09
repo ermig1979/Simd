@@ -222,7 +222,7 @@ namespace Test
         size_t width, height;
         SimdDetectionInfoFlags flags;
         SimdDetectionInfo(data, &width, &height, &flags);
-        if (width >= W || height >= H)
+        if (width >= (size_t)W || height >= (size_t)H)
         {
             TEST_LOG_SS(Error, "Test size is too small: (" << W << ", " << H << ")!");
             return false;
