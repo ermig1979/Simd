@@ -233,8 +233,8 @@ namespace Simd
                 return false;
             if (!(p.IsStride(1) || p.IsStride(2)))
                 return false;
-            double k = double(p.srcC) / p.group * p.strideX * p.strideY;
-            return k <= 16.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3));
+            double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
+            return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3));
         }
 
         void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const

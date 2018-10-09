@@ -324,8 +324,8 @@ namespace Simd
                 return false;
             if (!(p.IsStride(1) || p.IsStride(2)))
                 return false;
-            double k = double(p.srcC) / p.group * p.strideX * p.strideY;
-            return k <= 16.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)
+            double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
+            return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)
 #if SIMD_ZMM_COUNT == 32
                     || p.IsKernel(4) || p.IsKernel(5)
 #endif
@@ -335,7 +335,7 @@ namespace Simd
         void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
         {
             const ConvParam & p = _param;
-            if (p.dstW >= F)
+            if (p.dstW > HF)
             {
                 switch (p.kernelX)
                 {
