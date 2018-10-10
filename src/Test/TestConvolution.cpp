@@ -110,7 +110,7 @@ namespace Test
         Tensor32f dst1({ p.dstC, dstH, dstW });
         Tensor32f dst2({ p.dstC, dstH, dstW });
 
-        const ::SimdConvolutionActivationType activation = ::SimdConvolutionActivationRestrictRange;
+        const ::SimdConvolutionActivationType activation = ::SimdConvolutionActivationIdentity;
         float params[2] = { 0.0f, 6.0f };
 
         TEST_ALIGN(SIMD_ALIGN);
@@ -136,7 +136,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(17, 150, 150, 96, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _2, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(17, 150, 150, 96, _2, _1, _1, _0, _0, 1), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _3, _1, _1, _0, _0, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _3, _1, _1, _1, _1, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(17, 150, 150, 96, _3, _1, _1, _0, _0, 1), f1, f2);
 #endif
 #if 0
@@ -234,7 +234,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _1, _1, _1, _0, _0, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _3, _1, _1, _0, _0, 1), f1, f2);
 #endif
         return result;
     }

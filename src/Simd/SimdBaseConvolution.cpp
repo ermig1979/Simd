@@ -37,32 +37,37 @@ namespace Simd
             }
             else if (type == ::SimdConvolutionActivationRelu)
             {
+                if (bias)
+                {
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float shift = bias[i];
+                        for (size_t j = 0; j < size; ++j)
+                            dst[j] = Simd::Max(0.0f, dst[j] + shift);
+                        dst += size;
+                    }
+                }
+                else
+                {
+                    float slope = 0;
+                    NeuralRelu(dst, size*count, &slope, dst);
+                }
+            }
+            else if (type == ::SimdConvolutionActivationLeakyRelu)
+            {
                 float slope = params[0];
                 assert(slope >= 0.0f && slope <= 1.0f);
                 if (bias)
                 {
-                    if (slope == 0)
-                    { 
-                        for (size_t i = 0; i < count; ++i)
-                        {
-                            float shift = bias[i];
-                            for (size_t j = 0; j < size; ++j)
-                                dst[j] = Simd::Max(0.0f, dst[j] + shift);
-                            dst += size;
-                        }
-                    }
-                    else
+                    for (size_t i = 0; i < count; ++i)
                     {
-                        for (size_t i = 0; i < count; ++i)
+                        float shift = bias[i];
+                        for (size_t j = 0; j < size; ++j)
                         {
-                            float shift = bias[i];
-                            for (size_t j = 0; j < size; ++j)
-                            {
-                                float value = dst[j] + shift;
-                                dst[j] = Simd::Max(value*slope, value);
-                            }
-                            dst += size;
+                            float value = dst[j] + shift;
+                            dst[j] = Simd::Max(value*slope, value);
                         }
+                        dst += size;
                     }
                 }
                 else
@@ -603,6 +608,7 @@ namespace Simd
                         }
                     }
                 }
+                BiasAndActivation(NULL, 1, p.dstH*p.dstW, _activationType, _activationParams, dst);
                 dst += p.dstW * p.dstH;
             }
         }

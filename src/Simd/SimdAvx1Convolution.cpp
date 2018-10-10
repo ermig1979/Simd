@@ -38,49 +38,55 @@ namespace Simd
             }
             else if (type == ::SimdConvolutionActivationRelu)
             {
+                if (bias)
+                {
+                    size_t aligned = AlignLo(size, F);
+                    __m256 _0 = _mm256_set1_ps(0.0f);
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float shift = bias[i];
+                        __m256 _shift = _mm256_set1_ps(shift);
+                        size_t j = 0;
+                        for (; j < aligned; j += F)
+                        {
+                            __m256 _dst = _mm256_loadu_ps(dst + j);
+                            _mm256_storeu_ps(dst + j, _mm256_max_ps(_0, _mm256_add_ps(_dst, _shift)));
+                        }
+                        for (; j < size; ++j)
+                            dst[j] = Simd::Max(0.0f, dst[j] + shift);
+                        dst += size;
+                    }
+                }
+                else
+                {
+                    float slope = 0;
+                    NeuralRelu(dst, size*count, &slope, dst);
+                }
+            }
+            else if (type == ::SimdConvolutionActivationLeakyRelu)
+            {
                 float slope = params[0];
                 assert(slope >= 0.0f && slope <= 1.0f);
                 if (bias)
                 {
                     size_t aligned = AlignLo(size, F);
-                    if (slope == 0.0f)
+                    __m256 _slope = _mm256_set1_ps(slope);
+                    for (size_t i = 0; i < count; ++i)
                     {
-                        __m256 _0 = _mm256_set1_ps(0.0f);
-                        for (size_t i = 0; i < count; ++i)
+                        float shift = bias[i];
+                        __m256 _shift = _mm256_set1_ps(shift);
+                        size_t j = 0;
+                        for (; j < aligned; j += F)
                         {
-                            float shift = bias[i];
-                            __m256 _shift = _mm256_set1_ps(shift);
-                            size_t j = 0;
-                            for (; j < aligned; j += F)
-                            {
-                                __m256 _dst = _mm256_loadu_ps(dst + j);
-                                _mm256_storeu_ps(dst + j, _mm256_max_ps(_0, _mm256_add_ps(_dst, _shift)));
-                            }
-                            for (; j < size; ++j)
-                                dst[j] = Simd::Max(0.0f, dst[j] + shift);
-                            dst += size;
+                            __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _shift);
+                            _mm256_storeu_ps(dst + j, _mm256_max_ps(_mm256_mul_ps(_slope, value), value));
                         }
-                    }
-                    else
-                    {
-                        __m256 _slope = _mm256_set1_ps(slope);
-                        for (size_t i = 0; i < count; ++i)
+                        for (; j < size; ++j)
                         {
-                            float shift = bias[i];
-                            __m256 _shift = _mm256_set1_ps(shift);
-                            size_t j = 0;
-                            for (; j < aligned; j += F)
-                            {
-                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _shift);
-                                _mm256_storeu_ps(dst + j, _mm256_max_ps(_mm256_mul_ps(_slope, value), value));
-                            }
-                            for (; j < size; ++j)
-                            {
-                                float value = dst[j] + shift;
-                                dst[j] = Simd::Max(value*slope, value);
-                            }
-                            dst += size;
+                            float value = dst[j] + shift;
+                            dst[j] = Simd::Max(value*slope, value);
                         }
+                        dst += size;
                     }
                 }
                 else
@@ -220,16 +226,53 @@ namespace Simd
             }
         };
 
-        template<int kernel, int stride> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
-            const float * weight, const float * bias, float * dst, size_t dstC, size_t dstH, size_t dstW)
+        template<::SimdConvolutionActivationType type> struct Activation
+        {
+            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params);
+        };
+
+        template<> struct Activation<::SimdConvolutionActivationIdentity>
+        {
+            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
+            {
+                return value;
+            }
+        };
+
+        template<> struct Activation<::SimdConvolutionActivationRelu>
+        {
+            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
+            {
+                return _mm256_max_ps(_mm256_setzero_ps(), value);
+            }
+        };
+
+        template<> struct Activation<::SimdConvolutionActivationLeakyRelu>
+        {
+            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
+            {
+                return _mm256_max_ps(_mm256_mul_ps(params[0], value), value);
+            }
+        };
+
+        template<> struct Activation<::SimdConvolutionActivationRestrictRange>
+        {
+            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
+            {
+                return _mm256_min_ps(_mm256_max_ps(params[0], value), params[1]);
+            }
+        };
+
+        template<int kernel, int stride, ::SimdConvolutionActivationType type> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
+            const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
             __m256 _weight[kernel*kernel];
+            __m256 _params[2] = { _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]) };
             size_t dstWF = Simd::AlignLo(dstW, F);
             __m256 tail = RightNotZero(dstW - dstWF);
             for (size_t dc = 0; dc < dstC; ++dc)
             {
-                size_t sc = 0;
-                for (; sc < 1; ++sc)
+                if (srcC == 1)
                 {
                     const float * ps = src;
                     float * pd = dst;
@@ -240,46 +283,122 @@ namespace Simd
                         for (size_t x = 0; x < dstWF; x += F)
                         {
                             __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm256_storeu_ps(pd + x, _mm256_add_ps(_bias, conv));
+                            _mm256_storeu_ps(pd + x, Activation<type>::Apply(_mm256_add_ps(_bias, conv), _params));
                         }
                         if (dstWF < dstW)
                         {
                             size_t x = dstW - F;
                             __m256 _dst = _mm256_loadu_ps(pd + x);
                             __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, _mm256_add_ps(_bias, conv), tail));
+                            _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, Activation<type>::Apply(_mm256_add_ps(_bias, conv), _params), tail));
                         }
                         ps += srcW * stride;
                         pd += dstW;
                     }
                     weight += kernel * kernel;
                 }
-                for (; sc < srcC; ++sc)
+                else
                 {
-                    const float * ps = src + sc * srcW * srcH;
-                    float * pd = dst;
-                    LoadWeight<kernel*kernel>(weight, _weight);
-                    for (size_t y = 0; y < dstH; ++y)
+                    size_t sc = 0;
+                    for (; sc < 1; ++sc)
                     {
-                        for (size_t x = 0; x < dstWF; x += F)
+                        const float * ps = src;
+                        float * pd = dst;
+                        LoadWeight<kernel*kernel>(weight, _weight);
+                        __m256 _bias = bias ? _mm256_set1_ps(bias[dc]) : _mm256_setzero_ps();
+                        for (size_t y = 0; y < dstH; ++y)
                         {
-                            __m256 _dst = _mm256_loadu_ps(pd + x);
-                            __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm256_storeu_ps(pd + x, _mm256_add_ps(_dst, conv));
+                            for (size_t x = 0; x < dstWF; x += F)
+                            {
+                                __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                _mm256_storeu_ps(pd + x, _mm256_add_ps(_bias, conv));
+                            }
+                            if (dstWF < dstW)
+                            {
+                                size_t x = dstW - F;
+                                __m256 _dst = _mm256_loadu_ps(pd + x);
+                                __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, _mm256_add_ps(_bias, conv), tail));
+                            }
+                            ps += srcW * stride;
+                            pd += dstW;
                         }
-                        if (dstWF < dstW)
-                        {
-                            size_t x = dstW - F;
-                            __m256 _dst = _mm256_loadu_ps(pd + x);
-                            __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm256_storeu_ps(pd + x, _mm256_add_ps(_dst, _mm256_and_ps(conv, tail)));
-                        }
-                        ps += srcW * stride;
-                        pd += dstW;
+                        weight += kernel * kernel;
                     }
-                    weight += kernel * kernel;
+                    for (; sc < srcC - 1; ++sc)
+                    {
+                        const float * ps = src + sc * srcW * srcH;
+                        float * pd = dst;
+                        LoadWeight<kernel*kernel>(weight, _weight);
+                        for (size_t y = 0; y < dstH; ++y)
+                        {
+                            for (size_t x = 0; x < dstWF; x += F)
+                            {
+                                __m256 _dst = _mm256_loadu_ps(pd + x);
+                                __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                _mm256_storeu_ps(pd + x, _mm256_add_ps(_dst, conv));
+                            }
+                            if (dstWF < dstW)
+                            {
+                                size_t x = dstW - F;
+                                __m256 _dst = _mm256_loadu_ps(pd + x);
+                                __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                _mm256_storeu_ps(pd + x, _mm256_add_ps(_dst, _mm256_and_ps(conv, tail)));
+                            }
+                            ps += srcW * stride;
+                            pd += dstW;
+                        }
+                        weight += kernel * kernel;
+                    }
+                    for (; sc < srcC; ++sc)
+                    {
+                        const float * ps = src + sc * srcW * srcH;
+                        float * pd = dst;
+                        LoadWeight<kernel*kernel>(weight, _weight);
+                        for (size_t y = 0; y < dstH; ++y)
+                        {
+                            for (size_t x = 0; x < dstWF; x += F)
+                            {
+                                __m256 _dst = _mm256_loadu_ps(pd + x);
+                                __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                _mm256_storeu_ps(pd + x, Activation<type>::Apply(_mm256_add_ps(_dst, conv), _params));
+                            }
+                            if (dstWF < dstW)
+                            {
+                                size_t x = dstW - F;
+                                __m256 _dst = _mm256_loadu_ps(pd + x);
+                                __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, Activation<type>::Apply(_mm256_add_ps(_dst, conv), _params), tail));
+                            }
+                            ps += srcW * stride;
+                            pd += dstW;
+                        }
+                        weight += kernel * kernel;
+                    }
                 }
                 dst += dstH * dstW;
+            }
+        }
+
+        template<int kernel, int stride> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
+            const float * weight, const float * bias, ::SimdConvolutionActivationType type, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
+        {
+            switch (type)
+            {
+            case ::SimdConvolutionActivationIdentity:
+                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationIdentity>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
+                break;
+            case ::SimdConvolutionActivationRelu:
+                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
+                break;
+            case ::SimdConvolutionActivationLeakyRelu:
+                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationLeakyRelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
+                break;
+            case ::SimdConvolutionActivationRestrictRange:
+                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRestrictRange>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
+                break;
+            default:
+                assert(0);
             }
         }
 
@@ -291,13 +410,13 @@ namespace Simd
                 switch (p.kernelX)
                 {
                 case 1:
-                    Avx::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    Avx::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
                     return;
                 case 2:
-                    Avx::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    Avx::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
                     return;
                 case 3:
-                    Avx::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, dst, _dstC, p.dstH, p.dstW);
+                    Avx::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
                     return;
                 default:
                     break;

@@ -98,7 +98,7 @@ namespace Simd
         void SetActivation(::SimdConvolutionActivationType type, const float * params)
         {
             _activationType = type;
-            if (_activationType == ::SimdConvolutionActivationRelu)
+            if (_activationType == ::SimdConvolutionActivationLeakyRelu)
                 _activationParams[0] = params[0];
             if (_activationType == ::SimdConvolutionActivationRestrictRange)
             {

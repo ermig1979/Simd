@@ -1625,14 +1625,27 @@ extern "C"
             Identity (activation function is absent). 
         */
         SimdConvolutionActivationIdentity = 0,
-        /*! 
-            ReLU activation function. 
-            It has one parameter: slope (params[0]).
+        /*!
+            ReLU activation function.
+            \verbatim
+            dst[i] = Max(0, src[i]);
+            \endverbatim
         */
         SimdConvolutionActivationRelu,
+        /*! 
+            Leaky ReLU activation function. 
+            It has one parameter: slope (params[0]).
+            \verbatim
+            dst[i] = Max(src[i]*slope, src[i]);
+            \endverbatim
+        */
+        SimdConvolutionActivationLeakyRelu,
         /*!
             The activation function restricts range. 
             It has two parameters: lower (params[0]) and upper (params[1]) bound. 
+            \verbatim
+            dst[i] = Min(Max(lower, src[i]), upper);
+            \endverbatim
         */
         SimdConvolutionActivationRestrictRange,
     } SimdConvolutionActivationType;
