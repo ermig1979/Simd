@@ -162,42 +162,27 @@ namespace Simd
             }
         };
 
-        template<::SimdConvolutionActivationType type> struct Activation
-        {
-            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params);
-        };
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const __m256 * params);
 
-        template<> struct Activation<::SimdConvolutionActivationIdentity>
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const __m256 * params)
         {
-            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
-            {
-                return value;
-            }
-        };
+            return value;
+        }
 
-        template<> struct Activation<::SimdConvolutionActivationRelu>
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRelu>(__m256 value, const __m256 * params)
         {
-            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
-            {
-                return _mm256_max_ps(_mm256_setzero_ps(), value);
-            }
-        };
+            return _mm256_max_ps(_mm256_setzero_ps(), value);
+        }
 
-        template<> struct Activation<::SimdConvolutionActivationLeakyRelu>
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationLeakyRelu>(__m256 value, const __m256 * params)
         {
-            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
-            {
-                return _mm256_max_ps(_mm256_mul_ps(params[0], value), value);
-            }
-        };
+            return _mm256_max_ps(_mm256_mul_ps(params[0], value), value);
+        }
 
-        template<> struct Activation<::SimdConvolutionActivationRestrictRange>
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRestrictRange>(__m256 value, const __m256 * params)
         {
-            static SIMD_INLINE __m256 Apply(const __m256 & value, const __m256 * params)
-            {
-                return _mm256_min_ps(_mm256_max_ps(params[0], value), params[1]);
-            }
-        };
+            return _mm256_min_ps(_mm256_max_ps(params[0], value), params[1]);
+        }
 
         template<int kernel, int stride, ::SimdConvolutionActivationType type> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
             const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -219,14 +204,14 @@ namespace Simd
                         for (size_t x = 0; x < dstWF; x += F)
                         {
                             __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm256_storeu_ps(pd + x, Activation<type>::Apply(_mm256_add_ps(_bias, conv), _params));
+                            _mm256_storeu_ps(pd + x, Activate<type>(_mm256_add_ps(_bias, conv), _params));
                         }
                         if (dstWF < dstW)
                         {
                             size_t x = dstW - F;
                             __m256 _dst = _mm256_loadu_ps(pd + x);
                             __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, Activation<type>::Apply(_mm256_add_ps(_bias, conv), _params), tail));
+                            _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, Activate<type>(_mm256_add_ps(_bias, conv), _params), tail));
                         }
                         ps += srcW * stride;
                         pd += dstW;
@@ -297,14 +282,14 @@ namespace Simd
                             {
                                 __m256 _dst = _mm256_loadu_ps(pd + x);
                                 __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                                _mm256_storeu_ps(pd + x, Activation<type>::Apply(_mm256_add_ps(_dst, conv), _params));
+                                _mm256_storeu_ps(pd + x, Activate<type>(_mm256_add_ps(_dst, conv), _params));
                             }
                             if (dstWF < dstW)
                             {
                                 size_t x = dstW - F;
                                 __m256 _dst = _mm256_loadu_ps(pd + x);
                                 __m256 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                                _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, Activation<type>::Apply(_mm256_add_ps(_dst, conv), _params), tail));
+                                _mm256_storeu_ps(pd + x, _mm256_blendv_ps(_dst, Activate<type>(_mm256_add_ps(_dst, conv), _params), tail));
                             }
                             ps += srcW * stride;
                             pd += dstW;

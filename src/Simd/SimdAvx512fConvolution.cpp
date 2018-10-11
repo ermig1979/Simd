@@ -356,42 +356,27 @@ namespace Simd
             }
         };
 
-        template<::SimdConvolutionActivationType type> struct Activation
-        {
-            static SIMD_INLINE __m512 Apply(const __m512 & value, const __m512 * params);
-        };
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m512 Activate(__m512 value, const __m512 * params);
 
-        template<> struct Activation<::SimdConvolutionActivationIdentity>
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationIdentity>(__m512 value, const __m512 * params)
         {
-            static SIMD_INLINE __m512 Apply(const __m512 & value, const __m512 * params)
-            {
-                return value;
-            }
-        };
+            return value;
+        }
 
-        template<> struct Activation<::SimdConvolutionActivationRelu>
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationRelu>(__m512 value, const __m512 * params)
         {
-            static SIMD_INLINE __m512 Apply(const __m512 & value, const __m512 * params)
-            {
-                return _mm512_max_ps(_mm512_setzero_ps(), value);
-            }
-        };
+            return _mm512_max_ps(_mm512_setzero_ps(), value);
+        }
 
-        template<> struct Activation<::SimdConvolutionActivationLeakyRelu>
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationLeakyRelu>(__m512 value, const __m512 * params)
         {
-            static SIMD_INLINE __m512 Apply(const __m512 & value, const __m512 * params)
-            {
-                return _mm512_max_ps(_mm512_mul_ps(params[0], value), value);
-            }
-        };
+            return _mm512_max_ps(_mm512_mul_ps(params[0], value), value);
+        }
 
-        template<> struct Activation<::SimdConvolutionActivationRestrictRange>
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationRestrictRange>(__m512 value, const __m512 * params)
         {
-            static SIMD_INLINE __m512 Apply(const __m512 & value, const __m512 * params)
-            {
-                return _mm512_min_ps(_mm512_max_ps(params[0], value), params[1]);
-            }
-        };
+            return _mm512_min_ps(_mm512_max_ps(params[0], value), params[1]);
+        }
 
         template<int kernel, int stride, ::SimdConvolutionActivationType type> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
             const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -414,12 +399,12 @@ namespace Simd
                         for (; x < dstWF; x += F)
                         {
                             __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm512_storeu_ps(pd + x, Activation<type>::Apply(_mm512_add_ps(_bias, conv), _params));
+                            _mm512_storeu_ps(pd + x, Activate<type>(_mm512_add_ps(_bias, conv), _params));
                         }
                         if (x < dstW)
                         {
                             __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                            _mm512_mask_storeu_ps(pd + x, tail, Activation<type>::Apply(_mm512_add_ps(_bias, conv), _params));
+                            _mm512_mask_storeu_ps(pd + x, tail, Activate<type>(_mm512_add_ps(_bias, conv), _params));
                         }
                         ps += srcW * stride;
                         pd += dstW;
@@ -490,13 +475,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(pd + x);
                                 __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                                _mm512_storeu_ps(pd + x, Activation<type>::Apply(_mm512_add_ps(_dst, conv), _params));
+                                _mm512_storeu_ps(pd + x, Activate<type>(_mm512_add_ps(_dst, conv), _params));
                             }
                             if (x < dstW)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, pd + x);
                                 __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
-                                _mm512_mask_storeu_ps(pd + x, tail, Activation<type>::Apply(_mm512_add_ps(_dst, conv), _params));
+                                _mm512_mask_storeu_ps(pd + x, tail, Activate<type>(_mm512_add_ps(_dst, conv), _params));
                             }
                             ps += srcW * stride;
                             pd += dstW;
