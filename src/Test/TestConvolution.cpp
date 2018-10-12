@@ -132,6 +132,12 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
+        //result = result && ConvolutionForwardAutoTest(Param(1024, 13, 13, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(512, 10, 10, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(256, 10, 10, 512, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(384, 20, 20, 256, _3, _1, _1, _1, _1, 1), f1, f2);
+#endif
+#if 0
         result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(17, 150, 150, 96, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _2, _1, _1, _0, _0, 1), f1, f2);
@@ -234,7 +240,9 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _3, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _3, _1, _1, _0, _0, 1), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(1024, 13, 13, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(512, 10, 10, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
 #endif
         return result;
     }
