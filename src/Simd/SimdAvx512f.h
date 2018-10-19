@@ -113,6 +113,8 @@ namespace Simd
 
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
+        void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst);
+
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
 
         void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);

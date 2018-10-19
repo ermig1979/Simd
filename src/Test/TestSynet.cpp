@@ -463,6 +463,40 @@ namespace Test
         return result;
     }
 
+    bool SynetFusedLayerForward0AutoTest(const FuncSLF & f1, const FuncSLF & f2)
+    {
+        bool result = true;
+
+        result = result && SynetScaleLayerForwardAutoTest(H, W, true, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, true, f1, f2);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward0AutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Base::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Sse::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
+#endif
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Avx::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Avx512f::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool SynetAddBiasDataTest(bool create, size_t count, size_t size, const FuncAB & f)
@@ -661,5 +695,10 @@ namespace Test
     bool SynetScaleLayerForwardDataTest(bool create)
     {
         return SynetScaleLayerForwardDataTest(create, DH, DW, FUNC_SLF(SimdSynetScaleLayerForward));
+    }
+
+    bool SynetFusedLayerForward0DataTest(bool create)
+    {
+        return SynetScaleLayerForwardDataTest(create, DH, DW, FUNC_SLF(SimdSynetFusedLayerForward0));
     }
 }

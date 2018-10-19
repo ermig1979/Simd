@@ -46,6 +46,11 @@ namespace Simd
         {
             return Simd::Min(a, b);
         }
+
+        SIMD_INLINE float SynetFusedLayerForward0(float x, float s)
+        {
+            return (x - ::abs(x))*s + Simd::Max(0.0f, x);
+        }
     }
 }
 
