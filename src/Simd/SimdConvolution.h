@@ -27,7 +27,6 @@
 #include "Simd/SimdArray.h"
 
 #ifdef _N
-#define _N_OLD _N
 #undef _N
 #endif
 
@@ -379,10 +378,5 @@ namespace Simd
     }
 #endif//SIMD_AVX512F_ENABLE
 }
-
-#ifdef _N_OLD
-#define _N _N_OLD
-#undef _N_OLD
-#endif
 
 #endif//__SimConvolution_h__

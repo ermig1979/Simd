@@ -38,6 +38,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, size_t count, size_t size, float * dst)
         {
+            if (align)
+                assert(Aligned(size) && Aligned(dst));
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);     
             for (size_t i = 0; i < count; ++i)
@@ -64,7 +66,7 @@ namespace Simd
 
         void SynetAddBias(const float * bias, size_t count, size_t size, float * dst)
         {
-            if (Aligned(dst) && Aligned(size))
+            if (Aligned(size) && Aligned(dst))
                 SynetAddBias<true>(bias, count, size, dst);
             else
                 SynetAddBias<false>(bias, count, size, dst);
@@ -134,12 +136,12 @@ namespace Simd
             }
         }
 
-        template <bool align> void SynetEltwiseLayerForwardSum(const float * src0, const __m128 & weight0, const float * src1, const __m128 & weight1, float * dst, size_t offset)
+        template <bool align> SIMD_INLINE void SynetEltwiseLayerForwardSum(const float * src0, const __m128 & weight0, const float * src1, const __m128 & weight1, float * dst, size_t offset)
         {
             Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Load<align>(src0 + offset), weight0), _mm_mul_ps(Load<align>(src1 + offset), weight1)));
         }
 
-        template <bool align> void SynetEltwiseLayerForwardSum(const float * src, const __m128 & weight, float * dst, size_t offset)
+        template <bool align> SIMD_INLINE void SynetEltwiseLayerForwardSum(const float * src, const __m128 & weight, float * dst, size_t offset)
         {
             Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Load<align>(src + offset), weight), Load<align>(dst + offset)));
         }
@@ -222,6 +224,51 @@ namespace Simd
                 SynetEltwiseLayerForward<false>(src, weight, count, size, type, dst);
         }
 
+        template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, __m128 bias, __m128 scale, __m128 sign, float * dst)
+        {
+            __m128 x = _mm_add_ps(Load<align>(src), bias);
+            Store<align>(dst, _mm_add_ps(_mm_mul_ps(_mm_sub_ps(x, _mm_andnot_ps(sign, x)), scale), _mm_max_ps(_mm_setzero_ps(), x)));
+        }
+
+        template <bool align> void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(size) && Aligned(dst));
+            size_t aligned = AlignLo(size, QF);
+            size_t partial = AlignLo(size, F);
+            __m128 sign = _mm_set1_ps(-0.0f);
+            for (size_t i = 0; i < count; ++i)
+            {
+                size_t j = 0;
+                if (partial)
+                {
+                    __m128 _bias = _mm_set1_ps(bias[i]);
+                    __m128 _scale = _mm_set1_ps(scale[i]);
+                    for (; j < aligned; j += QF)
+                    {
+                        SynetFusedLayerForward0<align>(src + j + 0 * F, _bias, _scale, sign, dst + j + 0 * F);
+                        SynetFusedLayerForward0<align>(src + j + 1 * F, _bias, _scale, sign, dst + j + 1 * F);
+                        SynetFusedLayerForward0<align>(src + j + 2 * F, _bias, _scale, sign, dst + j + 2 * F);
+                        SynetFusedLayerForward0<align>(src + j + 3 * F, _bias, _scale, sign, dst + j + 3 * F);
+                    }
+                    for (; j < partial; j += F)
+                        SynetFusedLayerForward0<align>(src + j, _bias, _scale, sign, dst + j);
+                }
+                for (; j < size; ++j)
+                    dst[j] = Base::SynetFusedLayerForward0(src[j] + bias[i], scale[i]);
+                src += size;
+                dst += size;
+            }
+        }
+
+        void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst)
+        {
+            if (Aligned(src) && Aligned(size) && Aligned(dst))
+                SynetFusedLayerForward0<true>(src, bias, scale, count, size, dst);
+            else
+                SynetFusedLayerForward0<false>(src, bias, scale, count, size, dst);
+        }
+
         template <bool align> void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             assert(lower[0] <= upper[0]);
@@ -267,6 +314,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
         {
+            if (align)
+                assert(Aligned(src) && Aligned(size) && Aligned(dst));
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);
             if (bias)
@@ -322,7 +371,7 @@ namespace Simd
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
         {
-            if (Aligned(dst) && Aligned(size))
+            if (Aligned(src) && Aligned(size) && Aligned(dst))
                 SynetScaleLayerForward<true>(src, scale, bias, count, size, dst);
             else
                 SynetScaleLayerForward<false>(src, scale, bias, count, size, dst);

@@ -5026,6 +5026,14 @@ SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const floa
     simdSynetEltwiseLayerForward(src, weight, count, size, type, dst);
 }
 
+typedef void(*SimdSynetFusedLayerForward0Ptr) (const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst);
+volatile SimdSynetFusedLayerForward0Ptr simdSynetFusedLayerForward0 = SIMD_FUNC3(SynetFusedLayerForward0, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdSynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst)
+{
+    simdSynetFusedLayerForward0(src, bias, scale, count, size, dst);
+}
+
 typedef void(*SimdSynetLrnLayerCrossChannelsPtr) (const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
 volatile SimdSynetLrnLayerCrossChannelsPtr simdSynetLrnLayerCrossChannels = SIMD_FUNC3(SynetLrnLayerCrossChannels, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC);
 
