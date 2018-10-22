@@ -5316,6 +5316,34 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst);
+
+        \short This function is used for forward propagation of FusedLayer (type 1).
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+            {
+                x = src[i*size + j] + bias0[i];
+                dst[i*size + j] = max(0, -x)*scale1[i] + bias1[i] + max(0, x);
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] bias0 - a pointer to the 32-bit float array with bias0 coefficients.
+        \param [in] scale1 - a pointer to the 32-bit float array with scale1 coefficients.
+        \param [in] bias1 - a pointer to the 32-bit float array with bias1 coefficients.
+        \param [in] count - a size of bias and scale arrays.
+        \param [in] size - an internal size of the operation.
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+    */
+    SIMD_API void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
 
         \short This function is used for forward propagation of LrnLayer (cross channels normalization).

@@ -115,6 +115,8 @@ namespace Simd
 
         void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst);
 
+        void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst);
+
         void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);

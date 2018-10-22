@@ -253,6 +253,49 @@ namespace Simd
                 SynetFusedLayerForward0<false>(src, bias, scale, count, size, dst);
         }
 
+        template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward1(const float * src, __m512 bias0, __m512 scale1, __m512 bias1, float * dst, __mmask16 tail = -1)
+        {
+            __m512 x = _mm512_add_ps((Load<align, mask>(src, tail)), bias0);
+            Store<align, mask>(dst, _mm512_add_ps(_mm512_fmadd_ps(_mm512_max_ps(_mm512_setzero_ps(), _mm512_sub_ps(_mm512_setzero_ps(), x)), scale1, bias1), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
+        }
+
+        template <bool align> void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(size) && Aligned(dst));
+            size_t aligned = AlignLo(size, QF);
+            size_t partial = AlignLo(size, F);
+            __mmask16 tail = __mmask16(-1) >> (F + partial - size);
+            for (size_t i = 0; i < count; ++i)
+            {
+                size_t j = 0;
+                __m512 _bias0 = _mm512_set1_ps(bias0[i]);
+                __m512 _scale1 = _mm512_set1_ps(scale1[i]);
+                __m512 _bias1 = _mm512_set1_ps(bias1[i]);
+                for (; j < aligned; j += QF)
+                {
+                    SynetFusedLayerForward1<align, false>(src + j + 0 * F, _bias0, _scale1, _bias1, dst + j + 0 * F);
+                    SynetFusedLayerForward1<align, false>(src + j + 1 * F, _bias0, _scale1, _bias1, dst + j + 1 * F);
+                    SynetFusedLayerForward1<align, false>(src + j + 2 * F, _bias0, _scale1, _bias1, dst + j + 2 * F);
+                    SynetFusedLayerForward1<align, false>(src + j + 3 * F, _bias0, _scale1, _bias1, dst + j + 3 * F);
+                }
+                for (; j < partial; j += F)
+                    SynetFusedLayerForward1<align, false>(src + j, _bias0, _scale1, _bias1, dst + j);
+                if(j < size)
+                    SynetFusedLayerForward1<align, true>(src + j, _bias0, _scale1, _bias1, dst + j, tail);
+                src += size;
+                dst += size;
+            }
+        }
+
+        void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst)
+        {
+            if (Aligned(src) && Aligned(size) && Aligned(dst))
+                SynetFusedLayerForward1<true>(src, bias0, scale1, bias1, count, size, dst);
+            else
+                SynetFusedLayerForward1<false>(src, bias0, scale1, bias1, count, size, dst);
+        }
+
         template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
         {
             size_t aligned = AlignLo(size, F);

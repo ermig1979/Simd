@@ -218,6 +218,168 @@ namespace Test
 
     namespace
     {
+        struct FuncFLF0
+        {
+            typedef void(*FuncPtr)(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncFLF0(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Call(const View & src, const View & bias, const View & scale, size_t count, size_t size, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, (float*)bias.data, (float*)scale.data, count, size, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_FLF0(function) FuncFLF0(function, #function)
+
+    bool SynetFusedLayerForward0AutoTest(size_t count, size_t size, const FuncFLF0 & f1, const FuncFLF0 & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View scale(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        FillRandom32f(scale, -10.0, 10.0);
+        FillRandom32f(bias, -10.0, 10.0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward0AutoTest(const FuncFLF0 & f1, const FuncFLF0 & f2)
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward0AutoTest(H, W, f1, f2);
+        result = result && SynetFusedLayerForward0AutoTest(H - O, W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward0AutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Base::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Sse::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+#endif
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Avx::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(FUNC_FLF0(Simd::Avx512f::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
+        struct FuncFLF1
+        {
+            typedef void(*FuncPtr)(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncFLF1(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Call(const View & src, const View & bias0, const View & scale1, const View & bias1, size_t count, size_t size, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, (float*)bias0.data, (float*)scale1.data, (float*)bias1.data, count, size, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_FLF1(function) FuncFLF1(function, #function)
+
+    bool SynetFusedLayerForward1AutoTest(size_t count, size_t size, const FuncFLF1 & f1, const FuncFLF1 & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias0(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View scale1(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias1(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        FillRandom32f(bias0, -10.0, 10.0);
+        FillRandom32f(scale1, -10.0, 10.0);
+        FillRandom32f(bias1, -10.0, 10.0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, bias0, scale1, bias1, count, size, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, bias0, scale1, bias1, count, size, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward1AutoTest(const FuncFLF1 & f1, const FuncFLF1 & f2)
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward1AutoTest(H, W, f1, f2);
+        result = result && SynetFusedLayerForward1AutoTest(H - O, W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward1AutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Base::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Sse::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+#endif
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Avx::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetFusedLayerForward1AutoTest(FUNC_FLF1(Simd::Avx512f::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncLLCC
         {
             typedef void(*FuncPtr)(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
@@ -463,40 +625,6 @@ namespace Test
         return result;
     }
 
-    bool SynetFusedLayerForward0AutoTest(const FuncSLF & f1, const FuncSLF & f2)
-    {
-        bool result = true;
-
-        result = result && SynetScaleLayerForwardAutoTest(H, W, true, f1, f2);
-        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, true, f1, f2);
-
-        return result;
-    }
-
-    bool SynetFusedLayerForward0AutoTest()
-    {
-        bool result = true;
-
-        result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Base::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
-
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Sse::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
-#endif
-
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Avx::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
-#endif
-
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(FUNC_SLF(Simd::Avx512f::SynetFusedLayerForward0), FUNC_SLF(SimdSynetFusedLayerForward0));
-#endif
-
-        return result;
-    }
-
     //-----------------------------------------------------------------------
 
     bool SynetAddBiasDataTest(bool create, size_t count, size_t size, const FuncAB & f)
@@ -695,10 +823,5 @@ namespace Test
     bool SynetScaleLayerForwardDataTest(bool create)
     {
         return SynetScaleLayerForwardDataTest(create, DH, DW, FUNC_SLF(SimdSynetScaleLayerForward));
-    }
-
-    bool SynetFusedLayerForward0DataTest(bool create)
-    {
-        return SynetScaleLayerForwardDataTest(create, DH, DW, FUNC_SLF(SimdSynetFusedLayerForward0));
     }
 }
