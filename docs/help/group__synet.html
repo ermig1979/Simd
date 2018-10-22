@@ -50,6 +50,17 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="enum-members"></a>
 Enumerations</h2></td></tr>
+<tr class="memitem:gac0134d6cef9d64de8b89171e79ef4568"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> { <br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308">SimdConvolutionActivationIdentity</a> = 0, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede">SimdConvolutionActivationRelu</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8">SimdConvolutionActivationLeakyRelu</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a">SimdConvolutionActivationRestrictRange</a>
+<br />
+ }</td></tr>
+<tr class="separator:gac0134d6cef9d64de8b89171e79ef4568"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga89b4d9922d69654a2a675ccba0a9452d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga89b4d9922d69654a2a675ccba0a9452d">SimdSynetEltwiseOperationType</a> { <br />
 &#160;&#160;<a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452da5e01d4a14ba5fd7ef85837689f1eb3f1">SimdSynetEltwiseOperationProduct</a>, 
 <br />
@@ -119,6 +130,31 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for accelerating of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="gac0134d6cef9d64de8b89171e79ef4568"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gac0134d6cef9d64de8b89171e79ef4568">&#9670;&nbsp;</a></span>SimdConvolutionActivationType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Describes type of activation function used in ::SimdConvolutionSetActivation. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308"></a>SimdConvolutionActivationIdentity&#160;</td><td class="fielddoc"><p>Identity (activation function is absent). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede"></a>SimdConvolutionActivationRelu&#160;</td><td class="fielddoc"><p>ReLU activation function. </p><pre class="fragment">dst[i] = Max(0, src[i]);
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8"></a>SimdConvolutionActivationLeakyRelu&#160;</td><td class="fielddoc"><p>Leaky ReLU activation function. It has one parameter: slope (params[0]). </p><pre class="fragment">dst[i] = Max(src[i]*slope, src[i]);
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a"></a>SimdConvolutionActivationRestrictRange&#160;</td><td class="fielddoc"><p>The activation function restricts range. It has two parameters: lower (params[0]) and upper (params[1]) bound. </p><pre class="fragment">dst[i] = Min(Max(lower, src[i]), upper);
+</pre> </td></tr>
+</table>
+
+</div>
+</div>
 <a id="ga89b4d9922d69654a2a675ccba0a9452d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga89b4d9922d69654a2a675ccba0a9452d">&#9670;&nbsp;</a></span>SimdSynetEltwiseOperationType</h2>
 
@@ -338,7 +374,10 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to convolution weights. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL.</td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of activation function. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to parameters of activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
