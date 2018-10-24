@@ -314,6 +314,56 @@ namespace Simd
                 SynetFusedLayerForward1<false>(src, bias0, scale1, bias1, count, size, dst);
         }
 
+        template <bool align> SIMD_INLINE void SynetInnerProductLayerForward(const float * src, const float * weight, size_t offset, __m128 & sum)
+        {
+            __m128 s = Load<align>(src + offset);
+            __m128 w = Load<align>(weight + offset);
+            sum = _mm_add_ps(_mm_mul_ps(s, w), sum);
+        }
+
+        template<bool align> void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(weight) && Aligned(size) && Aligned(dst));
+            size_t partial = AlignLo(size, F);
+            size_t aligned = AlignLo(size, QF);
+            for (size_t i = 0; i < count; ++i)
+            {
+                size_t j = 0;
+                float sum = 0;
+                if (partial)
+                {
+                    __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                    if (aligned)
+                    {
+                        for (; j < aligned; j += QF)
+                        {
+                            SynetInnerProductLayerForward<align>(src, weight, j + 0 * F, sums[0]);
+                            SynetInnerProductLayerForward<align>(src, weight, j + 1 * F, sums[1]);
+                            SynetInnerProductLayerForward<align>(src, weight, j + 2 * F, sums[2]);
+                            SynetInnerProductLayerForward<align>(src, weight, j + 3 * F, sums[3]);
+                        }
+                        sums[0] = _mm_add_ps(_mm_add_ps(sums[0], sums[1]), _mm_add_ps(sums[2], sums[3]));
+                    }
+                    for (; j < partial; j += F)
+                        SynetInnerProductLayerForward<align>(src, weight, j, sums[0]);
+                    sum = ExtractSum(sums[0]);
+                }
+                for (; j < size; ++j)
+                    sum += src[j] * weight[j];
+                dst[i] = sum + (bias ? bias[i] : 0);
+                weight += size;
+            }
+        }
+
+        void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
+        {
+            if (Aligned(src) && Aligned(weight) && Aligned(size) && Aligned(dst))
+                SynetInnerProductLayerForward<true>(src, weight, bias, count, size, dst);
+            else
+                SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
+        }
+
         template <bool align> void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             assert(lower[0] <= upper[0]);

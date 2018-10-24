@@ -177,6 +177,27 @@ namespace Simd
             }
         }
 
+        void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
+        {
+            size_t aligned = Simd::AlignLo(size, 4);
+            for (size_t i = 0; i < count; ++i)
+            {
+                size_t j = 0;
+                float sums[4] = { 0, 0, 0, 0 };
+                for (; j < aligned; j += 4)
+                {
+                    sums[0] += src[j + 0] * weight[j + 0];
+                    sums[1] += src[j + 1] * weight[j + 1];
+                    sums[2] += src[j + 2] * weight[j + 2];
+                    sums[3] += src[j + 3] * weight[j + 3];
+                }
+                for (; j < size; ++j)
+                    sums[0] += src[j] * weight[j];
+                dst[i] = sums[0] + sums[1] + sums[2] + sums[3] + (bias ? bias[i] : 0);
+                weight += size;
+            }
+        }
+
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
         {
             float k0 = k[0], k1 = k[1], k2 = k[2];

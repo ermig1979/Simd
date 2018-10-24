@@ -5344,6 +5344,33 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
+
+        \short This function is used for forward propagation of InnerProductLayer.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count; ++i)
+        {
+            dst[i] = (bias ? bias[i] : 0);
+            for(j = 0; j < size; ++j)
+               dst[i] += src[j]*weight[i*size + j];
+        }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to size.
+        \param [in] weight - a pointer to the 32-bit float array with weight coefficients. The size of the array must be equal to count*size.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array must be equal to count. Can be NULL. 
+        \param [in] count - a size of output array.
+        \param [in] size - a size of input array.
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count.
+    */
+    SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
 
         \short This function is used for forward propagation of LrnLayer (cross channels normalization).

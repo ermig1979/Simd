@@ -105,6 +105,147 @@ namespace Simd
                 SynetEltwiseLayerForwardSum<false>(src, weight, count, size, dst);
         }
 
+        SIMD_INLINE __m256 Tail(size_t tail)
+        {
+            const int32_t mask[DF] = { 0, 0, 0, 0, 0, 0, 0, 0 , -1, -1, -1, -1, -1, -1, -1, -1 };
+            return _mm256_loadu_ps((float*)(mask + tail));
+        }
+
+        void SynetInnerProductLayerForward1(const float * S0, const float * W, const float * B, size_t K, float * D)
+        {
+            size_t K8 = K & (~7);
+            size_t K32 = K & (~31);
+            const float * W0 = W + 0 * K;
+            __m256 d00, d01, d02, d03;
+            __m256 s0, s1, s2, s3, w0, w1, w2, w3;
+            size_t k = 0;
+            d00 = _mm256_setzero_ps();
+            if (K32)
+            {
+                d01 = _mm256_setzero_ps();
+                d02 = _mm256_setzero_ps();
+                d03 = _mm256_setzero_ps();
+                for (; k < K32; k += 32)
+                {
+                    s0 = _mm256_loadu_ps(S0 + k + 0 * F);
+                    s1 = _mm256_loadu_ps(S0 + k + 1 * F);
+                    w0 = _mm256_loadu_ps(W0 + k + 0 * F);
+                    w1 = _mm256_loadu_ps(W0 + k + 1 * F);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
+                    d01 = _mm256_fmadd_ps(s1, w1, d01);
+                    s2 = _mm256_loadu_ps(S0 + k + 2 * F);
+                    s3 = _mm256_loadu_ps(S0 + k + 3 * F);
+                    w2 = _mm256_loadu_ps(W0 + k + 2 * F);
+                    w3 = _mm256_loadu_ps(W0 + k + 3 * F);
+                    d02 = _mm256_fmadd_ps(s2, w2, d02);
+                    d03 = _mm256_fmadd_ps(s3, w3, d03);
+                }
+                d00 = _mm256_add_ps(_mm256_add_ps(d00, d01), _mm256_add_ps(d02, d03));
+            }
+            for (; k < K8; k += 8)
+            {
+                s0 = _mm256_loadu_ps(S0 + k);
+                w0 = _mm256_loadu_ps(W0 + k);
+                d00 = _mm256_fmadd_ps(s0, w0, d00);
+            }
+            if (K8 < K)
+            {
+                size_t k = K - 8;
+                __m256 tail = Tail(K - K8);
+                s0 = _mm256_and_ps(tail, _mm256_loadu_ps(S0 + k));
+                w0 = _mm256_loadu_ps(W0 + k);
+                d00 = _mm256_fmadd_ps(s0, w0, d00);
+            }
+            D[0] = Avx::ExtractSum(d00) + B[0];
+        }
+
+        void SynetInnerProductLayerForward4(const float * S0, const float * W, const float * B, size_t K, float * D)
+        {
+            size_t K8 = K & (~7);
+            size_t K16 = K & (~15);
+            const float * W0 = W + 0 * K;
+            const float * W1 = W + 1 * K;
+            const float * W2 = W + 2 * K;
+            const float * W3 = W + 3 * K;
+            __m256 d00, d01, d10, d11, d20, d21, d30, d31;
+            __m256 s0, s1, w0, w1;
+            size_t k = 0;
+            d00 = _mm256_setzero_ps();
+            d10 = _mm256_setzero_ps();
+            d20 = _mm256_setzero_ps();
+            d30 = _mm256_setzero_ps();
+            if (K16)
+            {
+                d01 = _mm256_setzero_ps();
+                d11 = _mm256_setzero_ps();
+                d21 = _mm256_setzero_ps();
+                d31 = _mm256_setzero_ps();
+                for (; k < K16; k += 16)
+                {
+                    s0 = _mm256_loadu_ps(S0 + k + 0 * F);
+                    s1 = _mm256_loadu_ps(S0 + k + 1 * F);
+                    w0 = _mm256_loadu_ps(W0 + k + 0 * F);
+                    w1 = _mm256_loadu_ps(W0 + k + 1 * F);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
+                    d01 = _mm256_fmadd_ps(s1, w1, d01);
+                    w0 = _mm256_loadu_ps(W1 + k + 0 * F);
+                    w1 = _mm256_loadu_ps(W1 + k + 1 * F);
+                    d10 = _mm256_fmadd_ps(s0, w0, d10);
+                    d11 = _mm256_fmadd_ps(s1, w1, d11);
+                    w0 = _mm256_loadu_ps(W2 + k + 0 * F);
+                    w1 = _mm256_loadu_ps(W2 + k + 1 * F);
+                    d20 = _mm256_fmadd_ps(s0, w0, d20);
+                    d21 = _mm256_fmadd_ps(s1, w1, d21);
+                    w0 = _mm256_loadu_ps(W3 + k + 0 * F);
+                    w1 = _mm256_loadu_ps(W3 + k + 1 * F);
+                    d30 = _mm256_fmadd_ps(s0, w0, d30);
+                    d31 = _mm256_fmadd_ps(s1, w1, d31);
+                }
+                d00 = _mm256_add_ps(d00, d01);
+                d10 = _mm256_add_ps(d10, d11);
+                d20 = _mm256_add_ps(d20, d21);
+                d30 = _mm256_add_ps(d30, d31);
+            }
+            for (; k < K8; k += 8)
+            {
+                s0 = _mm256_loadu_ps(S0 + k + 0 * F);
+                w0 = _mm256_loadu_ps(W0 + k + 0 * F);
+                d00 = _mm256_fmadd_ps(s0, w0, d00);
+                w0 = _mm256_loadu_ps(W1 + k + 0 * F);
+                d10 = _mm256_fmadd_ps(s0, w0, d10);
+                w0 = _mm256_loadu_ps(W2 + k + 0 * F);
+                d20 = _mm256_fmadd_ps(s0, w0, d20);
+                w0 = _mm256_loadu_ps(W3 + k + 0 * F);
+                d30 = _mm256_fmadd_ps(s0, w0, d30);
+            }
+            if (K8 < K)
+            {
+                size_t k = K - 8;
+                __m256 tail = Tail(K - K8);
+                s0 = _mm256_and_ps(tail, _mm256_loadu_ps(S0 + k));
+                w0 = _mm256_loadu_ps(W0 + k + 0 * F);
+                d00 = _mm256_fmadd_ps(s0, w0, d00);
+                w0 = _mm256_loadu_ps(W1 + k + 0 * F);
+                d10 = _mm256_fmadd_ps(s0, w0, d10);
+                w0 = _mm256_loadu_ps(W2 + k + 0 * F);
+                d20 = _mm256_fmadd_ps(s0, w0, d20);
+                w0 = _mm256_loadu_ps(W3 + k + 0 * F);
+                d30 = _mm256_fmadd_ps(s0, w0, d30);
+            }
+            _mm_storeu_ps(D, _mm_add_ps(Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
+        }
+
+        void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
+        {
+            float _bias[4] = { 0, 0, 0, 0 };
+            size_t count4 = AlignLo(count, 4);
+            size_t i = 0;
+            for (; i < count4; i += 4)
+                SynetInnerProductLayerForward4(src, weight + i * size, (bias ? bias + i : _bias), size, dst + i);
+            for (; i < count; ++i)
+                SynetInnerProductLayerForward1(src, weight + i * size, (bias ? bias + i : _bias), size, dst + i);
+        }
+
         template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
         {
             size_t aligned = AlignLo(size, F);

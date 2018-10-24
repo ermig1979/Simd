@@ -127,6 +127,12 @@ namespace Simd
             __m256 b = _mm256_hadd_ps(_mm256_hadd_ps(a[0], a[1]), _mm256_hadd_ps(a[2], a[3]));
             return _mm_add_ps(_mm256_castps256_ps128(b), _mm256_extractf128_ps(b, 1));
         }
+
+        SIMD_INLINE __m128 Extract4Sums(const __m256 & a0, const __m256 & a1, const __m256 & a2, const __m256 & a3)
+        {
+            __m256 b = _mm256_hadd_ps(_mm256_hadd_ps(a0, a1), _mm256_hadd_ps(a2, a3));
+            return _mm_add_ps(_mm256_castps256_ps128(b), _mm256_extractf128_ps(b, 1));
+        }
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -192,6 +198,16 @@ namespace Simd
             __m256 b1 = _mm512_castps512_ps256(_mm512_add_ps(a[1], Alignr<8>(a[1], a[1])));
             __m256 b2 = _mm512_castps512_ps256(_mm512_add_ps(a[2], Alignr<8>(a[2], a[2])));
             __m256 b3 = _mm512_castps512_ps256(_mm512_add_ps(a[3], Alignr<8>(a[3], a[3])));
+            __m256 c = _mm256_hadd_ps(_mm256_hadd_ps(b0, b1), _mm256_hadd_ps(b2, b3));
+            return _mm_add_ps(_mm256_castps256_ps128(c), _mm256_extractf128_ps(c, 1));
+        }
+
+        SIMD_INLINE __m128 Extract4Sums(const __m512 & a0, const __m512 & a1, const __m512 & a2, const __m512 & a3)
+        {
+            __m256 b0 = _mm512_castps512_ps256(_mm512_add_ps(a0, Alignr<8>(a0, a0)));
+            __m256 b1 = _mm512_castps512_ps256(_mm512_add_ps(a1, Alignr<8>(a1, a1)));
+            __m256 b2 = _mm512_castps512_ps256(_mm512_add_ps(a2, Alignr<8>(a2, a2)));
+            __m256 b3 = _mm512_castps512_ps256(_mm512_add_ps(a3, Alignr<8>(a3, a3)));
             __m256 c = _mm256_hadd_ps(_mm256_hadd_ps(b0, b1), _mm256_hadd_ps(b2, b3));
             return _mm_add_ps(_mm256_castps256_ps128(c), _mm256_extractf128_ps(c, 1));
         }

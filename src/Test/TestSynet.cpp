@@ -380,6 +380,99 @@ namespace Test
 
     namespace
     {
+        struct FuncIPLF
+        {
+            typedef void(*FuncPtr)(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncIPLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+            FuncIPLF(const FuncIPLF & f, bool bias) : func(f.func), desc(f.desc + (bias ? "[1]" : "[0]")) {}
+
+            void Call(const View & src, const View & weight, const View & bias, size_t count, size_t size, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, (float*)weight.data, (float*)bias.data, count, size, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_IPLF(function) FuncIPLF(function, #function)
+#define ARGS_IPLF(bias, f1, f2) bias, FuncIPLF(f1, bias), FuncIPLF(f2, bias)
+
+    bool SynetInnerProductLayerForwardAutoTest(size_t count, size_t size, bool hasBias, const FuncIPLF & f1, const FuncIPLF & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View weight(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias;
+        View dst1(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        FillRandom32f(weight, -10.0, 10.0);
+        if (hasBias)
+        {
+            bias.Recreate(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+            FillRandom32f(bias, -10.0, 10.0);
+        }
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, weight, bias, count, size, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, weight, bias, count, size, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetInnerProductLayerForwardAutoTest(const FuncIPLF & f1, const FuncIPLF & f2)
+    {
+        bool result = true;
+
+        result = result && SynetInnerProductLayerForwardAutoTest(H, W, ARGS_IPLF(true, f1, f2));
+        result = result && SynetInnerProductLayerForwardAutoTest(H - O, W + O, ARGS_IPLF(true, f1, f2));
+        result = result && SynetInnerProductLayerForwardAutoTest(H, W, ARGS_IPLF(false, f1, f2));
+        result = result && SynetInnerProductLayerForwardAutoTest(H - O, W + O, ARGS_IPLF(false, f1, f2));
+
+        return result;
+    }
+
+    bool SynetInnerProductLayerForwardAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Base::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Sse::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Avx::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Avx2::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetInnerProductLayerForwardAutoTest(FUNC_IPLF(Simd::Avx512f::SynetInnerProductLayerForward), FUNC_IPLF(SimdSynetInnerProductLayerForward));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncLLCC
         {
             typedef void(*FuncPtr)(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
@@ -613,7 +706,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx::Enable)
+        if (Simd::Avx2::Enable)
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
 #endif
 
