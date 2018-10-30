@@ -424,12 +424,11 @@ namespace Simd
             if (align)
                 assert(Aligned(src) && Aligned(dst));
             float s = slope[0];
-            assert(s >= 0.0f && s <= 1.0f);
             size_t alignedSize = Simd::AlignLo(size, F);
             size_t i = 0;
+            float32x4_t _0 = vdupq_n_f32(0.0f);
             if (s == 0)
             {
-                float32x4_t _0 = vdupq_n_f32(0.0f);
                 for (; i < alignedSize; i += F)
                 {
                     float32x4_t _src = Load<align>(src + i);
@@ -445,11 +444,11 @@ namespace Simd
                 for (; i < alignedSize; i += F)
                 {
                     float32x4_t _src = Load<align>(src + i);
-                    float32x4_t relu = vmaxq_f32(vmulq_f32(_src, _s), _src);
+                    float32x4_t relu = vaddq_f32(vmaxq_f32(_0, _src), vmulq_f32(_s, vminq_f32(_0, _src)));
                     Store<align>(dst + i, relu);
                 }
                 for (; i < size; ++i)
-                    dst[i] = Simd::Max(src[i] * s, src[i]);
+                    dst[i] = Simd::Max(0.0f, src[i]) + s * Simd::Min(src[i], 0.0f);
             }
         }
 

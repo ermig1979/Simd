@@ -338,12 +338,11 @@ namespace Simd
         template <bool align> void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
-            assert(s >= 0.0f && s <= 1.0f);
             size_t alignedSize = Simd::AlignLo(size, F);
             size_t i = 0;
+            __m256 _0 = _mm256_set1_ps(0.0f);
             if (s == 0)
             {
-                __m256 _0 = _mm256_set1_ps(0.0f);
                 for (; i < alignedSize; i += F)
                 {
                     __m256 _src = Load<align>(src + i);
@@ -358,10 +357,10 @@ namespace Simd
                 for (; i < alignedSize; i += F)
                 {
                     __m256 _src = Load<align>(src + i);
-                    Store<align>(dst + i, _mm256_max_ps(_mm256_mul_ps(_s, _src), _src));
+                    Store<align>(dst + i, _mm256_add_ps(_mm256_max_ps(_0, _src), _mm256_mul_ps(_s, _mm256_min_ps(_0, _src))));
                 }
                 for (; i < size; ++i)
-                    dst[i] = Simd::Max(src[i] * s, src[i]);
+                    dst[i] = Simd::Max(0.0f, src[i]) + s * Simd::Min(src[i], 0.0f);
             }
         }
 

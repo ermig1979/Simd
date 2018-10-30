@@ -526,7 +526,8 @@ namespace Simd
         template <bool align, bool mask> SIMD_INLINE void NeuralRelu(const float * src, const __m512 & slope, float * dst, __mmask16 m = -1)
         {
             __m512 _src = Load<align, mask>(src, m);
-            Store<align, mask>(dst, _mm512_max_ps(_mm512_mul_ps(slope, _src), _src), m);
+            __m512 _0 = _mm512_setzero_ps();
+            Store<align, mask>(dst, _mm512_add_ps(_mm512_max_ps(_0, _src), _mm512_mul_ps(slope, _mm512_min_ps(_0, _src))), m);
         }
 
         template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)

@@ -1613,7 +1613,7 @@ extern "C"
         \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to convolution weights.
         \param [in] bias - a pointer to bias. Can be NULL.
-        \param [out] internal - a flag signalized that weight is used internal buffer. Can be NULL.
+        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
     */
     SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal);
 
@@ -1637,7 +1637,7 @@ extern "C"
             Leaky ReLU activation function. 
             It has one parameter: slope (params[0]).
             \verbatim
-            dst[i] = Max(src[i]*slope, src[i]);
+            dst[i] = src[i] > 0 ? src[i] : slope*src[i];
             \endverbatim
         */
         SimdConvolutionActivationLeakyRelu,
