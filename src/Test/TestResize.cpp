@@ -253,8 +253,10 @@ namespace Test
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 3, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 4, f1, f2);
+#ifndef __aarch64__
             result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 1, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 3, f1, f2);
+#endif
         }
 
         return result;
