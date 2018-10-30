@@ -1440,9 +1440,9 @@ SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)
     return ((Convolution*)convolution)->BufferSize();
 }
 
-SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias)
+SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal)
 {
-    ((Convolution*)convolution)->SetWeight(weight, bias);
+    ((Convolution*)convolution)->SetWeight(weight, bias, internal);
 }
 
 SIMD_API void SimdConvolutionSetActivation(void * convolution, SimdConvolutionActivationType type, const float * params)

@@ -71,7 +71,7 @@ namespace Test
             {
                 void * convolution = func(p.srcC, p.srcH, p.srcW, p.dstC, p.kernelY, p.kernelX, p.dilationY, p.dilationX, p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.group);
                 buf.Extend({ ::SimdConvolutionBufferSize(convolution) });
-                ::SimdConvolutionSetWeight(convolution, weight.Data(), bias.Data());
+                ::SimdConvolutionSetWeight(convolution, weight.Data(), bias.Data(), NULL);
                 ::SimdConvolutionSetActivation(convolution, activation, params);
                 {
                     TEST_PERFORMANCE_TEST(description);
@@ -132,7 +132,11 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        //result = result && ConvolutionForwardAutoTest(Param(1024, 13, 13, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(64, 19, 16, 64, _3, _1, _3, _1, _1, 64), f1, f2);
+#endif
+#if 0
+        result = result && ConvolutionForwardAutoTest(Param(1024, 13, 13, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(512, 10, 10, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(256, 10, 10, 512, _3, _1, _1, _1, _1, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(384, 20, 20, 256, _3, _1, _1, _1, _1, 1), f1, f2);

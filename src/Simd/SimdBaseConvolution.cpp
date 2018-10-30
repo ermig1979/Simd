@@ -115,10 +115,12 @@ namespace Simd
             }
         };
 
-        void ConvolutionImgToCol::SetWeight(const float * weight, const float * bias)
+        void ConvolutionImgToCol::SetWeight(const float * weight, const float * bias, SimdBool * internal)
         {
             _weight = weight;
             _bias = bias;
+            if (internal)
+                *internal = SimdFalse;
         }
 
         void ConvolutionImgToCol::Forward(const float * src, float * buf, float * dst)
@@ -261,10 +263,12 @@ namespace Simd
             return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
         };
 
-        void ConvolutionImgToRow::SetWeight(const float * weight, const float * bias)
+        void ConvolutionImgToRow::SetWeight(const float * weight, const float * bias, SimdBool * internal)
         {
             _weight = weight;
             _bias = bias;
+            if (internal)
+                *internal = SimdFalse;
         }
 
         void ConvolutionImgToRow::Forward(const float * src, float * buf, float * dst)
@@ -396,12 +400,14 @@ namespace Simd
             return (_strideS + _strideD)*_count;
         }
         
-        void ConvolutionWinograd2x3p::SetWeight(const float * weight, const float * bias)
+        void ConvolutionWinograd2x3p::SetWeight(const float * weight, const float * bias, SimdBool * internal)
         {
             const ConvParam & p = _param;
             _weight.Resize(_strideW*_count);
             Base::Winograd2x3pSetFilter(weight, p.srcC*p.dstC, _weight.data);
             _bias = bias;
+            if (internal)
+                *internal = SimdTrue;
         }
         
         void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
@@ -444,10 +450,12 @@ namespace Simd
                 return 1;
         }
 
-        void ConvolutionDirect::SetWeight(const float * weight, const float * bias)
+        void ConvolutionDirect::SetWeight(const float * weight, const float * bias, SimdBool * internal)
         {
             _weight = weight;
             _bias = bias;
+            if (internal)
+                *internal = SimdFalse;
         }
 
         void ConvolutionDirect::Forward(const float * src, float * buf, float * dst)

@@ -1606,15 +1606,16 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias);
+        \fn void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal);
 
         \short Sets weights and beases required for convolution algorithm.
 
         \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to convolution weights.
         \param [in] bias - a pointer to bias. Can be NULL.
+        \param [out] internal - a flag signalized that weight is used internal buffer. Can be NULL.
     */
-    SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias);
+    SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal);
 
     /*! @ingroup synet
         Describes type of activation function used in ::SimdConvolutionSetActivation.

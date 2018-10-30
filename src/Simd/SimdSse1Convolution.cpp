@@ -143,12 +143,14 @@ namespace Simd
         {
         }
 
-        void ConvolutionWinograd2x3p::SetWeight(const float * weight, const float * bias)
+        void ConvolutionWinograd2x3p::SetWeight(const float * weight, const float * bias, SimdBool * internal)
         {
             const ConvParam & p = _param;
             _weight.Resize(_strideW*_count);
             Sse::Winograd2x3pSetFilter(weight, p.srcC*p.dstC, _weight.data);
             _bias = bias;
+            if (internal)
+                *internal = SimdTrue;
         }
 
         void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)

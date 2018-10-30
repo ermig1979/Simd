@@ -91,7 +91,7 @@ namespace Simd
         }
 
         virtual size_t BufferSize() const = 0;
-        virtual void SetWeight(const float * weight, const float * bias) = 0;
+        virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal) = 0;
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
         void SetActivation(::SimdConvolutionActivationType type, const float * params)
@@ -132,7 +132,7 @@ namespace Simd
         public:
             ConvolutionImgToCol(const ConvParam & p);
             virtual size_t BufferSize() const;
-            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
             virtual void Forward(const float * src, float * buf, float * dst);
 
         protected:
@@ -150,7 +150,7 @@ namespace Simd
         public:
             ConvolutionImgToRow(const ConvParam & p);
             virtual size_t BufferSize() const;
-            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam & p);
@@ -169,7 +169,7 @@ namespace Simd
         public:
             ConvolutionWinograd2x3p(const ConvParam & p);
             virtual size_t BufferSize() const;
-            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam & p);
@@ -186,7 +186,7 @@ namespace Simd
         public:
             ConvolutionDirect(const ConvParam & p);
             virtual size_t BufferSize() const;
-            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam & p);
@@ -220,7 +220,7 @@ namespace Simd
         {
         public:
             ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void SetWeight(const float * weight, const float * bias);
+            virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
