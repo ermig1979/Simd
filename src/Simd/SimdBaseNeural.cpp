@@ -171,10 +171,15 @@ namespace Simd
         void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             float s = slope[0];
-            if (s == 0)
+            if (s == 0.0f)
             {
                 for (size_t i = 0; i < size; ++i)
-                    dst[i] = Simd::Max(0.0f, src[i]);
+                    dst[i] = Simd::Max(s, src[i]);
+            }
+            else if (s > 0.0f && s < 1.0f)
+            {
+                for (size_t i = 0; i < size; ++i)
+                    dst[i] = Simd::Max(s*src[i], src[i]);
             }
             else
             {

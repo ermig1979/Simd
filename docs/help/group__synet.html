@@ -81,9 +81,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga0e92e65935c1e5d128ddbd912839e830"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830">SimdConvolutionBufferSize</a> (const void *convolution)</td></tr>
 <tr class="memdesc:ga0e92e65935c1e5d128ddbd912839e830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of external buffer required for convolution algorithm.  <a href="#ga0e92e65935c1e5d128ddbd912839e830">More...</a><br /></td></tr>
 <tr class="separator:ga0e92e65935c1e5d128ddbd912839e830"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga44c6d63e9fc0f72db580c7f1890c15a7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga44c6d63e9fc0f72db580c7f1890c15a7">SimdConvolutionSetWeight</a> (void *convolution, const float *weight, const float *bias)</td></tr>
-<tr class="memdesc:ga44c6d63e9fc0f72db580c7f1890c15a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights and beases required for convolution algorithm.  <a href="#ga44c6d63e9fc0f72db580c7f1890c15a7">More...</a><br /></td></tr>
-<tr class="separator:ga44c6d63e9fc0f72db580c7f1890c15a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9f88bd65e8b8a1a6e2362bba85c44066"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9f88bd65e8b8a1a6e2362bba85c44066">SimdConvolutionSetWeight</a> (void *convolution, const float *weight, const float *bias, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal)</td></tr>
+<tr class="memdesc:ga9f88bd65e8b8a1a6e2362bba85c44066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights and beases required for convolution algorithm.  <a href="#ga9f88bd65e8b8a1a6e2362bba85c44066">More...</a><br /></td></tr>
+<tr class="separator:ga9f88bd65e8b8a1a6e2362bba85c44066"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga165f6716f420cfb7915caa5aab923937"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga165f6716f420cfb7915caa5aab923937">SimdConvolutionSetActivation</a> (void *convolution, <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> type, const float *params)</td></tr>
 <tr class="memdesc:ga165f6716f420cfb7915caa5aab923937"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets activation function required for convolution algorithm.  <a href="#ga165f6716f420cfb7915caa5aab923937">More...</a><br /></td></tr>
 <tr class="separator:ga165f6716f420cfb7915caa5aab923937"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -102,6 +102,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga880668744587d20fb311eb79b83617e4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga880668744587d20fb311eb79b83617e4">SimdSynetFusedLayerForward1</a> (const float *src, const float *bias0, const float *scale1, const float *bias1, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:ga880668744587d20fb311eb79b83617e4"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 1).  <a href="#ga880668744587d20fb311eb79b83617e4">More...</a><br /></td></tr>
 <tr class="separator:ga880668744587d20fb311eb79b83617e4"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga047b740a9df7fd353183ad364021316f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga047b740a9df7fd353183ad364021316f">SimdSynetFusedLayerForward2</a> (const float *src, const float *scale, const float *bias, size_t count, size_t size, const float *slope, float *dst)</td></tr>
+<tr class="memdesc:ga047b740a9df7fd353183ad364021316f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 2).  <a href="#ga047b740a9df7fd353183ad364021316f">More...</a><br /></td></tr>
+<tr class="separator:ga047b740a9df7fd353183ad364021316f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of InnerProductLayer.  <a href="#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -159,7 +162,7 @@ Functions</h2></td></tr>
 </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a812029d96edc3cef6b6e6bc329091ede"></a>SimdConvolutionActivationRelu&#160;</td><td class="fielddoc"><p>ReLU activation function. </p><pre class="fragment">dst[i] = Max(0, src[i]);
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8"></a>SimdConvolutionActivationLeakyRelu&#160;</td><td class="fielddoc"><p>Leaky ReLU activation function. It has one parameter: slope (params[0]). </p><pre class="fragment">dst[i] = Max(src[i]*slope, src[i]);
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a836643f236f0216fa4f5e422a77a5de8"></a>SimdConvolutionActivationLeakyRelu&#160;</td><td class="fielddoc"><p>Leaky ReLU activation function. It has one parameter: slope (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt; 0 ? src[i] : slope*src[i];
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a"></a>SimdConvolutionActivationRestrictRange&#160;</td><td class="fielddoc"><p>The activation function restricts range. It has two parameters: lower (params[0]) and upper (params[1]) bound. </p><pre class="fragment">dst[i] = Min(Max(lower, src[i]), upper);
 </pre> </td></tr>
@@ -318,7 +321,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830" title="Gets size of external buffer required for convolution algorithm. ">SimdConvolutionBufferSize</a>, <a class="el" href="group__synet.html#ga44c6d63e9fc0f72db580c7f1890c15a7" title="Sets weights and beases required for convolution algorithm. ">SimdConvolutionSetWeight</a> and <a class="el" href="group__synet.html#ga2027ec89df3aa682152884cd2c739fdb" title="Performs forward propagation of convolution algorithm. ">SimdConvolutionForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830" title="Gets size of external buffer required for convolution algorithm. ">SimdConvolutionBufferSize</a>, <a class="el" href="group__synet.html#ga9f88bd65e8b8a1a6e2362bba85c44066" title="Sets weights and beases required for convolution algorithm. ">SimdConvolutionSetWeight</a> and <a class="el" href="group__synet.html#ga2027ec89df3aa682152884cd2c739fdb" title="Performs forward propagation of convolution algorithm. ">SimdConvolutionForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -349,8 +352,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga44c6d63e9fc0f72db580c7f1890c15a7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga44c6d63e9fc0f72db580c7f1890c15a7">&#9670;&nbsp;</a></span>SimdConvolutionSetWeight()</h2>
+<a id="ga9f88bd65e8b8a1a6e2362bba85c44066"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9f88bd65e8b8a1a6e2362bba85c44066">&#9670;&nbsp;</a></span>SimdConvolutionSetWeight()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -371,7 +374,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>bias</em>&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *&#160;</td>
+          <td class="paramname"><em>internal</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -387,6 +396,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to convolution weights. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a flag signalized that weight is stored in the internal buffer. Can be NULL. </td></tr>
   </table>
   </dd>
 </dl>
@@ -773,6 +783,85 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">bias1</td><td>- a pointer to the 32-bit float array with bias1 coefficients. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of bias and scale arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of the operation. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga047b740a9df7fd353183ad364021316f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga047b740a9df7fd353183ad364021316f">&#9670;&nbsp;</a></span>SimdSynetFusedLayerForward2()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetFusedLayerForward2 </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>slope</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of FusedLayer (type 2). </p>
+<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; count; ++i)
+    for(j = 0; j &lt; size; ++j)
+    {
+        x = src[i*size + j]*scale[i]  + bias[i];
+        dst[i*size + j] = max(0, x) + min(0, x)*slope[0];
+    }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to count*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the 32-bit float array with bias coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of bias and scale arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of the operation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float slope coefficient. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
   </table>
   </dd>

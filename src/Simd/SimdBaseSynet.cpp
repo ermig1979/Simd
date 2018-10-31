@@ -177,6 +177,29 @@ namespace Simd
             }
         }
 
+        void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst)
+        {
+            size_t aligned = Simd::AlignLo(size, 4);
+            float _slope = slope[0];
+            for (size_t i = 0; i < count; ++i)
+            {
+                float _scale = scale[i];
+                float _bias = bias[i];
+                size_t j = 0;
+                for (; j < aligned; j += 4)
+                {
+                    dst[j + 0] = SynetFusedLayerForward2(src[j + 0], _scale, _bias, _slope);
+                    dst[j + 1] = SynetFusedLayerForward2(src[j + 1], _scale, _bias, _slope);
+                    dst[j + 2] = SynetFusedLayerForward2(src[j + 2], _scale, _bias, _slope);
+                    dst[j + 3] = SynetFusedLayerForward2(src[j + 3], _scale, _bias, _slope);
+                }
+                for (; j < size; ++j)
+                    dst[j] = SynetFusedLayerForward2(src[j], _scale, _bias, _slope);
+                src += size;
+                dst += size;
+            }
+        }
+
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);

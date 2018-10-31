@@ -314,6 +314,51 @@ namespace Simd
                 SynetFusedLayerForward1<false>(src, bias0, scale1, bias1, count, size, dst);
         }
 
+        template <bool align> SIMD_INLINE void SynetFusedLayerForward2(const float * src, __m256 scale, __m256 bias, __m256 slope, float * dst)
+        {
+            __m256 x = _mm256_add_ps(_mm256_mul_ps(Load<align>(src), scale), bias);
+            Store<align>(dst, _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), x), _mm256_mul_ps(_mm256_min_ps(_mm256_setzero_ps(), x), slope)));
+        }
+
+        template <bool align> void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(size) && Aligned(dst));
+            size_t aligned = AlignLo(size, QF);
+            size_t partial = AlignLo(size, F);
+            __m256 _slope = _mm256_set1_ps(slope[0]);
+            for (size_t i = 0; i < count; ++i)
+            {
+                size_t j = 0;
+                if (partial)
+                {
+                    __m256 _scale = _mm256_set1_ps(scale[i]);
+                    __m256 _bias = _mm256_set1_ps(bias[i]);
+                    for (; j < aligned; j += QF)
+                    {
+                        SynetFusedLayerForward2<align>(src + j + 0 * F, _scale, _bias, _slope, dst + j + 0 * F);
+                        SynetFusedLayerForward2<align>(src + j + 1 * F, _scale, _bias, _slope, dst + j + 1 * F);
+                        SynetFusedLayerForward2<align>(src + j + 2 * F, _scale, _bias, _slope, dst + j + 2 * F);
+                        SynetFusedLayerForward2<align>(src + j + 3 * F, _scale, _bias, _slope, dst + j + 3 * F);
+                    }
+                    for (; j < partial; j += F)
+                        SynetFusedLayerForward2<align>(src + j, _scale, _bias, _slope, dst + j);
+                }
+                for (; j < size; ++j)
+                    dst[j] = Base::SynetFusedLayerForward2(src[j], scale[i], bias[i], slope[0]);
+                src += size;
+                dst += size;
+            }
+        }
+
+        void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(size) && Aligned(dst))
+                SynetFusedLayerForward2<true>(src, scale, bias, count, size, slope, dst);
+            else
+                SynetFusedLayerForward2<false>(src, scale, bias, count, size, slope, dst);
+        }
+
         SIMD_INLINE __m256 Tail(size_t tail)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, 0, 0, 0, 0 , -1, -1, -1, -1, -1, -1, -1, -1 };

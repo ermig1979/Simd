@@ -687,30 +687,46 @@ namespace Test
         return result;
     }
 
+    bool NeuralReluAutoTest(float error, bool relative, const FuncAF & f1, const FuncAF & f2)
+    {
+        bool result = true;
+
+        const size_t count = 3;
+        float slopes[count] = { 0.0f, 0.5f, 1.5f };
+        for (size_t i = 0; i < count; ++i)
+        {
+            FuncAF _f1(f1.func, f1.description + "[" + ToString(slopes[i], 1, true) + "]");
+            FuncAF _f2(f2.func, f2.description + "[" + ToString(slopes[i], 1, true) + "]");
+            result = result && NeuralActivateFunctionAutoTest(error, relative, slopes[i], _f1, _f2);
+        }
+
+        return result;
+    }
+
     bool NeuralReluAutoTest()
     {
         bool result = true;
 
-        result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Base::NeuralRelu), FUNC_AF(SimdNeuralRelu));
+        result = result && NeuralReluAutoTest(EPS, false, FUNC_AF(Simd::Base::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Sse::NeuralRelu), FUNC_AF(SimdNeuralRelu));
+            result = result && NeuralReluAutoTest(EPS, false, FUNC_AF(Simd::Sse::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Avx::NeuralRelu), FUNC_AF(SimdNeuralRelu));
+            result = result && NeuralReluAutoTest(EPS, false, FUNC_AF(Simd::Avx::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Avx512f::NeuralRelu), FUNC_AF(SimdNeuralRelu));
+            result = result && NeuralReluAutoTest(EPS, false, FUNC_AF(Simd::Avx512f::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 0.5f, FUNC_AF(Simd::Neon::NeuralRelu), FUNC_AF(SimdNeuralRelu));
+            result = result && NeuralReluAutoTest(EPS, false, FUNC_AF(Simd::Neon::NeuralRelu), FUNC_AF(SimdNeuralRelu));
 #endif
 
         return result;
