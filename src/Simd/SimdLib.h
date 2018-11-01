@@ -1649,6 +1649,14 @@ extern "C"
             \endverbatim
         */
         SimdConvolutionActivationRestrictRange,
+        /*!
+            Leaky PReLU activation function.
+            It has m parameters: slopes[m] (m = dstC, n = dstH*dstW).
+            \verbatim
+            dst[i*n + j] = src[i*n + j] > 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
+            \endverbatim
+        */
+        SimdConvolutionActivationPrelu,
     } SimdConvolutionActivationType;
 
     /*! @ingroup synet

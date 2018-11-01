@@ -56,7 +56,6 @@ namespace Simd
             else if (type == ::SimdConvolutionActivationLeakyRelu)
             {
                 float slope = params[0];
-                assert(slope >= 0.0f && slope <= 1.0f);
                 if (bias)
                 {
                     for (size_t i = 0; i < count; ++i)
@@ -65,7 +64,7 @@ namespace Simd
                         for (size_t j = 0; j < size; ++j)
                         {
                             float value = dst[j] + shift;
-                            dst[j] = Simd::Max(value*slope, value);
+                            dst[i] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
                         }
                         dst += size;
                     }
@@ -89,6 +88,28 @@ namespace Simd
                 }
                 else
                     SynetRestrictRange(dst, size*count, &lower, &upper, dst);
+            }
+            else if (type == ::SimdConvolutionActivationPrelu)
+            {
+                if (bias)
+                {
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float shift = bias[i];
+                        float slope = params[i];
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            float value = dst[j] + shift;
+                            dst[i] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+                        }
+                        dst += size;
+                    }
+                }
+                else
+                {
+                    for (size_t i = 0; i < count; ++i)
+                        NeuralRelu(dst + i*size, size, params + i, dst + i*size);
+                }
             }
         }
 
@@ -463,6 +484,7 @@ namespace Simd
             const ConvParam & p = _param;
             const float * weight = _weight;
             const float * bias = _bias;
+            const float * params = _activationParams;
             if(_pad)
                 buf = Buffer(buf);
             for (size_t g = 0; g < p.group; ++g)
@@ -470,13 +492,15 @@ namespace Simd
                 if (_pad)
                 {
                     Pad(src, buf);
-                    ConvolutionAndBias(buf, weight, bias, dst);
+                    ConvolutionAndBias(buf, weight, bias, params, dst);
                 }
                 else
-                    ConvolutionAndBias(src, weight, bias, dst);
+                    ConvolutionAndBias(src, weight, bias, params, dst);
                 weight += _weightStep;
                 if(bias)
                     bias += _dstC;
+                if (_activationType == ::SimdConvolutionActivationPrelu)
+                    params += _dstC;
                 src += _srcStep;
                 dst += _dstStep;
             }
@@ -578,7 +602,7 @@ namespace Simd
             }
         }
 
-        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
+        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const
         {
             const ConvParam & p = _param;
             for (size_t dc = 0; dc < _dstC; ++dc)
@@ -616,7 +640,7 @@ namespace Simd
                         }
                     }
                 }
-                BiasAndActivation(NULL, 1, p.dstH*p.dstW, _activationType, _activationParams, dst);
+                BiasAndActivation(NULL, 1, p.dstH*p.dstW, _activationType, params, dst);
                 dst += p.dstW * p.dstH;
             }
         }

@@ -176,7 +176,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationLeakyRelu>(__m256 value, const __m256 * params)
         {
-            return _mm256_max_ps(_mm256_mul_ps(params[0], value), value);
+            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[0], _mm256_min_ps(_mm256_setzero_ps(), value)));
         }
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRestrictRange>(__m256 value, const __m256 * params)
@@ -184,15 +184,25 @@ namespace Simd
             return _mm256_min_ps(_mm256_max_ps(params[0], value), params[1]);
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const __m256 * params)
+        {
+            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[0], _mm256_min_ps(_mm256_setzero_ps(), value)));
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
             const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
             __m256 _weight[kernel*kernel];
-            __m256 _params[2] = { _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]) };
+            __m256 _params[2];
+            _params[0] = _mm256_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange)
+                _params[1] = _mm256_set1_ps(params[1]);
             size_t dstWF = Simd::AlignLo(dstW, F);
             __m256 tail = RightNotZero(dstW - dstWF);
             for (size_t dc = 0; dc < dstC; ++dc)
             {
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm256_set1_ps(params[dc]);
                 if (srcC == 1)
                 {
                     const float * ps = src;
@@ -318,12 +328,15 @@ namespace Simd
             case ::SimdConvolutionActivationRestrictRange:
                 ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRestrictRange>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
                 break;
+            case ::SimdConvolutionActivationPrelu:
+                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationPrelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
+                break;
             default:
                 assert(0);
             }
         }
 
-        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const
+        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const
         {
             const ConvParam & p = _param;
             if (p.dstW >= F)
@@ -334,21 +347,21 @@ namespace Simd
                     break;
                 case 2:
                     if (p.IsStride(2))
-                        Avx2::ConvolutionAndBias<2, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
+                        Avx2::ConvolutionAndBias<2, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
                     else
-                        Avx2::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
+                        Avx2::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
                     return;
                 case 3:
                     if (p.IsStride(2))
-                        Avx2::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
+                        Avx2::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
                     else
-                        Avx2::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, _activationParams, dst, _dstC, p.dstH, p.dstW);
+                        Avx2::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
                     return;
                 default:
                     break;
                 };
             }
-            Sse::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, dst);
+            Sse::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, params, dst);
         }
 
         //---------------------------------------------------------------------

@@ -97,13 +97,7 @@ namespace Simd
         void SetActivation(::SimdConvolutionActivationType type, const float * params)
         {
             _activationType = type;
-            if (_activationType == ::SimdConvolutionActivationLeakyRelu)
-                _activationParams[0] = params[0];
-            if (_activationType == ::SimdConvolutionActivationRestrictRange)
-            {
-                _activationParams[0] = params[0];
-                _activationParams[1] = params[1];
-            }
+            _activationParams = params;
         }
 
         float * Buffer(float * buffer)
@@ -122,7 +116,7 @@ namespace Simd
         Array32f _buffer;
         float _0, _1;
         ::SimdConvolutionActivationType _activationType;
-        float _activationParams[2];
+        const float * _activationParams;
     };
 
     namespace Base
@@ -193,7 +187,7 @@ namespace Simd
 
         protected:
             void Pad(const float * src, float * dst) const;
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;
+            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
 
             size_t _weightStep, _srcStep, _dstStep, _srcC, _srcH, _srcW, _dstC;
             int _pad;
@@ -232,7 +226,7 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;
+            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -291,7 +285,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;
+            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -330,7 +324,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;
+            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -371,7 +365,7 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, float * dst) const;
+            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
