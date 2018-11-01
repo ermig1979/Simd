@@ -134,6 +134,9 @@ namespace Test
 #if 1
         result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 19, 16, 64, _3, _1, _3, _1, _1, 64), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(128, 7, 7, 128, _7, _1, _1, _0, _0, 128), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 56, 56, 32, _1, _1, _1, _0, _0, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 112, 112, 16, _3, _1, _2, _1, _1, 1), f1, f2);
 #endif
 #if 0
         result = result && ConvolutionForwardAutoTest(Param(1024, 13, 13, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
