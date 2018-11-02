@@ -371,6 +371,10 @@ namespace Simd
             ConvolutionImgToCol(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
+            virtual void ImgToCol(const float * src, float * dst);
+        private:
+            Array32i _index;
+            Array16u _nose, _tail;
         };
 
         class ConvolutionImgToRow : public Avx2::ConvolutionImgToRow

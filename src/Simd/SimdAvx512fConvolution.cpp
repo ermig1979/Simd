@@ -158,6 +158,26 @@ namespace Simd
         ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
             : Avx2::ConvolutionImgToCol(p)
         {
+            _index.Resize(F);
+            for (size_t i = 0; i < F; ++i)
+                _index[i] = int(i * p.strideX);
+            _nose.Resize(p.kernelX);
+            _tail.Resize(p.kernelX);
+            ptrdiff_t aligned = AlignHi(p.dstW, F) - F;
+            for (size_t kx = 0; kx < p.kernelX; ++kx)
+            {
+                _nose[kx] = 0;
+                _tail[kx] = 0;
+                ptrdiff_t sx = kx * p.dilationX - p.padX;
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    if (sx >= 0 && sx < ptrdiff_t(p.srcW) && dx < F)
+                        _nose[kx] |= 1 << dx;
+                    if (sx < ptrdiff_t(p.srcW) && dx >= aligned)
+                        _tail[kx] |= 1 << (dx - aligned);
+                    sx += p.strideX;
+                }
+            }
         }
 
         void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
@@ -166,6 +186,71 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
                 Avx512f::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
             Avx512f::BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
+        }
+
+        void ConvolutionImgToCol::ImgToCol(const float * src, float * dst)
+        {
+            const ConvParam & p = _param;
+            size_t srcSize = p.srcW * p.srcH;
+            if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
+            {
+                for (size_t c = 0; c < p.srcC; ++c)
+                {
+                    for (size_t dy = 0; dy < p.dstH; ++dy)
+                    {
+                        const float * psrc = src + 2 * dy*p.srcW;
+                        for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += 2)
+                            *(dst++) = psrc[sx];
+                    }
+                    src += srcSize;
+                }
+            }
+            else if (p.dilationX*p.dilationY*p.strideX*p.strideY != 1)
+            {
+                __m512 _0 = _mm512_setzero_ps();
+                __m512i index = _mm512_loadu_si512(_index.data);
+                size_t aligned = AlignHi(p.dstW, F) - F;
+                __mmask16 storeTail = TailMask16(p.dstW - AlignLo(p.dstW, F));
+                __mmask16 storeNose = aligned ? __mmask16(-1) : storeTail;
+                for (size_t c = 0; c < p.srcC; ++c)
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ky++)
+                    {
+                        for (size_t kx = 0; kx < p.kernelX; kx++)
+                        {
+                            __mmask16 nose = _nose[kx];
+                            __mmask16 tail = _tail[kx];
+                            size_t sx0 = kx * p.dilationX - p.padX;
+                            size_t sy = ky * p.dilationY - p.padY;
+                            for (size_t dy = 0; dy < p.dstH; ++dy)
+                            {
+                                if (sy < p.srcH)
+                                {
+                                    size_t dx = 0, sx = sx0 + sy * p.srcW;
+                                    _mm512_mask_storeu_ps(dst + dx, storeNose, _mm512_mask_i32gather_ps(_0, nose, index, src + sx, sizeof(float)));
+                                    dx += F, sx += p.strideX*F;
+                                    for (; dx < aligned; dx += F, sx += p.strideX*F)
+                                        _mm512_storeu_ps(dst + dx, _mm512_i32gather_ps(index, src + sx, sizeof(float)));
+                                    if(aligned)
+                                        _mm512_mask_storeu_ps(dst + dx, storeTail, _mm512_mask_i32gather_ps(_0, tail, index, src + sx, sizeof(float)));
+                                    dst += p.dstW;
+                                }
+                                else
+                                {
+                                    memset(dst, 0, p.dstW * sizeof(float));
+                                    dst += p.dstW;
+                                }
+                                sy += p.strideY;
+                            }
+                        }
+                    }
+                    src += srcSize;
+                }
+            }
+            else
+            {
+                Base::ConvolutionImgToCol::ImgToCol(src, dst);
+            }
         }
 
         //---------------------------------------------------------------------
