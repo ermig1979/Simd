@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 
@@ -33,6 +34,27 @@ namespace Simd
         ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
             : Avx::ConvolutionImgToCol(p)
         {
+            _index.Resize(F);
+            for (size_t i = 0; i < F; ++i)
+                _index[i] = int(i * p.strideX);
+            _nose.Resize(p.kernelX);
+            _tail.Resize(p.kernelX);
+            _start.Resize(p.kernelX);
+            for (size_t kx = 0; kx < p.kernelX; ++kx)
+            {
+                _nose[kx] = 0;
+                _tail[kx] = int(p.dstW);
+                ptrdiff_t sx = kx * p.dilationX - p.padX;
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    if (sx < 0)
+                        _nose[kx]++;
+                    if (sx >= ptrdiff_t(p.srcW))
+                        _tail[kx]--;
+                    sx += p.strideX;
+                }
+                _start[kx] = int(kx * p.dilationX - p.padX + _nose[kx] * p.strideX);
+            }
         }
 
         void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
@@ -41,6 +63,69 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
             Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
+        }
+
+        void ConvolutionImgToCol::ImgToCol(const float * src, float * dst)
+        {
+            const ConvParam & p = _param;
+            size_t srcSize = p.srcW * p.srcH;
+            if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
+            {
+                for (size_t c = 0; c < p.srcC; ++c)
+                {
+                    for (size_t dy = 0; dy < p.dstH; ++dy)
+                    {
+                        const float * psrc = src + 2 * dy*p.srcW;
+                        for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += 2)
+                            *(dst++) = psrc[sx];
+                    }
+                    src += srcSize;
+                }
+            }
+            else if (p.dilationX*p.dilationY*p.strideX*p.strideY != 1)
+            {
+                __m256i index = _mm256_loadu_si256((__m256i*)_index.data);
+                for (size_t c = 0; c < p.srcC; ++c)
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ky++)
+                    {
+                        for (size_t kx = 0; kx < p.kernelX; kx++)
+                        {
+                            size_t noseDx = _nose[kx];
+                            size_t tailDx = _tail[kx];
+                            size_t bodyDx = AlignLo(tailDx - noseDx, F) + noseDx;
+                            size_t sx0 = _start[kx];
+                            size_t sy = ky * p.dilationY - p.padY;
+                            for (size_t dy = 0; dy < p.dstH; ++dy)
+                            {
+                                if (sy < p.srcH)
+                                {
+                                    size_t dx = 0, sx = sx0 + sy * p.srcW;
+                                    for (; dx < noseDx; ++dx)
+                                        *(dst++) = 0;
+                                    for (; dx < bodyDx; dx += F, sx += p.strideX*F, dst += F)
+                                        _mm256_storeu_ps(dst, _mm256_i32gather_ps(src + sx, index, sizeof(float)));
+                                    for (; dx < tailDx; ++dx, sx += p.strideX)
+                                        *(dst++) = src[sx];
+                                    for (; dx < p.dstW; ++dx)
+                                        *(dst++) = 0;
+                                }
+                                else
+                                {
+                                    memset(dst, 0, p.dstW * sizeof(float));
+                                    dst += p.dstW;
+                                }
+                                sy += p.strideY;
+                            }
+                        }
+                    }
+                    src += srcSize;
+                }
+            }
+            else
+            {
+                Base::ConvolutionImgToCol::ImgToCol(src, dst);
+            }
         }
 
         //---------------------------------------------------------------------
@@ -369,7 +454,9 @@ namespace Simd
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            if (ConvolutionWinograd2x3p::Preferable(param))
+            if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))
+                return new Avx::ConvolutionDepthwiseDotProduct(param);
+            else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);

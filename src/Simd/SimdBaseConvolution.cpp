@@ -149,7 +149,7 @@ namespace Simd
             if (!_is1x1)
             {
                 buf = Buffer(buf);
-                ImgToCol(src, _param, buf);
+                ImgToCol(src, buf);
                 src = buf;
             }
             GemmAndBias(src, dst);
@@ -163,8 +163,9 @@ namespace Simd
             BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
         }
 
-        void ConvolutionImgToCol::ImgToCol(const float * src, const ConvParam & p, float * dst)
+        void ConvolutionImgToCol::ImgToCol(const float * src, float * dst)
         {
+            const ConvParam & p = _param;
             size_t srcSize = p.srcW * p.srcH;
             if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
             {
@@ -644,12 +645,78 @@ namespace Simd
                 dst += p.dstW * p.dstH;
             }
         }
+
+        //---------------------------------------------------------------------
+
+        ConvolutionDepthwiseDotProduct::ConvolutionDepthwiseDotProduct(const ConvParam & p)
+            : Convolution(p)
+        {
+            _count = p.srcC;
+            _size = p.srcH*p.srcW;
+        }
+
+        size_t ConvolutionDepthwiseDotProduct::BufferSize() const
+        {
+            return 1;
+        }
+
+        void ConvolutionDepthwiseDotProduct::SetWeight(const float * weight, const float * bias, SimdBool * internal)
+        {
+            _weight = weight;
+            _bias = bias;
+            if (internal)
+                *internal = SimdFalse;
+        }
+
+        SIMD_INLINE float DotProduct(const float * a, const float * b, size_t size)
+        {
+            size_t i = 0, aligned = size&(~3);
+            float sums[4] = { 0, 0, 0, 0 };
+            for (; i < aligned; i += 4)
+            {
+                sums[0] += a[i + 0] * b[i + 0];
+                sums[1] += a[i + 1] * b[i + 1];
+                sums[2] += a[i + 2] * b[i + 2];
+                sums[3] += a[i + 3] * b[i + 3];
+            }
+            for (; i < size; ++i)
+                sums[0] += a[i] * b[i];
+            return sums[0] + sums[1] + sums[2] + sums[3];
+        }
+       
+        void ConvolutionDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
+        {
+            if (_bias)
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+            }
+            else
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+            }
+            if (_activationType)
+                BiasAndActivation(NULL, _count, 1, _activationType, _activationParams, dst);
+        }
+
+        bool ConvolutionDepthwiseDotProduct::Preferable(const ConvParam & p)
+        {
+            if (!(p.IsPad(0) && p.IsDilation(1) && p.IsStride(1)))
+                return false;
+            if (!(p.dstC == p.srcC && p.dstC == p.group && p.srcW == p.kernelX && p.srcH == p.kernelY))
+                return false;
+            return true;
+        }
+
         //---------------------------------------------------------------------
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            if(ConvolutionWinograd2x3p::Preferable(param))
+            if (ConvolutionDepthwiseDotProduct::Preferable(param))
+                return new ConvolutionDepthwiseDotProduct(param);
+            else if(ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);

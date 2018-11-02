@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdSse1.h"
 
 namespace Simd
@@ -502,10 +503,71 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionDepthwiseDotProduct::ConvolutionDepthwiseDotProduct(const ConvParam & p)
+            : Base::ConvolutionDepthwiseDotProduct(p)
+        {
+        }
+
+        SIMD_INLINE void DotProduct(const float * a, const float * b, size_t offset, __m128 & sum)
+        {
+            __m128 _a = _mm_loadu_ps(a + offset);
+            __m128 _b = _mm_loadu_ps(b + offset);
+            sum = _mm_add_ps(_mm_mul_ps(_a, _b), sum);
+        }
+
+        SIMD_INLINE float DotProduct(const float * a, const float * b, size_t size)
+        {
+            float sum = 0;
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                __m128 sums[4] = { _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps(), _mm_setzero_ps() };
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        DotProduct(a, b, i + F * 0, sums[0]);
+                        DotProduct(a, b, i + F * 1, sums[1]);
+                        DotProduct(a, b, i + F * 2, sums[2]);
+                        DotProduct(a, b, i + F * 3, sums[3]);
+                    }
+                    sums[0] = _mm_add_ps(_mm_add_ps(sums[0], sums[1]), _mm_add_ps(sums[2], sums[3]));
+                }
+                for (; i < partialAlignedSize; i += F)
+                    DotProduct(a, b, i, sums[0]);
+                sum += ExtractSum(sums[0]);
+            }
+            for (; i < size; ++i)
+                sum += a[i] * b[i];
+            return sum;
+        }
+
+        void ConvolutionDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
+        {
+            if (_bias)
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+            }
+            else
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+            }
+            if (_activationType)
+                ConvolutionBiasAndActivation(NULL, _count, 1, _activationType, _activationParams, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            if (ConvolutionWinograd2x3p::Preferable(param))
+            if (ConvolutionDepthwiseDotProduct::Preferable(param))
+                return new ConvolutionDepthwiseDotProduct(param);
+            else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionDirect::Preferable(param))
                 return new ConvolutionDirect(param);

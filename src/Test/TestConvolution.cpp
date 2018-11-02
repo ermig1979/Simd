@@ -247,8 +247,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1), f1, f2);
 #endif
 #else
-        //result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(64, 19, 16, 64, _3, _1, _3, _1, _1, 64), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1), f1, f2);
 #endif
         return result;
     }

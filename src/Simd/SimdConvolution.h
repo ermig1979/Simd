@@ -131,8 +131,7 @@ namespace Simd
 
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
-
-            static void ImgToCol(const float * src, const ConvParam & p, float * dst);
+            virtual void ImgToCol(const float * src, float * dst);
 
             bool _is1x1;
             const float * _weight, * _bias;
@@ -194,6 +193,21 @@ namespace Simd
             const float * _weight, * _bias;
         };
 
+        class ConvolutionDepthwiseDotProduct : public Convolution
+        {
+        public:
+            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            virtual size_t BufferSize() const;
+            virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
+            virtual void Forward(const float * src, float * buf, float * dst);
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            size_t _count, _size;
+            const float * _weight, * _bias;
+        }; 
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
     }
 
@@ -227,6 +241,13 @@ namespace Simd
 
         protected:
             virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
+        };
+
+        class ConvolutionDepthwiseDotProduct : public Base::ConvolutionDepthwiseDotProduct
+        {
+        public:
+            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -288,6 +309,13 @@ namespace Simd
             virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
         };
 
+        class ConvolutionDepthwiseDotProduct : public Sse::ConvolutionDepthwiseDotProduct
+        {
+        public:
+            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
 }
 #endif//SIMD_AVX_ENABLE
@@ -301,6 +329,9 @@ namespace Simd
             ConvolutionImgToCol(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
+            virtual void ImgToCol(const float * src, float * dst);
+        private:
+            Array32i _index, _nose, _tail, _start;
         };
 
         class ConvolutionImgToRow : public Avx::ConvolutionImgToRow

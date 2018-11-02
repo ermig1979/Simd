@@ -117,9 +117,11 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 0, 256, 4, 128, f1, f2);
 
         //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 728, 192, 728, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 728, 4, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 728, 192, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 728, 4, 728, f1, f2);
+
+        result = result && Gemm32fAutoTest(0, 0, 32, 1216, 144, f1, f2);
  
         return result;
     }

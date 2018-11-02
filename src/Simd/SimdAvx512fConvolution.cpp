@@ -610,7 +610,9 @@ namespace Simd
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
         {
             ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            if (ConvolutionWinograd2x3p::Preferable(param))
+            if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))
+                return new Avx::ConvolutionDepthwiseDotProduct(param);
+            else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionImgToRow::Preferable(param))
                 return new ConvolutionImgToRow(param);

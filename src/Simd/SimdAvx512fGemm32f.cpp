@@ -998,7 +998,7 @@ namespace Simd
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN;
 #if SIMD_ZMM_COUNT == 32
-            if (N < K)
+            if (N < K || M * 8 < N)
             {
                 microM = 12;
                 microN = 32;
@@ -1019,7 +1019,7 @@ namespace Simd
                 kernelTT = tail > DF ? KernelMx48nn : (tail > F ? KernelMx32nn : KernelMx16nn);
             }
 #elif SIMD_ZMM_COUNT == 16
-            if (N < K)
+            if (N < K || M * 8 < N)
             {
                 microM = 6;
                 microN = 32;
