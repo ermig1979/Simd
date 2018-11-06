@@ -462,6 +462,7 @@ namespace Simd
             _srcStep = _srcC * p.srcH * p.srcW;
             _dstStep = _dstC * p.dstH  * p.dstW;
             _pad = p.IsPad(0) ? 0 : 1;
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
         size_t ConvolutionDirect::BufferSize() const
@@ -493,10 +494,10 @@ namespace Simd
                 if (_pad)
                 {
                     Pad(src, buf);
-                    ConvolutionAndBias(buf, weight, bias, params, dst);
+                    _convolutionBiasActivation(buf, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
                 }
                 else
-                    ConvolutionAndBias(src, weight, bias, params, dst);
+                    _convolutionBiasActivation(src, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
                 weight += _weightStep;
                 if(bias)
                     bias += _dstC;
@@ -511,7 +512,7 @@ namespace Simd
         {
             if (!p.IsDilation(1))
                 return false;
-            if (!(p.IsStride(1) || p.IsStride(2)))
+            if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
             return k < 2.0 && (p.IsKernel(2) || p.IsKernel(3));
@@ -603,47 +604,89 @@ namespace Simd
             }
         }
 
-        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const
+        template<int kernel, int stride, ::SimdConvolutionActivationType type> 
+        void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
+            const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
-            const ConvParam & p = _param;
-            for (size_t dc = 0; dc < _dstC; ++dc)
+            for (size_t dc = 0; dc < dstC; ++dc)
             {
-                Fill32f(dst, p.dstW * p.dstH, bias ? bias + dc : NULL);
-                for (size_t sc = 0; sc < _srcC; ++sc)
+                Fill32f(dst, dstW * dstH, bias ? bias + dc : NULL);
+                for (size_t sc = 0; sc < srcC; ++sc)
                 {
-                    const float * ps = src + sc * _srcW * _srcH;
-                    const float * pw = weight + (dc*_srcC + sc)*p.kernelX*p.kernelY;
+                    const float * ps = src + sc * srcW * srcH;
+                    const float * pw = weight + (dc*srcC + sc)*kernel*kernel;
                     float * pd = dst;
-                    if (p.IsKernel(1))
-                        AddConvolutionKernel1x1(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
-                    else if (p.IsKernel(2))
-                        AddConvolutionKernel2x2(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
-                    else if (p.IsKernel(3))
-                        AddConvolutionKernel3x3(ps, _srcW, p.strideY, p.strideX, pw, pd, p.dstH, p.dstW);
+                    if (kernel == 1)
+                        AddConvolutionKernel1x1(ps, srcW, stride, stride, pw, pd, dstH, dstW);
+                    else if (kernel == 2)
+                        AddConvolutionKernel2x2(ps, srcW, stride, stride, pw, pd, dstH, dstW);
+                    else if (kernel == 3)
+                        AddConvolutionKernel3x3(ps, srcW, stride, stride, pw, pd, dstH, dstW);
                     else
                     {
-                        for (size_t dy = 0; dy < p.dstH; ++dy)
+                        for (size_t dy = 0; dy < dstH; ++dy)
                         {
-                            for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += p.strideX)
+                            for (size_t dx = 0, sx = 0; dx < dstW; ++dx, sx += stride)
                             {
                                 float sum = 0;
-                                for (size_t ky = 0; ky < p.kernelY; ++ky)
+                                for (size_t ky = 0; ky < kernel; ++ky)
                                 {
-                                    const float * s = ps + ky * _srcW + sx;
-                                    const float * w = pw + p.kernelX*ky;
-                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                    const float * s = ps + ky * srcW + sx;
+                                    const float * w = pw + kernel*ky;
+                                    for (size_t kx = 0; kx < kernel; ++kx)
                                         sum += s[kx] * w[kx];
                                 }
                                 pd[dx] += sum;
                             }
-                            ps += _srcW * p.strideY;
-                            pd += p.dstW;
+                            ps += srcW * stride;
+                            pd += dstW;
                         }
                     }
                 }
-                BiasAndActivation(NULL, 1, p.dstH*p.dstW, _activationType, params, dst);
-                dst += p.dstW * p.dstH;
+                BiasAndActivation(NULL, 1, dstH*dstW, type, params, dst);
+                dst += dstW * dstH;
             }
+        }
+
+        template <int kernel, int stride> ConvolutionDirect::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        {
+            switch (type)
+            {
+            case ::SimdConvolutionActivationIdentity: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationIdentity>;
+            case ::SimdConvolutionActivationRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRelu>;
+            case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
+            case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
+            case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            default:
+                assert(0);
+                return NULL;
+            }
+        }
+
+        ConvolutionDirect::ConvolutionBiasActivationPtr ConvolutionDirect::SetConvolutionBiasActivation()
+        {
+            const ConvParam & p = _param;
+            switch (p.strideX)
+            {
+            case 1:
+                if (p.kernelX == 2)
+                    return Base::SetConvolutionBiasActivation<2, 1>(_activationType);
+                if (p.kernelX == 3)
+                    return Base::SetConvolutionBiasActivation<3, 1>(_activationType);
+                break;
+            case 2: 
+                if (p.kernelX == 2)
+                    return Base::SetConvolutionBiasActivation<2, 2>(_activationType);
+                if (p.kernelX == 3)
+                    return Base::SetConvolutionBiasActivation<3, 2>(_activationType);
+                break;
+            case 3: 
+                if (p.kernelX == 3)
+                    return Base::SetConvolutionBiasActivation<3, 3>(_activationType);
+                break;
+            }
+            assert(0);
+            return NULL;
         }
 
         //---------------------------------------------------------------------

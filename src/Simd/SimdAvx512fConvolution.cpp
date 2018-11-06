@@ -173,7 +173,7 @@ namespace Simd
                 {
                     if (sx >= 0 && sx < ptrdiff_t(p.srcW) && dx < F)
                         _nose[kx] |= 1 << dx;
-                    if (sx < ptrdiff_t(p.srcW) && dx >= aligned)
+                    if (sx < ptrdiff_t(p.srcW) && ptrdiff_t(dx) >= aligned)
                         _tail[kx] |= 1 << (dx - aligned);
                     sx += p.strideX;
                 }
@@ -231,7 +231,7 @@ namespace Simd
                                     dx += F, sx += p.strideX*F;
                                     for (; dx < aligned; dx += F, sx += p.strideX*F)
                                         _mm512_storeu_ps(dst + dx, _mm512_i32gather_ps(index, src + sx, sizeof(float)));
-                                    if(aligned)
+                                    if (aligned)
                                         _mm512_mask_storeu_ps(dst + dx, storeTail, _mm512_mask_i32gather_ps(_0, tail, index, src + sx, sizeof(float)));
                                     dst += p.dstW;
                                 }
@@ -292,6 +292,7 @@ namespace Simd
         ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
             : Avx2::ConvolutionDirect(p)
         {
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
         template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m512 * dst)
@@ -387,6 +388,33 @@ namespace Simd
             {
                 return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight),
                     _mm512_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6))));
+            }
+        };
+
+        const __m512i K32_IDX_3_0A = SIMD_MM512_SETR_EPI32(0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0, 0, 0, 0, 0);
+        const __m512i K32_IDX_3_0B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 7, 10, 13);
+        const __m512i K32_IDX_3_1A = SIMD_MM512_SETR_EPI32(1, 4, 7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43, 46);
+        const __m512i K32_IDX_3_1B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 8, 11, 14);
+        const __m512i K32_IDX_3_2A = SIMD_MM512_SETR_EPI32(2, 5, 8, 11, 14, 17, 20, 23, 26, 29, 32, 35, 38, 41, 44, 47);
+        const __m512i K32_IDX_3_2B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 15);
+
+        template<> struct Kernel<3, 3>
+        {
+
+            static SIMD_INLINE __m512 RowConv(const float * src, const __m512  * weight)
+            {
+                __m512 src0 = _mm512_loadu_ps(src + 0 * F);
+                __m512 src1 = _mm512_loadu_ps(src + 1 * F);
+                __m512 src2 = _mm512_loadu_ps(src + 2 * F);
+                __m512 s0 = _mm512_mask_permutexvar_ps(_mm512_maskz_permutex2var_ps(0xFFFF, src0, K32_IDX_3_0A, src1), 0xF800, K32_IDX_3_0B, src2);
+                __m512 s1 = _mm512_mask_permutexvar_ps(_mm512_maskz_permutex2var_ps(0xFFFF, src0, K32_IDX_3_1A, src1), 0xF800, K32_IDX_3_1B, src2);
+                __m512 s2 = _mm512_mask_permutexvar_ps(_mm512_maskz_permutex2var_ps(0xFFFF, src0, K32_IDX_3_2A, src1), 0xFC00, K32_IDX_3_2B, src2);
+                return _mm512_fmadd_ps(s0, weight[0], _mm512_fmadd_ps(s1, weight[1], _mm512_mul_ps(s2, weight[2])));
+            }
+
+            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            {
+                return _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6)));
             }
         };
 
@@ -490,8 +518,9 @@ namespace Simd
             return _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), value), _mm512_mul_ps(params[0], _mm512_min_ps(_mm512_setzero_ps(), value)));
         }
 
-        template<int kernel, int stride, ::SimdConvolutionActivationType type> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
-            const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
+        template<int kernel, int stride, ::SimdConvolutionActivationType type> 
+        void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
+            const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
             __m512 _weight[kernel*kernel];
             __m512 _params[2];
@@ -610,36 +639,11 @@ namespace Simd
             }
         }
 
-        template<int kernel, int stride> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
-            const float * weight, const float * bias, ::SimdConvolutionActivationType type, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
-        {
-            switch (type)
-            {
-            case ::SimdConvolutionActivationIdentity:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationIdentity>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationRelu:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationLeakyRelu:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationLeakyRelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationRestrictRange:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRestrictRange>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationPrelu:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationPrelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            default:
-                assert(0);
-            }
-        }
-
          bool ConvolutionDirect::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
                 return false;
-            if (!(p.IsStride(1) || p.IsStride(2)))
+            if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
             return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)
@@ -649,45 +653,56 @@ namespace Simd
                     );
         }
 
-        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const
+        template <int kernel, int stride> ConvolutionDirect::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        {
+            switch (type)
+            {
+            case ::SimdConvolutionActivationIdentity: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationIdentity>;
+            case ::SimdConvolutionActivationRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRelu>;
+            case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
+            case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
+            case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            default:
+                assert(0);
+                return NULL;
+            }
+        }
+
+        ConvolutionDirect::ConvolutionBiasActivationPtr ConvolutionDirect::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
-            if (p.dstW > HF)
+            if (p.dstW <= HF)
+                return Avx2::ConvolutionDirect::SetConvolutionBiasActivation();
+            switch (p.strideX)
             {
-                switch (p.kernelX)
-                {
-                case 1:
-                    Avx512f::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                case 2:
-                    if (p.IsStride(2))
-                        Avx512f::ConvolutionAndBias<2, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    else
-                        Avx512f::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                case 3:
-                    if (p.IsStride(2))
-                        Avx512f::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    else
-                        Avx512f::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                case 4:
-                    if (p.IsStride(2))
-                        Avx512f::ConvolutionAndBias<4, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    else
-                        Avx512f::ConvolutionAndBias<4, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                case 5:
-                    if (p.IsStride(2))
-                        Avx512f::ConvolutionAndBias<5, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    else
-                        Avx512f::ConvolutionAndBias<5, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                default:
-                    break;
-                };
+            case 1:
+                if (p.kernelX == 1)
+                    return Avx512f::SetConvolutionBiasActivation<1, 1>(_activationType);
+                if (p.kernelX == 2)
+                    return Avx512f::SetConvolutionBiasActivation<2, 1>(_activationType);
+                if (p.kernelX == 3)
+                    return Avx512f::SetConvolutionBiasActivation<3, 1>(_activationType);
+                if (p.kernelX == 4)
+                    return Avx512f::SetConvolutionBiasActivation<4, 1>(_activationType);
+                if (p.kernelX == 5)
+                    return Avx512f::SetConvolutionBiasActivation<5, 1>(_activationType);
+                break;
+            case 2:
+                if (p.kernelX == 2)
+                    return Avx512f::SetConvolutionBiasActivation<2, 2>(_activationType);
+                if (p.kernelX == 3)
+                    return Avx512f::SetConvolutionBiasActivation<3, 2>(_activationType);
+                if (p.kernelX == 4)
+                    return Avx512f::SetConvolutionBiasActivation<4, 2>(_activationType);
+                if (p.kernelX == 5)
+                    return Avx512f::SetConvolutionBiasActivation<5, 2>(_activationType);
+                break;
+            case 3:
+                if (p.kernelX == 3)
+                    return Avx512f::SetConvolutionBiasActivation<3, 3>(_activationType);
+                break;
             }
-            Avx2::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, params, dst);
+            return Avx2::ConvolutionDirect::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------

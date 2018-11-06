@@ -184,13 +184,16 @@ namespace Simd
 
             static bool Preferable(const ConvParam & p);
 
+            typedef void(*ConvolutionBiasActivationPtr)(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW);
+
         protected:
             void Pad(const float * src, float * dst) const;
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
+            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
 
             size_t _weightStep, _srcStep, _dstStep, _srcC, _srcH, _srcW, _dstC;
             int _pad;
             const float * _weight, * _bias;
+            ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
         class ConvolutionDepthwiseDotProduct : public Convolution
@@ -240,7 +243,7 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
+            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         class ConvolutionDepthwiseDotProduct : public Base::ConvolutionDepthwiseDotProduct
@@ -306,7 +309,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
+            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         class ConvolutionDepthwiseDotProduct : public Sse::ConvolutionDepthwiseDotProduct
@@ -355,7 +358,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
+            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -400,7 +403,7 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            virtual void ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const;
+            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);

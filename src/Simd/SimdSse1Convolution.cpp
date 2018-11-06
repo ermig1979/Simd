@@ -200,6 +200,7 @@ namespace Simd
         ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
             : Base::ConvolutionDirect(p)
         {
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
         template <size_t size> SIMD_INLINE void LoadWeight(const float * src, __m128 * dst)
@@ -288,6 +289,22 @@ namespace Simd
             }
         };
 
+        template<> struct Kernel<3, 3>
+        {
+            static SIMD_INLINE __m128 RowConv(const float * src, const __m128  * weight)
+            {
+                __m128 s0 = _mm_shuffle_ps(_mm_loadu_ps(src + 0), _mm_loadu_ps(src + 6), 0xCC);
+                __m128 s1 = _mm_shuffle_ps(_mm_loadu_ps(src + 1), _mm_loadu_ps(src + 7), 0xCC);
+                __m128 s2 = _mm_shuffle_ps(_mm_loadu_ps(src + 2), _mm_loadu_ps(src + 8), 0xCC);
+                return _mm_add_ps(_mm_mul_ps(s0, weight[0]), _mm_add_ps(_mm_mul_ps(s1, weight[1]), _mm_mul_ps(s2, weight[2])));
+            }
+
+            static SIMD_INLINE __m128 Convolution(const float * src, size_t step, const __m128  * weight)
+            {
+                return _mm_add_ps(RowConv(src, weight), _mm_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6)));
+            }
+        };
+
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const __m128 * params);
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationIdentity>(__m128 value, const __m128 * params)
@@ -315,8 +332,9 @@ namespace Simd
             return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(params[0], _mm_min_ps(_mm_setzero_ps(), value)));
         }
 
-        template<int kernel, int stride, ::SimdConvolutionActivationType type> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
-            const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
+        template<int kernel, int stride, ::SimdConvolutionActivationType type> 
+        void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
+            const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
         {
             __m128 _weight[kernel*kernel];
             __m128 _params[2];
@@ -437,68 +455,61 @@ namespace Simd
             }
         }
 
-        template<int kernel, int stride> void ConvolutionAndBias(const float * src, size_t srcC, size_t srcH, size_t srcW,
-            const float * weight, const float * bias, ::SimdConvolutionActivationType type, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
-        {
-            switch (type)
-            {
-            case ::SimdConvolutionActivationIdentity:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationIdentity>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationRelu:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationLeakyRelu:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationLeakyRelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationRestrictRange:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationRestrictRange>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            case ::SimdConvolutionActivationPrelu:
-                ConvolutionAndBias<kernel, stride, ::SimdConvolutionActivationPrelu>(src, srcC, srcH, srcW, weight, bias, params, dst, dstC, dstH, dstW);
-                break;
-            default:
-                assert(0);
-            }
-        }
-
         bool ConvolutionDirect::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
                 return false;
-            if (!(p.IsStride(1) || p.IsStride(2)))
+            if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
             return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3));
         }
 
-        void ConvolutionDirect::ConvolutionAndBias(const float * src, const float * weight, const float * bias, const float * params, float * dst) const
+        template <int kernel, int stride> ConvolutionDirect::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        {
+            switch (type)
+            {
+            case ::SimdConvolutionActivationIdentity: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationIdentity>;
+            case ::SimdConvolutionActivationRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRelu>;
+            case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
+            case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
+            case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            default:
+                assert(0);
+                return NULL;
+            }
+        }
+
+        ConvolutionDirect::ConvolutionBiasActivationPtr ConvolutionDirect::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
-            if (p.dstW >= F)
+            if (p.dstW < F)
+                return Base::ConvolutionDirect::SetConvolutionBiasActivation();
+            switch (p.strideX)
             {
-                switch (p.kernelX)
-                {
-                case 1:
-                    Sse::ConvolutionAndBias<1, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                case 2:
-                    if (p.IsStride(2))
-                        Sse::ConvolutionAndBias<2, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    else
-                        Sse::ConvolutionAndBias<2, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                case 3:
-                    if (p.IsStride(2))
-                        Sse::ConvolutionAndBias<3, 2>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    else
-                        Sse::ConvolutionAndBias<3, 1>(src, _srcC, _srcH, _srcW, weight, bias, _activationType, params, dst, _dstC, p.dstH, p.dstW);
-                    return;
-                default:
-                    break;
-                };
+            case 1:
+                if (p.kernelX == 1)
+                    return Sse::SetConvolutionBiasActivation<1, 1>(_activationType);
+                if (p.kernelX == 2)
+                    return Sse::SetConvolutionBiasActivation<2, 1>(_activationType);
+                if (p.kernelX == 3)
+                    return Sse::SetConvolutionBiasActivation<3, 1>(_activationType);
+                break;
+            case 2:
+                if (p.kernelX == 2)
+                    return Sse::SetConvolutionBiasActivation<2, 2>(_activationType);
+                if (p.kernelX == 3)
+                    return Sse::SetConvolutionBiasActivation<3, 2>(_activationType);
+                break;
+            case 3:
+                if (p.kernelX == 3)
+                    return Sse::SetConvolutionBiasActivation<3, 3>(_activationType);
+                break;
+            default:
+                return Base::ConvolutionDirect::SetConvolutionBiasActivation();
             }
-            Base::ConvolutionDirect::ConvolutionAndBias(src, weight, bias, params, dst);
+            assert(0);
+            return NULL;
         }
 
         //---------------------------------------------------------------------
