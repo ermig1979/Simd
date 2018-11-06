@@ -210,7 +210,7 @@ namespace Simd
                 __m512 _0 = _mm512_setzero_ps();
                 __m512i index = _mm512_loadu_si512(_index.data);
                 size_t aligned = AlignHi(p.dstW, F) - F;
-                __mmask16 storeTail = TailMask16(p.dstW - AlignLo(p.dstW, F));
+                __mmask16 storeTail = TailMask16(p.dstW - aligned);
                 __mmask16 storeNose = aligned ? __mmask16(-1) : storeTail;
                 for (size_t c = 0; c < p.srcC; ++c)
                 {

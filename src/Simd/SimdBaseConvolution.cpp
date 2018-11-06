@@ -64,7 +64,7 @@ namespace Simd
                         for (size_t j = 0; j < size; ++j)
                         {
                             float value = dst[j] + shift;
-                            dst[i] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+                            dst[j] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
                         }
                         dst += size;
                     }
@@ -100,7 +100,7 @@ namespace Simd
                         for (size_t j = 0; j < size; ++j)
                         {
                             float value = dst[j] + shift;
-                            dst[i] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+                            dst[j] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
                         }
                         dst += size;
                     }
@@ -481,6 +481,12 @@ namespace Simd
                 *internal = SimdFalse;
         }
 
+        void ConvolutionDirect::SetActivation(::SimdConvolutionActivationType type, const float * params)
+        {
+            Convolution::SetActivation(type, params);
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
+        }
+
         void ConvolutionDirect::Forward(const float * src, float * buf, float * dst)
         {
             const ConvParam & p = _param;
@@ -644,6 +650,8 @@ namespace Simd
                     }
                 }
                 BiasAndActivation(NULL, 1, dstH*dstW, type, params, dst);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    params++;
                 dst += dstW * dstH;
             }
         }

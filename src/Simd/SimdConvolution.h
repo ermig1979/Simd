@@ -94,7 +94,7 @@ namespace Simd
         virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal) = 0;
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
-        void SetActivation(::SimdConvolutionActivationType type, const float * params)
+        virtual void SetActivation(::SimdConvolutionActivationType type, const float * params)
         {
             _activationType = type;
             _activationParams = params;
@@ -180,6 +180,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
             virtual size_t BufferSize() const;
             virtual void SetWeight(const float * weight, const float * bias, SimdBool * internal);
+            virtual void SetActivation(::SimdConvolutionActivationType type, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam & p);
@@ -188,7 +189,7 @@ namespace Simd
 
         protected:
             void Pad(const float * src, float * dst) const;
-            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
 
             size_t _weightStep, _srcStep, _dstStep, _srcC, _srcH, _srcW, _dstC;
             int _pad;
@@ -243,7 +244,7 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         class ConvolutionDepthwiseDotProduct : public Base::ConvolutionDepthwiseDotProduct
@@ -309,7 +310,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
 
         protected:
-            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         class ConvolutionDepthwiseDotProduct : public Sse::ConvolutionDepthwiseDotProduct
@@ -358,7 +359,7 @@ namespace Simd
             ConvolutionDirect(const ConvParam & p);
 
         protected:
-            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
@@ -403,7 +404,7 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);

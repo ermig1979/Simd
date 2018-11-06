@@ -66,13 +66,13 @@ namespace Test
             }
 
             void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, 
-                ::SimdConvolutionActivationType activation, const float * params,
+                ::SimdConvolutionActivationType activation, const Tensor32f & params,
                 const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
                 void * convolution = func(p.srcC, p.srcH, p.srcW, p.dstC, p.kernelY, p.kernelX, p.dilationY, p.dilationX, p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.group);
                 buf.Extend({ ::SimdConvolutionBufferSize(convolution) });
                 ::SimdConvolutionSetWeight(convolution, weight.Data(), bias.Data(), NULL);
-                ::SimdConvolutionSetActivation(convolution, activation, params);
+                ::SimdConvolutionSetActivation(convolution, activation, params.Data());
                 {
                     TEST_PERFORMANCE_TEST(description);
                     ::SimdConvolutionForward(convolution, src.Data(), buf.Data(), dst.Data());
@@ -103,6 +103,9 @@ namespace Test
         Tensor32f bias({ p.dstC });
         FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
 
+        Tensor32f params({ p.dstC });
+        FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
+
         Tensor32f buf;
 
         size_t dstH = (p.srcH + p.padY + p.padH - (p.dilationY * (p.kernelY - 1) + 1)) / p.strideY + 1;
@@ -110,8 +113,9 @@ namespace Test
         Tensor32f dst1({ p.dstC, dstH, dstW });
         Tensor32f dst2({ p.dstC, dstH, dstW });
 
-        const ::SimdConvolutionActivationType activation = ::SimdConvolutionActivationIdentity;
-        float params[2] = { 0.0f, 6.0f };
+        const ::SimdConvolutionActivationType activation = ::SimdConvolutionActivationRelu;
+        params.Data()[0] = 0.1f;
+        params.Data()[1] = 1.1f;
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -135,9 +139,13 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 112, 96, 64, _3, _1, _3, Size(1, 0), Size(1, 0), 64), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 19, 16, 64, _3, _1, _3, _1, _1, 64), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 19, 16, 64, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(128, 7, 7, 128, _7, _1, _1, _0, _0, 128), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(16, 56, 56, 32, _1, _1, _1, _0, _0, 1), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(3, 112, 112, 16, _3, _1, _2, _1, _1, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(128, 7, 6, 128, _3, _1, _2, Size(0, 1), Size(1, 1), 128), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(128, 4, 3, 256, _1, _1, _1, _0, _0, 1), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 38, 32, 32, _3, _1, _2, _0, _1, 32), f1, f2);
 #endif
 #if 0
         result = result && ConvolutionForwardAutoTest(Param(1024, 13, 13, 1024, _3, _1, _1, _1, _1, 1), f1, f2);
@@ -248,7 +256,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(64, 112, 96, 64, _3, _1, _3, Size(1, 0), Size(1, 0), 64), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1), f1, f2);
 #endif
         return result;
     }

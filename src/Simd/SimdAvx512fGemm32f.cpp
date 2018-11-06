@@ -991,13 +991,13 @@ namespace Simd
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
             const size_t CACHE_L1_SIZE = 32 * 1024;
-            const size_t CACHE_L2_SIZE = 256 * 1024;
-            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            const size_t CACHE_L2_SIZE = 1024 * 1024;
+            const size_t CACHE_L3_SIZE = 1280 * 1024;
             typedef Simd::GemmNN<float, __mmask16> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN;
-#if SIMD_ZMM_COUNT == 32
+#if SIMD_ZMM_COUNT == 32 
             if (N < K || M * 8 < N)
             {
                 microM = 12;
@@ -1018,7 +1018,7 @@ namespace Simd
                 kernelTM = KernelMx48nn;
                 kernelTT = tail > DF ? KernelMx48nn : (tail > F ? KernelMx32nn : KernelMx16nn);
             }
-#elif SIMD_ZMM_COUNT == 16
+#elif SIMD_ZMM_COUNT == 16 
             if (N < K || M * 8 < N)
             {
                 microM = 6;
@@ -1047,7 +1047,7 @@ namespace Simd
             kernelTM = KernelMx16nn;
             kernelTT = KernelMx16nn;
 #endif
-            GemmNN gemmNN(M, N, K, microM, microN, CACHE_L2_SIZE, CACHE_L3_SIZE, CACHE_L3_SIZE, F,
+            GemmNN gemmNN(M, N, K, microM, microN, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F,
                 kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::ScaleC, Avx512f::PackB, TailMask16);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
@@ -1519,8 +1519,8 @@ namespace Simd
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
             const size_t CACHE_L1_SIZE = 32 * 1024;
-            const size_t CACHE_L2_SIZE = 256 * 1024;
-            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
+            const size_t CACHE_L2_SIZE = 1024 * 1024;
+            const size_t CACHE_L3_SIZE = 1280 * 1024;
             typedef Simd::GemmNT<float> GemmNT;
 #if SIMD_ZMM_COUNT == 32
             GemmNT gemmNT(M, N, K, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F, Avx::GemmScaleC,
