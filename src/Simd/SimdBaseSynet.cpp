@@ -29,23 +29,44 @@ namespace Simd
 {
     namespace Base
     {
-        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst)
+        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            size_t aligned = Simd::AlignLo(size, 4);
-            for (size_t i = 0; i < count; ++i)
+            if (trans || size == 1)
             {
-                float value = bias[i];
-                size_t j = 0;
-                for (; j < aligned; j += 4)
+                size_t aligned = Simd::AlignLo(count, 4);
+                for (size_t j = 0; j < size; ++j)
                 {
-                    dst[j + 0] += value;
-                    dst[j + 1] += value;
-                    dst[j + 2] += value;
-                    dst[j + 3] += value;
+                    size_t i = 0;
+                    for (; i < aligned; i += 4)
+                    {
+                        dst[i + 0] += bias[i + 0];
+                        dst[i + 1] += bias[i + 1];
+                        dst[i + 2] += bias[i + 2];
+                        dst[i + 3] += bias[i + 3];
+                    }
+                    for (; i < count; ++i)
+                        dst[i] += bias[i];
+                    dst += count;
                 }
-                for (; j < size; ++j)
-                    dst[j] += value;
-                dst += size;
+            }
+            else
+            {
+                size_t aligned = Simd::AlignLo(size, 4);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    float value = bias[i];
+                    size_t j = 0;
+                    for (; j < aligned; j += 4)
+                    {
+                        dst[j + 0] += value;
+                        dst[j + 1] += value;
+                        dst[j + 2] += value;
+                        dst[j + 3] += value;
+                    }
+                    for (; j < size; ++j)
+                        dst[j] += value;
+                    dst += size;
+                }
             }
         }
 

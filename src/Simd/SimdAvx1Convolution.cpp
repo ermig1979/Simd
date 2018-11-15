@@ -36,7 +36,7 @@ namespace Simd
             if (type == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    SynetAddBias(bias, count, size, dst);
+                    SynetAddBias(bias, count, size, dst, SimdFalse);
             }
             else if (type == ::SimdConvolutionActivationRelu)
             {

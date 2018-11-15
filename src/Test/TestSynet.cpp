@@ -31,27 +31,35 @@ namespace Test
     {
         struct FuncAB
         {
-            typedef void(*FuncPtr)(const float * bias, size_t count, size_t size, float * dst);
+            typedef void(*FuncPtr)(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
             FuncPtr func;
             String desc;
 
             FuncAB(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Call(const View & bias, size_t count, size_t size, const View & dstSrc, View & dstDst) const
+            void Update(SimdBool trans)
+            {
+                desc = desc + (trans ? "[1]" : "[0]" );
+            }
+
+            void Call(const View & bias, size_t count, size_t size, SimdBool trans, const View & dstSrc, View & dstDst) const
             {
                 Simd::Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)bias.data, count, size, (float*)dstDst.data);
+                func((float*)bias.data, count, size, (float*)dstDst.data, trans);
             }
         };
     }
 
 #define FUNC_AB(function) FuncAB(function, #function)
 
-    bool SynetAddBiasAutoTest(size_t count, size_t size, const FuncAB & f1, const FuncAB & f2)
+    bool SynetAddBiasAutoTest(size_t count, size_t size, SimdBool trans, FuncAB f1, FuncAB f2)
     {
         bool result = true;
+
+        f1.Update(trans);
+        f2.Update(trans);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
 
@@ -63,9 +71,9 @@ namespace Test
         FillRandom32f(bias, -10.0, 10.0);
         FillRandom32f(dstSrc, -10.0, 10.0);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bias, count, size, dstSrc, dstDst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bias, count, size, trans, dstSrc, dstDst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bias, count, size, dstSrc, dstDst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bias, count, size, trans, dstSrc, dstDst2));
 
         result = result && Compare(dstDst1, dstDst2, EPS, true, 32, false);
 
@@ -76,8 +84,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetAddBiasAutoTest(H, W, f1, f2);
-        result = result && SynetAddBiasAutoTest(H - O, W + O, f1, f2);
+        result = result && SynetAddBiasAutoTest(H, W, SimdFalse, f1, f2);
+        result = result && SynetAddBiasAutoTest(H - O, W + O, SimdFalse, f1, f2);
+        result = result && SynetAddBiasAutoTest(H, W, SimdTrue, f1, f2);
+        result = result && SynetAddBiasAutoTest(H - O, W + O, SimdTrue, f1, f2);
 
         return result;
     }
@@ -801,7 +811,7 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
-    bool SynetAddBiasDataTest(bool create, size_t count, size_t size, const FuncAB & f)
+    bool SynetAddBiasDataTest(bool create, size_t count, size_t size, SimdBool trans, const FuncAB & f)
     {
         bool result = true;
 
@@ -822,7 +832,7 @@ namespace Test
             TEST_SAVE(bias);
             TEST_SAVE(dstSrc);
 
-            f.Call(bias, count, size, dstSrc, dstDst1);
+            f.Call(bias, count, size, trans, dstSrc, dstDst1);
 
             TEST_SAVE(dstDst1);
         }
@@ -833,7 +843,7 @@ namespace Test
 
             TEST_LOAD(dstDst1);
 
-            f.Call(bias, count, size, dstSrc, dstDst2);
+            f.Call(bias, count, size, trans, dstSrc, dstDst2);
 
             TEST_SAVE(dstDst2);
 
@@ -845,7 +855,7 @@ namespace Test
 
     bool SynetAddBiasDataTest(bool create)
     {
-        return SynetAddBiasDataTest(create, DH, DW, FUNC_AB(SimdSynetAddBias));
+        return SynetAddBiasDataTest(create, DH, DW, SimdFalse, FUNC_AB(SimdSynetAddBias));
     }
 
     bool SynetEltwiseLayerForwardDataTest(bool create, size_t size, size_t count, SimdSynetEltwiseOperationType type, const FuncELF & f)

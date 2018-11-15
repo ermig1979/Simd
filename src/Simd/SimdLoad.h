@@ -449,6 +449,24 @@ namespace Simd
         {
             return _mm512_maskz_load_ps(m, p);
         }
+
+        const __m512i K32_GATHER_ANY = SIMD_MM512_SET1_EPI32(1);
+        const __m512i K32_GATHER_3A = SIMD_MM512_SETR_EPI32(0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0, 0, 0, 0, 0);
+        const __m512i K32_GATHER_3B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 7, 10, 13);
+
+
+        template<int period> SIMD_INLINE __m512 Gather(const float * ptr)
+        {
+            return _mm512_i32gather_ps(K32_GATHER_ANY, ptr, sizeof(float)*period);
+        }
+
+        template<> SIMD_INLINE __m512 Gather<3>(const float * ptr)
+        {
+            __m512 s0 = _mm512_loadu_ps(ptr + 0 * F);
+            __m512 s1 = _mm512_loadu_ps(ptr + 1 * F);
+            __m512 s2 = _mm512_loadu_ps(ptr + 2 * F);
+            return _mm512_mask_permutexvar_ps(_mm512_maskz_permutex2var_ps(0xFFFF, s0, K32_GATHER_3A, s1), 0xF800, K32_GATHER_3B, s2);
+        }
     }
 #endif//SIMD_AVX512F_ENABLE
 

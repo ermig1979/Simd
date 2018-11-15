@@ -522,7 +522,7 @@ namespace Simd
 
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
-        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst);
+        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 

@@ -5212,15 +5212,18 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst);
+        \fn void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
         \short Adds a bias to given vector.
 
         Algorithm's details:
         \verbatim
-         for(i = 0; i < count; ++i)
+        for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
-                dst[i*size + j] += bias[i];
+                if(trans)
+                    dst[i*size + j] += bias[i];
+                else
+                    dst[i + j*count] += bias[i];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -5229,8 +5232,9 @@ extern "C"
         \param [in] count - a size of bias array.
         \param [in] size - an internal size of bias addition.
         \param [in, out] dst - a pointer to cumulative 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst);
+    SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup synet
         Describes operation type used in function ::SimdSynetEltwiseLayerForward.

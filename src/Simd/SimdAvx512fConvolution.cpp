@@ -37,7 +37,7 @@ namespace Simd
             if (type == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    SynetAddBias(bias, count, size, dst);
+                    SynetAddBias(bias, count, size, dst, SimdFalse);
             }
             else if (type == ::SimdConvolutionActivationRelu)
             {
@@ -229,17 +229,24 @@ namespace Simd
                                     size_t dx = 0, sx = sx0 + sy * p.srcW;
                                     _mm512_mask_storeu_ps(dst + dx, storeNose, _mm512_mask_i32gather_ps(_0, nose, index, src + sx, sizeof(float)));
                                     dx += F, sx += p.strideX*F;
-                                    for (; dx < aligned; dx += F, sx += p.strideX*F)
-                                        _mm512_storeu_ps(dst + dx, _mm512_i32gather_ps(index, src + sx, sizeof(float)));
+                                    //if (p.strideX == 3)
+                                    //{
+                                    //    for (; dx < aligned; dx += F, sx += p.strideX*F)
+                                    //        _mm512_storeu_ps(dst + dx, Avx512f::Gather<3>(src + sx));
+                                    //}
+                                    //else
+                                    //{
+                                        for (; dx < aligned; dx += F, sx += p.strideX*F)
+                                            _mm512_storeu_ps(dst + dx, _mm512_i32gather_ps(index, src + sx, sizeof(float)));
+                                    //}
                                     if (aligned)
                                         _mm512_mask_storeu_ps(dst + dx, storeTail, _mm512_mask_i32gather_ps(_0, tail, index, src + sx, sizeof(float)));
-                                    dst += p.dstW;
                                 }
                                 else
                                 {
                                     memset(dst, 0, p.dstW * sizeof(float));
-                                    dst += p.dstW;
                                 }
+                                dst += p.dstW;
                                 sy += p.strideY;
                             }
                         }
