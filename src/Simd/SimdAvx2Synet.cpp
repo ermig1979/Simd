@@ -302,6 +302,16 @@ namespace Simd
                 SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
         }
 
+        template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, _mm256_fmadd_ps(Avx::Load<align>(src + offset), Avx::Load<align>(scale + offset), Avx::Load<align>(bias + offset)));
+        }
+
+        template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, float * dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, _mm256_mul_ps(Avx::Load<align>(src + offset), Avx::Load<align>(scale + offset)));
+        }
+
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m256 & scale, const __m256 & bias, float * dst, size_t offset)
         {
             Avx::Store<align>(dst + offset, _mm256_fmadd_ps(Avx::Load<align>(src + offset), scale, bias));
@@ -312,67 +322,123 @@ namespace Simd
             Avx::Store<align>(dst + offset, _mm256_mul_ps(Avx::Load<align>(src + offset), scale));
         }
 
-        template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
+        template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            if (bias)
+            if (align)
+                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if (trans || size == 1)
             {
-                for (size_t i = 0; i < count; ++i)
+                size_t aligned = AlignLo(count, QF);
+                size_t partial = AlignLo(count, F);
+                if (bias)
                 {
-                    size_t j = 0;
-                    if (partial)
+                    for (size_t j = 0; j < size; ++j)
                     {
-                        __m256 _scale = _mm256_set1_ps(scale[i]);
-                        __m256 _bias = _mm256_set1_ps(bias[i]);
-                        for (; j < aligned; j += QF)
+                        size_t i = 0;
+                        if (partial)
                         {
-                            SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 0);
-                            SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 1);
-                            SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 2);
-                            SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 3);
+                            for (; i < aligned; i += QF)
+                            {
+                                SynetScaleLayerForward<align>(src, scale, bias, dst, i + F * 0);
+                                SynetScaleLayerForward<align>(src, scale, bias, dst, i + F * 1);
+                                SynetScaleLayerForward<align>(src, scale, bias, dst, i + F * 2);
+                                SynetScaleLayerForward<align>(src, scale, bias, dst, i + F * 3);
+                            }
+                            for (; i < partial; i += F)
+                                SynetScaleLayerForward<align>(src, scale, bias, dst, i);
                         }
-                        for (; j < partial; j += F)
-                            SynetScaleLayerForward<align>(src, _scale, _bias, dst, j);
+                        for (; i < count; ++i)
+                            dst[i] = src[i] * scale[i] + bias[i];
+                        src += count;
+                        dst += count;
                     }
-                    for (; j < size; ++j)
-                        dst[j] = src[j] * scale[i] + bias[i];
-                    src += size;
-                    dst += size;
+                }
+                else
+                {
+                    for (size_t j = 0; j < size; ++j)
+                    {
+                        size_t i = 0;
+                        if (partial)
+                        {
+                            for (; i < aligned; i += QF)
+                            {
+                                SynetScaleLayerForward<align>(src, scale, dst, i + F * 0);
+                                SynetScaleLayerForward<align>(src, scale, dst, i + F * 1);
+                                SynetScaleLayerForward<align>(src, scale, dst, i + F * 2);
+                                SynetScaleLayerForward<align>(src, scale, dst, i + F * 3);
+                            }
+                            for (; i < partial; i += F)
+                                SynetScaleLayerForward<align>(src, scale, dst, i);
+                        }
+                        for (; i < count; ++i)
+                            dst[i] = src[i] * scale[i];
+                        src += count;
+                        dst += count;
+                    }
                 }
             }
             else
             {
-                for (size_t i = 0; i < count; ++i)
+                size_t aligned = AlignLo(size, QF);
+                size_t partial = AlignLo(size, F);
+                if (bias)
                 {
-                    size_t j = 0;
-                    if (partial)
+                    for (size_t i = 0; i < count; ++i)
                     {
-                        __m256 _scale = _mm256_set1_ps(scale[i]);
-                        for (; j < aligned; j += QF)
+                        size_t j = 0;
+                        if (partial)
                         {
-                            SynetScaleLayerForward<align>(src, _scale, dst, j + F * 0);
-                            SynetScaleLayerForward<align>(src, _scale, dst, j + F * 1);
-                            SynetScaleLayerForward<align>(src, _scale, dst, j + F * 2);
-                            SynetScaleLayerForward<align>(src, _scale, dst, j + F * 3);
+                            __m256 _scale = _mm256_set1_ps(scale[i]);
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            for (; j < aligned; j += QF)
+                            {
+                                SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 0);
+                                SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 1);
+                                SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 2);
+                                SynetScaleLayerForward<align>(src, _scale, _bias, dst, j + F * 3);
+                            }
+                            for (; j < partial; j += F)
+                                SynetScaleLayerForward<align>(src, _scale, _bias, dst, j);
                         }
-                        for (; j < partial; j += F)
-                            SynetScaleLayerForward<align>(src, _scale, dst, j);
+                        for (; j < size; ++j)
+                            dst[j] = src[j] * scale[i] + bias[i];
+                        src += size;
+                        dst += size;
                     }
-                    for (; j < size; ++j)
-                        dst[j] = src[j] * scale[i];
-                    src += size;
-                    dst += size;
+                }
+                else
+                {
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        size_t j = 0;
+                        if (partial)
+                        {
+                            __m256 _scale = _mm256_set1_ps(scale[i]);
+                            for (; j < aligned; j += QF)
+                            {
+                                SynetScaleLayerForward<align>(src, _scale, dst, j + F * 0);
+                                SynetScaleLayerForward<align>(src, _scale, dst, j + F * 1);
+                                SynetScaleLayerForward<align>(src, _scale, dst, j + F * 2);
+                                SynetScaleLayerForward<align>(src, _scale, dst, j + F * 3);
+                            }
+                            for (; j < partial; j += F)
+                                SynetScaleLayerForward<align>(src, _scale, dst, j);
+                        }
+                        for (; j < size; ++j)
+                            dst[j] = src[j] * scale[i];
+                        src += size;
+                        dst += size;
+                    }
                 }
             }
         }
 
-        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
+        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (Aligned(dst) && Aligned(size))
-                SynetScaleLayerForward<true>(src, scale, bias, count, size, dst);
+            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+                SynetScaleLayerForward<true>(src, scale, bias, count, size, dst, trans);
             else
-                SynetScaleLayerForward<false>(src, scale, bias, count, size, dst);
+                SynetScaleLayerForward<false>(src, scale, bias, count, size, dst, trans);
         }
     }
 #endif// SIMD_AVX2_ENABLE

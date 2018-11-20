@@ -720,28 +720,34 @@ namespace Test
     {
         struct FuncSLF
         {
-            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
+            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
             FuncPtr func;
             String desc;
 
             FuncSLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
-            FuncSLF(const FuncSLF & f, bool bias) : func(f.func), desc(f.desc + (bias ? "[1]" : "[0]")) {}
 
-            void Call(const View & src, const View & scale, const View & bias, size_t count, size_t size, View & dst) const
+            void Update(SimdBool trans, bool bias)
+            {
+                desc = desc + "[" + ToString<int>(trans) + "-" + ToString<int>(bias) + "]";
+            }
+
+            void Call(const View & src, const View & scale, const View & bias, size_t count, size_t size, SimdBool trans, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)src.data, (float*)scale.data, (float*)bias.data, count, size, (float*)dst.data);
+                func((float*)src.data, (float*)scale.data, (float*)bias.data, count, size, (float*)dst.data, trans);
             }
         };
     }
 
 #define FUNC_SLF(function) FuncSLF(function, #function)
-#define ARGS_SLF(bias, f1, f2) bias, FuncSLF(f1, bias), FuncSLF(f2, bias)
 
-    bool SynetScaleLayerForwardAutoTest(size_t count, size_t size, bool hasBias, const FuncSLF & f1, const FuncSLF & f2)
+    bool SynetScaleLayerForwardAutoTest(size_t count, size_t size, SimdBool trans, bool hasBias, FuncSLF f1, FuncSLF f2)
     {
         bool result = true;
+
+        f1.Update(trans, hasBias);
+        f2.Update(trans, hasBias);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
 
@@ -759,9 +765,9 @@ namespace Test
             FillRandom32f(bias, -10.0, 10.0);
         }
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, trans, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, trans, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 32, false);
 
@@ -772,10 +778,14 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetScaleLayerForwardAutoTest(H, W, ARGS_SLF(true, f1, f2));
-        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, ARGS_SLF(true, f1, f2));
-        result = result && SynetScaleLayerForwardAutoTest(H, W, ARGS_SLF(false, f1, f2));
-        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, ARGS_SLF(false, f1, f2));
+        result = result && SynetScaleLayerForwardAutoTest(H, W, SimdFalse, false, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, SimdFalse, false, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H, W, SimdFalse, true, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, SimdFalse, true, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H, W, SimdTrue, false, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, SimdTrue, false, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H, W, SimdTrue, true, f1, f2);
+        result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, SimdTrue, true, f1, f2);
 
         return result;
     }
@@ -982,7 +992,7 @@ namespace Test
             TEST_SAVE(scale);
             TEST_SAVE(bias);
 
-            f.Call(src, scale, bias, count, size, dst1);
+            f.Call(src, scale, bias, count, size, SimdFalse, dst1);
 
             TEST_SAVE(dst1);
         }
@@ -994,7 +1004,7 @@ namespace Test
 
             TEST_LOAD(dst1);
 
-            f.Call(src, scale, bias, count, size, dst2);
+            f.Call(src, scale, bias, count, size, SimdFalse, dst2);
 
             TEST_SAVE(dst2);
 

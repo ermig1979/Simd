@@ -92,9 +92,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2027ec89df3aa682152884cd2c739fdb"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2027ec89df3aa682152884cd2c739fdb">SimdConvolutionForward</a> (void *convolution, const float *src, float *buf, float *dst)</td></tr>
 <tr class="memdesc:ga2027ec89df3aa682152884cd2c739fdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of convolution algorithm.  <a href="#ga2027ec89df3aa682152884cd2c739fdb">More...</a><br /></td></tr>
 <tr class="separator:ga2027ec89df3aa682152884cd2c739fdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga28d0b4f1155c7d9ec0ae3d5af65bde0e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga28d0b4f1155c7d9ec0ae3d5af65bde0e">SimdSynetAddBias</a> (const float *bias, size_t count, size_t size, float *dst)</td></tr>
-<tr class="memdesc:ga28d0b4f1155c7d9ec0ae3d5af65bde0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a bias to given vector.  <a href="#ga28d0b4f1155c7d9ec0ae3d5af65bde0e">More...</a><br /></td></tr>
-<tr class="separator:ga28d0b4f1155c7d9ec0ae3d5af65bde0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga756a5ad787b70a5abe209308789cee32"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga756a5ad787b70a5abe209308789cee32">SimdSynetAddBias</a> (const float *bias, size_t count, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:ga756a5ad787b70a5abe209308789cee32"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a bias to given vector.  <a href="#ga756a5ad787b70a5abe209308789cee32">More...</a><br /></td></tr>
+<tr class="separator:ga756a5ad787b70a5abe209308789cee32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga4834136a19efbacb48575f1c9d894092"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga4834136a19efbacb48575f1c9d894092">SimdSynetEltwiseLayerForward</a> (float const *const *src, const float *weight, size_t count, size_t size, <a class="el" href="group__synet.html#ga89b4d9922d69654a2a675ccba0a9452d">SimdSynetEltwiseOperationType</a> type, float *dst)</td></tr>
 <tr class="memdesc:ga4834136a19efbacb48575f1c9d894092"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of EltwiseLayer.  <a href="#ga4834136a19efbacb48575f1c9d894092">More...</a><br /></td></tr>
 <tr class="separator:ga4834136a19efbacb48575f1c9d894092"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -116,9 +116,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga711c80dca9d175a2ac9221b1062b7840"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga711c80dca9d175a2ac9221b1062b7840">SimdSynetRestrictRange</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
 <tr class="memdesc:ga711c80dca9d175a2ac9221b1062b7840"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given array.  <a href="#ga711c80dca9d175a2ac9221b1062b7840">More...</a><br /></td></tr>
 <tr class="separator:ga711c80dca9d175a2ac9221b1062b7840"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga4d3f432cc38690ea6203ae442d1a8c7b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga4d3f432cc38690ea6203ae442d1a8c7b">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t count, size_t size, float *dst)</td></tr>
-<tr class="memdesc:ga4d3f432cc38690ea6203ae442d1a8c7b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="#ga4d3f432cc38690ea6203ae442d1a8c7b">More...</a><br /></td></tr>
-<tr class="separator:ga4d3f432cc38690ea6203ae442d1a8c7b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaca331823030c720127aceb34c4cf6cf8"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaca331823030c720127aceb34c4cf6cf8">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t count, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:gaca331823030c720127aceb34c4cf6cf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="#gaca331823030c720127aceb34c4cf6cf8">More...</a><br /></td></tr>
+<tr class="separator:gaca331823030c720127aceb34c4cf6cf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga25ebb50f7aed1f7a456141fed188109f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga25ebb50f7aed1f7a456141fed188109f">SimdWinograd2x3iSetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, int pad)</td></tr>
 <tr class="memdesc:ga25ebb50f7aed1f7a456141fed188109f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 2x3 interleaved convolution algorithm.  <a href="#ga25ebb50f7aed1f7a456141fed188109f">More...</a><br /></td></tr>
 <tr class="separator:ga25ebb50f7aed1f7a456141fed188109f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -502,8 +502,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga28d0b4f1155c7d9ec0ae3d5af65bde0e"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga28d0b4f1155c7d9ec0ae3d5af65bde0e">&#9670;&nbsp;</a></span>SimdSynetAddBias()</h2>
+<a id="ga756a5ad787b70a5abe209308789cee32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga756a5ad787b70a5abe209308789cee32">&#9670;&nbsp;</a></span>SimdSynetAddBias()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -530,7 +530,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -541,9 +547,12 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Adds a bias to given vector. </p>
-<p>Algorithm's details: </p><pre class="fragment"> for(i = 0; i &lt; count; ++i)
+<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
-        dst[i*size + j] += bias[i];
+        if(trans)
+            dst[i + j*count] += bias[i];
+        else
+            dst[i*size + j] += bias[i];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -551,6 +560,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of bias array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of bias addition. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to cumulative 32-bit float array. The size of the array must be equal to count*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>
 </dl>
@@ -1083,8 +1093,8 @@ for(i = 0; i &lt; count; ++i)
 
 </div>
 </div>
-<a id="ga4d3f432cc38690ea6203ae442d1a8c7b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga4d3f432cc38690ea6203ae442d1a8c7b">&#9670;&nbsp;</a></span>SimdSynetScaleLayerForward()</h2>
+<a id="gaca331823030c720127aceb34c4cf6cf8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaca331823030c720127aceb34c4cf6cf8">&#9670;&nbsp;</a></span>SimdSynetScaleLayerForward()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1123,7 +1133,13 @@ for(i = 0; i &lt; count; ++i)
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1136,7 +1152,10 @@ for(i = 0; i &lt; count; ++i)
 <p>This function is used for forward propagation of ScaleLayer. </p>
 <p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
-        dst[i*size + j] = src[i*size + j]*scale[i] + (bias ? bias[i] : 0);
+        if(trans)
+            dst[i + j*count] = src[i + j*count]*scale[i] + (bias ? bias[i] : 0);
+        else
+            dst[i*size + j] = src[i*size + j]*scale[i] + (bias ? bias[i] : 0);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1146,6 +1165,7 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of scale and bias arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of the operation. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>
 </dl>

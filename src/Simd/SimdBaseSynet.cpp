@@ -277,46 +277,90 @@ namespace Simd
                  *dst++ = Simd::RestrictRange(*src++, min, max);
         }
 
-        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
+        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            size_t aligned = Simd::AlignLo(size, 4);
-            if (bias)
+            if (trans || size == 1)
             {
-                for (size_t i = 0; i < count; ++i)
+                size_t aligned = Simd::AlignLo(count, 4);
+                if (bias)
                 {
-                    float s = scale[i];
-                    float b = bias[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
+                    for (size_t j = 0; j < size; ++j)
                     {
-                        dst[j + 0] = src[j + 0] * s + b;
-                        dst[j + 1] = src[j + 1] * s + b;
-                        dst[j + 2] = src[j + 2] * s + b;
-                        dst[j + 3] = src[j + 3] * s + b;
+                        size_t i = 0;
+                        for (; i < aligned; i += 4)
+                        {
+                            dst[i + 0] = src[i + 0] * scale[i + 0] + bias[i + 0];
+                            dst[i + 1] = src[i + 1] * scale[i + 1] + bias[i + 1];
+                            dst[i + 2] = src[i + 2] * scale[i + 2] + bias[i + 2];
+                            dst[i + 3] = src[i + 3] * scale[i + 3] + bias[i + 3];
+                        }
+                        for (; i < count; ++i)
+                            dst[i] = src[i] * scale[i] + bias[i];
+                        src += count;
+                        dst += count;
+
                     }
-                    for (; j < size; ++j)
-                        dst[j] = src[j] * s + b;
-                    src += size;
-                    dst += size;
+                }
+                else
+                {
+                    for (size_t j = 0; j < size; ++j)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += 4)
+                        {
+                            dst[i + 0] = src[i + 0] * scale[i + 0];
+                            dst[i + 1] = src[i + 1] * scale[i + 1];
+                            dst[i + 2] = src[i + 2] * scale[i + 2];
+                            dst[i + 3] = src[i + 3] * scale[i + 3];
+                        }
+                        for (; i < count; ++i)
+                            dst[i] = src[i] * scale[i];
+                        src += count;
+                        dst += count;
+                    }
                 }
             }
             else
             {
-                for (size_t i = 0; i < count; ++i)
+                size_t aligned = Simd::AlignLo(size, 4);
+                if (bias)
                 {
-                    float s = scale[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
+                    for (size_t i = 0; i < count; ++i)
                     {
-                        dst[j + 0] = src[j + 0] * s;
-                        dst[j + 1] = src[j + 1] * s;
-                        dst[j + 2] = src[j + 2] * s;
-                        dst[j + 3] = src[j + 3] * s;
+                        float s = scale[i];
+                        float b = bias[i];
+                        size_t j = 0;
+                        for (; j < aligned; j += 4)
+                        {
+                            dst[j + 0] = src[j + 0] * s + b;
+                            dst[j + 1] = src[j + 1] * s + b;
+                            dst[j + 2] = src[j + 2] * s + b;
+                            dst[j + 3] = src[j + 3] * s + b;
+                        }
+                        for (; j < size; ++j)
+                            dst[j] = src[j] * s + b;
+                        src += size;
+                        dst += size;
                     }
-                    for (; j < size; ++j)
-                        dst[j] = src[j] * s;
-                    src += size;
-                    dst += size;
+                }
+                else
+                {
+                    for (size_t i = 0; i < count; ++i)
+                    {
+                        float s = scale[i];
+                        size_t j = 0;
+                        for (; j < aligned; j += 4)
+                        {
+                            dst[j + 0] = src[j + 0] * s;
+                            dst[j + 1] = src[j + 1] * s;
+                            dst[j + 2] = src[j + 2] * s;
+                            dst[j + 3] = src[j + 3] * s;
+                        }
+                        for (; j < size; ++j)
+                            dst[j] = src[j] * s;
+                        src += size;
+                        dst += size;
+                    }
                 }
             }
         }

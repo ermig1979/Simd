@@ -5074,12 +5074,12 @@ SIMD_API void SimdSynetRestrictRange(const float * src, size_t size, const float
     simdSynetRestrictRange(src, size, lower, upper, dst);
 }
 
-typedef void(*SimdSynetScaleLayerForwardPtr) (const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
+typedef void(*SimdSynetScaleLayerForwardPtr) (const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 volatile SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC4(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
-SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst)
+SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
 {
-    simdSynetScaleLayerForward(src, scale, bias, count, size, dst);
+    simdSynetScaleLayerForward(src, scale, bias, count, size, dst, trans);
 }
 
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,

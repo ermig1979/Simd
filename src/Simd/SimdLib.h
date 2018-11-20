@@ -5221,9 +5221,9 @@ extern "C"
         for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
                 if(trans)
-                    dst[i*size + j] += bias[i];
-                else
                     dst[i + j*count] += bias[i];
+                else
+                    dst[i*size + j] += bias[i];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -5466,7 +5466,7 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
+        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
         \short This function is used for forward propagation of ScaleLayer.
 
@@ -5474,7 +5474,10 @@ extern "C"
         \verbatim
         for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
-                dst[i*size + j] = src[i*size + j]*scale[i] + (bias ? bias[i] : 0);
+                if(trans)
+                    dst[i + j*count] = src[i + j*count]*scale[i] + (bias ? bias[i] : 0);
+                else
+                    dst[i*size + j] = src[i*size + j]*scale[i] + (bias ? bias[i] : 0);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -5485,8 +5488,9 @@ extern "C"
         \param [in] count - a size of scale and bias arrays.
         \param [in] size - an internal size of the operation.
         \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst);
+    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup texture_estimation
 
