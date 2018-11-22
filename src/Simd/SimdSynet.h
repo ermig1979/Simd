@@ -62,6 +62,11 @@ namespace Simd
             float x = src * scale + bias;
             return Simd::Max(0.0f, x) + Simd::Min(0.0f, x)*slope;
         }
+
+        SIMD_INLINE float SynetPreluLayerForward(float value, float slope)
+        {
+            return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+        }
     }
 }
 

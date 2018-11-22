@@ -5443,6 +5443,34 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);
+
+        \short This function is used for forward propagation of PreluLayer (PReLU).
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+                if(trans)
+                    o = i + j*count;
+                else
+                    o = i*size + j;
+                dst[o] = src[o] > 0 ? src[o] : slope[i]*src[o];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] slope - a pointer to the 32-bit float array with slope coefficients.
+        \param [in] count - a size of bias array.
+        \param [in] size - an internal size of bias addition.
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] trans - a flag of transposed data.
+    */
+    SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         \short This function is used in order to restrict range for given array.

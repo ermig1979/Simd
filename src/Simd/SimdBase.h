@@ -536,6 +536,8 @@ namespace Simd
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
 
+        void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);
+
         void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);

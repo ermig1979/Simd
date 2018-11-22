@@ -5066,6 +5066,14 @@ SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, siz
     simdSynetLrnLayerCrossChannels(src, half, count, size, k, dst);
 }
 
+typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);
+volatile SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC3(SynetPreluLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+
+SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+{
+    simdSynetPreluLayerForward(src, slope, count, size, dst, trans);
+}
+
 typedef void(*SimdSynetRestrictRangePtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
 volatile SimdSynetRestrictRangePtr simdSynetRestrictRange = SIMD_FUNC3(SynetRestrictRange, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 

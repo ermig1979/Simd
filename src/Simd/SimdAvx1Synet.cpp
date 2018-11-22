@@ -532,6 +532,88 @@ namespace Simd
                 SynetInnerProductLayerForward1(src, weight + i * size, (bias ? bias + i : _bias), size, dst + i);
         }
 
+        template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, const float * slope, float * dst, size_t offset)
+        {
+            __m256 _src = Load<align>(src + offset);
+            __m256 _slope = Load<align>(slope + offset);
+            __m256 pos = _mm256_max_ps(_mm256_setzero_ps(), _src);
+            __m256 neg = _mm256_min_ps(_mm256_setzero_ps(), _src);
+            Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(_slope, neg)));
+        }
+
+        template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, __m256 slope, float * dst, size_t offset)
+        {
+            __m256 _src = Load<align>(src + offset);
+            __m256 pos = _mm256_max_ps(_mm256_setzero_ps(), _src);
+            __m256 neg = _mm256_min_ps(_mm256_setzero_ps(), _src);
+            Store<align>(dst + offset, _mm256_add_ps(pos, _mm256_mul_ps(slope, neg)));
+        }
+
+        template <bool align> void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (align)
+                assert((trans || size == 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if (trans || size == 1)
+            {
+                size_t aligned = AlignLo(count, QF);
+                size_t partial = AlignLo(count, F);
+                for (size_t j = 0; j < size; ++j)
+                {
+                    size_t i = 0;
+                    if (partial)
+                    {
+                        for (; i < aligned; i += QF)
+                        {
+                            SynetPreluLayerForward<align>(src, slope, dst, i + F * 0);
+                            SynetPreluLayerForward<align>(src, slope, dst, i + F * 1);
+                            SynetPreluLayerForward<align>(src, slope, dst, i + F * 2);
+                            SynetPreluLayerForward<align>(src, slope, dst, i + F * 3);
+                        }
+                        for (; i < partial; i += F)
+                            SynetPreluLayerForward<align>(src, slope, dst, i);
+                    }
+                    for (; i < count; ++i)
+                        dst[i] = Base::SynetPreluLayerForward(src[i], slope[i]);
+                    src += count;
+                    dst += count;
+                }
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, QF);
+                size_t partial = AlignLo(size, F);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    size_t j = 0;
+                    if (partial)
+                    {
+                        __m256 _slope = _mm256_set1_ps(slope[i]);
+                        for (; j < aligned; j += QF)
+                        {
+                            SynetPreluLayerForward<align>(src, _slope, dst, j + F * 0);
+                            SynetPreluLayerForward<align>(src, _slope, dst, j + F * 1);
+                            SynetPreluLayerForward<align>(src, _slope, dst, j + F * 2);
+                            SynetPreluLayerForward<align>(src, _slope, dst, j + F * 3);
+                        }
+                        for (; j < partial; j += F)
+                            SynetPreluLayerForward<align>(src, _slope, dst, j);
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = Base::SynetPreluLayerForward(src[j], slope[i]);
+                    src += size;
+                    dst += size;
+                }
+            }
+        }
+
+        void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if ((trans || size == 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst))
+                SynetPreluLayerForward<true>(src, slope, count, size, dst, trans);
+            else
+                SynetPreluLayerForward<false>(src, slope, count, size, dst, trans);
+        }
+
         template <bool align> void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             assert(lower[0] <= upper[0]);

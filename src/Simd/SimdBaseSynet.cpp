@@ -269,6 +269,49 @@ namespace Simd
             }
         }
 
+        void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (trans || size == 1)
+            {
+                size_t aligned = Simd::AlignLo(count, 4);
+                for (size_t j = 0; j < size; ++j)
+                {
+                    size_t i = 0;
+                    for (; i < aligned; i += 4)
+                    {
+                        dst[i + 0] = SynetPreluLayerForward(src[i + 0], slope[i + 0]);
+                        dst[i + 1] = SynetPreluLayerForward(src[i + 1], slope[i + 1]);
+                        dst[i + 2] = SynetPreluLayerForward(src[i + 2], slope[i + 2]);
+                        dst[i + 3] = SynetPreluLayerForward(src[i + 3], slope[i + 3]);
+                    }
+                    for (; i < count; ++i)
+                        dst[i] = SynetPreluLayerForward(src[i], slope[i]);
+                    src += count;
+                    dst += count;
+                }
+            }
+            else
+            {
+                size_t aligned = Simd::AlignLo(size, 4);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    float s = slope[i];
+                    size_t j = 0;
+                    for (; j < aligned; j += 4)
+                    {
+                        dst[j + 0] = SynetPreluLayerForward(src[j + 0], s);
+                        dst[j + 1] = SynetPreluLayerForward(src[j + 1], s);
+                        dst[j + 2] = SynetPreluLayerForward(src[j + 2], s);
+                        dst[j + 3] = SynetPreluLayerForward(src[j + 3], s);
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = SynetPreluLayerForward(src[j], s);
+                    src += size;
+                    dst += size;
+                }
+            }
+        }
+
         void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             float min = *lower;

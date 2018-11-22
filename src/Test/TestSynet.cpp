@@ -641,6 +641,94 @@ namespace Test
 
     namespace
     {
+        struct FuncPLF
+        {
+            typedef void(*FuncPtr)(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);
+
+            FuncPtr func;
+            String desc;
+
+            FuncPLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Update(SimdBool trans)
+            {
+                desc = desc + "[" + ToString<int>(trans) + "]";
+            }
+
+            void Call(const View & src, const View & slope, size_t count, size_t size, SimdBool trans, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, (float*)slope.data, count, size, (float*)dst.data, trans);
+            }
+        };
+    }
+
+#define FUNC_PLF(function) FuncPLF(function, #function)
+
+    bool SynetPreluLayerForwardAutoTest(size_t count, size_t size, SimdBool trans, FuncPLF f1, FuncPLF f2)
+    {
+        bool result = true;
+
+        f1.Update(trans);
+        f2.Update(trans);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View slope(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        FillRandom32f(slope, -1.0, 1.0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, count, size, trans, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, count, size, trans, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetPreluLayerForwardAutoTest(const FuncPLF & f1, const FuncPLF & f2)
+    {
+        bool result = true;
+
+        result = result && SynetPreluLayerForwardAutoTest(H, W, SimdFalse, f1, f2);
+        result = result && SynetPreluLayerForwardAutoTest(H - O, W + O, SimdFalse, f1, f2);
+        result = result && SynetPreluLayerForwardAutoTest(H, W, SimdTrue, f1, f2);
+        result = result && SynetPreluLayerForwardAutoTest(H - O, W + O, SimdTrue, f1, f2);
+
+        return result;
+    }
+
+    bool SynetPreluLayerForwardAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Base::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Sse::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Avx::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Avx512f::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncRR
         {
             typedef void(*FuncPtr)(const float * src, size_t size, const float * lower, const float * upper, float * dst);
