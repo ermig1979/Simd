@@ -230,26 +230,34 @@ namespace Test
     {
         struct FuncFLF0
         {
-            typedef void(*FuncPtr)(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst);
+            typedef void(*FuncPtr)(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans);
 
             FuncPtr func;
             String desc;
 
             FuncFLF0(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Call(const View & src, const View & bias, const View & scale, size_t count, size_t size, View & dst) const
+            void Update(SimdBool trans)
+            {
+                desc = desc + (trans ? "[1]" : "[0]");
+            }
+
+            void Call(const View & src, const View & bias, const View & scale, size_t count, size_t size, SimdBool trans, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)src.data, (float*)bias.data, (float*)scale.data, count, size, (float*)dst.data);
+                func((float*)src.data, (float*)bias.data, (float*)scale.data, count, size, (float*)dst.data, trans);
             }
         };
     }
 
 #define FUNC_FLF0(function) FuncFLF0(function, #function)
 
-    bool SynetFusedLayerForward0AutoTest(size_t count, size_t size, const FuncFLF0 & f1, const FuncFLF0 & f2)
+    bool SynetFusedLayerForward0AutoTest(size_t count, size_t size, SimdBool trans, FuncFLF0 f1, FuncFLF0 f2)
     {
         bool result = true;
+
+        f1.Update(trans);
+        f2.Update(trans);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
 
@@ -263,9 +271,9 @@ namespace Test
         FillRandom32f(scale, -10.0, 10.0);
         FillRandom32f(bias, -10.0, 10.0);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, trans, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, trans, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 32, false);
 
@@ -276,8 +284,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward0AutoTest(H, W, f1, f2);
-        result = result && SynetFusedLayerForward0AutoTest(H - O, W + O, f1, f2);
+        result = result && SynetFusedLayerForward0AutoTest(H, W, SimdFalse, f1, f2);
+        result = result && SynetFusedLayerForward0AutoTest(H - O, W + O, SimdFalse, f1, f2);
+        result = result && SynetFusedLayerForward0AutoTest(H, W, SimdTrue, f1, f2);
+        result = result && SynetFusedLayerForward0AutoTest(H - O, W + O, SimdTrue, f1, f2);
 
         return result;
     }
@@ -504,12 +514,12 @@ namespace Test
         View dst1(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
         View dst2(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
 
-        FillRandom32f(src, -10.0, 10.0);
-        FillRandom32f(weight, -10.0, 10.0);
+        FillRandom32f(src, -1.0, 1.0);
+        FillRandom32f(weight, -1.0, 1.0);
         if (hasBias)
         {
             bias.Recreate(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-            FillRandom32f(bias, -10.0, 10.0);
+            FillRandom32f(bias, -1.0, 1.0);
         }
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, weight, bias, count, size, dst1));
