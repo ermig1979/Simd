@@ -412,26 +412,34 @@ namespace Test
     {
         struct FuncFLF2
         {
-            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float *slope, float * dst);
+            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float *slope, float * dst, SimdBool trans);
 
             FuncPtr func;
             String desc;
 
             FuncFLF2(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Call(const View & src, const View & scale, const View & bias, size_t count, size_t size, float slope, View & dst) const
+            void Update(SimdBool trans)
+            {
+                desc = desc + (trans ? "[1]" : "[0]");
+            }
+
+            void Call(const View & src, const View & scale, const View & bias, size_t count, size_t size, float slope, SimdBool trans, View & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)src.data, (float*)scale.data, (float*)bias.data, count, size, &slope, (float*)dst.data);
+                func((float*)src.data, (float*)scale.data, (float*)bias.data, count, size, &slope, (float*)dst.data, trans);
             }
         };
     }
 
 #define FUNC_FLF2(function) FuncFLF2(function, #function)
 
-    bool SynetFusedLayerForward2AutoTest(size_t count, size_t size, const FuncFLF2 & f1, const FuncFLF2 & f2)
+    bool SynetFusedLayerForward2AutoTest(size_t count, size_t size, SimdBool trans, FuncFLF2 f1, FuncFLF2 f2)
     {
         bool result = true;
+
+        f1.Update(trans);
+        f2.Update(trans);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
 
@@ -446,9 +454,9 @@ namespace Test
         FillRandom32f(bias, -10.0, 10.0);
         const float slope = 0.1;
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, slope, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, slope, trans, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, slope, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, slope, trans, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 32, false);
 
@@ -459,8 +467,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward2AutoTest(H, W, f1, f2);
-        result = result && SynetFusedLayerForward2AutoTest(H - O, W + O, f1, f2);
+        result = result && SynetFusedLayerForward2AutoTest(H, W, SimdFalse, f1, f2);
+        result = result && SynetFusedLayerForward2AutoTest(H - O, W + O, SimdFalse, f1, f2);
+        result = result && SynetFusedLayerForward2AutoTest(H, W, SimdTrue, f1, f2);
+        result = result && SynetFusedLayerForward2AutoTest(H - O, W + O, SimdTrue, f1, f2);
 
         return result;
     }

@@ -399,47 +399,85 @@ namespace Simd
                 SynetFusedLayerForward1<false>(src, bias0, scale1, bias1, count, size, dst, trans);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward2(const float * src, __m512 scale, __m512 bias, __m512 slope, float * dst, __mmask16 tail = -1)
+        template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, __m512 slope, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 x = _mm512_add_ps(_mm512_mul_ps((Load<align, mask>(src, tail)), scale), bias);
-            Store<align, mask>(dst, _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), x), _mm512_mul_ps(_mm512_min_ps(_mm512_setzero_ps(), x), slope)), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
+            __m512 x = _mm512_fmadd_ps(_src, _scale, _bias);
+            __m512 _dst = _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), x), _mm512_mul_ps(_mm512_min_ps(_mm512_setzero_ps(), x), slope));
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
-        template <bool align> void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst)
+        template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward2(const float * src, __m512 scale, __m512 bias, __m512 slope, float * dst, size_t offset, __mmask16 tail = -1)
+        {
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 x = _mm512_fmadd_ps(_src, scale, bias);
+            __m512 _dst = _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), x), _mm512_mul_ps(_mm512_min_ps(_mm512_setzero_ps(), x), slope));
+            Store<align, mask>(dst + offset, _dst, tail);
+        }
+
+        template <bool align> void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst, SimdBool trans)
         {
             if (align)
-                assert(Aligned(src) && Aligned(size) && Aligned(dst));
-            size_t aligned = AlignLo(size, QF);
-            size_t partial = AlignLo(size, F);
-            __mmask16 tail = __mmask16(-1) >> (F + partial - size);
+                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
             __m512 _slope = _mm512_set1_ps(slope[0]);
-            for (size_t i = 0; i < count; ++i)
+            if (trans || size == 1)
             {
-                size_t j = 0;
-                __m512 _scale = _mm512_set1_ps(scale[i]);
-                __m512 _bias = _mm512_set1_ps(bias[i]);
-                for (; j < aligned; j += QF)
+                size_t aligned = AlignLo(count, QF);
+                size_t partial = AlignLo(count, F);
+                __mmask16 tail = __mmask16(-1) >> (F + partial - count);
+                for (size_t j = 0; j < size; ++j)
                 {
-                    SynetFusedLayerForward2<align, false>(src + j + 0 * F, _scale, _bias, _slope, dst + j + 0 * F);
-                    SynetFusedLayerForward2<align, false>(src + j + 1 * F, _scale, _bias, _slope, dst + j + 1 * F);
-                    SynetFusedLayerForward2<align, false>(src + j + 2 * F, _scale, _bias, _slope, dst + j + 2 * F);
-                    SynetFusedLayerForward2<align, false>(src + j + 3 * F, _scale, _bias, _slope, dst + j + 3 * F);
+                    size_t i = 0;
+                    for (; i < aligned; i += QF)
+                    {
+                        SynetFusedLayerForward2<align, false>(src, scale, bias, _slope, dst, i + 0 * F);
+                        SynetFusedLayerForward2<align, false>(src, scale, bias, _slope, dst, i + 1 * F);
+                        SynetFusedLayerForward2<align, false>(src, scale, bias, _slope, dst, i + 2 * F);
+                        SynetFusedLayerForward2<align, false>(src, scale, bias, _slope, dst, i + 3 * F);
+                    }
+                    for (; i < partial; i += F)
+                        SynetFusedLayerForward2<align, false>(src, scale, bias, _slope, dst, i);
+                    if (i < count)
+                        SynetFusedLayerForward2<align, true>(src, scale, bias, _slope, dst, i, tail);
+                    src += count;
+                    dst += count;
                 }
-                for (; j < partial; j += F)
-                    SynetFusedLayerForward2<align, false>(src + j, _scale, _bias, _slope, dst + j);
-                if( j < size)
-                    SynetFusedLayerForward2<align, true>(src + j, _scale, _bias, _slope, dst + j, tail);
-                src += size;
-                dst += size;
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, QF);
+                size_t partial = AlignLo(size, F);
+                __mmask16 tail = __mmask16(-1) >> (F + partial - size);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    size_t j = 0;
+                    __m512 _scale = _mm512_set1_ps(scale[i]);
+                    __m512 _bias = _mm512_set1_ps(bias[i]);
+                    for (; j < aligned; j += QF)
+                    {
+                        SynetFusedLayerForward2<align, false>(src, _scale, _bias, _slope, dst, j + 0 * F);
+                        SynetFusedLayerForward2<align, false>(src, _scale, _bias, _slope, dst, j + 1 * F);
+                        SynetFusedLayerForward2<align, false>(src, _scale, _bias, _slope, dst, j + 2 * F);
+                        SynetFusedLayerForward2<align, false>(src, _scale, _bias, _slope, dst, j + 3 * F);
+                    }
+                    for (; j < partial; j += F)
+                        SynetFusedLayerForward2<align, false>(src, _scale, _bias, _slope, dst, j);
+                    if( j < size)
+                        SynetFusedLayerForward2<align, true>(src, _scale, _bias, _slope, dst, j, tail);
+                    src += size;
+                    dst += size;
+                }
             }
         }
 
-        void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst)
+        void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst, SimdBool trans)
         {
-            if (Aligned(src) && Aligned(size) && Aligned(dst))
-                SynetFusedLayerForward2<true>(src, scale, bias, count, size, slope, dst);
+            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+                SynetFusedLayerForward2<true>(src, scale, bias, count, size, slope, dst, trans);
             else
-                SynetFusedLayerForward2<false>(src, scale, bias, count, size, slope, dst);
+                SynetFusedLayerForward2<false>(src, scale, bias, count, size, slope, dst, trans);
         }
 
         void SynetInnerProductLayerForward1(const float * S0, const float * W, const float * B, size_t K, float * D)
