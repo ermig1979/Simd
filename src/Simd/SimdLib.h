@@ -5334,7 +5334,7 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst);
+        \fn void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst, SimdBool trans);
 
         \short This function is used for forward propagation of FusedLayer (type 1).
 
@@ -5343,8 +5343,12 @@ extern "C"
         for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
             {
-                x = src[i*size + j] + bias0[i];
-                dst[i*size + j] = max(0, -x)*scale1[i] + bias1[i] + max(0, x);
+                if(trans)
+                    o = i + j*count;
+                else
+                    o = i*size + j;
+                x = src[o] + bias0[i];
+                dst[o] = max(0, -x)*scale1[i] + bias1[i] + max(0, x);
             }
         \endverbatim
 
@@ -5357,8 +5361,9 @@ extern "C"
         \param [in] count - a size of bias and scale arrays.
         \param [in] size - an internal size of the operation.
         \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst);
+    SIMD_API void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup synet
 
