@@ -105,7 +105,7 @@ namespace Simd
                                     for (; dx < noseDx; ++dx)
                                         *(dst++) = 0;
                                     for (; dx < bodyDx; dx += F, sx += p.strideX*F, dst += F)
-                                        _mm256_storeu_ps(dst, _mm256_i32gather_ps(src + sx, index, sizeof(float)));
+                                        _mm256_storeu_ps(dst, _mm256_i32gather_ps(src + sx, index, 4));
                                     for (; dx < tailDx; ++dx, sx += p.strideX)
                                         *(dst++) = src[sx];
                                     for (; dx < p.dstW; ++dx)

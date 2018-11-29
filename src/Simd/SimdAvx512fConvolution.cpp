@@ -227,7 +227,7 @@ namespace Simd
                                 if (sy < p.srcH)
                                 {
                                     size_t dx = 0, sx = sx0 + sy * p.srcW;
-                                    _mm512_mask_storeu_ps(dst + dx, storeNose, _mm512_mask_i32gather_ps(_0, nose, index, src + sx, sizeof(float)));
+                                    _mm512_mask_storeu_ps(dst + dx, storeNose, _mm512_mask_i32gather_ps(_0, nose, index, (src + sx), 4));
                                     dx += F, sx += p.strideX*F;
                                     //if (p.strideX == 3)
                                     //{
@@ -237,10 +237,10 @@ namespace Simd
                                     //else
                                     //{
                                         for (; dx < aligned; dx += F, sx += p.strideX*F)
-                                            _mm512_storeu_ps(dst + dx, _mm512_i32gather_ps(index, src + sx, sizeof(float)));
+                                            _mm512_storeu_ps(dst + dx, _mm512_i32gather_ps(index, (src + sx), 4));
                                     //}
                                     if (aligned)
-                                        _mm512_mask_storeu_ps(dst + dx, storeTail, _mm512_mask_i32gather_ps(_0, tail, index, src + sx, sizeof(float)));
+                                        _mm512_mask_storeu_ps(dst + dx, storeTail, _mm512_mask_i32gather_ps(_0, tail, index, (src + sx), 4));
                                 }
                                 else
                                 {

@@ -140,6 +140,8 @@ namespace Simd
                 src -= srcWidth + 1;
                 rowPad = dstH2 < dstH ? PadTail2 : PadTail1;
                 noses[0] = noses[0] & (~1);
+                if (dstH2 == dstH)
+                    dstH2 -= 2;
             }
             for (size_t c = 0; c < srcChannels; ++c)
             {
