@@ -62,6 +62,8 @@
 
 #define SIMD_ALLOCATE_ASSERT
 
+#define SIMD_NO_MANS_LAND 64
+
 #define SIMD_NEON_RCP_ITER -1
 
 #define SIMD_NEON_ASM_DISABLE

@@ -76,14 +76,17 @@ namespace Simd
 
     SIMD_INLINE void * Allocate(size_t size, size_t align = SIMD_ALIGN)
     {
+#ifdef SIMD_NO_MANS_LAND
+        size += 2 * SIMD_NO_MANS_LAND;
+#endif
+        void * ptr = NULL;
 #if defined(_MSC_VER) 
-        return _aligned_malloc(size, align);
+        ptr = _aligned_malloc(size, align);
 #elif defined(__MINGW32__) || defined(__MINGW64__)
-        return __mingw_aligned_malloc(size, align);
+        ptr = __mingw_aligned_malloc(size, align);
 #elif defined(__GNUC__)
         align = AlignHi(align, sizeof(void *));
         size = AlignHi(size, align);
-        void * ptr;
         int result = ::posix_memalign(&ptr, align, size);
 #ifdef SIMD_ALLOCATE_ERROR_MESSAGE
         if (result != 0)
@@ -92,14 +95,23 @@ namespace Simd
 #ifdef SIMD_ALLOCATE_ASSERT
         assert(result == 0);
 #endif
-        return result ? NULL : ptr;
 #else
-        return malloc(size);
+        ptr = malloc(size);
 #endif
+
+#ifdef SIMD_NO_MANS_LAND
+        if (ptr)
+            ptr = (char*)ptr + SIMD_NO_MANS_LAND;
+#endif
+        return ptr;
     }
 
     SIMD_INLINE void Free(void * ptr)
     {
+#ifdef SIMD_NO_MANS_LAND
+        if (ptr)
+            ptr = (char*)ptr - SIMD_NO_MANS_LAND;
+#endif
 #if defined(_MSC_VER) 
         _aligned_free(ptr);
 #elif defined(__MINGW32__) || defined(__MINGW64__)
