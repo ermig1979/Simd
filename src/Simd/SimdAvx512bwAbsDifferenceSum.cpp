@@ -101,8 +101,10 @@ namespace Simd
 
         template <bool align, int bits> void AbsDifferenceSumMasked(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums)
         {
-            __mmask64 mask = _mm512_cmpeq_epu8_mask(Load<align>(m), index);
-            Sum<bits>(sums[0], _mm512_sad_epu8(Load<align, true>(a, mask), Load<align, true>(b, mask)));
+            __mmask64 m0 = _mm512_cmpeq_epu8_mask(Load<align>(m), index);
+            __m512i a0 = Load<align, true>(a, m0);
+            __m512i b0 = Load<align, true>(b, m0);
+            Sum<bits>(sums[0], _mm512_sad_epu8(a0, b0));
         }
 
         template <bool align, int bits> void AbsDifferenceSumMasked4(const uint8_t * a, const uint8_t * b, const uint8_t * m, const __m512i & index, __m512i * sums)
@@ -115,9 +117,9 @@ namespace Simd
 
         template <bool align, int bits, bool mask> void AbsDifferenceSumMasked1(const uint8_t * a, const uint8_t * b, const uint8_t * m, __m512i & index, __m512i * sums, __mmask64 mm = -1)
         {
-            __mmask64 m0 = _mm512_cmpeq_epu8_mask(Load<align>(m + 0), index) & mm;
-            const __m512i a0 = Load<align, true>(a + 0, m0);
-            const __m512i b0 = Load<align, true>(b + 0, m0);
+            __mmask64 m0 = _mm512_cmpeq_epu8_mask((Load<align, mask>(m, mm)), index) & mm;
+            const __m512i a0 = Load<align, true>(a, m0);
+            const __m512i b0 = Load<align, true>(b, m0);
             Sum<bits>(sums[0], _mm512_sad_epu8(a0, b0));
         }
 

@@ -99,6 +99,10 @@
 #define SIMD_AVX512BW_ENABLE
 #endif
 
+#if defined(NDEBUG) && _MSC_VER == 1914
+#define SIMD_MASKZ_LOAD_ERROR
+#endif
+
 #endif//defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
 
 #if defined(SIMD_ARM_ENABLE)

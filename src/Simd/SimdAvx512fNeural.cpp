@@ -532,7 +532,6 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
         {
-            assert(slope[0] >= 0.0f && slope[0] <= 1.0f);
             size_t partialAlignedSize = Simd::AlignLo(size, F);
             size_t fullAlignedSize = Simd::AlignLo(size, QF);
             size_t i = 0;

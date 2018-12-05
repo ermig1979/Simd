@@ -289,7 +289,7 @@ SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStr
 SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
                                              const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
 {
-#ifdef SIMD_AVX512BW_ENABLE
+#if defined(SIMD_AVX512BW_ENABLE) && !defined(SIMD_MASKZ_LOAD_ERROR)
     if (Avx512bw::Enable)
         Avx512bw::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else

@@ -494,12 +494,20 @@ namespace Simd
 
         template <> SIMD_INLINE __m512i Load<false, true>(const uint8_t * p, __mmask64 m)
         {
+#if defined (SIMD_MASKZ_LOAD_ERROR)
+            return _mm512_mask_mov_epi8(K_ZERO, m, _mm512_maskz_loadu_epi8(m, p));
+#else
             return _mm512_maskz_loadu_epi8(m, p);
+#endif
         }
 
         template <> SIMD_INLINE __m512i Load<true, true>(const uint8_t * p, __mmask64 m)
         {
+#if defined (SIMD_MASKZ_LOAD_ERROR)
+            return _mm512_mask_mov_epi8(K_ZERO, m, _mm512_maskz_loadu_epi8(m, p));
+#else
             return _mm512_maskz_loadu_epi8(m, p);
+#endif
         }
 
         template <bool align, bool mask> SIMD_INLINE __m512i Load(const int16_t * p, __mmask32 m)
