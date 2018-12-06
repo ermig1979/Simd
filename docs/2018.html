@@ -32,10 +32,20 @@
 <h3 id="R073">January X, 2019 (version X.X.73)</h3> 
 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>Base implementation, SSE, AVX and AVX-512F optimizations of function FusedLayerForward3</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Wrong assert condition in AVX-512F optimization of function NeuralRelu.</li>
  <li>Visual Studio 2017 compiler error (intrinsic _mm512_maskz_loadu_epi8 in Release mode).</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of function FusedLayerForward3.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

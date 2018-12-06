@@ -501,6 +501,96 @@ namespace Test
 
     namespace
     {
+        struct FuncFLF3
+        {
+            typedef void(*FuncPtr)(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans);
+
+            FuncPtr func;
+            String desc;
+
+            FuncFLF3(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Update(SimdBool trans)
+            {
+                desc = desc + (trans ? "[1]" : "[0]");
+            }
+
+            void Call(const View & src, const View & bias, const View & scale, size_t count, size_t size, SimdBool trans, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, (float*)bias.data, (float*)scale.data, count, size, (float*)dst.data, trans);
+            }
+        };
+    }
+
+#define FUNC_FLF3(function) FuncFLF3(function, #function)
+
+    bool SynetFusedLayerForward3AutoTest(size_t count, size_t size, SimdBool trans, FuncFLF3 f1, FuncFLF3 f2)
+    {
+        bool result = true;
+
+        f1.Update(trans);
+        f2.Update(trans);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+
+        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View scale(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(src, -10.0, 10.0);
+        FillRandom32f(scale, -10.0, 10.0);
+        FillRandom32f(bias, -10.0, 10.0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, trans, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, trans, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward3AutoTest(const FuncFLF3 & f1, const FuncFLF3 & f2)
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward3AutoTest(H, W, SimdFalse, f1, f2);
+        result = result && SynetFusedLayerForward3AutoTest(H - O, W + O, SimdFalse, f1, f2);
+        result = result && SynetFusedLayerForward3AutoTest(H, W, SimdTrue, f1, f2);
+        result = result && SynetFusedLayerForward3AutoTest(H - O, W + O, SimdTrue, f1, f2);
+
+        return result;
+    }
+
+    bool SynetFusedLayerForward3AutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Base::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Sse::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+#endif
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Avx::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Avx512f::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct FuncIPLF
         {
             typedef void(*FuncPtr)(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);

@@ -5400,6 +5400,38 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans);
+
+        \short This function is used for forward propagation of FusedLayer (type 3).
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count; ++i)
+            for(j = 0; j < size; ++j)
+            {
+                if(trans)
+                    o = i + j*count;
+                else
+                    o = i*size + j;
+                x = src[o] + bias[i];
+                dst[o] = max(0, x) + min(0, x)*scale[i];
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
+        \param [in] count - a size of bias and scale arrays.
+        \param [in] size - an internal size of the operation.
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] trans - a flag of transposed data.
+    */
+    SIMD_API void SimdSynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
 
         \short This function is used for forward propagation of InnerProductLayer.

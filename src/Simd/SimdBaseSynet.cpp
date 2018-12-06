@@ -287,6 +287,50 @@ namespace Simd
             }
         }
 
+        void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (trans || size == 1)
+            {
+                size_t aligned = Simd::AlignLo(count, 4);
+                for (size_t j = 0; j < size; ++j)
+                {
+                    size_t i = 0;
+                    for (; i < aligned; i += 4)
+                    {
+                        dst[i + 0] = SynetFusedLayerForward3(src[i + 0] + bias[i + 0], scale[i + 0]);
+                        dst[i + 1] = SynetFusedLayerForward3(src[i + 1] + bias[i + 1], scale[i + 1]);
+                        dst[i + 2] = SynetFusedLayerForward3(src[i + 2] + bias[i + 2], scale[i + 2]);
+                        dst[i + 3] = SynetFusedLayerForward3(src[i + 3] + bias[i + 3], scale[i + 3]);
+                    }
+                    for (; i < count; ++i)
+                        dst[i] = SynetFusedLayerForward3(src[i] + bias[i], scale[i]);
+                    src += count;
+                    dst += count;
+                }
+            }
+            else
+            {
+                size_t aligned = Simd::AlignLo(size, 4);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    float b = bias[i];
+                    float s = scale[i];
+                    size_t j = 0;
+                    for (; j < aligned; j += 4)
+                    {
+                        dst[j + 0] = SynetFusedLayerForward3(src[j + 0] + b, s);
+                        dst[j + 1] = SynetFusedLayerForward3(src[j + 1] + b, s);
+                        dst[j + 2] = SynetFusedLayerForward3(src[j + 2] + b, s);
+                        dst[j + 3] = SynetFusedLayerForward3(src[j + 3] + b, s);
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = SynetFusedLayerForward3(src[j] + b, s);
+                    src += size;
+                    dst += size;
+                }
+            }
+        }
+
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);

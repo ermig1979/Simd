@@ -63,6 +63,11 @@ namespace Simd
             return Simd::Max(0.0f, x) + Simd::Min(0.0f, x)*slope;
         }
 
+        SIMD_INLINE float SynetFusedLayerForward3(float x, float s)
+        {
+            return Simd::Max(0.0f, x) + Simd::Min(x, 0.0f) * s;
+        }
+
         SIMD_INLINE float SynetPreluLayerForward(float value, float slope)
         {
             return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
