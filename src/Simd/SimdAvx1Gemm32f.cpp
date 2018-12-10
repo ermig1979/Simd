@@ -62,33 +62,35 @@ namespace Simd
             __m256 c12 = _mm256_setzero_ps();
             __m256 c22 = _mm256_setzero_ps();
             __m256 c32 = _mm256_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t sa = lda == 1 ? 4 : 1;
             __m256 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 b1 = _mm256_loadu_ps(B + 1 * F);
                 b2 = _mm256_loadu_ps(B + 2 * F);
-                a0 = _mm256_set1_ps(*A0++);
+                a0 = _mm256_set1_ps(A[o0]);
                 c00 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c00);
                 c01 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c01);
                 c02 = _mm256_add_ps(_mm256_mul_ps(a0, b2), c02);
-                a0 = _mm256_set1_ps(*A1++);
+                a0 = _mm256_set1_ps(A[o1]);
                 c10 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c10);
                 c11 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c11);
                 c12 = _mm256_add_ps(_mm256_mul_ps(a0, b2), c12);
-                a0 = _mm256_set1_ps(*A2++);
+                a0 = _mm256_set1_ps(A[o2]);
                 c20 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c20);
                 c21 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c21);
                 c22 = _mm256_add_ps(_mm256_mul_ps(a0, b2), c22);
-                a0 = _mm256_set1_ps(*A3++);
+                a0 = _mm256_set1_ps(A[o3]);
                 c30 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c30);
                 c31 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c31);
                 c32 = _mm256_add_ps(_mm256_mul_ps(a0, b2), c32);
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
@@ -118,28 +120,30 @@ namespace Simd
             __m256 c11 = _mm256_setzero_ps();
             __m256 c21 = _mm256_setzero_ps();
             __m256 c31 = _mm256_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t sa = lda == 1 ? 4 : 1;
             __m256 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 b1 = _mm256_loadu_ps(B + 1 * F);
-                a0 = _mm256_set1_ps(*A0++);
+                a0 = _mm256_set1_ps(A[o0]);
                 c00 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c00);
                 c01 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c01);
-                a0 = _mm256_set1_ps(*A1++);
+                a0 = _mm256_set1_ps(A[o1]);
                 c10 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c10);
                 c11 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c11);
-                a0 = _mm256_set1_ps(*A2++);
+                a0 = _mm256_set1_ps(A[o2]);
                 c20 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c20);
                 c21 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c21);
-                a0 = _mm256_set1_ps(*A3++);
+                a0 = _mm256_set1_ps(A[o3]);
                 c30 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c30);
                 c31 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c31);
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
@@ -161,19 +165,21 @@ namespace Simd
             __m256 c1 = _mm256_setzero_ps();
             __m256 c2 = _mm256_setzero_ps();
             __m256 c3 = _mm256_setzero_ps();
-            const float * a0 = A + lda * 0;
-            const float * a1 = A + lda * 1;
-            const float * a2 = A + lda * 2;
-            const float * a3 = A + lda * 3;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t sa = lda == 1 ? 4 : 1;
             __m256 b0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm256_loadu_ps(B);
-                c0 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(*a0++)), c0);
-                c1 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(*a1++)), c1);
-                c2 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(*a2++)), c2);
-                c3 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(*a3++)), c3);
+                c0 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(A[o0])), c0);
+                c1 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(A[o1])), c1);
+                c2 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(A[o2])), c2);
+                c3 = _mm256_add_ps(_mm256_mul_ps(b0, _mm256_set1_ps(A[o3])), c3);
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             AddProduct(C + 0 * ldc, _alpha, c0, tail);
@@ -196,36 +202,38 @@ namespace Simd
             __m256 c31 = _mm256_setzero_ps();
             __m256 c41 = _mm256_setzero_ps();
             __m256 c51 = _mm256_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
-            const float * A4 = A + lda * 4;
-            const float * A5 = A + lda * 5;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t o4 = lda * 4;
+            const size_t o5 = lda * 5;
+            const size_t sa = lda == 1 ? 6 : 1;
             __m256 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 b1 = _mm256_loadu_ps(B + 1 * F);
-                a0 = _mm256_set1_ps(*A0++);
+                a0 = _mm256_set1_ps(A[o0]);
                 c00 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c00);
                 c01 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c01);
-                a0 = _mm256_set1_ps(*A1++);
+                a0 = _mm256_set1_ps(A[o1]);
                 c10 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c10);
                 c11 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c11);
-                a0 = _mm256_set1_ps(*A2++);
+                a0 = _mm256_set1_ps(A[o2]);
                 c20 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c20);
                 c21 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c21);
-                a0 = _mm256_set1_ps(*A3++);
+                a0 = _mm256_set1_ps(A[o3]);
                 c30 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c30);
                 c31 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c31);
-                a0 = _mm256_set1_ps(*A4++);
+                a0 = _mm256_set1_ps(A[o4]);
                 c40 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c40);
                 c41 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c41);
-                a0 = _mm256_set1_ps(*A5++);
+                a0 = _mm256_set1_ps(A[o5]);
                 c50 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c50);
                 c51 = _mm256_add_ps(_mm256_mul_ps(a0, b1), c51);
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
@@ -255,29 +263,31 @@ namespace Simd
             __m256 c30 = _mm256_setzero_ps();
             __m256 c40 = _mm256_setzero_ps();
             __m256 c50 = _mm256_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
-            const float * A4 = A + lda * 4;
-            const float * A5 = A + lda * 5;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t o4 = lda * 4;
+            const size_t o5 = lda * 5;
+            const size_t sa = lda == 1 ? 6 : 1;
             __m256 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm256_loadu_ps(B + 0 * F);
-                a0 = _mm256_set1_ps(*A0++);
+                a0 = _mm256_set1_ps(A[o0]);
                 c00 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c00);
-                a0 = _mm256_set1_ps(*A1++);
+                a0 = _mm256_set1_ps(A[o1]);
                 c10 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c10);
-                a0 = _mm256_set1_ps(*A2++);
+                a0 = _mm256_set1_ps(A[o2]);
                 c20 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c20);
-                a0 = _mm256_set1_ps(*A3++);
+                a0 = _mm256_set1_ps(A[o3]);
                 c30 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c30);
-                a0 = _mm256_set1_ps(*A4++);
+                a0 = _mm256_set1_ps(A[o4]);
                 c40 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c40);
-                a0 = _mm256_set1_ps(*A5++);
+                a0 = _mm256_set1_ps(A[o5]);
                 c50 = _mm256_add_ps(_mm256_mul_ps(a0, b0), c50);
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00, tail);
@@ -296,13 +306,14 @@ namespace Simd
         static void KernelMx24nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[4][3];
-            const float * a[4];
+            size_t o[4];
+            const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm256_setzero_ps();
                 c[i][1] = _mm256_setzero_ps();
                 c[i][2] = _mm256_setzero_ps();
-                a[i] = A + lda * i;
+                o[i] = lda * i;
             }
             __m256 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
@@ -312,12 +323,13 @@ namespace Simd
                 b2 = _mm256_loadu_ps(B + 2 * F);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm256_set1_ps(*a[i]++);
+                    a0 = _mm256_set1_ps(A[o[i]]);
                     c[i][0] = _mm256_add_ps(_mm256_mul_ps(b0, a0), c[i][0]);
                     c[i][1] = _mm256_add_ps(_mm256_mul_ps(b1, a0), c[i][1]);
                     c[i][2] = _mm256_add_ps(_mm256_mul_ps(b2, a0), c[i][2]);
                 }
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
@@ -332,12 +344,13 @@ namespace Simd
         static void KernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[6][2];
-            const float * a[6];
+            size_t o[6];
+            const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm256_setzero_ps();
                 c[i][1] = _mm256_setzero_ps();
-                a[i] = A + lda * i;
+                o[i] = lda * i;
             }
             __m256 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
@@ -346,11 +359,12 @@ namespace Simd
                 b1 = _mm256_loadu_ps(B + 1 * F);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm256_set1_ps(*a[i]++);
+                    a0 = _mm256_set1_ps(A[o[i]]);
                     c[i][0] = _mm256_add_ps(_mm256_mul_ps(b0, a0), c[i][0]);
                     c[i][1] = _mm256_add_ps(_mm256_mul_ps(b1, a0), c[i][1]);
                 }
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
@@ -365,15 +379,16 @@ namespace Simd
         {
 #ifdef SIMD_X64_ENABLE
             __m256 c[6];
-            const float * a[6];
+            size_t o[6];
 #else
             __m256 c[4];
-            const float * a[4];
+            size_t o[4];
 #endif
+            const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i] = _mm256_setzero_ps();
-                a[i] = A + lda * i;
+                o[i] = lda * i;
             }
             __m256 b0, a0;
             for (size_t k = 0; k < K; k++)
@@ -381,51 +396,99 @@ namespace Simd
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm256_set1_ps(*a[i]++);
+                    a0 = _mm256_set1_ps(A[o[i]]);
                     c[i] = _mm256_add_ps(_mm256_mul_ps(b0, a0), c[i]);
                 }
                 B += ldb;
+                A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
                 AddProduct(C + i * ldc, _alpha, c[i], tail);
         }
 
-        SIMD_INLINE void ScaleC(float * C, __m256 beta)
+        void GemmPackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)
         {
-            _mm256_storeu_ps(C, _mm256_mul_ps(_mm256_loadu_ps(C), beta));
-        }
-
-        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc)
-        {
-            if (beta == 1.0f)
-                return;
-            else if (beta == 0.0f)
+            size_t K4 = AlignLo(K, 4), K8 = AlignLo(K, 8);
+            for (size_t i = 0; i < M; i += cell)
             {
-                for (size_t i = 0; i < M; ++i)
-                    memset(C + i * ldc, 0, N * sizeof(float));
-            }
-            else
-            {
-                size_t NQF = AlignLo(N, QF);
-                size_t NF = AlignLo(N, F);
-                __m256 _beta = _mm256_set1_ps(beta);
-                for (size_t i = 0; i < M; ++i)
+                size_t m = Simd::Min(cell, M - i), k = 0;
+                if (cell == 6 && m == 6)
                 {
-                    size_t j = 0;
-                    for (; j < NQF; j += QF)
+                    size_t K4 = AlignLo(K, 4);
+                    for (; k < K4; k += 4)
                     {
-                        ScaleC(C + j + F * 0, _beta);
-                        ScaleC(C + j + F * 1, _beta);
-                        ScaleC(C + j + F * 2, _beta);
-                        ScaleC(C + j + F * 3, _beta);
+                        const float * ps = src + k;
+                        __m128 s0 = _mm_loadu_ps(ps + 0 * stride);
+                        __m128 s1 = _mm_loadu_ps(ps + 1 * stride);
+                        __m128 s2 = _mm_loadu_ps(ps + 2 * stride);
+                        __m128 s3 = _mm_loadu_ps(ps + 3 * stride);
+                        __m128 s4 = _mm_loadu_ps(ps + 4 * stride);
+                        __m128 s5 = _mm_loadu_ps(ps + 5 * stride);
+                        __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                        __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                        __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                        __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                        __m128 s20 = _mm_unpacklo_ps(s4, s5);
+                        __m128 s21 = _mm_unpackhi_ps(s4, s5);
+                        _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
+                        _mm_storel_pi((__m64*)(dst + 4), s20);
+                        _mm_storeu_ps(dst + 6, _mm_unpackhi_ps(s00, s01));
+                        _mm_storeh_pi((__m64*)(dst + 10), s20);
+                        _mm_storeu_ps(dst + 12, _mm_unpacklo_ps(s10, s11));
+                        _mm_storel_pi((__m64*)(dst + 16), s21);
+                        _mm_storeu_ps(dst + 18, _mm_unpackhi_ps(s10, s11));
+                        _mm_storeh_pi((__m64*)(dst + 22), s21);
+                        dst += 24;
                     }
-                    for (; j < NF; j += F)
-                        ScaleC(C + j, _beta);
-                    for (; j < N; ++j)
-                        C[j] *= beta;
-                    C += ldc;
                 }
+                if (cell == 4 && m == 4)
+                {
+                    for (; k < K8; k += 8)
+                    {
+                        const float * ps = src + k;
+                        __m256 s0 = _mm256_loadu_ps(ps + 0 * stride);
+                        __m256 s1 = _mm256_loadu_ps(ps + 1 * stride);
+                        __m256 s2 = _mm256_loadu_ps(ps + 2 * stride);
+                        __m256 s3 = _mm256_loadu_ps(ps + 3 * stride);
+                        __m256 s00 = _mm256_unpacklo_ps(s0, s2);
+                        __m256 s01 = _mm256_unpacklo_ps(s1, s3);
+                        __m256 s10 = _mm256_unpackhi_ps(s0, s2);
+                        __m256 s11 = _mm256_unpackhi_ps(s1, s3);
+                        __m256 d0 = _mm256_unpacklo_ps(s00, s01);
+                        __m256 d1 = _mm256_unpackhi_ps(s00, s01);
+                        __m256 d2 = _mm256_unpacklo_ps(s10, s11);
+                        __m256 d3 = _mm256_unpackhi_ps(s10, s11);
+                        _mm256_storeu_ps(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
+                        _mm256_storeu_ps(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
+                        _mm256_storeu_ps(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
+                        _mm256_storeu_ps(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
+                        dst += 32;
+                    };
+                    for (; k < K4; k += 4)
+                    {
+                        const float * ps = src + k;
+                        __m128 s0 = _mm_loadu_ps(ps + 0 * stride);
+                        __m128 s1 = _mm_loadu_ps(ps + 1 * stride);
+                        __m128 s2 = _mm_loadu_ps(ps + 2 * stride);
+                        __m128 s3 = _mm_loadu_ps(ps + 3 * stride);
+                        __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                        __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                        __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                        __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                        _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
+                        _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(s00, s01));
+                        _mm_storeu_ps(dst + 8, _mm_unpacklo_ps(s10, s11));
+                        _mm_storeu_ps(dst + 12, _mm_unpackhi_ps(s10, s11));
+                        dst += 16;
+                    }
+                }
+                for (; k < K; ++k)
+                {
+                    for (size_t c = 0; c < m; ++c)
+                        *(dst++) = src[c*stride + k];
+                }
+                src += cell * stride;
             }
         }
 
@@ -523,59 +586,41 @@ namespace Simd
             }
         }
 
-        static void PackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)
+        SIMD_INLINE void ScaleC(float * C, __m256 beta)
         {
-            size_t K4 = AlignLo(K, 4), K8 = AlignLo(K, 8);
-            for (size_t i = 0; i < M; i += cell)
+            _mm256_storeu_ps(C, _mm256_mul_ps(_mm256_loadu_ps(C), beta));
+        }
+
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc)
+        {
+            if (beta == 1.0f)
+                return;
+            else if (beta == 0.0f)
             {
-                size_t m = Simd::Min(cell, M - i), k = 0;
-                if (cell == 4 && m == 4)
+                for (size_t i = 0; i < M; ++i)
+                    memset(C + i * ldc, 0, N * sizeof(float));
+            }
+            else
+            {
+                size_t NQF = AlignLo(N, QF);
+                size_t NF = AlignLo(N, F);
+                __m256 _beta = _mm256_set1_ps(beta);
+                for (size_t i = 0; i < M; ++i)
                 {
-                    for (; k < K8; k += 8)
+                    size_t j = 0;
+                    for (; j < NQF; j += QF)
                     {
-                        const float * ps = src + k;
-                        __m256 s0 = _mm256_loadu_ps(ps + 0 * K);
-                        __m256 s1 = _mm256_loadu_ps(ps + 1 * K);
-                        __m256 s2 = _mm256_loadu_ps(ps + 2 * K);
-                        __m256 s3 = _mm256_loadu_ps(ps + 3 * K);
-                        __m256 s00 = _mm256_unpacklo_ps(s0, s2);
-                        __m256 s01 = _mm256_unpacklo_ps(s1, s3);
-                        __m256 s10 = _mm256_unpackhi_ps(s0, s2);
-                        __m256 s11 = _mm256_unpackhi_ps(s1, s3);
-                        __m256 d0 = _mm256_unpacklo_ps(s00, s01);
-                        __m256 d1 = _mm256_unpackhi_ps(s00, s01);
-                        __m256 d2 = _mm256_unpacklo_ps(s10, s11);
-                        __m256 d3 = _mm256_unpackhi_ps(s10, s11);
-                        _mm256_storeu_ps(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
-                        _mm256_storeu_ps(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
-                        _mm256_storeu_ps(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
-                        _mm256_storeu_ps(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
-                        dst += 32;
-                    };
-                    for (; k < K4; k += 4)
-                    {
-                        const float * ps = src + k;
-                        __m128 s0 = _mm_loadu_ps(ps + 0 * stride);
-                        __m128 s1 = _mm_loadu_ps(ps + 1 * stride);
-                        __m128 s2 = _mm_loadu_ps(ps + 2 * stride);
-                        __m128 s3 = _mm_loadu_ps(ps + 3 * stride);
-                        __m128 s00 = _mm_unpacklo_ps(s0, s2);
-                        __m128 s01 = _mm_unpacklo_ps(s1, s3);
-                        __m128 s10 = _mm_unpackhi_ps(s0, s2);
-                        __m128 s11 = _mm_unpackhi_ps(s1, s3);
-                        _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
-                        _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(s00, s01));
-                        _mm_storeu_ps(dst + 8, _mm_unpacklo_ps(s10, s11));
-                        _mm_storeu_ps(dst + 12, _mm_unpackhi_ps(s10, s11));
-                        dst += 16;
+                        ScaleC(C + j + F * 0, _beta);
+                        ScaleC(C + j + F * 1, _beta);
+                        ScaleC(C + j + F * 2, _beta);
+                        ScaleC(C + j + F * 3, _beta);
                     }
+                    for (; j < NF; j += F)
+                        ScaleC(C + j, _beta);
+                    for (; j < N; ++j)
+                        C[j] *= beta;
+                    C += ldc;
                 }
-                for (; k < K; ++k)
-                {
-                    for (size_t c = 0; c < m; ++c)
-                        *(dst++) = src[c*stride + k];
-                }  
-                src += cell * stride;
             }
         }
 
@@ -617,10 +662,11 @@ namespace Simd
             kernelTM = KernelMx8nn;
             kernelTT = KernelMx8nn;
 #endif
+            GemmNN::PackA packA = NULL;
             L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
             L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
             GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,
-                kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmScaleC, Avx::GemmPackB, NULL);
+                kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx::GemmPackB, Avx::GemmScaleC, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
 

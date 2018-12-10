@@ -188,8 +188,8 @@ namespace Test
     TEST_ADD_GROUP_AD0(Float32ToUint8);
     TEST_ADD_GROUP_AD0(Uint8ToFloat32);
 
-    TEST_ADD_GROUP_AD0(Gemm32fNN);
-    TEST_ADD_GROUP_AD0(Gemm32fNT);
+    TEST_ADD_GROUP_A00(Gemm32fNN);
+    TEST_ADD_GROUP_A00(Gemm32fNT);
 
     TEST_ADD_GROUP_AD0(MeanFilter3x3);
     TEST_ADD_GROUP_AD0(MedianFilterRhomb3x3);
@@ -467,7 +467,7 @@ namespace Test
                 }
                 else if (arg.find("-tt=") == 0)
                 {
-#ifdef NDEBUG
+#if defined(NDEBUG)
                     testThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
 #endif
                 }

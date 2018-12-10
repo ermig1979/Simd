@@ -39,12 +39,13 @@ namespace Simd
     public:
         typedef void(*Main)(size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, TM tail);
         typedef void(*Tail)(size_t M, size_t N, size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, TM tail);
-        typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
+        typedef void(*PackA)(const T * A, size_t lda, size_t M, size_t K, size_t microM, T * pA);
         typedef void(*PackB)(const T * B, size_t ldb, size_t K, size_t N, size_t microN, T * pB);
+        typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
         typedef TM(*TailMask)(ptrdiff_t tail);
 
         GemmNN(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3, size_t F,
-            Main kernelMM, Main kernelMT, Tail kernelTM, Tail kernelTT, ScaleC scaleC, PackB packB, TailMask tailMask)
+            Main kernelMM, Main kernelMT, Tail kernelTM, Tail kernelTT, PackA packA, PackB packB, ScaleC scaleC, TailMask tailMask)
             : _M(M)
             , _N(N)
             , _K(K)
@@ -56,8 +57,9 @@ namespace Simd
             , _kernelMT(kernelMT)
             , _kernelTM(kernelTM)
             , _kernelTT(kernelTT)
-            , _scaleC(scaleC)
+            , _packA(packA)
             , _packB(packB)
+            , _scaleC(scaleC)
         {
 
             _macroK = L1 / sizeof(T) / _microN;
@@ -103,7 +105,6 @@ namespace Simd
                 for (size_t k = 0; k < _K; k += _macroK)
                 {
                     size_t macroK = Simd::Min(_K, k + _macroK) - k;
-                    //PackA(A + i * lda, lda, macroM, K, _microM, _A.data);
                     for (size_t i = 0; i < _M; i += _macroM)
                     {
                         size_t macroM = Simd::Min(_M, i + _macroM) - i;
@@ -117,6 +118,14 @@ namespace Simd
 
         void MacroKernel(size_t M, size_t N, size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T beta, T * C, size_t ldc, bool packB, size_t thread)
         {
+            size_t klda = lda;
+            if (_packA)
+            {
+                _packA(A, lda, M, K, _microM, _pA[thread].data);
+                A = _pA[thread].data;
+                lda = K;
+                klda = 1;
+            }
             size_t MA = AlignLoAny(M, _microM);
             size_t NA = AlignLoAny(N, _microN);
             size_t j = 0;
@@ -127,9 +136,9 @@ namespace Simd
                     _packB(B + j, ldb, K, _microN, _microN, pB);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMM(K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelMM(K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _main);
                 if (i < M)
-                    _kernelTM(M - i, _microN, K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelTM(M - i, _microN, K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _main);
             }
             if (j < N)
             {
@@ -138,9 +147,9 @@ namespace Simd
                     _packB(B + j, ldb, K, N - j, _microN, pB);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMT(K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelMT(K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _tail);
                 if (i < M)
-                    _kernelTT(M - i, NA - j, K, alpha, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, NA - j, K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _tail);
             }
         }
 
@@ -153,6 +162,7 @@ namespace Simd
         Tail _kernelTM, _kernelTT;
         ScaleC _scaleC;
         PackB _packB;
+        PackA _packA;
     };
 
     template <class T> class GemmNT
@@ -285,9 +295,11 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
-        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+        void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
 
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
+
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
     }
 #endif//SIMD_AVX_ENABLE
 }

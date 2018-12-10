@@ -61,33 +61,35 @@ namespace Simd
             __m128 c12 = _mm_setzero_ps();
             __m128 c22 = _mm_setzero_ps();
             __m128 c32 = _mm_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
             __m128 b0, b1, b2, a0;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t sa = lda == 1 ? 4 : 1;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
                 b1 = _mm_loadu_ps(B + 1 * F);
                 b2 = _mm_loadu_ps(B + 2 * F);
-                a0 = _mm_set1_ps(*A0++);
+                a0 = _mm_set1_ps(A[o0]);
                 c00 = _mm_add_ps(_mm_mul_ps(a0, b0), c00);
                 c01 = _mm_add_ps(_mm_mul_ps(a0, b1), c01);
                 c02 = _mm_add_ps(_mm_mul_ps(a0, b2), c02);
-                a0 = _mm_set1_ps(*A1++);
+                a0 = _mm_set1_ps(A[o1]);
                 c10 = _mm_add_ps(_mm_mul_ps(a0, b0), c10);
                 c11 = _mm_add_ps(_mm_mul_ps(a0, b1), c11);
                 c12 = _mm_add_ps(_mm_mul_ps(a0, b2), c12);
-                a0 = _mm_set1_ps(*A2++);
+                a0 = _mm_set1_ps(A[o2]);
                 c20 = _mm_add_ps(_mm_mul_ps(a0, b0), c20);
                 c21 = _mm_add_ps(_mm_mul_ps(a0, b1), c21);
                 c22 = _mm_add_ps(_mm_mul_ps(a0, b2), c22);
-                a0 = _mm_set1_ps(*A3++);
+                a0 = _mm_set1_ps(A[o3]);
                 c30 = _mm_add_ps(_mm_mul_ps(a0, b0), c30);
                 c31 = _mm_add_ps(_mm_mul_ps(a0, b1), c31);
                 c32 = _mm_add_ps(_mm_mul_ps(a0, b2), c32);
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
@@ -117,28 +119,30 @@ namespace Simd
             __m128 c11 = _mm_setzero_ps();
             __m128 c21 = _mm_setzero_ps();
             __m128 c31 = _mm_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t sa = lda == 1 ? 4 : 1;
             __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
                 b1 = _mm_loadu_ps(B + 1 * F);
-                a0 = _mm_set1_ps(*A0++);
+                a0 = _mm_set1_ps(A[o0]);
                 c00 = _mm_add_ps(_mm_mul_ps(a0, b0), c00);
                 c01 = _mm_add_ps(_mm_mul_ps(a0, b1), c01);
-                a0 = _mm_set1_ps(*A1++);
+                a0 = _mm_set1_ps(A[o1]);
                 c10 = _mm_add_ps(_mm_mul_ps(a0, b0), c10);
                 c11 = _mm_add_ps(_mm_mul_ps(a0, b1), c11);
-                a0 = _mm_set1_ps(*A2++);
+                a0 = _mm_set1_ps(A[o2]);
                 c20 = _mm_add_ps(_mm_mul_ps(a0, b0), c20);
                 c21 = _mm_add_ps(_mm_mul_ps(a0, b1), c21);
-                a0 = _mm_set1_ps(*A3++);
+                a0 = _mm_set1_ps(A[o3]);
                 c30 = _mm_add_ps(_mm_mul_ps(a0, b0), c30);
                 c31 = _mm_add_ps(_mm_mul_ps(a0, b1), c31);
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
@@ -160,19 +164,21 @@ namespace Simd
             __m128 c1 = _mm_setzero_ps();
             __m128 c2 = _mm_setzero_ps();
             __m128 c3 = _mm_setzero_ps();
-            const float * a0 = A + lda * 0;
-            const float * a1 = A + lda * 1;
-            const float * a2 = A + lda * 2;
-            const float * a3 = A + lda * 3;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t sa = lda == 1 ? 4 : 1;
             __m128 b0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B);
-                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a0++)), c0);
-                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a1++)), c1);
-                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a2++)), c2);
-                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a3++)), c3);
+                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o0])), c0);
+                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o1])), c1);
+                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o2])), c2);
+                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o3])), c3);
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             AddProduct(C + 0 * ldc, _alpha, c0, tail);
@@ -195,36 +201,38 @@ namespace Simd
             __m128 c31 = _mm_setzero_ps();
             __m128 c41 = _mm_setzero_ps();
             __m128 c51 = _mm_setzero_ps();
-            const float * A0 = A + lda * 0;
-            const float * A1 = A + lda * 1;
-            const float * A2 = A + lda * 2;
-            const float * A3 = A + lda * 3;
-            const float * A4 = A + lda * 4;
-            const float * A5 = A + lda * 5;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t o4 = lda * 4;
+            const size_t o5 = lda * 5;
+            const size_t sa = lda == 1 ? 6 : 1;
             __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B + 0 * F);
                 b1 = _mm_loadu_ps(B + 1 * F);
-                a0 = _mm_set1_ps(*A0++);
+                a0 = _mm_set1_ps(A[o0]);
                 c00 = _mm_add_ps(_mm_mul_ps(a0, b0), c00);
                 c01 = _mm_add_ps(_mm_mul_ps(a0, b1), c01);
-                a0 = _mm_set1_ps(*A1++);
+                a0 = _mm_set1_ps(A[o1]);
                 c10 = _mm_add_ps(_mm_mul_ps(a0, b0), c10);
                 c11 = _mm_add_ps(_mm_mul_ps(a0, b1), c11);
-                a0 = _mm_set1_ps(*A2++);
+                a0 = _mm_set1_ps(A[o2]);
                 c20 = _mm_add_ps(_mm_mul_ps(a0, b0), c20);
                 c21 = _mm_add_ps(_mm_mul_ps(a0, b1), c21);
-                a0 = _mm_set1_ps(*A3++);
+                a0 = _mm_set1_ps(A[o3]);
                 c30 = _mm_add_ps(_mm_mul_ps(a0, b0), c30);
                 c31 = _mm_add_ps(_mm_mul_ps(a0, b1), c31);
-                a0 = _mm_set1_ps(*A4++);
+                a0 = _mm_set1_ps(A[o4]);
                 c40 = _mm_add_ps(_mm_mul_ps(a0, b0), c40);
                 c41 = _mm_add_ps(_mm_mul_ps(a0, b1), c41);
-                a0 = _mm_set1_ps(*A5++);
+                a0 = _mm_set1_ps(A[o5]);
                 c50 = _mm_add_ps(_mm_mul_ps(a0, b0), c50);
                 c51 = _mm_add_ps(_mm_mul_ps(a0, b1), c51);
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
@@ -254,23 +262,25 @@ namespace Simd
             __m128 c3 = _mm_setzero_ps();
             __m128 c4 = _mm_setzero_ps();
             __m128 c5 = _mm_setzero_ps();
-            const float * a0 = A + lda * 0;
-            const float * a1 = A + lda * 1;
-            const float * a2 = A + lda * 2;
-            const float * a3 = A + lda * 3;
-            const float * a4 = A + lda * 4;
-            const float * a5 = A + lda * 5;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t o4 = lda * 4;
+            const size_t o5 = lda * 5;
+            const size_t sa = lda == 1 ? 6 : 1;
             __m128 b0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm_loadu_ps(B);
-                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a0++)), c0);
-                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a1++)), c1);
-                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a2++)), c2);
-                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a3++)), c3);
-                c4 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a4++)), c4);
-                c5 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(*a5++)), c5);
+                c0 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o0])), c0);
+                c1 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o1])), c1);
+                c2 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o2])), c2);
+                c3 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o3])), c3);
+                c4 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o4])), c4);
+                c5 = _mm_add_ps(_mm_mul_ps(b0, _mm_set1_ps(A[o5])), c5);
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             AddProduct(C + 0 * ldc, _alpha, c0, tail);
@@ -284,13 +294,14 @@ namespace Simd
         static void KernelMx12nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m128 c[4][3];
-            const float * a[4];
+            size_t o[4];
+            const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm_setzero_ps();
                 c[i][1] = _mm_setzero_ps();
                 c[i][2] = _mm_setzero_ps();
-                a[i] = A + lda * i;
+                o[i] = lda * i;
             }
             __m128 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
@@ -300,12 +311,13 @@ namespace Simd
                 b2 = _mm_loadu_ps(B + 2 * F);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm_set1_ps(*a[i]++);
+                    a0 = _mm_set1_ps(A[o[i]]);
                     c[i][0] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i][0]);
                     c[i][1] = _mm_add_ps(_mm_mul_ps(b1, a0), c[i][1]);
                     c[i][2] = _mm_add_ps(_mm_mul_ps(b2, a0), c[i][2]);
                 }
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
@@ -320,12 +332,13 @@ namespace Simd
         static void KernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
             __m128 c[6][2];
-            const float * a[6];
+            size_t o[6];
+            const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm_setzero_ps();
                 c[i][1] = _mm_setzero_ps();
-                a[i] = A + lda * i;
+                o[i] = lda * i;
             }
             __m128 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
@@ -334,11 +347,12 @@ namespace Simd
                 b1 = _mm_loadu_ps(B + 1 * F);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm_set1_ps(*a[i]++);
+                    a0 = _mm_set1_ps(A[o[i]]);
                     c[i][0] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i][0]);
                     c[i][1] = _mm_add_ps(_mm_mul_ps(b1, a0), c[i][1]);
                 }
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
@@ -353,15 +367,16 @@ namespace Simd
         {
 #ifdef SIMD_X64_ENABLE
             __m128 c[6];
-            const float * a[6];
+            size_t o[6];
 #else
             __m128 c[4];
-            const float * a[4];
+            size_t o[4];
 #endif
+            const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i] = _mm_setzero_ps();
-                a[i] = A + lda * i;
+                o[i] = lda * i;
             }
             __m128 b0, a0;
             for (size_t k = 0; k < K; k++)
@@ -369,52 +384,15 @@ namespace Simd
                 b0 = _mm_loadu_ps(B + 0 * F);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm_set1_ps(*a[i]++);
+                    a0 = _mm_set1_ps(A[o[i]]);
                     c[i] = _mm_add_ps(_mm_mul_ps(b0, a0), c[i]);
                 }
                 B += ldb;
+                A += sa;
             }
             __m128 _alpha = _mm_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
                 AddProduct(C + i * ldc, _alpha, c[i], tail);
-        }
-
-        SIMD_INLINE void ScaleC(float * C, __m128 beta)
-        {
-            _mm_storeu_ps(C, _mm_mul_ps(_mm_loadu_ps(C), beta));
-        }
-
-        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc)
-        {
-            if (beta == 1.0f)
-                return;
-            else if (beta == 0.0f)
-            {
-                for (size_t i = 0; i < M; ++i)
-                    memset(C + i * ldc, 0, N * sizeof(float));
-            }
-            else
-            {
-                size_t NQF = AlignLo(N, QF);
-                size_t NF = AlignLo(N, F);
-                __m128 _beta = _mm_set1_ps(beta);
-                for (size_t i = 0; i < M; ++i)
-                {
-                    size_t j = 0;
-                    for (; j < NQF; j += QF)
-                    {
-                        ScaleC(C + j + F * 0, _beta);
-                        ScaleC(C + j + F * 1, _beta);
-                        ScaleC(C + j + F * 2, _beta);
-                        ScaleC(C + j + F * 3, _beta);
-                    }
-                    for (; j < NF; j += F)
-                        ScaleC(C + j, _beta);
-                    for (; j < N; ++j)
-                        C[j] *= beta;
-                    C += ldc;
-                }
-            }
         }
 
         static void PackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)
@@ -422,6 +400,35 @@ namespace Simd
             for (size_t i = 0; i < M; i += cell)
             {
                 size_t m = Simd::Min(cell, M - i), k = 0;
+                if (cell == 6 && m == 6)
+                {
+                    size_t K4 = AlignLo(K, 4);
+                    for (; k < K4; k += 4)
+                    {
+                        const float * ps = src + k;
+                        __m128 s0 = _mm_loadu_ps(ps + 0 * stride);
+                        __m128 s1 = _mm_loadu_ps(ps + 1 * stride);
+                        __m128 s2 = _mm_loadu_ps(ps + 2 * stride);
+                        __m128 s3 = _mm_loadu_ps(ps + 3 * stride);
+                        __m128 s4 = _mm_loadu_ps(ps + 4 * stride);
+                        __m128 s5 = _mm_loadu_ps(ps + 5 * stride);
+                        __m128 s00 = _mm_unpacklo_ps(s0, s2);
+                        __m128 s01 = _mm_unpacklo_ps(s1, s3);
+                        __m128 s10 = _mm_unpackhi_ps(s0, s2);
+                        __m128 s11 = _mm_unpackhi_ps(s1, s3);
+                        __m128 s20 = _mm_unpacklo_ps(s4, s5);
+                        __m128 s21 = _mm_unpackhi_ps(s4, s5);
+                        _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
+                        _mm_storel_pi((__m64*)(dst + 4), s20);
+                        _mm_storeu_ps(dst + 6, _mm_unpackhi_ps(s00, s01));
+                        _mm_storeh_pi((__m64*)(dst + 10), s20);
+                        _mm_storeu_ps(dst + 12, _mm_unpacklo_ps(s10, s11));
+                        _mm_storel_pi((__m64*)(dst + 16), s21);
+                        _mm_storeu_ps(dst + 18, _mm_unpackhi_ps(s10, s11));
+                        _mm_storeh_pi((__m64*)(dst + 22), s21);
+                        dst += 24;
+                    }
+                }
                 if (cell == 4 && m == 4)
                 {
                     size_t K4 = AlignLo(K, 4);
@@ -546,6 +553,44 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void ScaleC(float * C, __m128 beta)
+        {
+            _mm_storeu_ps(C, _mm_mul_ps(_mm_loadu_ps(C), beta));
+        }
+
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc)
+        {
+            if (beta == 1.0f)
+                return;
+            else if (beta == 0.0f)
+            {
+                for (size_t i = 0; i < M; ++i)
+                    memset(C + i * ldc, 0, N * sizeof(float));
+            }
+            else
+            {
+                size_t NQF = AlignLo(N, QF);
+                size_t NF = AlignLo(N, F);
+                __m128 _beta = _mm_set1_ps(beta);
+                for (size_t i = 0; i < M; ++i)
+                {
+                    size_t j = 0;
+                    for (; j < NQF; j += QF)
+                    {
+                        ScaleC(C + j + F * 0, _beta);
+                        ScaleC(C + j + F * 1, _beta);
+                        ScaleC(C + j + F * 2, _beta);
+                        ScaleC(C + j + F * 3, _beta);
+                    }
+                    for (; j < NF; j += F)
+                        ScaleC(C + j, _beta);
+                    for (; j < N; ++j)
+                        C[j] *= beta;
+                    C += ldc;
+                }
+            }
+        }
+
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
             const size_t CACHE_L1_SIZE = 32 * 1024;
@@ -584,10 +629,11 @@ namespace Simd
             kernelTM = KernelMx4nn;
             kernelTT = KernelMx4nn;
 #endif
+            GemmNN::PackA packA = NULL;
             L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
             L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
             GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,
-                kernelMM, kernelMT, kernelTM, kernelTT, GemmScaleC, PackBnn, NULL); 
+                kernelMM, kernelMT, kernelTM, kernelTT, packA, PackBnn, GemmScaleC, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }

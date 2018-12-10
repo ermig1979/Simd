@@ -24,6 +24,7 @@
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
+#include "Test/TestTensor.h"
 
 namespace Test
 {
@@ -38,12 +39,11 @@ namespace Test
 
             FuncGemm32f(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Call(size_t M, size_t N, size_t K, float alpha, const View & A, const View & B, float beta, const View & srcC, View & dstC) const
+            void Call(size_t M, size_t N, size_t K, float alpha, const Tensor32f & A, const Tensor32f & B, float beta, const Tensor32f & srcC, Tensor32f & dstC) const
             {
-                Simd::Copy(srcC, dstC);
+                memcpy(dstC.Data(), srcC.Data(), sizeof(float)*srcC.Size());
                 TEST_PERFORMANCE_TEST(description);
-                func(M, N, K, &alpha, (float*)A.data, A.stride / sizeof(float), 
-                    (float*)B.data, B.stride / sizeof(float), &beta, (float*)dstC.data, dstC.stride / sizeof(float));
+                func(M, N, K, &alpha, A.Data(), A.Axis(1), B.Data(), B.Axis(1), &beta, dstC.Data(), dstC.Axis(1));
             }
 
             void Update(size_t M, size_t N, size_t K)
@@ -67,16 +67,18 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << M << ", " << N << ", " << K << "].");
 
-        View A(transA ? M : K, transA ? K : M, View::Float, NULL, TEST_ALIGN(1));
-        View B(transB ? K : N, transB ? N : K, View::Float, NULL, TEST_ALIGN(1));
-        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(1));
-        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(1));
-        View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        Tensor32f A({ transA ? K : M, transA ? M : K });
+        Tensor32f B({ transB ? N : K, transB ? K : N });
+        Tensor32f dstC1({ M, N });
+        Tensor32f dstC2({ M, N });
+        Tensor32f srcC({ M, N });
 
         const float alpha = 1.5f, beta = 0.5f;
-        FillRandom32f(A, -1.0f, 1.0f);
-        FillRandom32f(B, -1.0f, 1.0f);
-        FillRandom32f(srcC, -1.0f, 1.0f);
+        FillRandom(A.Data(), A.Size(), -1.0, 1.0f);
+        FillRandom(B.Data(), B.Size(), -1.0, 1.0f);
+        FillRandom(srcC.Data(), srcC.Size(), -1.0, 1.0f);
+
+        TEST_ALIGN(SIMD_ALIGN);
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(M, N, K, alpha, A, B, beta, srcC, dstC1));
 
@@ -130,14 +132,27 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 0, 256, 12, 128, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 12, 256, 128, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 0, 96, 22500, 16, f1, f2);       
-        result = result && Gemm32fAutoTest(0, 0, 22500, 96, 16, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 96, 22500, 16, f1, f2);       
+        //result = result && Gemm32fAutoTest(0, 0, 22500, 96, 16, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 0, 5625, 144, 24, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 144, 5625, 24, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 5625, 144, 24, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 144, 5625, 24, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 196, 728, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 196, 728, 728, f1, f2);
+
+        //result = result && Gemm32fAutoTest(0, 0, 9, 256, 256, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 256, 9, 256, f1, f2);
+
+        result = result && Gemm32fAutoTest(0, 0, 997, 998, 999, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 999, 998, 997, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 667, 666, 665, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 665, 666, 667, f1, f2);
+        
+        
+        //result = result && Gemm32fAutoTest(0, 0, 1002, 1001, 3000, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 1000, 1001, 3002, f1, f2);
+
         return result;
     }
 
@@ -175,6 +190,8 @@ namespace Test
         bool result = true;
 
         //result = result && Gemm32fAutoTest(0, 1, 666, 666, 666, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 997, 998, 999, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 999, 998, 997, f1, f2);
 
         //result = result && Gemm32fAutoTest(0, 1, 1280, 100, 256, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
@@ -182,9 +199,9 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 1, 16, 1, 1152, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 16, 25, 4608, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 1, 728, 196, 728, f1, f2);
-        result = result && Gemm32fAutoTest(0, 1, 728, 192, 728, f1, f2);
-        result = result && Gemm32fAutoTest(0, 1, 728, 4, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 728, 196, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 728, 192, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 728, 4, 728, f1, f2);
 
         return result;
     }
@@ -216,65 +233,5 @@ namespace Test
 #endif 
 
         return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool Gemm32fDataTest(bool create, int transA, int transB, size_t M, size_t N, size_t K, const FuncGemm32f & f)
-    {
-        bool result = true;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << M << ", " << N << ", " << K << "].");
-
-        View A(transA ? M : K, transA ? K : M, View::Float, NULL, TEST_ALIGN(1));
-        View B(transB ? K : N, transB ? N : K, View::Float, NULL, TEST_ALIGN(1));
-        View dstC1(N, M, View::Float, NULL, TEST_ALIGN(1));
-        View dstC2(N, M, View::Float, NULL, TEST_ALIGN(1));
-        View srcC(N, M, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        const float alpha = 1.5f, beta = 0.5f;
-
-        if (create)
-        {
-            FillRandom32f(A, -1.0f, 1.0f);
-            FillRandom32f(B, -1.0f, 1.0f);
-            FillRandom32f(srcC, -1.0f, 1.0f);
-
-            TEST_SAVE(A);
-            TEST_SAVE(B);
-            TEST_SAVE(srcC);
-
-            f.Call(M, N, K, alpha, A, B, beta, srcC, dstC1);
-
-            TEST_SAVE(dstC1);
-        }
-        else
-        {
-            TEST_LOAD(A);
-            TEST_LOAD(B);
-            TEST_LOAD(srcC);
-
-            TEST_LOAD(dstC1);
-
-            f.Call(M, N, K, alpha, A, B, beta, srcC, dstC2);
-
-            TEST_SAVE(dstC2);
-
-            result = result && Compare(dstC1, dstC2, EPS, true, 32, false);
-        }
-
-        return result;
-    }
-
-    bool Gemm32fNNDataTest(bool create)
-    {
-        return Gemm32fDataTest(create, 0, 0, 16, 18, 20, FUNC_GEMM32F(SimdGemm32fNN));
-    }
-
-    bool Gemm32fNTDataTest(bool create)
-    {
-        return Gemm32fDataTest(create, 0, 1, 16, 18, 20, FUNC_GEMM32F(SimdGemm32fNT));
     }
 }
