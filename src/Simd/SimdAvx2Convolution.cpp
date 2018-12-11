@@ -63,7 +63,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, dst);
         }
 
         void ConvolutionImgToCol::ImgToCol(const float * src, float * dst)
@@ -141,7 +141,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, dst);
         }
 
         //---------------------------------------------------------------------
@@ -160,7 +160,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Avx::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _activationType, _activationParams, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, dst);
         }
 
         //---------------------------------------------------------------------
@@ -451,21 +451,21 @@ namespace Simd
             {
             case 1:
                 if (p.kernelX == 1)
-                    return Avx2::SetConvolutionBiasActivation<1, 1>(_activationType);
+                    return Avx2::SetConvolutionBiasActivation<1, 1>(p.activation);
                 if (p.kernelX == 2)
-                    return Avx2::SetConvolutionBiasActivation<2, 1>(_activationType);
+                    return Avx2::SetConvolutionBiasActivation<2, 1>(p.activation);
                 if (p.kernelX == 3)
-                    return Avx2::SetConvolutionBiasActivation<3, 1>(_activationType);
+                    return Avx2::SetConvolutionBiasActivation<3, 1>(p.activation);
                 break;
             case 2:
                 if (p.kernelX == 2)
-                    return Avx2::SetConvolutionBiasActivation<2, 2>(_activationType);
+                    return Avx2::SetConvolutionBiasActivation<2, 2>(p.activation);
                 if (p.kernelX == 3)
-                    return Avx2::SetConvolutionBiasActivation<3, 2>(_activationType);
+                    return Avx2::SetConvolutionBiasActivation<3, 2>(p.activation);
                 break;
             case 3:
                 if (p.kernelX == 3)
-                    return Avx2::SetConvolutionBiasActivation<3, 3>(_activationType);
+                    return Avx2::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
             return Sse::ConvolutionDirect::SetConvolutionBiasActivation();
@@ -473,10 +473,14 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+            size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation)
         {
-            ConvParam param(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
-            if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))
+            ConvParam param(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
+            if (!param.Valid())
+                return NULL;
+            else if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))
                 return new Avx::ConvolutionDepthwiseDotProduct(param);
             else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);

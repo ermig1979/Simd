@@ -1567,63 +1567,12 @@ extern "C"
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup synet
-
-        \fn void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
-        
-        \short Initilizes convolution algorithm.
-
-        \param [in] srcC - a number of input channels.
-        \param [in] srcH - an input height.
-        \param [in] srcW - an input width.
-        \param [in] dstC - a number of output channels.
-        \param [in] kernelY - a height of the convolution kernel.
-        \param [in] kernelX - a width of the convolution kernel.
-        \param [in] dilationY - a y-dilation of the convolution.
-        \param [in] dilationX - a x-dilation of the convolution.
-        \param [in] strideY - a y-stride of the convolution.
-        \param [in] strideX - a x-stride of the convolution.
-        \param [in] padY - a pad to the top of the input image.
-        \param [in] padX - a pad to the left of the input image.
-        \param [in] padH - a pad to the bottom of the input image.
-        \param [in] padW - a pad to the right of the input image.
-        \param [in] group - a size of convolution group.
-        \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetWeight and ::SimdConvolutionForward.
-    */
-    SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, 
-        size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group);
-
-    /*! @ingroup synet
-
-        \fn size_t SimdConvolutionBufferSize(const void * convolution);
-
-        \short Gets size of external buffer required for convolution algorithm.
-
-        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease. 
-        \return size of external buffer required for convolution algorithm.
-    */
-    SIMD_API size_t SimdConvolutionBufferSize(const void * convolution);
-
-    /*! @ingroup synet
-
-        \fn void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal);
-
-        \short Sets weights and beases required for convolution algorithm.
-
-        \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to convolution weights.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
-    */
-    SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal);
-
-    /*! @ingroup synet
-        Describes type of activation function used in ::SimdConvolutionSetActivation.
+        Describes type of activation function. It is used in ::SimdConvolutionInit and ::SimdConvolutionSetParams.
     */
     typedef enum
     {
-        /*! 
-            Identity (activation function is absent). 
+        /*!
+            Identity (activation function is absent).
         */
         SimdConvolutionActivationIdentity = 0,
         /*!
@@ -1633,8 +1582,8 @@ extern "C"
             \endverbatim
         */
         SimdConvolutionActivationRelu,
-        /*! 
-            Leaky ReLU activation function. 
+        /*!
+            Leaky ReLU activation function.
             It has one parameter: slope (params[0]).
             \verbatim
             dst[i] = src[i] > 0 ? src[i] : slope*src[i];
@@ -1642,8 +1591,8 @@ extern "C"
         */
         SimdConvolutionActivationLeakyRelu,
         /*!
-            The activation function restricts range. 
-            It has two parameters: lower (params[0]) and upper (params[1]) bound. 
+            The activation function restricts range.
+            It has two parameters: lower (params[0]) and upper (params[1]) bound.
             \verbatim
             dst[i] = Min(Max(lower, src[i]), upper);
             \endverbatim
@@ -1661,15 +1610,60 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdConvolutionSetActivation(void * convolution, SimdConvolutionActivationType type, const float * params);
+        \fn void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+        
+        \short Initilizes convolution algorithm.
 
-        \short Sets activation function required for convolution algorithm.
+        \param [in] srcC - a number of input channels.
+        \param [in] srcH - an input height.
+        \param [in] srcW - an input width.
+        \param [in] srcT - a flag of transposed input data (::SimdFalse - CHW order, ::SimdTrue - HWC order).
+        \param [in] dstC - a number of output channels.
+        \param [in] dstT - a flag of transposed output data (::SimdFalse - CHW order, ::SimdTrue - HWC order).
+        \param [in] kernelY - a height of the convolution kernel.
+        \param [in] kernelX - a width of the convolution kernel.
+        \param [in] dilationY - a y-dilation of the convolution.
+        \param [in] dilationX - a x-dilation of the convolution.
+        \param [in] strideY - a y-stride of the convolution.
+        \param [in] strideX - a x-stride of the convolution.
+        \param [in] padY - a pad to the top of the input image.
+        \param [in] padX - a pad to the left of the input image.
+        \param [in] padH - a pad to the bottom of the input image.
+        \param [in] padW - a pad to the right of the input image.
+        \param [in] group - a size of convolution group.
+        \param [in] activation - a type of activation function (see ::SimdConvolutionActivationType).
+        \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetWeight and ::SimdConvolutionForward.
+    */
+    SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
+        size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
+        size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdConvolutionBufferSize(const void * convolution);
+
+        \short Gets size of external buffer required for convolution algorithm.
+
+        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease. 
+        \return size of external buffer required for convolution algorithm.
+    */
+    SIMD_API size_t SimdConvolutionBufferSize(const void * convolution);
+
+    /*! @ingroup synet
+
+        \fn void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
+
+        \short Sets weights, beases and parameters of activation function required for convolution algorithm.
 
         \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
-        \param [in] type - a type of activation function.
+        \param [in] weight - a pointer to convolution weights.
+        \param [in] trans - a flag of transposed weight data (::SimdFalse - DCHW order, ::SimdTrue - HWCD order).
+        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
-    SIMD_API void SimdConvolutionSetActivation(void * convolution, SimdConvolutionActivationType type, const float * params);
+    SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
 
     /*! @ingroup synet
 

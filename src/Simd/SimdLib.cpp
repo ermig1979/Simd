@@ -1404,35 +1404,36 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
 }
 
-SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX,
-    size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)
+SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+    size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
+    size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation)
 {
 #ifdef SIMD_AVX512F_ENABLE
     if (Avx512f::Enable)
-        return Avx512f::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+        return Avx512f::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
-        return Avx2::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+        return Avx2::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
     else
 #endif
 #ifdef SIMD_AVX_ENABLE
     if (Avx::Enable)
-        return Avx::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+        return Avx::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
     else
 #endif
 #ifdef SIMD_SSE3_ENABLE
     if (Sse3::Enable)
-        return Sse3::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+        return Sse3::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
     else
 #endif
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable)
-        return Sse::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+        return Sse::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
     else
 #endif
-        return Base::ConvolutionInit(srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group);
+        return Base::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
 }
 
 SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)
@@ -1440,14 +1441,9 @@ SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)
     return ((Convolution*)convolution)->BufferSize();
 }
 
-SIMD_API void SimdConvolutionSetWeight(void * convolution, const float * weight, const float * bias, SimdBool * internal)
+SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
 {
-    ((Convolution*)convolution)->SetWeight(weight, bias, internal);
-}
-
-SIMD_API void SimdConvolutionSetActivation(void * convolution, SimdConvolutionActivationType type, const float * params)
-{
-    ((Convolution*)convolution)->SetActivation(type, params);
+    ((Convolution*)convolution)->SetParams(weight, trans, internal, bias, params);
 }
 
 SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst)
