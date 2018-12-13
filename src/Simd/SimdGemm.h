@@ -149,7 +149,7 @@ namespace Simd
                 for (; i < MA; i += _microM)
                     _kernelMT(K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _tail);
                 if (i < M)
-                    _kernelTT(M - i, NA - j, K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, N - j, K, alpha, A + i * lda, klda, pB, _microN, C + i * ldc + j, ldc, _tail);
             }
         }
 

@@ -368,8 +368,13 @@ namespace Simd
 
         static void KernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
+#ifdef SIMD_X64_ENABLE
+            __m256 c[6];
+            size_t o[6];
+#else
             __m256 c[4];
-            size_t o[4]; 
+            size_t o[4];
+#endif
             const size_t sa = lda == 1 ? M : 1;
             for (size_t i = 0; i < M; ++i)
             {
