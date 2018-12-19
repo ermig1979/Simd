@@ -32,8 +32,8 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
-            : Avx::ConvolutionImgToCol(p)
+        ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
+            : Avx::ConvolutionGemmNN(p)
         {
             _index.Resize(F);
             for (size_t i = 0; i < F; ++i)
@@ -58,15 +58,20 @@ namespace Simd
             }
         }
 
-        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
-                Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, dst);
+            {
+                if (p.srcT)
+                    Avx2::Gemm32fNN(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                else
+                    Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+            }
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
-        void ConvolutionImgToCol::ImgToCol(const float * src, float * dst)
+        void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             size_t srcSize = p.srcW * p.srcH;
@@ -125,7 +130,7 @@ namespace Simd
             }
             else
             {
-                Base::ConvolutionImgToCol::ImgToCol(src, dst);
+                Base::ConvolutionGemmNN::ImgToCol(src, dst);
             }
         }
 
@@ -141,7 +146,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -160,7 +165,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Avx::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -489,7 +494,7 @@ namespace Simd
             else if (ConvolutionDirect::Preferable(param))
                 return new Avx2::ConvolutionDirect(param);
             else
-                return new ConvolutionImgToCol(param);
+                return new ConvolutionGemmNN(param);
         }
     }
 #endif//SIMD_AVX2_ENABLE

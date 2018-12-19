@@ -73,6 +73,42 @@ namespace Simd
             return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
         }
     }
+
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        SIMD_INLINE __m128 SynetPreluLayerForward(const __m128 & value, const __m128 & slope)
+        {
+            __m128 positive = _mm_max_ps(_mm_setzero_ps(), value);
+            __m128 negative = _mm_min_ps(_mm_setzero_ps(), value);
+            return _mm_add_ps(positive, _mm_mul_ps(slope, negative));
+        }
+    }
+#endif//SIMD_SSE_ENABLE
+
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        SIMD_INLINE __m256 SynetPreluLayerForward(const __m256 & value, const __m256 & slope)
+        {
+            __m256 positive = _mm256_max_ps(_mm256_setzero_ps(), value);
+            __m256 negative = _mm256_min_ps(_mm256_setzero_ps(), value);
+            return _mm256_add_ps(positive, _mm256_mul_ps(slope, negative));
+        }
+    }
+#endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX512F_ENABLE
+    namespace Avx512f
+    {
+        SIMD_INLINE __m512 SynetPreluLayerForward(const __m512 & value, const __m512 & slope)
+        {
+            __m512 positive = _mm512_max_ps(_mm512_setzero_ps(), value);
+            __m512 negative = _mm512_min_ps(_mm512_setzero_ps(), value);
+            return _mm512_add_ps(positive, _mm512_mul_ps(slope, negative));
+        }
+    }
+#endif//SIMD_AVX512F_ENABLE
 }
 
 #endif//__SimdSynet_h__

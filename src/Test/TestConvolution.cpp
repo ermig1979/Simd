@@ -287,7 +287,7 @@ namespace Test
         bool result = true;
 
         result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationRelu, ::SimdFalse, f1, f2);
-        //result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationRelu, ::SimdTrue, f1, f2);
+        result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationRelu, ::SimdTrue, f1, f2);
 
         return result;
     }

@@ -37,7 +37,7 @@ namespace Simd
 
         bool ConvolutionImgToRow::Preferable(const ConvParam & p)
         {
-            return p.srcH < 6 && p.srcW < 6 && p.group == 1;
+            return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.srcT == 0 && p.dstT == 0;
         }
 
         void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
@@ -45,7 +45,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Sse3::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -66,7 +66,7 @@ namespace Simd
             else if (ConvolutionDirect::Preferable(param))
                 return new Sse::ConvolutionDirect(param);
             else
-                return new Sse::ConvolutionImgToCol(param);
+                return new Sse::ConvolutionGemmNN(param);
         }
     }
 #endif//SIMD_SSE3_ENABLE

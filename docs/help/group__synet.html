@@ -77,18 +77,15 @@ Enumerations</h2></td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaa02fc06fc41f0a9c45189057846349dc"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc">SimdConvolutionInit</a> (size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group)</td></tr>
-<tr class="memdesc:gaa02fc06fc41f0a9c45189057846349dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes convolution algorithm.  <a href="#gaa02fc06fc41f0a9c45189057846349dc">More...</a><br /></td></tr>
-<tr class="separator:gaa02fc06fc41f0a9c45189057846349dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafcde23a098727991eb224105f45ddc13"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gafcde23a098727991eb224105f45ddc13">SimdConvolutionInit</a> (size_t srcC, size_t srcH, size_t srcW, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> srcT, size_t dstC, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> activation)</td></tr>
+<tr class="memdesc:gafcde23a098727991eb224105f45ddc13"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes convolution algorithm.  <a href="#gafcde23a098727991eb224105f45ddc13">More...</a><br /></td></tr>
+<tr class="separator:gafcde23a098727991eb224105f45ddc13"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0e92e65935c1e5d128ddbd912839e830"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830">SimdConvolutionBufferSize</a> (const void *convolution)</td></tr>
 <tr class="memdesc:ga0e92e65935c1e5d128ddbd912839e830"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of external buffer required for convolution algorithm.  <a href="#ga0e92e65935c1e5d128ddbd912839e830">More...</a><br /></td></tr>
 <tr class="separator:ga0e92e65935c1e5d128ddbd912839e830"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9f88bd65e8b8a1a6e2362bba85c44066"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9f88bd65e8b8a1a6e2362bba85c44066">SimdConvolutionSetWeight</a> (void *convolution, const float *weight, const float *bias, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal)</td></tr>
-<tr class="memdesc:ga9f88bd65e8b8a1a6e2362bba85c44066"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights and beases required for convolution algorithm.  <a href="#ga9f88bd65e8b8a1a6e2362bba85c44066">More...</a><br /></td></tr>
-<tr class="separator:ga9f88bd65e8b8a1a6e2362bba85c44066"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga165f6716f420cfb7915caa5aab923937"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga165f6716f420cfb7915caa5aab923937">SimdConvolutionSetActivation</a> (void *convolution, <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a> type, const float *params)</td></tr>
-<tr class="memdesc:ga165f6716f420cfb7915caa5aab923937"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets activation function required for convolution algorithm.  <a href="#ga165f6716f420cfb7915caa5aab923937">More...</a><br /></td></tr>
-<tr class="separator:ga165f6716f420cfb7915caa5aab923937"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gae91c73cf1fc25d82b769406b812370a3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gae91c73cf1fc25d82b769406b812370a3">SimdConvolutionSetParams</a> (void *convolution, const float *weight, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal, const float *bias, const float *params)</td></tr>
+<tr class="memdesc:gae91c73cf1fc25d82b769406b812370a3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, beases and parameters of activation function required for convolution algorithm.  <a href="#gae91c73cf1fc25d82b769406b812370a3">More...</a><br /></td></tr>
+<tr class="separator:gae91c73cf1fc25d82b769406b812370a3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2027ec89df3aa682152884cd2c739fdb"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2027ec89df3aa682152884cd2c739fdb">SimdConvolutionForward</a> (void *convolution, const float *src, float *buf, float *dst)</td></tr>
 <tr class="memdesc:ga2027ec89df3aa682152884cd2c739fdb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of convolution algorithm.  <a href="#ga2027ec89df3aa682152884cd2c739fdb">More...</a><br /></td></tr>
 <tr class="separator:ga2027ec89df3aa682152884cd2c739fdb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -164,7 +161,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Describes type of activation function used in <a class="el" href="group__synet.html#ga165f6716f420cfb7915caa5aab923937" title="Sets activation function required for convolution algorithm. ">SimdConvolutionSetActivation</a>. </p>
+<p>Describes type of activation function. It is used in <a class="el" href="group__synet.html#gafcde23a098727991eb224105f45ddc13" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and <a class="el" href="group__synet.html#gae91c73cf1fc25d82b769406b812370a3" title="Sets weights, beases and parameters of activation function required for convolution algorithm...">SimdConvolutionSetParams</a>. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a4691e110fbe68f7b8e6d17facf855308"></a>SimdConvolutionActivationIdentity&#160;</td><td class="fielddoc"><p>Identity (activation function is absent). </p>
 </td></tr>
@@ -206,8 +203,8 @@ Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gaa02fc06fc41f0a9c45189057846349dc"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaa02fc06fc41f0a9c45189057846349dc">&#9670;&nbsp;</a></span>SimdConvolutionInit()</h2>
+<a id="gafcde23a098727991eb224105f45ddc13"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafcde23a098727991eb224105f45ddc13">&#9670;&nbsp;</a></span>SimdConvolutionInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -233,8 +230,20 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>srcT</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>dstC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>dstT</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -300,7 +309,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>group</em>&#160;</td>
+          <td class="paramname"><em>group</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>&#160;</td>
+          <td class="paramname"><em>activation</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -316,7 +331,9 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcT</td><td>- a flag of transposed input data (<a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> - CHW order, <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> - HWC order). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstC</td><td>- a number of output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstT</td><td>- a flag of transposed output data (<a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> - CHW order, <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> - HWC order). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the convolution kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the convolution kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dilationY</td><td>- a y-dilation of the convolution. </td></tr>
@@ -328,10 +345,11 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padH</td><td>- a pad to the bottom of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padW</td><td>- a pad to the right of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">group</td><td>- a size of convolution group. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">activation</td><td>- a type of activation function (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830" title="Gets size of external buffer required for convolution algorithm. ">SimdConvolutionBufferSize</a>, <a class="el" href="group__synet.html#ga9f88bd65e8b8a1a6e2362bba85c44066" title="Sets weights and beases required for convolution algorithm. ">SimdConvolutionSetWeight</a> and <a class="el" href="group__synet.html#ga2027ec89df3aa682152884cd2c739fdb" title="Performs forward propagation of convolution algorithm. ">SimdConvolutionForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830" title="Gets size of external buffer required for convolution algorithm. ">SimdConvolutionBufferSize</a>, <a class="el" href="group__synet.html#gae91c73cf1fc25d82b769406b812370a3" title="Sets weights, beases and parameters of activation function required for convolution algorithm...">SimdConvolutionSetParams</a> and <a class="el" href="group__synet.html#ga2027ec89df3aa682152884cd2c739fdb" title="Performs forward propagation of convolution algorithm. ">SimdConvolutionForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -354,7 +372,7 @@ Functions</h2></td></tr>
 <p>Gets size of external buffer required for convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gafcde23a098727991eb224105f45ddc13" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -362,14 +380,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga9f88bd65e8b8a1a6e2362bba85c44066"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga9f88bd65e8b8a1a6e2362bba85c44066">&#9670;&nbsp;</a></span>SimdConvolutionSetWeight()</h2>
+<a id="gae91c73cf1fc25d82b769406b812370a3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gae91c73cf1fc25d82b769406b812370a3">&#9670;&nbsp;</a></span>SimdConvolutionSetParams()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdConvolutionSetWeight </td>
+          <td class="memname">void SimdConvolutionSetParams </td>
           <td>(</td>
           <td class="paramtype">void *&#160;</td>
           <td class="paramname"><em>convolution</em>, </td>
@@ -383,53 +401,20 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>bias</em>, </td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *&#160;</td>
-          <td class="paramname"><em>internal</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Sets weights and beases required for convolution algorithm. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to convolution weights. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a flag signalized that weight is stored in the internal buffer. Can be NULL. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga165f6716f420cfb7915caa5aab923937"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga165f6716f420cfb7915caa5aab923937">&#9670;&nbsp;</a></span>SimdConvolutionSetActivation()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdConvolutionSetActivation </td>
-          <td>(</td>
-          <td class="paramtype">void *&#160;</td>
-          <td class="paramname"><em>convolution</em>, </td>
+          <td class="paramname"><em>internal</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>&#160;</td>
-          <td class="paramname"><em>type</em>, </td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -445,11 +430,14 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Sets activation function required for convolution algorithm. </p>
+<p>Sets weights, beases and parameters of activation function required for convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a type of activation function. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gafcde23a098727991eb224105f45ddc13" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to convolution weights. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed weight data (<a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> - DCHW order, <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> - HWCD order). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a flag signalized that weight is stored in the internal buffer. Can be NULL. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to bias. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to parameters of activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
   </table>
   </dd>
@@ -498,7 +486,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gaa02fc06fc41f0a9c45189057846349dc" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">convolution</td><td>- a pointer to convolution context. It must be created by function <a class="el" href="group__synet.html#gafcde23a098727991eb224105f45ddc13" title="Initilizes convolution algorithm. ">SimdConvolutionInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to temporary buffer. The size of the temporary buffer is determined by function <a class="el" href="group__synet.html#ga0e92e65935c1e5d128ddbd912839e830" title="Gets size of external buffer required for convolution algorithm. ">SimdConvolutionBufferSize</a>. Can be NULL. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image. </td></tr>

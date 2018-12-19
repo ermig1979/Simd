@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdConvolution.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx1.h"
 
 namespace Simd
@@ -30,32 +31,50 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, float * dst)
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
-            size_t aligned = AlignLo(size, F);
+            size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    SynetAddBias(bias, count, size, dst, SimdFalse);
+                    SynetAddBias(bias, count, size, dst, trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {
                 if (bias)
                 {
                     __m256 _0 = _mm256_set1_ps(0.0f);
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
-                        __m256 _shift = _mm256_set1_ps(shift);
-                        size_t j = 0;
-                        for (; j < aligned; j += F)
+                        for (size_t j = 0; j < size; ++j)
                         {
-                            __m256 _dst = _mm256_loadu_ps(dst + j);
-                            _mm256_storeu_ps(dst + j, _mm256_max_ps(_0, _mm256_add_ps(_dst, _shift)));
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 _dst = _mm256_loadu_ps(dst + i);
+                                __m256 _bias = _mm256_loadu_ps(bias + i);
+                                _mm256_storeu_ps(dst + i, _mm256_max_ps(_0, _mm256_add_ps(_dst, _bias)));
+                            }
+                            for (; i < count; ++i)
+                                dst[j] = Simd::Max(0.0f, dst[i] + bias[i]);
+                            dst += count;
                         }
-                        for (; j < size; ++j)
-                            dst[j] = Simd::Max(0.0f, dst[j] + shift);
-                        dst += size;
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 _dst = _mm256_loadu_ps(dst + j);
+                                _mm256_storeu_ps(dst + j, _mm256_max_ps(_0, _mm256_add_ps(_dst, _bias)));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Simd::Max(0.0f, dst[j] + bias[i]);
+                            dst += size;
+                        }
                     }
                 }
                 else
@@ -70,23 +89,36 @@ namespace Simd
                 if (bias)
                 {
                     __m256 _slope = _mm256_set1_ps(slope);
-                    __m256 _0 = _mm256_set1_ps(0.0f);
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
-                        __m256 _shift = _mm256_set1_ps(shift);
-                        size_t j = 0;
-                        for (; j < aligned; j += F)
+                        for (size_t j = 0; j < size; ++j)
                         {
-                            __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _shift);
-                            _mm256_storeu_ps(dst + j, _mm256_add_ps(_mm256_max_ps(_0, value), _mm256_mul_ps(_slope, _mm256_min_ps(_0, value))));
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _slope));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], slope);
+                            dst += count;
                         }
-                        for (; j < size; ++j)
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
                         {
-                            float value = dst[j] + shift;
-                            dst[i] = Simd::Max(0.0f, value) + slope * Simd::Min(value, 0.0f);
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, SynetPreluLayerForward(value, _slope));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetPreluLayerForward(dst[j] + bias[i], slope);
+                            dst += size;
                         }
-                        dst += size;
                     }
                 }
                 else
@@ -100,19 +132,36 @@ namespace Simd
                 {
                     __m256 _lower = _mm256_set1_ps(lower);
                     __m256 _upper = _mm256_set1_ps(upper);
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
-                        __m256 _shift = _mm256_set1_ps(shift);
-                        size_t j = 0;
-                        for (; j < aligned; j += F)
+                        for (size_t j = 0; j < size; ++j)
                         {
-                            __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _shift);
-                            _mm256_storeu_ps(dst + j, _mm256_min_ps(_mm256_max_ps(_lower, value), _upper));
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(dst + i));
+                                _mm256_storeu_ps(dst + i, _mm256_min_ps(_mm256_max_ps(_lower, value), _upper));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Simd::RestrictRange(dst[i] + bias[i], lower, upper);
+                            dst += count;
                         }
-                        for (; j < size; ++j)
-                            dst[j] = Simd::RestrictRange(dst[j] + shift, lower, upper);
-                        dst += size;
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, _mm256_min_ps(_mm256_max_ps(_lower, value), _upper));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Simd::RestrictRange(dst[j] + bias[i], lower, upper);
+                            dst += size;
+                        }
                     }
                 }
                 else
@@ -122,48 +171,62 @@ namespace Simd
             {
                 if (bias)
                 {
-                    __m256 _0 = _mm256_set1_ps(0.0f);
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
-                        float slope = params[i];
-                        __m256 _shift = _mm256_set1_ps(shift);
-                        __m256 _slope = _mm256_set1_ps(slope);
-                        size_t j = 0;
-                        for (; j < aligned; j += F)
+                        for (size_t j = 0; j < size; ++j)
                         {
-                            __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _shift);
-                            _mm256_storeu_ps(dst + j, _mm256_add_ps(_mm256_max_ps(_0, value), _mm256_mul_ps(_slope, _mm256_min_ps(_0, value))));
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm256_loadu_ps(params + i)));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                            dst += count;
                         }
-                        for (; j < size; ++j)
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
                         {
-                            float value = dst[j] + shift;
-                            dst[j] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            __m256 _slope = _mm256_set1_ps(params[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, SynetPreluLayerForward(value, _slope));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetPreluLayerForward(dst[j] + bias[i], params[i]);
+                            dst += size;
                         }
-                        dst += size;
                     }
                 }
                 else
-                {
-                    for (size_t i = 0; i < count; ++i)
-                        NeuralRelu(dst + i*size, size, params + i, dst + i*size);
-                }
+                    Avx::SynetPreluLayerForward(dst, params, count, size, dst, trans);
             }
         }
 
         //---------------------------------------------------------------------
 
-        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
-            : Sse::ConvolutionImgToCol(p)
+        ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
+            : Sse::ConvolutionGemmNN(p)
         {
         }
 
-        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
-                Avx::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            {
+                if (p.srcT)
+                    Avx::Gemm32fNN(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                else
+                    Avx::Gemm32fNN(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+            }
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
         //---------------------------------------------------------------------
@@ -178,7 +241,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -197,7 +260,7 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Avx::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Avx::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -497,7 +560,7 @@ namespace Simd
                     dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
             }
             if (_param.activation)
-                ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, dst);
+                ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -518,7 +581,7 @@ namespace Simd
             else if (ConvolutionDirect::Preferable(param))
                 return new Avx::ConvolutionDirect(param);
             else
-                return new ConvolutionImgToCol(param);
+                return new ConvolutionGemmNN(param);
         }
     }
 #endif//SIMD_AVX_ENABLE

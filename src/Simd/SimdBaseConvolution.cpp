@@ -22,29 +22,41 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
 {
     namespace Base
     {
-        static void BiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, float * dst)
+        static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst)
         {
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if(bias)
-                    SynetAddBias(bias, count, size, dst, SimdFalse);
+                    SynetAddBias(bias, count, size, dst, trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {
                 if (bias)
                 {
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
                         for (size_t j = 0; j < size; ++j)
-                            dst[j] = Simd::Max(0.0f, dst[j] + shift);
-                        dst += size;
+                        {
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = Simd::Max(0.0f, dst[i] + bias[i]);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = Simd::Max(0.0f, dst[j] + bias[i]);
+                            dst += size;
+                        }
                     }
                 }
                 else
@@ -58,15 +70,23 @@ namespace Simd
                 float slope = params[0];
                 if (bias)
                 {
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
                         for (size_t j = 0; j < size; ++j)
                         {
-                            float value = dst[j] + shift;
-                            dst[j] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = SynetPreluLayerForward(dst[i] + bias[i], slope);
+                            dst += count;
                         }
-                        dst += size;
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = SynetPreluLayerForward(dst[j] + bias[i], slope);
+                            dst += size;
+                        }
                     }
                 }
                 else
@@ -78,12 +98,24 @@ namespace Simd
                 float upper = params[1];
                 if (bias)
                 {
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
                         for (size_t j = 0; j < size; ++j)
-                            dst[j] = Simd::RestrictRange(dst[j] + shift, lower, upper);
-                        dst += size;
+                        {
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = Simd::RestrictRange(dst[i] + bias[i], lower, upper);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float shift = bias[i];
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = Simd::RestrictRange(dst[j] + bias[i], lower, upper);
+                            dst += size;
+                        }
                     }
                 }
                 else
@@ -93,39 +125,61 @@ namespace Simd
             {
                 if (bias)
                 {
-                    for (size_t i = 0; i < count; ++i)
+                    if (trans)
                     {
-                        float shift = bias[i];
-                        float slope = params[i];
                         for (size_t j = 0; j < size; ++j)
                         {
-                            float value = dst[j] + shift;
-                            dst[j] = Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                            dst += count;
                         }
-                        dst += size;
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = SynetPreluLayerForward(dst[j] + bias[i], params[i]);
+                            dst += size;
+                        }
                     }
                 }
                 else
-                {
-                    for (size_t i = 0; i < count; ++i)
-                        NeuralRelu(dst + i*size, size, params + i, dst + i*size);
-                }
+                    Base::SynetPreluLayerForward(dst, params, count, size, dst, trans);
             }
         }
 
-        ConvolutionImgToCol::ConvolutionImgToCol(const ConvParam & p)
+        ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Convolution(p)
         {
             _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
-            _M = p.dstC / p.group;
-            _N = p.dstH  * p.dstW;
-            _K = p.srcC * p.kernelY * p.kernelX / p.group;
-            _weightStep = p.dstC * _K / p.group;
-            _srcStep = _K * _N;
-            _dstStep = p.dstC * _N / p.group;
+            if (p.srcT)
+            {
+                _M = p.dstH * p.dstW;
+                _N = p.dstC / p.group;
+                _K = p.srcC * p.kernelY * p.kernelX / p.group;
+                _ldS = _K;
+                _ldW = p.dstC;
+                _ldD = p.dstC;
+                _grW = _N;
+                _grS = _M * _K;
+                _grD = _N;
+            }
+            else
+            {
+                _M = p.dstC / p.group;
+                _N = p.dstH * p.dstW;
+                _K = p.srcC *  p.kernelY *  p.kernelX / p.group;
+                _ldW = _K;
+                _ldS = _N;
+                _ldD = _N;
+                _grW = _M * _K;
+                _grS = _K * _N;
+                _grD = _M * _N;
+            }
         }
 
-        size_t ConvolutionImgToCol::BufferSize() const
+        size_t ConvolutionGemmNN::BufferSize() const
         {
             if (_is1x1)
                 return 1;
@@ -136,7 +190,7 @@ namespace Simd
             }
         };
 
-        void ConvolutionImgToCol::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
         {
             assert(_param.srcT == trans);
             _weight = weight;
@@ -146,28 +200,37 @@ namespace Simd
             _params = params;
         }
 
-        void ConvolutionImgToCol::Forward(const float * src, float * buf, float * dst)
+        void ConvolutionGemmNN::Forward(const float * src, float * buf, float * dst)
         {
             if (!_is1x1)
             {
                 buf = Buffer(buf);
-                ImgToCol(src, buf);
+                if(_param.srcT)
+                    ImgToRow(src, buf);
+                else
+                    ImgToCol(src, buf);
                 src = buf;
             }
             GemmAndBias(src, dst);
         }
 
-        void ConvolutionImgToCol::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
-                Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _N, &_0, dst + _dstStep * g, _N);
-            BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            {
+                if (p.srcT)
+                    Base::Gemm32fNN(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                else
+                    Base::Gemm32fNN(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+            }
+            ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
-        void ConvolutionImgToCol::ImgToCol(const float * src, float * dst)
+        void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
         {
             const ConvParam & p = _param;
+            assert(p.srcT == ::SimdFalse);
             size_t srcSize = p.srcW * p.srcH;
             if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
             {
@@ -268,6 +331,49 @@ namespace Simd
             }
         }
 
+        void ConvolutionGemmNN::ImgToRow(const float * src, float * dst)
+        {
+            const ConvParam & p = _param;
+            assert(p.srcT == ::SimdTrue);
+            size_t size = p.srcC / p.group;
+            for (size_t g = 0; g < p.group; ++g)
+            {
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                {
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                    {
+                        for (size_t ky = 0; ky < p.kernelY; ky++)
+                        {
+                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            if (sy < p.srcH)
+                            {
+                                for (size_t kx = 0; kx < p.kernelX; kx++)
+                                {
+                                    size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        memcpy(dst, src + (sy * p.srcW + sx)*p.srcC, size * sizeof(float));
+                                        dst += size;
+                                    }
+                                    else
+                                    {
+                                        memset(dst, 0, size * sizeof(float));
+                                        dst += size;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                memset(dst, 0, p.kernelX * size * sizeof(float));
+                                dst += p.kernelX * size;
+                            }
+                        }
+                    }
+                }
+                src += size;
+            }
+        }
+
         //---------------------------------------------------------------------
 
         ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
@@ -306,7 +412,7 @@ namespace Simd
 
         bool ConvolutionImgToRow::Preferable(const ConvParam & p)
         {
-            return p.srcH < 6 && p.srcW < 6 && p.group == 1;
+            return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.srcT == 0 && p.dstT == 0;
         }
 
         void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
@@ -314,7 +420,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Base::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
         void ConvolutionImgToRow::ImgToRow(const float * src, const ConvParam & p, float * dst)
@@ -447,12 +553,12 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
                 Base::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             Base::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            BiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, dst);
+            ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
         bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
         {
-            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && p.srcH >= 6 && p.srcW >= 6;
+            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && p.srcH >= 6 && p.srcW >= 6 && p.srcT == 0 && p.dstT == 0;
         }
 
         //---------------------------------------------------------------------
@@ -523,7 +629,7 @@ namespace Simd
             if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
-            return k < 2.0 && (p.IsKernel(2) || p.IsKernel(3));
+            return k < 2.0 && (p.IsKernel(2) || p.IsKernel(3)) && p.srcT == 0 && p.dstT == 0;
         }
 
         void ConvolutionDirect::Pad(const float * src, float * dst) const
@@ -651,7 +757,7 @@ namespace Simd
                         }
                     }
                 }
-                BiasAndActivation(NULL, 1, dstH*dstW, type, params, dst);
+                ConvolutionBiasAndActivation(NULL, 1, dstH*dstW, type, params, ::SimdFalse, dst);
                 if (type == ::SimdConvolutionActivationPrelu)
                     params++;
                 dst += dstW * dstH;
@@ -752,7 +858,7 @@ namespace Simd
                     dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
             }
             if (_param.activation)
-                BiasAndActivation(NULL, _count, 1, _param.activation, _params, dst);
+                ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
         }
 
         bool ConvolutionDepthwiseDotProduct::Preferable(const ConvParam & p)
@@ -761,7 +867,7 @@ namespace Simd
                 return false;
             if (!(p.dstC == p.srcC && p.dstC == p.group && p.srcW == p.kernelX && p.srcH == p.kernelY))
                 return false;
-            return true;
+            return p.srcT == 0 && p.dstT == 0;
         }
 
         //---------------------------------------------------------------------
@@ -782,7 +888,7 @@ namespace Simd
             else if (ConvolutionDirect::Preferable(param))
                 return new ConvolutionDirect(param);
             else
-                return new ConvolutionImgToCol(param);
+                return new ConvolutionGemmNN(param);
         }
     }
 }

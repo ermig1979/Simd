@@ -66,7 +66,7 @@ namespace Simd
 
         bool Valid()
         {
-            return srcT == dstT && srcT == ::SimdFalse;
+            return srcT == dstT;// && srcT == ::SimdFalse;
         }
 
         SIMD_INLINE bool IsKernel(size_t value) const
@@ -124,10 +124,10 @@ namespace Simd
 
     namespace Base
     {
-        class ConvolutionImgToCol : public Convolution
+        class ConvolutionGemmNN : public Convolution
         {
         public:
-            ConvolutionImgToCol(const ConvParam & p);
+            ConvolutionGemmNN(const ConvParam & p);
             virtual size_t BufferSize() const;
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -135,10 +135,11 @@ namespace Simd
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
+            virtual void ImgToRow(const float * src, float * dst);
 
             bool _is1x1;
             const float * _weight, * _bias;
-            size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
+            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD;
         };
 
         class ConvolutionImgToRow : public Convolution
@@ -222,12 +223,12 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
-        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, float * dst);
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionImgToCol : public Base::ConvolutionImgToCol
+        class ConvolutionGemmNN : public Base::ConvolutionGemmNN
         {
         public:
-            ConvolutionImgToCol(const ConvParam & p);
+            ConvolutionGemmNN(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -287,12 +288,12 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, float * dst);
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionImgToCol : public Sse::ConvolutionImgToCol
+        class ConvolutionGemmNN : public Sse::ConvolutionGemmNN
         {
         public:
-            ConvolutionImgToCol(const ConvParam & p);
+            ConvolutionGemmNN(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -337,10 +338,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class ConvolutionImgToCol : public Avx::ConvolutionImgToCol
+        class ConvolutionGemmNN : public Avx::ConvolutionGemmNN
         {
         public:
-            ConvolutionImgToCol(const ConvParam & p);
+            ConvolutionGemmNN(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
@@ -381,10 +382,10 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        class ConvolutionImgToCol : public Avx2::ConvolutionImgToCol
+        class ConvolutionGemmNN : public Avx2::ConvolutionGemmNN
         {
         public:
-            ConvolutionImgToCol(const ConvParam & p);
+            ConvolutionGemmNN(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);

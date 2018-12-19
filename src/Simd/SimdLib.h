@@ -1633,7 +1633,7 @@ extern "C"
         \param [in] group - a size of convolution group.
         \param [in] activation - a type of activation function (see ::SimdConvolutionActivationType).
         \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetWeight and ::SimdConvolutionForward.
+            This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
     */
     SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
         size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 

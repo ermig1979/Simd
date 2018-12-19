@@ -639,19 +639,12 @@ namespace Simd
         
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, const float * slope, float * dst, size_t offset)
         {
-            __m128 _src = Load<align>(src + offset);
-            __m128 _slope = Load<align>(slope + offset);
-            __m128 pos = _mm_max_ps(_mm_setzero_ps(), _src);
-            __m128 neg = _mm_min_ps(_mm_setzero_ps(), _src);
-            Store<align>(dst + offset, _mm_add_ps(pos, _mm_mul_ps(_slope, neg)));
+            Store<align>(dst + offset, SynetPreluLayerForward(Load<align>(src + offset), Load<align>(slope + offset)));
         }
         
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, __m128 slope, float * dst, size_t offset)
         {
-            __m128 _src = Load<align>(src + offset);
-            __m128 pos = _mm_max_ps(_mm_setzero_ps(), _src);
-            __m128 neg = _mm_min_ps(_mm_setzero_ps(), _src);
-            Store<align>(dst + offset, _mm_add_ps(pos, _mm_mul_ps(slope, neg)));
+            Store<align>(dst + offset, SynetPreluLayerForward(Load<align>(src + offset), slope));
         }        
 
         template <bool align> void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
