@@ -473,7 +473,7 @@ namespace Simd
             template <bool align> void Filter8(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterWidth, size_t filterHeight, float * dst, size_t dstStride)
             {
                 size_t filterStride = 8 * filterWidth;
-                size_t alignedDstWidth = AlignLo(dstWidth, 8);
+                size_t alignedDstWidth = AlignLo(dstWidth, 4);
                 size_t alignedFilterStride = AlignLo(filterStride, DF);
                 for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
                 {
@@ -489,7 +489,7 @@ namespace Simd
                             for (; filterCol < alignedFilterStride; filterCol += DF)
                                 ProductSum4x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
                             for (; filterCol < filterStride; filterCol += HF)
-                                ProductSum1x4x8<align>(pSrc + filterCol, pFilter + filterCol, sums);
+                                ProductSum1x4x8<false>(pSrc + filterCol, pFilter + filterCol, sums);
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }

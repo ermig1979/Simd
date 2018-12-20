@@ -234,6 +234,8 @@ namespace Test
         result = result && HogLiteFilterFeaturesAutoTest(8, 8, 8, 0, f1, f2);
         result = result && HogLiteFilterFeaturesAutoTest(5, 7, 16, 0, f1, f2);
         result = result && HogLiteFilterFeaturesAutoTest(9, 5, 8, 1, f1, f2);
+        result = result && HogLiteFilterFeaturesAutoTest(5, 5, 8, 0, f1, f2);
+
         return result;
     }
 
