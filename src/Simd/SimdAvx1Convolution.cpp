@@ -56,7 +56,7 @@ namespace Simd
                                 _mm256_storeu_ps(dst + i, _mm256_max_ps(_0, _mm256_add_ps(_dst, _bias)));
                             }
                             for (; i < count; ++i)
-                                dst[j] = Simd::Max(0.0f, dst[i] + bias[i]);
+                                dst[i] = Simd::Max(0.0f, dst[i] + bias[i]);
                             dst += count;
                         }
                     }
@@ -231,12 +231,12 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
-            : Sse3::ConvolutionImgToRow(p)
+        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
+            : Sse3::ConvolutionGemmNT(p)
         {
         }
 
-        void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
@@ -265,8 +265,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
-            : Sse::ConvolutionDirect(p)
+        ConvolutionDirectChw::ConvolutionDirectChw(const ConvParam & p)
+            : Sse::ConvolutionDirectChw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -470,7 +470,7 @@ namespace Simd
             }
         }
 
-        template <int kernel, int stride> ConvolutionDirect::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        template <int kernel, int stride> ConvolutionDirectChw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
         {
             switch (type)
             {
@@ -485,11 +485,11 @@ namespace Simd
             }
         }
 
-        ConvolutionDirect::ConvolutionBiasActivationPtr ConvolutionDirect::SetConvolutionBiasActivation()
+        ConvolutionDirectChw::ConvolutionBiasActivationPtr ConvolutionDirectChw::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
             if (p.dstW < F)
-                return Sse::ConvolutionDirect::SetConvolutionBiasActivation();
+                return Sse::ConvolutionDirectChw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -501,7 +501,7 @@ namespace Simd
                     return Avx::SetConvolutionBiasActivation<3, 1>(p.activation);
                 break;
             }
-            return Sse::ConvolutionDirect::SetConvolutionBiasActivation();
+            return Sse::ConvolutionDirectChw::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------
@@ -576,10 +576,10 @@ namespace Simd
                 return new ConvolutionDepthwiseDotProduct(param);
             else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
-            else if (ConvolutionImgToRow::Preferable(param))
-                return new ConvolutionImgToRow(param);
-            else if (ConvolutionDirect::Preferable(param))
-                return new Avx::ConvolutionDirect(param);
+            else if (ConvolutionGemmNT::Preferable(param))
+                return new ConvolutionGemmNT(param);
+            else if (ConvolutionDirectChw::Preferable(param))
+                return new Avx::ConvolutionDirectChw(param);
             else
                 return new ConvolutionGemmNN(param);
         }

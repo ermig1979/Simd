@@ -30,17 +30,17 @@ namespace Simd
 #ifdef SIMD_SSE3_ENABLE    
     namespace Sse3
     {
-        ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
-            : Base::ConvolutionImgToRow(p)
+        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
+            : Base::ConvolutionGemmNT(p)
         {
         }
 
-        bool ConvolutionImgToRow::Preferable(const ConvParam & p)
+        bool ConvolutionGemmNT::Preferable(const ConvParam & p)
         {
             return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.srcT == 0 && p.dstT == 0;
         }
 
-        void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
@@ -61,10 +61,10 @@ namespace Simd
                 return new Sse::ConvolutionDepthwiseDotProduct(param);
             else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new Sse::ConvolutionWinograd2x3p(param);
-            else if (ConvolutionImgToRow::Preferable(param))
-                return new ConvolutionImgToRow(param);
-            else if (ConvolutionDirect::Preferable(param))
-                return new Sse::ConvolutionDirect(param);
+            else if (ConvolutionGemmNT::Preferable(param))
+                return new ConvolutionGemmNT(param);
+            else if (ConvolutionDirectChw::Preferable(param))
+                return new Sse::ConvolutionDirectChw(param);
             else
                 return new Sse::ConvolutionGemmNN(param);
         }

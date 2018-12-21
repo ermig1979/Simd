@@ -33,8 +33,8 @@ namespace Simd
     {
         static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
-            size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
-            __mmask16 tail = __mmask16(-1) >> (F + aligned - size);
+            size_t aligned = AlignLo(trans ? count : size, F);
+            __mmask16 tail = __mmask16(-1) >> (F + aligned - (trans ? count : size));
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
@@ -351,12 +351,12 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
-            : Avx2::ConvolutionImgToRow(p)
+        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
+            : Avx2::ConvolutionGemmNT(p)
         {
         }
 
-        void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
@@ -385,8 +385,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
-            : Avx2::ConvolutionDirect(p)
+        ConvolutionDirectChw::ConvolutionDirectChw(const ConvParam & p)
+            : Avx2::ConvolutionDirectChw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -735,7 +735,7 @@ namespace Simd
             }
         }
 
-         bool ConvolutionDirect::Preferable(const ConvParam & p)
+         bool ConvolutionDirectChw::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
                 return false;
@@ -746,10 +746,10 @@ namespace Simd
 #if SIMD_ZMM_COUNT == 32
                 || p.IsKernel(4) || p.IsKernel(5)
 #endif
-                ) && p.srcT == 0 && p.dstT == 0;
+                ) && p.IsChw();
         }
 
-        template <int kernel, int stride> ConvolutionDirect::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        template <int kernel, int stride> ConvolutionDirectChw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
         {
             switch (type)
             {
@@ -764,11 +764,11 @@ namespace Simd
             }
         }
 
-        ConvolutionDirect::ConvolutionBiasActivationPtr ConvolutionDirect::SetConvolutionBiasActivation()
+        ConvolutionDirectChw::ConvolutionBiasActivationPtr ConvolutionDirectChw::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
             if (p.dstW <= HF)
-                return Avx2::ConvolutionDirect::SetConvolutionBiasActivation();
+                return Avx2::ConvolutionDirectChw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -798,7 +798,7 @@ namespace Simd
                     return Avx512f::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
-            return Avx2::ConvolutionDirect::SetConvolutionBiasActivation();
+            return Avx2::ConvolutionDirectChw::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------
@@ -814,10 +814,10 @@ namespace Simd
                 return new Avx::ConvolutionDepthwiseDotProduct(param);
             else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
-            else if (ConvolutionImgToRow::Preferable(param))
-                return new ConvolutionImgToRow(param);
-            else if (ConvolutionDirect::Preferable(param))
-                return new Avx512f::ConvolutionDirect(param);
+            else if (ConvolutionGemmNT::Preferable(param))
+                return new ConvolutionGemmNT(param);
+            else if (ConvolutionDirectChw::Preferable(param))
+                return new Avx512f::ConvolutionDirectChw(param);
             else
                 return new ConvolutionGemmNN(param);
         }

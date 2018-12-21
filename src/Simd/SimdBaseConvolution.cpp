@@ -376,7 +376,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionImgToRow::ConvolutionImgToRow(const ConvParam & p)
+        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
             : Convolution(p)
         {
             _M = p.dstC / p.group;
@@ -387,13 +387,13 @@ namespace Simd
             _dstStep = p.dstC * _N / p.group;
         }
 
-        size_t ConvolutionImgToRow::BufferSize() const
+        size_t ConvolutionGemmNT::BufferSize() const
         {
             const ConvParam & p = _param;
             return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
         };
 
-        void ConvolutionImgToRow::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        void ConvolutionGemmNT::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
         {
             assert(_param.srcT == trans);
             _weight = weight;
@@ -403,19 +403,19 @@ namespace Simd
             _params = params;
         }
 
-        void ConvolutionImgToRow::Forward(const float * src, float * buf, float * dst)
+        void ConvolutionGemmNT::Forward(const float * src, float * buf, float * dst)
         {
             buf = Buffer(buf);
             ImgToRow(src, _param, buf);
             GemmAndBias(buf, dst);
         }
 
-        bool ConvolutionImgToRow::Preferable(const ConvParam & p)
+        bool ConvolutionGemmNT::Preferable(const ConvParam & p)
         {
             return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.srcT == 0 && p.dstT == 0;
         }
 
-        void ConvolutionImgToRow::GemmAndBias(const float * src, float * dst)
+        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
@@ -423,7 +423,7 @@ namespace Simd
             ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
-        void ConvolutionImgToRow::ImgToRow(const float * src, const ConvParam & p, float * dst)
+        void ConvolutionGemmNT::ImgToRow(const float * src, const ConvParam & p, float * dst)
         {
             const size_t K = p.kernelX * p.kernelY*p.srcC, N = p.dstH * p.dstW;
             if (p.IsDilation(1) && p.IsStride(1))
@@ -563,21 +563,21 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirect::ConvolutionDirect(const ConvParam & p)
+        ConvolutionDirectChw::ConvolutionDirectChw(const ConvParam & p)
             : Convolution(p)
         {
             _srcC = p.srcC / p.group;
             _srcH = p.padY + p.srcH + p.padH;
             _srcW = p.padX + p.srcW + p.padW;
             _dstC = p.dstC / p.group;
-            _weightStep = _srcC * _dstC * p.kernelY * p.kernelX;
-            _srcStep = _srcC * p.srcH * p.srcW;
-            _dstStep = _dstC * p.dstH  * p.dstW;
+            _grW = _srcC * _dstC * p.kernelY * p.kernelX;
+            _grS = _srcC * p.srcH * p.srcW;
+            _grD = _dstC * p.dstH  * p.dstW;
             _pad = p.IsPad(0) ? 0 : 1;
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
-        size_t ConvolutionDirect::BufferSize() const
+        size_t ConvolutionDirectChw::BufferSize() const
         {
             if (_pad)
                 return _srcC*_srcH*_srcW;
@@ -585,7 +585,7 @@ namespace Simd
                 return 1;
         }
 
-        void ConvolutionDirect::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        void ConvolutionDirectChw::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
         {
             assert(_param.srcT == trans);
             _weight = weight;
@@ -595,7 +595,7 @@ namespace Simd
             _params = params;
         }
 
-        void ConvolutionDirect::Forward(const float * src, float * buf, float * dst)
+        void ConvolutionDirectChw::Forward(const float * src, float * buf, float * dst)
         {
             const ConvParam & p = _param;
             const float * weight = _weight;
@@ -612,27 +612,27 @@ namespace Simd
                 }
                 else
                     _convolutionBiasActivation(src, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
-                weight += _weightStep;
+                weight += _grW;
                 if(bias)
                     bias += _dstC;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
                     params += _dstC;
-                src += _srcStep;
-                dst += _dstStep;
+                src += _grS;
+                dst += _grD;
             }
         }
 
-        bool ConvolutionDirect::Preferable(const ConvParam & p)
+        bool ConvolutionDirectChw::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
                 return false;
             if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
-            return k < 2.0 && (p.IsKernel(2) || p.IsKernel(3)) && p.srcT == 0 && p.dstT == 0;
+            return k < 2.0 && (p.IsKernel(2) || p.IsKernel(3)) && p.IsChw();
         }
 
-        void ConvolutionDirect::Pad(const float * src, float * dst) const
+        void ConvolutionDirectChw::Pad(const float * src, float * dst) const
         {
             const ConvParam & p = _param;
             for (size_t c = 0; c < _srcC; ++c)
@@ -764,7 +764,7 @@ namespace Simd
             }
         }
 
-        template <int kernel, int stride> ConvolutionDirect::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        template <int kernel, int stride> ConvolutionDirectChw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
         {
             switch (type)
             {
@@ -779,12 +779,14 @@ namespace Simd
             }
         }
 
-        ConvolutionDirect::ConvolutionBiasActivationPtr ConvolutionDirect::SetConvolutionBiasActivation()
+        ConvolutionDirectChw::ConvolutionBiasActivationPtr ConvolutionDirectChw::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
             switch (p.strideX)
             {
             case 1:
+                if (p.kernelX == 1)
+                    return Base::SetConvolutionBiasActivation<1, 1>(p.activation);
                 if (p.kernelX == 2)
                     return Base::SetConvolutionBiasActivation<2, 1>(p.activation);
                 if (p.kernelX == 3)
@@ -803,6 +805,90 @@ namespace Simd
             }
             assert(0);
             return NULL;
+        }
+
+        //---------------------------------------------------------------------
+
+        ConvolutionDirectHwc::ConvolutionDirectHwc(const ConvParam & p)
+            : Convolution(p)
+        {
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
+        }
+
+        size_t ConvolutionDirectHwc::BufferSize() const
+        {
+            return 1;
+        }
+
+        void ConvolutionDirectHwc::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        {
+            assert(_param.srcT == trans);
+            _weight = weight;
+            if (internal)
+                *internal = SimdFalse;
+            _bias = bias;
+            _params = params;
+        }
+
+        void ConvolutionDirectHwc::Forward(const float * src, float * buf, float * dst)
+        {
+            _convolutionBiasActivation(src, _param, _weight, _bias, _params, dst);
+        }
+
+        bool ConvolutionDirectHwc::Preferable(const ConvParam & p)
+        {
+            if (!p.IsDilation(1))
+                return false;
+            if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
+                return false;
+            double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
+            return k < 2.0 && (p.IsKernel(1) || p.IsKernel(2) || p.IsKernel(3)) && p.IsHwc();
+        }
+
+        static void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t srcC = p.srcC / p.group;
+            size_t dstC = p.dstC / p.group;
+            for (size_t dy = 0; dy < p.dstH; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    memset(dst, 0, p.dstC * sizeof(float));
+                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    {
+                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (size_t kx = 0; kx < p.kernelX; ++kx)
+                            {
+                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                if (sx < p.srcW)
+                                {
+                                    const float * pw = weight + (ky*p.kernelX + kx)*srcC*p.dstC;
+                                    const float * ps = src + (sy*p.srcW + sx)*srcC;
+                                    for (size_t g = 0; g < p.group; ++g)
+                                    {
+                                        for (size_t sc = 0; sc < srcC; ++sc)
+                                        {
+                                            for (size_t dc = 0; dc < dstC; ++dc)
+                                                dst[dc] += ps[0] * pw[dc];
+                                            ps += 1;
+                                            pw += dstC;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ConvolutionBiasAndActivation(bias, p.dstC, 1, p.activation, params, ::SimdTrue, dst);
+                    dst += p.dstC;
+                }
+            }
+        }
+
+        ConvolutionDirectHwc::ConvolutionBiasActivationPtr ConvolutionDirectHwc::SetConvolutionBiasActivation()
+        {
+            return ConvolutionDirectHwcConvolutionBiasActivationDefault;
         }
 
         //---------------------------------------------------------------------
@@ -883,10 +969,12 @@ namespace Simd
                 return new ConvolutionDepthwiseDotProduct(param);
             else if(ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
-            else if (ConvolutionImgToRow::Preferable(param))
-                return new ConvolutionImgToRow(param);
-            else if (ConvolutionDirect::Preferable(param))
-                return new ConvolutionDirect(param);
+            else if (ConvolutionGemmNT::Preferable(param))
+                return new ConvolutionGemmNT(param);
+            else if (ConvolutionDirectChw::Preferable(param))
+                return new ConvolutionDirectChw(param);
+            else if (ConvolutionDirectHwc::Preferable(param))
+                return new ConvolutionDirectHwc(param);
             else
                 return new ConvolutionGemmNN(param);
         }

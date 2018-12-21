@@ -66,7 +66,7 @@ namespace Simd
 
         bool Valid()
         {
-            return srcT == dstT;// && srcT == ::SimdFalse;
+            return srcT == dstT;
         }
 
         SIMD_INLINE bool IsKernel(size_t value) const
@@ -87,6 +87,21 @@ namespace Simd
         SIMD_INLINE bool IsPad(size_t value) const
         {
             return padY == value && padX == value && padH == value && padW == value;
+        }
+
+        SIMD_INLINE bool IsDepthwise() const
+        {
+            return srcC == group && dstC == group;
+        }
+
+        SIMD_INLINE bool IsChw() const
+        {
+            return srcT == 0 && dstT == 0;
+        }
+
+        SIMD_INLINE bool IsHwc() const
+        {
+            return srcT == 1 && dstT == 1;
         }
     };
 
@@ -142,10 +157,10 @@ namespace Simd
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD;
         };
 
-        class ConvolutionImgToRow : public Convolution
+        class ConvolutionGemmNT : public Convolution
         {
         public:
-            ConvolutionImgToRow(const ConvParam & p);
+            ConvolutionGemmNT(const ConvParam & p);
             virtual size_t BufferSize() const;
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -178,10 +193,10 @@ namespace Simd
             const float * _bias;
         };
 
-        class ConvolutionDirect : public Convolution
+        class ConvolutionDirectChw : public Convolution
         {
         public:
-            ConvolutionDirect(const ConvParam & p);
+            ConvolutionDirectChw(const ConvParam & p);
             virtual size_t BufferSize() const;
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -194,9 +209,28 @@ namespace Simd
             void Pad(const float * src, float * dst) const;
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
 
-            size_t _weightStep, _srcStep, _dstStep, _srcC, _srcH, _srcW, _dstC;
+            size_t _grW, _grS, _grD, _srcC, _srcH, _srcW, _dstC;
             int _pad;
             const float * _weight, * _bias;
+            ConvolutionBiasActivationPtr _convolutionBiasActivation;
+        };
+
+        class ConvolutionDirectHwc : public Convolution
+        {
+        public:
+            ConvolutionDirectHwc(const ConvParam & p);
+            virtual size_t BufferSize() const;
+            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
+            virtual void Forward(const float * src, float * buf, float * dst);
+
+            static bool Preferable(const ConvParam & p);
+
+            typedef void(*ConvolutionBiasActivationPtr)(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst);
+
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation(); 
+
+            const float * _weight, *_bias;
             ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
@@ -241,13 +275,23 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionDirect : public Base::ConvolutionDirect
+        class ConvolutionDirectChw : public Base::ConvolutionDirectChw
         {
         public:
-            ConvolutionDirect(const ConvParam & p);
+            ConvolutionDirectChw(const ConvParam & p);
 
             static bool Preferable(const ConvParam & p);
 
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
+        class ConvolutionDirectHwc : public Base::ConvolutionDirectHwc
+        {
+        public:
+            ConvolutionDirectHwc(const ConvParam & p);
+
+            static bool Preferable(const ConvParam & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -268,10 +312,10 @@ namespace Simd
 #ifdef SIMD_SSE3_ENABLE    
     namespace Sse3
     {
-        class ConvolutionImgToRow : public Base::ConvolutionImgToRow
+        class ConvolutionGemmNT : public Base::ConvolutionGemmNT
         {
         public:
-            ConvolutionImgToRow(const ConvParam & p);
+            ConvolutionGemmNT(const ConvParam & p);
 
             static bool Preferable(const ConvParam & p);
 
@@ -298,10 +342,10 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionImgToRow : public Sse3::ConvolutionImgToRow
+        class ConvolutionGemmNT : public Sse3::ConvolutionGemmNT
         {
         public:
-            ConvolutionImgToRow(const ConvParam & p);
+            ConvolutionGemmNT(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -313,10 +357,10 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionDirect : public Sse::ConvolutionDirect
+        class ConvolutionDirectChw : public Sse::ConvolutionDirectChw
         {
         public:
-            ConvolutionDirect(const ConvParam & p);
+            ConvolutionDirectChw(const ConvParam & p);
 
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
@@ -349,10 +393,10 @@ namespace Simd
             Array32i _index, _nose, _tail, _start;
         };
 
-        class ConvolutionImgToRow : public Avx::ConvolutionImgToRow
+        class ConvolutionGemmNT : public Avx::ConvolutionGemmNT
         {
         public:
-            ConvolutionImgToRow(const ConvParam & p);
+            ConvolutionGemmNT(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -364,10 +408,10 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionDirect : public Avx::ConvolutionDirect
+        class ConvolutionDirectChw : public Avx::ConvolutionDirectChw
         {
         public:
-            ConvolutionDirect(const ConvParam & p);
+            ConvolutionDirectChw(const ConvParam & p);
 
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
@@ -394,10 +438,10 @@ namespace Simd
             Array16u _nose, _tail;
         };
 
-        class ConvolutionImgToRow : public Avx2::ConvolutionImgToRow
+        class ConvolutionGemmNT : public Avx2::ConvolutionGemmNT
         {
         public:
-            ConvolutionImgToRow(const ConvParam & p);
+            ConvolutionGemmNT(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -409,10 +453,10 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionDirect : public Avx2::ConvolutionDirect
+        class ConvolutionDirectChw : public Avx2::ConvolutionDirectChw
         {
         public:
-            ConvolutionDirect(const ConvParam & p);
+            ConvolutionDirectChw(const ConvParam & p);
 
             static bool Preferable(const ConvParam & p);
 
