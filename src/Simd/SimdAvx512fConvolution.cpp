@@ -803,6 +803,462 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionDirectHwc::ConvolutionDirectHwc(const ConvParam & p)
+            : Avx2::ConvolutionDirectHwc(p)
+        {
+            _convolutionBiasActivation = SetConvolutionBiasActivation();
+        }
+
+        bool ConvolutionDirectHwc::Preferable(const ConvParam & p)
+        {
+            if (!p.IsDilation(1))
+                return false;
+            if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
+                return false;
+            if (!(p.group == 1 || p.IsDepthwise()))
+                return false;
+            double k = double(p.srcC) / p.group / p.kernelX / p.kernelY;
+            return k < 2.0 && (p.IsKernel(1) || p.IsKernel(2) || p.IsKernel(3)) && p.IsHwc();
+        }
+
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m512 Activate(__m512 value, const float * params, size_t offset, __mmask16 tail = -1);
+
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationIdentity>(__m512 value, const float * params, size_t offset, __mmask16 tail)
+        {
+            return value;
+        }
+
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationRelu>(__m512 value, const float * params, size_t offset, __mmask16 tail)
+        {
+            return _mm512_max_ps(_mm512_setzero_ps(), value);
+        }
+
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationLeakyRelu>(__m512 value, const float * params, size_t offset, __mmask16 tail)
+        {
+            return _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), value), _mm512_mul_ps(_mm512_set1_ps(params[0]), _mm512_min_ps(_mm512_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationRestrictRange>(__m512 value, const float * params, size_t offset, __mmask16 tail)
+        {
+            return _mm512_min_ps(_mm512_max_ps(_mm512_set1_ps(params[0]), value), _mm512_set1_ps(params[1]));
+        }
+
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationPrelu>(__m512 value, const float * params, size_t offset, __mmask16 tail)
+        {
+            return _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), value), _mm512_mul_ps(_mm512_maskz_loadu_ps(tail, params + offset), _mm512_min_ps(_mm512_setzero_ps(), value)));
+        }
+
+        template<size_t stride, size_t height, size_t width>
+        SIMD_INLINE void KernelHwcDefaultEdge1(const float * src, size_t srcW, size_t srcC, size_t dstC, const float * weight, __m512 & sum, __mmask16 tail = -1)
+        {
+            for (size_t ky = 0; ky < height; ++ky)
+            {
+                for (size_t kx = 0; kx < width; ++kx)
+                {
+                    const float * pw = weight + (ky*stride + kx)*srcC*dstC;
+                    const float * ps = src + (ky*srcW + kx)*srcC;
+                    for (size_t sc = 0; sc < srcC; ++sc, pw += dstC)
+                        sum = _mm512_fmadd_ps(_mm512_set1_ps(ps[sc]), _mm512_maskz_loadu_ps(tail, pw), sum);
+                }
+            }
+        }
+
+        template<> SIMD_INLINE void KernelHwcDefaultEdge1<3, 3, 3>(const float * src, size_t srcW, size_t srcC, size_t dstC, const float * weight, __m512 & sum, __mmask16 tail)
+        {
+            __m512 sum0 = _mm512_setzero_ps();
+            __m512 sum1 = _mm512_setzero_ps();
+            __m512 sum2 = _mm512_setzero_ps();
+            for (size_t ky = 0; ky < 3; ++ky)
+            {
+                for (size_t i = 0, n = 3 * srcC; i < n; i += 3, weight += 3 * dstC)
+                {
+                    sum0 = _mm512_fmadd_ps(_mm512_set1_ps(src[i + 0]), _mm512_maskz_loadu_ps(tail, weight + 0 * dstC), sum0);
+                    sum1 = _mm512_fmadd_ps(_mm512_set1_ps(src[i + 1]), _mm512_maskz_loadu_ps(tail, weight + 1 * dstC), sum1);
+                    sum2 = _mm512_fmadd_ps(_mm512_set1_ps(src[i + 2]), _mm512_maskz_loadu_ps(tail, weight + 2 * dstC), sum2);
+                }
+                src += srcW * srcC;
+            }
+            sum = _mm512_add_ps(_mm512_add_ps(sum, sum0), _mm512_add_ps(sum1, sum2));
+        }
+
+        template<size_t stride, size_t height, size_t width, ::SimdConvolutionActivationType type>
+        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, size_t srcW, size_t srcC, size_t dstC, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t dstCF1 = AlignLo(dstC, 1 * F);
+            __mmask16 tail = TailMask16(dstC - dstCF1);
+            size_t dc = 0;
+            for (; dc < dstCF1; dc += 1 * F)
+            {
+                __m512 conv = bias ? _mm512_loadu_ps(bias + dc) : _mm512_setzero_ps();
+                KernelHwcDefaultEdge1<stride, height, width>(src, srcW, srcC, dstC, weight + dc, conv);
+                _mm512_storeu_ps(dst + dc, Activate<type>(conv, params, dc));
+            }
+            if (dc < dstC)
+            {
+                __m512 conv = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
+                KernelHwcDefaultEdge1<stride, height, width>(src, srcW, srcC, dstC, weight + dc, conv, tail);
+                _mm512_mask_storeu_ps(dst + dc, tail, Activate<type>(conv, params, dc, tail));
+            }
+        }
+
+        template<size_t kernel>
+        SIMD_INLINE void KernelHwcDefaultMain2x2(const float * src, size_t srcW, size_t srcC, size_t dstC, size_t strideX, const float * weight, __m512 sums[2][2])
+        {
+            __m512 w0, w1, s0;
+            for (size_t ky = 0; ky < kernel; ++ky)
+            {
+                for (size_t i = 0, n = kernel * srcC; i < n; ++i)
+                {
+                    w0 = _mm512_loadu_ps(weight + 0 * F);
+                    w1 = _mm512_loadu_ps(weight + 1 * F);
+                    s0 = _mm512_set1_ps(src[i + 0 * srcC*strideX]);
+                    sums[0][0] = _mm512_fmadd_ps(s0, w0, sums[0][0]);
+                    sums[0][1] = _mm512_fmadd_ps(s0, w1, sums[0][1]);
+                    s0 = _mm512_set1_ps(src[i + 1 * srcC*strideX]);
+                    sums[1][0] = _mm512_fmadd_ps(s0, w0, sums[1][0]);
+                    sums[1][1] = _mm512_fmadd_ps(s0, w1, sums[1][1]);
+                    weight += dstC;
+                }
+                src += srcW * srcC;
+            }
+        }
+
+        template<size_t kernel>
+        SIMD_INLINE void KernelHwcDefaultMain2x1(const float * src, size_t srcW, size_t srcC, size_t dstC, size_t strideX, const float * weight, __m512 sums[2][1], __mmask16 tail = -1)
+        {
+            __m512 w0, s0;
+            for (size_t ky = 0; ky < kernel; ++ky)
+            {
+                for (size_t i = 0, n = kernel * srcC; i < n; ++i)
+                {
+                    w0 = _mm512_maskz_loadu_ps(tail, weight + 0 * F);
+                    s0 = _mm512_set1_ps(src[i + 0 * srcC*strideX]);
+                    sums[0][0] = _mm512_fmadd_ps(s0, w0, sums[0][0]);
+                    s0 = _mm512_set1_ps(src[i + 1 * srcC*strideX]);
+                    sums[1][0] = _mm512_fmadd_ps(s0, w0, sums[1][0]);
+                    weight += dstC;
+                }
+                src += srcW * srcC;
+            }
+        }
+
+        template<size_t kernel, ::SimdConvolutionActivationType type>
+        SIMD_INLINE void KernelHwcDefaultMain2(const float * src, size_t srcW, size_t srcC, size_t dstC, size_t strideX, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t dstCF1 = AlignLo(dstC, 1 * F);
+            size_t dstCF2 = AlignLo(dstC, 2 * F);
+            size_t dc = 0;
+            __mmask16 tail = TailMask16(dstC - dstCF1);
+            for (; dc < dstCF2; dc += 2 * F)
+            {
+                __m512 sums[2][2];
+                if (bias)
+                {
+                    sums[0][0] = _mm512_loadu_ps(bias + dc + 0 * F);
+                    sums[0][1] = _mm512_loadu_ps(bias + dc + 1 * F);
+                    sums[1][0] = _mm512_loadu_ps(bias + dc + 0 * F);
+                    sums[1][1] = _mm512_loadu_ps(bias + dc + 1 * F);
+                }
+                else
+                {
+                    sums[0][0] = _mm512_setzero_ps();
+                    sums[0][1] = _mm512_setzero_ps();
+                    sums[1][0] = _mm512_setzero_ps();
+                    sums[1][1] = _mm512_setzero_ps();
+                }
+                KernelHwcDefaultMain2x2<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
+                _mm512_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 0 * dstC + 1 * F));
+                _mm512_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 1 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * dstC + 1 * F));
+            }
+            for (; dc < dstCF1; dc += 1 * F)
+            {
+                __m512 sums[2][1];
+                if (bias)
+                {
+                    __m512 _bias = _mm512_loadu_ps(bias + dc);
+                    sums[0][0] = _bias;
+                    sums[1][0] = _bias;
+                }
+                else
+                {
+                    sums[0][0] = _mm512_setzero_ps();
+                    sums[1][0] = _mm512_setzero_ps();
+                }
+                KernelHwcDefaultMain2x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
+                _mm512_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc + 0 * dstC));
+                _mm512_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc + 1 * dstC));
+            }
+            if (dc < dstC)
+            {
+                __m512 sums[2][1];
+                if (bias)
+                {
+                    __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + dc);
+                    sums[0][0] = _bias;
+                    sums[1][0] = _bias;
+                }
+                else
+                {
+                    sums[0][0] = _mm512_setzero_ps();
+                    sums[1][0] = _mm512_setzero_ps();
+                }
+                KernelHwcDefaultMain2x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums, tail);
+                _mm512_mask_storeu_ps(dst + dc + 0 * dstC, tail, Activate<type>(sums[0][0], params, dc + 0 * dstC, tail));
+                _mm512_mask_storeu_ps(dst + dc + 1 * dstC, tail, Activate<type>(sums[1][0], params, dc + 1 * dstC, tail));
+            }
+        }
+
+        template<size_t kernel>
+        SIMD_INLINE void KernelHwcDefaultMain6x2(const float * src, size_t srcW, size_t srcC, size_t dstC, size_t strideX, const float * weight, __m512 sums[6][2])
+        {
+            const float * src0 = src + 0 * srcC*strideX;
+            const float * src1 = src + 1 * srcC*strideX;
+            const float * src2 = src + 2 * srcC*strideX;
+            const float * src3 = src + 3 * srcC*strideX;
+            const float * src4 = src + 4 * srcC*strideX;
+            const float * src5 = src + 5 * srcC*strideX;
+            __m512 w0, w1, s0;
+            for (size_t ky = 0; ky < kernel; ++ky)
+            {
+                size_t offset = ky * srcW * srcC;
+                for (size_t end = offset + kernel * srcC; offset < end; ++offset)
+                {
+                    w0 = _mm512_loadu_ps(weight + 0 * F);
+                    w1 = _mm512_loadu_ps(weight + 1 * F);
+                    s0 = _mm512_set1_ps(src0[offset]);
+                    sums[0][0] = _mm512_fmadd_ps(s0, w0, sums[0][0]);
+                    sums[0][1] = _mm512_fmadd_ps(s0, w1, sums[0][1]);
+                    s0 = _mm512_set1_ps(src1[offset]);
+                    sums[1][0] = _mm512_fmadd_ps(s0, w0, sums[1][0]);
+                    sums[1][1] = _mm512_fmadd_ps(s0, w1, sums[1][1]);
+                    s0 = _mm512_set1_ps(src2[offset]);
+                    sums[2][0] = _mm512_fmadd_ps(s0, w0, sums[2][0]);
+                    sums[2][1] = _mm512_fmadd_ps(s0, w1, sums[2][1]);
+                    s0 = _mm512_set1_ps(src3[offset]);
+                    sums[3][0] = _mm512_fmadd_ps(s0, w0, sums[3][0]);
+                    sums[3][1] = _mm512_fmadd_ps(s0, w1, sums[3][1]);
+                    s0 = _mm512_set1_ps(src4[offset]);
+                    sums[4][0] = _mm512_fmadd_ps(s0, w0, sums[4][0]);
+                    sums[4][1] = _mm512_fmadd_ps(s0, w1, sums[4][1]);
+                    s0 = _mm512_set1_ps(src5[offset]);
+                    sums[5][0] = _mm512_fmadd_ps(s0, w0, sums[5][0]);
+                    sums[5][1] = _mm512_fmadd_ps(s0, w1, sums[5][1]);
+                    weight += dstC;
+                }
+            }
+        }
+
+        template<size_t kernel>
+        SIMD_INLINE void KernelHwcDefaultMain6x1(const float * src, size_t srcW, size_t srcC, size_t dstC, size_t strideX, const float * weight, __m512 sums[6][1], __mmask16 tail = -1)
+        {
+            __m512 w0, s0;
+            for (size_t ky = 0; ky < kernel; ++ky)
+            {
+                for (size_t i = 0, n = kernel * srcC; i < n; ++i)
+                {
+                    w0 = _mm512_maskz_loadu_ps(tail, weight + 0 * F);
+                    s0 = _mm512_set1_ps(src[i + 0 * srcC*strideX]);
+                    sums[0][0] = _mm512_fmadd_ps(s0, w0, sums[0][0]);
+                    s0 = _mm512_set1_ps(src[i + 1 * srcC*strideX]);
+                    sums[1][0] = _mm512_fmadd_ps(s0, w0, sums[1][0]);
+                    s0 = _mm512_set1_ps(src[i + 2 * srcC*strideX]);
+                    sums[2][0] = _mm512_fmadd_ps(s0, w0, sums[2][0]);
+                    s0 = _mm512_set1_ps(src[i + 3 * srcC*strideX]);
+                    sums[3][0] = _mm512_fmadd_ps(s0, w0, sums[3][0]);
+                    s0 = _mm512_set1_ps(src[i + 4 * srcC*strideX]);
+                    sums[4][0] = _mm512_fmadd_ps(s0, w0, sums[4][0]);
+                    s0 = _mm512_set1_ps(src[i + 5 * srcC*strideX]);
+                    sums[5][0] = _mm512_fmadd_ps(s0, w0, sums[5][0]);
+                    weight += dstC;
+                }
+                src += srcW * srcC;
+            }
+        }
+
+        template<size_t kernel, ::SimdConvolutionActivationType type>
+        SIMD_INLINE void KernelHwcDefaultMain6(const float * src, size_t srcW, size_t srcC, size_t dstC, size_t strideX, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t dstCF1 = AlignLo(dstC, 1 * F);
+            size_t dstCF2 = AlignLo(dstC, 2 * F);
+            size_t dc = 0;
+            __mmask16 tail = TailMask16(dstC - dstCF1);
+            for (; dc < dstCF2; dc += 2 * F)
+            {
+                __m512 sums[6][2];
+                __m512 bias0 = bias ? _mm512_loadu_ps(bias + dc + 0 * F) : _mm512_setzero_ps();
+                __m512 bias1 = bias ? _mm512_loadu_ps(bias + dc + 1 * F) : _mm512_setzero_ps();
+                sums[0][0] = bias0;
+                sums[0][1] = bias1;
+                sums[1][0] = bias0;
+                sums[1][1] = bias1;
+                sums[2][0] = bias0;
+                sums[2][1] = bias1;
+                sums[3][0] = bias0;
+                sums[3][1] = bias1;
+                sums[4][0] = bias0;
+                sums[4][1] = bias1;
+                sums[5][0] = bias0;
+                sums[5][1] = bias1;
+                KernelHwcDefaultMain6x2<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
+                _mm512_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 0 * dstC + 1 * F));
+                _mm512_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 1 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * dstC + 1 * F));
+                _mm512_storeu_ps(dst + dc + 2 * dstC + 0 * F, Activate<type>(sums[2][0], params, dc + 2 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 2 * dstC + 1 * F, Activate<type>(sums[2][1], params, dc + 2 * dstC + 1 * F));
+                _mm512_storeu_ps(dst + dc + 3 * dstC + 0 * F, Activate<type>(sums[3][0], params, dc + 3 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 3 * dstC + 1 * F, Activate<type>(sums[3][1], params, dc + 3 * dstC + 1 * F));
+                _mm512_storeu_ps(dst + dc + 4 * dstC + 0 * F, Activate<type>(sums[4][0], params, dc + 4 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 4 * dstC + 1 * F, Activate<type>(sums[4][1], params, dc + 4 * dstC + 1 * F));
+                _mm512_storeu_ps(dst + dc + 5 * dstC + 0 * F, Activate<type>(sums[5][0], params, dc + 5 * dstC + 0 * F));
+                _mm512_storeu_ps(dst + dc + 5 * dstC + 1 * F, Activate<type>(sums[5][1], params, dc + 5 * dstC + 1 * F));
+            }
+            for (; dc < dstCF1; dc += 1 * F)
+            {
+                __m512 sums[6][1];
+                __m512 bias0 = bias ? _mm512_loadu_ps(bias + dc) : _mm512_setzero_ps();
+                sums[0][0] = bias0;
+                sums[1][0] = bias0;
+                sums[2][0] = bias0;
+                sums[3][0] = bias0;
+                sums[4][0] = bias0;
+                sums[5][0] = bias0;
+                KernelHwcDefaultMain6x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
+                _mm512_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc + 0 * dstC));
+                _mm512_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc + 1 * dstC));
+                _mm512_storeu_ps(dst + dc + 2 * dstC, Activate<type>(sums[2][0], params, dc + 2 * dstC));
+                _mm512_storeu_ps(dst + dc + 3 * dstC, Activate<type>(sums[3][0], params, dc + 3 * dstC));
+                _mm512_storeu_ps(dst + dc + 4 * dstC, Activate<type>(sums[4][0], params, dc + 4 * dstC));
+                _mm512_storeu_ps(dst + dc + 5 * dstC, Activate<type>(sums[5][0], params, dc + 5 * dstC));
+            }
+            if (dc < dstC)
+            {
+                __m512 sums[6][1];
+                __m512 bias0 = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
+                sums[0][0] = bias0;
+                sums[1][0] = bias0;
+                sums[2][0] = bias0;
+                sums[3][0] = bias0;
+                sums[4][0] = bias0;
+                sums[5][0] = bias0;
+                KernelHwcDefaultMain6x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums, tail);
+                _mm512_mask_storeu_ps(dst + dc + 0 * dstC, tail, Activate<type>(sums[0][0], params, dc + 0 * dstC, tail));
+                _mm512_mask_storeu_ps(dst + dc + 1 * dstC, tail, Activate<type>(sums[1][0], params, dc + 1 * dstC, tail));
+                _mm512_mask_storeu_ps(dst + dc + 2 * dstC, tail, Activate<type>(sums[2][0], params, dc + 2 * dstC, tail));
+                _mm512_mask_storeu_ps(dst + dc + 3 * dstC, tail, Activate<type>(sums[3][0], params, dc + 3 * dstC, tail));
+                _mm512_mask_storeu_ps(dst + dc + 4 * dstC, tail, Activate<type>(sums[4][0], params, dc + 4 * dstC, tail));
+                _mm512_mask_storeu_ps(dst + dc + 5 * dstC, tail, Activate<type>(sums[5][0], params, dc + 5 * dstC, tail));
+            }
+        }
+
+        template<size_t kernel, ::SimdConvolutionActivationType type> void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t dstH = p.dstH - p.padH, dstW = p.dstW - p.padW;
+            size_t wS = p.srcC*p.dstC, sS = p.strideX*p.srcC;
+            size_t dstW2 = AlignLoAny(dstW - p.padX, 2) + p.padX;
+            size_t dstW6 = AlignLoAny(dstW - p.padX, 6) + p.padX;
+            if (p.padY)
+            {
+                if (p.padX)
+                    KernelHwcDefaultEdge<kernel, kernel - 1, kernel - 1, type>(src, p.srcW, p.srcC, p.dstC, weight + (kernel + 1)*wS, bias, params, dst);
+                for (size_t dx = p.padX; dx < dstW; ++dx)
+                    KernelHwcDefaultEdge<kernel, kernel - 1, kernel, type>(src + (dx - p.padX) * sS, p.srcW, p.srcC, p.dstC, weight + kernel * wS, bias, params, dst + dx * p.dstC);
+                if (p.padW)
+                    KernelHwcDefaultEdge<kernel, kernel - 1, kernel - 1, type>(src + (dstW - p.padX) * sS, p.srcW, p.srcC, p.dstC, weight + kernel * wS, bias, params, dst + dstW * p.dstC);
+                dst += p.dstW*p.dstC;
+            }
+            for (size_t dy = p.padY; dy < dstH; ++dy)
+            {
+                if (p.padX)
+                    KernelHwcDefaultEdge<kernel, kernel, kernel - 1, type>(src, p.srcW, p.srcC, p.dstC, weight + wS, bias, params, dst);
+                size_t dx = p.padX;
+                for (; dx < dstW6; dx += 6)
+                    KernelHwcDefaultMain6<kernel, type>(src + (dx - p.padX) * sS, p.srcW, p.srcC, p.dstC, p.strideX, weight, bias, params, dst + dx * p.dstC);
+                for (; dx < dstW2; dx += 2)
+                    KernelHwcDefaultMain2<kernel, type>(src + (dx - p.padX) * sS, p.srcW, p.srcC, p.dstC, p.strideX, weight, bias, params, dst + dx * p.dstC);
+                for (; dx < dstW; ++dx)
+                    KernelHwcDefaultEdge<kernel, kernel, kernel, type>(src + (dx - p.padX) * sS, p.srcW, p.srcC, p.dstC, weight, bias, params, dst + dx * p.dstC);
+                if (p.padW)
+                    KernelHwcDefaultEdge<kernel, kernel, kernel - 1, type>(src + (dstW - p.padX) * sS, p.srcW, p.srcC, p.dstC, weight, bias, params, dst + dstW * p.dstC);
+                src += p.strideY*p.srcW*p.srcC;
+                dst += p.dstW*p.dstC;
+            }
+            if (p.padH)
+            {
+                if (p.padX)
+                    KernelHwcDefaultEdge<kernel, kernel - 1, kernel - 1, type>(src, p.srcW, p.srcC, p.dstC, weight + wS, bias, params, dst);
+                for (size_t dx = p.padX; dx < dstW; ++dx)
+                    KernelHwcDefaultEdge<kernel, kernel - 1, kernel, type>(src + (dx - p.padX) * sS, p.srcW, p.srcC, p.dstC, weight, bias, params, dst + dx * p.dstC);
+                if (p.padW)
+                    KernelHwcDefaultEdge<kernel, kernel - 1, kernel - 1, type>(src + (dstW - p.padX) * sS, p.srcW, p.srcC, p.dstC, weight, bias, params, dst + dstW * p.dstC);
+            }
+        }
+
+        static void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            for (size_t dy = 0; dy < p.dstH; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    memset(dst, 0, p.dstC * sizeof(float));
+                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    {
+                        size_t sy = dy * p.strideY + ky - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (size_t kx = 0; kx < p.kernelX; ++kx)
+                            {
+                                size_t sx = dx * p.strideX + kx - p.padX;
+                                if (sx < p.srcW)
+                                {
+                                    const float * pw = weight + (ky*p.kernelX + kx)*p.srcC*p.dstC;
+                                    const float * ps = src + (sy*p.srcW + sx)*p.srcC;
+                                    for (size_t sc = 0; sc < p.srcC; ++sc)
+                                    {
+                                        for (size_t dc = 0; dc < p.dstC; ++dc)
+                                            dst[dc] += ps[0] * pw[dc];
+                                        ps += 1;
+                                        pw += p.dstC;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    ConvolutionBiasAndActivation(bias, p.dstC, 1, p.activation, params, ::SimdTrue, dst);
+                    dst += p.dstC;
+                }
+            }
+        }
+
+        template <::SimdConvolutionActivationType type> ConvolutionDirectHwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam & p)
+        {
+            if (p.IsKernel(3))
+                return ConvolutionDirectHwcConvolutionBiasActivationDefault<3, type>;
+            return ConvolutionDirectHwcConvolutionBiasActivationDefault;
+        }
+
+        ConvolutionDirectHwc::ConvolutionBiasActivationPtr ConvolutionDirectHwc::SetConvolutionBiasActivation()
+        {
+            const ConvParam & p = _param;
+            ConvolutionDirectHwc::ConvolutionBiasActivationPtr func = NULL;
+            if (p.dstC > HF && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
+            {
+                switch (p.activation)
+                {
+                case ::SimdConvolutionActivationIdentity: func = GetConvolutionBiasActivation<::SimdConvolutionActivationIdentity>(p); break;
+                case ::SimdConvolutionActivationRelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRelu>(p); break;
+                case ::SimdConvolutionActivationLeakyRelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationLeakyRelu>(p); break;
+                case ::SimdConvolutionActivationRestrictRange: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRestrictRange>(p); break;
+                case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
+                }
+            }
+            return func ? func : Avx2::ConvolutionDirectHwc::SetConvolutionBiasActivation();
+        };
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation)
@@ -818,6 +1274,8 @@ namespace Simd
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectChw::Preferable(param))
                 return new Avx512f::ConvolutionDirectChw(param);
+            else if (ConvolutionDirectHwc::Preferable(param))
+                return new ConvolutionDirectHwc(param);
             else
                 return new ConvolutionGemmNN(param);
         }

@@ -139,11 +139,6 @@ namespace Test
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3), _4(4, 4), _5(5, 5), _7(7, 7);
 
 #ifdef NDEBUG
-#if 1
-        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 16, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1, a, t), f1, f2);
-#endif
 #if 0
         result = result && ConvolutionForwardAutoTest(Param(3, 112, 96, 16, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(16, 112, 96, 32, _3, _1, _3, Size(1, 0), Size(1, 0), 1, a, t), f1, f2);
@@ -275,10 +270,17 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(320, 8, 8, 320, _5, _1, _1, _2, _2, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1, a, t), f1, f2);
 #endif
+#if 1
+        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 16, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 224, 224, 16, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 112, 112, 16, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 180, 320, 10, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(10, 89, 159, 16, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 87, 157, 32, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+#endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(1, 30, 30, 16, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 16, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 30, 30, 16, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
         return result;
     }
