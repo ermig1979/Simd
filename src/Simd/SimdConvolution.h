@@ -318,7 +318,6 @@ namespace Simd
             ConvolutionGemmNT(const ConvParam & p);
 
             static bool Preferable(const ConvParam & p);
-
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -361,7 +360,6 @@ namespace Simd
         {
         public:
             ConvolutionDirectChw(const ConvParam & p);
-
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -370,8 +368,6 @@ namespace Simd
         {
         public:
             ConvolutionDirectHwc(const ConvParam & p);
-
-            static bool Preferable(const ConvParam & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -422,7 +418,6 @@ namespace Simd
         {
         public:
             ConvolutionDirectChw(const ConvParam & p);
-
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -431,8 +426,6 @@ namespace Simd
         {
         public:
             ConvolutionDirectHwc(const ConvParam & p);
-
-            static bool Preferable(const ConvParam & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -488,8 +481,6 @@ namespace Simd
         {
         public:
             ConvolutionDirectHwc(const ConvParam & p);
-
-            static bool Preferable(const ConvParam & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };

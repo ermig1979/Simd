@@ -842,7 +842,7 @@ namespace Simd
             if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
-            return k < 2.0 && (p.IsKernel(1) || p.IsKernel(2) || p.IsKernel(3)) && p.IsHwc();
+            return k < 2.0 && p.IsHwc();
         }
 
         static void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
