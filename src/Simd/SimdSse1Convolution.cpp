@@ -741,10 +741,10 @@ namespace Simd
                     sums[1][1] = _mm_setzero_ps();
                 }
                 KernelHwcDefaultMain2x2<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
-                _mm_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 0 * dstC + 1 * F));
-                _mm_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 1 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * dstC + 1 * F));
+                _mm_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 1 * F));
+                _mm_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * F));
             }
             for (; dc < dstCF1; dc += 1 * F)
             {
@@ -761,8 +761,8 @@ namespace Simd
                     sums[1][0] = _mm_setzero_ps();
                 }
                 KernelHwcDefaultMain2x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
-                _mm_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc + 0 * dstC));
-                _mm_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc + 1 * dstC));
+                _mm_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc));
+                _mm_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc));
             }
             if (dc < dstC)
             {
@@ -779,8 +779,8 @@ namespace Simd
                     sums[1][0] = _mm_setzero_ps();
                 }
                 KernelHwcDefaultMain2x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dstC - F, sums);
-                _mm_storeu_ps(dst + dstC - F + 0 * dstC, Activate<type>(sums[0][0], params, dstC - F + 0 * dstC));
-                _mm_storeu_ps(dst + dstC - F + 1 * dstC, Activate<type>(sums[1][0], params, dstC - F + 1 * dstC));
+                _mm_storeu_ps(dst + dstC - F + 0 * dstC, Activate<type>(sums[0][0], params, dstC - F));
+                _mm_storeu_ps(dst + dstC - F + 1 * dstC, Activate<type>(sums[1][0], params, dstC - F));
             }
         }
 
@@ -875,18 +875,18 @@ namespace Simd
                 sums[5][0] = bias0;
                 sums[5][1] = bias1;
                 KernelHwcDefaultMain6x2<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
-                _mm_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 0 * dstC + 1 * F));
-                _mm_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 1 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * dstC + 1 * F));
-                _mm_storeu_ps(dst + dc + 2 * dstC + 0 * F, Activate<type>(sums[2][0], params, dc + 2 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 2 * dstC + 1 * F, Activate<type>(sums[2][1], params, dc + 2 * dstC + 1 * F));
-                _mm_storeu_ps(dst + dc + 3 * dstC + 0 * F, Activate<type>(sums[3][0], params, dc + 3 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 3 * dstC + 1 * F, Activate<type>(sums[3][1], params, dc + 3 * dstC + 1 * F));
-                _mm_storeu_ps(dst + dc + 4 * dstC + 0 * F, Activate<type>(sums[4][0], params, dc + 4 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 4 * dstC + 1 * F, Activate<type>(sums[4][1], params, dc + 4 * dstC + 1 * F));
-                _mm_storeu_ps(dst + dc + 5 * dstC + 0 * F, Activate<type>(sums[5][0], params, dc + 5 * dstC + 0 * F));
-                _mm_storeu_ps(dst + dc + 5 * dstC + 1 * F, Activate<type>(sums[5][1], params, dc + 5 * dstC + 1 * F));
+                _mm_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 1 * F));
+                _mm_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * F));
+                _mm_storeu_ps(dst + dc + 2 * dstC + 0 * F, Activate<type>(sums[2][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 2 * dstC + 1 * F, Activate<type>(sums[2][1], params, dc + 1 * F));
+                _mm_storeu_ps(dst + dc + 3 * dstC + 0 * F, Activate<type>(sums[3][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 3 * dstC + 1 * F, Activate<type>(sums[3][1], params, dc + 1 * F));
+                _mm_storeu_ps(dst + dc + 4 * dstC + 0 * F, Activate<type>(sums[4][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 4 * dstC + 1 * F, Activate<type>(sums[4][1], params, dc + 1 * F));
+                _mm_storeu_ps(dst + dc + 5 * dstC + 0 * F, Activate<type>(sums[5][0], params, dc + 0 * F));
+                _mm_storeu_ps(dst + dc + 5 * dstC + 1 * F, Activate<type>(sums[5][1], params, dc + 1 * F));
             }
             for (; dc < dstCF1; dc += 1 * F)
             {
@@ -899,12 +899,12 @@ namespace Simd
                 sums[4][0] = bias0;
                 sums[5][0] = bias0;
                 KernelHwcDefaultMain6x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dc, sums);
-                _mm_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc + 0 * dstC));
-                _mm_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc + 1 * dstC));
-                _mm_storeu_ps(dst + dc + 2 * dstC, Activate<type>(sums[2][0], params, dc + 2 * dstC));
-                _mm_storeu_ps(dst + dc + 3 * dstC, Activate<type>(sums[3][0], params, dc + 3 * dstC));
-                _mm_storeu_ps(dst + dc + 4 * dstC, Activate<type>(sums[4][0], params, dc + 4 * dstC));
-                _mm_storeu_ps(dst + dc + 5 * dstC, Activate<type>(sums[5][0], params, dc + 5 * dstC));
+                _mm_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc));
+                _mm_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc));
+                _mm_storeu_ps(dst + dc + 2 * dstC, Activate<type>(sums[2][0], params, dc));
+                _mm_storeu_ps(dst + dc + 3 * dstC, Activate<type>(sums[3][0], params, dc));
+                _mm_storeu_ps(dst + dc + 4 * dstC, Activate<type>(sums[4][0], params, dc));
+                _mm_storeu_ps(dst + dc + 5 * dstC, Activate<type>(sums[5][0], params, dc));
             }
             if (dc < dstC)
             {
@@ -917,12 +917,12 @@ namespace Simd
                 sums[4][0] = bias0;
                 sums[5][0] = bias0;
                 KernelHwcDefaultMain6x1<kernel>(src, srcW, srcC, dstC, strideX, weight + dstC - F, sums);
-                _mm_storeu_ps(dst + dstC - F + 0 * dstC, Activate<type>(sums[0][0], params, dstC - F + 0 * dstC));
-                _mm_storeu_ps(dst + dstC - F + 1 * dstC, Activate<type>(sums[1][0], params, dstC - F + 1 * dstC));
-                _mm_storeu_ps(dst + dstC - F + 2 * dstC, Activate<type>(sums[2][0], params, dstC - F + 2 * dstC));
-                _mm_storeu_ps(dst + dstC - F + 3 * dstC, Activate<type>(sums[3][0], params, dstC - F + 3 * dstC));
-                _mm_storeu_ps(dst + dstC - F + 4 * dstC, Activate<type>(sums[4][0], params, dstC - F + 4 * dstC));
-                _mm_storeu_ps(dst + dstC - F + 5 * dstC, Activate<type>(sums[5][0], params, dstC - F + 5 * dstC));
+                _mm_storeu_ps(dst + dstC - F + 0 * dstC, Activate<type>(sums[0][0], params, dstC - F));
+                _mm_storeu_ps(dst + dstC - F + 1 * dstC, Activate<type>(sums[1][0], params, dstC - F));
+                _mm_storeu_ps(dst + dstC - F + 2 * dstC, Activate<type>(sums[2][0], params, dstC - F));
+                _mm_storeu_ps(dst + dstC - F + 3 * dstC, Activate<type>(sums[3][0], params, dstC - F));
+                _mm_storeu_ps(dst + dstC - F + 4 * dstC, Activate<type>(sums[4][0], params, dstC - F));
+                _mm_storeu_ps(dst + dstC - F + 5 * dstC, Activate<type>(sums[5][0], params, dstC - F));
             }
         }
 

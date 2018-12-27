@@ -280,7 +280,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(16, 87, 157, 32, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(3, 30, 30, 16, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 30, 30, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
 #endif
         return result;
     }
@@ -289,8 +289,8 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationRelu, ::SimdFalse, f1, f2);
-        result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationRelu, ::SimdTrue, f1, f2);
+        result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationPrelu, ::SimdFalse, f1, f2);
+        result = result && ConvolutionForwardAutoTest(::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
 
         return result;
     }
