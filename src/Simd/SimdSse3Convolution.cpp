@@ -65,6 +65,8 @@ namespace Simd
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectChw::Preferable(param))
                 return new Sse::ConvolutionDirectChw(param);
+            else if (ConvolutionDirectHwc::Preferable(param))
+                return new Sse::ConvolutionDirectHwc(param);
             else
                 return new Sse::ConvolutionGemmNN(param);
         }

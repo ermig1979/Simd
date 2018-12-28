@@ -837,18 +837,21 @@ namespace Simd
 
         bool ConvolutionDirectHwc::Preferable(const ConvParam & p)
         {
-            if (!p.IsDilation(1))
+            if (!p.IsHwc())
                 return false;
-            if (!(p.IsStride(1) || p.IsStride(2) || p.IsStride(3)))
-                return false;
-            double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
-            return k < 2.0 && p.IsHwc();
+            if (p.group == 1)
+            {
+                double k = double(p.srcC) / p.group * p.strideX * p.strideY / p.kernelX / p.kernelY;
+                return k < 2.0 && p.IsHwc();
+            }
+            return p.IsDepthwise();
         }
 
         static void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
-            size_t srcC = p.srcC / p.group;
-            size_t dstC = p.dstC / p.group;
+            size_t group = p.group;
+            size_t srcC = p.srcC / group;
+            size_t dstC = p.dstC / group;
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
@@ -864,9 +867,10 @@ namespace Simd
                                 size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
                                 if (sx < p.srcW)
                                 {
+
                                     const float * pw = weight + (ky*p.kernelX + kx)*srcC*p.dstC;
-                                    const float * ps = src + (sy*p.srcW + sx)*srcC;
-                                    for (size_t g = 0; g < p.group; ++g)
+                                    const float * ps = src + (sy*p.srcW + sx)*p.srcC;
+                                    if (group == 1)
                                     {
                                         for (size_t sc = 0; sc < srcC; ++sc)
                                         {
@@ -875,6 +879,11 @@ namespace Simd
                                             ps += 1;
                                             pw += dstC;
                                         }
+                                    }
+                                    else
+                                    {
+                                        for (size_t g = 0; g < group; ++g)
+                                            dst[g] += ps[g] * pw[g];
                                     }
                                 }
                             }
