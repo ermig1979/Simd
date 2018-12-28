@@ -325,8 +325,8 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
-            if (trans || size == 1)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -435,7 +435,7 @@ namespace Simd
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetScaleLayerForward<true>(src, scale, bias, count, size, dst, trans);
             else
                 SynetScaleLayerForward<false>(src, scale, bias, count, size, dst, trans);

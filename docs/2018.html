@@ -47,6 +47,7 @@
  <li>Wrong assert condition in AVX-512F optimization of function NeuralRelu.</li>
  <li>Visual Studio 2017 compiler error (intrinsic _mm512_maskz_loadu_epi8 in Release mode).</li>
  <li>Crash: reading of unaligned memory in AVX-512BW optimization of function HogLiteFilterFeatures.</li>
+ <li>Performance bug in functions SynetAddBias, SynetFusedLayerForwardX, SynetPreluLayerForward and SynetScaleLayerForward when (count == 1, trans == 1).</li>
 </ul>
 
 <h4>Test framework</h4>

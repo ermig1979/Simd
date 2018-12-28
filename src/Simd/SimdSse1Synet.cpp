@@ -44,8 +44,8 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(bias) : Aligned(size)) && Aligned(dst));
-            if (trans || size == 1)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(bias) : Aligned(size)) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -98,7 +98,7 @@ namespace Simd
 
         void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(bias) : Aligned(size)) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(bias) : Aligned(size)) && Aligned(dst))
                 SynetAddBias<true>(bias, count, size, dst, trans);
             else
                 SynetAddBias<false>(bias, count, size, dst, trans);
@@ -273,9 +273,9 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
             __m128 sign = _mm_set1_ps(-0.0f);
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -331,7 +331,7 @@ namespace Simd
 
         void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetFusedLayerForward0<true>(src, bias, scale, count, size, dst, trans);
             else
                 SynetFusedLayerForward0<false>(src, bias, scale, count, size, dst, trans);
@@ -355,8 +355,8 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(bias0) && Aligned(scale1) && Aligned(bias1) : Aligned(size)) && Aligned(src) && Aligned(dst));
-            if (trans || size == 1)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(bias0) && Aligned(scale1) && Aligned(bias1) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -413,7 +413,7 @@ namespace Simd
 
         void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(bias0) && Aligned(scale1) && Aligned(bias1) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(bias0) && Aligned(scale1) && Aligned(bias1) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetFusedLayerForward1<true>(src, bias0, scale1, bias1, count, size, dst, trans);
             else
                 SynetFusedLayerForward1<false>(src, bias0, scale1, bias1, count, size, dst, trans);
@@ -438,9 +438,9 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
             __m128 _slope = _mm_set1_ps(slope[0]);
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -496,7 +496,7 @@ namespace Simd
 
         void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetFusedLayerForward2<true>(src, scale, bias, count, size, slope, dst, trans);
             else
                 SynetFusedLayerForward2<false>(src, scale, bias, count, size, slope, dst, trans);
@@ -523,9 +523,9 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
             __m128 sign = _mm_set1_ps(-0.0f);
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -581,7 +581,7 @@ namespace Simd
 
         void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetFusedLayerForward3<true>(src, bias, scale, count, size, dst, trans);
             else
                 SynetFusedLayerForward3<false>(src, bias, scale, count, size, dst, trans);
@@ -650,8 +650,8 @@ namespace Simd
         template <bool align> void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst));
-            if (trans || size == 1)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -706,7 +706,7 @@ namespace Simd
 
         void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetPreluLayerForward<true>(src, slope, count, size, dst, trans);
             else
                 SynetPreluLayerForward<false>(src, slope, count, size, dst, trans);
@@ -768,8 +768,8 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
-            if (trans || size == 1)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = AlignLo(count, QF);
                 size_t partial = AlignLo(count, F);
@@ -878,7 +878,7 @@ namespace Simd
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if ((trans || size == 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
                 SynetScaleLayerForward<true>(src, scale, bias, count, size, dst, trans);
             else
                 SynetScaleLayerForward<false>(src, scale, bias, count, size, dst, trans);

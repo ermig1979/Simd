@@ -31,7 +31,7 @@ namespace Simd
     {
         void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 for (size_t j = 0; j < size; ++j)
@@ -155,7 +155,7 @@ namespace Simd
 
         void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 for (size_t j = 0; j < size; ++j)
@@ -199,7 +199,7 @@ namespace Simd
 
         void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 for (size_t j = 0; j < size; ++j)
@@ -245,7 +245,7 @@ namespace Simd
         void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst, SimdBool trans)
         {
             float _slope = slope[0];
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 for (size_t j = 0; j < size; ++j)
@@ -289,7 +289,7 @@ namespace Simd
 
         void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 for (size_t j = 0; j < size; ++j)
@@ -381,7 +381,7 @@ namespace Simd
 
         void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 for (size_t j = 0; j < size; ++j)
@@ -432,7 +432,7 @@ namespace Simd
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
         {
-            if (trans || size == 1)
+            if ((trans || size == 1) && count != 1)
             {
                 size_t aligned = Simd::AlignLo(count, 4);
                 if (bias)
