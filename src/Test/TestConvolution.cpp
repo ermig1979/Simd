@@ -301,10 +301,17 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(64, 19, 16, 64, _3, _1, _3, _1, _1, 64, a, t), f1, f2);
 #endif
 #if 1
-        result = result && ConvolutionForwardAutoTest(Param(64, 56, 48, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(128, 28, 24, 128, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(256, 14, 12, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(512, 7, 6, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(728, 14, 14, 728, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(64, 56, 48, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(128, 28, 24, 128, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(256, 14, 12, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(Param(512, 7, 6, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 150, 150, 32, _3, _1, _1, _1, _1, 32, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 150, 150, 16, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 150, 150, 96, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(96, 150, 150, 96, _3, _1, _2, _0, _1, 96, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(96, 75, 75, 24, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
         //result = result && ConvolutionForwardAutoTest(Param(3, 30, 30, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);

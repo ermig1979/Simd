@@ -368,6 +368,8 @@ namespace Simd
         {
         public:
             ConvolutionDirectHwc(const ConvParam & p);
+        
+            static bool Preferable(const ConvParam & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };

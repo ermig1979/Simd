@@ -512,6 +512,25 @@ namespace Simd
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
+        bool ConvolutionDirectHwc::Preferable(const ConvParam & p)
+        {
+            if (!p.IsDilation(1) || !p.IsHwc())
+                return false;
+            if (p.group == 1)
+            {
+                if (p.kernelY > p.srcH || p.kernelX > p.srcW)
+                    return false;
+                //double k = double(p.srcC) / p.kernelX / p.kernelY;
+                //return k < 2.0;
+                return p.srcC <= 16;
+            }
+            else if (p.IsDepthwise())
+            {
+                return true;
+            }
+            return false;
+        }
+
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const float * params, size_t offset);
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const float * params, size_t offset)
