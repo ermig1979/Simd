@@ -139,7 +139,7 @@ namespace Simd
                             size_t i = 0;
                             for (; i < aligned; i += F)
                             {
-                                __m128 value = _mm_add_ps(_mm_loadu_ps(dst + i), _mm_loadu_ps(dst + i));
+                                __m128 value = _mm_add_ps(_mm_loadu_ps(dst + i), _mm_loadu_ps(bias + i));
                                 _mm_storeu_ps(dst + i, _mm_min_ps(_mm_max_ps(_lower, value), _upper));
                             }
                             for (; i < count; ++i)

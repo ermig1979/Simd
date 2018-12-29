@@ -139,7 +139,7 @@ namespace Simd
                             size_t i = 0;
                             for (; i < aligned; i += F)
                             {
-                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(dst + i));
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
                                 _mm256_storeu_ps(dst + i, _mm256_min_ps(_mm256_max_ps(_lower, value), _upper));
                             }
                             for (; i < count; ++i)
