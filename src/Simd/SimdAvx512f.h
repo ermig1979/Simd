@@ -136,6 +136,8 @@ namespace Simd
         void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
 
         void Winograd2x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+
+        void Winograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
     }
 #endif// SIMD_AVX512F_ENABLE
 }

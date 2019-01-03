@@ -234,18 +234,7 @@ namespace Simd
         ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
             : Base::ConvolutionWinograd2x3p(p)
         {
-        }
-
-        void ConvolutionWinograd2x3p::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            const ConvParam & p = _param;
-            assert(p.srcT == trans);
-            _weight.Resize(_strideW*_count);
-            Sse::Winograd2x3SetFilter(weight, p.srcC*p.dstC, _weight.data, trans);
-            if (internal)
-                *internal = SimdTrue;
-            _bias = bias;
-            _params = params;
+            _setFilter = Sse::Winograd2x3SetFilter;
         }
 
         void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)

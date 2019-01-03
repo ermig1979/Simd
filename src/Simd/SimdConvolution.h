@@ -187,10 +187,13 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
+            typedef void(*SetFilter)(const float * src, size_t size, float * dst, SimdBool trans);
+
             size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K;
             int _pad;
             Array32f _weight;
             const float * _bias;
+            SetFilter _setFilter;
         };
 
         class ConvolutionDirectChw : public Convolution
@@ -271,7 +274,6 @@ namespace Simd
         {
         public:
             ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 

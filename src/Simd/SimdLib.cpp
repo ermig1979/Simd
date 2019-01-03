@@ -5262,7 +5262,7 @@ SIMD_API void SimdWinograd2x3pSetOutput(const float * src, float * dst, size_t d
     simdWinograd2x3pSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
 }
 
-volatile SimdWinogradSetFilterPtr simdWinograd4x3SetFilter = SIMD_FUNC1(Winograd4x3SetFilter, SIMD_SSE_FUNC);
+volatile SimdWinogradSetFilterPtr simdWinograd4x3SetFilter = SIMD_FUNC3(Winograd4x3SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
 SIMD_API void SimdWinograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
 {

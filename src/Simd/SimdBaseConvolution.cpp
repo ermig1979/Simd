@@ -525,6 +525,7 @@ namespace Simd
             _N = _tileW * _tileH;
             _K = p.srcC;
             _pad = (int)p.padX;
+            _setFilter = Base::Winograd2x3SetFilter;
         }
         
         size_t ConvolutionWinograd2x3p::BufferSize() const
@@ -537,7 +538,7 @@ namespace Simd
             const ConvParam & p = _param;
             assert(p.srcT == trans);
             _weight.Resize(_strideW*_count);
-            Base::Winograd2x3SetFilter(weight, p.srcC*p.dstC, _weight.data, trans);
+            _setFilter(weight, p.srcC*p.dstC, _weight.data, trans);
             if (internal)
                 *internal = SimdTrue;
             _bias = bias;

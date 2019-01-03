@@ -369,6 +369,7 @@ namespace Simd
         ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
             : Avx2::ConvolutionWinograd2x3p(p)
         {
+            _setFilter = Avx512f::Winograd2x3SetFilter;
         }
 
         void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)

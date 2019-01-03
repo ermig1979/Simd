@@ -714,6 +714,92 @@ namespace Simd
                 dst += dstHeight * dstWidth;
             }
         }
+
+        SIMD_INLINE void Winograd4x3SetFilter8Row(const __m256 * t, float * dst, size_t stride)
+        {
+            const __m256 r4 = _mm256_set1_ps(1.0f / 4.0f);
+            const __m256 r6 = _mm256_set1_ps(1.0f / 6.0f);
+            const __m256 mr6 = _mm256_set1_ps(-1.0f / 6.0f);
+            const __m256 r12 = _mm256_set1_ps(1.0f / 12.0f);
+            const __m256 r24 = _mm256_set1_ps(1.0f / 24.0f);
+            _mm256_storeu_ps(dst + 0 * stride, _mm256_mul_ps(r4, t[0]));
+            __m256 t0 = _mm256_add_ps(t[0], t[2]);
+            _mm256_storeu_ps(dst + 1 * stride, _mm256_mul_ps(mr6, _mm256_add_ps(t0, t[1])));
+            _mm256_storeu_ps(dst + 2 * stride, _mm256_mul_ps(mr6, _mm256_sub_ps(t0, t[1])));
+            __m256 t1 = _mm256_add_ps(_mm256_mul_ps(r24, t[0]), _mm256_mul_ps(r6, t[2]));
+            __m256 t2 = _mm256_mul_ps(r12, t[1]);
+            _mm256_storeu_ps(dst + 3 * stride, _mm256_add_ps(t1, t2));
+            _mm256_storeu_ps(dst + 4 * stride, _mm256_sub_ps(t1, t2));
+            _mm256_storeu_ps(dst + 5 * stride, t[2]);
+        }
+
+        SIMD_INLINE void Winograd4x3SetFilter8All(const __m256 * s, float * dst, size_t stride)
+        {
+            const __m256 r4 = _mm256_set1_ps(1.0f / 4.0f);
+            const __m256 r6 = _mm256_set1_ps(1.0f / 6.0f);
+            const __m256 mr6 = _mm256_set1_ps(-1.0f / 6.0f);
+            const __m256 r12 = _mm256_set1_ps(1.0f / 12.0f);
+            const __m256 r24 = _mm256_set1_ps(1.0f / 24.0f);
+
+            __m256 t[3];
+            t[0] = _mm256_mul_ps(r4, s[0]);
+            t[1] = _mm256_mul_ps(r4, s[1]);
+            t[2] = _mm256_mul_ps(r4, s[2]);
+            Winograd4x3SetFilter8Row(t, dst + 0 * stride, stride);
+
+            t[0] = _mm256_mul_ps(mr6, _mm256_add_ps(_mm256_add_ps(s[0], s[3]), s[6]));
+            t[1] = _mm256_mul_ps(mr6, _mm256_add_ps(_mm256_add_ps(s[1], s[4]), s[7]));
+            t[2] = _mm256_mul_ps(mr6, _mm256_add_ps(_mm256_add_ps(s[2], s[5]), s[8]));
+            Winograd4x3SetFilter8Row(t, dst + 6 * stride, stride);
+
+            t[0] = _mm256_mul_ps(mr6, _mm256_add_ps(_mm256_sub_ps(s[0], s[3]), s[6]));
+            t[1] = _mm256_mul_ps(mr6, _mm256_add_ps(_mm256_sub_ps(s[1], s[4]), s[7]));
+            t[2] = _mm256_mul_ps(mr6, _mm256_add_ps(_mm256_sub_ps(s[2], s[5]), s[8]));
+            Winograd4x3SetFilter8Row(t, dst + 12 * stride, stride);
+
+            t[0] = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(r24, s[0]), _mm256_mul_ps(r12, s[3])), _mm256_mul_ps(r6, s[6]));
+            t[1] = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(r24, s[1]), _mm256_mul_ps(r12, s[4])), _mm256_mul_ps(r6, s[7]));
+            t[2] = _mm256_add_ps(_mm256_add_ps(_mm256_mul_ps(r24, s[2]), _mm256_mul_ps(r12, s[5])), _mm256_mul_ps(r6, s[8]));
+            Winograd4x3SetFilter8Row(t, dst + 18 * stride, stride);
+
+            t[0] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(r24, s[0]), _mm256_mul_ps(r12, s[3])), _mm256_mul_ps(r6, s[6]));
+            t[1] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(r24, s[1]), _mm256_mul_ps(r12, s[4])), _mm256_mul_ps(r6, s[7]));
+            t[2] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(r24, s[2]), _mm256_mul_ps(r12, s[5])), _mm256_mul_ps(r6, s[8]));
+            Winograd4x3SetFilter8Row(t, dst + 24 * stride, stride);
+
+            Winograd4x3SetFilter8Row(s + 6, dst + 30 * stride, stride);
+        }
+
+        SIMD_INLINE void Winograd4x3SetFilter8t(const float * src, float * dst, size_t stride)
+        {
+            __m256 s[9];
+            s[0] = _mm256_loadu_ps(src + 0 * stride);
+            s[1] = _mm256_loadu_ps(src + 1 * stride);
+            s[2] = _mm256_loadu_ps(src + 2 * stride);
+            s[3] = _mm256_loadu_ps(src + 3 * stride);
+            s[4] = _mm256_loadu_ps(src + 4 * stride);
+            s[5] = _mm256_loadu_ps(src + 5 * stride);
+            s[6] = _mm256_loadu_ps(src + 6 * stride);
+            s[7] = _mm256_loadu_ps(src + 7 * stride);
+            s[8] = _mm256_loadu_ps(src + 8 * stride);
+            Winograd4x3SetFilter8All(s, dst + 0 * stride, stride);
+        }
+
+        void Winograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
+        {
+            if (trans)
+            {
+                size_t size8 = AlignLo(size, 8), i = 0;
+                for (; i < size8; i += 8)
+                    Winograd4x3SetFilter8t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::Winograd4x3SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                Sse::Winograd4x3SetFilter(src, size, dst, trans);
+            }
+        }
     }
 #endif// SIMD_AVX_ENABLE
 }

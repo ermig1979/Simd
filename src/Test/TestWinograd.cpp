@@ -125,6 +125,16 @@ namespace Test
             result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Sse::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
 #endif 
 
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Avx::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Avx512f::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
+#endif
+
         return result;
     }
 
