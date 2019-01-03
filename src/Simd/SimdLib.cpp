@@ -5223,7 +5223,7 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
 }
 
-typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst);
+typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);
 typedef void(*SimdWinogradSetInputPtr) (const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
 typedef void(*SimdWinogradSetOutputPtr) (const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
 
@@ -5241,11 +5241,11 @@ SIMD_API void SimdWinograd2x3iSetOutput(const float * src, float * dst, size_t d
     simdWinograd2x3iSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
 }
 
-volatile SimdWinogradSetFilterPtr simdWinograd2x3pSetFilter = SIMD_FUNC1(Winograd2x3pSetFilter, SIMD_SSE_FUNC);
+volatile SimdWinogradSetFilterPtr simdWinograd2x3SetFilter = SIMD_FUNC3(Winograd2x3SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
-SIMD_API void SimdWinograd2x3pSetFilter(const float * src, size_t size, float * dst)
+SIMD_API void SimdWinograd2x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
 {
-    simdWinograd2x3pSetFilter(src, size, dst);
+    simdWinograd2x3SetFilter(src, size, dst, trans);
 }
 
 volatile SimdWinogradSetInputPtr simdWinograd2x3pSetInput = SIMD_FUNC3(Winograd2x3pSetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
@@ -5262,11 +5262,11 @@ SIMD_API void SimdWinograd2x3pSetOutput(const float * src, float * dst, size_t d
     simdWinograd2x3pSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
 }
 
-volatile SimdWinogradSetFilterPtr simdWinograd4x3pSetFilter = SIMD_FUNC1(Winograd4x3pSetFilter, SIMD_SSE_FUNC);
+volatile SimdWinogradSetFilterPtr simdWinograd4x3SetFilter = SIMD_FUNC1(Winograd4x3SetFilter, SIMD_SSE_FUNC);
 
-SIMD_API void SimdWinograd4x3pSetFilter(const float * src, size_t size, float * dst)
+SIMD_API void SimdWinograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
 {
-    simdWinograd4x3pSetFilter(src, size, dst);
+    simdWinograd4x3SetFilter(src, size, dst, trans);
 }
 
 SIMD_API void SimdWinograd4x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)

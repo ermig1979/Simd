@@ -241,7 +241,7 @@ namespace Simd
             const ConvParam & p = _param;
             assert(p.srcT == trans);
             _weight.Resize(_strideW*_count);
-            Sse::Winograd2x3pSetFilter(weight, p.srcC*p.dstC, _weight.data);
+            Sse::Winograd2x3SetFilter(weight, p.srcC*p.dstC, _weight.data, trans);
             if (internal)
                 *internal = SimdTrue;
             _bias = bias;

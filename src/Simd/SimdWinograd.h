@@ -109,7 +109,7 @@ namespace Simd
                     dst[row*dstStride + col] = tmp[row * 2 + col];
         }
 
-        SIMD_INLINE void Winograd2x3pSetFilter1(const float * src, float * dst, size_t stride)
+        SIMD_INLINE void Winograd2x3SetFilter1n(const float * src, float * dst, size_t stride)
         {
             const float r2 = 1.0f / 2.0f;
             const float r4 = 1.0f / 4.0f;
@@ -129,6 +129,37 @@ namespace Simd
             dst[13 * stride] = (src[6] + src[8] + src[7])*r2;
             dst[14 * stride] = (src[6] + src[8] - src[7])*r2;
             dst[15 * stride] = src[8];
+        }
+
+        SIMD_INLINE void Winograd2x3SetFilter1t(const float * src, float * dst, size_t stride)
+        {
+            const float r2 = 1.0f / 2.0f;
+            const float r4 = 1.0f / 4.0f;
+            float src0 = src[0 * stride];
+            float src1 = src[1 * stride];
+            float src2 = src[2 * stride];
+            float src3 = src[3 * stride];
+            float src4 = src[4 * stride];
+            float src5 = src[5 * stride];
+            float src6 = src[6 * stride];
+            float src7 = src[7 * stride];
+            float src8 = src[8 * stride];
+            dst[0 * stride] = src0;
+            dst[1 * stride] = (src0 + src2 + src1)*r2;
+            dst[2 * stride] = (src0 + src2 - src1)*r2;
+            dst[3 * stride] = src2;
+            dst[4 * stride] = (src0 + src6 + src3)*r2;
+            dst[5 * stride] = ((src0 + src6 + src3) + (src2 + src8 + src5) + (src1 + src7 + src4))*r4;
+            dst[6 * stride] = ((src0 + src6 + src3) + (src2 + src8 + src5) - (src1 + src7 + src4))*r4;
+            dst[7 * stride] = (src2 + src8 + src5)*r2;
+            dst[8 * stride] = (src0 + src6 - src3)*r2;
+            dst[9 * stride] = ((src0 + src6 - src3) + (src2 + src8 - src5) + (src1 + src7 - src4))*r4;
+            dst[10 * stride] = ((src0 + src6 - src3) + (src2 + src8 - src5) - (src1 + src7 - src4))*r4;
+            dst[11 * stride] = (src2 + src8 - src5)*r2;
+            dst[12 * stride] = src6;
+            dst[13 * stride] = (src6 + src8 + src7)*r2;
+            dst[14 * stride] = (src6 + src8 - src7)*r2;
+            dst[15 * stride] = src8;
         }
 
         SIMD_INLINE void Winograd4x3pSetFilter1(const float * src, float * dst, size_t stride)

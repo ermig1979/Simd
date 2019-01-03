@@ -341,10 +341,10 @@ namespace Test
 
     TEST_ADD_GROUP_AD0(Winograd2x3iSetInput);
     TEST_ADD_GROUP_AD0(Winograd2x3iSetOutput);
-    TEST_ADD_GROUP_AD0(Winograd2x3pSetFilter);
+    TEST_ADD_GROUP_A00(Winograd2x3SetFilter);
     TEST_ADD_GROUP_AD0(Winograd2x3pSetInput);
     TEST_ADD_GROUP_AD0(Winograd2x3pSetOutput);
-    TEST_ADD_GROUP_AD0(Winograd4x3pSetFilter);
+    TEST_ADD_GROUP_A00(Winograd4x3SetFilter);
     TEST_ADD_GROUP_AD0(Winograd4x3pSetInput);
     TEST_ADD_GROUP_AD0(Winograd4x3pSetOutput);
 

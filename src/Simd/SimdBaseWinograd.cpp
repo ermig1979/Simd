@@ -107,10 +107,18 @@ namespace Simd
             }
         }
 
-        void Winograd2x3pSetFilter(const float * src, size_t size, float * dst)
+        void Winograd2x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
         {
-            for (size_t i = 0; i < size; i += 1, src += 9, dst += 1)
-                Base::Winograd2x3pSetFilter1(src, dst, size);
+            if (trans)
+            {
+                for (size_t i = 0; i < size; i += 1)
+                    Base::Winograd2x3SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                for (size_t i = 0; i < size; i += 1, src += 9, dst += 1)
+                    Base::Winograd2x3SetFilter1n(src, dst, size);
+            }
         }
 
         SIMD_INLINE void Winograd2x3pSetInput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
@@ -288,7 +296,7 @@ namespace Simd
             }
         }
 
-        void Winograd4x3pSetFilter(const float * src, size_t size, float * dst)
+        void Winograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
         {
             for (size_t i = 0; i < size; i += 1, src += 9, dst += 1)
                 Base::Winograd4x3pSetFilter1(src, dst, size);

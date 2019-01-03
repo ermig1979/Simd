@@ -26,12 +26,77 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSse1.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
+        SIMD_INLINE void Winograd2x3SetFilter16t(const float * src, float * dst, size_t stride, __mmask16 tail = -1)
+        {
+            const __m512 r2 = _mm512_set1_ps(1.0f / 2.0f);
+            const __m512 r4 = _mm512_set1_ps(1.0f / 4.0f);
+
+            __m512 s[9];
+            s[0] = _mm512_maskz_loadu_ps(tail, src + 0 * stride);
+            s[1] = _mm512_maskz_loadu_ps(tail, src + 1 * stride);
+            s[2] = _mm512_maskz_loadu_ps(tail, src + 2 * stride);
+            s[3] = _mm512_maskz_loadu_ps(tail, src + 3 * stride);
+            s[4] = _mm512_maskz_loadu_ps(tail, src + 4 * stride);
+            s[5] = _mm512_maskz_loadu_ps(tail, src + 5 * stride);
+            s[6] = _mm512_maskz_loadu_ps(tail, src + 6 * stride);
+            s[7] = _mm512_maskz_loadu_ps(tail, src + 7 * stride);
+            s[8] = _mm512_maskz_loadu_ps(tail, src + 8 * stride);
+
+            _mm512_mask_storeu_ps(dst + 0 * stride, tail, s[0]);
+            __m512 _0a2 = _mm512_add_ps(s[0], s[2]);
+            _mm512_mask_storeu_ps(dst + 1 * stride, tail, _mm512_mul_ps(_mm512_add_ps(_0a2, s[1]), r2));
+            _mm512_mask_storeu_ps(dst + 2 * stride, tail, _mm512_mul_ps(_mm512_sub_ps(_0a2, s[1]), r2));
+            _mm512_mask_storeu_ps(dst + 3 * stride, tail, s[2]);
+
+            __m512 _0a6a3 = _mm512_add_ps(_mm512_add_ps(s[0], s[6]), s[3]);
+            _mm512_mask_storeu_ps(dst + 4 * stride, tail, _mm512_mul_ps(_0a6a3, r2));
+            __m512 _2a8a5 = _mm512_add_ps(_mm512_add_ps(s[2], s[8]), s[5]);
+            __m512 _1a7a4 = _mm512_add_ps(_mm512_add_ps(s[1], s[7]), s[4]);
+            _mm512_mask_storeu_ps(dst + 5 * stride, tail, _mm512_mul_ps(_mm512_add_ps(_mm512_add_ps(_0a6a3, _2a8a5), _1a7a4), r4));
+            _mm512_mask_storeu_ps(dst + 6 * stride, tail, _mm512_mul_ps(_mm512_sub_ps(_mm512_add_ps(_0a6a3, _2a8a5), _1a7a4), r4));
+            _mm512_mask_storeu_ps(dst + 7 * stride, tail, _mm512_mul_ps(_2a8a5, r2));
+
+            __m512 _0a6s3 = _mm512_sub_ps(_mm512_add_ps(s[0], s[6]), s[3]);
+            _mm512_mask_storeu_ps(dst + 8 * stride, tail, _mm512_mul_ps(_0a6s3, r2));
+            __m512 _2a8s5 = _mm512_sub_ps(_mm512_add_ps(s[2], s[8]), s[5]);
+            __m512 _1a7s4 = _mm512_sub_ps(_mm512_add_ps(s[1], s[7]), s[4]);
+            _mm512_mask_storeu_ps(dst + 9 * stride, tail, _mm512_mul_ps(_mm512_add_ps(_mm512_add_ps(_0a6s3, _2a8s5), _1a7s4), r4));
+            _mm512_mask_storeu_ps(dst + 10 * stride, tail, _mm512_mul_ps(_mm512_sub_ps(_mm512_add_ps(_0a6s3, _2a8s5), _1a7s4), r4));
+            _mm512_mask_storeu_ps(dst + 11 * stride, tail, _mm512_mul_ps(_2a8s5, r2));
+
+            _mm512_mask_storeu_ps(dst + 12 * stride, tail, s[6]);
+            __m512 _6a8 = _mm512_add_ps(s[6], s[8]);
+            _mm512_mask_storeu_ps(dst + 13 * stride, tail, _mm512_mul_ps(_mm512_add_ps(_6a8, s[7]), r2));
+            _mm512_mask_storeu_ps(dst + 14 * stride, tail, _mm512_mul_ps(_mm512_sub_ps(_6a8, s[7]), r2));
+            _mm512_mask_storeu_ps(dst + 15 * stride, tail, s[8]);
+        }
+
+        void Winograd2x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
+        {
+            if (trans)
+            {
+                size_t sizeF = AlignLo(size, F), i = 0;
+                for (; i < sizeF; i += F)
+                    Winograd2x3SetFilter16t(src + i, dst + i, size);
+                if (i < size)
+                {
+                    __mmask16 tail = TailMask16(size - sizeF); 
+                    Winograd2x3SetFilter16t(src + i, dst + i, size, tail);
+                }
+            }
+            else
+            {
+                Sse::Winograd2x3SetFilter(src, size, dst, trans);
+            }
+        }
+
         template <bool mask> SIMD_INLINE void Winograd2x3pSetInputLoad16Row(const float * src, __m512 * dst, const __mmask16 * tails)
         {
             __m512 a0 = Load<false, mask>(src + 0, tails[0]);
