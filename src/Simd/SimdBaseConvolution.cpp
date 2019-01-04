@@ -564,7 +564,8 @@ namespace Simd
 
         bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
         {
-            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && p.srcH >= 6 && p.srcW >= 6 && p.srcT == 0 && p.dstT == 0;
+            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && 
+                (p.srcT ? (p.srcH >= 12 && p.srcW >= 12) : (p.srcH >= 6 && p.srcW >= 6));
         }
 
         //---------------------------------------------------------------------
