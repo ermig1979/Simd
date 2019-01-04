@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -31,84 +31,6 @@ namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE void Winograd2x3iSetInput1(const float * src, size_t srcStride, float * dst)
-        {
-            float tmp[16];
-            tmp[0] = src[0 * srcStride + 0];
-            tmp[1] = src[0 * srcStride + 1];
-            tmp[2] = src[0 * srcStride + 2];
-            tmp[3] = src[0 * srcStride + 3];
-
-            tmp[4] = src[1 * srcStride + 0];
-            tmp[5] = src[1 * srcStride + 1];
-            tmp[6] = src[1 * srcStride + 2];
-            tmp[7] = src[1 * srcStride + 3];
-
-            tmp[8] = src[2 * srcStride + 0];
-            tmp[9] = src[2 * srcStride + 1];
-            tmp[10] = src[2 * srcStride + 2];
-            tmp[11] = src[2 * srcStride + 3];
-
-            tmp[12] = src[3 * srcStride + 0];
-            tmp[13] = src[3 * srcStride + 1];
-            tmp[14] = src[3 * srcStride + 2];
-            tmp[15] = src[3 * srcStride + 3];
-
-            dst[0] = (tmp[0] - tmp[8]) - (tmp[2] - tmp[10]);
-            dst[1] = (tmp[1] - tmp[9]) + (tmp[2] - tmp[10]);
-            dst[2] = (tmp[2] - tmp[10]) - (tmp[1] - tmp[9]);
-            dst[3] = (tmp[1] - tmp[9]) - (tmp[3] - tmp[11]);
-            dst[4] = (tmp[4] + tmp[8]) - (tmp[6] + tmp[10]);
-            dst[5] = (tmp[5] + tmp[9]) + (tmp[6] + tmp[10]);
-            dst[6] = (tmp[6] + tmp[10]) - (tmp[5] + tmp[9]);
-            dst[7] = (tmp[5] + tmp[9]) - (tmp[7] + tmp[11]);
-            dst[8] = (tmp[8] - tmp[4]) - (tmp[10] - tmp[6]);
-            dst[9] = (tmp[9] - tmp[5]) + (tmp[10] - tmp[6]);
-            dst[10] = (tmp[10] - tmp[6]) - (tmp[9] - tmp[5]);
-            dst[11] = (tmp[9] - tmp[5]) - (tmp[11] - tmp[7]);
-            dst[12] = (tmp[4] - tmp[12]) - (tmp[6] - tmp[14]);
-            dst[13] = (tmp[5] - tmp[13]) + (tmp[6] - tmp[14]);
-            dst[14] = (tmp[6] - tmp[14]) - (tmp[5] - tmp[13]);
-            dst[15] = (tmp[5] - tmp[13]) - (tmp[7] - tmp[15]);
-        }
-
-        SIMD_INLINE void Winograd2x3iSetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst)
-        {
-            float tmp[4 * 4] = { 0 };
-            for (size_t row = rowB; row < rowE; ++row)
-                for (size_t col = colB; col < colE; ++col)
-                    tmp[row * 4 + col] = src[row * srcStride + col];
-            Winograd2x3iSetInput1(tmp, 4, dst);
-        }
-
-
-        SIMD_INLINE void Winograd2x3iSetOutput1(const float * src, float * dst, size_t dstStride)
-        {
-            float tmp[8];
-            tmp[0] = src[0] + src[1] + src[2];
-            tmp[1] = src[1] - src[2] - src[3];
-            tmp[2] = src[4] + src[5] + src[6];
-            tmp[3] = src[5] - src[6] - src[7];
-            tmp[4] = src[8] + src[9] + src[10];
-            tmp[5] = src[9] - src[10] - src[11];
-            tmp[6] = src[12] + src[13] + src[14];
-            tmp[7] = src[13] - src[14] - src[15];
-
-            dst[0 * dstStride + 0] = tmp[0] + tmp[2] + tmp[4];
-            dst[0 * dstStride + 1] = tmp[1] + tmp[3] + tmp[5];
-            dst[1 * dstStride + 0] = tmp[2] - tmp[4] - tmp[6];
-            dst[1 * dstStride + 1] = tmp[3] - tmp[5] - tmp[7];
-        }
-
-        SIMD_INLINE void Winograd2x3iSetOutput1p(const float * src, float * dst, size_t dstStride, size_t rowE, size_t colE)
-        {
-            float tmp[2 * 2];
-            Winograd2x3iSetOutput1(src, tmp, 2);
-            for (size_t row = 0; row < rowE; ++row)
-                for (size_t col = 0; col < colE; ++col)
-                    dst[row*dstStride + col] = tmp[row * 2 + col];
-        }
-
         SIMD_INLINE void Winograd2x3SetFilter1n(const float * src, float * dst, size_t stride)
         {
             const float r2 = 1.0f / 2.0f;

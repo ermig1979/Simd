@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar,
+* Copyright (c) 2011-2019 Yermalayeu Ihar,
 *               2014-2018 Antonenka Mikhail,
 *               2018-2018 Radchenko Andrey.
 *
@@ -5224,22 +5224,8 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
 }
 
 typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);
-typedef void(*SimdWinogradSetInputPtr) (const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
-typedef void(*SimdWinogradSetOutputPtr) (const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
-
-volatile SimdWinogradSetInputPtr simdWinograd2x3iSetInput = SIMD_FUNC2(Winograd2x3iSetInput, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdWinograd2x3iSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
-{
-    simdWinograd2x3iSetInput(src, srcChannels, srcHeight, srcWidth, dst, pad);
-}
-
-volatile SimdWinogradSetOutputPtr simdWinograd2x3iSetOutput = SIMD_FUNC2(Winograd2x3iSetOutput, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
-
-SIMD_API void SimdWinograd2x3iSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
-{
-    simdWinograd2x3iSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
-}
+typedef void(*SimdWinogradSetInputPtr) (const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
+typedef void(*SimdWinogradSetOutputPtr) (const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
 volatile SimdWinogradSetFilterPtr simdWinograd2x3SetFilter = SIMD_FUNC3(Winograd2x3SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
@@ -5248,18 +5234,18 @@ SIMD_API void SimdWinograd2x3SetFilter(const float * src, size_t size, float * d
     simdWinograd2x3SetFilter(src, size, dst, trans);
 }
 
-volatile SimdWinogradSetInputPtr simdWinograd2x3pSetInput = SIMD_FUNC3(Winograd2x3pSetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+volatile SimdWinogradSetInputPtr simdWinograd2x3SetInput = SIMD_FUNC3(Winograd2x3SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
-SIMD_API void SimdWinograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
+SIMD_API void SimdWinograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
 {
-    simdWinograd2x3pSetInput(src, srcChannels, srcHeight, srcWidth, dst, pad);
+    simdWinograd2x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
 }
 
-volatile SimdWinogradSetOutputPtr simdWinograd2x3pSetOutput = SIMD_FUNC3(Winograd2x3pSetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+volatile SimdWinogradSetOutputPtr simdWinograd2x3SetOutput = SIMD_FUNC3(Winograd2x3SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
-SIMD_API void SimdWinograd2x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
+SIMD_API void SimdWinograd2x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
-    simdWinograd2x3pSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
+    simdWinograd2x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
 }
 
 volatile SimdWinogradSetFilterPtr simdWinograd4x3SetFilter = SIMD_FUNC3(Winograd4x3SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
@@ -5269,14 +5255,14 @@ SIMD_API void SimdWinograd4x3SetFilter(const float * src, size_t size, float * d
     simdWinograd4x3SetFilter(src, size, dst, trans);
 }
 
-SIMD_API void SimdWinograd4x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
+SIMD_API void SimdWinograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
 {
-    Base::Winograd4x3pSetInput(src, srcChannels, srcHeight, srcWidth, dst, pad);
+    Base::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
 }
 
-SIMD_API void SimdWinograd4x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
+SIMD_API void SimdWinograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
-    Base::Winograd4x3pSetOutput(src, dst, dstChannels, dstHeight, dstWidth);
+    Base::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
 }
 
 SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,

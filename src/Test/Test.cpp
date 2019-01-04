@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar,
+* Copyright (c) 2011-2019 Yermalayeu Ihar,
 *               2014-2017 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -339,14 +339,12 @@ namespace Test
     TEST_ADD_GROUP_AD0(TextureGetDifferenceSum);
     TEST_ADD_GROUP_AD0(TexturePerformCompensation);
 
-    TEST_ADD_GROUP_AD0(Winograd2x3iSetInput);
-    TEST_ADD_GROUP_AD0(Winograd2x3iSetOutput);
     TEST_ADD_GROUP_A00(Winograd2x3SetFilter);
-    TEST_ADD_GROUP_AD0(Winograd2x3pSetInput);
-    TEST_ADD_GROUP_AD0(Winograd2x3pSetOutput);
+    TEST_ADD_GROUP_A00(Winograd2x3SetInput);
+    TEST_ADD_GROUP_A00(Winograd2x3SetOutput);
     TEST_ADD_GROUP_A00(Winograd4x3SetFilter);
-    TEST_ADD_GROUP_AD0(Winograd4x3pSetInput);
-    TEST_ADD_GROUP_AD0(Winograd4x3pSetOutput);
+    TEST_ADD_GROUP_A00(Winograd4x3SetInput);
+    TEST_ADD_GROUP_A00(Winograd4x3SetOutput);
 
     TEST_ADD_GROUP_AD0(Yuv444pToBgr);
     TEST_ADD_GROUP_AD0(Yuv422pToBgr);

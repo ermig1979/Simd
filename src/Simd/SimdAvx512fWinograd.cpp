@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -97,7 +97,7 @@ namespace Simd
             }
         }
 
-        template <bool mask> SIMD_INLINE void Winograd2x3pSetInputLoad16Row(const float * src, __m512 * dst, const __mmask16 * tails)
+        template <bool mask> SIMD_INLINE void Winograd2x3SetInputLoad16Row(const float * src, __m512 * dst, const __mmask16 * tails)
         {
             __m512 a0 = Load<false, mask>(src + 0, tails[0]);
             __m512 a1 = Load<false, mask>(src + 2, tails[1]);
@@ -109,7 +109,7 @@ namespace Simd
             dst[3] = Deinterleave<1>(a1, a3);
         }
 
-        SIMD_INLINE void Winograd2x3pSetInputLoad16Zero(__m512 * dst)
+        SIMD_INLINE void Winograd2x3SetInputLoad16Zero(__m512 * dst)
         {
             dst[0] = _mm512_setzero_ps();
             dst[1] = _mm512_setzero_ps();
@@ -117,7 +117,7 @@ namespace Simd
             dst[3] = _mm512_setzero_ps();
         }
 
-        template <bool mask> SIMD_INLINE void Winograd2x3pSetInput16Store(const __m512 * t, float * dst, size_t dstStride, const __mmask16 * tails)
+        template <bool mask> SIMD_INLINE void Winograd2x3SetInput16Store(const __m512 * t, float * dst, size_t dstStride, const __mmask16 * tails)
         {
             Store<false, mask>(dst + 0 * dstStride, _mm512_sub_ps(_mm512_sub_ps(t[0], t[8]), _mm512_sub_ps(t[2], t[10])), tails[4]);
             Store<false, mask>(dst + 1 * dstStride, _mm512_add_ps(_mm512_sub_ps(t[1], t[9]), _mm512_sub_ps(t[2], t[10])), tails[4]);
@@ -137,40 +137,40 @@ namespace Simd
             Store<false, mask>(dst + 15 * dstStride, _mm512_sub_ps(_mm512_sub_ps(t[5], t[13]), _mm512_sub_ps(t[7], t[15])), tails[4]);
         }
 
-        SIMD_INLINE void Winograd2x3pSetInput16Body(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
+        SIMD_INLINE void Winograd2x3SetInput16Body(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
         {
             __m512 t[16];
-            Winograd2x3pSetInputLoad16Row<false>(src + 0 * srcStride, t + 0, tails);
-            Winograd2x3pSetInputLoad16Row<false>(src + 1 * srcStride, t + 4, tails);
-            Winograd2x3pSetInputLoad16Row<false>(src + 2 * srcStride, t + 8, tails);
-            Winograd2x3pSetInputLoad16Row<false>(src + 3 * srcStride, t + 12, tails);
-            Winograd2x3pSetInput16Store<false>(t, dst, dstStride, tails);
+            Winograd2x3SetInputLoad16Row<false>(src + 0 * srcStride, t + 0, tails);
+            Winograd2x3SetInputLoad16Row<false>(src + 1 * srcStride, t + 4, tails);
+            Winograd2x3SetInputLoad16Row<false>(src + 2 * srcStride, t + 8, tails);
+            Winograd2x3SetInputLoad16Row<false>(src + 3 * srcStride, t + 12, tails);
+            Winograd2x3SetInput16Store<false>(t, dst, dstStride, tails);
         }
 
-        template<bool mask> SIMD_INLINE void Winograd2x3pSetInput16Edge(const float * src, size_t srcStride, PadType rowPad, float * dst, size_t dstStride, const __mmask16 * tails)
+        template<bool mask> SIMD_INLINE void Winograd2x3SetInput16Edge(const float * src, size_t srcStride, PadType rowPad, float * dst, size_t dstStride, const __mmask16 * tails)
         {
             __m512 t[16];
             if (rowPad == PadNose1)
-                Winograd2x3pSetInputLoad16Zero(t + 0);
+                Winograd2x3SetInputLoad16Zero(t + 0);
             else
-                Winograd2x3pSetInputLoad16Row<mask>(src + 0 * srcStride, t + 0, tails);
-            Winograd2x3pSetInputLoad16Row<mask>(src + 1 * srcStride, t + 4, tails);
+                Winograd2x3SetInputLoad16Row<mask>(src + 0 * srcStride, t + 0, tails);
+            Winograd2x3SetInputLoad16Row<mask>(src + 1 * srcStride, t + 4, tails);
             if (rowPad == PadTail2)
-                Winograd2x3pSetInputLoad16Zero(t + 8);
+                Winograd2x3SetInputLoad16Zero(t + 8);
             else
-                Winograd2x3pSetInputLoad16Row<mask>(src + 2 * srcStride, t + 8, tails);
+                Winograd2x3SetInputLoad16Row<mask>(src + 2 * srcStride, t + 8, tails);
             if (rowPad >= PadTail1)
-                Winograd2x3pSetInputLoad16Zero(t + 12);
+                Winograd2x3SetInputLoad16Zero(t + 12);
             else
-                Winograd2x3pSetInputLoad16Row<mask>(src + 3 * srcStride, t + 12, tails);
-            Winograd2x3pSetInput16Store<mask>(t, dst, dstStride, tails);
+                Winograd2x3SetInputLoad16Row<mask>(src + 3 * srcStride, t + 12, tails);
+            Winograd2x3SetInput16Store<mask>(t, dst, dstStride, tails);
         }
 
-        void Winograd2x3pSetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad)
+        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
         {
             if (srcHeight < 4 || srcWidth < 4)
             {
-                Base::Winograd2x3pSetInput(src, srcChannels, srcHeight, srcWidth, dst, pad);
+                Base::Winograd2x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
@@ -217,11 +217,11 @@ namespace Simd
                     const float * s = src + row * srcWidth;
                     float * d = dst + tileY * tileW;
                     if (pad)
-                        Winograd2x3pSetInput16Edge<true>(s + col, srcWidth, PadNose1, d + tileX, dstStride, noses), col += 32, tileX += 16;
+                        Winograd2x3SetInput16Edge<true>(s + col, srcWidth, PadNose1, d + tileX, dstStride, noses), col += 32, tileX += 16;
                     for (; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3pSetInput16Edge<false>(s + col, srcWidth, PadNose1, d + tileX, dstStride, tails);
+                        Winograd2x3SetInput16Edge<false>(s + col, srcWidth, PadNose1, d + tileX, dstStride, tails);
                     if (specialColTail)
-                        Winograd2x3pSetInput16Edge<true>(s + col, srcWidth, PadNose1, d + tileX, dstStride, tails);
+                        Winograd2x3SetInput16Edge<true>(s + col, srcWidth, PadNose1, d + tileX, dstStride, tails);
                     row += 2, tileY += 1;
                 }
                 for (; row < dstH2; row += 2, tileY += 1)
@@ -230,11 +230,11 @@ namespace Simd
                     const float * s = src + row * srcWidth;
                     float * d = dst + tileY * tileW;
                     if (pad)
-                        Winograd2x3pSetInput16Edge<true>(s + col, srcWidth, PadNone, d + tileX, dstStride, noses), col += 32, tileX += 16;
+                        Winograd2x3SetInput16Edge<true>(s + col, srcWidth, PadNone, d + tileX, dstStride, noses), col += 32, tileX += 16;
                     for (; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3pSetInput16Body(s + col, srcWidth, d + tileX, dstStride, tails);
+                        Winograd2x3SetInput16Body(s + col, srcWidth, d + tileX, dstStride, tails);
                     if (specialColTail)
-                        Winograd2x3pSetInput16Edge<true>(s + col, srcWidth, PadNone, d + tileX, dstStride, tails);
+                        Winograd2x3SetInput16Edge<true>(s + col, srcWidth, PadNone, d + tileX, dstStride, tails);
                 }
                 if (specialRowTail)
                 {
@@ -242,18 +242,18 @@ namespace Simd
                     const float * s = src + tailRow * srcWidth;
                     float * d = dst + (tileH - 1) * tileW;
                     if (pad)
-                        Winograd2x3pSetInput16Edge<true>(s + col, srcWidth, rowPad, d + tileX, dstStride, noses), col += 32, tileX += 16;
+                        Winograd2x3SetInput16Edge<true>(s + col, srcWidth, rowPad, d + tileX, dstStride, noses), col += 32, tileX += 16;
                     for (; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3pSetInput16Edge<false>(s + col, srcWidth, rowPad, d + tileX, dstStride, tails);
+                        Winograd2x3SetInput16Edge<false>(s + col, srcWidth, rowPad, d + tileX, dstStride, tails);
                     if (specialColTail)
-                        Winograd2x3pSetInput16Edge<true>(s + col, srcWidth, rowPad, d + tileX, dstStride, tails);
+                        Winograd2x3SetInput16Edge<true>(s + col, srcWidth, rowPad, d + tileX, dstStride, tails);
                 }
                 src += srcWidth * srcHeight;
                 dst += tileW * tileH;
             }
         }
 
-        template<bool mask> SIMD_INLINE void Winograd2x3pSetOutputLoad2t(const float * src, size_t srcStride, __m512 * dst, __mmask16 tail)
+        template<bool mask> SIMD_INLINE void Winograd2x3SetOutputLoad2t(const float * src, size_t srcStride, __m512 * dst, __mmask16 tail)
         {
             __m512 s0 = Load<false, mask>(src + 0 * srcStride, tail);
             __m512 s1 = Load<false, mask>(src + 1 * srcStride, tail);
@@ -263,12 +263,12 @@ namespace Simd
             dst[1] = _mm512_sub_ps(_mm512_sub_ps(s1, s2), s3);
         }
 
-        template<bool main, bool mask> SIMD_INLINE void Winograd2x3pSetOutput16(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
+        template<bool main, bool mask> SIMD_INLINE void Winograd2x3SetOutput16(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
         {
             __m512 t[8], d[4];
-            Winograd2x3pSetOutputLoad2t<mask>(src + 0 * srcStride, srcStride, t + 0, tails[0]);
-            Winograd2x3pSetOutputLoad2t<mask>(src + 4 * srcStride, srcStride, t + 2, tails[0]);
-            Winograd2x3pSetOutputLoad2t<mask>(src + 8 * srcStride, srcStride, t + 4, tails[0]);
+            Winograd2x3SetOutputLoad2t<mask>(src + 0 * srcStride, srcStride, t + 0, tails[0]);
+            Winograd2x3SetOutputLoad2t<mask>(src + 4 * srcStride, srcStride, t + 2, tails[0]);
+            Winograd2x3SetOutputLoad2t<mask>(src + 8 * srcStride, srcStride, t + 4, tails[0]);
             d[0] = _mm512_add_ps(_mm512_add_ps(t[0], t[2]), t[4]);
             d[1] = _mm512_add_ps(_mm512_add_ps(t[1], t[3]), t[5]);
             Store<false, mask>(dst + 0, Interleave<0>(d[0], d[1]), tails[1]);
@@ -276,7 +276,7 @@ namespace Simd
             if (main)
             {
                 dst += dstStride;
-                Winograd2x3pSetOutputLoad2t<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
+                Winograd2x3SetOutputLoad2t<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
                 d[2] = _mm512_sub_ps(_mm512_sub_ps(t[2], t[4]), t[6]);
                 d[3] = _mm512_sub_ps(_mm512_sub_ps(t[3], t[5]), t[7]);
                 Store<false, mask>(dst + 0, Interleave<0>(d[2], d[3]), tails[1]);
@@ -284,7 +284,7 @@ namespace Simd
             }
         }
 
-        void Winograd2x3pSetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)
+        void Winograd2x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
         {
             size_t tileH = (dstHeight + 1) / 2;
             size_t tileW = (dstWidth + 1) / 2;
@@ -305,9 +305,9 @@ namespace Simd
                     const float * s = src + tileY * tileW;
                     float * d = dst + row * dstWidth;
                     for (; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3pSetOutput16<true, false>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        Winograd2x3SetOutput16<true, false>(s + tileX, srcStride, d + col, dstWidth, tails);
                     if (col < dstWidth)
-                        Winograd2x3pSetOutput16<true, true>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        Winograd2x3SetOutput16<true, true>(s + tileX, srcStride, d + col, dstWidth, tails);
                 }
                 if (row < dstHeight)
                 {
@@ -315,9 +315,9 @@ namespace Simd
                     const float * s = src + tileY * tileW;
                     float * d = dst + row * dstWidth;
                     for (col = 0; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3pSetOutput16<false, false>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        Winograd2x3SetOutput16<false, false>(s + tileX, srcStride, d + col, dstWidth, tails);
                     if (col < dstWidth)
-                        Winograd2x3pSetOutput16<false, true>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        Winograd2x3SetOutput16<false, true>(s + tileX, srcStride, d + col, dstWidth, tails);
                 }
                 src += tileW * tileH;
                 dst += dstHeight * dstWidth;

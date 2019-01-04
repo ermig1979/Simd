@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -190,7 +190,7 @@ namespace Simd
             typedef void(*SetFilter)(const float * src, size_t size, float * dst, SimdBool trans);
 
             size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K;
-            int _pad;
+            SimdBool _pad;
             Array32f _weight;
             const float * _bias;
             SetFilter _setFilter;

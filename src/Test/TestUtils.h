@@ -103,6 +103,13 @@ namespace Test
         return ss.str();
     }
 
+    template <> SIMD_INLINE String ToString<SimdBool>(const SimdBool & value)
+    {
+        std::stringstream ss;
+        ss << (int)value;
+        return ss.str();
+    }
+
     SIMD_INLINE String ToString(int value, int width)
     {
         std::stringstream ss;

@@ -122,27 +122,21 @@ Functions</h2></td></tr>
 <tr class="memitem:gaca331823030c720127aceb34c4cf6cf8"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaca331823030c720127aceb34c4cf6cf8">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t count, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:gaca331823030c720127aceb34c4cf6cf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="#gaca331823030c720127aceb34c4cf6cf8">More...</a><br /></td></tr>
 <tr class="separator:gaca331823030c720127aceb34c4cf6cf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga25ebb50f7aed1f7a456141fed188109f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga25ebb50f7aed1f7a456141fed188109f">SimdWinograd2x3iSetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, int pad)</td></tr>
-<tr class="memdesc:ga25ebb50f7aed1f7a456141fed188109f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 2x3 interleaved convolution algorithm.  <a href="#ga25ebb50f7aed1f7a456141fed188109f">More...</a><br /></td></tr>
-<tr class="separator:ga25ebb50f7aed1f7a456141fed188109f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga9af32d55900df8fb3d4adbdfbad7ba5d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9af32d55900df8fb3d4adbdfbad7ba5d">SimdWinograd2x3iSetOutput</a> (const float *src, float *dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)</td></tr>
-<tr class="memdesc:ga9af32d55900df8fb3d4adbdfbad7ba5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for output image conversion in Winograd 2x3 interleaved convolution algorithm.  <a href="#ga9af32d55900df8fb3d4adbdfbad7ba5d">More...</a><br /></td></tr>
-<tr class="separator:ga9af32d55900df8fb3d4adbdfbad7ba5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2342ab223da6ae12b76c4954bf995143"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2342ab223da6ae12b76c4954bf995143">SimdWinograd2x3SetFilter</a> (const float *src, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:ga2342ab223da6ae12b76c4954bf995143"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for filter conversion in Winograd 2x3 convolution algorithm.  <a href="#ga2342ab223da6ae12b76c4954bf995143">More...</a><br /></td></tr>
 <tr class="separator:ga2342ab223da6ae12b76c4954bf995143"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gab89d9415d4956756f3204f5048e7a1e7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gab89d9415d4956756f3204f5048e7a1e7">SimdWinograd2x3pSetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, int pad)</td></tr>
-<tr class="memdesc:gab89d9415d4956756f3204f5048e7a1e7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 2x3 planar convolution algorithm.  <a href="#gab89d9415d4956756f3204f5048e7a1e7">More...</a><br /></td></tr>
-<tr class="separator:gab89d9415d4956756f3204f5048e7a1e7"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga54b33e224b2460f209ad391fb8758909"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga54b33e224b2460f209ad391fb8758909">SimdWinograd2x3pSetOutput</a> (const float *src, float *dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)</td></tr>
-<tr class="memdesc:ga54b33e224b2460f209ad391fb8758909"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for output image conversion in Winograd 2x3 planar convolution algorithm.  <a href="#ga54b33e224b2460f209ad391fb8758909">More...</a><br /></td></tr>
-<tr class="separator:ga54b33e224b2460f209ad391fb8758909"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga18db3ea0564c3499a7f5f295dd3455da"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga18db3ea0564c3499a7f5f295dd3455da">SimdWinograd4x3pSetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, int pad)</td></tr>
-<tr class="memdesc:ga18db3ea0564c3499a7f5f295dd3455da"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 4x3 planar convolution algorithm.  <a href="#ga18db3ea0564c3499a7f5f295dd3455da">More...</a><br /></td></tr>
-<tr class="separator:ga18db3ea0564c3499a7f5f295dd3455da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadc0cd0f77e8fc2e6a8952ffa44991f14"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gadc0cd0f77e8fc2e6a8952ffa44991f14">SimdWinograd4x3pSetOutput</a> (const float *src, float *dst, size_t dstChannels, size_t dstHeight, size_t dstWidth)</td></tr>
-<tr class="memdesc:gadc0cd0f77e8fc2e6a8952ffa44991f14"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for output image conversion in Winograd 4x3 planar convolution algorithm.  <a href="#gadc0cd0f77e8fc2e6a8952ffa44991f14">More...</a><br /></td></tr>
-<tr class="separator:gadc0cd0f77e8fc2e6a8952ffa44991f14"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga13c85a11e7a05340b66a0c72644eeaf3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga13c85a11e7a05340b66a0c72644eeaf3">SimdWinograd2x3SetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> pad, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:ga13c85a11e7a05340b66a0c72644eeaf3"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 2x3 convolution algorithm.  <a href="#ga13c85a11e7a05340b66a0c72644eeaf3">More...</a><br /></td></tr>
+<tr class="separator:ga13c85a11e7a05340b66a0c72644eeaf3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf92550288f625f2caa5f048aea7508a7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaf92550288f625f2caa5f048aea7508a7">SimdWinograd2x3SetOutput</a> (const float *src, float *dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:gaf92550288f625f2caa5f048aea7508a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for output image conversion in Winograd 2x3 convolution algorithm.  <a href="#gaf92550288f625f2caa5f048aea7508a7">More...</a><br /></td></tr>
+<tr class="separator:gaf92550288f625f2caa5f048aea7508a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga64c8db090cefe9fd0b91feb2a2cb5356"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga64c8db090cefe9fd0b91feb2a2cb5356">SimdWinograd4x3SetInput</a> (const float *src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> pad, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:ga64c8db090cefe9fd0b91feb2a2cb5356"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for input image conversion in Winograd 4x3 convolution algorithm.  <a href="#ga64c8db090cefe9fd0b91feb2a2cb5356">More...</a><br /></td></tr>
+<tr class="separator:ga64c8db090cefe9fd0b91feb2a2cb5356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad9d9640572d817d8ecca4b56333adb79"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gad9d9640572d817d8ecca4b56333adb79">SimdWinograd4x3SetOutput</a> (const float *src, float *dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:gad9d9640572d817d8ecca4b56333adb79"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for output image conversion in Winograd 4x3 convolution algorithm.  <a href="#gad9d9640572d817d8ecca4b56333adb79">More...</a><br /></td></tr>
+<tr class="separator:gad9d9640572d817d8ecca4b56333adb79"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for accelerating of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -1352,131 +1346,6 @@ for(i = 0; i &lt; count; ++i)
 
 </div>
 </div>
-<a id="ga25ebb50f7aed1f7a456141fed188109f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga25ebb50f7aed1f7a456141fed188109f">&#9670;&nbsp;</a></span>SimdWinograd2x3iSetInput()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdWinograd2x3iSetInput </td>
-          <td>(</td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcChannels</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcHeight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcWidth</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pad</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>This function is used for input image conversion in Winograd 2x3 interleaved convolution algorithm. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcChannels</td><td>- a number of input channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcHeight</td><td>- a height of input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output array with converted image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">pad</td><td>- a flag to signalize padding. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="ga9af32d55900df8fb3d4adbdfbad7ba5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga9af32d55900df8fb3d4adbdfbad7ba5d">&#9670;&nbsp;</a></span>SimdWinograd2x3iSetOutput()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdWinograd2x3iSetOutput </td>
-          <td>(</td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstChannels</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstHeight</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstWidth</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>This function is used for output image conversion in Winograd 2x3 interleaved convolution algorithm. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input image. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstChannels</td><td>- a number of output channels. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
 <a id="ga2342ab223da6ae12b76c4954bf995143"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga2342ab223da6ae12b76c4954bf995143">&#9670;&nbsp;</a></span>SimdWinograd2x3SetFilter()</h2>
 
@@ -1529,14 +1398,14 @@ for(i = 0; i &lt; count; ++i)
 
 </div>
 </div>
-<a id="gab89d9415d4956756f3204f5048e7a1e7"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gab89d9415d4956756f3204f5048e7a1e7">&#9670;&nbsp;</a></span>SimdWinograd2x3pSetInput()</h2>
+<a id="ga13c85a11e7a05340b66a0c72644eeaf3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga13c85a11e7a05340b66a0c72644eeaf3">&#9670;&nbsp;</a></span>SimdWinograd2x3SetInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdWinograd2x3pSetInput </td>
+          <td class="memname">void SimdWinograd2x3SetInput </td>
           <td>(</td>
           <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>src</em>, </td>
@@ -1568,8 +1437,14 @@ for(i = 0; i &lt; count; ++i)
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pad</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>pad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1579,7 +1454,7 @@ for(i = 0; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for input image conversion in Winograd 2x3 planar convolution algorithm. </p>
+<p>This function is used for input image conversion in Winograd 2x3 convolution algorithm. </p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1589,20 +1464,21 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output array with converted image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pad</td><td>- a flag to signalize padding. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga54b33e224b2460f209ad391fb8758909"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga54b33e224b2460f209ad391fb8758909">&#9670;&nbsp;</a></span>SimdWinograd2x3pSetOutput()</h2>
+<a id="gaf92550288f625f2caa5f048aea7508a7"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf92550288f625f2caa5f048aea7508a7">&#9670;&nbsp;</a></span>SimdWinograd2x3SetOutput()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdWinograd2x3pSetOutput </td>
+          <td class="memname">void SimdWinograd2x3SetOutput </td>
           <td>(</td>
           <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>src</em>, </td>
@@ -1629,7 +1505,13 @@ for(i = 0; i &lt; count; ++i)
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstWidth</em>&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1639,7 +1521,7 @@ for(i = 0; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for output image conversion in Winograd 2x3 planar convolution algorithm. </p>
+<p>This function is used for output image conversion in Winograd 2x3 convolution algorithm. </p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1648,20 +1530,21 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">dstChannels</td><td>- a number of output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga18db3ea0564c3499a7f5f295dd3455da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga18db3ea0564c3499a7f5f295dd3455da">&#9670;&nbsp;</a></span>SimdWinograd4x3pSetInput()</h2>
+<a id="ga64c8db090cefe9fd0b91feb2a2cb5356"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga64c8db090cefe9fd0b91feb2a2cb5356">&#9670;&nbsp;</a></span>SimdWinograd4x3SetInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdWinograd4x3pSetInput </td>
+          <td class="memname">void SimdWinograd4x3SetInput </td>
           <td>(</td>
           <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>src</em>, </td>
@@ -1693,8 +1576,14 @@ for(i = 0; i &lt; count; ++i)
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">int&#160;</td>
-          <td class="paramname"><em>pad</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>pad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1704,7 +1593,7 @@ for(i = 0; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for input image conversion in Winograd 4x3 planar convolution algorithm. </p>
+<p>This function is used for input image conversion in Winograd 4x3 convolution algorithm. </p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1714,20 +1603,21 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">srcWidth</td><td>- a width of input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output array with converted image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">pad</td><td>- a flag to signalize padding. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="gadc0cd0f77e8fc2e6a8952ffa44991f14"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gadc0cd0f77e8fc2e6a8952ffa44991f14">&#9670;&nbsp;</a></span>SimdWinograd4x3pSetOutput()</h2>
+<a id="gad9d9640572d817d8ecca4b56333adb79"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad9d9640572d817d8ecca4b56333adb79">&#9670;&nbsp;</a></span>SimdWinograd4x3SetOutput()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdWinograd4x3pSetOutput </td>
+          <td class="memname">void SimdWinograd4x3SetOutput </td>
           <td>(</td>
           <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>src</em>, </td>
@@ -1754,7 +1644,13 @@ for(i = 0; i &lt; count; ++i)
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstWidth</em>&#160;</td>
+          <td class="paramname"><em>dstWidth</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1764,7 +1660,7 @@ for(i = 0; i &lt; count; ++i)
       </table>
 </div><div class="memdoc">
 
-<p>This function is used for output image conversion in Winograd 4x3 planar convolution algorithm. </p>
+<p>This function is used for output image conversion in Winograd 4x3 convolution algorithm. </p>
 <dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -1773,6 +1669,7 @@ for(i = 0; i &lt; count; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">dstChannels</td><td>- a number of output channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstHeight</td><td>- a height of output image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstWidth</td><td>- a width of output image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>
 </dl>

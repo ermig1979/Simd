@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -162,11 +162,16 @@ namespace Simd
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
             float * bufD = bufS + _strideS * _count;
-            Avx::Winograd2x3pSetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad);
+            Avx::Winograd2x3SetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
             for (size_t i = 0; i < _count; ++i)
-                Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
-            Avx::Winograd2x3pSetOutput(bufD, dst, p.dstC, p.dstH, p.dstW);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
+            {
+                if (p.srcT)
+                    Avx2::Gemm32fNN(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
+                else
+                    Avx2::Gemm32fNN(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+            }
+            Avx::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
+            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
         //---------------------------------------------------------------------

@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -142,55 +142,67 @@ namespace Test
     {
         struct FuncWI
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, int pad);
+            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
 
             FuncPtr func;
             String description;
 
             FuncWI(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Update(size_t c, size_t h, size_t w, int p)
+            void Update(size_t c, size_t h, size_t w, int p, int t)
             {
-                description = description + "[" + ToString(w) + "-" + ToString(h) + "-" + ToString(c) + "-" + ToString(p) + "]";
+                description = description + "[" + ToString(c) + "-" + ToString(h) + "-" + ToString(w) + "-" + ToString(p) + "-" + ToString(t) + "]";
             }
 
-            void Call(const View & src, size_t srcChannels, size_t srcHeight, size_t srcWidth, View & dst, int pad) const
+            void Call(const Tensor32f & src, size_t srcC, size_t srcH, size_t srcW, Tensor32f & dst, int pad, int trans) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, srcChannels, srcHeight, srcWidth, (float*)dst.data, pad);
+                func(src.Data(), srcC, srcH, srcW, dst.Data(), (SimdBool)pad, (SimdBool)trans);
             }
         };
     }
 
 #define FUNC_WI(function) FuncWI(function, #function)
 
-    bool WinogradSetInputAutoTest(size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t block, size_t core, FuncWI f1, FuncWI f2, int pad)
+    bool WinogradSetInputAutoTest(size_t srcC, size_t srcH, size_t srcW, size_t block, size_t core, int pad, int trans, FuncWI f1, FuncWI f2)
     {
         bool result = true;
 
-        f1.Update(srcChannels, srcHeight, srcWidth, pad);
-        f2.Update(srcChannels, srcHeight, srcWidth, pad);
+        f1.Update(srcC, srcH, srcW, pad, trans);
+        f2.Update(srcC, srcH, srcW, pad, trans);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcChannels << ", " << srcHeight << ", " << srcWidth << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " .");
 
-        size_t dstWidth = pad ? srcWidth : srcWidth - core + 1;
-        size_t dstHeight = pad ? srcHeight : srcHeight - core + 1;
+        size_t dstW = pad ? srcW : srcW - core + 1;
+        size_t dstH = pad ? srcH : srcH - core + 1;
         size_t count = Simd::Square(block + core - 1);
-        size_t tileH = (dstHeight + block - 1) / block;
-        size_t tileW = (dstWidth + block - 1) / block;
-        size_t strideS = srcChannels * tileH * tileW;
+        size_t tileH = (dstH + block - 1) / block;
+        size_t tileW = (dstW + block - 1) / block;
 
-        View src(srcChannels*srcHeight*srcWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        Tensor32f src({ trans ? srcH : srcC, trans ? srcW : srcH, trans ? srcC : srcW});
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0f);
+        Tensor32f dst1({ count, trans ? tileH : srcC, trans ? tileW : tileH, trans ? srcC : tileW });
+        Tensor32f dst2({ count, trans ? tileH : srcC, trans ? tileW : tileH, trans ? srcC : tileW });
 
-        FillRandom32f(src, -10.0, 10.0);
+        TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcChannels, srcHeight, srcWidth, dst1, pad));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, srcC, srcH, srcW, dst1, pad, trans));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcChannels, srcHeight, srcWidth, dst2, pad));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcC, srcH, srcW, dst2, pad, trans));
 
-        result = result && Compare(dst1, dst2, EPS, true, 64);
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool WinogradSetInputAutoTest(size_t block, size_t core, int pad, int trans, const FuncWI & f1, const FuncWI & f2)
+    {
+        bool result = true;
+
+        result = result && WinogradSetInputAutoTest(64, 56, 48, block, core, pad, trans, f1, f2);
+        result = result && WinogradSetInputAutoTest(128, 28, 24, block, core, pad, trans, f1, f2);
+        result = result && WinogradSetInputAutoTest(256, 14, 12, block, core, pad, trans, f1, f2);
+        result = result && WinogradSetInputAutoTest(512, 7, 6, block, core, pad, trans, f1, f2);
 
         return result;
     }
@@ -199,65 +211,41 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetInputAutoTest(3, 320, 320, block, core, f1, f2, 1);
-        result = result && WinogradSetInputAutoTest(16, 160, 160, block, core, f1, f2, 1);
-        result = result && WinogradSetInputAutoTest(32, 80, 80, block, core, f1, f2, 1);
-        result = result && WinogradSetInputAutoTest(64, 40, 40, block, core, f1, f2, 1);
-        result = result && WinogradSetInputAutoTest(128, 20, 20, block, core, f1, f2, 1);
-        result = result && WinogradSetInputAutoTest(256, 10, 10, block, core, f1, f2, 1);
-        result = result && WinogradSetInputAutoTest(320, 20, 20, block, core, f1, f2, 1);
+        result = result && WinogradSetInputAutoTest(block, core, 1, 0, f1, f2);
+        result = result && WinogradSetInputAutoTest(block, core, 1, 1, f1, f2);
 
         return result;
     }
 
-    bool Winograd2x3iSetInputAutoTest()
+    bool Winograd2x3SetInputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
+        result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx::Winograd2x3iSetInput), FUNC_WI(SimdWinograd2x3iSetInput));
-#endif 
-
-        return result;
-    }
-
-    bool Winograd2x3pSetInputAutoTest()
-    {
-        bool result = true;
-
-        result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Base::Winograd2x3pSetInput), FUNC_WI(SimdWinograd2x3pSetInput));
-
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Sse::Winograd2x3pSetInput), FUNC_WI(SimdWinograd2x3pSetInput));
-#endif 
-
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx::Winograd2x3pSetInput), FUNC_WI(SimdWinograd2x3pSetInput));
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx512f::Winograd2x3pSetInput), FUNC_WI(SimdWinograd2x3pSetInput));
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx512f::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 #endif 
 
         return result;
     }
 
-    bool Winograd4x3pSetInputAutoTest()
+    bool Winograd4x3SetInputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Base::Winograd4x3pSetInput), FUNC_WI(SimdWinograd4x3pSetInput));
+        result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Base::Winograd4x3SetInput), FUNC_WI(SimdWinograd4x3SetInput));
 
         return result;
     }
@@ -266,53 +254,65 @@ namespace Test
     {
         struct FuncWO
         {
-            typedef void(*FuncPtr)(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth);
+            typedef void(*FuncPtr)(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
             FuncPtr func;
             String description;
 
             FuncWO(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Update(size_t c, size_t h, size_t w)
+            void Update(size_t c, size_t h, size_t w, int t)
             {
-                description = description + "[" + ToString(w) + "-" + ToString(h) + "-" + ToString(c) + "]";
+                description = description + "[" + ToString(c) + "-" + ToString(h) + "-" + ToString(w) + "-" + ToString(t) + "]";
             }
 
-            void Call(const View & src, View & dst, size_t dstChannels, size_t dstHeight, size_t dstWidth) const
+            void Call(const Tensor32f & src, Tensor32f & dst, size_t dstC, size_t dstH, size_t dstW, int trans) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func((float*)src.data, (float*)dst.data, dstChannels, dstHeight, dstWidth);
+                func(src.Data(), dst.Data(), dstC, dstH, dstW, (SimdBool)trans);
             }
         };
     }
 
 #define FUNC_WO(function) FuncWO(function, #function)
 
-    bool WinogradSetOutputAutoTest(size_t dstChannels, size_t dstHeight, size_t dstWidth, size_t block, size_t core, FuncWO f1, FuncWO f2)
+    bool WinogradSetOutputAutoTest(size_t dstC, size_t dstH, size_t dstW, size_t block, size_t core, int trans, FuncWO f1, FuncWO f2)
     {
         bool result = true;
 
-        f1.Update(dstChannels, dstHeight, dstWidth);
-        f2.Update(dstChannels, dstHeight, dstWidth);
+        f1.Update(dstC, dstH, dstW, trans);
+        f2.Update(dstC, dstH, dstW, trans);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << dstChannels << ", " << dstHeight << ", " << dstWidth << "].");
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " .");
 
         size_t count = Simd::Square(block + core - 1);
-        size_t tileH = (dstHeight + block - 1) / block;
-        size_t tileW = (dstWidth + block - 1) / block;
-        size_t strideD = dstChannels * tileH * tileW;
+        size_t tileH = (dstH + block - 1) / block;
+        size_t tileW = (dstW + block - 1) / block;
 
-        View src(strideD*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        Tensor32f src({count, trans ? tileH : dstC, trans ? tileW : tileH, trans ? dstC : tileW });
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0f);
+        Tensor32f dst1({ trans ? dstH : dstC, trans ? dstW : dstH, trans ? dstC : dstW });
+        Tensor32f dst2({ trans ? dstH : dstC, trans ? dstW : dstH, trans ? dstC : dstW });
 
-        FillRandom32f(src, -10.0, 10.0);
+        TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1, dstChannels, dstHeight, dstWidth));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1, dstC, dstH, dstW, trans));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, dstChannels, dstHeight, dstWidth));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2, dstC, dstH, dstW, trans));
 
-        result = result && Compare(dst1, dst2, EPS, true, 64);
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool WinogradSetOutputAutoTest(size_t block, size_t core, int trans, const FuncWO & f1, const FuncWO & f2)
+    {
+        bool result = true;
+
+        result = result && WinogradSetOutputAutoTest(64, 56, 48, block, core, trans, f1, f2);
+        result = result && WinogradSetOutputAutoTest(128, 28, 24, block, core, trans, f1, f2);
+        result = result && WinogradSetOutputAutoTest(256, 14, 12, block, core, trans, f1, f2);
+        result = result && WinogradSetOutputAutoTest(512, 7, 6, block, core, trans, f1, f2);
 
         return result;
     }
@@ -321,186 +321,42 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(16, 320, 320, block, core, f1, f2);
-        result = result && WinogradSetOutputAutoTest(32, 160, 160, block, core, f1, f2);
-        result = result && WinogradSetOutputAutoTest(64, 80, 80, block, core, f1, f2);
-        result = result && WinogradSetOutputAutoTest(128, 40, 40, block, core, f1, f2);
-        result = result && WinogradSetOutputAutoTest(256, 20, 20, block, core, f1, f2);
-        result = result && WinogradSetOutputAutoTest(256, 10, 10, block, core, f1, f2);
+        result = result && WinogradSetOutputAutoTest(block, core, 0, f1, f2);
+        result = result && WinogradSetOutputAutoTest(block, core, 1, f1, f2);
 
         return result;
     }
 
-    bool Winograd2x3iSetOutputAutoTest()
+    bool Winograd2x3SetOutputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::Winograd2x3iSetOutput), FUNC_WO(SimdWinograd2x3iSetOutput));
+        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::Winograd2x3SetOutput), FUNC_WO(SimdWinograd2x3SetOutput));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Sse::Winograd2x3iSetOutput), FUNC_WO(SimdWinograd2x3iSetOutput));
-#endif
-
-#ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx::Winograd2x3iSetOutput), FUNC_WO(SimdWinograd2x3iSetOutput));
-#endif 
-
-        return result;
-    }
-
-    bool Winograd2x3pSetOutputAutoTest()
-    {
-        bool result = true;
-
-        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
-
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Sse::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
+            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Sse::Winograd2x3SetOutput), FUNC_WO(SimdWinograd2x3SetOutput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
+            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx::Winograd2x3SetOutput), FUNC_WO(SimdWinograd2x3SetOutput));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx512f::Winograd2x3pSetOutput), FUNC_WO(SimdWinograd2x3pSetOutput));
+            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx512f::Winograd2x3SetOutput), FUNC_WO(SimdWinograd2x3SetOutput));
 #endif 
 
         return result;
     }
 
-    bool Winograd4x3pSetOutputAutoTest()
+    bool Winograd4x3SetOutputAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Base::Winograd4x3pSetOutput), FUNC_WO(SimdWinograd4x3pSetOutput));
+        result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Base::Winograd4x3SetOutput), FUNC_WO(SimdWinograd4x3SetOutput));
 
         return result;
-    }
-
-    //-----------------------------------------------------------------------
-
-    bool WinogradSetInputDataTest(bool create, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t block, size_t core, const FuncWI & f)
-    {
-        bool result = true;
-
-        int pad = 1;
-        size_t dstWidth = pad ? srcWidth : srcWidth - core + 1;
-        size_t dstHeight = pad ? srcHeight : srcHeight - core + 1;
-        size_t count = Simd::Square(block + core - 1);
-        size_t tileH = (dstHeight + block - 1) / block;
-        size_t tileW = (dstWidth + block - 1) / block;
-        size_t strideS = srcChannels * tileH * tileW;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << srcChannels << ", " << srcHeight << ", " << srcWidth << "].");
-
-        View src(srcChannels*srcHeight*srcWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(strideS*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        if (create)
-        {
-            FillRandom32f(src, -10.0, 10.0);
-
-            TEST_SAVE(src);
-
-            f.Call(src, srcChannels, srcHeight, srcWidth, dst1, pad);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, srcChannels, srcHeight, srcWidth, dst2, pad);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, EPS, true, 64);
-        }
-
-        return result;
-    }
-
-    bool Winograd2x3iSetInputDataTest(bool create)
-    {
-        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WI(SimdWinograd2x3iSetInput));
-    }
-
-    bool Winograd2x3pSetInputDataTest(bool create)
-    {
-        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WI(SimdWinograd2x3pSetInput));
-    }
-
-    bool Winograd4x3pSetInputDataTest(bool create)
-    {
-        return WinogradSetInputDataTest(create, DW / 7, DW / 7, DW / 7, 4, 3, FUNC_WI(SimdWinograd4x3pSetInput));
-    }
-
-    bool WinogradSetOutputDataTest(bool create, size_t dstChannels, size_t dstHeight, size_t dstWidth, size_t block, size_t core, const FuncWO & f)
-    {
-        bool result = true;
-
-        size_t count = Simd::Square(block + core - 1);
-        size_t tileH = (dstHeight + block - 1) / block;
-        size_t tileW = (dstWidth + block - 1) / block;
-        size_t strideD = dstChannels * tileH * tileW;
-
-        Data data(f.description);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << dstChannels << ", " << dstHeight << ", " << dstWidth << "].");
-
-        View src(strideD*count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(dstChannels*dstHeight*dstWidth, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        if (create)
-        {
-            FillRandom32f(src, -10.0, 10.0);
-
-            TEST_SAVE(src);
-
-            f.Call(src, dst1, dstChannels, dstHeight, dstWidth);
-
-            TEST_SAVE(dst1);
-        }
-        else
-        {
-            TEST_LOAD(src);
-
-            TEST_LOAD(dst1);
-
-            f.Call(src, dst2, dstChannels, dstHeight, dstWidth);
-
-            TEST_SAVE(dst2);
-
-            result = result && Compare(dst1, dst2, EPS, true, 64);
-        }
-
-        return result;
-    }
-
-    bool Winograd2x3iSetOutputDataTest(bool create)
-    {
-        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WO(SimdWinograd2x3iSetOutput));
-    }
-
-    bool Winograd2x3pSetOutputDataTest(bool create)
-    {
-        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 2, 3, FUNC_WO(SimdWinograd2x3pSetOutput));
-    }
-
-    bool Winograd4x3pSetOutputDataTest(bool create)
-    {
-        return WinogradSetOutputDataTest(create, DW / 7, DW / 7, DW / 7, 4, 3, FUNC_WO(SimdWinograd4x3pSetOutput));
     }
 }
