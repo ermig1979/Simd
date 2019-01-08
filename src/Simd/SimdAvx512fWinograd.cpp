@@ -365,7 +365,7 @@ namespace Simd
             }
         }
 
-        template<bool mask> SIMD_INLINE void Winograd2x3SetOutputLoad2t(const float * src, size_t srcStride, __m512 * dst, __mmask16 tail)
+        template<bool mask> SIMD_INLINE void Winograd2x3SetOutputLoad4(const float * src, size_t srcStride, __m512 * dst, __mmask16 tail)
         {
             __m512 s0 = Load<false, mask>(src + 0 * srcStride, tail);
             __m512 s1 = Load<false, mask>(src + 1 * srcStride, tail);
@@ -375,12 +375,12 @@ namespace Simd
             dst[1] = _mm512_sub_ps(_mm512_sub_ps(s1, s2), s3);
         }
 
-        template<bool main, bool mask> SIMD_INLINE void Winograd2x3SetOutput16(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
+        template<bool main, bool mask> SIMD_INLINE void Winograd2x3SetOutput16n(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
         {
             __m512 t[8], d[4];
-            Winograd2x3SetOutputLoad2t<mask>(src + 0 * srcStride, srcStride, t + 0, tails[0]);
-            Winograd2x3SetOutputLoad2t<mask>(src + 4 * srcStride, srcStride, t + 2, tails[0]);
-            Winograd2x3SetOutputLoad2t<mask>(src + 8 * srcStride, srcStride, t + 4, tails[0]);
+            Winograd2x3SetOutputLoad4<mask>(src + 0 * srcStride, srcStride, t + 0, tails[0]);
+            Winograd2x3SetOutputLoad4<mask>(src + 4 * srcStride, srcStride, t + 2, tails[0]);
+            Winograd2x3SetOutputLoad4<mask>(src + 8 * srcStride, srcStride, t + 4, tails[0]);
             d[0] = _mm512_add_ps(_mm512_add_ps(t[0], t[2]), t[4]);
             d[1] = _mm512_add_ps(_mm512_add_ps(t[1], t[3]), t[5]);
             Store<false, mask>(dst + 0, Interleave<0>(d[0], d[1]), tails[1]);
@@ -388,7 +388,7 @@ namespace Simd
             if (main)
             {
                 dst += dstStride;
-                Winograd2x3SetOutputLoad2t<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
+                Winograd2x3SetOutputLoad4<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
                 d[2] = _mm512_sub_ps(_mm512_sub_ps(t[2], t[4]), t[6]);
                 d[3] = _mm512_sub_ps(_mm512_sub_ps(t[3], t[5]), t[7]);
                 Store<false, mask>(dst + 0, Interleave<0>(d[2], d[3]), tails[1]);
@@ -396,48 +396,128 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void Winograd2x3SetOutputLoad16(const float * src, size_t stride, __m512 * dst, __mmask16 tail = -1)
+        {
+            __m512 tmp[8];
+            Winograd2x3SetOutputLoad4<true>(src + 0 * stride, stride, tmp + 0, tail);
+            Winograd2x3SetOutputLoad4<true>(src + 4 * stride, stride, tmp + 2, tail);
+            Winograd2x3SetOutputLoad4<true>(src + 8 * stride, stride, tmp + 4, tail);
+            Winograd2x3SetOutputLoad4<true>(src + 12 * stride, stride, tmp + 6, tail);
+            dst[0] = _mm512_add_ps(_mm512_add_ps(tmp[0], tmp[2]), tmp[4]);
+            dst[1] = _mm512_add_ps(_mm512_add_ps(tmp[1], tmp[3]), tmp[5]);
+            dst[2] = _mm512_sub_ps(_mm512_sub_ps(tmp[2], tmp[4]), tmp[6]);
+            dst[3] = _mm512_sub_ps(_mm512_sub_ps(tmp[3], tmp[5]), tmp[7]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutputStore4(const __m512 src[4], float * dst, size_t dstS, size_t dstC, __mmask16 tail = -1)
+        {
+            _mm512_mask_storeu_ps(dst + 0 * dstS + 0 * dstC, tail, src[0]);
+            _mm512_mask_storeu_ps(dst + 0 * dstS + 1 * dstC, tail, src[1]);
+            _mm512_mask_storeu_ps(dst + 1 * dstS + 0 * dstC, tail, src[2]);
+            _mm512_mask_storeu_ps(dst + 1 * dstS + 1 * dstC, tail, src[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutput16t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F), d = 0;
+            for (; d < dstCF; d += F)
+            {
+                __m512 tmp[4];
+                Winograd2x3SetOutputLoad16(src + d, srcStride, tmp);
+                Winograd2x3SetOutputStore4(tmp, dst + d, dstS, dstC);
+            }
+            if (d < dstC)
+            {
+                __mmask16 tail = TailMask16(dstC - dstCF);
+                __m512 tmp[4];
+                Winograd2x3SetOutputLoad16(src + d, srcStride, tmp, tail);
+                Winograd2x3SetOutputStore4(tmp, dst + d, dstS, dstC, tail);
+            }
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutputStore4(const __m512 src[4], float * dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, __mmask16 tail = -1)
+        {
+            for (size_t row = 0; row < rowE; ++row)
+                for (size_t col = 0; col < colE; ++col)
+                    _mm512_mask_storeu_ps(dst + row * dstS + col * dstC, tail, src[row * 2 + col]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutput16t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F), d = 0;
+            for (; d < dstCF; d += F)
+            {
+                __m512 tmp[4];
+                Winograd2x3SetOutputLoad16(src + d, srcStride, tmp);
+                Winograd2x3SetOutputStore4(tmp, dst + d, dstS, dstC, rowE, colE);
+            }
+            if (d < dstC)
+            {
+                __mmask16 tail = TailMask16(dstC - dstCF);
+                __m512 tmp[4];
+                Winograd2x3SetOutputLoad16(src + d, srcStride, tmp, tail);
+                Winograd2x3SetOutputStore4(tmp, dst + d, dstS, dstC, rowE, colE, tail);
+            }
+        }
+
         void Winograd2x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
         {
-            if (trans)
-            {
-                Avx::Winograd2x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
-                return;
-            }
             size_t tileH = (dstHeight + 1) / 2;
             size_t tileW = (dstWidth + 1) / 2;
             size_t srcStride = dstChannels * tileH*tileW;
             size_t dstH2 = AlignLo(dstHeight, 2);
             size_t dstW2 = AlignLo(dstWidth, 2);
-            size_t dstW32 = AlignLo(dstWidth, 32);
-            __mmask16 tails[3];
-            tails[0] = TailMask16(tileW - AlignLo(tileW, F));
-            for (size_t c = 0; c < 2; ++c)
-                tails[1 + c] = TailMask16(dstWidth - dstW32 - F * c);
-            for (size_t c = 0; c < dstChannels; ++c)
+            if (trans)
             {
-                size_t row = 0, tileY = 0;
-                for (; row < dstH2; row += 2, tileY += 1)
+                size_t row, col;
+                for (row = 0; row < dstH2; row += 2)
                 {
-                    size_t col = 0, tileX = 0;
-                    const float * s = src + tileY * tileW;
-                    float * d = dst + row * dstWidth;
-                    for (; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3SetOutput16<true, false>(s + tileX, srcStride, d + col, dstWidth, tails);
+                    for (col = 0; col < dstW2; col += 2)
+                        Winograd2x3SetOutput16t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels), src += dstChannels;
                     if (col < dstWidth)
-                        Winograd2x3SetOutput16<true, true>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        Winograd2x3SetOutput16t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, 2, dstWidth - col), src += dstChannels;
                 }
                 if (row < dstHeight)
                 {
-                    size_t col = 0, tileX = 0;
-                    const float * s = src + tileY * tileW;
-                    float * d = dst + row * dstWidth;
-                    for (col = 0; col < dstW32; col += 32, tileX += 16)
-                        Winograd2x3SetOutput16<false, false>(s + tileX, srcStride, d + col, dstWidth, tails);
+                    for (col = 0; col < dstW2; col += 2)
+                        Winograd2x3SetOutput16t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, 2), src += dstChannels;
                     if (col < dstWidth)
-                        Winograd2x3SetOutput16<false, true>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        Winograd2x3SetOutput16t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
                 }
-                src += tileW * tileH;
-                dst += dstHeight * dstWidth;
+            }
+            else
+            {
+                size_t dstW32 = AlignLo(dstWidth, 32);
+                __mmask16 tails[3];
+                tails[0] = TailMask16(tileW - AlignLo(tileW, F));
+                for (size_t c = 0; c < 2; ++c)
+                    tails[1 + c] = TailMask16(dstWidth - dstW32 - F * c);
+                for (size_t c = 0; c < dstChannels; ++c)
+                {
+                    size_t row = 0, tileY = 0;
+                    for (; row < dstH2; row += 2, tileY += 1)
+                    {
+                        size_t col = 0, tileX = 0;
+                        const float * s = src + tileY * tileW;
+                        float * d = dst + row * dstWidth;
+                        for (; col < dstW32; col += 32, tileX += 16)
+                            Winograd2x3SetOutput16n<true, false>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        if (col < dstWidth)
+                            Winograd2x3SetOutput16n<true, true>(s + tileX, srcStride, d + col, dstWidth, tails);
+                    }
+                    if (row < dstHeight)
+                    {
+                        size_t col = 0, tileX = 0;
+                        const float * s = src + tileY * tileW;
+                        float * d = dst + row * dstWidth;
+                        for (col = 0; col < dstW32; col += 32, tileX += 16)
+                            Winograd2x3SetOutput16n<false, false>(s + tileX, srcStride, d + col, dstWidth, tails);
+                        if (col < dstWidth)
+                            Winograd2x3SetOutput16n<false, true>(s + tileX, srcStride, d + col, dstWidth, tails);
+                    }
+                    src += tileW * tileH;
+                    dst += dstHeight * dstWidth;
+                }
             }
         }
 
