@@ -25,6 +25,7 @@
 #define __SimdConvolution_h__
 
 #include "Simd/SimdArray.h"
+#include "Simd/SimdPerformance.h"
 
 #ifdef _N
 #undef _N
@@ -103,6 +104,17 @@ namespace Simd
         {
             return srcT == 1 && dstT == 1;
         }
+
+#ifdef SIMD_PERFORMANCE_STATISTIC
+        String Info() const
+        {
+            std::stringstream ss;
+            ss <<  srcC << "x" << srcH << "x" << srcW;
+            ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
+            ss << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group << "-" << srcT;
+            return ss.str();
+        }
+#endif
     };
 
     class Convolution : public Deletable

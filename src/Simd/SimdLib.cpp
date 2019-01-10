@@ -71,6 +71,15 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdMsa.h"
 
+#ifdef SIMD_PERFORMANCE_STATISTIC
+#include "Simd/SimdPerformance.h"
+
+namespace Simd
+{
+    PerformanceMeasurerStorage PerformanceMeasurerStorage::s_storage;
+}
+#endif//SIMD_PERFORMANCE_STATISTIC
+
 #if !defined(SIMD_VERSION)
 #include "Simd/SimdVersion.h"
 #endif

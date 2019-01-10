@@ -117,6 +117,8 @@
 #define SIMD_CPP_2011_ENABLE
 #endif
 
+#define SIMD_FUNCTION __FUNCTION__
+
 #elif defined(__GNUC__)
 
 #define SIMD_ALIGNED(x) __attribute__ ((aligned(x)))
@@ -242,6 +244,8 @@
 #if defined(__clang__)
 #define SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR
 #endif
+
+#define SIMD_FUNCTION __PRETTY_FUNCTION__
 
 #else
 
