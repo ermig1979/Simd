@@ -328,7 +328,7 @@ namespace Test
         //result = result && ConvolutionForwardAutoTest(Param(3, 40, 30, 32, _5, _1, _2, _1, _2, 1, a, t), f1, f2);
         //result = result && ConvolutionForwardAutoTest(Param(3, 30, 40, 32, _5, _1, _2, _2, _2, 1, a, t), f1, f2);
         //result = result && ConvolutionForwardAutoTest(Param(3, 30, 40, 32, _5, _1, _1, _2, _2, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(16, 30, 30, 16, _3, _1, _1, _1, _1, 16, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(3, 30, 35, 10, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
         return result;
     }

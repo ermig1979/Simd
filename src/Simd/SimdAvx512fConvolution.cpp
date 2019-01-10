@@ -870,7 +870,6 @@ namespace Simd
             if (dc < dstC)
             {
                 __mmask16 tail = TailMask16(dstC - dstCF); 
-                dc = dstC - F;
                 __m512 conv = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
                 KernelHwcDefaultEdge(src, p, kH, kW, weight + dc, conv, tail);
                 _mm512_mask_storeu_ps(dst + dc, tail, Activate<type>(conv, params, dc, tail));
@@ -957,7 +956,6 @@ namespace Simd
             if (dc < dstC)
             {
                 __mmask16 tail = TailMask16(dstC - dstCF1);
-                dc = dstC - F;
                 __m512 sums[2][1];
                 __m512 bias0 = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
                 sums[0][0] = bias0;
