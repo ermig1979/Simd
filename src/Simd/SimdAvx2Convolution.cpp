@@ -60,6 +60,8 @@ namespace Simd
 
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
         {
+            SIMD_PERF_BEG(_param.Info());
+
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
             {

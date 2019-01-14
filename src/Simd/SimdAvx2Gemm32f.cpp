@@ -50,6 +50,8 @@ namespace Simd
 
         static void Kernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
+            _mm_prefetch((char*)A, _MM_HINT_T1);
+            _mm_prefetch((char*)B, _MM_HINT_T0);
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
             __m256 c20 = _mm256_setzero_ps();
@@ -71,6 +73,7 @@ namespace Simd
             for (size_t k = 0; k < K; ++k)
             {
                 _mm_prefetch((char*)B + 384, _MM_HINT_T0);
+                _mm_prefetch((char*)A + 384, _MM_HINT_T1);
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 b1 = _mm256_loadu_ps(B + 1 * F);
                 b2 = _mm256_loadu_ps(B + 2 * F);
@@ -191,6 +194,8 @@ namespace Simd
 
         static void Kernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
+            _mm_prefetch((char*)A, _MM_HINT_T1);
+            _mm_prefetch((char*)B, _MM_HINT_T0);
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
             __m256 c20 = _mm256_setzero_ps();
@@ -213,6 +218,7 @@ namespace Simd
             __m256 b0, b1, a0, a1;
             for (size_t k = 0; k < K; k++)
             {
+                _mm_prefetch((char*)A + 512, _MM_HINT_T1);
                 _mm_prefetch((char*)B + 512, _MM_HINT_T0);
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 b1 = _mm256_loadu_ps(B + 1 * F);
@@ -400,6 +406,8 @@ namespace Simd
 
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
+            SIMD_PERF_BEG(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K));
+
             const size_t CACHE_L1_SIZE = 32 * 1024;
             const size_t CACHE_L2_SIZE = 256 * 1024;
             const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;

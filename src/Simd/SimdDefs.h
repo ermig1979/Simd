@@ -327,4 +327,7 @@
 #endif
 #endif
 
+#define SIMD_CAT_DO(a, b) a##b
+#define SIMD_CAT(a, b) SIMD_CAT_DO(a, b)
+
 #endif//__SimdDefs_h__

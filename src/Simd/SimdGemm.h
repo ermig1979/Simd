@@ -27,6 +27,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdParallel.hpp"
+#include "Simd/SimdPerformance.h"
 
 #ifdef _N
 #undef _N
@@ -61,10 +62,9 @@ namespace Simd
             , _packB(packB)
             , _scaleC(scaleC)
         {
-
-            _macroK = L1 / sizeof(T) / _microN;
-            _macroM = AlignLoAny(L2 / sizeof(T) / _macroK, _microM);
-            _macroN = AlignLoAny(L3 / sizeof(T) / _macroK, _microN);
+            _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
+            _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));
+            _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _microN));
             if (_N * _M * _K < 256 * 256 * 256 * 2)
                 _threadNumber = 1;
             _pA.resize(_threadNumber);

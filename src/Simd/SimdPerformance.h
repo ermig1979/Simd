@@ -40,7 +40,9 @@
 #include <algorithm>
 
 #if defined(_MSC_VER)
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
 #include <windows.h>
 #elif defined(__GNUC__)
 #include <sys/time.h>
@@ -218,7 +220,7 @@ namespace Simd
                 std::cout << it->second->Statistic() << std::endl;
         }
 
-        SIMD_INLINE PerformanceMeasurer * Get(String name)
+        SIMD_INLINE PerformanceMeasurer * Get(const String & name)
         {
             FunctionMap & thread = ThisThread();
             PerformanceMeasurer * pm = NULL;
@@ -232,16 +234,22 @@ namespace Simd
                 pm = it->second.get();
             return pm;
         }
+
+        SIMD_INLINE PerformanceMeasurer * Get(const String func, const String & block)
+        {
+            return Get(func + "{ " + block + " }");
+        }
     };
 }
 
-#define SIMD_PERF_TEST(name) Simd::PerformanceMeasurerHolder ___pmh(Simd::PerformanceMeasurerStorage::s_storage.Get(name));
-#define SIMD_PERF_FUNC() SIMD_PERF_TEST(SIMD_FUNCTION)
-#define SIMD_PERF_BEG(block) SIMD_PERF_TEST(Simd::String(SIMD_FUNCTION) + " { " + Simd::String(block) + " }")
-#define SIMD_PERF_END(block) Simd::PerformanceMeasurerStorage::s_storage.Get(Simd::String(SIMD_FUNCTION) + " { " + Simd::String(block) + " }")->Leave();
+#define SIMD_PERF_FUNC() Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION))
+#define SIMD_PERF_BEG(block) Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, block))
+#define SIMD_PERF_IF(cond, block) Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((cond) ? Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, block) : NULL)
+#define SIMD_PERF_END(block) Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, block)->Leave();
 #else//SIMD_PERFORMANCE_STATISTIC
 #define SIMD_PERF_FUNC()
 #define SIMD_PERF_BEG(block)
+#define SIMD_PERF_IF(cond, block)
 #define SIMD_PERF_END(block)
 #endif//SIMD_PERFORMANCE_STATISTIC 
 
