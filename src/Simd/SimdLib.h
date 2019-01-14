@@ -1610,7 +1610,31 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+        \brief Callback function type "SimdGemm32fNNPtr";
+
+        The function has to perform general matrix multiplication (for 32-bit float numbers).
+
+        \verbatim
+        C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
+        \endverbatim
+
+        \param [in] M - a height of A and height of C matrices.
+        \param [in] N - a width of B and width of C matrices.
+        \param [in] K - a width of A and height of B matrices.
+        \param [in] alpha - a pointer to multiplier of the first term.
+        \param [in] A - a pointer to input A matrix.
+        \param [in] lda - a leading dimension of A matrix.
+        \param [in] B - a pointer to input B matrix.
+        \param [in] ldb - a leading dimension of B matrix.
+        \param [in] beta - a pointer to multiplier of the second term.
+        \param [out] C - a pointer to output C matrix.
+        \param [in] ldc - a leading dimension of C matrix.
+    */
+    typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
+
+    /*! @ingroup synet
+
+        \fn void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
         
         \short Initilizes convolution algorithm.
 
@@ -1632,12 +1656,13 @@ extern "C"
         \param [in] padW - a pad to the right of the input image.
         \param [in] group - a size of convolution group.
         \param [in] activation - a type of activation function (see ::SimdConvolutionActivationType).
+        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
         \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
     */
     SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
         size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
-        size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+        size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
 
     /*! @ingroup synet
 
@@ -2439,7 +2464,9 @@ extern "C"
 
         \short Performs general matrix multiplication (for 32-bit float numbers).
 
+        \verbatim
         C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
+        \endverbatim
 
         \note This function supports multithreading (See functions ::SimdGetThreadNumber and ::SimdSetThreadNumber).
 
@@ -2463,7 +2490,9 @@ extern "C"
 
         \short Performs general matrix multiplication (for 32-bit float numbers).
 
+        \verbatim
         C(M, N) = alpha*A(M, K)*Trans(B(N, K)) + beta*C(M, N);
+        \endverbatim
 
         \note This function supports multithreading (See functions ::SimdGetThreadNumber and ::SimdSetThreadNumber).
 

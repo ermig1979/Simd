@@ -38,10 +38,11 @@ namespace Simd
         size_t srcC, srcH, srcW, dstC, dstH, dstW, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group;
         SimdBool srcT, dstT;
         SimdConvolutionActivationType activation;
+        SimdGemm32fNNPtr gemm;
 
         ConvParam(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation)
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
         {
             this->srcC = srcC;
             this->srcH = srcH;
@@ -63,6 +64,7 @@ namespace Simd
             this->padW = padW;
             this->group = group;
             this->activation = activation;
+            this->gemm = gemm;
         }
 
         bool Valid()
@@ -266,7 +268,7 @@ namespace Simd
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 
 #ifdef SIMD_SSE_ENABLE    
@@ -319,7 +321,7 @@ namespace Simd
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -338,7 +340,7 @@ namespace Simd
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_SSE3_ENABLE
 
@@ -397,7 +399,7 @@ namespace Simd
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -448,7 +450,7 @@ namespace Simd
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -503,7 +505,7 @@ namespace Simd
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX512F_ENABLE
 }

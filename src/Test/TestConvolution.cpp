@@ -52,8 +52,9 @@ namespace Test
 
         struct FuncC
         {
-            typedef void*(*FuncPtr)(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX,
-                size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation);
+            typedef void*(*FuncPtr)(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
+                size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
+                size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
 
             FuncPtr func;
             String description;
@@ -74,7 +75,7 @@ namespace Test
             void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, const Tensor32f & params, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
                 void * convolution = func(p.srcC, p.srcH, p.srcW, p.srcT, p.dstC, p.dstT, p.kernelY, p.kernelX, 
-                    p.dilationY, p.dilationX, p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.group, p.activation);
+                    p.dilationY, p.dilationX, p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.group, p.activation, NULL);
                 buf.Extend({ ::SimdConvolutionBufferSize(convolution) });
                 ::SimdConvolutionSetParams(convolution, weight.Data(), p.srcT, NULL, bias.Data(), params.Data());
                 {

@@ -1413,36 +1413,18 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
 }
 
+
+typedef void* (*SimdConvolutionInitPtr) (size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+    size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
+    size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
+
+SimdConvolutionInitPtr simdConvolutionInit = SIMD_FUNC5(ConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE_FUNC);
+
 SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
     size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-    size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation)
+    size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
 {
-#ifdef SIMD_AVX512F_ENABLE
-    if (Avx512f::Enable)
-        return Avx512f::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable)
-        return Avx2::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
-    else
-#endif
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable)
-        return Avx::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
-    else
-#endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable)
-        return Sse3::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
-    else
-#endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable)
-        return Sse::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
-    else
-#endif
-        return Base::ConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation);
+    return simdConvolutionInit(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
 }
 
 SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)
