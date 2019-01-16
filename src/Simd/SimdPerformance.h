@@ -28,6 +28,8 @@
 
 #ifdef SIMD_PERFORMANCE_STATISTIC
 
+#include "Simd/SimdTime.h"
+
 #include <string>
 #include <sstream>
 #include <limits>
@@ -38,17 +40,6 @@
 #include <thread>
 #include <mutex>
 #include <algorithm>
-
-#if defined(_MSC_VER)
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#elif defined(__GNUC__)
-#include <sys/time.h>
-#else
-#error Platform is not supported!
-#endif
 
 namespace Simd
 {
@@ -70,25 +61,6 @@ namespace Simd
         double _min;
         double _max;
         bool _entered;
-
-#if defined(_MSC_VER)
-        SIMD_INLINE double GetTime()
-        {
-            LARGE_INTEGER counter, frequency;
-            QueryPerformanceCounter(&counter);
-            QueryPerformanceFrequency(&frequency);
-            return double(counter.QuadPart) / double(frequency.QuadPart);
-        }
-#elif defined(__GNUC__)
-        SIMD_INLINE double GetTime()
-        {
-            timeval t1;
-            gettimeofday(&t1, NULL);
-            return t1.tv_sec + t1.tv_usec / 1000000.0;
-        }
-#else
-#error Platform is not supported!
-#endif
 
     public:
         SIMD_INLINE PerformanceMeasurer(const String & name = "Unknown")
@@ -116,7 +88,7 @@ namespace Simd
             if (!_entered)
             {
                 _entered = true;
-                _start = GetTime();
+                _start = Time();
             }
         }
 
@@ -125,7 +97,7 @@ namespace Simd
             if (_entered)
             {
                 _entered = false;
-                double difference = double(GetTime() - _start);
+                double difference = Time() - _start;
                 _total += difference;
                 _min = std::min(_min, difference);
                 _max = std::max(_max, difference);
@@ -202,6 +174,8 @@ namespace Simd
 
         ~PerformanceMeasurerStorage()
         {
+            if (_map.empty())
+                return;
             FunctionMap combined;
             {
                 std::lock_guard<std::recursive_mutex> lock(_mutex);

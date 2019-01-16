@@ -177,8 +177,7 @@ namespace Simd
                 _grS = _K * _N;
                 _grD = _M * _N;
             }
-            if (p.gemm == NULL)
-                _param.gemm = Base::Gemm32fNN;
+            _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
         }
 
         size_t ConvolutionGemmNN::BufferSize() const
@@ -222,9 +221,9 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
             {
                 if (p.srcT)
-                    p.gemm(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                    _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
                 else
-                    p.gemm(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                    _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
             }
             ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
@@ -528,8 +527,7 @@ namespace Simd
             _K = p.srcC;
             _pad = (SimdBool)p.padX;
             _setFilter = Base::Winograd2x3SetFilter;
-            if (p.gemm == NULL)
-                _param.gemm = Base::Gemm32fNN;
+            _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
         }
         
         size_t ConvolutionWinograd2x3p::BufferSize() const
@@ -558,9 +556,9 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
             {
                 if (p.srcT)
-                    p.gemm(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
+                    _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
                 else
-                    p.gemm(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+                    _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             }
             Base::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
             Base::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);

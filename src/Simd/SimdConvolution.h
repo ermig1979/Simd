@@ -26,6 +26,7 @@
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
+#include "Simd/SimdRuntime.h"
 
 #ifdef _N
 #undef _N
@@ -149,6 +150,7 @@ namespace Simd
         Array32f _buffer;
         float _0, _1;
         const float * _params;
+        RuntimeGemm _gemm;
     };
 
     namespace Base

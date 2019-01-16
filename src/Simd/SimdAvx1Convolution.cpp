@@ -214,8 +214,7 @@ namespace Simd
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Sse::ConvolutionGemmNN(p)
         {
-            if (p.gemm == NULL)
-                _param.gemm = Avx::Gemm32fNN;
+            _gemm.Init(Avx::Gemm32fNN, "Avx", p.gemm, "Ext");
         }
 
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
@@ -224,9 +223,9 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
             {
                 if (p.srcT)
-                    p.gemm(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                    _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
                 else
-                    p.gemm(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                    _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
             }
             Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
@@ -252,8 +251,7 @@ namespace Simd
             : Sse::ConvolutionWinograd2x3p(p)
         {
             _setFilter = Avx::Winograd2x3SetFilter;
-            if (p.gemm == NULL)
-                _param.gemm = Avx::Gemm32fNN;
+            _gemm.Init(Avx::Gemm32fNN, "Avx", p.gemm, "Ext");
         }
 
         void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
@@ -265,9 +263,9 @@ namespace Simd
             for (size_t i = 0; i < _count; ++i)
             {
                 if (p.srcT)
-                    p.gemm(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
+                    _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
                 else
-                    p.gemm(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+                    _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             }
             Avx::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
             Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
