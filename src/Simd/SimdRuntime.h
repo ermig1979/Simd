@@ -30,6 +30,10 @@
 #include <limits>
 #include <algorithm>
 #include <string>
+#ifdef SIMD_RUNTIME_GEMM_STATISTIC
+#include <iostream>
+#include <iomanip>
+#endif
 
 namespace Simd
 {
@@ -40,7 +44,25 @@ namespace Simd
 
         RuntimeGemm()
             : _best(NULL)
+            , _m(0)
+            , _n(0)
+            , _k(0)
         {
+        }
+
+        ~RuntimeGemm()
+        {
+#ifdef SIMD_RUNTIME_GEMM_STATISTIC
+            if (_m && _n && _k)
+            {
+                std::cout << std::setprecision(3) << std::fixed;
+                std::cout << "Simd::RuntimeGemm [" << _m << ", " << _n << ", " << _k << "]  ";
+                std::sort(_candidates.begin(), _candidates.end(), [](const Candidate & a, const Candidate & b) { return a.Mean() < b.Mean(); });
+                for (size_t i = 0; i < _candidates.size(); ++i)
+                    std::cout<< _candidates[i].name << ": " << _candidates[i].Mean()*1000.0 << "  ";
+                std::cout << std::endl;
+            }
+#endif
         }
 
         void Init(const Func & func1, const Name & name1, const Func & func2 = NULL, const Name & name2 = Name())
@@ -99,6 +121,7 @@ namespace Simd
 
         Func _best;
         Candidates _candidates;
+        size_t _m, _n, _k;
 
         SIMD_INLINE void Test(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
@@ -106,6 +129,7 @@ namespace Simd
             Candidate * current = Current();
             if (current)
             {
+                Set(M, N, K);
                 double start = Simd::Time();
                 current->func(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
                 current->Update(Simd::Time() - start);
@@ -115,6 +139,14 @@ namespace Simd
                 _best = Best()->func;
                 _best(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
             }
+        }
+
+        SIMD_INLINE void Set(size_t m, size_t n, size_t k)
+        {
+            assert((_m == 0 && _n == 0 && _k == 0) || (_m == m && _n == n && _k == k));
+            _m = m;
+            _n = n;
+            _k = k;
         }
 
         SIMD_INLINE Candidate * Current()

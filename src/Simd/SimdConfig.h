@@ -74,4 +74,6 @@
 
 //#define SIMD_PERFORMANCE_STATISTIC
 
+//#define SIMD_RUNTIME_GEMM_STATISTIC
+
 #endif//__SimdConfig_h__
