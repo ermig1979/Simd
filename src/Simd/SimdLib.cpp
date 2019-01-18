@@ -28,7 +28,9 @@
 #if defined(WIN32) && !defined(SIMD_STATIC)
 
 #define SIMD_EXPORTS
-
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
@@ -5059,6 +5061,17 @@ volatile SimdSynetLrnLayerCrossChannelsPtr simdSynetLrnLayerCrossChannels = SIMD
 SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
 {
     simdSynetLrnLayerCrossChannels(src, half, count, size, k, dst);
+}
+
+typedef void(*SimdSynetPoolingForwardPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
+
+volatile SimdSynetPoolingForwardPtr simdSynetPoolingForwardMax = SIMD_FUNC3(SynetPoolingForwardMax, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC);
+
+SIMD_API void SimdSynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)
+{
+    simdSynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
 }
 
 typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);

@@ -23,7 +23,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\Test*.h" />
-    <ClCompile Include="..\..\src\Test\Test*.cpp" />
+    <ClCompile Include="..\..\src\Test\Test*.cpp">
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Simd.vcxproj">

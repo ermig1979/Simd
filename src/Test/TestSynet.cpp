@@ -24,6 +24,7 @@
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
+#include "Test/TestTensor.h"
 
 namespace Test
 {
@@ -755,6 +756,143 @@ namespace Test
         if (Simd::Avx512f::Enable)
             result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
+
+        return result;
+    }
+
+    namespace
+    {
+        struct ParamP
+        {
+            size_t srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dstH, dstW;
+            SimdBool trans, ceil;
+
+            ParamP(size_t sC, size_t sH, size_t sW, Size k, Size s, Size b, Size e, ::SimdBool t, ::SimdBool c)
+                : srcC(sC), srcH(sH), srcW(sW), kernelY(k.y), kernelX(k.x), strideY(s.y), strideX(s.x)
+                , padY(b.y), padX(b.x), trans(t), ceil(c)
+            {
+                if (ceil)
+                {
+                    dstH = (size_t)(::ceil((float)(srcH + b.y + e.y - kernelY) / strideY)) + 1;
+                    dstW = (size_t)(::ceil((float)(srcW + b.x + e.x - kernelX) / strideX)) + 1;
+                }
+                else
+                {
+                    dstH = (size_t)(::floor((float)(srcH + b.y + e.y - kernelY) / strideY)) + 1;
+                    dstW = (size_t)(::floor((float)(srcW + b.x + e.x - kernelX) / strideX)) + 1;
+                }
+            }
+        };        
+            
+        struct FuncP
+        {
+            typedef void(*FuncPtr)(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+                size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
+
+            FuncPtr func;
+            String desc;
+
+            FuncP(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Update(const ParamP & p)
+            {
+                std::stringstream ss;
+                ss << desc;
+                ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
+                ss << "-" << p.kernelY << "x" << p.kernelX;
+                ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padY) << "-" << p.trans;
+                ss << "]";
+                desc = ss.str();
+            }
+
+            void Call(const ParamP & p, const Tensor32f & src, Tensor32f & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX, p.padY, p.padX, dst.Data(), p.dstH, p.dstW, p.trans);
+            }
+        };
+    }
+
+#define FUNC_P(function) FuncP(function, #function)
+
+    bool SynetPoolingForwardAutoTest(const ParamP & p, FuncP f1, FuncP f2)
+    {
+        bool result = true;
+
+        f1.Update(p);
+        f2.Update(p);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
+
+        Tensor32f src({ p.trans ? p.srcH : p.srcC, p.trans ? p.srcW : p.srcH, p.trans ? p.srcC : p.srcW });
+        FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
+
+        Tensor32f dst1({ p.trans ? p.dstH : p.srcC, p.trans ? p.dstW : p.dstH, p.trans ? p.srcC : p.dstW });
+        Tensor32f dst2({ p.trans ? p.dstH : p.srcC, p.trans ? p.dstW : p.dstH, p.trans ? p.srcC : p.dstW });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, src, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool SynetPoolingForwardMaxAutoTest(::SimdBool t, ::SimdBool c, const FuncP & f1, const FuncP & f2)
+    {
+        bool result = true;
+
+        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
+
+        result = result && SynetPoolingForwardAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0,  t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(32, 99, 99, _3, _1, _1, _1, t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(28, 22, 22, _3, _2, _0, _1, t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(48, 9, 9, _2, _2, _1, _1, t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(64, 8, 8, _2, _2, _0, _0, t, c), f1, f2);
+
+        return result;
+    }
+
+    bool SynetPoolingForwardMaxAutoTest(const FuncP & f1, const FuncP & f2)
+    {
+        bool result = true;
+
+        result = result && SynetPoolingForwardMaxAutoTest(::SimdFalse, ::SimdTrue, f1, f2);
+        result = result && SynetPoolingForwardMaxAutoTest(::SimdTrue, ::SimdTrue, f1, f2);
+
+        return result;
+    }
+
+    bool SynetPoolingForwardMaxAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Base::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Sse::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Avx::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Avx2::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
+#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+//#endif 
 
         return result;
     }
