@@ -888,11 +888,11 @@ namespace Test
         if (Simd::Avx2::Enable)
             result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Avx2::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
 #endif 
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
-//#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Avx512f::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
+#endif
 
         return result;
     }

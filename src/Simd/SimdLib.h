@@ -30,7 +30,7 @@
 
 #include <stddef.h>
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) || defined(__CODEGEARC__)
 
 #define SIMD_INLINE __forceinline
 
@@ -44,7 +44,7 @@
 
 #endif
 
-#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600))
+#if defined(__GNUC__) || (defined(_MSC_VER) && (_MSC_VER >= 1600)) || (defined(__CODEGEARC__) && (__CODEGEARC__ >= 1840))
 #include <stdint.h>
 #else
 #  if (_MSC_VER < 1300)

@@ -5066,7 +5066,7 @@ SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, siz
 typedef void(*SimdSynetPoolingForwardPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
 
-volatile SimdSynetPoolingForwardPtr simdSynetPoolingForwardMax = SIMD_FUNC3(SynetPoolingForwardMax, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC);
+volatile SimdSynetPoolingForwardPtr simdSynetPoolingForwardMax = SIMD_FUNC4(SynetPoolingForwardMax, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
 SIMD_API void SimdSynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)
