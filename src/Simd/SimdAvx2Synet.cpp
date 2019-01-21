@@ -306,34 +306,7 @@ namespace Simd
         void SynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)
         {
-            if (trans)
-            {
-                for (size_t ph = 0; ph < dstH; ++ph)
-                {
-                    size_t hStart = ph * strideY - padY;
-                    size_t hEnd = Simd::Min(hStart + kernelY, srcH);
-                    hStart = Simd::Max<ptrdiff_t>(0, hStart);
-                    for (size_t pw = 0; pw < dstW; ++pw)
-                    {
-                        size_t wStart = pw * strideX - padX;
-                        size_t wEnd = Simd::Min(wStart + kernelX, srcW);
-                        wStart = Simd::Max<ptrdiff_t>(0, wStart);
-                        for (size_t c = 0; c < srcC; ++c)
-                            dst[c] = -FLT_MAX;
-                        for (size_t h = hStart; h < hEnd; ++h)
-                        {
-                            for (size_t w = wStart; w < wEnd; ++w)
-                            {
-                                const float * pc = src + (h * srcW + w)*srcC;
-                                for (size_t c = 0; c < srcC; ++c)
-                                    dst[c] = Simd::Max(dst[c], pc[c]);
-                            }
-                        }
-                        dst += srcC;
-                    }
-                }
-            }
-            else
+            if (!trans)
             {
                 if (strideY == 1 && strideX == 1 && kernelY == 3 && kernelX == 3 && srcH == dstH && srcW == dstW && dstW > F)
                 {
@@ -347,8 +320,8 @@ namespace Simd
                         Avx2::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
-                Avx::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
             }
+            Avx::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
         }
 
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)

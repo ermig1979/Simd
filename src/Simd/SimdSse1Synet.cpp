@@ -646,7 +646,7 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w*srcC + 0 * F));
+                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w * srcC + 0 * F));
                 }
                 src += srcS;
             }
@@ -661,8 +661,8 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w*srcC + 0 * F));
-                    max1 = _mm_max_ps(max1, _mm_loadu_ps(src + w*srcC + 1 * F));
+                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w * srcC + 0 * F));
+                    max1 = _mm_max_ps(max1, _mm_loadu_ps(src + w * srcC + 1 * F));
                 }
                 src += srcS;
             }
@@ -680,10 +680,10 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w*srcC + 0 * F));
-                    max1 = _mm_max_ps(max1, _mm_loadu_ps(src + w*srcC + 1 * F));
-                    max2 = _mm_max_ps(max2, _mm_loadu_ps(src + w*srcC + 2 * F));
-                    max3 = _mm_max_ps(max3, _mm_loadu_ps(src + w*srcC + 3 * F));
+                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w * srcC + 0 * F));
+                    max1 = _mm_max_ps(max1, _mm_loadu_ps(src + w * srcC + 1 * F));
+                    max2 = _mm_max_ps(max2, _mm_loadu_ps(src + w * srcC + 2 * F));
+                    max3 = _mm_max_ps(max3, _mm_loadu_ps(src + w * srcC + 3 * F));
                 }
                 src += srcS;
             }
@@ -707,14 +707,14 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w*srcC + 0 * F));
-                    max1 = _mm_max_ps(max1, _mm_loadu_ps(src + w*srcC + 1 * F));
-                    max2 = _mm_max_ps(max2, _mm_loadu_ps(src + w*srcC + 2 * F));
-                    max3 = _mm_max_ps(max3, _mm_loadu_ps(src + w*srcC + 3 * F));
-                    max4 = _mm_max_ps(max4, _mm_loadu_ps(src + w*srcC + 4 * F));
-                    max5 = _mm_max_ps(max5, _mm_loadu_ps(src + w*srcC + 5 * F));
-                    max6 = _mm_max_ps(max6, _mm_loadu_ps(src + w*srcC + 6 * F));
-                    max7 = _mm_max_ps(max7, _mm_loadu_ps(src + w*srcC + 7 * F));
+                    max0 = _mm_max_ps(max0, _mm_loadu_ps(src + w * srcC + 0 * F));
+                    max1 = _mm_max_ps(max1, _mm_loadu_ps(src + w * srcC + 1 * F));
+                    max2 = _mm_max_ps(max2, _mm_loadu_ps(src + w * srcC + 2 * F));
+                    max3 = _mm_max_ps(max3, _mm_loadu_ps(src + w * srcC + 3 * F));
+                    max4 = _mm_max_ps(max4, _mm_loadu_ps(src + w * srcC + 4 * F));
+                    max5 = _mm_max_ps(max5, _mm_loadu_ps(src + w * srcC + 5 * F));
+                    max6 = _mm_max_ps(max6, _mm_loadu_ps(src + w * srcC + 6 * F));
+                    max7 = _mm_max_ps(max7, _mm_loadu_ps(src + w * srcC + 7 * F));
                 }
                 src += srcS;
             }
@@ -766,9 +766,8 @@ namespace Simd
                             dst += srcC;
                         }
                     }
+                    return;
                 }
-                else
-                    Base::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
             }
             else
             {
@@ -790,8 +789,8 @@ namespace Simd
                         Sse::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
-                Base::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
             }
+            Base::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
         }
         
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, const float * slope, float * dst, size_t offset)

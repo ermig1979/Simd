@@ -854,6 +854,7 @@ namespace Test
         result = result && SynetPoolingForwardAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, t, c), f1, f2);
         result = result && SynetPoolingForwardAutoTest(ParamP(48, 9, 9, _2, _2, _1, _1, t, c), f1, f2);
         result = result && SynetPoolingForwardAutoTest(ParamP(64, 8, 8, _2, _2, _0, _0, t, c), f1, f2);
+        result = result && SynetPoolingForwardAutoTest(ParamP(24, 56, 48, _2, _2, _0, _0, t, c), f1, f2);
 
         return result;
     }
