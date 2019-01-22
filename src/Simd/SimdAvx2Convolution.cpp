@@ -796,12 +796,147 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void KernelHwcDefaultBody4x3(const float * src, const ConvParam & p, const float * weight, __m256 sums[4][3])
+        {
+            size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
+            const float * src0 = src + 0 * step;
+            const float * src1 = src + 1 * step;
+            const float * src2 = src + 2 * step;
+            const float * src3 = src + 3 * step;
+            __m256 w0, w1, w2, s0;
+            for (size_t ky = 0; ky < p.kernelY; ++ky)
+            {
+                size_t offset = ky * stride;
+                for (size_t end = offset + size; offset < end; ++offset)
+                {
+                    w0 = _mm256_loadu_ps(weight + 0 * F);
+                    w1 = _mm256_loadu_ps(weight + 1 * F);
+                    w2 = _mm256_loadu_ps(weight + 2 * F);
+                    s0 = _mm256_set1_ps(src0[offset]);
+                    sums[0][0] = _mm256_fmadd_ps(s0, w0, sums[0][0]);
+                    sums[0][1] = _mm256_fmadd_ps(s0, w1, sums[0][1]);
+                    sums[0][2] = _mm256_fmadd_ps(s0, w2, sums[0][2]);
+                    s0 = _mm256_set1_ps(src1[offset]);
+                    sums[1][0] = _mm256_fmadd_ps(s0, w0, sums[1][0]);
+                    sums[1][1] = _mm256_fmadd_ps(s0, w1, sums[1][1]);
+                    sums[1][2] = _mm256_fmadd_ps(s0, w2, sums[1][2]);
+                    s0 = _mm256_set1_ps(src2[offset]);
+                    sums[2][0] = _mm256_fmadd_ps(s0, w0, sums[2][0]);
+                    sums[2][1] = _mm256_fmadd_ps(s0, w1, sums[2][1]);
+                    sums[2][2] = _mm256_fmadd_ps(s0, w2, sums[2][2]);
+                    s0 = _mm256_set1_ps(src3[offset]);
+                    sums[3][0] = _mm256_fmadd_ps(s0, w0, sums[3][0]);
+                    sums[3][1] = _mm256_fmadd_ps(s0, w1, sums[3][1]);
+                    sums[3][2] = _mm256_fmadd_ps(s0, w2, sums[3][2]);
+                    weight += dstC;
+                }
+            }
+        }
+
+        SIMD_INLINE void KernelHwcDefaultBody4x1(const float * src, const ConvParam & p, const float * weight, __m256 sums[4][1])
+        {
+            size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
+            const float * src0 = src + 0 * step;
+            const float * src1 = src + 1 * step;
+            const float * src2 = src + 2 * step;
+            const float * src3 = src + 3 * step;
+            __m256 w0, s0;
+            for (size_t ky = 0; ky < p.kernelY; ++ky)
+            {
+                size_t offset = ky * stride;
+                for (size_t end = offset + size; offset < end; ++offset)
+                {
+                    w0 = _mm256_loadu_ps(weight + 0 * F);
+                    s0 = _mm256_set1_ps(src0[offset]);
+                    sums[0][0] = _mm256_fmadd_ps(s0, w0, sums[0][0]);
+                    s0 = _mm256_set1_ps(src1[offset]);
+                    sums[1][0] = _mm256_fmadd_ps(s0, w0, sums[1][0]);
+                    s0 = _mm256_set1_ps(src2[offset]);
+                    sums[2][0] = _mm256_fmadd_ps(s0, w0, sums[2][0]);
+                    s0 = _mm256_set1_ps(src3[offset]);
+                    sums[3][0] = _mm256_fmadd_ps(s0, w0, sums[3][0]);
+                    weight += dstC;
+                }
+            }
+        }
+
+        template<::SimdConvolutionActivationType type>
+        SIMD_INLINE void KernelHwcDefaultBody4(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t dstC = p.dstC;
+            size_t dstCF1 = AlignLo(dstC, 1 * F);
+            size_t dstCF3 = AlignLoAny(dstC, 3 * F);
+            size_t dc = 0;
+            for (; dc < dstCF3; dc += 3 * F)
+            {
+                __m256 sums[4][3];
+                __m256 bias0 = bias ? _mm256_loadu_ps(bias + dc + 0 * F) : _mm256_setzero_ps();
+                __m256 bias1 = bias ? _mm256_loadu_ps(bias + dc + 1 * F) : _mm256_setzero_ps();
+                __m256 bias2 = bias ? _mm256_loadu_ps(bias + dc + 2 * F) : _mm256_setzero_ps();
+                sums[0][0] = bias0;
+                sums[0][1] = bias1;
+                sums[0][2] = bias2;
+                sums[1][0] = bias0;
+                sums[1][1] = bias1;
+                sums[1][2] = bias2;
+                sums[2][0] = bias0;
+                sums[2][1] = bias1;
+                sums[2][2] = bias2;
+                sums[3][0] = bias0;
+                sums[3][1] = bias1;
+                sums[3][2] = bias2;
+                KernelHwcDefaultBody4x3(src, p, weight + dc, sums);
+                _mm256_storeu_ps(dst + dc + 0 * dstC + 0 * F, Activate<type>(sums[0][0], params, dc + 0 * F));
+                _mm256_storeu_ps(dst + dc + 0 * dstC + 1 * F, Activate<type>(sums[0][1], params, dc + 1 * F));
+                _mm256_storeu_ps(dst + dc + 0 * dstC + 2 * F, Activate<type>(sums[0][2], params, dc + 2 * F));
+                _mm256_storeu_ps(dst + dc + 1 * dstC + 0 * F, Activate<type>(sums[1][0], params, dc + 0 * F));
+                _mm256_storeu_ps(dst + dc + 1 * dstC + 1 * F, Activate<type>(sums[1][1], params, dc + 1 * F));
+                _mm256_storeu_ps(dst + dc + 1 * dstC + 2 * F, Activate<type>(sums[1][2], params, dc + 2 * F));
+                _mm256_storeu_ps(dst + dc + 2 * dstC + 0 * F, Activate<type>(sums[2][0], params, dc + 0 * F));
+                _mm256_storeu_ps(dst + dc + 2 * dstC + 1 * F, Activate<type>(sums[2][1], params, dc + 1 * F));
+                _mm256_storeu_ps(dst + dc + 2 * dstC + 2 * F, Activate<type>(sums[2][2], params, dc + 2 * F));
+                _mm256_storeu_ps(dst + dc + 3 * dstC + 0 * F, Activate<type>(sums[3][0], params, dc + 0 * F));
+                _mm256_storeu_ps(dst + dc + 3 * dstC + 1 * F, Activate<type>(sums[3][1], params, dc + 1 * F));
+                _mm256_storeu_ps(dst + dc + 3 * dstC + 2 * F, Activate<type>(sums[3][2], params, dc + 2 * F));
+            }
+            for (; dc < dstCF1; dc += 1 * F)
+            {
+                __m256 sums[4][1];
+                __m256 bias0 = bias ? _mm256_loadu_ps(bias + dc) : _mm256_setzero_ps();
+                sums[0][0] = bias0;
+                sums[1][0] = bias0;
+                sums[2][0] = bias0;
+                sums[3][0] = bias0;
+                KernelHwcDefaultBody4x1(src, p, weight + dc, sums);
+                _mm256_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc));
+                _mm256_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc));
+                _mm256_storeu_ps(dst + dc + 2 * dstC, Activate<type>(sums[2][0], params, dc));
+                _mm256_storeu_ps(dst + dc + 3 * dstC, Activate<type>(sums[3][0], params, dc));
+            }
+            if (dc < dstC)
+            {
+                dc = dstC - F;
+                __m256 sums[4][1];
+                __m256 bias0 = bias ? _mm256_loadu_ps(bias + dc) : _mm256_setzero_ps();
+                sums[0][0] = bias0;
+                sums[1][0] = bias0;
+                sums[2][0] = bias0;
+                sums[3][0] = bias0;
+                KernelHwcDefaultBody4x1(src, p, weight + dc, sums);
+                _mm256_storeu_ps(dst + dc + 0 * dstC, Activate<type>(sums[0][0], params, dc));
+                _mm256_storeu_ps(dst + dc + 1 * dstC, Activate<type>(sums[1][0], params, dc));
+                _mm256_storeu_ps(dst + dc + 2 * dstC, Activate<type>(sums[2][0], params, dc));
+                _mm256_storeu_ps(dst + dc + 3 * dstC, Activate<type>(sums[3][0], params, dc));
+            }
+        }
+
         template<::SimdConvolutionActivationType type> void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t noseH = p.padY, noseW = p.padX;
             size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
             size_t tailH = bodyH + p.padH, tailW = bodyW + p.padW;
             size_t bodyW2 = AlignLoAny(bodyW - noseW, 2 * p.strideX) + noseW;
+            size_t bodyW4 = AlignLoAny(bodyW - noseW, 4 * p.strideX) + noseW;
             size_t bodyW6 = AlignLoAny(bodyW - noseW, 6 * p.strideX) + noseW;
             size_t wS = p.srcC*p.dstC;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
@@ -823,8 +958,16 @@ namespace Simd
                 size_t sx = 0;
                 for (; sx < noseW; sx += p.strideX, dst += p.dstC)
                     KernelHwcDefaultEdge<type>(src, p, p.kernelY, kX + sx, weight + (noseW - sx)*wS, bias, params, dst);
-                for (; sx < bodyW6; sx += 6 * p.strideX, dst += 6 * p.dstC)
-                    KernelHwcDefaultBody6<type>(src + (sx - noseW) * p.srcC, p, weight, bias, params, dst);
+                if (p.dstC == 24)
+                {
+                    for (; sx < bodyW4; sx += 4 * p.strideX, dst += 4 * p.dstC)
+                        KernelHwcDefaultBody4<type>(src + (sx - noseW) * p.srcC, p, weight, bias, params, dst);
+                }
+                else
+                {
+                    for (; sx < bodyW6; sx += 6 * p.strideX, dst += 6 * p.dstC)
+                        KernelHwcDefaultBody6<type>(src + (sx - noseW) * p.srcC, p, weight, bias, params, dst);
+                }
                 for (; sx < bodyW2; sx += 2 * p.strideX, dst += 2 * p.dstC)
                     KernelHwcDefaultBody2<type>(src + (sx - noseW) * p.srcC, p, weight, bias, params, dst);
                 for (; sx < bodyW; sx += p.strideX, dst += p.dstC)
