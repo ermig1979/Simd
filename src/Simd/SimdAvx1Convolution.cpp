@@ -230,6 +230,215 @@ namespace Simd
             Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
+        template<size_t size> SIMD_INLINE void Copy(const float * src, float * dst)
+        {
+            memcpy(dst, src, size * sizeof(float));
+        }
+
+        template<size_t size> SIMD_INLINE void Zero(float * dst)
+        {
+            memset(dst, 0, size * sizeof(float));
+        }
+
+        template<> SIMD_INLINE void Copy<16>(const float * src, float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_loadu_ps(src + 0 * F));
+            _mm256_stream_ps(dst + 1 * F, _mm256_loadu_ps(src + 1 * F));
+        }
+
+        template<> SIMD_INLINE void Zero<16>(float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 1 * F, _mm256_setzero_ps());
+        }
+
+        template<> SIMD_INLINE void Copy<24>(const float * src, float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_loadu_ps(src + 0 * F));
+            _mm256_stream_ps(dst + 1 * F, _mm256_loadu_ps(src + 1 * F));
+            _mm256_stream_ps(dst + 2 * F, _mm256_loadu_ps(src + 2 * F));
+        }
+
+        template<> SIMD_INLINE void Zero<24>(float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 1 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 2 * F, _mm256_setzero_ps());
+        }
+
+        template<> SIMD_INLINE void Copy<32>(const float * src, float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_loadu_ps(src + 0 * F));
+            _mm256_stream_ps(dst + 1 * F, _mm256_loadu_ps(src + 1 * F));
+            _mm256_stream_ps(dst + 2 * F, _mm256_loadu_ps(src + 2 * F));
+            _mm256_stream_ps(dst + 3 * F, _mm256_loadu_ps(src + 3 * F));
+        }
+
+        template<> SIMD_INLINE void Zero<32>(float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 1 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 2 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 3 * F, _mm256_setzero_ps());
+        }
+
+        template<> SIMD_INLINE void Copy<48>(const float * src, float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_loadu_ps(src + 0 * F));
+            _mm256_stream_ps(dst + 1 * F, _mm256_loadu_ps(src + 1 * F));
+            _mm256_stream_ps(dst + 2 * F, _mm256_loadu_ps(src + 2 * F));
+            _mm256_stream_ps(dst + 3 * F, _mm256_loadu_ps(src + 3 * F));
+            _mm256_stream_ps(dst + 4 * F, _mm256_loadu_ps(src + 4 * F));
+            _mm256_stream_ps(dst + 5 * F, _mm256_loadu_ps(src + 5 * F));
+        }
+
+        template<> SIMD_INLINE void Zero<48>(float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 1 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 2 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 3 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 4 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 5 * F, _mm256_setzero_ps());
+        }
+
+        template<> SIMD_INLINE void Copy<64>(const float * src, float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_loadu_ps(src + 0 * F));
+            _mm256_stream_ps(dst + 1 * F, _mm256_loadu_ps(src + 1 * F));
+            _mm256_stream_ps(dst + 2 * F, _mm256_loadu_ps(src + 2 * F));
+            _mm256_stream_ps(dst + 3 * F, _mm256_loadu_ps(src + 3 * F));
+            _mm256_stream_ps(dst + 4 * F, _mm256_loadu_ps(src + 4 * F));
+            _mm256_stream_ps(dst + 5 * F, _mm256_loadu_ps(src + 5 * F));
+            _mm256_stream_ps(dst + 6 * F, _mm256_loadu_ps(src + 6 * F));
+            _mm256_stream_ps(dst + 7 * F, _mm256_loadu_ps(src + 7 * F));
+        }
+
+        template<> SIMD_INLINE void Zero<64>(float * dst)
+        {
+            _mm256_stream_ps(dst + 0 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 1 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 2 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 3 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 4 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 5 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 6 * F, _mm256_setzero_ps());
+            _mm256_stream_ps(dst + 7 * F, _mm256_setzero_ps());
+        }
+
+        template<size_t size> void ImgToCol(const ConvParam & p, const float * src, float * dst)
+        {
+            for (size_t g = 0; g < p.group; ++g)
+            {
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                {
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                    {
+                        for (size_t ky = 0; ky < p.kernelY; ky++)
+                        {
+                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            if (sy < p.srcH)
+                            {
+                                for (size_t kx = 0; kx < p.kernelX; kx++)
+                                {
+                                    size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        Copy<size>(src + (sy * p.srcW + sx)*p.srcC, dst);
+                                        dst += size;
+                                    }
+                                    else
+                                    {
+                                        Zero<size>(dst);
+                                        dst += size;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (size_t kx = 0; kx < p.kernelX; kx++)
+                                    Zero<size>(dst), dst += size;
+                            }
+                        }
+                    }
+                }
+                src += size;
+            }
+        }
+
+        void ConvolutionGemmNN::ImgToRow(const float * src, float * dst)
+        {
+            SIMD_PERF_BEG(_param.Info());
+
+            const ConvParam & p = _param;
+            assert(p.srcT == ::SimdTrue);
+            size_t size = p.srcC / p.group;
+            if (size*p.dstH*p.dstW*p.kernelY*p.kernelX >= 1024 * 512 && Aligned(dst))
+            {
+                if (size == 16)
+                {
+                    Avx::ImgToCol<16>(p, src, dst);
+                    return;
+                }
+                if (size == 24)
+                {
+                    Avx::ImgToCol<24>(p, src, dst);
+                    return;
+                }
+                if (size == 32)
+                {
+                    Avx::ImgToCol<32>(p, src, dst);
+                    return;
+                }
+                if (size == 48)
+                {
+                    Avx::ImgToCol<48>(p, src, dst);
+                    return;
+                }
+                if (size == 64)
+                {
+                    Avx::ImgToCol<64>(p, src, dst);
+                    return;
+                }
+            }
+            for (size_t g = 0; g < p.group; ++g)
+            {
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                {
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                    {
+                        for (size_t ky = 0; ky < p.kernelY; ky++)
+                        {
+                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            if (sy < p.srcH)
+                            {
+                                for (size_t kx = 0; kx < p.kernelX; kx++)
+                                {
+                                    size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        memcpy(dst, src + (sy * p.srcW + sx)*p.srcC, size * sizeof(float));
+                                        dst += size;
+                                    }
+                                    else
+                                    {
+                                        memset(dst, 0, size * sizeof(float));
+                                        dst += size;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                memset(dst, 0, p.kernelX * size * sizeof(float));
+                                dst += p.kernelX * size;
+                            }
+                        }
+                    }
+                }
+                src += size;
+            }
+        }
+
         //---------------------------------------------------------------------
 
         ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)

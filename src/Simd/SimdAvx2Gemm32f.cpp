@@ -194,7 +194,6 @@ namespace Simd
 
         static void Kernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
         {
-            _mm_prefetch((char*)A, _MM_HINT_T1);
             _mm_prefetch((char*)B, _MM_HINT_T0);
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -218,10 +217,9 @@ namespace Simd
             __m256 b0, b1, a0, a1;
             for (size_t k = 0; k < K; k++)
             {
-                _mm_prefetch((char*)A + 512, _MM_HINT_T1);
-                _mm_prefetch((char*)B + 512, _MM_HINT_T0);
                 b0 = _mm256_loadu_ps(B + 0 * F);
                 b1 = _mm256_loadu_ps(B + 1 * F);
+                _mm_prefetch((char*)B + 256, _MM_HINT_T0);
                 a0 = _mm256_set1_ps(A[o0]);
                 a1 = _mm256_set1_ps(A[o1]);
                 c00 = _mm256_fmadd_ps(a0, b0, c00);
@@ -416,7 +414,7 @@ namespace Simd
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN, L1, L2;
 #ifdef SIMD_X64_ENABLE
-            if (N < K)
+            if (N <= K)
             {
                 microM = 6;
                 microN = 16;
@@ -444,7 +442,7 @@ namespace Simd
             kernelTM = KernelMx8nn;
             kernelTT = KernelMx8nn;
 #endif
-            GemmNN::PackA packA = NULL;
+            GemmNN::PackA packA = NULL;// K*M > 1024 * 1024 ? Avx::GemmPackA : NULL;
             L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
             L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
             GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,

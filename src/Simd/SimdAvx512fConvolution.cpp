@@ -1355,7 +1355,7 @@ namespace Simd
         {
             const ConvParam & p = _param;
             ConvolutionDirectHwc::ConvolutionBiasActivationPtr func = NULL;
-            if (p.dstC > HF && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
+            if (p.dstC > HF && p.dstC != 24 && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
             {
                 switch (p.activation)
                 {

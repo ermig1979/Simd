@@ -357,6 +357,7 @@ namespace Simd
             ConvolutionGemmNN(const ConvParam & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
+            virtual void ImgToRow(const float * src, float * dst);
         };
 
         class ConvolutionGemmNT : public Sse3::ConvolutionGemmNT

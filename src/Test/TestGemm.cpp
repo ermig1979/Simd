@@ -155,13 +155,15 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 0, 16, 22500, 27, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 22500, 16, 27, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 196, 728, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 728, 196, 728, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 196, 728, 728, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 728, 192, 728, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 192, 728, 728, f1, f2);
         
         //result = result && Gemm32fAutoTest(0, 0, 1002, 1001, 3000, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 1000, 1001, 3002, f1, f2);
+
+        result = result && Gemm32fAutoTest(0, 0, 4096, 64, 1200, f1, f2);
 
         return result;
     }
