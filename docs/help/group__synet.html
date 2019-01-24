@@ -135,6 +135,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaca331823030c720127aceb34c4cf6cf8"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaca331823030c720127aceb34c4cf6cf8">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t count, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:gaca331823030c720127aceb34c4cf6cf8"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="#gaca331823030c720127aceb34c4cf6cf8">More...</a><br /></td></tr>
 <tr class="separator:gaca331823030c720127aceb34c4cf6cf8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga16ad436edc5feea4bcd1d65dc88c5595">SimdSynetSoftmaxLayerForward</a> (const float *src, size_t outer, size_t count, size_t inner, float *dst)</td></tr>
+<tr class="memdesc:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SoftmaxLayer.  <a href="#ga16ad436edc5feea4bcd1d65dc88c5595">More...</a><br /></td></tr>
+<tr class="separator:ga16ad436edc5feea4bcd1d65dc88c5595"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2342ab223da6ae12b76c4954bf995143"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2342ab223da6ae12b76c4954bf995143">SimdWinograd2x3SetFilter</a> (const float *src, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:ga2342ab223da6ae12b76c4954bf995143"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for filter conversion in Winograd 2x3 convolution algorithm.  <a href="#ga2342ab223da6ae12b76c4954bf995143">More...</a><br /></td></tr>
 <tr class="separator:ga2342ab223da6ae12b76c4954bf995143"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1613,6 +1616,65 @@ else
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of the operation. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga16ad436edc5feea4bcd1d65dc88c5595"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga16ad436edc5feea4bcd1d65dc88c5595">&#9670;&nbsp;</a></span>SimdSynetSoftmaxLayerForward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetSoftmaxLayerForward </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>outer</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>inner</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of SoftmaxLayer. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to outer*count*inner. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">outer</td><td>- an outer size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of softmax dimmension. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">inner</td><td>- an inner size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to outer*count*inner. </td></tr>
   </table>
   </dd>
 </dl>

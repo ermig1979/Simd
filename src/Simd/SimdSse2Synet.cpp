@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -85,6 +86,99 @@ namespace Simd
                 SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst);
             else
                 SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
+        }
+
+        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        {
+            Sse2::Exp exp;
+            if (inner == 1 && count == 2)
+            {
+                size_t aligned = Simd::AlignLo(outer, F);
+                size_t o = 0;
+                for (; o < aligned; o += F)
+                {
+                    __m128 s0 = _mm_loadu_ps(src + 0);
+                    __m128 s1 = _mm_loadu_ps(src + F);
+                    __m128 ss0 = _mm_shuffle_ps(s0, s1, 0x88);
+                    __m128 ss1 = _mm_shuffle_ps(s0, s1, 0xDD);
+                    __m128 max = _mm_max_ps(ss0, ss1);
+                    __m128 exp0 = exp.Exponent(_mm_sub_ps(ss0, max));
+                    __m128 exp1 = exp.Exponent(_mm_sub_ps(ss1, max));
+                    __m128 sum = _mm_add_ps(exp0, exp1);
+                    __m128 d0 = _mm_div_ps(exp0, sum);
+                    __m128 d1 = _mm_div_ps(exp1, sum);
+                    _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(d0, d1));
+                    _mm_storeu_ps(dst + F, _mm_unpackhi_ps(d0, d1));
+                    src += DF;
+                    dst += DF;
+                }
+                for (; o < outer; ++o)
+                {
+                    float max = Simd::Max(src[0], src[1]);
+                    float exp0 = ::exp(src[0] - max);
+                    float exp1 = ::exp(src[1] - max);
+                    float sum = exp0 + exp1;
+                    dst[0] = exp0 / sum;
+                    dst[1] = exp1 / sum;
+                    src += 2;
+                    dst += 2;
+                }
+            }
+            else
+            {
+                size_t aligned = Simd::AlignLo(inner, F);
+                Array32f tmp(inner * 2);
+                const float * s;
+                float * max = tmp.data, *sum = tmp.data + inner, *d;
+                for (size_t o = 0; o < outer; ++o)
+                {
+                    memcpy(max, src, inner * sizeof(float));
+                    s = src + inner;
+                    for (size_t c = 1; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                            _mm_storeu_ps(max + i, _mm_max_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
+                        for (; i < inner; ++i)
+                            max[i] = Simd::Max(max[i], s[i]);
+                        s += inner;
+                    }
+
+                    s = src;
+                    d = dst;
+                    memset(sum, 0, inner * sizeof(float));
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                        {
+                            __m128 _d = exp.Exponent(_mm_sub_ps(_mm_loadu_ps(s + i), _mm_loadu_ps(max + i)));
+                            _mm_storeu_ps(d + i, _d);
+                            _mm_storeu_ps(sum + i, _mm_add_ps(_d, _mm_loadu_ps(sum + i)));
+                        }
+                        for (; i < inner; ++i)
+                        {
+                            d[i] = ::exp(s[i] - max[i]);
+                            sum[i] += d[i];
+                        }
+                        s += inner;
+                        d += inner;
+                    }
+
+                    d = dst;
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                            _mm_storeu_ps(d + i, _mm_div_ps(_mm_loadu_ps(d + i), _mm_loadu_ps(sum + i)));
+                        for (; i < inner; ++i)
+                            d[i] /= sum[i];
+                        d += inner;
+                    }
+                    src += count * inner;
+                    dst += count * inner;
+                }
+            }
         }
     }
 #endif// SIMD_SSE2_ENABLE

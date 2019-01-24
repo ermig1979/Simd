@@ -5655,6 +5655,22 @@ extern "C"
     */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
+    /*! @ingroup synet
+
+        \fn void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+
+        \short This function is used for forward propagation of SoftmaxLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to outer*count*inner.
+        \param [in] outer - an outer size of input and output arrays.
+        \param [in] count - a size of softmax dimmension.
+        \param [in] inner - an inner size of input and output arrays.
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to outer*count*inner.
+    */
+    SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+
     /*! @ingroup texture_estimation
 
         \fn void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);

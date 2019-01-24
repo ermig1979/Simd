@@ -28,6 +28,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdNeural.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -176,118 +177,48 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-        class ExpEstimator
+        template<bool align> void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
-            __m256i _exponent, _mantissa, _127;
-            __m256 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
 
-            void Init(float k)
-            {
-                _exponent = _mm256_set1_epi32(0x7F800000);
-                _mantissa = _mm256_set1_epi32(0x007FFFFF);
-                _127 = _mm256_set1_epi32(127);
-                _1_0 = _mm256_set1_ps(1.0f);
-                _0_5 = _mm256_set1_ps(0.5f);
-                _min = _mm256_set1_ps(-126.99999f);
-                _max = _mm256_set1_ps(129.00000f);
-                _exp0 = _mm256_set1_ps(9.9999994e-1f);
-                _exp1 = _mm256_set1_ps(6.9315308e-1f);
-                _exp2 = _mm256_set1_ps(2.4015361e-1f);
-                _exp3 = _mm256_set1_ps(5.5826318e-2f);
-                _exp4 = _mm256_set1_ps(8.9893397e-3f);
-                _exp5 = _mm256_set1_ps(1.8775767e-3f);
-                _k = _mm256_set1_ps(k / 0.69314718056f);
-            }
-
-            SIMD_INLINE __m256 Poly5(__m256 x)
-            {
-                __m256 p = _exp5;
-                p = _mm256_fmadd_ps(x, p, _exp4);
-                p = _mm256_fmadd_ps(x, p, _exp3);
-                p = _mm256_fmadd_ps(x, p, _exp2);
-                p = _mm256_fmadd_ps(x, p, _exp1);
-                p = _mm256_fmadd_ps(x, p, _exp0);
-                return p;
-            }
-
-            SIMD_INLINE __m256 Exp2(__m256 x)
-            {
-                x = _mm256_max_ps(_mm256_min_ps(x, _max), _min);
-                __m256i ipart = _mm256_cvtps_epi32(_mm256_sub_ps(x, _0_5));
-                __m256 fpart = _mm256_sub_ps(x, _mm256_cvtepi32_ps(ipart));
-                __m256 expipart = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_add_epi32(ipart, _127), 23));
-                __m256 expfpart = Poly5(fpart);
-                return _mm256_mul_ps(expipart, expfpart);
-            }
-
-            SIMD_INLINE __m256 Sigmoid(__m256 value)
-            {
-                __m256 exp = Exp2(_mm256_mul_ps(_k, value));
-                return _mm256_div_ps(_1_0, _mm256_add_ps(_1_0, exp));
-            }
-
-            template<bool align> void Sigmoid(const float * src, size_t size, const float * slope, float * dst)
-            {
-                if (align)
-                    assert(Aligned(src) && Aligned(dst));
-
-                Init(-slope[0]);
-                size_t alignedSize = AlignLo(size, F);
-                size_t i = 0;
-                for (; i < alignedSize; i += F)
-                    Avx::Store<align>(dst + i, Sigmoid(Avx::Load<align>(src + i)));
-                for (; i < size; ++i)
-                    dst[i] = Base::Sigmoid(src[i] * slope[0]);
-            }
-
-            SIMD_INLINE __m256 Tanh(__m256 value)
-            {
-                __m256 exp = Exp2(_mm256_mul_ps(_k, value));
-                return _mm256_div_ps(_mm256_sub_ps(_1_0, exp), _mm256_add_ps(_1_0, exp));
-            }
-
-            template<bool align> void Tanh(const float * src, size_t size, const float * slope, float * dst)
-            {
-                if (align)
-                    assert(Aligned(src) && Aligned(dst));
-
-                Init(-2.0f*slope[0]);
-                size_t alignedSize = AlignLo(size, F);
-                size_t i = 0;
-                for (; i < alignedSize; i += F)
-                    Avx::Store<align>(dst + i, Tanh(Avx::Load<align>(src + i)));
-                for (; i < size; ++i)
-                    dst[i] = Base::Tanh(src[i] * slope[0]);
-            }
-
-        public:
-            void Sigmoid(const float * src, size_t size, const float * slope, float * dst)
-            {
-                if (Aligned(src) && Aligned(dst))
-                    Sigmoid<true>(src, size, slope, dst);
-                else
-                    Sigmoid<false>(src, size, slope, dst);
-            }
-
-            void Tanh(const float * src, size_t size, const float * slope, float * dst)
-            {
-                if (Aligned(src) && Aligned(dst))
-                    Tanh<true>(src, size, slope, dst);
-                else
-                    Tanh<false>(src, size, slope, dst);
-            }
-        };
+            Exp exp(-slope[0]);
+            size_t alignedSize = AlignLo(size, F);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+                Avx::Store<align>(dst + i, exp.Sigmoid(Avx::Load<align>(src + i)));
+            for (; i < size; ++i)
+                dst[i] = Base::Sigmoid(src[i] * slope[0]);
+        }
 
         void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
-            ExpEstimator estimator;
-            estimator.Sigmoid(src, size, slope, dst);
+            if (Aligned(src) && Aligned(dst))
+                NeuralSigmoid<true>(src, size, slope, dst);
+            else
+                NeuralSigmoid<false>(src, size, slope, dst);
+        }
+
+        template<bool align> void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-2.0f*slope[0]);
+            size_t alignedSize = AlignLo(size, F);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+                Avx::Store<align>(dst + i, exp.Tanh(Avx::Load<align>(src + i)));
+            for (; i < size; ++i)
+                dst[i] = Base::Tanh(src[i] * slope[0]);
         }
 
         void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
         {
-            ExpEstimator estimator;
-            estimator.Tanh(src, size, slope, dst);
+            if (Aligned(src) && Aligned(dst))
+                NeuralTanh<true>(src, size, slope, dst);
+            else
+                NeuralTanh<false>(src, size, slope, dst);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m256 & k, const __m256 & o, const __m256 & m, float * dst)

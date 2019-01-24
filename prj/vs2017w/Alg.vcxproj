@@ -15,7 +15,7 @@
       <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <SubSystem>Windows</SubSystem>
+      <SubSystem>Windows</SubSystem> 
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

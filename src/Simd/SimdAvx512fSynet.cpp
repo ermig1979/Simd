@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdExp.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"
 #include "Simd/SimdArray.h"
@@ -1241,6 +1242,101 @@ namespace Simd
                 SynetScaleLayerForward<true>(src, scale, bias, count, size, dst, trans);
             else
                 SynetScaleLayerForward<false>(src, scale, bias, count, size, dst, trans);
+        }
+
+        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        {
+            Avx512f::Exp exp;
+            if (inner == 1 && count == 2)
+            {
+                size_t aligned = Simd::AlignLo(outer, F);
+                size_t o = 0;
+                for (; o < aligned; o += F)
+                {
+                    __m512 s0 = _mm512_loadu_ps(src + 0);
+                    __m512 s1 = _mm512_loadu_ps(src + F);
+                    __m512 ss0 = _mm512_shuffle_ps(s0, s1, 0x88);
+                    __m512 ss1 = _mm512_shuffle_ps(s0, s1, 0xDD);
+                    __m512 max = _mm512_max_ps(ss0, ss1);
+                    __m512 exp0 = exp.Exponent(_mm512_sub_ps(ss0, max));
+                    __m512 exp1 = exp.Exponent(_mm512_sub_ps(ss1, max));
+                    __m512 sum = _mm512_add_ps(exp0, exp1);
+                    __m512 d0 = _mm512_div_ps(exp0, sum);
+                    __m512 d1 = _mm512_div_ps(exp1, sum);
+                    _mm512_storeu_ps(dst + 0, _mm512_unpacklo_ps(d0, d1));
+                    _mm512_storeu_ps(dst + F, _mm512_unpackhi_ps(d0, d1));
+                    src += DF;
+                    dst += DF;
+                }
+                for (; o < outer; ++o)
+                {
+                    float max = Simd::Max(src[0], src[1]);
+                    float exp0 = ::exp(src[0] - max);
+                    float exp1 = ::exp(src[1] - max);
+                    float sum = exp0 + exp1;
+                    dst[0] = exp0 / sum;
+                    dst[1] = exp1 / sum;
+                    src += 2;
+                    dst += 2;
+                }
+            }
+            else
+            {
+                size_t aligned = Simd::AlignLo(inner, F);
+                __mmask16 tail = TailMask16(inner - aligned);
+                Array32f tmp(inner * 2);
+                const float * s;
+                float * max = tmp.data, *sum = tmp.data + inner, *d;
+                for (size_t o = 0; o < outer; ++o)
+                {
+                    memcpy(max, src, inner * sizeof(float));
+                    s = src + inner;
+                    for (size_t c = 1; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                            _mm512_storeu_ps(max + i, _mm512_max_ps(_mm512_loadu_ps(s + i), _mm512_loadu_ps(max + i)));
+                        if(i < inner)
+                            _mm512_mask_storeu_ps(max + i, tail, _mm512_max_ps(_mm512_maskz_loadu_ps(tail, s + i), _mm512_maskz_loadu_ps(tail, max + i)));
+                        s += inner;
+                    }
+
+                    s = src;
+                    d = dst;
+                    memset(sum, 0, inner * sizeof(float));
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                        {
+                            __m512 _d = exp.Exponent(_mm512_sub_ps(_mm512_loadu_ps(s + i), _mm512_loadu_ps(max + i)));
+                            _mm512_storeu_ps(d + i, _d);
+                            _mm512_storeu_ps(sum + i, _mm512_add_ps(_d, _mm512_loadu_ps(sum + i)));
+                        }
+                        if(i < inner)
+                        {
+                            __m512 _d = exp.Exponent(_mm512_sub_ps(_mm512_maskz_loadu_ps(tail, s + i), _mm512_maskz_loadu_ps(tail, max + i)));
+                            _mm512_mask_storeu_ps(d + i, tail, _d);
+                            _mm512_mask_storeu_ps(sum + i, tail, _mm512_add_ps(_d, _mm512_maskz_loadu_ps(tail, sum + i)));
+                        }
+                        s += inner;
+                        d += inner;
+                    }
+
+                    d = dst;
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                            _mm512_storeu_ps(d + i, _mm512_div_ps(_mm512_loadu_ps(d + i), _mm512_loadu_ps(sum + i)));
+                        if(i < inner)
+                            _mm512_mask_storeu_ps(d + i, tail, _mm512_div_ps(_mm512_maskz_loadu_ps(tail, d + i), _mm512_maskz_loadu_ps(tail, sum + i)));
+                        d += inner;
+                    }
+                    src += count * inner;
+                    dst += count * inner;
+                }
+            }
         }
     }
 #endif// SIMD_AVX512F_ENABLE

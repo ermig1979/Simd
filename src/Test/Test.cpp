@@ -335,6 +335,7 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetPreluLayerForward);
     TEST_ADD_GROUP_A00(SynetRestrictRange);
     TEST_ADD_GROUP_AD0(SynetScaleLayerForward);
+    TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
 
     TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
     TEST_ADD_GROUP_AD0(TextureBoostedUv);
