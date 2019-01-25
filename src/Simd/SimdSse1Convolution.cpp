@@ -1127,7 +1127,7 @@ namespace Simd
         {
              if(p.group == 1)
                 return ConvolutionDirectHwcConvolutionBiasActivationDefault<type>;
-             else if (p.IsDepthwise() && p.group == 32)
+             else if (p.IsDepthwise())
                  return ConvolutionDirectHwcConvolutionBiasActivationDepthwise<type>;
              return NULL;
         }

@@ -385,6 +385,9 @@ namespace Simd
         void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             int shift, uint8_t * dst, size_t dstStride);
 
+        void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
         void Yuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
             size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 

@@ -45,6 +45,67 @@ namespace Simd
             Store<align, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
         }
 
+        template <bool align, bool mask> SIMD_INLINE void Yuva420pToBgra(const uint8_t * y0, const uint8_t * y1, const uint8_t * u, const uint8_t * v,
+            const uint8_t * a0, const uint8_t * a1, uint8_t * bgra0, uint8_t * bgra1, const __mmask64 * tails)
+        {
+            __m512i _u = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(u, tails[0])));
+            __m512i u0 = UnpackU8<0>(_u, _u);
+            __m512i u1 = UnpackU8<1>(_u, _u);
+            __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(v, tails[0])));
+            __m512i v0 = UnpackU8<0>(_v, _v);
+            __m512i v1 = UnpackU8<1>(_v, _v);
+            YuvToBgra<align, mask>(Load<align, mask>(y0 + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a0 + 0, tails[1])), bgra0 + 00, tails + 3);
+            YuvToBgra<align, mask>(Load<align, mask>(y0 + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a0 + A, tails[2])), bgra0 + QA, tails + 7);
+            YuvToBgra<align, mask>(Load<align, mask>(y1 + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a1 + 0, tails[1])), bgra1 + 00, tails + 3);
+            YuvToBgra<align, mask>(Load<align, mask>(y1 + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a1 + A, tails[2])), bgra1 + QA, tails + 7);
+        }
+
+        template <bool align> void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            width /= 2;
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            __mmask64 tailMasks[11];
+            tailMasks[0] = TailMask64(tail);
+            for (size_t i = 0; i < 2; ++i)
+                tailMasks[1 + i] = TailMask64(tail * 2 - A * i);
+            for (size_t i = 0; i < 8; ++i)
+                tailMasks[3 + i] = TailMask64(tail * 8 - A * i);
+            for (size_t row = 0; row < height; row += 2)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    Yuva420pToBgra<align, false>(y + col * 2, y + yStride + col * 2, u + col, v + col, a + col * 2, a + aStride + col * 2, 
+                        bgra + col * 8, bgra + bgraStride + col * 8, tailMasks);
+                if (col < width)
+                    Yuva420pToBgra<align, true>(y + col * 2, y + yStride + col * 2, u + col, v + col, a + col * 2, a + aStride + col * 2,
+                        bgra + col * 8, bgra + bgraStride + col * 8, tailMasks);
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride)
+                && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuva420pToBgra<true>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+            else
+                Yuva420pToBgra<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+        }
+
         template <bool align, bool mask> SIMD_INLINE void Yuv420pToBgra(const uint8_t * y0, const uint8_t * y1, const uint8_t * u, const uint8_t * v,
             const __m512i & a, uint8_t * bgra0, uint8_t * bgra1, const __mmask64 * tails)
         {

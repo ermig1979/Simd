@@ -5890,6 +5890,33 @@ extern "C"
 
     /*! @ingroup yuv_conversion
 
+        \fn void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
+        \short Converts YUVA420P image to 32-bit BGRA image.
+
+        The input Y, A and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrappers: Simd::Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A> & a, View<A>& bgra).
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] a - a pointer to pixels data of input 8-bit image with alpha channel.
+        \param [in] aStride - a row size of the a image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+        \param [in] bgraStride - a row size of the bgra image.
+    */
+    SIMD_API void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
+        const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
+    /*! @ingroup yuv_conversion
+
         \fn void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
         \short Converts YUV420P image to 24-bit BGR image.

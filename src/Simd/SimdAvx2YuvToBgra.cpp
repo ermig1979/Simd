@@ -51,6 +51,70 @@ namespace Simd
             AdjustedYuv16ToBgra<align>(AdjustY16(y16), AdjustUV16(u16), AdjustUV16(v16), a_0, bgra);
         }
 
+        template <bool align> SIMD_INLINE void Yuva8ToBgra(__m256i y8, __m256i u8, __m256i v8, const __m256i & a8, __m256i * bgra)
+        {
+            Yuv16ToBgra<align>(_mm256_unpacklo_epi8(y8, K_ZERO), _mm256_unpacklo_epi8(u8, K_ZERO),
+                _mm256_unpacklo_epi8(v8, K_ZERO), _mm256_unpacklo_epi8(K_ZERO, a8), bgra + 0);
+            Yuv16ToBgra<align>(_mm256_unpackhi_epi8(y8, K_ZERO), _mm256_unpackhi_epi8(u8, K_ZERO),
+                _mm256_unpackhi_epi8(v8, K_ZERO), _mm256_unpackhi_epi8(K_ZERO, a8), bgra + 2);
+        }
+
+        template <bool align> SIMD_INLINE void Yuva422pToBgra(const uint8_t * y, const __m256i & u, const __m256i & v,
+            const uint8_t * a, uint8_t * bgra)
+        {
+            Yuva8ToBgra<align>(LoadPermuted<align>((__m256i*)y + 0), _mm256_permute4x64_epi64(_mm256_unpacklo_epi8(u, u), 0xD8), 
+                _mm256_permute4x64_epi64(_mm256_unpacklo_epi8(v, v), 0xD8), LoadPermuted<align>((__m256i*)a + 0), (__m256i*)bgra + 0);
+            Yuva8ToBgra<align>(LoadPermuted<align>((__m256i*)y + 1), _mm256_permute4x64_epi64(_mm256_unpackhi_epi8(u, u), 0xD8),
+                _mm256_permute4x64_epi64(_mm256_unpackhi_epi8(v, v), 0xD8), LoadPermuted<align>((__m256i*)a + 1), (__m256i*)bgra + 4);
+        }
+
+        template <bool align> void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < bodyWidth; colY += DA, colUV += A, colBgra += OA)
+                {
+                    __m256i u_ = LoadPermuted<align>((__m256i*)(u + colUV));
+                    __m256i v_ = LoadPermuted<align>((__m256i*)(v + colUV));
+                    Yuva422pToBgra<align>(y + colY, u_, v_, a + colY, bgra + colBgra);
+                    Yuva422pToBgra<align>(y + colY + yStride, u_, v_, a + colY + aStride, bgra + colBgra + bgraStride);
+                }
+                if (tail)
+                {
+                    size_t offset = width - DA;
+                    __m256i u_ = LoadPermuted<false>((__m256i*)(u + offset / 2));
+                    __m256i v_ = LoadPermuted<false>((__m256i*)(v + offset / 2));
+                    Yuva422pToBgra<false>(y + offset, u_, v_, a + offset, bgra + 4 * offset);
+                    Yuva422pToBgra<false>(y + offset + yStride, u_, v_, a + offset + aStride, bgra + 4 * offset + bgraStride);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride)
+                && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuva420pToBgra<true>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+            else
+                Yuva420pToBgra<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+        }
+
         template <bool align> SIMD_INLINE void Yuv8ToBgra(__m256i y8, __m256i u8, __m256i v8, const __m256i & a_0, __m256i * bgra)
         {
             Yuv16ToBgra<align>(_mm256_unpacklo_epi8(y8, K_ZERO), _mm256_unpacklo_epi8(u8, K_ZERO),
