@@ -24,6 +24,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdGemm.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
@@ -1540,6 +1541,11 @@ namespace Simd
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN;
+            if (N <= 8)
+            {
+                Avx2::Gemm32fNN(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+                return;
+            }
 #if SIMD_ZMM_COUNT == 32 
             if (N < K || M * 8 < N)
             {

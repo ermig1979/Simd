@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -54,10 +54,10 @@ namespace Simd
             __m512i _v = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<align, mask>(v, tails[0])));
             __m512i v0 = UnpackU8<0>(_v, _v);
             __m512i v1 = UnpackU8<1>(_v, _v);
-            YuvToBgra<align, mask>(Load<align, mask>(y0 + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a0 + 0, tails[1])), bgra0 + 00, tails + 3);
-            YuvToBgra<align, mask>(Load<align, mask>(y0 + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a0 + A, tails[2])), bgra0 + QA, tails + 7);
-            YuvToBgra<align, mask>(Load<align, mask>(y1 + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a1 + 0, tails[1])), bgra1 + 00, tails + 3);
-            YuvToBgra<align, mask>(Load<align, mask>(y1 + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, Load<align, mask>(a1 + A, tails[2])), bgra1 + QA, tails + 7);
+            YuvToBgra<align, mask>(Load<align, mask>(y0 + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(a0 + 0, tails[1]))), bgra0 + 00, tails + 3);
+            YuvToBgra<align, mask>(Load<align, mask>(y0 + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(a0 + A, tails[2]))), bgra0 + QA, tails + 7);
+            YuvToBgra<align, mask>(Load<align, mask>(y1 + 0, tails[1]), u0, v0, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(a1 + 0, tails[1]))), bgra1 + 00, tails + 3);
+            YuvToBgra<align, mask>(Load<align, mask>(y1 + A, tails[2]), u1, v1, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, (Load<align, mask>(a1 + A, tails[2]))), bgra1 + QA, tails + 7);
         }
 
         template <bool align> void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
