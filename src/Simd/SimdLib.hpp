@@ -3504,6 +3504,27 @@ namespace Simd
         SimdTexturePerformCompensation(src.data, src.stride, src.width, src.height, shift, dst.data, dst.stride);
     }
 
+    /*! @ingroup transform
+
+        \fn void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst);
+
+        \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
+
+        \note This function is a C++ wrapper for function ::SimdTransformImage.
+
+        \param [in] src - an input image.
+        \param [in] transform - a type of image transformation.
+        \param [out] dst - an output image.
+    */
+    template<template<class> class A> SIMD_INLINE void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst)
+    {
+        assert((transform == ::SimdTransformRotate0 || transform == ::SimdTransformRotate180 ||
+            transform == ::SimdTransformTransposeRotate90 || transform == ::SimdTransformTransposeRotate270) ?
+            Compatible(src, dst) : (src.format == dst.format && src.width == dst.height && src.height == dst.width));
+
+        SimdTransformImage(src.data, src.stride, src.width, src.height, src.PixelSize(), transform, dst.data, dst.stride);
+    }
+
     /*! @ingroup yuv_conversion
 
         \fn void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra)

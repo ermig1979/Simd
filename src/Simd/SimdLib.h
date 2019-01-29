@@ -5788,6 +5788,41 @@ extern "C"
     SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         int32_t shift, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup transform
+        Describes transform type used in function ::SimdTransformImage in order to describe result of transformation.
+    */
+    typedef enum
+    {
+        SimdTransformRotate0 = 0, /*!< An original image. The output image has the same size as input image.*/
+        SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+        SimdTransformRotate180, /*!< Image rotated 180 degrees counterclockwise. The output image has the same size as input image. */
+        SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+        SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and widht. */
+        SimdTransformTransposeRotate90, /*!< Image transposed and rotated 90 degrees counterclockwise. It is equal to horizontal mirroring of image. The output image has the same size as input image.*/
+        SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+        SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
+    } SimdTransformType;
+
+    /*! @ingroup transform
+
+        \fn void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, ::SimdTransformType transform, uint8_t * dst, size_t dstStride);
+
+        \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
+
+        \note This function has a C++ wrappers: Simd::TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst).
+
+        \param [in] src - a pointer to pixels data of input image.
+        \param [in] srcStride - a row size of input image.
+        \param [in] width - an input image width. 
+        \param [in] height - an input image height.
+        \param [in] pixelSize - a pixel size in input and output images. It can be 1, 2, 3, 4.
+        \param [in] transform - a type of image transformation.
+        \param [out] dst - a pointer to pixels data of output image.
+        \param [in] dstStride - a row size of output image.
+    */
+    SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
+        size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
+
     /*! @ingroup synet
 
         \fn void SimdWinograd2x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
