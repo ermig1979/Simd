@@ -342,6 +342,8 @@ namespace Test
     TEST_ADD_GROUP_AD0(TextureGetDifferenceSum);
     TEST_ADD_GROUP_AD0(TexturePerformCompensation);
 
+    TEST_ADD_GROUP_A00(TransformImage);
+
     TEST_ADD_GROUP_A00(Winograd2x3SetFilter);
     TEST_ADD_GROUP_A00(Winograd2x3SetInput);
     TEST_ADD_GROUP_A00(Winograd2x3SetOutput);

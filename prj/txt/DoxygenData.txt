@@ -445,6 +445,11 @@
 */
 
 /*! @ingroup functions
+    @defgroup transform Image Transformation
+    \short Functions for image transformation (transposition, rotation).
+*/
+
+/*! @ingroup functions
     @defgroup motion_detection Motion Detection
     \short Functions for motion detection.
 */

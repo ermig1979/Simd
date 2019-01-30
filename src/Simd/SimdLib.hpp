@@ -3506,6 +3506,36 @@ namespace Simd
 
     /*! @ingroup transform
 
+        \fn Point<ptrdiff_t> TransformSize(const Point<ptrdiff_t> & size, ::SimdTransformType transform);
+
+        \short Gets size of transformed image.
+
+        \param [in] size - a size of input image.
+        \param [in] transform - a type of image transformation.
+        \return - the size of transformed image.
+    */
+    SIMD_INLINE Point<ptrdiff_t> TransformSize(const Point<ptrdiff_t> & size, ::SimdTransformType transform)
+    {
+        switch (transform)
+        {
+        case ::SimdTransformRotate0:
+        case ::SimdTransformRotate180:
+        case ::SimdTransformTransposeRotate90:
+        case ::SimdTransformTransposeRotate270:
+            return size;
+        case ::SimdTransformRotate90:
+        case ::SimdTransformRotate270:
+        case ::SimdTransformTransposeRotate0:
+        case ::SimdTransformTransposeRotate180:
+            return Point<ptrdiff_t>(size.y, size.x);
+        default:
+            assert(0);
+            return Point<ptrdiff_t>();
+        }
+    }
+
+    /*! @ingroup transform
+
         \fn void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst);
 
         \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
@@ -3518,9 +3548,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void TransformImage(const View<A> & src, ::SimdTransformType transform, View<A> & dst)
     {
-        assert((transform == ::SimdTransformRotate0 || transform == ::SimdTransformRotate180 ||
-            transform == ::SimdTransformTransposeRotate90 || transform == ::SimdTransformTransposeRotate270) ?
-            Compatible(src, dst) : (src.format == dst.format && src.width == dst.height && src.height == dst.width));
+        assert(src.format == dst.format && TransformSize(src.Size(), transform) == dst.Size());
 
         SimdTransformImage(src.data, src.stride, src.width, src.height, src.PixelSize(), transform, dst.data, dst.stride);
     }

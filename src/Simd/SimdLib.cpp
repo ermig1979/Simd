@@ -5243,6 +5243,11 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Base::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
 }
 
+SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride)
+{
+    Base::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
+}
+
 typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);
 typedef void(*SimdWinogradSetInputPtr) (const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
 typedef void(*SimdWinogradSetOutputPtr) (const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);

@@ -1541,7 +1541,7 @@ namespace Simd
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN;
-            if (N <= 8)
+            if (N == 8)
             {
                 Avx2::Gemm32fNN(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
                 return;

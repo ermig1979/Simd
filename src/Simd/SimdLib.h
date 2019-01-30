@@ -5805,7 +5805,7 @@ extern "C"
 
     /*! @ingroup transform
 
-        \fn void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, ::SimdTransformType transform, uint8_t * dst, size_t dstStride);
+        \fn void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
 
         \short Performs transformation of input image. The type of transformation is defined by ::SimdTransformType enumeration.
 
@@ -5820,8 +5820,7 @@ extern "C"
         \param [out] dst - a pointer to pixels data of output image.
         \param [in] dstStride - a row size of output image.
     */
-    SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, 
-        size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
+    SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
 
     /*! @ingroup synet
 
