@@ -1613,7 +1613,7 @@ namespace Simd
                         }
                     }
                 }
-                _mm512_mask_storeu_ps(dst + c, tail, Activate<type>(sum, params, c));
+                _mm512_mask_storeu_ps(dst + c, tail, Activate<type>(sum, params, c, tail));
             }
         }
 
