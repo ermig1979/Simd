@@ -118,6 +118,11 @@ namespace Test
 
         result = result && TransformImageAutoTest(FUNC_TI(Simd::Base::TransformImage), FUNC_TI(SimdTransformImage));
 
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
+            result = result && TransformImageAutoTest(FUNC_TI(Simd::Ssse3::TransformImage), FUNC_TI(SimdTransformImage));
+#endif 
+
         return result;
     }
 }

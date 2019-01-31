@@ -5245,7 +5245,12 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
 
 SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride)
 {
-    Base::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
+    else
+#endif
+        Base::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
 }
 
 typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);
