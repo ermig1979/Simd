@@ -737,7 +737,7 @@ namespace Simd
             {
                 if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                     return false;
-                return p.srcC <= 16;
+                return p.srcC <= 16 || (p.IsKernel(1) && p.srcC*p.dstC <= 8*1024);
             }
             else if (p.IsDepthwise())
             {

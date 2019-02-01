@@ -1329,8 +1329,84 @@ namespace Simd
             }
         }
 
+        template<::SimdConvolutionActivationType type>
+        SIMD_INLINE void KernelHwcDefaultBody6_1x1x16(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t size = p.srcC, step = p.srcC * p.strideX;
+            const float * src0 = src + 0 * step;
+            const float * src1 = src + 1 * step;
+            const float * src2 = src + 2 * step;
+            const float * src3 = src + 3 * step;
+            const float * src4 = src + 4 * step;
+            const float * src5 = src + 5 * step;
+            __m512 w0, w1, s0, s1;
+            __m512 sums[6];
+            __m512 bias0 = bias ? _mm512_loadu_ps(bias) : _mm512_setzero_ps();
+            sums[0] = bias0;
+            sums[1] = bias0;
+            sums[2] = bias0;
+            sums[3] = bias0;
+            sums[4] = bias0;
+            sums[5] = bias0;
+            size_t offset = 0, size2 = size & (~1);
+            for (; offset < size2; offset += 2)
+            {
+                w0 = _mm512_loadu_ps(weight + 0 * F);
+                w1 = _mm512_loadu_ps(weight + 1 * F);
+                s0 = _mm512_set1_ps(src0[offset + 0]);
+                s1 = _mm512_set1_ps(src1[offset + 0]);
+                sums[0] = _mm512_fmadd_ps(s0, w0, sums[0]);
+                sums[1] = _mm512_fmadd_ps(s1, w0, sums[1]);
+                s0 = _mm512_set1_ps(src0[offset + 1]);
+                s1 = _mm512_set1_ps(src1[offset + 1]);
+                sums[0] = _mm512_fmadd_ps(s0, w1, sums[0]);
+                sums[1] = _mm512_fmadd_ps(s1, w1, sums[1]);
+                s0 = _mm512_set1_ps(src2[offset + 0]);
+                s1 = _mm512_set1_ps(src3[offset + 0]);
+                sums[2] = _mm512_fmadd_ps(s0, w0, sums[2]);
+                sums[3] = _mm512_fmadd_ps(s1, w0, sums[3]);
+                s0 = _mm512_set1_ps(src2[offset + 1]);
+                s1 = _mm512_set1_ps(src3[offset + 1]);
+                sums[2] = _mm512_fmadd_ps(s0, w1, sums[2]);
+                sums[3] = _mm512_fmadd_ps(s1, w1, sums[3]);
+                s0 = _mm512_set1_ps(src4[offset + 0]);
+                s1 = _mm512_set1_ps(src5[offset + 0]);
+                sums[4] = _mm512_fmadd_ps(s0, w0, sums[4]);
+                sums[5] = _mm512_fmadd_ps(s1, w0, sums[5]);
+                s0 = _mm512_set1_ps(src4[offset + 1]);
+                s1 = _mm512_set1_ps(src5[offset + 1]);
+                sums[4] = _mm512_fmadd_ps(s0, w1, sums[4]);
+                sums[5] = _mm512_fmadd_ps(s1, w1, sums[5]);
+                weight += 2 * F;
+            }
+            for (; offset < size; ++offset)
+            {
+                w0 = _mm512_loadu_ps(weight + 0 * F);
+                s0 = _mm512_set1_ps(src0[offset]);
+                s1 = _mm512_set1_ps(src1[offset]);
+                sums[0] = _mm512_fmadd_ps(s0, w0, sums[0]);
+                sums[1] = _mm512_fmadd_ps(s1, w0, sums[1]);
+                s0 = _mm512_set1_ps(src2[offset]);
+                s1 = _mm512_set1_ps(src3[offset]);
+                sums[2] = _mm512_fmadd_ps(s0, w0, sums[2]);
+                sums[3] = _mm512_fmadd_ps(s1, w0, sums[3]);
+                s0 = _mm512_set1_ps(src4[offset]);
+                s1 = _mm512_set1_ps(src5[offset]);
+                sums[4] = _mm512_fmadd_ps(s0, w0, sums[4]);
+                sums[5] = _mm512_fmadd_ps(s1, w0, sums[5]);
+                weight += F;
+            }
+            _mm512_storeu_ps(dst + 0 * F, Activate<type>(sums[0], params, 0));
+            _mm512_storeu_ps(dst + 1 * F, Activate<type>(sums[1], params, 0));
+            _mm512_storeu_ps(dst + 2 * F, Activate<type>(sums[2], params, 0));
+            _mm512_storeu_ps(dst + 3 * F, Activate<type>(sums[3], params, 0));
+            _mm512_storeu_ps(dst + 4 * F, Activate<type>(sums[4], params, 0));
+            _mm512_storeu_ps(dst + 5 * F, Activate<type>(sums[5], params, 0));
+        }
+
         template<::SimdConvolutionActivationType type> void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
+            bool is1x1x16 = p.dstC == 16 && p.kernelX == 1 && p.kernelY == 1;
             size_t noseH = p.padY, noseW = p.padX;
             size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
             size_t tailH = bodyH + p.padH, tailW = bodyW + p.padW;
@@ -1357,7 +1433,12 @@ namespace Simd
                 size_t sx = 0;
                 for (; sx < noseW; sx += p.strideX, dst += p.dstC)
                     KernelHwcDefaultEdge<type>(src, p, p.kernelY, kX + sx, weight + (noseW - sx)*wS, bias, params, dst);
-                if (p.dstC == 48)
+                if (is1x1x16)
+                {
+                    for (; sx < bodyW6; sx += 6 * p.strideX, dst += 6 * p.dstC)
+                        KernelHwcDefaultBody6_1x1x16<type>(src + (sx - noseW) * p.srcC, p, weight, bias, params, dst);
+                }
+                else if (p.dstC == 48)
                 {
                     for (; sx < bodyW8; sx += 8 * p.strideX, dst += 8 * p.dstC)
                         KernelHwcDefaultBody8<type>(src + (sx - noseW) * p.srcC, p, weight, bias, params, dst);
