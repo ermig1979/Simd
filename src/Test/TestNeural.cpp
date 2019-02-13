@@ -1949,7 +1949,7 @@ namespace Test
         result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 640), 640, _5, _2, _1, _1, 1, eps, f1, f2);
 #endif
 #else
-        result = result && NeuralConvolutionForwardAutoTest(Index(320, 180, 3), 10, _3, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(6, 6, 12), 24, _3, _0, _1, _1, 0, eps, f1, f2);
 #endif        
 
         return result;

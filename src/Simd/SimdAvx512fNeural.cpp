@@ -2826,7 +2826,7 @@ namespace Simd
                 {
                     if (kernelX == kernelY && strideX*strideY*dilationX*dilationY == 1)
                     {
-                        if (kernelX >= 2 && kernelX <= 5 && dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
+                        if (kernelX >= 2 && kernelX <= 5)// && dstWidth*dstHeight*kernelX*kernelY >= 8 * 8 * 3 * 3)
                             return true;
                         if (kernelX == 1 && (dstWidth*dstHeight == 16))// || dstWidth * dstHeight == 64))
                             return true;
