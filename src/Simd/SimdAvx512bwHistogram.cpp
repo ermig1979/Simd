@@ -294,17 +294,29 @@ namespace Simd
             }
         }
 
-        template< bool align> void ChangeColors(const uint8_t * src, const __m512i * colors, uint8_t * dst)
+        SIMD_INLINE __m512i ChangeColors(const __m512i & src, const __m512i colors[4])
         {
-            __m512i _src = _mm512_cvtepu8_epi16(Avx2::Load<align>((__m256i*)src));
-            __mmask32 blend = _mm512_cmpge_epi16_mask(_src, K16_0080);
-            __m512i permute = _mm512_srli_epi16(_src, 1);
-            __m512i shift = _mm512_slli_epi16(_mm512_and_si512(_src, K16_0001), 3);
+            __mmask32 blend = _mm512_cmpge_epi16_mask(src, K16_0080);
+            __m512i permute = _mm512_srli_epi16(src, 1);
+            __m512i shift = _mm512_slli_epi16(_mm512_and_si512(src, K16_0001), 3);
             __m512i permute0 = _mm512_permutex2var_epi16(colors[0], permute, colors[1]);
             __m512i permute1 = _mm512_permutex2var_epi16(colors[2], permute, colors[3]);
             __m512i blended = _mm512_mask_blend_epi16(blend, permute0, permute1);
-            __m512i shifted = _mm512_and_si512(_mm512_srlv_epi16(blended, shift), K16_00FF);
-            Avx2::Store<align>((__m256i*)dst, _mm512_cvtepi16_epi8(shifted));
+            return _mm512_and_si512(_mm512_srlv_epi16(blended, shift), K16_00FF);
+        }
+
+        template<bool align> SIMD_INLINE void ChangeColors(const uint8_t * src, const __m512i colors[4], uint8_t * dst)
+        {
+            __m512i _src = _mm512_cvtepu8_epi16(Avx2::Load<align>((__m256i*)src));
+            __m512i _dst = ChangeColors(_src, colors);
+            Avx2::Store<align>((__m256i*)dst, _mm512_cvtepi16_epi8(_dst));
+        }
+
+        SIMD_INLINE void ChangeColors(const uint8_t * src, const __m512i colors[4], uint8_t * dst, __mmask64 tail)
+        {
+            __m512i _src = _mm512_cvtepu8_epi16(_mm512_castsi512_si256(_mm512_maskz_loadu_epi8(tail, src)));
+            __m512i _dst = ChangeColors(_src, colors);
+            _mm512_mask_storeu_epi8(dst, tail, _mm512_castsi256_si512(_mm512_cvtepi16_epi8(_dst)));
         }
 
         template< bool align> void ChangeColors(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * colors, uint8_t * dst, size_t dstStride)
@@ -319,14 +331,16 @@ namespace Simd
             _colors[2] = Load<false>(colors + 2 * A);
             _colors[3] = Load<false>(colors + 3 * A);
 
-            size_t alignedWidth = Simd::AlignLo(width, HA);
+            size_t widthHA = Simd::AlignLo(width, HA);
+            __mmask64 tail = TailMask64(width - widthHA);
 
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0; col < alignedWidth; col += HA)
+                size_t col = 0;
+                for (; col < widthHA; col += HA)
                     ChangeColors<align>(src + col, _colors, dst + col);
-                if(alignedWidth < width)
-                    ChangeColors<false>(src + width - HA, _colors, dst + width - HA);
+                if(col < width)
+                    ChangeColors(src + col, _colors, dst + col, tail);
                 src += srcStride;
                 dst += dstStride;
             }
@@ -339,7 +353,6 @@ namespace Simd
             else
                 ChangeColors<false>(src, srcStride, width, height, colors, dst, dstStride);
         }  
-
 
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {

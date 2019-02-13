@@ -1706,7 +1706,7 @@ namespace Test
         bool result = true;
 
         result = result && NeuralPoolingMaxAutoTest(Size(W, H), stride, pooling, pad, eps, f1, f2);
-        result = result && NeuralPoolingMaxAutoTest(Size(W - O, H + O), stride, pooling, pad, eps, f1, f2);
+        result = result && NeuralPoolingMaxAutoTest(Size(W + O, H - O), stride, pooling, pad, eps, f1, f2);
 
         return result;
     }
@@ -1749,17 +1749,17 @@ namespace Test
         result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 
 #ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
+        if (Simd::Sse::Enable && W >= Simd::Sse::DF)
             result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
-        if (Simd::Avx::Enable)
+        if (Simd::Avx::Enable && W >= Simd::Avx::DF)
             result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
+        if (Simd::Avx512f::Enable && W >= Simd::Avx512f::DF)
             result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Avx512f::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif
 
@@ -1896,6 +1896,13 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 1), 8, _3, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(14, 14, 8), 12, _3, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(6, 6, 12), 24, _3, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 24), 32, _1, _0, _1, _1, 0, eps, f1, f2);
+        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 1), 12, _5, _0, _1, _1, 0, eps, f1, f2);
+#endif
+#if 0
         result = result && NeuralConvolutionForwardAutoTest(Index(320, 180, 3), 10, _3, _0, _1, _1, 0, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(159, 89, 10), 16, _3, _0, _1, _1, 0, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(157, 87, 16), 32, _3, _0, _1, _1, 0, eps, f1, f2);

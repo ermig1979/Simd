@@ -298,7 +298,7 @@ namespace Test
         FillRandom(s);
 
         View c(Simd::HISTOGRAM_SIZE, 1, View::Gray8, NULL, TEST_ALIGN(width));
-        FillRandom(c);
+        FillRandom(c, 64, 191);
 
         View d1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
