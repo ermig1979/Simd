@@ -2968,6 +2968,13 @@ namespace Simd
             assert(dstWidth == (srcWidth + 2 * padX - (dilationX * (kernelX - 1) + 1)) / strideX + 1);
             assert(dstHeight == (srcHeight + 2 * padY - (dilationY * (kernelY - 1) + 1)) / strideY + 1);
 
+            if (dstWidth < F && srcDepth <= 32)
+            {
+                Avx2::NeuralConvolutionForward(src, srcWidth, srcHeight, srcDepth, weight, kernelX, kernelY, padX, padY, 
+                    strideX, strideY, dilationX, dilationY, buffer, size, dst, dstWidth, dstHeight, dstDepth, add);
+                return;
+            }
+
             if (!add)
                 memset(dst, 0, dstWidth*dstHeight*dstDepth * sizeof(float));
 
