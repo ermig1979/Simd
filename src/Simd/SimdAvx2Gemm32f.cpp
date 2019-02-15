@@ -414,7 +414,7 @@ namespace Simd
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN, L1, L2;
 #ifdef SIMD_X64_ENABLE
-            if (N <= K)
+            if (N <= K && M != 4)
             {
                 microM = 6;
                 microN = 16;

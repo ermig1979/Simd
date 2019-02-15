@@ -339,17 +339,21 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(96, 40, 40, 96, _3, _1, _1, _1, _1, 96, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(96, 40, 40, 96, _3, _1, _2, _1, _0, 96, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && ConvolutionForwardAutoTest(Param(16, 160, 160, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(8, 160, 160, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(16, 16, 160, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(8, 16, 160, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
-        //result = result && ConvolutionForwardAutoTest(Param(8, 80, 80, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(8, 160, 160, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(16, 16, 160, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(8, 16, 160, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(8, 80, 80, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(48, 80, 80, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(8, 80, 80, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
+#if 1
+        result = result && ConvolutionForwardAutoTest(Param(32, 115, 63, 4, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 115, 63, 2, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+#endif
 #else
-        result = result && ConvolutionForwardAutoTest(Param(16, 80, 80, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(32, 115, 63, 4, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }

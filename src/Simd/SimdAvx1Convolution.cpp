@@ -173,17 +173,59 @@ namespace Simd
                 {
                     if (trans)
                     {
-                        for (size_t j = 0; j < size; ++j)
+                        if (count == 1 || count == 2 || count == 4 || count == 8)
                         {
-                            size_t i = 0;
-                            for (; i < aligned; i += F)
+                            __m256 _bias, _slope;
+                            if (count == 1)
                             {
-                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
-                                _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm256_loadu_ps(params + i)));
+                                _bias = _mm256_set1_ps(bias[0]);
+                                _slope = _mm256_set1_ps(params[0]);
                             }
-                            for (; i < count; ++i)
-                                dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
-                            dst += count;
+                            else if (count == 2)
+                            {
+                                _bias = _mm256_setr_ps(bias[0], bias[1], bias[0], bias[1], bias[0], bias[1], bias[0], bias[1]);
+                                _slope = _mm256_setr_ps(params[0], params[1], params[0], params[1], params[0], params[1], params[0], params[1]);
+                            }
+                            else if (count == 4)
+                            {
+                                _bias = _mm256_setr_ps(bias[0], bias[1], bias[2], bias[3], bias[0], bias[1], bias[2], bias[3]);
+                                _slope = _mm256_setr_ps(params[0], params[1], params[2], params[3], params[0], params[1], params[2], params[3]);
+                            }
+                            else if (count == 8)
+                            {
+                                _bias = _mm256_setr_ps(bias[0], bias[1], bias[2], bias[3], bias[4], bias[5], bias[6], bias[7]);
+                                _slope = _mm256_setr_ps(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+                            }
+                            else
+                                assert(0);
+                            size_t n = size * count, nF = AlignLo(n, F), i = 0;
+                            for (; i < nF; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _bias);
+                                _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _slope));
+                            }
+                            dst += nF;
+                            for (size_t j = nF/count; j < size; ++j)
+                            {
+                                for (size_t i = 0; i < count; ++i)
+                                    dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                                dst += count;
+                            }
+                        }
+                        else
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                            {
+                                size_t i = 0;
+                                for (; i < aligned; i += F)
+                                {
+                                    __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                    _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm256_loadu_ps(params + i)));
+                                }
+                                for (; i < count; ++i)
+                                    dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                                dst += count;
+                            }
                         }
                     }
                     else
@@ -737,7 +779,7 @@ namespace Simd
             {
                 if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                     return false;
-                return p.srcC <= 16 || (p.IsKernel(1) && p.srcC*p.dstC <= 8*1024);
+                return p.srcC <= 16 || (p.IsKernel(1) && p.srcC*p.dstC <= 8*1024 && p.dstC >= F);
             }
             else if (p.IsDepthwise())
             {

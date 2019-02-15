@@ -33,6 +33,8 @@ namespace Simd
     {
         static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
+            SIMD_PERF_BEG(Simd::ToStr(count) + "-" + Simd::ToStr(size) + "-" + Simd::ToStr((int)activation) + "-" + Simd::ToStr((int)trans));
+
             size_t aligned = AlignLo(trans ? count : size, F);
             __mmask16 tail = __mmask16(-1) >> (F + aligned - (trans ? count : size));
             if (activation == ::SimdConvolutionActivationIdentity)
@@ -195,20 +197,68 @@ namespace Simd
                 {
                     if (trans)
                     {
-                        for (size_t j = 0; j < size; ++j)
+                        if (count == 1 || count == 2 || count == 4 || count == 8 || count == 16)
                         {
-                            size_t i = 0;
-                            for (; i < aligned; i += F)
+                            __m512 _bias, _slope;
+                            if (count == 1)
                             {
-                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _mm512_loadu_ps(bias + i));
-                                _mm512_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm512_loadu_ps(params + i)));
+                                _bias = _mm512_broadcast_f32x4(_mm_set1_ps(bias[0]));
+                                _slope = _mm512_broadcast_f32x4(_mm_set1_ps(params[0]));
                             }
-                            if (i < count)
+                            else if (count == 2)
                             {
-                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _mm512_maskz_loadu_ps(tail, bias + i));
-                                _mm512_mask_storeu_ps(dst + i, tail, SynetPreluLayerForward(value, _mm512_maskz_loadu_ps(tail, params + i)));
+                                _bias = _mm512_broadcast_f32x4(_mm_setr_ps(bias[0], bias[1], bias[0], bias[1]));
+                                _slope = _mm512_broadcast_f32x4(_mm_setr_ps(params[0], params[1], params[0], params[1]));
                             }
-                            dst += count;
+                            else if (count == 4)
+                            {
+                                _bias = _mm512_broadcast_f32x4(_mm_loadu_ps(bias));
+                                _slope = _mm512_broadcast_f32x4(_mm_loadu_ps(params));
+                            }
+                            else if (count == 8)
+                            {
+                                _bias = _mm512_setr_ps(bias[0], bias[1], bias[2], bias[3], bias[4], bias[5], bias[6], bias[7], 
+                                    bias[0], bias[1], bias[2], bias[3], bias[4], bias[5], bias[6], bias[7]);
+                                _slope = _mm512_setr_ps(params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7],
+                                    params[0], params[1], params[2], params[3], params[4], params[5], params[6], params[7]);
+                            }
+                            else if (count == 16)
+                            {
+                                _bias = _mm512_loadu_ps(bias);
+                                _slope = _mm512_loadu_ps(params);
+                            }
+                            else
+                                assert(0);
+                            size_t n = size * count, nF = AlignLo(n, F), i = 0;
+                            for (; i < nF; i += F)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _bias);
+                                _mm512_storeu_ps(dst + i, SynetPreluLayerForward(value, _slope));
+                            }
+                            if (i < n)
+                            {
+                                __mmask16 tail = TailMask16(n - nF);
+                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _bias);
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetPreluLayerForward(value, _slope));
+                            }
+                        }
+                        else
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                            {
+                                size_t i = 0;
+                                for (; i < aligned; i += F)
+                                {
+                                    __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _mm512_loadu_ps(bias + i));
+                                    _mm512_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm512_loadu_ps(params + i)));
+                                }
+                                if (i < count)
+                                {
+                                    __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _mm512_maskz_loadu_ps(tail, bias + i));
+                                    _mm512_mask_storeu_ps(dst + i, tail, SynetPreluLayerForward(value, _mm512_maskz_loadu_ps(tail, params + i)));
+                                }
+                                dst += count;
+                            }
                         }
                     }
                     else

@@ -1541,7 +1541,7 @@ namespace Simd
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN;
-            if (N == 8)
+            if (N <= 8)
             {
                 Avx2::Gemm32fNN(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
                 return;
@@ -1595,6 +1595,18 @@ namespace Simd
             kernelMT = Kernel4x16nn;
             kernelTM = KernelMx16nn;
             kernelTT = KernelMx16nn;
+#endif
+#if SIMD_ZMM_COUNT >= 16 
+            if (M == 4)
+            {
+                microM = 4;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Kernel4x48nn;
+                kernelMT = tail > DF ? Kernel4x48nn : (tail > F ? Kernel4x32nn : Kernel4x16nn);
+                kernelTM = KernelMx48nn;
+                kernelTT = tail > DF ? KernelMx48nn : (tail > F ? KernelMx32nn : KernelMx16nn);
+            }
 #endif
             GemmNN::PackA packA = (microM > 6 && M*N*K > 700*700*700) ? Avx::GemmPackA : NULL;
             GemmNN gemmNN(M, N, K, microM, microN, CACHE_L1_SIZE, CACHE_L2_SIZE, CACHE_L3_SIZE, F,
