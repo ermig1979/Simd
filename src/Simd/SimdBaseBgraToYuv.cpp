@@ -112,5 +112,46 @@ namespace Simd
                 bgra += bgraStride;
             }
         }
+
+        SIMD_INLINE void BgraToYuva420p(const uint8_t * bgra0, size_t bgraStride, uint8_t * y0, size_t yStride, uint8_t * u, uint8_t * v, uint8_t * a0, size_t aStride)
+        {
+            const uint8_t * bgra1 = bgra0 + bgraStride;
+            uint8_t * y1 = y0 + yStride;
+            uint8_t * a1 = a0 + aStride;
+
+            y0[0] = BgrToY(bgra0[0], bgra0[1], bgra0[2]);
+            y0[1] = BgrToY(bgra0[4], bgra0[5], bgra0[6]);
+            y1[0] = BgrToY(bgra1[0], bgra1[1], bgra1[2]);
+            y1[1] = BgrToY(bgra1[4], bgra1[5], bgra1[6]);
+
+            int blue = Average(bgra0[0], bgra0[4], bgra1[0], bgra1[4]);
+            int green = Average(bgra0[1], bgra0[5], bgra1[1], bgra1[5]);
+            int red = Average(bgra0[2], bgra0[6], bgra1[2], bgra1[6]);
+
+            u[0] = BgrToU(blue, green, red);
+            v[0] = BgrToV(blue, green, red);
+
+            a0[0] = bgra0[3];
+            a0[1] = bgra0[7];
+            a1[0] = bgra1[3];
+            a1[1] = bgra1[7];
+        }
+
+        void BgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colYA = 0, colBgra = 0; colYA < width; colYA += 2, colUV++, colBgra += 8)
+                    BgraToYuva420p(bgra + colBgra, bgraStride, y + colYA, yStride, u + colUV, v + colUV, a + colYA, aStride);
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
     }
 }

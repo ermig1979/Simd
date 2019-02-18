@@ -33,6 +33,10 @@
 <h3 id="R075">March X, 2019 (version X.X.75)</h3>
 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>Base implementation, SSE2, SSSE3, AVX2 and AVX-512BW optimizations of function BgraToYuva420p.</li>
+</ul>
 <h5>Improving</h5>
 <ul>
  <li>AVX, AVX2 and AVX-512F optimizations of function ConvolutionForward.</li>
@@ -42,6 +46,12 @@
  <li>Error in AVX-512BW optimization of function ChangeColors.</li>
  <li>Error in AVX-512BW optimization of function NormalizeHistogram.</li>
  <li>Error in AVX-512F optimization of function NeuralConvolutionForward.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of function BgraToYuva420p.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

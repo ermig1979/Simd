@@ -439,6 +439,7 @@ namespace Simd
         const __m512i K16_FF00 = SIMD_MM512_SET1_EPI16(0xFF00);
 
         const __m512i K32_00000001 = SIMD_MM512_SET1_EPI32(0x00000001);
+        const __m512i K32_000000FF = SIMD_MM512_SET1_EPI32(0x000000FF);
         const __m512i K32_0000FFFF = SIMD_MM512_SET1_EPI32(0x0000FFFF);
         const __m512i K32_00010000 = SIMD_MM512_SET1_EPI32(0x00010000);
         const __m512i K32_FFFFFF00 = SIMD_MM512_SET1_EPI32(0xFFFFFF00);
@@ -471,6 +472,12 @@ namespace Simd
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
             0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
+
+        const __m512i K8_SUFFLE_BGRA_TO_A000 = SIMD_MM512_SETR_EPI8(
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1);
 
         const __m512i K8_SUFFLE_BGR_TO_B0R0 = SIMD_MM512_SETR_EPI8(
             0x0, -1, 0x2, -1, 0x3, -1, 0x5, -1, 0x6, -1, 0x8, -1, 0x9, -1, 0xB, -1,

@@ -707,6 +707,32 @@ namespace Simd
         SimdBgraToYuv444p(bgra.data, bgra.width, bgra.height, bgra.stride, y.data, y.stride, u.data, u.stride, v.data, v.stride);
     }
 
+    /*! @ingroup bgra_conversion
+
+        \fn void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a)
+
+        \short Converts 32-bit BGRA image to YUVA420P.
+
+        The input BGRA and output Y and A images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function is a C++ wrapper for function ::SimdBgraToYuva420p.
+
+        \param [in] bgra - an input 32-bit BGRA image.
+        \param [out] y - an output 8-bit image with Y color plane.
+        \param [out] u - an output 8-bit image with U color plane.
+        \param [out] v - an output 8-bit image with V color plane.
+        \param [out] a - an output 8-bit image with alpha plane.
+    */
+    template<template<class> class A> SIMD_INLINE void BgraToYuva420p(const View<A> & bgra, View<A> & y, View<A> & u, View<A> & v, View<A> & a)
+    {
+        assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
+        assert(Compatible(y, a) && Compatible(u, v) && EqualSize(y, bgra));
+        assert(y.format == View<A>::Gray8 && bgra.format == View<A>::Bgra32);
+
+        SimdBgraToYuva420p(bgra.data, bgra.stride, bgra.width, bgra.height, y.data, y.stride, u.data, u.stride, v.data, v.stride, a.data, a.stride);
+    }
+
     /*! @ingroup bgr_conversion
 
         \fn void BgrToBayer(const View<A>& bgr, View<A>& bayer)
