@@ -232,12 +232,12 @@ namespace Test
                         if (errorCount == 1)
                             message << std::endl << "Fail comparison: " << description << std::endl;
                         size_t col = offset / channelCount;
-                        message << "Error at [" << col << "," << row << "] : (" << (int)pA[col*channelCount];
+                        message << "Error at [" << col << "," << row << "] : (" << (int64_t)pA[col*channelCount];
                         for (size_t channel = 1; channel < channelCount; ++channel)
-                            message << "," << (int)pA[col*channelCount + channel];
-                        message << ") != (" << (int)pB[col*channelCount];
+                            message << "," << (int64_t)pA[col*channelCount + channel];
+                        message << ") != (" << (int64_t)pB[col*channelCount];
                         for (size_t channel = 1; channel < channelCount; ++channel)
-                            message << "," << (int)pB[col*channelCount + channel];
+                            message << "," << (int64_t)pB[col*channelCount + channel];
                         message << ")." << std::endl;
                     }
                     if (errorCount >= errorCountMax)
@@ -270,8 +270,8 @@ namespace Test
     {
         assert(Simd::Compatible(a, b));
 
-        //if (FullEqual(a, b))
-        //	return true;
+        if (FullEqual(a, b))
+        	return true;
 
         if (a.format == View::Float)
             return Compare<float>(a, b, differenceMax, printError, errorCountMax, valueCycle, description);

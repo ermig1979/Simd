@@ -134,8 +134,8 @@ namespace Simd
             if (partialAlignedSize != size)
             {
                 float32x4_t tailMask = RightNotZero(size - partialAlignedSize);
-                float32x4_t _a = vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + size - F));
-                float32x4_t _b = vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + size - F));
+                float32x4_t _a = vcvt_f32_f16((float16x4_t)LoadHalf<false>(a + size - F));
+                float32x4_t _b = vcvt_f32_f16((float16x4_t)LoadHalf<false>(a + size - F));
                 float32x4_t _d = And(vsubq_f32(_a, _b), tailMask);
                 sums[0] = vaddq_f32(sums[0], vmulq_f32(_d, _d));
             }

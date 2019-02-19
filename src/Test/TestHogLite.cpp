@@ -583,7 +583,7 @@ namespace Test
                 TEST_PERFORMANCE_TEST(description);
                 for(size_t i = 0; i < value.width; ++i)
                     func((float*)a.data + i, a.stride / sizeof(float), (float*)b.data + i, b.stride / sizeof(float), a.height, 
-                        (float*)value.data + i, (size_t*)((uint64_t*)col.data + i), (size_t*)((uint64_t*)row.data + i));
+                        (float*)value.data + i, (size_t*)col.data + i, (size_t*)row.data + i);
             }
         };
     }
@@ -596,6 +596,8 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << number << "].");
 
+        View::Format format = sizeof(size_t) == 8 ? View::Int64 : View::Int32;
+
         View a(number + 6, 7, View::Float, NULL, TEST_ALIGN(number));
         FillRandom32f(a, 0.5f, 1.5f);
 
@@ -603,12 +605,12 @@ namespace Test
         FillRandom32f(b, 0.5f, 1.5f);
 
         View value1(number, 1, View::Float, NULL, TEST_ALIGN(number));
-        View col1(number, 1, View::Int64, NULL, TEST_ALIGN(number));
-        View row1(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+        View col1(number, 1, format, NULL, TEST_ALIGN(number));
+        View row1(number, 1, format, NULL, TEST_ALIGN(number));
 
         View value2(number, 1, View::Float, NULL, TEST_ALIGN(number));
-        View col2(number, 1, View::Int64, NULL, TEST_ALIGN(number));
-        View row2(number, 1, View::Int64, NULL, TEST_ALIGN(number));
+        View col2(number, 1, format, NULL, TEST_ALIGN(number));
+        View row2(number, 1, format, NULL, TEST_ALIGN(number));
 
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(a, b, value1, col1, row1));
