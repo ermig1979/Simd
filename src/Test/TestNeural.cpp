@@ -660,6 +660,11 @@ namespace Test
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralTanh), FUNC_AF(SimdNeuralTanh));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Neon::NeuralTanh), FUNC_AF(SimdNeuralTanh));
+#endif
+
         return result;
     }
 
