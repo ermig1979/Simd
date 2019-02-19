@@ -563,6 +563,11 @@ namespace Test
             result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Avx512f::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, true, 1.1f, FUNC_AF(Simd::Neon::NeuralSigmoid), FUNC_AF(SimdNeuralSigmoid));
+#endif
+
         return result;
     }
 

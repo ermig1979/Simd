@@ -3223,7 +3223,7 @@ SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size)
 }
 
 typedef void(*SimdNeuralSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdNeuralSigmoidPtr simdNeuralSigmoid = SIMD_FUNC3(NeuralSigmoid, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC);
+SimdNeuralSigmoidPtr simdNeuralSigmoid = SIMD_FUNC4(NeuralSigmoid, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {

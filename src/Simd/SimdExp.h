@@ -242,6 +242,75 @@ namespace Simd
         };
     }
 #endif //SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class Exp
+        {
+            int32x4_t _exponent, _mantissa, _127;
+            float32x4_t _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
+
+            SIMD_INLINE float32x4_t Poly5(float32x4_t x)
+            {
+                float32x4_t p = _exp5;
+                p = vmlaq_f32(_exp4, x, p);
+                p = vmlaq_f32(_exp3, x, p);
+                p = vmlaq_f32(_exp2, x, p);
+                p = vmlaq_f32(_exp1, x, p);
+                p = vmlaq_f32(_exp0, x, p);
+                return p;
+            }
+
+            SIMD_INLINE float32x4_t Exp2(float32x4_t x)
+            {
+                x = vmaxq_f32(vminq_f32(x, _max), _min);
+                int32x4_t ipart = vcvtq_s32_f32(vsubq_f32(x, _0_5));
+                float32x4_t fpart = vsubq_f32(x, vcvtq_f32_s32(ipart));
+                float32x4_t expipart = vreinterpretq_f32_s32(vshlq_n_s32(vaddq_s32(ipart, _127), 23));
+                float32x4_t expfpart = Poly5(fpart);
+                return vmulq_f32(expipart, expfpart);
+            }
+
+        public:
+
+            SIMD_INLINE Exp(float k = 1.0f)
+            {
+                _exponent = vdupq_n_s32(0x7F800000);
+                _mantissa = vdupq_n_s32(0x007FFFFF);
+                _127 = vdupq_n_s32(127);
+                _1_0 = vdupq_n_f32(1.0f);
+                _0_5 = vdupq_n_f32(0.5f);
+                _min = vdupq_n_f32(-126.99999f);
+                _max = vdupq_n_f32(129.00000f);
+                _exp0 = vdupq_n_f32(9.9999994e-1f);
+                _exp1 = vdupq_n_f32(6.9315308e-1f);
+                _exp2 = vdupq_n_f32(2.4015361e-1f);
+                _exp3 = vdupq_n_f32(5.5826318e-2f);
+                _exp4 = vdupq_n_f32(8.9893397e-3f);
+                _exp5 = vdupq_n_f32(1.8775767e-3f);
+                _k = vdupq_n_f32(k / 0.69314718056f);
+            }
+
+            SIMD_INLINE float32x4_t Exponent(float32x4_t value)
+            {
+                return Exp2(vmulq_f32(_k, value));
+            }
+
+            template<int iter> SIMD_INLINE float32x4_t Sigmoid(float32x4_t value)
+            {
+                float32x4_t exp = Exp2(vmulq_f32(_k, value));
+                return Reciprocal<iter>(vaddq_f32(_1_0, exp));
+            }
+
+            template<int iter> SIMD_INLINE float32x4_t Tanh(float32x4_t value)
+            {
+                float32x4_t exp = Exp2(vmulq_f32(_k, value));
+                return Div<iter>(vsubq_f32(_1_0, exp), vaddq_f32(_1_0, exp));
+            }
+        };
+    }
+#endif //SIMD_NEON_ENABLE
 }
 
 #endif//__SimdExp_h__

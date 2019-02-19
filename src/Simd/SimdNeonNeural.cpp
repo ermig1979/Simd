@@ -25,6 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -41,7 +42,6 @@ namespace Simd
             float32x2_t sm23 = vpadd_f32(sm2, sm3);
             float32x4_t sm0123 = vcombine_f32(sm01 , sm23);
             vst1q_f32(dst, vaddq_f32(vld1q_f32(dst), sm0123));
-            //_mm_storeu_ps(dst, _mm_add_ps(_mm_loadu_ps(dst), _mm_hadd_ps(_mm_hadd_ps(src[0], src[1]), _mm_hadd_ps(src[2], src[3]))));
         }
 
         template <bool inversion> uint8x16_t Invert(const uint8x16_t & value);
@@ -250,6 +250,28 @@ namespace Simd
                 AddValue<true>(value, dst, aligned, partial, size);
             else
                 AddValue<false>(value, dst, aligned, partial, size);
+        }
+
+        template<bool align> void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-slope[0]);
+            size_t alignedSize = AlignLo(size, F);
+            size_t i = 0;
+            for (; i < alignedSize; i += F)
+                Store<align>(dst + i, exp.Sigmoid<1>(Load<align>(src + i)));
+            for (; i < size; ++i)
+                dst[i] = Base::Sigmoid(src[i] * slope[0]);
+        }
+
+        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                NeuralSigmoid<true>(src, size, slope, dst);
+            else
+                NeuralSigmoid<false>(src, size, slope, dst);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
