@@ -746,7 +746,11 @@ namespace Test
     {
         bool result = true;
 
+#ifdef SIMD_NEON_ENABLE
+        const float lo = 0.002f, hi = 9.998f, exponent = -0.75;
+#else
         const float lo = 0.001f, hi = 9.999f, exponent = -0.75;
+#endif
         result = result && NeuralActivateFunctionAutoTest(W*H, error, relative, exponent, lo, hi, f1, f2);
         result = result && NeuralActivateFunctionAutoTest(W*H + O, error, relative, exponent, lo, hi, f1, f2);
 
@@ -773,6 +777,11 @@ namespace Test
         if (Simd::Avx512f::Enable)
             result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Avx512f::NeuralPow), FUNC_AF(SimdNeuralPow));
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Neon::NeuralPow), FUNC_AF(SimdNeuralPow));
+#endif 
 
         return result;
     }

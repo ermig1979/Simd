@@ -200,6 +200,61 @@ namespace Simd
         };
     }
 #endif //SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class Pow
+        {
+            int32x4_t _exponent, _mantissa;
+            float32x4_t _one;
+
+            SIMD_INLINE float32x4_t Poly5(float32x4_t x, float a, float b, float c, float d, float e, float f) const
+            {
+                float32x4_t p = vdupq_n_f32(f);
+                p = vmlaq_f32(vdupq_n_f32(e), x, p);
+                p = vmlaq_f32(vdupq_n_f32(d), x, p);
+                p = vmlaq_f32(vdupq_n_f32(c), x, p);
+                p = vmlaq_f32(vdupq_n_f32(b), x, p);
+                p = vmlaq_f32(vdupq_n_f32(a), x, p);
+                return p;
+            }
+
+            SIMD_INLINE float32x4_t Exp2(float32x4_t x) const
+            {
+                x = vmaxq_f32(vminq_f32(x, vdupq_n_f32(129.00000f)), vdupq_n_f32(-126.99999f));
+                int32x4_t ipart = vcvtq_s32_f32(vsubq_f32(x, vdupq_n_f32(0.5f)));
+                float32x4_t fpart = vsubq_f32(x, vcvtq_f32_s32(ipart));
+                float32x4_t expipart = vreinterpretq_f32_s32(vshlq_n_s32(vaddq_s32(ipart, vdupq_n_s32(127)), 23));
+                float32x4_t expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
+                return vmulq_f32(expipart, expfpart);
+            }
+
+            SIMD_INLINE float32x4_t Log2(float32x4_t x) const
+            {
+                int32x4_t i = vreinterpretq_s32_f32(x);
+                float32x4_t e = vcvtq_f32_s32(vsubq_s32(vshrq_n_s32(vandq_s32(i, _exponent), 23), vdupq_n_s32(127)));
+                float32x4_t m = Or(vreinterpretq_f32_s32(vandq_s32(i, _mantissa)), _one);
+                float32x4_t p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
+                return vaddq_f32(vmulq_f32(p, vsubq_f32(m, _one)), e);
+            }
+
+        public:
+
+            SIMD_INLINE Pow()
+            {
+                _exponent = vdupq_n_s32(0x7F800000);
+                _mantissa = vdupq_n_s32(0x007FFFFF);
+                _one = vdupq_n_f32(1.0f);
+            }
+
+            SIMD_INLINE float32x4_t operator() (float32x4_t basis, float32x4_t exponent) const
+            {
+                return Exp2(vmulq_f32(Log2(basis), exponent));
+            }
+        };
+    }
+#endif //SIMD_NEON_ENABLE 
 }
 
 #endif//__SimdPow_h__

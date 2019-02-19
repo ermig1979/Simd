@@ -1523,6 +1523,11 @@ namespace Simd
             return (float32x4_t)vandq_u32((uint32x4_t)a, (uint32x4_t)b);
         }
 
+        SIMD_INLINE float32x4_t Or(float32x4_t a, float32x4_t b)
+        {
+            return (float32x4_t)vorrq_u32((uint32x4_t)a, (uint32x4_t)b);
+        }
+
         template <int index> SIMD_INLINE float32x4_t Broadcast(float32x4_t a)
         {
             return vdupq_lane_f32(Half<index / 2>(a), index & 1);
