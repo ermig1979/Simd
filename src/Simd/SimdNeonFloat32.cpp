@@ -70,7 +70,7 @@ namespace Simd
 
         template<int part> SIMD_INLINE float32x4_t Uint16ToFloat32(const uint16x8_t & value, const float32x4_t & lower, const float32x4_t & boost)
         {
-            return vsubq_f32(vmulq_f32(vcvtq_f32_u32(UnpackU16<part>(value)), boost), lower);
+            return vaddq_f32(vmulq_f32(vcvtq_f32_u32(UnpackU16<part>(value)), boost), lower);
         }
 
         template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const float32x4_t & lower, const float32x4_t & boost, float * dst)
