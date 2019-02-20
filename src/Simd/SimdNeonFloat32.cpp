@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -106,6 +107,64 @@ namespace Simd
                 Uint8ToFloat32<true>(src, size, lower, upper, dst);
             else
                 Uint8ToFloat32<false>(src, size, lower, upper, dst);
+        }
+
+        template<bool align> void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
+        {
+            if (align)
+                assert(Aligned(a) && Aligned(b));
+
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, DF);
+            size_t i = 0;
+            float32x4_t _aa[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
+            float32x4_t _ab[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
+            float32x4_t _bb[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
+            if (fullAlignedSize)
+            {
+                for (; i < fullAlignedSize; i += DF)
+                {
+                    float32x4_t a0 = Load<align>(a + i + 0);
+                    float32x4_t b0 = Load<align>(b + i + 0);
+                    _aa[0] = vmlaq_f32(_aa[0], a0, a0);
+                    _ab[0] = vmlaq_f32(_ab[0], a0, b0);
+                    _bb[0] = vmlaq_f32(_bb[0], b0, b0);
+                    float32x4_t a1 = Load<align>(a + i + F);
+                    float32x4_t b1 = Load<align>(b + i + F);
+                    _aa[1] = vmlaq_f32(_aa[1], a1, a1);
+                    _ab[1] = vmlaq_f32(_ab[1], a1, b1);
+                    _bb[1] = vmlaq_f32(_bb[1], b1, b1);
+                }
+                _aa[0] = vaddq_f32(_aa[0], _aa[1]);
+                _ab[0] = vaddq_f32(_ab[0], _ab[1]);
+                _bb[0] = vaddq_f32(_bb[0], _bb[1]);
+            }
+            for (; i < partialAlignedSize; i += F)
+            {
+                float32x4_t a0 = Load<align>(a + i + 0);
+                float32x4_t b0 = Load<align>(b + i + 0);
+                _aa[0] = vmlaq_f32(_aa[0], a0, a0);
+                _ab[0] = vmlaq_f32(_ab[0], a0, b0);
+                _bb[0] = vmlaq_f32(_bb[0], b0, b0);
+            }
+            float aa = ExtractSum32f(_aa[0]), ab = ExtractSum32f(_ab[0]), bb = ExtractSum32f(_bb[0]);
+            for (; i < size; ++i)
+            {
+                float _a = a[i];
+                float _b = b[i];
+                aa += _a * _a;
+                ab += _a * _b;
+                bb += _b * _b;
+            }
+            *distance = 1.0f - ab / ::sqrt(aa*bb);
+        }
+
+        void CosineDistance32f(const float * a, const float * b, size_t size, float * distance)
+        {
+            if (Aligned(a) && Aligned(b))
+                CosineDistance32f<true>(a, b, size, distance);
+            else
+                CosineDistance32f<false>(a, b, size, distance);
         }
     }
 #endif// SIMD_SSE2_ENABLE

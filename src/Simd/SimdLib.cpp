@@ -2162,7 +2162,7 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
 }
 
 typedef void(*SimdCosineDistance32fPtr) (const float * a, const float * b, size_t size, float * distance);
-SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC4(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC5(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance)
 {
