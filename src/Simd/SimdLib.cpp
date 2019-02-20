@@ -454,6 +454,11 @@ SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, si
         Sse2::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+    else
+#endif
         Base::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
 }
 

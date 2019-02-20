@@ -218,6 +218,11 @@ namespace Test
             result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Avx512bw::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Neon::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+#endif
+
         return result;
     }
 
