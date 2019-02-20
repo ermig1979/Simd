@@ -183,6 +183,11 @@ SIMD_API SimdBool SimdGetFlushToZero()
         return Sse::GetFlushToZero();
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        return Neon::GetFlushToZero();
+    else
+#endif
         return SimdFalse;
 }
 

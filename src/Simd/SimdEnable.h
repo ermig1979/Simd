@@ -179,7 +179,7 @@ namespace Simd
 
         SIMD_INLINE SimdBool GetFlushToZero()
         {
-            return _mm_getcsr() | SCR_FTZ ? SimdTrue : SimdFalse;
+            return _mm_getcsr() & SCR_FTZ ? SimdTrue : SimdFalse;
         }
 
         SIMD_INLINE void SetFlushToZero(SimdBool value)
@@ -520,6 +520,34 @@ namespace Simd
         }
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
+
+        const unsigned int FPSCR_FTZ = 1 << 24;
+
+        SIMD_INLINE SimdBool GetFlushToZero()
+        {
+#if defined(__GNUC__)
+            unsigned int fpscr;
+            __asm__ volatile("vmrs %0, fpscr " : "=r" (fpscr));
+            return fpscr & FPSCR_FTZ ? SimdTrue : SimdFalse;
+#else
+            return SimdFalse;
+#endif
+        }
+
+        SIMD_INLINE void SetFlushToZero(SimdBool value)
+        {
+#if defined(__GNUC__)
+            unsigned int fpscr;
+            if (value)
+                __asm__ volatile("vmrs r0, fpscr\n"
+                    "orr r0, $(1 << 24)\n"
+                    "vmsr fpscr, r0" : : : "r0");
+            else
+                __asm__ volatile("vmrs r0, fpscr\n"
+                    "bic r0, $(1 << 24)\n"
+                    "vmsr fpscr, r0" : : : "r0");
+#endif
+        }
     }
 #endif
 

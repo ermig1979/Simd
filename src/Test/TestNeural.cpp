@@ -746,7 +746,7 @@ namespace Test
     {
         bool result = true;
 
-#ifdef SIMD_NEON_ENABLE
+#if defined(SIMD_NEON_ENABLE)
         const float lo = 0.002f, hi = 9.998f, exponent = -0.75;
 #else
         const float lo = 0.001f, hi = 9.999f, exponent = -0.75;
