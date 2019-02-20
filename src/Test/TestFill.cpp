@@ -505,6 +505,11 @@ namespace Test
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx512f::Fill32f), FUNC_32F(SimdFill32f));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Neon::Fill32f), FUNC_32F(SimdFill32f));
+#endif 
+
         return result;
     }
 

@@ -2024,7 +2024,7 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
 }
 
 typedef void(*SimdFill32fPtr) (float * dst, size_t size, const float * value);
-SimdFill32fPtr simdFill32f = SIMD_FUNC3(Fill32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+SimdFill32fPtr simdFill32f = SIMD_FUNC4(Fill32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
 {

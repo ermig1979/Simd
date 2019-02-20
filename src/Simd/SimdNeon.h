@@ -180,6 +180,8 @@ namespace Simd
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
 
+        void Fill32f(float * dst, size_t size, const float * value);
+
 #ifdef SIMD_NEON_FP16_ENABLE
         void Float32ToFloat16(const float * src, size_t size, uint16_t * dst);
 

@@ -88,6 +88,43 @@ namespace Simd
             else
                 FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
         }
+
+        template <bool align> void Fill32f(float * dst, size_t size, const float * value)
+        {
+            if (value == 0 || value[0] == 0)
+                memset(dst, 0, sizeof(float));
+            else
+            {
+                float v = value[0];
+                const float * nose = (float*)AlignHi(dst, F * sizeof(float));
+                for (; dst < nose && size; --size)
+                    *dst++ = v;
+                const float * end = dst + size;
+                const float * endF = dst + AlignLo(size, F);
+                const float * endQF = dst + AlignLo(size, QF);
+                size_t i = 0;
+                float32x4_t _v = vdupq_n_f32(v);
+                for (; dst < endQF; dst += QF)
+                {
+                    Store<align>(dst + 0 * F, _v);
+                    Store<align>(dst + 1 * F, _v);
+                    Store<align>(dst + 2 * F, _v);
+                    Store<align>(dst + 3 * F, _v);
+                }
+                for (; dst < endF; dst += F)
+                    Store<align>(dst, _v);
+                for (; dst < end;)
+                    *dst++ = v;
+            }
+        }
+
+        void Fill32f(float * dst, size_t size, const float * value)
+        {
+            if (Aligned(dst))
+                Fill32f<true>(dst, size, value);
+            else
+                Fill32f<false>(dst, size, value);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }
