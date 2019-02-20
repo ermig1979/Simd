@@ -149,6 +149,65 @@ namespace Simd
             else
                 SquaredDifferenceSum16f<false>(a, b, size, sum);
         }
+
+        template<bool align> void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+        {
+            if (align)
+                assert(Aligned(a) && Aligned(b));
+
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, DF);
+            size_t i = 0;
+            float32x4_t _aa[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
+            float32x4_t _ab[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
+            float32x4_t _bb[2] = { vdupq_n_f32(0), vdupq_n_f32(0) };
+            if (fullAlignedSize)
+            {
+                for (; i < fullAlignedSize; i += DF)
+                {
+                    float32x4_t a0 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + i + 0));
+                    float32x4_t b0 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(b + i + 0));
+                    _aa[0] = vmlaq_f32(_aa[0], a0, a0);
+                    _ab[0] = vmlaq_f32(_ab[0], a0, b0);
+                    _bb[0] = vmlaq_f32(_bb[0], b0, b0);
+                    float32x4_t a1 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + i + F));
+                    float32x4_t b1 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(b + i + F));
+                    _aa[1] = vmlaq_f32(_aa[1], a1, a1);
+                    _ab[1] = vmlaq_f32(_ab[1], a1, b1);
+                    _bb[1] = vmlaq_f32(_bb[1], b1, b1);
+                }
+                _aa[0] = vaddq_f32(_aa[0], _aa[1]);
+                _ab[0] = vaddq_f32(_ab[0], _ab[1]);
+                _bb[0] = vaddq_f32(_bb[0], _bb[1]);
+            }
+            for (; i < partialAlignedSize; i += F)
+            {
+                float32x4_t a0 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + i + 0));
+                float32x4_t b0 = vcvt_f32_f16((float16x4_t)LoadHalf<align>(b + i + 0));
+                _aa[0] = vmlaq_f32(_aa[0], a0, a0);
+                _ab[0] = vmlaq_f32(_ab[0], a0, b0);
+                _bb[0] = vmlaq_f32(_bb[0], b0, b0);
+            }
+            if (partialAlignedSize != size)
+            {
+                float32x4_t tailMask = RightNotZero(size - partialAlignedSize);
+                float32x4_t a0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + i + 0)), tailMask);
+                float32x4_t b0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(b + i + 0)), tailMask);
+                _aa[0] = vmlaq_f32(_aa[0], a0, a0);
+                _ab[0] = vmlaq_f32(_ab[0], a0, b0);
+                _bb[0] = vmlaq_f32(_bb[0], b0, b0);
+            }
+            float aa = ExtractSum32f(_aa[0]), ab = ExtractSum32f(_ab[0]), bb = ExtractSum32f(_bb[0]);
+            *distance = 1.0f - ab / ::sqrt(aa*bb);
+        }
+
+        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance)
+        {
+            if (Aligned(a) && Aligned(b))
+                CosineDistance16f<true>(a, b, size, distance);
+            else
+                CosineDistance16f<false>(a, b, size, distance);
+        }
     }
 #endif // defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
 }

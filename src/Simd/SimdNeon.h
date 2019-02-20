@@ -190,6 +190,8 @@ namespace Simd
         void Float16ToFloat32(const uint16_t * src, size_t size, float * dst);
 
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum);
+
+        void CosineDistance16f(const uint16_t * a, const uint16_t * b, size_t size, float * distance);
 #endif
 
         void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
