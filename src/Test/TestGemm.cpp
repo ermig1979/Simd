@@ -93,9 +93,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
-        result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
         result = result && Gemm32fAutoTest(0, 0, 333, 333, 333, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 999, 399, 379, f1, f2);
 
@@ -216,6 +216,7 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 1, 666, 666, 666, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 997, 998, 999, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 999, 998, 997, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 333, 332, 334, f1, f2);
 
         //result = result && Gemm32fAutoTest(0, 1, 1280, 100, 256, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 512, 25, 256, f1, f2);
@@ -227,7 +228,7 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 1, 728, 192, 728, f1, f2);
         //result = result && Gemm32fAutoTest(0, 1, 728, 4, 728, f1, f2);
 
-        result = result && Gemm32fAutoTest(0, 1, 6400, 8, 48, f1, f2);
+        //result = result && Gemm32fAutoTest(0, 1, 6400, 8, 48, f1, f2);
 
         return result;
     }
@@ -257,6 +258,11 @@ namespace Test
         if (Simd::Avx512f::Enable)
             result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Avx512f::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
 #endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Neon::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#endif
 
         return result;
     }
