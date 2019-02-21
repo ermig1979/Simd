@@ -395,6 +395,63 @@ namespace Simd
                 AddProduct(C + i * ldc, _alpha, c[i], tail);
         }
 
+        static void PackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)
+        {
+            for (size_t i = 0; i < M; i += cell)
+            {
+                size_t m = Simd::Min(cell, M - i), k = 0;
+                if (cell == 6 && m == 6)
+                {
+                    size_t K4 = AlignLo(K, 4);
+                    for (; k < K4; k += 4)
+                    {
+                        const float * ps = src + k;
+                        float32x4_t src0 = Load<false>(ps + 0 * stride);
+                        float32x4_t src1 = Load<false>(ps + 1 * stride);
+                        float32x4_t src2 = Load<false>(ps + 2 * stride);
+                        float32x4_t src3 = Load<false>(ps + 3 * stride);
+                        float32x4_t src4 = Load<false>(ps + 4 * stride);
+                        float32x4_t src5 = Load<false>(ps + 5 * stride);
+                        float32x4x2_t src03 = vzipq_f32(src0, src3);
+                        float32x4x2_t src14 = vzipq_f32(src1, src4);
+                        float32x4x2_t src25 = vzipq_f32(src2, src5);
+                        float32x4x3_t dst0;
+                        dst0.val[0] = src03.val[0];
+                        dst0.val[1] = src14.val[0];
+                        dst0.val[2] = src25.val[0];
+                        Store3<false>(dst, dst0);
+                        float32x4x3_t dst1;
+                        dst1.val[0] = src03.val[1];
+                        dst1.val[1] = src14.val[1];
+                        dst1.val[2] = src25.val[1];
+                        Store3<false>(dst + 12, dst1);
+                        dst += 24;
+                    }
+                }
+                if (cell == 4 && m == 4)
+                {
+                    size_t K4 = AlignLo(K, 4);
+                    for (; k < K4; k += 4)
+                    {
+                        const float * ps = src + k;
+                        float32x4x4_t _dst;
+                        _dst.val[0] = Load<false>(ps + 0 * stride);
+                        _dst.val[1] = Load<false>(ps + 1 * stride);
+                        _dst.val[2] = Load<false>(ps + 2 * stride);
+                        _dst.val[3] = Load<false>(ps + 3 * stride);
+                        Store4<false>(dst, _dst);
+                        dst += 16;
+                    }
+                }
+                for (; k < K; ++k)
+                {
+                    for (size_t c = 0; c < m; ++c)
+                        *(dst++) = src[c*stride + k];
+                }
+                src += cell * stride;
+            }
+        }
+
         static void PackBnn(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB)
         {
             for (size_t j = 0; j < N; j += microN)
@@ -536,7 +593,7 @@ namespace Simd
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN, L1, L2;
-            if (N < K)
+            if (N != 12 && M != 4 && M != 8)
             {
                 microM = 6;
                 microN = 8;
@@ -556,7 +613,7 @@ namespace Simd
                 kernelTM = KernelMx12nn;
                 kernelTT = tail > DF ? KernelMx12nn : (tail > F ? KernelMx8nn : KernelMx4nn);
             }
-            GemmNN::PackA packA = NULL;
+            GemmNN::PackA packA = PackA;
             L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
             L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
             GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,

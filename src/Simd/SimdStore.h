@@ -643,6 +643,44 @@ namespace Simd
             vst1_f32(p, a);
 #endif
         }
+
+        template <bool align> SIMD_INLINE void Store3(float * p, float32x4x3_t a);
+
+        template <> SIMD_INLINE void Store3<false>(float * p, float32x4x3_t a)
+        {
+            vst3q_f32(p, a);
+        }
+
+        template <> SIMD_INLINE void Store3<true>(float * p, float32x4x3_t a)
+        {
+#if defined(__GNUC__)
+            float * _p = (float *)__builtin_assume_aligned(p, 16);
+            vst3q_f32(_p, a);
+#elif defined(_MSC_VER)
+            vst3q_f32_ex(p, a, 128);
+#else
+            vst3q_f32(p, a);
+#endif
+        }
+
+        template <bool align> SIMD_INLINE void Store4(float * p, float32x4x4_t a);
+
+        template <> SIMD_INLINE void Store4<false>(float * p, float32x4x4_t a)
+        {
+            vst4q_f32(p, a);
+        }
+
+        template <> SIMD_INLINE void Store4<true>(float * p, float32x4x4_t a)
+        {
+#if defined(__GNUC__)
+            float * _p = (float *)__builtin_assume_aligned(p, 16);
+            vst4q_f32(_p, a);
+#elif defined(_MSC_VER)
+            vst4q_f32_ex(p, a, 128);
+#else
+            vst4q_f32(p, a);
+#endif
+        }
     }
 #endif//SIMD_NEON_ENABLE
 
