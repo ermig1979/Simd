@@ -120,6 +120,11 @@ namespace Test
             result = result && ReduceColorAutoTest(FUNC_RC(Simd::Avx512bw::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ReduceColorAutoTest(FUNC_RC(Simd::Neon::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
+#endif 
+
         return result;
     }
 

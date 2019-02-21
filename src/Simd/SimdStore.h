@@ -587,6 +587,25 @@ namespace Simd
 #endif
         }
 
+        template <bool align> SIMD_INLINE void Store3(uint8_t * p, uint8x8x3_t a);
+
+        template <> SIMD_INLINE void Store3<false>(uint8_t * p, uint8x8x3_t a)
+        {
+            vst3_u8(p, a);
+        }
+
+        template <> SIMD_INLINE void Store3<true>(uint8_t * p, uint8x8x3_t a)
+        {
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
+            vst3_u8(_p, a);
+#elif defined(_MSC_VER)
+            vst3_u8_ex(p, a, 64);
+#else
+            vst3_u8(p, a);
+#endif
+        }
+
         template <bool align> SIMD_INLINE void Store4(uint8_t * p, uint8x16x4_t a);
 
         template <> SIMD_INLINE void Store4<false>(uint8_t * p, uint8x16x4_t a)
@@ -603,6 +622,25 @@ namespace Simd
             vst4q_u8_ex(p, a, 128);
 #else
             vst4q_u8(p, a);
+#endif
+        }
+
+        template <bool align> SIMD_INLINE void Store4(uint8_t * p, uint8x8x4_t a);
+
+        template <> SIMD_INLINE void Store4<false>(uint8_t * p, uint8x8x4_t a)
+        {
+            vst4_u8(p, a);
+        }
+
+        template <> SIMD_INLINE void Store4<true>(uint8_t * p, uint8x8x4_t a)
+        {
+#if defined(__GNUC__)
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
+            vst4_u8(_p, a);
+#elif defined(_MSC_VER)
+            vst4_u8_ex(p, a, 64);
+#else
+            vst4_u8(p, a);
 #endif
         }
 
