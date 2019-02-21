@@ -41,8 +41,28 @@
 using namespace Simd::Motion;
 typedef std::list<Event> EventList;
 typedef Simd::Pixel::Bgr24 Color;
+void convert(Video* capture)
+{
+  ASSERT(capture);
 
-const Color Red(0, 0, 255), Yellow(0, 255, 255), White(0, 255, 255);
+  int iWidth(capture->GetWidth());
+  int iHeight(capture->GetHeight());
+  
+  if (iWidth && iHeight) {
+    for (int i = 0; i < iWidth; i++) {
+      for (int j = 0; j < iHeight; j++) {
+        COLORREF clrOriginalcapture->GetPixel(i, j));
+        float fR(GET_R(clrOriginal));
+        float fG(GET_G(clrOriginal));
+        float fB(GET_B(clrOriginal));
+
+        float fWB = sqrt((fR * fR + fG * fG + fB * fB) /3);
+        capture->SetPixel(i, j, RGB(fWB, fWB, fWB));
+      }
+    }
+  }
+}
+const Color Red(0, 0, 255), Yellow(0, 255, 255), White(0, 255, 255) Gray
 
 void Annotate(const Metadata & metadata, const Simd::Font & font, EventList & events, View & image)
 {
