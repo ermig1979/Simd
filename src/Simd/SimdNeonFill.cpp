@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -124,6 +125,64 @@ namespace Simd
                 Fill32f<true>(dst, size, value);
             else
                 Fill32f<false>(dst, size, value);
+        }
+
+        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8x16_t & pixel)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(dst) && Aligned(stride));
+
+            size_t fullAlignedWidth = AlignLo(width, QA);
+            size_t alignedWidth = AlignLo(width, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < fullAlignedWidth; col += QA)
+                {
+                    Store<align>((dst + col) + 0 * A, pixel);
+                    Store<align>((dst + col) + 1 * A, pixel);
+                    Store<align>((dst + col) + 2 * A, pixel);
+                    Store<align>((dst + col) + 3 * A, pixel);
+                }
+                for (; col < alignedWidth; col += A)
+                    Store<align>((dst + col), pixel);
+                if (col < width)
+                    Store<false>((dst + width - A), pixel);
+                dst += stride;
+            }
+        }
+
+        template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        {
+            if (pixelSize == 3)
+                FillBgr<align>(dst, stride, width, height, pixel[0], pixel[1], pixel[2]);
+            else if (pixelSize == 1)
+                Base::Fill(dst, stride, width, height, 1, pixel[0]);
+            else
+            {
+                uint8x16_t _pixel;
+                switch (pixelSize)
+                {
+                case 2:
+                    _pixel = (uint8x16_t)vdupq_n_u16(*(uint16_t*)pixel);
+                    break;
+                case 4:
+                    _pixel = (uint8x16_t)vdupq_n_u32(*(uint32_t*)pixel);
+                    break;
+                default:
+                    assert(0);
+                }
+                FillPixel<align>(dst, stride, width*pixelSize, height, _pixel);
+            }
+        }
+
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize)
+        {
+            if (Aligned(dst) && Aligned(stride))
+                FillPixel<true>(dst, stride, width, height, pixel, pixelSize);
+            else
+                FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
         }
     }
 #endif// SIMD_SSE2_ENABLE

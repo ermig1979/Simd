@@ -184,6 +184,8 @@ namespace Simd
 
         void Fill32f(float * dst, size_t size, const float * value);
 
+        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
+
 #ifdef SIMD_NEON_FP16_ENABLE
         void Float32ToFloat16(const float * src, size_t size, uint16_t * dst);
 
