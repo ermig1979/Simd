@@ -167,5 +167,5 @@ namespace Simd
                 CosineDistance32f<false>(a, b, size, distance);
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif// SIMD_NEON_ENABLE
 }

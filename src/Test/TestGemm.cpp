@@ -93,10 +93,10 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
-        //result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
-        //result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
-        //result = result && Gemm32fAutoTest(0, 0, 333, 333, 333, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 666, 666, 666, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 555, 555, 555, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 999, 999, 999, f1, f2);
+        result = result && Gemm32fAutoTest(0, 0, 333, 333, 333, f1, f2);
         //result = result && Gemm32fAutoTest(0, 0, 999, 399, 379, f1, f2);
 
         //result = result && Gemm32fAutoTest(0, 0, 32, 173056, 27, f1, f2);
@@ -199,6 +199,11 @@ namespace Test
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
             result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Avx512f::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Gemm32fNNAutoTest(FUNC_GEMM32F(Simd::Neon::Gemm32fNN), FUNC_GEMM32F(SimdGemm32fNN));
 #endif
 
         return result;

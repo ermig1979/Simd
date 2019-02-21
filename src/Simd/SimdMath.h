@@ -1515,7 +1515,13 @@ namespace Simd
         SIMD_INLINE float32x4_t RightNotZero(size_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
-            return vld1q_f32((float*)(mask + count));
+            return vld1q_f32((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
+        SIMD_INLINE float32x4_t LeftNotZero(ptrdiff_t count)
+        {
+            const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
+            return vld1q_f32((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
         SIMD_INLINE float32x4_t And(float32x4_t a, float32x4_t b)
