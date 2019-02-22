@@ -1144,6 +1144,31 @@ namespace Simd
 #endif
         }
 
+        template <bool align> SIMD_INLINE uint8x8x2_t LoadHalf2(const uint8_t * p);
+
+        template <> SIMD_INLINE uint8x8x2_t LoadHalf2<false>(const uint8_t * p)
+        {
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld2_u8(p);
+        }
+
+        template <> SIMD_INLINE uint8x8x2_t LoadHalf2<true>(const uint8_t * p)
+        {
+#if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            uint8_t * _p = (uint8_t *)__builtin_assume_aligned(p, 8);
+            return vld2_u8(_p);
+#elif defined(_MSC_VER)
+            return vld2_u8_ex(p, 64);
+#else
+            return vld2_u8(p);
+#endif
+        }
+
         template <bool align> SIMD_INLINE uint8x8x3_t LoadHalf3(const uint8_t * p);
 
         template <> SIMD_INLINE uint8x8x3_t LoadHalf3<false>(const uint8_t * p)
@@ -1302,6 +1327,16 @@ namespace Simd
         {
             a[0] = vld1q_u8(p - 1);
             a[2] = LoadAfterLast<1>(vld1q_u8(p));
+        }
+
+        template <size_t count> SIMD_INLINE uint8x8_t LoadBeforeFirst(uint8x8_t first)
+        {
+            return vext_u8(vext_u8(first, first, count), first, 8 - count);
+        }
+
+        template <size_t count> SIMD_INLINE uint8x8_t LoadAfterLast(uint8x8_t last)
+        {
+            return vext_u8(last, vext_u8(last, last, 8 - count), count);
         }
     }
 #endif//SIMD_NEON_ENABLE

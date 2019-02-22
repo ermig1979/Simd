@@ -63,7 +63,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2, 0xFF));
 
-        result = result && Compare(d1, d2, 0, true, 32);
+        result = result && Compare(d1, d2, 0, true, 64);
 
         return result;
     }
@@ -101,6 +101,11 @@ namespace Test
         if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::A + 2)
             result = result && BayerToBgraAutoTest(FUNC(Simd::Avx512bw::BayerToBgra), FUNC(SimdBayerToBgra));
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
+            result = result && BayerToBgraAutoTest(FUNC(Simd::Neon::BayerToBgra), FUNC(SimdBayerToBgra));
+#endif 
 
         return result;
     }

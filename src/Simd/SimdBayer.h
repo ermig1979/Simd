@@ -462,5 +462,169 @@ namespace Simd
         }
     }
 #endif//SIMD_AVX512BW_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE void LoadBayerNose2(const uint8_t * src, uint8x8x2_t dst[3])
+        {
+            dst[2] = LoadHalf2<false>(src + 1);
+            dst[0].val[0] = LoadBeforeFirst<1>(dst[2].val[0]);
+            dst[0].val[1] = LoadHalf2<false>(src).val[0];
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerNose3(const uint8_t * src, uint8x8x2_t dst[3])
+        {
+            dst[1] = LoadHalf2<align>(src);
+            dst[0].val[0] = LoadBeforeFirst<1>(dst[1].val[0]);
+            dst[0].val[1] = LoadBeforeFirst<1>(dst[1].val[1]);
+            dst[2] = LoadHalf2<false>(src + 2);
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerNose(const uint8_t * src[3], size_t offset, size_t stride, uint8x8x2_t dst[12])
+        {
+            dst[1] = LoadHalf2<align>(src[0] + offset);
+            LoadBayerNose2(src[0] + offset + stride, dst + 0);
+            LoadBayerNose3<align>(src[1] + offset, dst + 3);
+            LoadBayerNose3<align>(src[1] + offset + stride, dst + 6);
+            LoadBayerNose2(src[2] + offset, dst + 9);
+            dst[10] = LoadHalf2<align>(src[2] + offset + stride);
+        }
+
+        SIMD_INLINE void LoadBayerBody2(const uint8_t * src, uint8x8x2_t dst[3])
+        {
+            dst[0] = LoadHalf2<false>(src - 1);
+            dst[2] = LoadHalf2<false>(src + 1);
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerBody3(const uint8_t * src, uint8x8x2_t dst[3])
+        {
+            dst[0] = LoadHalf2<false>(src - 2);
+            dst[1] = LoadHalf2<align>(src);
+            dst[2] = LoadHalf2<false>(src + 2);
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerBody(const uint8_t * src[3], size_t offset, size_t stride, uint8x8x2_t dst[12])
+        {
+            dst[1] = LoadHalf2<align>(src[0] + offset);
+            LoadBayerBody2(src[0] + offset + stride, dst + 0);
+            LoadBayerBody3<align>(src[1] + offset, dst + 3);
+            LoadBayerBody3<align>(src[1] + offset + stride, dst + 6);
+            LoadBayerBody2(src[2] + offset, dst + 9);
+            dst[10] = LoadHalf2<align>(src[2] + offset + stride);
+        }
+
+        SIMD_INLINE void LoadBayerTail2(const uint8_t * src, uint8x8x2_t dst[3])
+        {
+            dst[0] = LoadHalf2<false>(src - 1);
+            dst[2].val[0] = LoadHalf2<false>(src).val[1];
+            dst[2].val[1] = LoadAfterLast<1>(dst[0].val[1]);
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerTail3(const uint8_t * src, uint8x8x2_t dst[3])
+        {
+            dst[0] = LoadHalf2<false>(src - 2);
+            dst[1] = LoadHalf2<align>(src);
+            dst[2].val[0] = LoadAfterLast<1>(dst[1].val[0]);
+            dst[2].val[1] = LoadAfterLast<1>(dst[1].val[1]);
+        }
+
+        template <bool align> SIMD_INLINE void LoadBayerTail(const uint8_t * src[3], size_t offset, size_t stride, uint8x8x2_t dst[12])
+        {
+            dst[1] = LoadHalf2<align>(src[0] + offset);
+            LoadBayerTail2(src[0] + offset + stride, dst + 0);
+            LoadBayerTail3<align>(src[1] + offset, dst + 3);
+            LoadBayerTail3<align>(src[1] + offset + stride, dst + 6);
+            LoadBayerTail2(src[2] + offset, dst + 9);
+            dst[10] = LoadHalf2<align>(src[2] + offset + stride);
+        }
+
+        SIMD_INLINE uint8x8_t Average(uint8x8_t s0, uint8x8_t s1)
+        {
+            return vrhadd_u8(s0, s1);
+        }
+
+        SIMD_INLINE uint8x8_t Average(const uint8x8_t & s0, const uint8x8_t & s1, const uint8x8_t & s2, const uint8x8_t & s3)
+        {
+            return vshrn_n_u16(vaddq_u16(vaddq_u16(vaddl_u8(s0, s1), vaddl_u8(s2, s3)), vdupq_n_u16(2)), 2);
+        }
+
+        SIMD_INLINE uint8x8_t BayerToGreen(const uint8x8_t & greenLeft, const uint8x8_t & greenTop, const uint8x8_t & greenRight, const uint8x8_t & greenBottom,
+            const uint8x8_t & blueOrRedLeft, const uint8x8_t & blueOrRedTop, const uint8x8_t & blueOrRedRight, const uint8x8_t & blueOrRedBottom)
+        {
+            uint8x8_t verticalAbsDifference = vabd_u8(blueOrRedTop, blueOrRedBottom);
+            uint8x8_t horizontalAbsDifference = vabd_u8(blueOrRedLeft, blueOrRedRight);
+            uint8x8_t green = Average(greenLeft, greenTop, greenRight, greenBottom);
+            green = vbsl_u8(vclt_u8(verticalAbsDifference, horizontalAbsDifference), Average(greenTop, greenBottom), green);
+            return vbsl_u8(vcgt_u8(verticalAbsDifference, horizontalAbsDifference), Average(greenRight, greenLeft), green);
+        }
+
+        template <SimdPixelFormatType bayerFormat> void BayerToBgr(const uint8x8x2_t s[12], uint8x8x2_t d[6]);
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerGrbg>(const uint8x8x2_t s[12], uint8x8x2_t d[6])
+        {
+            d[0].val[0] = Average(s[0].val[1], s[7].val[0]);
+            d[0].val[1] = Average(s[0].val[1], s[2].val[1], s[7].val[0], s[8].val[0]);
+            d[1].val[0] = s[4].val[0];
+            d[1].val[1] = BayerToGreen(s[4].val[0], s[2].val[0], s[5].val[0], s[7].val[1], s[3].val[1], s[1].val[1], s[5].val[1], s[11].val[0]);
+            d[2].val[0] = Average(s[3].val[1], s[4].val[1]);
+            d[2].val[1] = s[4].val[1];
+            d[3].val[0] = s[7].val[0];
+            d[3].val[1] = Average(s[7].val[0], s[8].val[0]);
+            d[4].val[0] = BayerToGreen(s[6].val[1], s[4].val[0], s[7].val[1], s[9].val[1], s[6].val[0], s[0].val[1], s[8].val[0], s[10].val[0]);
+            d[4].val[1] = s[7].val[1];
+            d[5].val[0] = Average(s[3].val[1], s[4].val[1], s[9].val[0], s[11].val[0]);
+            d[5].val[1] = Average(s[4].val[1], s[11].val[0]);
+        }
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerGbrg>(const uint8x8x2_t s[12], uint8x8x2_t d[6])
+        {
+            d[0].val[0] = Average(s[3].val[1], s[4].val[1]);
+            d[0].val[1] = s[4].val[1];
+            d[1].val[0] = s[4].val[0];
+            d[1].val[1] = BayerToGreen(s[4].val[0], s[2].val[0], s[5].val[0], s[7].val[1], s[3].val[1], s[1].val[1], s[5].val[1], s[11].val[0]);
+            d[2].val[0] = Average(s[0].val[1], s[7].val[0]);
+            d[2].val[1] = Average(s[0].val[1], s[2].val[1], s[7].val[0], s[8].val[0]);
+            d[3].val[0] = Average(s[3].val[1], s[4].val[1], s[9].val[0], s[11].val[0]);
+            d[3].val[1] = Average(s[4].val[1], s[11].val[0]);
+            d[4].val[0] = BayerToGreen(s[6].val[1], s[4].val[0], s[7].val[1], s[9].val[1], s[6].val[0], s[0].val[1], s[8].val[0], s[10].val[0]);
+            d[4].val[1] = s[7].val[1];
+            d[5].val[0] = s[7].val[0];
+            d[5].val[1] = Average(s[7].val[0], s[8].val[0]);
+        }
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerRggb>(const uint8x8x2_t s[12], uint8x8x2_t d[6])
+        {
+            d[0].val[0] = Average(s[0].val[0], s[2].val[0], s[6].val[1], s[7].val[1]);
+            d[0].val[1] = Average(s[2].val[0], s[7].val[1]);
+            d[1].val[0] = BayerToGreen(s[3].val[1], s[0].val[1], s[4].val[1], s[7].val[0], s[3].val[0], s[1].val[0], s[5].val[0], s[9].val[1]);
+            d[1].val[1] = s[4].val[1];
+            d[2].val[0] = s[4].val[0];
+            d[2].val[1] = Average(s[4].val[0], s[5].val[0]);
+            d[3].val[0] = Average(s[6].val[1], s[7].val[1]);
+            d[3].val[1] = s[7].val[1];
+            d[4].val[0] = s[7].val[0];
+            d[4].val[1] = BayerToGreen(s[7].val[0], s[4].val[1], s[8].val[0], s[11].val[0], s[6].val[1], s[2].val[0], s[8].val[1], s[10].val[1]);
+            d[5].val[0] = Average(s[4].val[0], s[9].val[1]);
+            d[5].val[1] = Average(s[4].val[0], s[5].val[0], s[9].val[1], s[11].val[1]);
+        }
+
+        template <> SIMD_INLINE void BayerToBgr<SimdPixelFormatBayerBggr>(const uint8x8x2_t s[12], uint8x8x2_t d[6])
+        {
+            d[0].val[0] = s[4].val[0];
+            d[0].val[1] = Average(s[4].val[0], s[5].val[0]);
+            d[1].val[0] = BayerToGreen(s[3].val[1], s[0].val[1], s[4].val[1], s[7].val[0], s[3].val[0], s[1].val[0], s[5].val[0], s[9].val[1]);
+            d[1].val[1] = s[4].val[1];
+            d[2].val[0] = Average(s[0].val[0], s[2].val[0], s[6].val[1], s[7].val[1]);
+            d[2].val[1] = Average(s[2].val[0], s[7].val[1]);
+            d[3].val[0] = Average(s[4].val[0], s[9].val[1]);
+            d[3].val[1] = Average(s[4].val[0], s[5].val[0], s[9].val[1], s[11].val[1]);
+            d[4].val[0] = s[7].val[0];
+            d[4].val[1] = BayerToGreen(s[7].val[0], s[4].val[1], s[8].val[0], s[11].val[0], s[6].val[1], s[2].val[0], s[8].val[1], s[10].val[1]);
+            d[5].val[0] = Average(s[6].val[1], s[7].val[1]);
+            d[5].val[1] = s[7].val[1];
+        }
+    }
+#endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdBayer_h__
