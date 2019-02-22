@@ -395,6 +395,11 @@ namespace Test
             result = result && BgraToYuvaAutoTest(FUNC_YUVA(Simd::Avx512bw::BgraToYuva420p), FUNC_YUVA(SimdBgraToYuva420p));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
+            result = result && BgraToYuvaAutoTest(FUNC_YUVA(Simd::Neon::BgraToYuva420p), FUNC_YUVA(SimdBgraToYuva420p));
+#endif
+
         return result;
     }
 

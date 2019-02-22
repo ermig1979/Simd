@@ -211,6 +211,79 @@ namespace Simd
             else
                 BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
         }
+
+        template <bool align> SIMD_INLINE void BgraToYuva420p(const uint8_t * bgra0, size_t bgraStride, uint8_t * y0, size_t yStride, uint8_t * u, uint8_t * v, uint8_t * a0, size_t aStride)
+        {
+            const uint8_t * bgra1 = bgra0 + bgraStride;
+            uint8_t * y1 = y0 + yStride;
+            uint8_t * a1 = a0 + aStride;
+
+            uint8x16x4_t bgra00 = Load4<align>(bgra0);
+            Store<align>(y0 + 0, BgrToY(bgra00.val[0], bgra00.val[1], bgra00.val[2]));
+            Store<align>(a0 + 0, bgra00.val[3]);
+
+            uint8x16x4_t bgra01 = Load4<align>(bgra0 + QA);
+            Store<align>(y0 + A, BgrToY(bgra01.val[0], bgra01.val[1], bgra01.val[2]));
+            Store<align>(a0 + A, bgra01.val[3]);
+
+            uint8x16x4_t bgra10 = Load4<align>(bgra1);
+            Store<align>(y1 + 0, BgrToY(bgra10.val[0], bgra10.val[1], bgra10.val[2]));
+            Store<align>(a1 + 0, bgra10.val[3]);
+
+            uint8x16x4_t bgra11 = Load4<align>(bgra1 + QA);
+            Store<align>(y1 + A, BgrToY(bgra11.val[0], bgra11.val[1], bgra11.val[2]));
+            Store<align>(a1 + A, bgra11.val[3]);
+
+            uint16x8_t b0 = Average(bgra00.val[0], bgra10.val[0]);
+            uint16x8_t g0 = Average(bgra00.val[1], bgra10.val[1]);
+            uint16x8_t r0 = Average(bgra00.val[2], bgra10.val[2]);
+
+            uint16x8_t b1 = Average(bgra01.val[0], bgra11.val[0]);
+            uint16x8_t g1 = Average(bgra01.val[1], bgra11.val[1]);
+            uint16x8_t r1 = Average(bgra01.val[2], bgra11.val[2]);
+
+            Store<align>(u, PackSaturatedI16(BgrToU(b0, g0, r0), BgrToU(b1, g1, r1)));
+            Store<align>(v, PackSaturatedI16(BgrToV(b0, g0, r0), BgrToV(b1, g1, r1)));
+        }
+
+        template <bool align> void BgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, DA);
+            const size_t A8 = A * 8;
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colYA = 0, colBgra = 0; colYA < alignedWidth; colYA += DA, colUV += A, colBgra += A8)
+                    BgraToYuva420p<align>(bgra + colBgra, bgraStride, y + colYA, yStride, u + colUV, v + colUV, a + colYA, aStride);
+                if (width != alignedWidth)
+                {
+                    size_t offset = width - DA;
+                    BgraToYuva420p<false>(bgra + offset * 4, bgraStride, y + offset, yStride, u + offset / 2, v + offset / 2, a + offset, aStride);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void BgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * y, size_t yStride,
+            uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride)
+                && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
+                BgraToYuva420p<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
+            else
+                BgraToYuva420p<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
