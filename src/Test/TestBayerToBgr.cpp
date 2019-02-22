@@ -103,6 +103,11 @@ namespace Test
             result = result && BayerToBgrAutoTest(FUNC(Simd::Avx512bw::BayerToBgr), FUNC(SimdBayerToBgr));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A + 2)
+            result = result && BayerToBgrAutoTest(FUNC(Simd::Neon::BayerToBgr), FUNC(SimdBayerToBgr));
+#endif 
+
         return result;
     }
 
