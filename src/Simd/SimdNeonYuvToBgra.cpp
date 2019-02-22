@@ -30,16 +30,73 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template <bool align> SIMD_INLINE void YuvToBgra(const uint8x16_t & y, const uint8x16_t & u, const uint8x16_t & v, const uint8x16_t & alpha, uint8_t * bgra)
+        template <bool align> SIMD_INLINE void YuvToBgra(const uint8x16_t & y, const uint8x16_t & u, const uint8x16_t & v, const uint8x16_t & a, uint8_t * bgra)
         {
             uint8x16x4_t _bgra;
             YuvToBgr(y, u, v, *(uint8x16x3_t*)&_bgra);
-            _bgra.val[3] = alpha;
+            _bgra.val[3] = a;
             Store4<align>(bgra, _bgra);
         }
 
-        template <bool align> SIMD_INLINE void Yuv422pToBgra(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v,
-            const uint8x16_t & alpha, uint8_t * bgra)
+        template <bool align> SIMD_INLINE void Yuva422pToBgra(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v, const uint8_t * a, uint8_t * bgra)
+        {
+            YuvToBgra<align>(Load<align>(y + 0), u.val[0], v.val[0], Load<align>(a + 0), bgra + 0);
+            YuvToBgra<align>(Load<align>(y + A), u.val[1], v.val[1], Load<align>(a + A), bgra + QA);
+        }
+
+        template <bool align> void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= DA) && (height >= 2));
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+                assert(Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, DA);
+            size_t tail = width - bodyWidth;
+            uint8x16x2_t _u, _v;
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < bodyWidth; colY += DA, colUV += A, colBgra += OA)
+                {
+                    _u.val[1] = _u.val[0] = Load<align>(u + colUV);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<align>(v + colUV);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuva422pToBgra<align>(y + colY, _u, _v, a + colY, bgra + colBgra);
+                    Yuva422pToBgra<align>(y + colY + yStride, _u, _v, a + colY + aStride, bgra + colBgra + bgraStride);
+                }
+                if (tail)
+                {
+                    size_t offset = width - DA;
+                    _u.val[1] = _u.val[0] = Load<false>(u + offset / 2);
+                    _u = vzipq_u8(_u.val[0], _u.val[1]);
+                    _v.val[1] = _v.val[0] = Load<false>(v + offset / 2);
+                    _v = vzipq_u8(_v.val[0], _v.val[1]);
+                    Yuva422pToBgra<false>(y + offset, _u, _v, a + offset, bgra + 4 * offset);
+                    Yuva422pToBgra<false>(y + offset + yStride, _u, _v, a + offset + aStride, bgra + 4 * offset + bgraStride);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                a += 2 * aStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
+            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride)
+                && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuva420pToBgra<true>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+            else
+                Yuva420pToBgra<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+        }
+
+        template <bool align> SIMD_INLINE void Yuv422pToBgra(const uint8_t * y, const uint8x16x2_t & u, const uint8x16x2_t & v, const uint8x16_t & alpha, uint8_t * bgra)
         {
             YuvToBgra<align>(Load<align>(y + 0), u.val[0], v.val[0], alpha, bgra + 0);
             YuvToBgra<align>(Load<align>(y + A), u.val[1], v.val[1], alpha, bgra + QA);
