@@ -5310,6 +5310,11 @@ SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t w
         Ssse3::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::HA)
+        Neon::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
+    else
+#endif
         Base::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
 }
 

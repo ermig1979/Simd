@@ -123,6 +123,11 @@ namespace Test
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Ssse3::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::HA)
+            result = result && TransformImageAutoTest(FUNC_TI(Simd::Neon::TransformImage), FUNC_TI(SimdTransformImage));
+#endif 
+
         return result;
     }
 }
