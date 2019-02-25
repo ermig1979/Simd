@@ -234,6 +234,6 @@ namespace Simd
             default: assert(0);
            }
         }
-#endif// SIMD_NEON_ENABLE
     }
+#endif// SIMD_NEON_ENABLE
 }

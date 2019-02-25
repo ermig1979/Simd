@@ -638,6 +638,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Avx2::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HogLiteFindMax7x7AutoTest(W, FUNC_HLFM(Simd::Neon::HogLiteFindMax7x7), FUNC_HLFM(SimdHogLiteFindMax7x7));
 #endif 
 
         return result;
