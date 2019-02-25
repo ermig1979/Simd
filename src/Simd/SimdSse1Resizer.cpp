@@ -79,6 +79,19 @@ namespace Simd
                             _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                         }
                     }
+                    if (_cn == 3 && _rs > 3)
+                    {
+                        __m128 _1 = _mm_set1_ps(1.0f);
+                        size_t rs3 = _rs - 3;
+                        for (; dx < rs3; dx += 3)
+                        {
+                            __m128 s0 = _mm_loadu_ps(ps + _ix[dx] + 0);
+                            __m128 s1 = _mm_loadu_ps(ps + _ix[dx] + 3);
+                            __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                            __m128 fx0 = _mm_sub_ps(_1, fx1);
+                            _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
+                        }
+                    }
                     for (; dx < _rs; dx++)
                     {
                         int32_t sx = _ix[dx];

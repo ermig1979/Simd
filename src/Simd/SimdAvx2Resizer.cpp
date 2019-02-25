@@ -91,6 +91,28 @@ namespace Simd
                             _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                         }
                     }
+                    if (_cn == 3 && _rs > 3)
+                    {
+                        __m256 _1 = _mm256_set1_ps(1.0f);
+                        size_t rs3 = _rs - 3;
+                        size_t rs6 = AlignLoAny(rs3, 6);
+                        for (; dx < rs6; dx += 6)
+                        {
+                            __m256 s0 = Avx::Load<false>(ps + _ix[dx + 0] + 0, ps + _ix[dx + 3] + 0);
+                            __m256 s1 = Avx::Load<false>(ps + _ix[dx + 0] + 3, ps + _ix[dx + 3] + 3);
+                            __m256 fx1 = Avx::Load<false>(_ax.data + dx + 0, _ax.data + dx + 3);
+                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                            Avx::Store<false>(pb + dx + 0, pb + dx + 3, _mm256_fmadd_ps(fx0, s0, _mm256_mul_ps(fx1, s1)));
+                        }
+                        for (; dx < rs3; dx += 3)
+                        {
+                            __m128 s0 = _mm_loadu_ps(ps + _ix[dx] + 0);
+                            __m128 s1 = _mm_loadu_ps(ps + _ix[dx] + 3);
+                            __m128 fx1 = _mm_set1_ps(_ax.data[dx]);
+                            __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
+                            _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
+                        }
+                    }
                     else
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
