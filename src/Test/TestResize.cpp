@@ -249,10 +249,10 @@ namespace Test
 
         for (SimdResizeMethodType method = SimdResizeMethodBilinear; method <= SimdResizeMethodBilinear; method = SimdResizeMethodType(method + 1))
         {
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 3, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 4, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 3, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 4, f1, f2);
 #ifndef __aarch64__
             result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 1, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 3, f1, f2);
@@ -287,6 +287,11 @@ namespace Test
         if (Simd::Avx512f::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512f::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Neon::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif 
 
         return result;
     }

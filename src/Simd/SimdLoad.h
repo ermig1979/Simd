@@ -1338,6 +1338,12 @@ namespace Simd
         {
             return vext_u8(last, vext_u8(last, last, 8 - count), count);
         }
+
+        SIMD_INLINE float32x4_t Load(const  float * p0, const  float * p1)
+        {
+            return vcombine_f32(vld1_f32(p0), vld1_f32(p1));
+        }
+
     }
 #endif//SIMD_NEON_ENABLE
 
