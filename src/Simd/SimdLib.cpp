@@ -2662,7 +2662,7 @@ SIMD_API void SimdHogLiteFindMax7x7(const float * a, size_t aStride, const float
 }
 
 typedef void(*SimdHogLiteCreateMaskPtr) (const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
-SimdHogLiteCreateMaskPtr simdHogLiteCreateMask = SIMD_FUNC3(HogLiteCreateMask, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+SimdHogLiteCreateMaskPtr simdHogLiteCreateMask = SIMD_FUNC4(HogLiteCreateMask, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride)
 {

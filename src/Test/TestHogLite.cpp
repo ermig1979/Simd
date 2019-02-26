@@ -732,6 +732,11 @@ namespace Test
             result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Avx512bw::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HogLiteCreateMaskAutoTest(FUNC_HLCM(Simd::Neon::HogLiteCreateMask), FUNC_HLCM(SimdHogLiteCreateMask));
+#endif 
+
         return result;
     }
 
