@@ -33,6 +33,142 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        namespace HogLiteFeatureResizerDetail
+        {
+            template <int size> struct Feature
+            {
+                template <bool align> static SIMD_INLINE void Interpolate(const float * src0, const float * src1, const float32x4_t k[2][2], float * dst);
+            };
+
+            template <> struct Feature<8>
+            {
+                template <bool align> static SIMD_INLINE void Interpolate(const float * src0, const float * src1, const float32x4_t k[2][2], float * dst)
+                {
+                    Store<align>(dst + 0 * F, vaddq_f32(
+                        vmlaq_f32(vmulq_f32(Load<align>(src0 + 0 * F), k[0][0]), Load<align>(src0 + 2 * F), k[0][1]),
+                        vmlaq_f32(vmulq_f32(Load<align>(src1 + 0 * F), k[1][0]), Load<align>(src1 + 2 * F), k[1][1])));
+                    Store<align>(dst + 1 * F, vaddq_f32(
+                        vmlaq_f32(vmulq_f32(Load<align>(src0 + 1 * F), k[0][0]), Load<align>(src0 + 3 * F), k[0][1]),
+                        vmlaq_f32(vmulq_f32(Load<align>(src1 + 1 * F), k[1][0]), Load<align>(src1 + 3 * F), k[1][1])));
+                }
+            };
+
+            template <> struct Feature<16>
+            {
+                template <bool align> static SIMD_INLINE void Interpolate(const float * src0, const float * src1, const float32x4_t k[2][2], float * dst)
+                {
+                    Store<align>(dst + 0 * F, vaddq_f32(
+                        vmlaq_f32(vmulq_f32(Load<align>(src0 + 0 * F), k[0][0]), Load<align>(src0 + 4 * F), k[0][1]),
+                        vmlaq_f32(vmulq_f32(Load<align>(src1 + 0 * F), k[1][0]), Load<align>(src1 + 4 * F), k[1][1])));
+                    Store<align>(dst + 1 * F, vaddq_f32(
+                        vmlaq_f32(vmulq_f32(Load<align>(src0 + 1 * F), k[0][0]), Load<align>(src0 + 5 * F), k[0][1]),
+                        vmlaq_f32(vmulq_f32(Load<align>(src1 + 1 * F), k[1][0]), Load<align>(src1 + 5 * F), k[1][1])));
+                    Store<align>(dst + 2 * F, vaddq_f32(
+                        vmlaq_f32(vmulq_f32(Load<align>(src0 + 2 * F), k[0][0]), Load<align>(src0 + 6 * F), k[0][1]),
+                        vmlaq_f32(vmulq_f32(Load<align>(src1 + 2 * F), k[1][0]), Load<align>(src1 + 6 * F), k[1][1])));
+                    Store<align>(dst + 3 * F, vaddq_f32(
+                        vmlaq_f32(vmulq_f32(Load<align>(src0 + 3 * F), k[0][0]), Load<align>(src0 + 7 * F), k[0][1]),
+                        vmlaq_f32(vmulq_f32(Load<align>(src1 + 3 * F), k[1][0]), Load<align>(src1 + 7 * F), k[1][1])));
+                }
+            };
+        }
+
+        class HogLiteFeatureResizer
+        {
+            typedef Array<int> Ints;
+            typedef Array<float> Floats;
+
+            Ints _iy, _ix;
+            Floats _ky, _kx;
+
+            void InitIndexWeight(size_t srcSize, size_t dstSize, size_t dstStep, Ints & indexes, Floats & weights)
+            {
+                indexes.Resize(dstSize);
+                weights.Resize(dstSize);
+
+                float scale = float(srcSize) / float(dstSize);
+                for (size_t i = 0; i < dstSize; ++i)
+                {
+                    float weight = (float)((i + 0.5f)*scale - 0.5f);
+                    int index = (int)::floor(weight);
+                    weight -= index;
+                    if (index < 0)
+                    {
+                        index = 0;
+                        weight = 0.0f;
+                    }
+                    if (index >(int)srcSize - 2)
+                    {
+                        index = (int)srcSize - 2;
+                        weight = 1.0f;
+                    }
+                    indexes[i] = int(index*dstStep);
+                    weights[i] = weight;
+                }
+            }
+
+            template<bool align, size_t featureSize> void Resize(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                float32x4_t _1 = vdupq_n_f32(1.0f);
+                for (size_t rowDst = 0; rowDst < dstHeight; ++rowDst)
+                {
+                    float32x4_t ky1 = vdupq_n_f32(_ky[rowDst]);
+                    float32x4_t ky0 = vsubq_f32(_1, ky1);
+                    const float * pSrc = src + _iy[rowDst];
+                    float * pDst = dst + rowDst * dstStride;
+                    for (size_t colDst = 0; colDst < dstWidth; ++colDst, pDst += featureSize)
+                    {
+                        float32x4_t kx1 = vdupq_n_f32(_kx[colDst]);
+                        float32x4_t kx0 = vsubq_f32(_1, kx1);
+                        float32x4_t k[2][2];
+                        k[0][0] = vmulq_f32(ky0, kx0);
+                        k[0][1] = vmulq_f32(ky0, kx1);
+                        k[1][0] = vmulq_f32(ky1, kx0);
+                        k[1][1] = vmulq_f32(ky1, kx1);
+                        const float * pSrc0 = pSrc + _ix[colDst];
+                        const float * pSrc1 = pSrc0 + srcStride;
+                        HogLiteFeatureResizerDetail::Feature<featureSize>:: template Interpolate<align>(pSrc0, pSrc1, k, pDst);
+                    }
+                }
+            }
+
+            template<bool align> void Resize(const float * src, size_t srcStride, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                if (featureSize == 8)
+                    Resize<align, 8>(src, srcStride, dst, dstStride, dstWidth, dstHeight);
+                else
+                    Resize<align, 16>(src, srcStride, dst, dstStride, dstWidth, dstHeight);
+            }
+
+        public:
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+
+                if (srcWidth == dstWidth && srcHeight == dstHeight)
+                {
+                    size_t size = sizeof(float)*srcWidth*featureSize;
+                    for (size_t row = 0; row < dstHeight; ++row)
+                        memcpy(dst + row * dstStride, src + row * srcStride, size);
+                    return;
+                }
+
+                InitIndexWeight(srcWidth, dstWidth, featureSize, _ix, _kx);
+                InitIndexWeight(srcHeight, dstHeight, srcStride, _iy, _ky);
+
+                if (Aligned(src) && Aligned(dst))
+                    Resize<true>(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);
+                else
+                    Resize<false>(src, srcStride, featureSize, dst, dstStride, dstWidth, dstHeight);
+            }
+        };
+
+        void HogLiteResizeFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, float * dst, size_t dstStride, size_t dstWidth, size_t dstHeight)
+        {
+            HogLiteFeatureResizer featureResizer;
+            featureResizer.Run(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+        }
+
         template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)

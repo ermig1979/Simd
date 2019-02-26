@@ -2600,6 +2600,11 @@ SIMD_API void SimdHogLiteResizeFeatures(const float * src, size_t srcStride, siz
         Sse41::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        Neon::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
+    else
+#endif
         Base::HogLiteResizeFeatures(src, srcStride, srcWidth, srcHeight, featureSize, dst, dstStride, dstWidth, dstHeight);
 }
 
