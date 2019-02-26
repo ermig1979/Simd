@@ -24,12 +24,143 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdArray.h"
+#include "Simd/SimdExtract.h"
+#include "Simd/SimdUpdate.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class HogLiteSeparableFilter
+        {
+            size_t _dstWidth, _dstHeight, _dstStride;
+            Array32f _buffer;
+            Array128f _filter;
+
+            void Init(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize)
+            {
+                _dstWidth = srcWidth - hSize + 1;
+                _dstStride = AlignHi(_dstWidth, F);
+                _dstHeight = srcHeight - vSize + 1;
+                _buffer.Resize(_dstStride*srcHeight);
+            }
+
+            template<bool align> static SIMD_INLINE void FilterHx1(const float * src, const float * filter, float32x4_t & sum)
+            {
+                float32x4_t _src = Load<align>(src);
+                float32x4_t _filter = Load<align>(filter);
+                sum = vmlaq_f32(sum, _src, _filter);
+            }
+
+            template<bool align, size_t step> static SIMD_INLINE void FilterHx4(const float * src, const float * filter, float32x4_t * sums)
+            {
+                float32x4_t _filter = Load<align>(filter);
+                sums[0] = vmlaq_f32(sums[0], Load<align>(src + 0 * step), _filter);
+                sums[1] = vmlaq_f32(sums[1], Load<align>(src + 1 * step), _filter);
+                sums[2] = vmlaq_f32(sums[2], Load<align>(src + 2 * step), _filter);
+                sums[3] = vmlaq_f32(sums[3], Load<align>(src + 3 * step), _filter);
+            }
+
+            template <bool align, size_t step> void FilterH(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                size_t alignedWidth = AlignLo(width, 4);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    size_t col = 0;
+                    for (; col < alignedWidth; col += 4)
+                    {
+                        float32x4_t sums[4] = { vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0) };
+                        const float * s = src + col * step;
+                        for (size_t i = 0; i < size; i += F)
+                            FilterHx4<align, step>(s + i, filter + i, sums);
+                        Store<true>(dst + col, Extract4Sums(sums));
+                    }
+                    for (; col < width; ++col)
+                    {
+                        float32x4_t sum = vdupq_n_f32(0);
+                        const float * s = src + col * step;
+                        for (size_t i = 0; i < size; i += F)
+                            FilterHx1<align>(s + i, filter + i, sum);
+                        dst[col] = ExtractSum32f(sum);
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            template <bool align> void FilterH(const float * src, size_t srcStride, size_t width, size_t height, size_t step, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                if (step == 16)
+                    FilterH<align, 16>(src, srcStride, width, height, filter, size, dst, dstStride);
+                else
+                    FilterH<align, 8>(src, srcStride, width, height, filter, size, dst, dstStride);
+            }
+
+            template <bool srcAlign, bool dstAlign, UpdateType update, bool masked> static SIMD_INLINE void FilterV(const float * src, size_t stride, const float32x4_t * filter, size_t size, float * dst, const float32x4_t & mask)
+            {
+                float32x4_t sum = vdupq_n_f32(0);
+                for (size_t i = 0; i < size; ++i, src += stride)
+                    sum = vmlaq_f32(sum, Load<srcAlign>(src), filter[i]);
+                Update<update, dstAlign>(dst, Masked<masked && update != UpdateSet>(sum, mask));
+            }
+
+            template <UpdateType update, bool align> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                _filter.Resize(size);
+                for (size_t i = 0; i < size; ++i)
+                    _filter[i] = vdupq_n_f32(filter[i]);
+
+                size_t alignedWidth = AlignLo(width, F);
+                float32x4_t tailMask = RightNotZero(width - alignedWidth);
+
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += F)
+                        FilterV<true, align, update, false>(src + col, srcStride, _filter.data, size, dst + col, tailMask);
+                    if (alignedWidth != width)
+                        FilterV<false, false, update, true>(src + width - F, srcStride, _filter.data, size, dst + width - F, tailMask);
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+
+            template <UpdateType update> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
+            {
+                if (Aligned(dst) && Aligned(dstStride))
+                    FilterV<update, true>(src, srcStride, width, height, filter, size, dst, dstStride);
+                else
+                    FilterV<update, false>(src, srcStride, width, height, filter, size, dst, dstStride);
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth >= hSize && srcHeight >= vSize);
+
+                Init(srcWidth, srcHeight, hSize, vSize);
+
+                if (Aligned(src) && Aligned(srcStride) && Aligned(hFilter))
+                    FilterH<true>(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstStride);
+                else
+                    FilterH<false>(src, srcStride, _dstWidth, srcHeight, featureSize, hFilter, hSize*featureSize, _buffer.data, _dstStride);
+
+                if (add)
+                    FilterV<UpdateAdd>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+                else
+                    FilterV<UpdateSet>(_buffer.data, _dstStride, _dstWidth, _dstHeight, vFilter, vSize, dst, dstStride);
+            }
+        };
+
+        void HogLiteFilterSeparable(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * hFilter, size_t hSize, const float * vFilter, size_t vSize, float * dst, size_t dstStride, int add)
+        {
+            HogLiteSeparableFilter filter;
+            filter.Run(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
+        }
+
         void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * pValue, size_t * pCol, size_t * pRow)
         {
             float32x4_t max = vdupq_n_f32(-FLT_MAX), val;

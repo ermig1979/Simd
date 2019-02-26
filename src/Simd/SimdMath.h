@@ -1555,6 +1555,18 @@ namespace Simd
         {
             return vcombine_f32(vpadd_f32(Half<0>(a), Half<1>(a)), vpadd_f32(Half<0>(b), Half<1>(b)));
         }
+
+        template <bool condition> SIMD_INLINE float32x4_t Masked(const float32x4_t & value, const float32x4_t & mask);
+
+        template <> SIMD_INLINE float32x4_t Masked<false>(const float32x4_t & value, const float32x4_t & mask)
+        {
+            return value;
+        }
+
+        template <> SIMD_INLINE float32x4_t Masked<true>(const float32x4_t & value, const float32x4_t & mask)
+        {
+            return And(value, mask);
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }

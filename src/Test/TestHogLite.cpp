@@ -564,6 +564,11 @@ namespace Test
             result = result && HogLiteFilterSeparableAutoTest(1, FUNC_HLFS(Simd::Avx512bw::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HogLiteFilterSeparableAutoTest(Simd::Neon::F, FUNC_HLFS(Simd::Neon::HogLiteFilterSeparable), FUNC_HLFS(SimdHogLiteFilterSeparable));
+#endif 
+
         return result;
     }
 

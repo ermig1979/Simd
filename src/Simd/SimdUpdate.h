@@ -116,5 +116,25 @@ namespace Simd
         }
     }
 #endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        template <UpdateType update, bool align> SIMD_INLINE void Update(float  * p, float32x4_t a)
+        {
+            Store<align>(p, a);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, false>(float  * p, float32x4_t a)
+        {
+            Store<false>(p, vaddq_f32(Load<false>(p), a));
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, true>(float  * p, float32x4_t a)
+        {
+            Store<true>(p, vaddq_f32(Load<true>(p), a));
+        }
+    }
+#endif//SIMD_SSE_ENABLE
 }
 #endif//__SimdUpdate_h__

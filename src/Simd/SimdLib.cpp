@@ -2650,6 +2650,11 @@ SIMD_API void SimdHogLiteFilterSeparable(const float * src, size_t srcStride, si
         Sse41::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && srcWidth >= hSize - 1 + Neon::F)
+        Neon::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
+    else
+#endif
         Base::HogLiteFilterSeparable(src, srcStride, srcWidth, srcHeight, featureSize, hFilter, hSize, vFilter, vSize, dst, dstStride, add);
 }
 

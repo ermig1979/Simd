@@ -283,6 +283,24 @@ namespace Simd
         {
             return vgetq_lane_f32(a, 0) + vgetq_lane_f32(a, 1) + vgetq_lane_f32(a, 2) + vgetq_lane_f32(a, 3);
         }
+
+        SIMD_INLINE float32x4_t Extract4Sums(const float32x4_t a[4])
+        {
+            float32x4x2_t b0 = vzipq_f32(a[0], a[2]);
+            float32x4x2_t b1 = vzipq_f32(a[1], a[3]);
+            float32x4x2_t c0 = vzipq_f32(b0.val[0], b1.val[0]);
+            float32x4x2_t c1 = vzipq_f32(b0.val[1], b1.val[1]);
+            return vaddq_f32(vaddq_f32(c0.val[0], c0.val[1]), vaddq_f32(c1.val[0], c1.val[1]));
+        }
+
+        SIMD_INLINE float32x4_t Extract4Sums(const float32x4_t & a0, const float32x4_t & a1, const float32x4_t & a2, const float32x4_t & a3)
+        {
+            float32x4x2_t b0 = vzipq_f32(a0, a2);
+            float32x4x2_t b1 = vzipq_f32(a1, a3);
+            float32x4x2_t c0 = vzipq_f32(b0.val[0], b1.val[0]);
+            float32x4x2_t c1 = vzipq_f32(b0.val[1], b1.val[1]);
+            return vaddq_f32(vaddq_f32(c0.val[0], c0.val[1]), vaddq_f32(c1.val[0], c1.val[1]));
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

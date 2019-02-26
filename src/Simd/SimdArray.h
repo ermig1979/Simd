@@ -107,6 +107,13 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        typedef Array<float32x4_t> Array128f;
+    }
+#endif
+
 #if defined(__GNUC__) && __GNUC__ >= 6
 #pragma GCC diagnostic pop
 #endif
