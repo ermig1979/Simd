@@ -2625,6 +2625,11 @@ SIMD_API void SimdHogLiteCompressFeatures(const float * src, size_t srcStride, s
         Sse41::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        Neon::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
+    else
+#endif
         Base::HogLiteCompressFeatures(src, srcStride, width, height, pca, dst, dstStride);
 }
 

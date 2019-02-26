@@ -33,6 +33,45 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                const float * s = src;
+                float * d = dst;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    const float * p = pca;
+                    for (size_t i = 0; i < 8; i += 4, p += 64)
+                    {
+                        float32x4_t sums[4] = { vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0), vdupq_n_f32(0) };
+                        for (size_t j = 0; j < 16; j += F)
+                        {
+                            float32x4_t _s = Load<align>(s + j);
+                            sums[0] = vmlaq_f32(sums[0], _s, Load<align>(p + j + 00));
+                            sums[1] = vmlaq_f32(sums[1], _s, Load<align>(p + j + 16));
+                            sums[2] = vmlaq_f32(sums[2], _s, Load<align>(p + j + 32));
+                            sums[3] = vmlaq_f32(sums[3], _s, Load<align>(p + j + 48));
+                        }
+                        Store<align>(d + i, Extract4Sums(sums));
+                    }
+                    s += 16;
+                    d += 8;
+                }
+                src += srcStride;
+                dst += dstStride;
+            }
+
+        }
+
+        void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(pca) && Aligned(dst))
+                HogLiteCompressFeatures<true>(src, srcStride, width, height, pca, dst, dstStride);
+            else
+                HogLiteCompressFeatures<false>(src, srcStride, width, height, pca, dst, dstStride);
+        }
+
         class HogLiteSeparableFilter
         {
             size_t _dstWidth, _dstHeight, _dstStride;

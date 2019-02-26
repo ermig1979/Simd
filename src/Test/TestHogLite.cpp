@@ -451,6 +451,11 @@ namespace Test
             result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Avx512bw::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HogLiteCompressFeaturesAutoTest(FUNC_HLCF(Simd::Neon::HogLiteCompressFeatures), FUNC_HLCF(SimdHogLiteCompressFeatures));
+#endif 
+
         return result;
     }
 
