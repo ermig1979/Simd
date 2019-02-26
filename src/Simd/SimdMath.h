@@ -1567,6 +1567,11 @@ namespace Simd
         {
             return And(value, mask);
         }
+
+        SIMD_INLINE bool TestZ(uint32x4_t a)
+        {
+            return !(vgetq_lane_u32(a, 0) | vgetq_lane_u32(a, 1) | vgetq_lane_u32(a, 2) | vgetq_lane_u32(a, 3));
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }

@@ -265,6 +265,11 @@ namespace Test
             result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Avx512bw::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HogLiteFilterFeaturesAutoTest(FUNC_HLFF(Simd::Neon::HogLiteFilterFeatures), FUNC_HLFF(SimdHogLiteFilterFeatures));
+#endif 
+
         return result;
     }
 

@@ -33,6 +33,166 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class HogLiteFeatureFilter
+        {
+            template<bool align> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, float32x4_t & sum)
+            {
+                float32x4_t _src = Load<align>(src);
+                float32x4_t _filter = Load<align>(filter);
+                sum = vmlaq_f32(sum, _src, _filter);
+            }
+
+            template<bool align, size_t step> SIMD_INLINE void ProductSum1x4(const float * src, const float * filter, float32x4_t * sums)
+            {
+                float32x4_t _filter = Load<align>(filter);
+                sums[0] = vmlaq_f32(sums[0], Load<align>(src + 0 * step), _filter);
+                sums[1] = vmlaq_f32(sums[1], Load<align>(src + 1 * step), _filter);
+                sums[2] = vmlaq_f32(sums[2], Load<align>(src + 2 * step), _filter);
+                sums[3] = vmlaq_f32(sums[3], Load<align>(src + 3 * step), _filter);
+            }
+
+            template <bool align, size_t featureSize> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterWidth, size_t filterHeight, float * dst, size_t dstStride)
+            {
+                size_t filterStride = featureSize * filterWidth;
+                size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        float32x4_t sums[4] = { vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f) };
+                        const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterHeight; ++filterRow)
+                        {
+                            size_t filterCol = 0;
+                            for (; filterCol < filterStride; filterCol += F)
+                                ProductSum1x4<align, featureSize>(pSrc + filterCol, pFilter + filterCol, sums);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        Store<false>(dst + dstCol, Extract4Sums(sums));
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        float32x4_t sum = vdupq_n_f32(0.0f);
+                        const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
+                        const float * pFilter = filter;
+                        for (size_t filterRow = 0; filterRow < filterHeight; ++filterRow)
+                        {
+                            for (size_t filterCol = 0; filterCol < filterStride; filterCol += F)
+                                ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
+                            pSrc += srcStride;
+                            pFilter += filterStride;
+                        }
+                        dst[dstCol] = ExtractSum32f(sum);
+                    }
+                    dst += dstStride;
+                }
+            }
+
+            template <bool align, size_t featureSize> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, const float * filter, size_t filterWidth, size_t filterHeight, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+            {
+                size_t filterStride = featureSize * filterWidth;
+                size_t alignedDstWidth = AlignLo(dstWidth, 4);
+                float32x4_t _min = vdupq_n_f32(-FLT_MAX);
+                for (size_t dstRow = 0; dstRow < dstHeight; ++dstRow)
+                {
+                    size_t dstCol = 0;
+                    for (; dstCol < alignedDstWidth; dstCol += 4)
+                    {
+                        uint32x4_t _mask = Load<false>(mask + dstCol);
+                        if (TestZ(_mask))
+                            Store<false>(dst + dstCol, _min);
+                        else
+                        {
+                            float32x4_t sums[4] = { vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f) };
+                            const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
+                            const float * pFilter = filter;
+                            for (size_t filterRow = 0; filterRow < filterHeight; ++filterRow)
+                            {
+                                size_t filterCol = 0;
+                                for (; filterCol < filterStride; filterCol += F)
+                                    ProductSum1x4<align, featureSize>(pSrc + filterCol, pFilter + filterCol, sums);
+                                pSrc += srcStride;
+                                pFilter += filterStride;
+                            }
+                            Store<false>(dst + dstCol, vbslq_f32(_mask, Extract4Sums(sums), _min));
+                        }
+                    }
+                    for (; dstCol < dstWidth; ++dstCol)
+                    {
+                        if (mask[dstCol])
+                        {
+                            float32x4_t sum = vdupq_n_f32(0.0f);
+                            const float * pSrc = src + dstRow * srcStride + dstCol * featureSize;
+                            const float * pFilter = filter;
+                            for (size_t filterRow = 0; filterRow < filterHeight; ++filterRow)
+                            {
+                                for (size_t filterCol = 0; filterCol < filterStride; filterCol += F)
+                                    ProductSum1x1<align>(pSrc + filterCol, pFilter + filterCol, sum);
+                                pSrc += srcStride;
+                                pFilter += filterStride;
+                            }
+                            dst[dstCol] = ExtractSum32f(sum);
+                        }
+                        else
+                            dst[dstCol] = -FLT_MAX;
+                    }
+                    dst += dstStride;
+                    mask += maskStride;
+                }
+            }
+
+            template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterWidth, size_t filterHeight, float * dst, size_t dstStride)
+            {
+                if (featureSize == 16)
+                    Filter<align, 16>(src, srcStride, dstWidth, dstHeight, filter, filterWidth, filterHeight, dst, dstStride);
+                else
+                    Filter<align, 8>(src, srcStride, dstWidth, dstHeight, filter, filterWidth, filterHeight, dst, dstStride);
+            }
+
+            template <bool align> void Filter(const float * src, size_t srcStride, size_t dstWidth, size_t dstHeight, size_t featureSize, const float * filter, size_t filterWidth, size_t filterHeight, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+            {
+                if (featureSize == 16)
+                    Filter<align, 16>(src, srcStride, dstWidth, dstHeight, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
+                else
+                    Filter<align, 8>(src, srcStride, dstWidth, dstHeight, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
+            }
+
+        public:
+
+            void Run(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterWidth, size_t filterHeight, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+            {
+                assert(featureSize == 8 || featureSize == 16);
+                assert(srcWidth >= filterWidth && srcHeight >= filterHeight);
+
+                size_t dstWidth = srcWidth - filterWidth + 1;
+                size_t dstHeight = srcHeight - filterHeight + 1;
+
+                if (mask)
+                {
+                    if (Aligned(src) && Aligned(srcStride) && Aligned(filter))
+                        Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
+                    else
+                        Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
+                }
+                else
+                {
+                    if (Aligned(src) && Aligned(srcStride) && Aligned(filter))
+                        Filter<true>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterWidth, filterHeight, dst, dstStride);
+                    else
+                        Filter<false>(src, srcStride, dstWidth, dstHeight, featureSize, filter, filterWidth, filterHeight, dst, dstStride);
+                }
+            }
+        };
+
+        void HogLiteFilterFeatures(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, size_t featureSize, const float * filter, size_t filterWidth, size_t filterHeight, const uint32_t * mask, size_t maskStride, float * dst, size_t dstStride)
+        {
+            HogLiteFeatureFilter featureFilter;
+            featureFilter.Run(src, srcStride, srcWidth, srcHeight, featureSize, filter, filterWidth, filterHeight, mask, maskStride, dst, dstStride);
+        }
+
         namespace HogLiteFeatureResizerDetail
         {
             template <int size> struct Feature
