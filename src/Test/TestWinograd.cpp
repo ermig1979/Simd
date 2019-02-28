@@ -140,6 +140,11 @@ namespace Test
             result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Avx512f::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Neon::Winograd4x3SetFilter), FUNC_WF(SimdWinograd4x3SetFilter));
+#endif 
+
         return result;
     }
 
