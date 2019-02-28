@@ -27,12 +27,359 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdCompare.h"
 
 namespace Simd
 {
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        const uint8x16_t K8_KX4 = SIMD_VEC_SETR_EPI8(1, 3, 5, 7, 7, 5, 3, 1, 1, 3, 5, 7, 7, 5, 3, 1);
+        const uint8x16_t K8_KX8 = SIMD_VEC_SETR_EPI8(1, 3, 5, 7, 9, 11, 13, 15, 15, 13, 11, 9, 7, 5, 3, 1);
+
+        SIMD_INLINE uint16x8_t Hadd16u(uint16x8_t a, uint16x8_t b)
+        {
+            return vcombine_u16(vpadd_u16(Half<0>(a), Half<1>(a)), vpadd_u16(Half<0>(b), Half<1>(b)));
+        }
+
+        SIMD_INLINE uint32x4_t Hadd32u(uint32x4_t a, uint32x4_t b)
+        {
+            return vcombine_u32(vpadd_u32(Half<0>(a), Half<1>(a)), vpadd_u32(Half<0>(b), Half<1>(b)));
+        }
+
+        SIMD_INLINE uint16x8_t Madd8u(uint8x16_t a, uint8x16_t b)
+        {
+            return Hadd16u(vmull_u8(Half<0>(a), Half<0>(b)), vmull_u8(Half<1>(a), Half<1>(b)));
+        }
+
+        SIMD_INLINE int32x4_t Madd16u(uint16x8_t a, uint16x8_t b)
+        {
+            return (int32x4_t)Hadd32u(vmull_u16(Half<0>(a), Half<0>(b)), vmull_u16(Half<1>(a), Half<1>(b)));
+        }
+
+        const uint8x8_t K8_I40 = SIMD_VEC_SETR_PI8(16, 17, 18, 19, 0, 1, 2, 3);
+        const uint8x8_t K8_I51 = SIMD_VEC_SETR_PI8(20, 21, 22, 23, 4, 5, 6, 7);
+        const uint8x8_t K8_I62 = SIMD_VEC_SETR_PI8(24, 25, 26, 27, 8, 9, 10, 11);
+        const uint8x8_t K8_I73 = SIMD_VEC_SETR_PI8(28, 29, 30, 31, 12, 13, 14, 15);
+
+        SIMD_INLINE float32x2_t Permute(float32x4x2_t v, uint8x8_t i)
+        {
+            return vreinterpret_f32_u8(vtbl4_u8(*(uint8x8x4_t*)&v, i));
+        }
+
+        SIMD_INLINE void UzpAs32(const uint16x8_t * src, uint16x8_t * dst)
+        {
+            *(uint32x4x2_t*)dst = vuzpq_u32(vreinterpretq_u32_u16(src[0]), vreinterpretq_u32_u16(src[1]));
+        }
+
+        template <size_t cell> class HogLiteFeatureExtractor
+        {
+            static const size_t FQ = 8;
+            static const size_t HQ = FQ / 2;
+            static const size_t DQ = FQ * 2;
+
+            typedef Array<uint8_t> Bytes;
+            typedef Array<int> Ints;
+            typedef Array<float> Floats;
+
+            size_t _hx, _fx, _w, _aw;
+            Bytes _value, _index;
+            Ints _hi[2];
+            Floats _hf[2], _nf[4], _nb;
+            int _k0[cell], _k1[cell];
+            //__m128i _kx4, _kx8;
+            float32x4_t _k, _02, _05, _02357, _eps;
+
+            SIMD_INLINE void Init(size_t width)
+            {
+                _w = (width / cell - 1)*cell;
+                _aw = AlignLo(_w, A);
+                _hx = width / cell;
+                _fx = _hx - 2;
+                _value.Resize(_aw + 3 * A, true);
+                _index.Resize(_aw + 3 * A, true);
+                for (size_t i = 0; i < cell; ++i)
+                {
+                    _k0[i] = int(cell - i - 1) * 2 + 1;
+                    _k1[i] = int(i) * 2 + 1;
+                }
+                for (size_t i = 0; i < 2; ++i)
+                {
+                    _hi[i].Resize((_hx + 4)*FQ, true);
+                    _hf[i].Resize(_hx*FQ);
+                }
+                for (size_t i = 0; i < 4; ++i)
+                    _nf[i].Resize(_hx + DF);
+                _nb.Resize(_hx * 4);
+                _k = vdupq_n_f32(1.0f / Simd::Square(cell * 2));
+                _02 = vdupq_n_f32(0.2f);
+                _05 = vdupq_n_f32(0.5f);
+                _02357 = vdupq_n_f32(0.2357f);
+                _eps = vdupq_n_f32(0.0001f);
+            }
+
+            template<bool align> static SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride, uint8_t * value, uint8_t * index)
+            {
+                uint8x16_t y0 = Load<false>(src - stride);
+                uint8x16_t y1 = Load<false>(src + stride);
+                uint8x16_t x0 = Load<false>(src - 1);
+                uint8x16_t x1 = Load<false>(src + 1);
+
+                uint8x16_t ady = vabdq_u8(y0, y1);
+                uint8x16_t adx = vabdq_u8(x0, x1);
+
+                uint8x16_t max = vmaxq_u8(ady, adx);
+                uint8x16_t min = vminq_u8(ady, adx);
+                uint8x16_t val = vqaddq_u8(max, vrhaddq_u8(min, K8_00));
+                Store<align>(value, val);
+
+                uint8x16_t idx = vbslq_u8(Compare8u<SimdCompareGreater>(adx, ady), K8_00, K8_01);
+                idx = vbslq_u8(Compare8u<SimdCompareGreater>(x1, x0), idx, vsubq_u8(K8_03, idx));
+                idx = vbslq_u8(Compare8u<SimdCompareGreater>(y1, y0), idx, vsubq_u8(K8_07, idx));
+                Store<align>(index, idx);
+            }
+
+            SIMD_INLINE void SetIndexAndValue(const uint8_t * src, size_t stride)
+            {
+                uint8_t * value = _value.data + A;
+                uint8_t * index = _index.data + A;
+                for (size_t col = 0; col < _aw; col += A)
+                    SetIndexAndValue<true>(src + col, stride, value + col, index + col);
+                if (_aw < _w)
+                {
+                    size_t col = _w - A;
+                    SetIndexAndValue<false>(src + col, stride, value + col, index + col);
+                }
+            }
+
+            static SIMD_INLINE void UpdateIntegerHistogram4x4(uint8_t * value, uint8_t * index, const uint16x8_t & ky0, const uint16x8_t & ky1, int * h0, int * h1)
+            {
+                uint8x16_t val = Load<false>(value);
+                uint8x16_t idx = Load<false>(index);
+                uint8x16_t cur0 = K8_00;
+                uint8x16_t cur1 = K8_01;
+                uint16x8_t dirs[4];
+                for (size_t i = 0; i < 4; ++i)
+                {
+                    uint16x8_t dir0 = Madd8u(vandq_u8(vceqq_u8(idx, cur0), val), K8_KX4);
+                    uint16x8_t dir1 = Madd8u(vandq_u8(vceqq_u8(idx, cur1), val), K8_KX4);
+                    dirs[i] = Hadd16u(dir0, dir1);
+                    cur0 = vqaddq_u8(cur0, K8_02);
+                    cur1 = vqaddq_u8(cur1, K8_02);
+                }
+                UzpAs32(dirs + 0, dirs + 0);
+                UzpAs32(dirs + 2, dirs + 2);
+                Store<true>(h0 + 0 * F, vaddq_s32(Load<true>(h0 + 0 * F), Madd16u(dirs[0], ky0)));
+                Store<true>(h0 + 1 * F, vaddq_s32(Load<true>(h0 + 1 * F), Madd16u(dirs[2], ky0)));
+                Store<true>(h0 + 4 * F, vaddq_s32(Load<true>(h0 + 4 * F), Madd16u(dirs[1], ky0)));
+                Store<true>(h0 + 5 * F, vaddq_s32(Load<true>(h0 + 5 * F), Madd16u(dirs[3], ky0)));
+                Store<true>(h1 + 0 * F, vaddq_s32(Load<true>(h1 + 0 * F), Madd16u(dirs[0], ky1)));
+                Store<true>(h1 + 1 * F, vaddq_s32(Load<true>(h1 + 1 * F), Madd16u(dirs[2], ky1)));
+                Store<true>(h1 + 4 * F, vaddq_s32(Load<true>(h1 + 4 * F), Madd16u(dirs[1], ky1)));
+                Store<true>(h1 + 5 * F, vaddq_s32(Load<true>(h1 + 5 * F), Madd16u(dirs[3], ky1)));
+            }
+
+            SIMD_INLINE void UpdateIntegerHistogram4x4(size_t rowI, size_t rowF)
+            {
+                int * h0 = _hi[(rowI + 0) & 1].data;
+                int * h1 = _hi[(rowI + 1) & 1].data;
+                uint8_t * value = _value.data + A - cell;
+                uint8_t * index = _index.data + A - cell;
+                uint16x8_t ky0 = vdupq_n_u16(_k0[rowF]);
+                uint16x8_t ky1 = vdupq_n_u16(_k1[rowF]);
+                for (size_t col = 0; col <= _w;)
+                {
+                    UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
+                    col += cell;
+                    h0 += FQ;
+                    h1 += FQ;
+                    UpdateIntegerHistogram4x4(value + col, index + col, ky0, ky1, h0, h1);
+                    col += 3 * cell;
+                    h0 += 3 * FQ;
+                    h1 += 3 * FQ;
+                }
+            }
+
+            SIMD_INLINE void UpdateIntegerHistogram8x8(size_t rowI, size_t rowF)
+            {
+                int * h0 = _hi[(rowI + 0) & 1].data;
+                int * h1 = _hi[(rowI + 1) & 1].data;
+                uint8_t * value = _value.data + A - cell;
+                uint8_t * index = _index.data + A - cell;
+                uint16x8_t ky0 = vdupq_n_u16(_k0[rowF]);
+                uint16x8_t ky1 = vdupq_n_u16(_k1[rowF]);
+                for (size_t col = 0; col <= _w; col += cell)
+                {
+                    uint8x16_t val = Load<false>(value + col);
+                    uint8x16_t idx = Load<false>(index + col);
+                    uint8x16_t cur0 = K8_00;
+                    uint8x16_t cur1 = K8_01;
+                    uint16x8_t dirs[4];
+                    for (size_t i = 0; i < 4; ++i)
+                    {
+                        uint16x8_t dir0 = Madd8u(vandq_u8(vceqq_u8(idx, cur0), val), K8_KX8);
+                        uint16x8_t dir1 = Madd8u(vandq_u8(vceqq_u8(idx, cur1), val), K8_KX8);
+                        dirs[i] = Hadd16u(dir0, dir1);
+                        cur0 = vqaddq_u8(cur0, K8_02);
+                        cur1 = vqaddq_u8(cur1, K8_02);
+                    }
+                    dirs[0] = Hadd16u(dirs[0], dirs[1]);
+                    dirs[1] = Hadd16u(dirs[2], dirs[3]);
+                    Store<true>(h0 + 0, vaddq_s32(Load<true>(h0 + 0), Madd16u(dirs[0], ky0)));
+                    Store<true>(h0 + F, vaddq_s32(Load<true>(h0 + F), Madd16u(dirs[1], ky0)));
+                    Store<true>(h1 + 0, vaddq_s32(Load<true>(h1 + 0), Madd16u(dirs[0], ky1)));
+                    Store<true>(h1 + F, vaddq_s32(Load<true>(h1 + F), Madd16u(dirs[1], ky1)));
+                    h0 += FQ;
+                    h1 += FQ;
+                }
+            }
+
+            SIMD_INLINE void UpdateFloatHistogram(size_t rowI)
+            {
+                Ints & hi = _hi[rowI & 1];
+                Floats & hf = _hf[rowI & 1];
+                Floats & nf = _nf[rowI & 3];
+
+                for (size_t i = 0; i < hf.size; i += DF)
+                {
+                    Store<true>(hf.data + i + 0, vmulq_f32(_k, vcvtq_f32_s32(Load<true>(hi.data + i + 0))));
+                    Store<true>(hf.data + i + F, vmulq_f32(_k, vcvtq_f32_s32(Load<true>(hi.data + i + F))));
+                }
+                hi.Clear();
+
+                const float * h = hf.data;
+                for (size_t x = 0; x < _hx; ++x, h += FQ)
+                {
+                    float32x4_t h0 = Load<true>(h + 00);
+                    float32x4_t h1 = Load<true>(h + HQ);
+                    float32x4_t s1 = vaddq_f32(h0, h1);
+                    float32x4_t s2 = vmulq_f32(s1, s1);
+                    nf.data[x] = ExtractSum32f(s2);
+                }
+            }
+
+            SIMD_INLINE void BlockNorm(size_t rowI)
+            {
+                const float * src0 = _nf[(rowI - 2) & 3].data;
+                const float * src1 = _nf[(rowI - 1) & 3].data;
+                const float * src2 = _nf[(rowI - 0) & 3].data;
+                float * dst = _nb.data;
+                for (size_t x = 0; x < _fx; x += 3, src0 += 3, src1 += 3, src2 += 3, dst += 3 * F)
+                {
+                    float32x4_t s00 = Load<false>(src0 + 0);
+                    float32x4_t s01 = Load<false>(src0 + 1);
+                    float32x4_t s10 = Load<false>(src1 + 0);
+                    float32x4_t s11 = Load<false>(src1 + 1);
+                    float32x4_t s20 = Load<false>(src2 + 0);
+                    float32x4_t s21 = Load<false>(src2 + 1);
+                    float32x4_t v00 = vaddq_f32(s00, s10);
+                    float32x4_t v01 = vaddq_f32(s01, s11);
+                    float32x4_t v10 = vaddq_f32(s10, s20);
+                    float32x4_t v11 = vaddq_f32(s11, s21);
+                    float32x4x2_t h;
+                    h.val[0] = Hadd(v00, v01);
+                    h.val[1] = Hadd(v10, v11);
+                    float32x2_t p40 = Permute(h, K8_I40);
+                    float32x2_t p51 = Permute(h, K8_I51);
+                    float32x2_t p62 = Permute(h, K8_I62);
+                    float32x2_t p73 = Permute(h, K8_I73);
+                    Store<true>(dst + 0 * HF, p62);
+                    Store<true>(dst + 1 * HF, p40);
+                    Store<true>(dst + 2 * HF, p51);
+                    Store<true>(dst + 3 * HF, p62);
+                    Store<true>(dst + 4 * HF, p73);
+                    Store<true>(dst + 5 * HF, p51);
+                }
+            }
+
+            SIMD_INLINE void SetFeatures(size_t rowI, float * dst)
+            {
+                const float * hf = _hf[(rowI - 1) & 1].data + FQ;
+                const float * nb = _nb.data;
+                for (size_t x = 0; x < _fx; ++x, nb += 4)
+                {
+                    float32x4_t n = ReciprocalSqrt<1>(vaddq_f32(Load<true>(nb), _eps));
+                    float32x4_t t = vdupq_n_f32(0.0f);
+                    const float * src = hf + x * FQ;
+                    for (int o = 0; o < FQ; o += 4)
+                    {
+                        float32x4_t s = Load<false>(src);
+                        float32x4_t h0 = vminq_f32(vmulq_f32(Broadcast<0>(s), n), _02);
+                        float32x4_t h1 = vminq_f32(vmulq_f32(Broadcast<1>(s), n), _02);
+                        float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
+                        float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
+                        t = vaddq_f32(t, vaddq_f32(vaddq_f32(h0, h1), vaddq_f32(h2, h3)));
+                        Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                        dst += F;
+                        src += F;
+                    }
+                    src = hf + x * FQ;
+                    float32x4_t s = vaddq_f32(Load<false>(src), Load<false>(src + HQ));
+                    float32x4_t h0 = vminq_f32(vmulq_f32(Broadcast<0>(s), n), _02);
+                    float32x4_t h1 = vminq_f32(vmulq_f32(Broadcast<1>(s), n), _02);
+                    float32x4_t h2 = vminq_f32(vmulq_f32(Broadcast<2>(s), n), _02);
+                    float32x4_t h3 = vminq_f32(vmulq_f32(Broadcast<3>(s), n), _02);
+                    Store<false>(dst, vmulq_f32(_05, Hadd(Hadd(h0, h1), Hadd(h2, h3))));
+                    dst += 4;
+                    Store<false>(dst, vmulq_f32(t, _02357));
+                    dst += 4;
+                }
+            }
+
+        public:
+
+            void Run(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * features, size_t featuresStride)
+            {
+                assert(cell == 8 || cell == 4);
+                assert(width >= cell * 3 && height >= cell * 3);
+
+                Init(width);
+
+                src += (srcStride + 1)*cell / 2;
+                height = (height / cell - 1)*cell;
+
+                for (size_t row = 0; row < height; ++row)
+                {
+                    SetIndexAndValue(src, srcStride);
+                    size_t rowI = row / cell;
+                    size_t rowF = row & (cell - 1);
+                    if (cell == 4)
+                        UpdateIntegerHistogram4x4(rowI, rowF);
+                    else
+                        UpdateIntegerHistogram8x8(rowI, rowF);
+                    if (rowF == cell - 1)
+                    {
+                        UpdateFloatHistogram(rowI);
+                        if (rowI >= 2)
+                        {
+                            BlockNorm(rowI);
+                            SetFeatures(rowI, features);
+                            features += featuresStride;
+                        }
+                    }
+                    src += srcStride;
+                }
+                size_t rowI = height / cell;
+                UpdateFloatHistogram(rowI);
+                BlockNorm(rowI);
+                SetFeatures(rowI, features);
+            }
+        };
+
+        void HogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride)
+        {
+            if (cell == 4)
+            {
+                HogLiteFeatureExtractor<4> extractor;
+                extractor.Run(src, srcStride, width, height, features, featuresStride);
+            }
+            else
+            {
+                HogLiteFeatureExtractor<8> extractor;
+                extractor.Run(src, srcStride, width, height, features, featuresStride);
+            }
+        }
+
         class HogLiteFeatureFilter
         {
             template<bool align> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, float32x4_t & sum)
@@ -257,7 +604,7 @@ namespace Simd
                         index = 0;
                         weight = 0.0f;
                     }
-                    if (index >(int)srcSize - 2)
+                    if (index > (int)srcSize - 2)
                     {
                         index = (int)srcSize - 2;
                         weight = 1.0f;
@@ -525,8 +872,8 @@ namespace Simd
                 if (_max[i] > *pValue)
                 {
                     *pValue = _max[i];
-                    *pCol = _idx[i]&7;
-                    *pRow = _idx[i]/8;
+                    *pCol = _idx[i] & 7;
+                    *pRow = _idx[i] / 8;
                 }
             }
         }

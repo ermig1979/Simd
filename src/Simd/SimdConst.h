@@ -720,7 +720,9 @@ namespace Simd
         const uint8x16_t K8_00 = SIMD_VEC_SET1_EPI8(0x00);
         const uint8x16_t K8_01 = SIMD_VEC_SET1_EPI8(0x01);
         const uint8x16_t K8_02 = SIMD_VEC_SET1_EPI8(0x02);
+        const uint8x16_t K8_03 = SIMD_VEC_SET1_EPI8(0x03);
         const uint8x16_t K8_04 = SIMD_VEC_SET1_EPI8(0x04);
+        const uint8x16_t K8_07 = SIMD_VEC_SET1_EPI8(0x07);
         const uint8x16_t K8_08 = SIMD_VEC_SET1_EPI8(0x08);
         const uint8x16_t K8_10 = SIMD_VEC_SET1_EPI8(0x10);
         const uint8x16_t K8_20 = SIMD_VEC_SET1_EPI8(0x20);

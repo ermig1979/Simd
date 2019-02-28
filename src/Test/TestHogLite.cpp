@@ -130,6 +130,12 @@ namespace Test
         if (Simd::Avx512bw::Enable)
             result = result && HogLiteExtractFeaturesAutoTest(1, FUNC_HLEF(Simd::Avx512bw::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && HogLiteExtractFeaturesAutoTest(Simd::Neon::A, FUNC_HLEF(Simd::Neon::HogLiteExtractFeatures), FUNC_HLEF(SimdHogLiteExtractFeatures));
+#endif 
+
         return result;
     }
 

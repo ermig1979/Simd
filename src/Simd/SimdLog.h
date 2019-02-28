@@ -25,6 +25,7 @@
 #define __SimdLog_h__
 
 #include "Simd/SimdConst.h"
+#include "Simd/SimdArray.h"
 
 #ifdef SIMD_LOG_ENABLE
 #include <iostream>
@@ -42,6 +43,40 @@ namespace Simd
         std::cout << "} " << std::endl << std::flush;
     }
 
+    template<> SIMD_INLINE void Log<float>(const float * data, size_t size, const std::string & name)
+    {
+        std::cout << name.c_str() << " = { " << std::setprecision(3) << std::fixed;
+        for (int i = 0; i < size; i++)
+        {
+            std::cout << data[i] << " ";
+        }
+        std::cout << "} " << std::endl << std::flush;
+    }
+
+    template<class T> SIMD_INLINE void Log(const Array<T> & array, const std::string & name)
+    {
+        Log<T>(array.data, array.size, name);
+    }
+
+#ifdef SIMD_SSE_ENABLE
+    namespace Sse
+    {
+        SIMD_INLINE void Log(const __m128 & value, const std::string & name)
+        {
+            float buffer[F];
+            _mm_storeu_ps(buffer, value);
+            Simd::Log<float>(buffer, F, name);
+        }
+    }
+#endif //SIMD_SSE_ENABLE
+
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        using namespace Sse;
+    }
+#endif //SIMD_SSE_ENABLE
+
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
@@ -53,7 +88,7 @@ namespace Simd
             Simd::Log<T>(buffer, n, name);
         }
     }
-#endif //SIMD_AVX2_ENABLE
+#endif //SIMD_SSE_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
