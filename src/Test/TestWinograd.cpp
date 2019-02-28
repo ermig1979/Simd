@@ -109,6 +109,11 @@ namespace Test
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
             result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Avx512f::Winograd2x3SetFilter), FUNC_WF(SimdWinograd2x3SetFilter));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Neon::Winograd2x3SetFilter), FUNC_WF(SimdWinograd2x3SetFilter));
 #endif 
 
         return result;
