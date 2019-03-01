@@ -994,6 +994,11 @@ namespace Test
             result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Avx512f::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetPoolingForwardMaxAutoTest(FUNC_P(Simd::Neon::SynetPoolingForwardMax), FUNC_P(SimdSynetPoolingForwardMax));
+#endif 
+
         return result;
     }
 
