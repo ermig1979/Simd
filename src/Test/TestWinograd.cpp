@@ -248,6 +248,11 @@ namespace Test
             result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Avx512f::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Neon::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
+#endif
+
         return result;
     }
 

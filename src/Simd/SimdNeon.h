@@ -482,6 +482,8 @@ namespace Simd
 
         void Winograd2x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
+        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
+
         void Winograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
         void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
