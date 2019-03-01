@@ -468,6 +468,8 @@ namespace Simd
 
         void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
+        void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
+
         void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
