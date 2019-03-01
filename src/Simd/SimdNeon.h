@@ -466,6 +466,8 @@ namespace Simd
 
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
 
+        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+
         void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 

@@ -5095,7 +5095,7 @@ SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float *
 }
 
 typedef void(*SimdSynetAddBiasPtr) (const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
-volatile SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC3(SynetAddBias, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+volatile SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC4(SynetAddBias, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
 {
