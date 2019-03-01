@@ -702,6 +702,25 @@ namespace Simd
 #endif
         }
 
+        template <bool align> SIMD_INLINE void Store2(float * p, float32x4x2_t a);
+
+        template <> SIMD_INLINE void Store2<false>(float * p, float32x4x2_t a)
+        {
+            vst2q_f32(p, a);
+        }
+
+        template <> SIMD_INLINE void Store2<true>(float * p, float32x4x2_t a)
+        {
+#if defined(__GNUC__)
+            float * _p = (float *)__builtin_assume_aligned(p, 16);
+            vst2q_f32(_p, a);
+#elif defined(_MSC_VER)
+            vst2q_f32_ex(p, a, 128);
+#else
+            vst2q_f32(p, a);
+#endif
+        }
+
         template <bool align> SIMD_INLINE void Store3(float * p, float32x4x3_t a);
 
         template <> SIMD_INLINE void Store3<false>(float * p, float32x4x3_t a)
@@ -738,6 +757,12 @@ namespace Simd
 #else
             vst4q_f32(p, a);
 #endif
+        }
+
+        template <bool align> SIMD_INLINE void StoreMasked(float * p, float32x4_t value, uint32x4_t mask)
+        {
+            float32x4_t old = Load<align>(p);
+            Store<align>(p, vbslq_f32(mask, value, old));
         }
     }
 #endif//SIMD_NEON_ENABLE

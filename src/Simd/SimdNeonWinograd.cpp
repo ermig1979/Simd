@@ -408,6 +408,173 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void Winograd2x3SetOutputLoad4(const float * src, size_t stride, float32x4_t * dst)
+        {
+            float32x4_t s0 = Load<false>(src + 0 * stride);
+            float32x4_t s1 = Load<false>(src + 1 * stride);
+            float32x4_t s2 = Load<false>(src + 2 * stride);
+            float32x4_t s3 = Load<false>(src + 3 * stride);
+            dst[0] = vaddq_f32(vaddq_f32(s0, s1), s2);
+            dst[1] = vsubq_f32(vsubq_f32(s1, s2), s3);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutputLoad16(const float * src, size_t stride, float32x4_t * dst)
+        {
+            float32x4_t tmp[8];
+            Winograd2x3SetOutputLoad4(src + 0 * stride, stride, tmp + 0);
+            Winograd2x3SetOutputLoad4(src + 4 * stride, stride, tmp + 2);
+            Winograd2x3SetOutputLoad4(src + 8 * stride, stride, tmp + 4);
+            Winograd2x3SetOutputLoad4(src + 12 * stride, stride, tmp + 6);
+            dst[0] = vaddq_f32(vaddq_f32(tmp[0], tmp[2]), tmp[4]);
+            dst[1] = vaddq_f32(vaddq_f32(tmp[1], tmp[3]), tmp[5]);
+            dst[2] = vsubq_f32(vsubq_f32(tmp[2], tmp[4]), tmp[6]);
+            dst[3] = vsubq_f32(vsubq_f32(tmp[3], tmp[5]), tmp[7]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutput4n(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            float32x4x2_t tmp[2];
+            Winograd2x3SetOutputLoad16(src, srcStride, (float32x4_t*)tmp);
+            Store2<false>(dst + 0 * dstStride, tmp[0]);
+            Store2<false>(dst + 1 * dstStride, tmp[1]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutput4n(const float * src, size_t srcStride, float * dst, size_t dstStride, bool lastRow, bool lastCol, const uint32x4_t & mask)
+        {
+            float32x4_t tmp[4];
+            Winograd2x3SetOutputLoad16(src, srcStride, tmp);
+            float32x4x2_t zip0 = vzipq_f32(tmp[0], tmp[1]);
+            Store<false>(dst + 0, zip0.val[0]);
+            if (lastCol)
+                Store<false>(dst + 4, zip0.val[1]);
+            else
+                StoreMasked<false>(dst + 4, zip0.val[1], mask);
+            if (lastRow)
+            {
+                float32x4x2_t zip1 = vzipq_f32(tmp[2], tmp[3]);
+                dst += dstStride;
+                Store<false>(dst + 0, zip1.val[0]);
+                if (lastCol)
+                    Store<false>(dst + 4, zip1.val[1]);
+                else
+                    StoreMasked<false>(dst + 4, zip1.val[1], mask);
+            }
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutputStore4(const float32x4_t src[4], float * dst, size_t dstS, size_t dstC)
+        {
+            Store<false>(dst + 0 * dstS + 0 * dstC, src[0]);
+            Store<false>(dst + 0 * dstS + 1 * dstC, src[1]);
+            Store<false>(dst + 1 * dstS + 0 * dstC, src[2]);
+            Store<false>(dst + 1 * dstS + 1 * dstC, src[3]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutput4t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                float32x4_t tmp[4];
+                Winograd2x3SetOutputLoad16(src + d, srcStride, tmp);
+                Winograd2x3SetOutputStore4(tmp, dst + d, dstS, dstC);
+            }
+            if (dstCF < dstC)
+            {
+                float32x4_t tmp[4];
+                Winograd2x3SetOutputLoad16(src + dstC - F, srcStride, tmp);
+                Winograd2x3SetOutputStore4(tmp, dst + dstC - F, dstS, dstC);
+            }
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutputStore4(const float32x4_t src[4], float * dst, size_t dstS, size_t dstC, size_t rowE, size_t colE)
+        {
+            for (size_t row = 0; row < rowE; ++row)
+                for (size_t col = 0; col < colE; ++col)
+                    Store<false>(dst + row * dstS + col * dstC, src[row * 2 + col]);
+        }
+
+        SIMD_INLINE void Winograd2x3SetOutput4t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                float32x4_t tmp[4];
+                Winograd2x3SetOutputLoad16(src + d, srcStride, tmp);
+                Winograd2x3SetOutputStore4(tmp, dst + d, dstS, dstC, rowE, colE);
+            }
+            if (dstCF < dstC)
+            {
+                float32x4_t tmp[4];
+                Winograd2x3SetOutputLoad16(src + dstC - F, srcStride, tmp);
+                Winograd2x3SetOutputStore4(tmp, dst + dstC - F, dstS, dstC, rowE, colE);
+            }
+        }
+
+        void Winograd2x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        {
+            if (trans ? (dstChannels < 4) : (dstHeight < 2 || dstWidth < 8))
+            {
+                Base::Winograd2x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
+                return;
+            }
+            size_t tileH = (dstHeight + 1) / 2;
+            size_t tileW = (dstWidth + 1) / 2;
+            size_t srcStride = dstChannels * tileH*tileW;
+            size_t dstH2 = AlignLo(dstHeight, 2);
+            size_t dstW2 = AlignLo(dstWidth, 2);
+            if (trans)
+            {
+                size_t row, col;
+                for (row = 0; row < dstH2; row += 2)
+                {
+                    for (col = 0; col < dstW2; col += 2)
+                        Winograd2x3SetOutput4t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels), src += dstChannels;
+                    if (col < dstWidth)
+                        Winograd2x3SetOutput4t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, 2, dstWidth - col), src += dstChannels;
+                }
+                if (row < dstHeight)
+                {
+                    for (col = 0; col < dstW2; col += 2)
+                        Winograd2x3SetOutput4t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, 2), src += dstChannels;
+                    if (col < dstWidth)
+                        Winograd2x3SetOutput4t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
+                }
+            }
+            else
+            {
+                size_t dstW8 = AlignLo(dstWidth, 8);
+                uint32x4_t tailMask = vreinterpretq_u32_f32(LeftNotZero(4 + dstW2 - dstWidth));
+                size_t tailCol = dstW2 < dstWidth ? dstWidth - 7 : dstWidth - 8;
+                size_t tailRow = dstH2 < dstHeight ? dstHeight - 1 : dstHeight - 2;
+                for (size_t c = 0; c < dstChannels; ++c)
+                {
+                    size_t row = 0, tileY = 0;
+                    for (; row < dstH2; row += 2, tileY += 1)
+                    {
+                        size_t col = 0, tileX = 0;
+                        const float * s = src + tileY * tileW;
+                        float * d = dst + row * dstWidth;
+                        for (; col < dstW8; col += 8, tileX += 4)
+                            Winograd2x3SetOutput4n(s + tileX, srcStride, d + col, dstWidth);
+                        if (col < dstWidth)
+                            Winograd2x3SetOutput4n(s + tileW - 4, srcStride, d + tailCol, dstWidth, true, false, tailMask);
+                    }
+                    if (row < dstHeight)
+                    {
+                        size_t col = 0, tileX = 0;
+                        const float * s = src + (tileH - 1) * tileW;
+                        float * d = dst + (dstHeight - 1) * dstWidth;
+                        for (; col < dstW8; col += 8, tileX += 4)
+                            Winograd2x3SetOutput4n(s + tileX, srcStride, d + col, dstWidth, false, true, tailMask);
+                        if (col < dstWidth)
+                            Winograd2x3SetOutput4n(s + tileW - 4, srcStride, d + tailCol, dstWidth, false, false, tailMask);
+                    }
+                    src += tileW * tileH;
+                    dst += dstHeight * dstWidth;
+                }
+            }
+        }
+
         SIMD_INLINE void Winograd4x3SetFilter4Row(const float32x4_t * t, float * dst, size_t stride)
         {
             const float32x4_t r4 = vdupq_n_f32(1.0f / 4.0f);
