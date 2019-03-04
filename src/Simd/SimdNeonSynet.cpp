@@ -245,6 +245,87 @@ namespace Simd
             }
         }
 
+
+        template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, float * dst, size_t offset)
+        {
+            float32x4_t _bias = Load<align>(bias + offset);
+            float32x4_t x = vaddq_f32(Load<align>(src + offset), _bias);
+            float32x4_t _scale = Load<align>(scale + offset);
+            Store<align>(dst + offset, vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), x), vsubq_f32(x, vabsq_f32(x)), _scale));
+        }
+
+        template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, float32x4_t bias, float32x4_t scale, float * dst, size_t offset)
+        {
+            float32x4_t x = vaddq_f32(Load<align>(src + offset), bias);
+            Store<align>(dst + offset, vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), x), vsubq_f32(x, vabsq_f32(x)), scale));
+        }
+
+        template <bool align> void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (align)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
+            {
+                size_t aligned = AlignLo(count, QF);
+                size_t partial = AlignLo(count, F);
+                for (size_t j = 0; j < size; ++j)
+                {
+                    size_t i = 0;
+                    if (partial)
+                    {
+                        for (; i < aligned; i += QF)
+                        {
+                            SynetFusedLayerForward0<align>(src, bias, scale, dst, i + 0 * F);
+                            SynetFusedLayerForward0<align>(src, bias, scale, dst, i + 1 * F);
+                            SynetFusedLayerForward0<align>(src, bias, scale, dst, i + 2 * F);
+                            SynetFusedLayerForward0<align>(src, bias, scale, dst, i + 3 * F);
+                        }
+                        for (; i < partial; i += F)
+                            SynetFusedLayerForward0<align>(src, bias, scale, dst, i);
+                    }
+                    for (; i < count; ++i)
+                        dst[i] = Base::SynetFusedLayerForward0(src[i] + bias[i], scale[i]);
+                    src += count;
+                    dst += count;
+                }
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, QF);
+                size_t partial = AlignLo(size, F);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    size_t j = 0;
+                    if (partial)
+                    {
+                        float32x4_t _bias = vdupq_n_f32(bias[i]);
+                        float32x4_t _scale = vdupq_n_f32(scale[i]);
+                        for (; j < aligned; j += QF)
+                        {
+                            SynetFusedLayerForward0<align>(src, _bias, _scale, dst, j + 0 * F);
+                            SynetFusedLayerForward0<align>(src, _bias, _scale, dst, j + 1 * F);
+                            SynetFusedLayerForward0<align>(src, _bias, _scale, dst, j + 2 * F);
+                            SynetFusedLayerForward0<align>(src, _bias, _scale, dst, j + 3 * F);
+                        }
+                        for (; j < partial; j += F)
+                            SynetFusedLayerForward0<align>(src, _bias, _scale, dst, j);
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = Base::SynetFusedLayerForward0(src[j] + bias[i], scale[i]);
+                    src += size;
+                    dst += size;
+                }
+            }
+        }
+
+        void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(scale) && Aligned(bias) : Aligned(size)) && Aligned(src) && Aligned(dst))
+                SynetFusedLayerForward0<true>(src, bias, scale, count, size, dst, trans);
+            else
+                SynetFusedLayerForward0<false>(src, bias, scale, count, size, dst, trans);
+        }
+
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
         {
             assert(count >= 2);

@@ -499,7 +499,7 @@ namespace Simd
                 min += std::min(leave[0], leave[1]);
                 max += std::max(leave[0], leave[1]);
             }
-            float k = float(SHRT_MAX)*0.9f / std::max(std::abs(min), std::abs(max));
+            float k = float(SHRT_MAX)*0.9f / Simd::Max(Simd::Abs(min), Simd::Abs(max));
 
             stages[index].first = data.stages[index].first;
             stages[index].ntrees = data.stages[index].ntrees;
