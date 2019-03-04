@@ -612,6 +612,11 @@ namespace Test
             result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Avx512f::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetFusedLayerForward3AutoTest(FUNC_FLF3(Simd::Neon::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+#endif
+
         return result;
     }
 

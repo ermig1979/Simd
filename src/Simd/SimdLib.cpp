@@ -5135,7 +5135,7 @@ SIMD_API void SimdSynetFusedLayerForward2(const float * src, const float * scale
 }
 
 typedef void(*SimdSynetFusedLayerForward3Ptr) (const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans);
-volatile SimdSynetFusedLayerForward3Ptr simdSynetFusedLayerForward3 = SIMD_FUNC3(SynetFusedLayerForward3, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+volatile SimdSynetFusedLayerForward3Ptr simdSynetFusedLayerForward3 = SIMD_FUNC4(SynetFusedLayerForward3, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t count, size_t size, float * dst, SimdBool trans)
 {
