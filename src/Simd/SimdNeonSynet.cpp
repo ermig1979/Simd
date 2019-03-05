@@ -26,6 +26,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -245,6 +246,17 @@ namespace Simd
             }
         }
 
+        void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
+        {
+            assert(count >= 2);
+            bool aligned = Aligned(dst) && Aligned(src[0]) && Aligned(src[1]);
+            for (size_t i = 2; i < count; ++i)
+                aligned = aligned && Aligned(src[i]);
+            if (aligned)
+                SynetEltwiseLayerForward<true>(src, weight, count, size, type, dst);
+            else
+                SynetEltwiseLayerForward<false>(src, weight, count, size, type, dst);
+        }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, float * dst, size_t offset)
         {
@@ -665,18 +677,101 @@ namespace Simd
                 SynetFusedLayerForward4<false>(src, bias0, scale1, bias1, count, size, dst, trans);
         }
 
-        void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
+        template <bool align> SIMD_INLINE void SynetInnerProductLayerForward(const float * src, const float * weight, size_t offset, float32x4_t & sum)
         {
-            assert(count >= 2);
-            bool aligned = Aligned(dst) && Aligned(src[0]) && Aligned(src[1]);
-            for (size_t i = 2; i < count; ++i)
-                aligned = aligned && Aligned(src[i]);
-            if (aligned)
-                SynetEltwiseLayerForward<true>(src, weight, count, size, type, dst);
-            else
-                SynetEltwiseLayerForward<false>(src, weight, count, size, type, dst);
+            float32x4_t s = Load<align>(src + offset);
+            float32x4_t w = Load<align>(weight + offset);
+            sum = vmlaq_f32(sum, s, w);
         }
 
+        template <bool align> SIMD_INLINE void SynetInnerProductLayerForward(const float * src, const float * weight0, const float * weight1, size_t offset, float32x4_t * sum)
+        {
+            float32x4_t s = Load<align>(src + offset);
+            float32x4_t w0 = Load<align>(weight0 + offset);
+            float32x4_t w1 = Load<align>(weight1 + offset);
+            sum[0] = vmlaq_f32(sum[0], s, w0);
+            sum[1] = vmlaq_f32(sum[1], s, w1);
+        }
+
+        template<bool align> void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(weight) && Aligned(size) && Aligned(dst));
+            size_t count2 = AlignLo(count, 2);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeDF = AlignLo(size, DF);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t aligned = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < count2; i += 2)
+            {
+                size_t j = 0;
+                float sum0 = 0, sum1 = 0;
+                const float * weight0 = weight + 0 * size;
+                const float * weight1 = weight + 1 * size;
+                if (sizeF)
+                {
+                    float32x4_t sums[4] = { vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f) };
+                    if (sizeDF)
+                    {
+                        for (; j < sizeDF; j += DF)
+                        {
+                            SynetInnerProductLayerForward<align>(src, weight0, weight1, j + 0 * F, sums + 0);
+                            SynetInnerProductLayerForward<align>(src, weight0, weight1, j + 1 * F, sums + 2);
+                        }
+                        sums[0] = vaddq_f32(sums[0], sums[2]);
+                        sums[1] = vaddq_f32(sums[1], sums[3]);
+                    }
+                    for (; j < sizeF; j += F)
+                        SynetInnerProductLayerForward<align>(src, weight0, weight1, j, sums);
+                    sum0 = ExtractSum32f(sums[0]);
+                    sum1 = ExtractSum32f(sums[1]);
+                }
+                for (; j < size; ++j)
+                {
+                    sum0 += src[j] * weight0[j];
+                    sum1 += src[j] * weight1[j];
+                }
+                dst[i + 0] = sum0 + (bias ? bias[i + 0] : 0);
+                dst[i + 1] = sum1 + (bias ? bias[i + 1] : 0);
+                weight += 2*size;
+            }
+            for (; i < count; ++i)
+            {
+                size_t j = 0;
+                float sum = 0;
+                if (sizeF)
+                {
+                    float32x4_t sums[4] = { vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f) };
+                    if (sizeQF)
+                    {
+                        for (; j < sizeQF; j += QF)
+                        {
+                            SynetInnerProductLayerForward<align>(src, weight, j + 0 * F, sums[0]);
+                            SynetInnerProductLayerForward<align>(src, weight, j + 1 * F, sums[1]);
+                            SynetInnerProductLayerForward<align>(src, weight, j + 2 * F, sums[2]);
+                            SynetInnerProductLayerForward<align>(src, weight, j + 3 * F, sums[3]);
+                        }
+                        sums[0] = vaddq_f32(vaddq_f32(sums[0], sums[1]), vaddq_f32(sums[2], sums[3]));
+                    }
+                    for (; j < sizeF; j += F)
+                        SynetInnerProductLayerForward<align>(src, weight, j, sums[0]);
+                    sum = ExtractSum32f(sums[0]);
+                }
+                for (; j < size; ++j)
+                    sum += src[j] * weight[j];
+                dst[i] = sum + (bias ? bias[i] : 0);
+                weight += size;
+            }
+        }
+
+        void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
+        {
+            if (Aligned(src) && Aligned(weight) && Aligned(size) && Aligned(dst))
+                SynetInnerProductLayerForward<true>(src, weight, bias, count, size, dst);
+            else
+                SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
+        }
 
         SIMD_INLINE void PoolingMaxHwc1(const float * src, size_t srcS, size_t srcC, size_t kH, size_t kW, const float32x4_t & min, float * dst)
         {
