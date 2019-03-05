@@ -1313,6 +1313,11 @@ namespace Test
             result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Avx512f::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetScaleLayerForwardAutoTest(FUNC_SLF(Simd::Neon::SynetScaleLayerForward), FUNC_SLF(SimdSynetScaleLayerForward));
+#endif 
+
         return result;
     }
 

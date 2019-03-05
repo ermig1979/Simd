@@ -5194,7 +5194,7 @@ SIMD_API void SimdSynetRestrictRange(const float * src, size_t size, const float
 }
 
 typedef void(*SimdSynetScaleLayerForwardPtr) (const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
-volatile SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC4(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+volatile SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
 {
