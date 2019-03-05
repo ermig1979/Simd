@@ -27,6 +27,7 @@
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdPow.h"
 
 namespace Simd
 {
@@ -771,6 +772,62 @@ namespace Simd
                 SynetInnerProductLayerForward<true>(src, weight, bias, count, size, dst);
             else
                 SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
+        }
+
+        template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            size_t aligned = AlignLo(size, F);
+            Array32f sum(size, true), zero(size, true);
+
+            for (size_t i = 0; i < half; ++i)
+            {
+                const float * pos = src + i * size;
+                size_t j = 0;
+                for (; j < aligned; j += F)
+                {
+                    float32x4_t _pos = Load<align>(pos + j);
+                    Store<true>(sum.data + j, vmlaq_f32(Load<true>(sum.data + j), _pos, _pos));
+                }
+                for (; j < size; ++j)
+                    sum[j] += Simd::Square(pos[j]);
+            }
+
+            float32x4_t k0 = vdupq_n_f32(k[0]);
+            float32x4_t k1 = vdupq_n_f32(k[1]);
+            float32x4_t k2 = vdupq_n_f32(k[2]);
+            Pow pow;
+            for (size_t i = 0; i < count; ++i)
+            {
+                const float * pos = (i < count - half) ? src + half * size : zero.data;
+                const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
+                size_t j = 0;
+                for (; j < aligned; j += F)
+                {
+                    float32x4_t _pos = Load<align>(pos + j);
+                    float32x4_t _neg = Load<align>(neg + j);
+                    float32x4_t _sum = Load<true>(sum.data + j);
+                    _sum = vmlsq_f32(vmlaq_f32(_sum, _pos, _pos), _neg, _neg);
+                    float32x4_t _src = Load<align>(src + j);
+                    Store<true>(sum.data + j, _sum);
+                    Store<align>(dst + j, vmulq_f32(_src, pow(vmlaq_f32(k0, k1, _sum), k2)));
+                }
+                for (; j < size; ++j)
+                {
+                    sum[j] += Simd::Square(pos[j]);
+                    sum[j] -= Simd::Square(neg[j]);
+                    dst[j] = src[j] * Base::Pow(k[0] + k[1] * sum[j], k[2]);
+                }
+                src += size;
+                dst += size;
+            }
+        }
+
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst) && Aligned(size))
+                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst);
+            else
+                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
         }
 
         SIMD_INLINE void PoolingMaxHwc1(const float * src, size_t srcS, size_t srcC, size_t kH, size_t kW, const float32x4_t & min, float * dst)
