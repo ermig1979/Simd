@@ -5178,7 +5178,7 @@ SIMD_API void SimdSynetPoolingForwardMax(const float * src, size_t srcC, size_t 
 }
 
 typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans);
-volatile SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC3(SynetPreluLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
+volatile SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
 {

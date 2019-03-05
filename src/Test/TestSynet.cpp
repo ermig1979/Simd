@@ -1122,6 +1122,11 @@ namespace Test
             result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Avx512f::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(FUNC_PLF(Simd::Neon::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif
+
         return result;
     }
 

@@ -983,6 +983,89 @@ namespace Simd
             }
             Base::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
         }
+
+        SIMD_INLINE float32x4_t SynetPreluLayerForward(const float32x4_t & value, const float32x4_t & slope, const float32x4_t & _0)
+        {
+            float32x4_t positive = vmaxq_f32(_0, value);
+            float32x4_t negative = vminq_f32(_0, value);
+            return vmlaq_f32(positive, slope, negative);
+        }
+
+        template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, const float * slope, float32x4_t _0, float * dst, size_t offset)
+        {
+            Store<align>(dst + offset, SynetPreluLayerForward(Load<align>(src + offset), Load<align>(slope + offset), _0));
+        }
+
+        template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, float32x4_t slope, float32x4_t _0, float * dst, size_t offset)
+        {
+            Store<align>(dst + offset, SynetPreluLayerForward(Load<align>(src + offset), slope, _0));
+        }
+
+        template <bool align> void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (align)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst));
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            if ((trans || size == 1) && count != 1)
+            {
+                size_t aligned = AlignLo(count, QF);
+                size_t partial = AlignLo(count, F);
+                for (size_t j = 0; j < size; ++j)
+                {
+                    size_t i = 0;
+                    if (partial)
+                    {
+                        for (; i < aligned; i += QF)
+                        {
+                            SynetPreluLayerForward<align>(src, slope, _0, dst, i + F * 0);
+                            SynetPreluLayerForward<align>(src, slope, _0, dst, i + F * 1);
+                            SynetPreluLayerForward<align>(src, slope, _0, dst, i + F * 2);
+                            SynetPreluLayerForward<align>(src, slope, _0, dst, i + F * 3);
+                        }
+                        for (; i < partial; i += F)
+                            SynetPreluLayerForward<align>(src, slope, _0, dst, i);
+                    }
+                    for (; i < count; ++i)
+                        dst[i] = Base::SynetPreluLayerForward(src[i], slope[i]);
+                    src += count;
+                    dst += count;
+                }
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, QF);
+                size_t partial = AlignLo(size, F);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    size_t j = 0;
+                    if (partial)
+                    {
+                        float32x4_t _slope = vdupq_n_f32(slope[i]);
+                        for (; j < aligned; j += QF)
+                        {
+                            SynetPreluLayerForward<align>(src, _slope, _0, dst, j + F * 0);
+                            SynetPreluLayerForward<align>(src, _slope, _0, dst, j + F * 1);
+                            SynetPreluLayerForward<align>(src, _slope, _0, dst, j + F * 2);
+                            SynetPreluLayerForward<align>(src, _slope, _0, dst, j + F * 3);
+                        }
+                        for (; j < partial; j += F)
+                            SynetPreluLayerForward<align>(src, _slope, _0, dst, j);
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = Base::SynetPreluLayerForward(src[j], slope[i]);
+                    src += size;
+                    dst += size;
+                }
+            }
+        }
+
+        void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(slope) : Aligned(size)) && Aligned(src) && Aligned(dst))
+                SynetPreluLayerForward<true>(src, slope, count, size, dst, trans);
+            else
+                SynetPreluLayerForward<false>(src, slope, count, size, dst, trans);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
