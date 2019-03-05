@@ -1204,6 +1204,11 @@ namespace Test
             result = result && SynetRestrictRangeAutoTest(FUNC_RR(Simd::Avx512f::SynetRestrictRange), FUNC_RR(SimdSynetRestrictRange));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetRestrictRangeAutoTest(FUNC_RR(Simd::Neon::SynetRestrictRange), FUNC_RR(SimdSynetRestrictRange));
+#endif 
+
         return result;
     }
 
