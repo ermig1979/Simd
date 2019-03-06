@@ -116,6 +116,18 @@ namespace Simd
         }
     }
 #endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        SIMD_INLINE float32x4_t SynetPreluLayerForward(const float32x4_t & value, const float32x4_t & slope, const float32x4_t & zero)
+        {
+            float32x4_t positive = vmaxq_f32(zero, value);
+            float32x4_t negative = vminq_f32(zero, value);
+            return vmlaq_f32(positive, slope, negative);
+        }
+    }
+#endif//SIMD_NEON_ENABLE
 }
 
 #endif//__SimdSynet_h__

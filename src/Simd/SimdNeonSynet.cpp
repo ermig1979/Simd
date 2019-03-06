@@ -985,13 +985,6 @@ namespace Simd
             Base::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
         }
 
-        SIMD_INLINE float32x4_t SynetPreluLayerForward(const float32x4_t & value, const float32x4_t & slope, const float32x4_t & _0)
-        {
-            float32x4_t positive = vmaxq_f32(_0, value);
-            float32x4_t negative = vminq_f32(_0, value);
-            return vmlaq_f32(positive, slope, negative);
-        }
-
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float * src, const float * slope, float32x4_t _0, float * dst, size_t offset)
         {
             Store<align>(dst + offset, SynetPreluLayerForward(Load<align>(src + offset), Load<align>(slope + offset), _0));

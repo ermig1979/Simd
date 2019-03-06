@@ -246,7 +246,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(128, 3, 3, 128, _3, _1, _2, _1, _1, 128, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 2, 2, 64, _3, _1, _2, _0, _1, 64, a, t), f1, f2);
 #endif
-#if 0
+#if 1
         result = result && ConvolutionForwardAutoTest(Param(48, 256, 256, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(96, 128, 128, 96, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(192, 64, 64, 192, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
@@ -348,7 +348,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(48, 80, 80, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(8, 80, 80, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && ConvolutionForwardAutoTest(Param(32, 115, 63, 4, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(32, 115, 63, 2, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
@@ -397,6 +397,11 @@ namespace Test
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
             result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Avx512f::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ConvolutionForwardAutoTest(FUNC_C(Simd::Neon::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif
 
         return result;

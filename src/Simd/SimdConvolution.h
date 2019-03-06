@@ -511,6 +511,25 @@ namespace Simd
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst);
+
+        class ConvolutionGemmNN : public Base::ConvolutionGemmNN
+        {
+        public:
+            ConvolutionGemmNN(const ConvParam & p);
+        protected:
+            virtual void GemmAndBias(const float * src, float * dst);
+        };
+
+        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+            size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
+            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_NEON_ENABLE
 }
 
 #endif//__SimConvolution_h__
