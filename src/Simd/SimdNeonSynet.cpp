@@ -28,6 +28,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdPow.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -1238,6 +1239,96 @@ namespace Simd
                 SynetScaleLayerForward<true>(src, scale, bias, count, size, dst, trans);
             else
                 SynetScaleLayerForward<false>(src, scale, bias, count, size, dst, trans);
+        }
+
+        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        {
+            Exp exp;
+            if (inner == 1 && count == 2)
+            {
+                size_t aligned = Simd::AlignLo(outer, F);
+                size_t o = 0;
+                for (; o < aligned; o += F)
+                {
+                    float32x4x2_t s = Load2<false>(src);
+                    float32x4_t max = vmaxq_f32(s.val[0], s.val[1]);
+                    float32x4_t exp0 = exp.Exponent(vsubq_f32(s.val[0], max));
+                    float32x4_t exp1 = exp.Exponent(vsubq_f32(s.val[1], max));
+                    float32x4_t sum = vaddq_f32(exp0, exp1);
+                    float32x4x2_t d;
+                    d.val[0] = Div<1>(exp0, sum);
+                    d.val[1] = Div<1>(exp1, sum);
+                    Store2<false>(dst, d);
+                    src += DF;
+                    dst += DF;
+                }
+                for (; o < outer; ++o)
+                {
+                    float max = Simd::Max(src[0], src[1]);
+                    float exp0 = ::exp(src[0] - max);
+                    float exp1 = ::exp(src[1] - max);
+                    float sum = exp0 + exp1;
+                    dst[0] = exp0 / sum;
+                    dst[1] = exp1 / sum;
+                    src += 2;
+                    dst += 2;
+                }
+            }
+            else
+            {
+                size_t aligned = Simd::AlignLo(inner, F);
+                Array32f tmp(inner * 2);
+                const float * s;
+                float * max = tmp.data, *sum = tmp.data + inner, *d;
+                for (size_t o = 0; o < outer; ++o)
+                {
+                    memcpy(max, src, inner * sizeof(float));
+                    s = src + inner;
+                    for (size_t c = 1; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                            Store<false>(max + i, vmaxq_f32(Load<false>(s + i), Load<false>(max + i)));
+                        for (; i < inner; ++i)
+                            max[i] = Simd::Max(max[i], s[i]);
+                        s += inner;
+                    }
+
+                    s = src;
+                    d = dst;
+                    memset(sum, 0, inner * sizeof(float));
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                        {
+                            float32x4_t _d = exp.Exponent(vsubq_f32(Load<false>(s + i), Load<false>(max + i)));
+                            Store<false>(d + i, _d);
+                            Store<false>(sum + i, vaddq_f32(_d, Load<false>(sum + i)));
+                        }
+                        for (; i < inner; ++i)
+                        {
+                            d[i] = ::exp(s[i] - max[i]);
+                            sum[i] += d[i];
+                        }
+                        s += inner;
+                        d += inner;
+                    }
+
+                    d = dst;
+                    for (size_t c = 0; c < count; ++c)
+                    {
+                        size_t i = 0;
+                        for (; i < aligned; i += F)
+                            Store<false>(d + i, Div<1>(Load<false>(d + i), Load<false>(sum + i)));
+                        for (; i < inner; ++i)
+                            d[i] /= sum[i];
+                        d += inner;
+                    }
+                    src += count * inner;
+                    dst += count * inner;
+                }
+            }
         }
     }
 #endif// SIMD_NEON_ENABLE
