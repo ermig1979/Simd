@@ -535,6 +535,13 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
+        class ConvolutionWinograd2x3p : public Base::ConvolutionWinograd2x3p
+        {
+        public:
+            ConvolutionWinograd2x3p(const ConvParam & p);
+            virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);

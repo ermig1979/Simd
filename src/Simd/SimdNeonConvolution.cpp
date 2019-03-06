@@ -255,6 +255,32 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
+            : Base::ConvolutionWinograd2x3p(p)
+        {
+            _setFilter = Neon::Winograd2x3SetFilter;
+            _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
+        }
+
+        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
+        {
+            const ConvParam & p = _param;
+            float * bufS = Buffer(buf);
+            float * bufD = bufS + _strideS * _count;
+            Neon::Winograd2x3SetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
+            for (size_t i = 0; i < _count; ++i)
+            {
+                if (p.srcT)
+                    _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
+                else
+                    _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+            }
+            Neon::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
+            Neon::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
@@ -262,6 +288,8 @@ namespace Simd
             ConvParam param(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
             if (!param.Valid())
                 return NULL;
+            else if (ConvolutionWinograd2x3p::Preferable(param))
+                return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionGemmNT::Preferable(param))
                 return new ConvolutionGemmNT(param);
             else
