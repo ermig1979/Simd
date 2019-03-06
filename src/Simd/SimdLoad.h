@@ -1094,6 +1094,31 @@ namespace Simd
 #endif
         }
 
+        template <bool align> SIMD_INLINE float32x4x3_t Load3(const float * p);
+
+        template <> SIMD_INLINE float32x4x3_t Load3<false>(const float * p)
+        {
+#if defined(__GNUC__) && SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            return vld3q_f32(p);
+        }
+
+        template <> SIMD_INLINE float32x4x3_t Load3<true>(const float * p)
+        {
+#if defined(__GNUC__)
+#if SIMD_NEON_PREFECH_SIZE
+            __builtin_prefetch(p + SIMD_NEON_PREFECH_SIZE);
+#endif
+            float * _p = (float *)__builtin_assume_aligned(p, 16);
+            return vld3q_f32(_p);
+#elif defined(_MSC_VER)
+            return vld3q_f32_ex(p, 128);
+#else
+            return vld3q_f32(p);
+#endif
+        }
+
         template <bool align> SIMD_INLINE float32x4x4_t Load4(const float * p);
 
         template <> SIMD_INLINE float32x4x4_t Load4<false>(const float * p)

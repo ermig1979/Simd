@@ -540,6 +540,19 @@ namespace Simd
         public:
             ConvolutionWinograd2x3p(const ConvParam & p);
             virtual void Forward(const float * src, float * buf, float * dst);
+
+            static bool Preferable(const ConvParam & p);
+        };
+
+        class ConvolutionDirectChw : public Base::ConvolutionDirectChw
+        {
+        public:
+            ConvolutionDirectChw(const ConvParam & p);
+
+            static bool Preferable(const ConvParam & p);
+
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
