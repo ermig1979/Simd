@@ -555,6 +555,16 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
+        class ConvolutionDirectHwc : public Base::ConvolutionDirectHwc
+        {
+        public:
+            ConvolutionDirectHwc(const ConvParam & p);
+
+            static bool Preferable(const ConvParam & p);
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
         class ConvolutionDepthwiseDotProduct : public Base::ConvolutionDepthwiseDotProduct
         {
         public:
