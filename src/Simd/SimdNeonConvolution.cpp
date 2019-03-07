@@ -599,6 +599,65 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ConvolutionDepthwiseDotProduct::ConvolutionDepthwiseDotProduct(const ConvParam & p)
+            : Base::ConvolutionDepthwiseDotProduct(p)
+        {
+        }
+
+        SIMD_INLINE void DotProduct(const float * a, const float * b, size_t offset, float32x4_t & sum)
+        {
+            float32x4_t _a = Load<false>(a + offset);
+            float32x4_t _b = Load<false>(b + offset);
+            sum = vmlaq_f32(sum, _a, _b);
+        }
+
+        SIMD_INLINE float DotProduct(const float * a, const float * b, size_t size)
+        {
+            float sum = 0;
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            if (partialAlignedSize)
+            {
+                float32x4_t sums[4] = { vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f), vdupq_n_f32(0.0f) };
+                if (fullAlignedSize)
+                {
+                    for (; i < fullAlignedSize; i += QF)
+                    {
+                        DotProduct(a, b, i + F * 0, sums[0]);
+                        DotProduct(a, b, i + F * 1, sums[1]);
+                        DotProduct(a, b, i + F * 2, sums[2]);
+                        DotProduct(a, b, i + F * 3, sums[3]);
+                    }
+                    sums[0] = vaddq_f32(vaddq_f32(sums[0], sums[1]), vaddq_f32(sums[2], sums[3]));
+                }
+                for (; i < partialAlignedSize; i += F)
+                    DotProduct(a, b, i, sums[0]);
+                sum += ExtractSum32f(sums[0]);
+            }
+            for (; i < size; ++i)
+                sum += a[i] * b[i];
+            return sum;
+        }
+
+        void ConvolutionDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
+        {
+            if (_bias)
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+            }
+            else
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+            }
+            if (_param.activation)
+                ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
@@ -606,6 +665,8 @@ namespace Simd
             ConvParam param(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
             if (!param.Valid())
                 return NULL;
+            else if (ConvolutionDepthwiseDotProduct::Preferable(param))
+                return new ConvolutionDepthwiseDotProduct(param);
             else if (ConvolutionWinograd2x3p::Preferable(param))
                 return new ConvolutionWinograd2x3p(param);
             else if (ConvolutionDirectChw::Preferable(param))
