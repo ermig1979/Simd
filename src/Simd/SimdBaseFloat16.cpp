@@ -160,5 +160,12 @@ namespace Simd
             }
             *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
+
+        void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances)
+        {
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
+                    CosineDistance16f(A[i], B[j], K, distances + i * N + j);
+        }
     }
 }

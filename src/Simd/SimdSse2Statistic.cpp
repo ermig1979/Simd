@@ -83,7 +83,7 @@ namespace Simd
                 GetStatistic<false>(src, stride, width, height, min, max, average);
         }
 
-        template <bool small> void GetMoments16(__m128i row, __m128i col,
+        template <bool little> void GetMoments16(__m128i row, __m128i col,
             __m128i & x, __m128i & y, __m128i & xx, __m128i & xy, __m128i & yy);
 
         template<> SIMD_INLINE void GetMoments16<true>(__m128i row, __m128i col,
@@ -106,21 +106,21 @@ namespace Simd
             yy = _mm_add_epi64(yy, HorizontalSum32(_mm_madd_epi16(row, row)));
         }
 
-        template <bool small> SIMD_INLINE void GetMoments8(__m128i mask, __m128i & row, __m128i & col,
+        template <bool little> SIMD_INLINE void GetMoments8(__m128i mask, __m128i & row, __m128i & col,
             __m128i & area, __m128i & x, __m128i & y, __m128i & xx, __m128i & xy, __m128i & yy)
         {
             area = _mm_add_epi64(area, _mm_sad_epu8(_mm_and_si128(K8_01, mask), K_ZERO));
 
             const __m128i lo = _mm_cmpeq_epi16(_mm_unpacklo_epi8(mask, K_ZERO), K16_00FF);
-            GetMoments16<small>(_mm_and_si128(lo, row), _mm_and_si128(lo, col), x, y, xx, xy, yy);
+            GetMoments16<little>(_mm_and_si128(lo, row), _mm_and_si128(lo, col), x, y, xx, xy, yy);
             col = _mm_add_epi16(col, K16_0008);
 
             const __m128i hi = _mm_cmpeq_epi16(_mm_unpackhi_epi8(mask, K_ZERO), K16_00FF);
-            GetMoments16<small>(_mm_and_si128(hi, row), _mm_and_si128(hi, col), x, y, xx, xy, yy);
+            GetMoments16<little>(_mm_and_si128(hi, row), _mm_and_si128(hi, col), x, y, xx, xy, yy);
             col = _mm_add_epi16(col, K16_0008);
         }
 
-        template <bool align> void GetMomentsSmall(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
+        template <bool align> void GetMomentsLittle(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             __m128i & area, __m128i & x, __m128i & y, __m128i & xx, __m128i & xy, __m128i & yy)
         {
             size_t alignedWidth = AlignLo(width, A);
@@ -196,7 +196,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE bool IsSmall(uint64_t width, uint64_t height)
+        SIMD_INLINE bool IsLittle(uint64_t width, uint64_t height)
         {
             return
                 width*width*width < 0x300000000ULL &&
@@ -218,8 +218,8 @@ namespace Simd
             __m128i _xy = _mm_setzero_si128();
             __m128i _yy = _mm_setzero_si128();
 
-            if (IsSmall(width, height))
-                GetMomentsSmall<align>(mask, stride, width, height, index, _area, _x, _y, _xx, _xy, _yy);
+            if (IsLittle(width, height))
+                GetMomentsLittle<align>(mask, stride, width, height, index, _area, _x, _y, _xx, _xy, _yy);
             else
                 GetMomentsLarge<align>(mask, stride, width, height, index, _area, _x, _y, _xx, _xy, _yy);
 

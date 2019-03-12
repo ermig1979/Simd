@@ -2131,6 +2131,26 @@ SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size
         Base::CosineDistance16f(a, b, size, distance);
 }
 
+SIMD_API void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && K >= Avx512bw::F)
+        Avx512bw::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && K >= Avx2::F)
+        Avx2::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && K >= Neon::F)
+        Neon::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+    else
+#endif
+        Base::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+}
+
 SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
 {
 #ifdef SIMD_AVX512BW_ENABLE

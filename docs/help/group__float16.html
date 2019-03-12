@@ -61,6 +61,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga716e819eece22d718bb0313dde3b0782"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#ga716e819eece22d718bb0313dde3b0782">SimdCosineDistance16f</a> (const uint16_t *a, const uint16_t *b, size_t size, float *distance)</td></tr>
 <tr class="memdesc:ga716e819eece22d718bb0313dde3b0782"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates cosine distance of two 16-bit float arrays.  <a href="#ga716e819eece22d718bb0313dde3b0782">More...</a><br /></td></tr>
 <tr class="separator:ga716e819eece22d718bb0313dde3b0782"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2a95eb77c9139ab7808576deffe97d91"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#ga2a95eb77c9139ab7808576deffe97d91">SimdCosineDistancesMxNa16f</a> (size_t M, size_t N, size_t K, const uint16_t *const *A, const uint16_t *const *B, float *distances)</td></tr>
+<tr class="memdesc:ga2a95eb77c9139ab7808576deffe97d91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates mutual cosine distance of two arrays of 16-bit float arrays.  <a href="#ga2a95eb77c9139ab7808576deffe97d91">More...</a><br /></td></tr>
+<tr class="separator:ga2a95eb77c9139ab7808576deffe97d91"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for conversion between 16-bit and 32-bit float numbers and other. </p>
@@ -253,6 +256,72 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to the second 16-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">distance</td><td>- a pointer to 32-bit float with cosine distance. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga2a95eb77c9139ab7808576deffe97d91"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2a95eb77c9139ab7808576deffe97d91">&#9670;&nbsp;</a></span>SimdCosineDistancesMxNa16f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdCosineDistancesMxNa16f </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>M</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>K</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint16_t *const *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint16_t *const *&#160;</td>
+          <td class="paramname"><em>B</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>distances</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates mutual cosine distance of two arrays of 16-bit float arrays. </p>
+<p>Algorithm description: </p><pre class="fragment">distances[i, j] = 1 - Sum(A[i][k]*B[j][k])/Sqrt(Sum(A[i][k]*A[i][k])*Sum(B[j][k]*B[j][k]));
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a number of A arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a number of B arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- a size of A and B arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to the first array with pointers to 16-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to the second array with pointers to 16-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">distances</td><td>- a pointer to result 32-bit float array with cosine distances. It size must be M*N. </td></tr>
   </table>
   </dd>
 </dl>
