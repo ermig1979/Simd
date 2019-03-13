@@ -76,4 +76,6 @@
 
 //#define SIMD_RUNTIME_GEMM_STATISTIC
 
+//#define SIMD_FUTURE_DISABLE
+
 #endif//__SimdConfig_h__
