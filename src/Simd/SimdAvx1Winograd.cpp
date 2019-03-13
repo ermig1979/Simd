@@ -529,7 +529,6 @@ namespace Simd
                 size_t dstW16 = AlignLo(dstWidth, 16);
                 __m256 tailMask = LeftNotZero(8 + dstW2 - dstWidth);
                 size_t tailCol = dstW2 < dstWidth ? dstWidth - 15 : dstWidth - 16;
-                size_t tailRow = dstH2 < dstHeight ? dstHeight - 1 : dstHeight - 2;
                 for (size_t c = 0; c < dstChannels; ++c)
                 {
                     size_t row = 0, tileY = 0;
