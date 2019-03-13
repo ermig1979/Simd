@@ -111,7 +111,6 @@ namespace Simd
                     {
                         for (size_t i = 0; i < count; ++i)
                         {
-                            float shift = bias[i];
                             for (size_t j = 0; j < size; ++j)
                                 dst[j] = Simd::RestrictRange(dst[j] + bias[i], lower, upper);
                             dst += size;

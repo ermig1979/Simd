@@ -40,13 +40,13 @@ namespace Test
 
             Param(size_t sC, size_t sH, size_t sW, SimdBool sT, size_t dC, SimdBool dT, size_t kY, size_t kX, size_t dY, size_t dX, 
                 size_t sY, size_t sX, size_t pY, size_t pX, size_t pH, size_t pW, size_t g, ::SimdConvolutionActivationType a)
-                : srcC(sC), srcH(sH), srcW(sW), srcT(sT), dstC(dC), dstT(dT), kernelY(kY), kernelX(kX), dilationY(dY), dilationX(dX), 
-                strideY(sY), strideX(sX), padY(pY), padX(pX), padH(pH), padW(pW), group(g), activation(a)
+                : srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(kY), kernelX(kX), dilationY(dY), dilationX(dX), 
+                strideY(sY), strideX(sX), padY(pY), padX(pX), padH(pH), padW(pW), group(g), srcT(sT), dstT(dT), activation(a)
             {}
 
             Param(size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size d, Size s, Size b, Size e, size_t g, ::SimdConvolutionActivationType a, ::SimdBool t)
-                : srcC(sC), srcH(sH), srcW(sW), srcT(t), dstC(dC), dstT(t), kernelY(k.y), kernelX(k.x), dilationY(d.y), dilationX(d.x), 
-                strideY(s.y), strideX(s.x), padY(b.y), padX(b.x), padH(e.y), padW(e.x), group(g), activation(a)
+                : srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(k.y), kernelX(k.x), dilationY(d.y), dilationX(d.x), 
+                strideY(s.y), strideX(s.x), padY(b.y), padX(b.x), padH(e.y), padW(e.x), group(g), srcT(t), dstT(t), activation(a)
             {}
         };
 

@@ -240,7 +240,6 @@ namespace Simd
                 assert(Aligned(alpha) && Aligned(alphaStride));
             }
 
-            uint8x16_t _channel[4];
             switch (channelCount)
             {
             case 1:

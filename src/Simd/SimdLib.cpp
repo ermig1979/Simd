@@ -2108,6 +2108,11 @@ SIMD_API void SimdSquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b
         Avx2::SquaredDifferenceSum16f(a, b, size, sum);
     else
 #endif
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Neon::Enable && size >= Neon::F)
+        Neon::SquaredDifferenceSum16f(a, b, size, sum);
+    else
+#endif
         Base::SquaredDifferenceSum16f(a, b, size, sum);
 }
 
@@ -2123,7 +2128,7 @@ SIMD_API void SimdCosineDistance16f(const uint16_t * a, const uint16_t * b, size
         Avx2::CosineDistance16f(a, b, size, distance);
     else
 #endif
-#ifdef SIMD_NEON_ENABLE
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     if (Neon::Enable && size >= Neon::F)
         Neon::CosineDistance16f(a, b, size, distance);
     else
@@ -2143,7 +2148,7 @@ SIMD_API void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uin
         Avx2::CosineDistancesMxNa16f(M, N, K, A, B, distances);
     else
 #endif
-#ifdef SIMD_NEON_ENABLE
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
     if (Neon::Enable && K >= Neon::F)
         Neon::CosineDistancesMxNa16f(M, N, K, A, B, distances);
     else

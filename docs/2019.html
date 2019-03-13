@@ -37,13 +37,31 @@
 <ul>
  <li>Base implementation, AVX2, AVX-512BW and NEON optimizations of function CosineDistancesMxNa16f.</li>
 </ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Compiler error (using of name 'small' which can be system macro) in file SimdSse2Statistic.cpp.</li>
+ <li>Compiler warning (unused variable) in function Neon::SetFlushToZero.</li>
+ <li>Compiler warning (unused variable) in function Base::ConvolutionBiasAndActivation.</li>
+ <li>Compiler error (Visual Studio for Android) in file SimdSsse3Transform.cpp.</li>
+ <li>Compiler error (Visual Studio for Android) in function SimdCosineDistance16f.</li>
+ <li>Low performance of function SimdSquaredDifferenceSum16f.</li>
+ <li>Compiler warning (unused variable) in function Neon::AlphaFilling.</li>
+ <li>Compiler warning (unused variable) in function Neon::Fill32f.</li>
+ <li>Compiler warning (wrong initialization order) in file SimdNeonGemm32f.cpp.</li>
+ <li>Compiler warning (unused variable) in function Neon::SynetInnerProductLayerForward.</li>
+ <li>Compiler warning (unused variable) in file TestConvolution.cpp.</li>
+</ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
 <ul>
  <li>Tests for verifying functionality of function CosineDistancesMxNa16f.</li>
 </ul>
-
+<h5>Bug fixing</h5>
+<ul>
+ <li>Compiler error (Visual Studio for Android) in file TestFloat16.cpp.</li>
+ <li>Compiler warning (wrong initialization order) in file SimdNeonGemm32f.cpp.</li>
+</ul>
 
 <a href="#HOME">Home</a> 
 <hr/>

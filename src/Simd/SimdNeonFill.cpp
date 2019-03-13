@@ -103,7 +103,6 @@ namespace Simd
                 const float * end = dst + size;
                 const float * endF = dst + AlignLo(size, F);
                 const float * endQF = dst + AlignLo(size, QF);
-                size_t i = 0;
                 float32x4_t _v = vdupq_n_f32(v);
                 for (; dst < endQF; dst += QF)
                 {

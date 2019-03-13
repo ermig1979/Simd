@@ -284,7 +284,7 @@ namespace Test
             result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Avx512bw::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
 #endif
 
-#ifdef SIMD_NEON_ENABLE
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable)
             result = result && DifferenceSum16fAutoTest(EPS, FUNC_S(Simd::Neon::CosineDistance16f), FUNC_S(SimdCosineDistance16f), check);
 #endif
@@ -390,7 +390,7 @@ namespace Test
             result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
 #endif
 
-#ifdef SIMD_NEON_ENABLE
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
         if (Simd::Neon::Enable)
             result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
 #endif

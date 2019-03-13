@@ -703,7 +703,6 @@ namespace Simd
             size_t sizeF = AlignLo(size, F);
             size_t sizeDF = AlignLo(size, DF);
             size_t sizeQF = AlignLo(size, QF);
-            size_t aligned = AlignLo(size, QF);
             size_t i = 0;
             for (; i < count2; i += 2)
             {

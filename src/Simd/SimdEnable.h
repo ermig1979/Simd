@@ -537,6 +537,8 @@ namespace Simd
         SIMD_INLINE void SetFlushToZero(SimdBool value)
         {
 #if defined(__GNUC__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-variable"
             unsigned int fpscr;
             if (value)
                 __asm__ volatile("vmrs r0, fpscr\n"
@@ -546,6 +548,7 @@ namespace Simd
                 __asm__ volatile("vmrs r0, fpscr\n"
                     "bic r0, $(1 << 24)\n"
                     "vmsr fpscr, r0" : : : "r0");
+#pragma GCC diagnostic pop
 #endif
         }
     }

@@ -58,9 +58,9 @@ namespace Simd
             , _kernelMT(kernelMT)
             , _kernelTM(kernelTM)
             , _kernelTT(kernelTT)
-            , _packA(packA)
-            , _packB(packB)
             , _scaleC(scaleC)
+            , _packB(packB)
+            , _packA(packA)
         {
             _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
             _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));

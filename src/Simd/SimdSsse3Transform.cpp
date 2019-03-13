@@ -238,6 +238,6 @@ namespace Simd
             default: assert(0);
            }
         }
-#endif// SIMD_SSSE3_ENABLE
     }
+#endif// SIMD_SSSE3_ENABLE
 }
