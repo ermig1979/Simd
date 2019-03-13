@@ -521,35 +521,43 @@ namespace Simd
 
         const bool Enable = SupportedByCPU() && SupportedByOS();
 
+        SIMD_INLINE unsigned int GetStatusWord()
+        {
+            unsigned int dst;
+#if defined(__GNUC__)
+#if defined(SIMD_ARM64_ENABLE)
+            __asm__ volatile("mrs %[dst], FPCR" : [dst] "=r" (dst));
+#else
+            __asm__ volatile("vmrs %[dst], FPSCR" : [dst] "=r" (dst));
+#endif
+#endif
+            return dst;
+        }
+
+        SIMD_INLINE void SetStatusWord(unsigned int src)
+        {
+#if defined(__GNUC__)
+#if defined(SIMD_ARM64_ENABLE)
+            __asm__ volatile("msr FPCR, %[src]" : : [src] "r" (src));
+#else
+            __asm__ volatile("vmsr FPSCR, %[src]" : : [src] "r" (src));
+#endif
+#endif
+        }
+
         const unsigned int FPSCR_FTZ = 1 << 24;
 
         SIMD_INLINE SimdBool GetFlushToZero()
         {
-#if defined(__GNUC__)
-            unsigned int fpscr;
-            __asm__ volatile("vmrs %0, fpscr " : "=r" (fpscr));
-            return fpscr & FPSCR_FTZ ? SimdTrue : SimdFalse;
-#else
-            return SimdFalse;
-#endif
+            return GetStatusWord() & FPSCR_FTZ ? SimdTrue : SimdFalse;
         }
 
         SIMD_INLINE void SetFlushToZero(SimdBool value)
         {
-#if defined(__GNUC__)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunused-variable"
-            unsigned int fpscr;
             if (value)
-                __asm__ volatile("vmrs r0, fpscr\n"
-                    "orr r0, $(1 << 24)\n"
-                    "vmsr fpscr, r0" : : : "r0");
+                SetStatusWord(GetStatusWord() | FPSCR_FTZ);
             else
-                __asm__ volatile("vmrs r0, fpscr\n"
-                    "bic r0, $(1 << 24)\n"
-                    "vmsr fpscr, r0" : : : "r0");
-#pragma GCC diagnostic pop
-#endif
+                SetStatusWord(GetStatusWord() & ~FPSCR_FTZ);
         }
     }
 #endif
