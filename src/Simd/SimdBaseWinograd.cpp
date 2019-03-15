@@ -363,129 +363,192 @@ namespace Simd
             }
         }
 
-        void Winograd4x3SetInput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        void Winograd4x3SetInput1(const float src[36], float * dst, size_t stride)
         {
-            float tmp1[36];
-            tmp1[0] = src[0 * srcStride + 0];
-            tmp1[1] = src[0 * srcStride + 1];
-            tmp1[2] = src[0 * srcStride + 2];
-            tmp1[3] = src[0 * srcStride + 3];
-            tmp1[4] = src[0 * srcStride + 4];
-            tmp1[5] = src[0 * srcStride + 5];
-            tmp1[6] = src[1 * srcStride + 0];
-            tmp1[7] = src[1 * srcStride + 1];
-            tmp1[8] = src[1 * srcStride + 2];
-            tmp1[9] = src[1 * srcStride + 3];
-            tmp1[10] = src[1 * srcStride + 4];
-            tmp1[11] = src[1 * srcStride + 5];
-            tmp1[12] = src[2 * srcStride + 0];
-            tmp1[13] = src[2 * srcStride + 1];
-            tmp1[14] = src[2 * srcStride + 2];
-            tmp1[15] = src[2 * srcStride + 3];
-            tmp1[16] = src[2 * srcStride + 4];
-            tmp1[17] = src[2 * srcStride + 5];
-            tmp1[18] = src[3 * srcStride + 0];
-            tmp1[19] = src[3 * srcStride + 1];
-            tmp1[20] = src[3 * srcStride + 2];
-            tmp1[21] = src[3 * srcStride + 3];
-            tmp1[22] = src[3 * srcStride + 4];
-            tmp1[23] = src[3 * srcStride + 5];
-            tmp1[24] = src[4 * srcStride + 0];
-            tmp1[25] = src[4 * srcStride + 1];
-            tmp1[26] = src[4 * srcStride + 2];
-            tmp1[27] = src[4 * srcStride + 3];
-            tmp1[28] = src[4 * srcStride + 4];
-            tmp1[29] = src[4 * srcStride + 5];
-            tmp1[30] = src[5 * srcStride + 0];
-            tmp1[31] = src[5 * srcStride + 1];
-            tmp1[32] = src[5 * srcStride + 2];
-            tmp1[33] = src[5 * srcStride + 3];
-            tmp1[34] = src[5 * srcStride + 4];
-            tmp1[35] = src[5 * srcStride + 5];
+            float tmp[36];
+            tmp[0] = 4 * src[0] - 5 * src[12] + src[24];
+            tmp[1] = 4 * src[1] - 5 * src[13] + src[25];
+            tmp[2] = 4 * src[2] - 5 * src[14] + src[26];
+            tmp[3] = 4 * src[3] - 5 * src[15] + src[27];
+            tmp[4] = 4 * src[4] - 5 * src[16] + src[28];
+            tmp[5] = 4 * src[5] - 5 * src[17] + src[29];
+            tmp[6] = -4 * src[6] - 4 * src[12] + src[18] + src[24];
+            tmp[7] = -4 * src[7] - 4 * src[13] + src[19] + src[25];
+            tmp[8] = -4 * src[8] - 4 * src[14] + src[20] + src[26];
+            tmp[9] = -4 * src[9] - 4 * src[15] + src[21] + src[27];
+            tmp[10] = -4 * src[10] - 4 * src[16] + src[22] + src[28];
+            tmp[11] = -4 * src[11] - 4 * src[17] + src[23] + src[29];
+            tmp[12] = 4 * src[6] - 4 * src[12] - src[18] + src[24];
+            tmp[13] = 4 * src[7] - 4 * src[13] - src[19] + src[25];
+            tmp[14] = 4 * src[8] - 4 * src[14] - src[20] + src[26];
+            tmp[15] = 4 * src[9] - 4 * src[15] - src[21] + src[27];
+            tmp[16] = 4 * src[10] - 4 * src[16] - src[22] + src[28];
+            tmp[17] = 4 * src[11] - 4 * src[17] - src[23] + src[29];
+            tmp[18] = -2 * src[6] - src[12] + 2 * src[18] + src[24];
+            tmp[19] = -2 * src[7] - src[13] + 2 * src[19] + src[25];
+            tmp[20] = -2 * src[8] - src[14] + 2 * src[20] + src[26];
+            tmp[21] = -2 * src[9] - src[15] + 2 * src[21] + src[27];
+            tmp[22] = -2 * src[10] - src[16] + 2 * src[22] + src[28];
+            tmp[23] = -2 * src[11] - src[17] + 2 * src[23] + src[29];
+            tmp[24] = 2 * src[6] - src[12] - 2 * src[18] + src[24];
+            tmp[25] = 2 * src[7] - src[13] - 2 * src[19] + src[25];
+            tmp[26] = 2 * src[8] - src[14] - 2 * src[20] + src[26];
+            tmp[27] = 2 * src[9] - src[15] - 2 * src[21] + src[27];
+            tmp[28] = 2 * src[10] - src[16] - 2 * src[22] + src[28];
+            tmp[29] = 2 * src[11] - src[17] - 2 * src[23] + src[29];
+            tmp[30] = 4 * src[6] - 5 * src[18] + src[30];
+            tmp[31] = 4 * src[7] - 5 * src[19] + src[31];
+            tmp[32] = 4 * src[8] - 5 * src[20] + src[32];
+            tmp[33] = 4 * src[9] - 5 * src[21] + src[33];
+            tmp[34] = 4 * src[10] - 5 * src[22] + src[34];
+            tmp[35] = 4 * src[11] - 5 * src[23] + src[35];
 
-            float tmp2[36];
-            tmp2[0] = 4 * tmp1[0] - 5 * tmp1[12] + tmp1[24];
-            tmp2[1] = 4 * tmp1[1] - 5 * tmp1[13] + tmp1[25];
-            tmp2[2] = 4 * tmp1[2] - 5 * tmp1[14] + tmp1[26];
-            tmp2[3] = 4 * tmp1[3] - 5 * tmp1[15] + tmp1[27];
-            tmp2[4] = 4 * tmp1[4] - 5 * tmp1[16] + tmp1[28];
-            tmp2[5] = 4 * tmp1[5] - 5 * tmp1[17] + tmp1[29];
-            tmp2[6] = -4 * tmp1[6] - 4 * tmp1[12] + tmp1[18] + tmp1[24];
-            tmp2[7] = -4 * tmp1[7] - 4 * tmp1[13] + tmp1[19] + tmp1[25];
-            tmp2[8] = -4 * tmp1[8] - 4 * tmp1[14] + tmp1[20] + tmp1[26];
-            tmp2[9] = -4 * tmp1[9] - 4 * tmp1[15] + tmp1[21] + tmp1[27];
-            tmp2[10] = -4 * tmp1[10] - 4 * tmp1[16] + tmp1[22] + tmp1[28];
-            tmp2[11] = -4 * tmp1[11] - 4 * tmp1[17] + tmp1[23] + tmp1[29];
-            tmp2[12] = 4 * tmp1[6] - 4 * tmp1[12] - tmp1[18] + tmp1[24];
-            tmp2[13] = 4 * tmp1[7] - 4 * tmp1[13] - tmp1[19] + tmp1[25];
-            tmp2[14] = 4 * tmp1[8] - 4 * tmp1[14] - tmp1[20] + tmp1[26];
-            tmp2[15] = 4 * tmp1[9] - 4 * tmp1[15] - tmp1[21] + tmp1[27];
-            tmp2[16] = 4 * tmp1[10] - 4 * tmp1[16] - tmp1[22] + tmp1[28];
-            tmp2[17] = 4 * tmp1[11] - 4 * tmp1[17] - tmp1[23] + tmp1[29];
-            tmp2[18] = -2 * tmp1[6] - tmp1[12] + 2 * tmp1[18] + tmp1[24];
-            tmp2[19] = -2 * tmp1[7] - tmp1[13] + 2 * tmp1[19] + tmp1[25];
-            tmp2[20] = -2 * tmp1[8] - tmp1[14] + 2 * tmp1[20] + tmp1[26];
-            tmp2[21] = -2 * tmp1[9] - tmp1[15] + 2 * tmp1[21] + tmp1[27];
-            tmp2[22] = -2 * tmp1[10] - tmp1[16] + 2 * tmp1[22] + tmp1[28];
-            tmp2[23] = -2 * tmp1[11] - tmp1[17] + 2 * tmp1[23] + tmp1[29];
-            tmp2[24] = 2 * tmp1[6] - tmp1[12] - 2 * tmp1[18] + tmp1[24];
-            tmp2[25] = 2 * tmp1[7] - tmp1[13] - 2 * tmp1[19] + tmp1[25];
-            tmp2[26] = 2 * tmp1[8] - tmp1[14] - 2 * tmp1[20] + tmp1[26];
-            tmp2[27] = 2 * tmp1[9] - tmp1[15] - 2 * tmp1[21] + tmp1[27];
-            tmp2[28] = 2 * tmp1[10] - tmp1[16] - 2 * tmp1[22] + tmp1[28];
-            tmp2[29] = 2 * tmp1[11] - tmp1[17] - 2 * tmp1[23] + tmp1[29];
-            tmp2[30] = 4 * tmp1[6] - 5 * tmp1[18] + tmp1[30];
-            tmp2[31] = 4 * tmp1[7] - 5 * tmp1[19] + tmp1[31];
-            tmp2[32] = 4 * tmp1[8] - 5 * tmp1[20] + tmp1[32];
-            tmp2[33] = 4 * tmp1[9] - 5 * tmp1[21] + tmp1[33];
-            tmp2[34] = 4 * tmp1[10] - 5 * tmp1[22] + tmp1[34];
-            tmp2[35] = 4 * tmp1[11] - 5 * tmp1[23] + tmp1[35];
-
-            dst[0 * dstStride] = tmp2[0] * 4 - tmp2[2] * 5 + tmp2[4];
-            dst[1 * dstStride] = -tmp2[1] * 4 - tmp2[2] * 4 + tmp2[3] + tmp2[4];
-            dst[2 * dstStride] = tmp2[1] * 4 - tmp2[2] * 4 - tmp2[3] + tmp2[4];
-            dst[3 * dstStride] = -tmp2[1] * 2 - tmp2[2] + tmp2[3] * 2 + tmp2[4];
-            dst[4 * dstStride] = tmp2[1] * 2 - tmp2[2] - tmp2[3] * 2 + tmp2[4];
-            dst[5 * dstStride] = tmp2[1] * 4 - tmp2[3] * 5 + tmp2[5];
-            dst[6 * dstStride] = tmp2[6] * 4 - tmp2[8] * 5 + tmp2[10];
-            dst[7 * dstStride] = -tmp2[7] * 4 - tmp2[8] * 4 + tmp2[9] + tmp2[10];
-            dst[8 * dstStride] = tmp2[7] * 4 - tmp2[8] * 4 - tmp2[9] + tmp2[10];
-            dst[9 * dstStride] = -tmp2[7] * 2 - tmp2[8] + tmp2[9] * 2 + tmp2[10];
-            dst[10 * dstStride] = tmp2[7] * 2 - tmp2[8] - tmp2[9] * 2 + tmp2[10];
-            dst[11 * dstStride] = tmp2[7] * 4 - tmp2[9] * 5 + tmp2[11];
-            dst[12 * dstStride] = tmp2[12] * 4 - tmp2[14] * 5 + tmp2[16];
-            dst[13 * dstStride] = -tmp2[13] * 4 - tmp2[14] * 4 + tmp2[15] + tmp2[16];
-            dst[14 * dstStride] = tmp2[13] * 4 - tmp2[14] * 4 - tmp2[15] + tmp2[16];
-            dst[15 * dstStride] = -tmp2[13] * 2 - tmp2[14] + tmp2[15] * 2 + tmp2[16];
-            dst[16 * dstStride] = tmp2[13] * 2 - tmp2[14] - tmp2[15] * 2 + tmp2[16];
-            dst[17 * dstStride] = tmp2[13] * 4 - tmp2[15] * 5 + tmp2[17];
-            dst[18 * dstStride] = tmp2[18] * 4 - tmp2[20] * 5 + tmp2[22];
-            dst[19 * dstStride] = -tmp2[19] * 4 - tmp2[20] * 4 + tmp2[21] + tmp2[22];
-            dst[20 * dstStride] = tmp2[19] * 4 - tmp2[20] * 4 - tmp2[21] + tmp2[22];
-            dst[21 * dstStride] = -tmp2[19] * 2 - tmp2[20] + tmp2[21] * 2 + tmp2[22];
-            dst[22 * dstStride] = tmp2[19] * 2 - tmp2[20] - tmp2[21] * 2 + tmp2[22];
-            dst[23 * dstStride] = tmp2[19] * 4 - tmp2[21] * 5 + tmp2[23];
-            dst[24 * dstStride] = tmp2[24] * 4 - tmp2[26] * 5 + tmp2[28];
-            dst[25 * dstStride] = -tmp2[25] * 4 - tmp2[26] * 4 + tmp2[27] + tmp2[28];
-            dst[26 * dstStride] = tmp2[25] * 4 - tmp2[26] * 4 - tmp2[27] + tmp2[28];
-            dst[27 * dstStride] = -tmp2[25] * 2 - tmp2[26] + tmp2[27] * 2 + tmp2[28];
-            dst[28 * dstStride] = tmp2[25] * 2 - tmp2[26] - tmp2[27] * 2 + tmp2[28];
-            dst[29 * dstStride] = tmp2[25] * 4 - tmp2[27] * 5 + tmp2[29];
-            dst[30 * dstStride] = tmp2[30] * 4 - tmp2[32] * 5 + tmp2[34];
-            dst[31 * dstStride] = -tmp2[31] * 4 - tmp2[32] * 4 + tmp2[33] + tmp2[34];
-            dst[32 * dstStride] = tmp2[31] * 4 - tmp2[32] * 4 - tmp2[33] + tmp2[34];
-            dst[33 * dstStride] = -tmp2[31] * 2 - tmp2[32] + tmp2[33] * 2 + tmp2[34];
-            dst[34 * dstStride] = tmp2[31] * 2 - tmp2[32] - tmp2[33] * 2 + tmp2[34];
-            dst[35 * dstStride] = tmp2[31] * 4 - tmp2[33] * 5 + tmp2[35];
+            dst[0 * stride] = tmp[0] * 4 - tmp[2] * 5 + tmp[4];
+            dst[1 * stride] = -tmp[1] * 4 - tmp[2] * 4 + tmp[3] + tmp[4];
+            dst[2 * stride] = tmp[1] * 4 - tmp[2] * 4 - tmp[3] + tmp[4];
+            dst[3 * stride] = -tmp[1] * 2 - tmp[2] + tmp[3] * 2 + tmp[4];
+            dst[4 * stride] = tmp[1] * 2 - tmp[2] - tmp[3] * 2 + tmp[4];
+            dst[5 * stride] = tmp[1] * 4 - tmp[3] * 5 + tmp[5];
+            dst[6 * stride] = tmp[6] * 4 - tmp[8] * 5 + tmp[10];
+            dst[7 * stride] = -tmp[7] * 4 - tmp[8] * 4 + tmp[9] + tmp[10];
+            dst[8 * stride] = tmp[7] * 4 - tmp[8] * 4 - tmp[9] + tmp[10];
+            dst[9 * stride] = -tmp[7] * 2 - tmp[8] + tmp[9] * 2 + tmp[10];
+            dst[10 * stride] = tmp[7] * 2 - tmp[8] - tmp[9] * 2 + tmp[10];
+            dst[11 * stride] = tmp[7] * 4 - tmp[9] * 5 + tmp[11];
+            dst[12 * stride] = tmp[12] * 4 - tmp[14] * 5 + tmp[16];
+            dst[13 * stride] = -tmp[13] * 4 - tmp[14] * 4 + tmp[15] + tmp[16];
+            dst[14 * stride] = tmp[13] * 4 - tmp[14] * 4 - tmp[15] + tmp[16];
+            dst[15 * stride] = -tmp[13] * 2 - tmp[14] + tmp[15] * 2 + tmp[16];
+            dst[16 * stride] = tmp[13] * 2 - tmp[14] - tmp[15] * 2 + tmp[16];
+            dst[17 * stride] = tmp[13] * 4 - tmp[15] * 5 + tmp[17];
+            dst[18 * stride] = tmp[18] * 4 - tmp[20] * 5 + tmp[22];
+            dst[19 * stride] = -tmp[19] * 4 - tmp[20] * 4 + tmp[21] + tmp[22];
+            dst[20 * stride] = tmp[19] * 4 - tmp[20] * 4 - tmp[21] + tmp[22];
+            dst[21 * stride] = -tmp[19] * 2 - tmp[20] + tmp[21] * 2 + tmp[22];
+            dst[22 * stride] = tmp[19] * 2 - tmp[20] - tmp[21] * 2 + tmp[22];
+            dst[23 * stride] = tmp[19] * 4 - tmp[21] * 5 + tmp[23];
+            dst[24 * stride] = tmp[24] * 4 - tmp[26] * 5 + tmp[28];
+            dst[25 * stride] = -tmp[25] * 4 - tmp[26] * 4 + tmp[27] + tmp[28];
+            dst[26 * stride] = tmp[25] * 4 - tmp[26] * 4 - tmp[27] + tmp[28];
+            dst[27 * stride] = -tmp[25] * 2 - tmp[26] + tmp[27] * 2 + tmp[28];
+            dst[28 * stride] = tmp[25] * 2 - tmp[26] - tmp[27] * 2 + tmp[28];
+            dst[29 * stride] = tmp[25] * 4 - tmp[27] * 5 + tmp[29];
+            dst[30 * stride] = tmp[30] * 4 - tmp[32] * 5 + tmp[34];
+            dst[31 * stride] = -tmp[31] * 4 - tmp[32] * 4 + tmp[33] + tmp[34];
+            dst[32 * stride] = tmp[31] * 4 - tmp[32] * 4 - tmp[33] + tmp[34];
+            dst[33 * stride] = -tmp[31] * 2 - tmp[32] + tmp[33] * 2 + tmp[34];
+            dst[34 * stride] = tmp[31] * 2 - tmp[32] - tmp[33] * 2 + tmp[34];
+            dst[35 * stride] = tmp[31] * 4 - tmp[33] * 5 + tmp[35];
         }
 
-        void Winograd4x3SetInput1p(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
+        void Winograd4x3SetInput1n(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            float tmp[36];
+            tmp[0] = src[0 * srcStride + 0];
+            tmp[1] = src[0 * srcStride + 1];
+            tmp[2] = src[0 * srcStride + 2];
+            tmp[3] = src[0 * srcStride + 3];
+            tmp[4] = src[0 * srcStride + 4];
+            tmp[5] = src[0 * srcStride + 5];
+            tmp[6] = src[1 * srcStride + 0];
+            tmp[7] = src[1 * srcStride + 1];
+            tmp[8] = src[1 * srcStride + 2];
+            tmp[9] = src[1 * srcStride + 3];
+            tmp[10] = src[1 * srcStride + 4];
+            tmp[11] = src[1 * srcStride + 5];
+            tmp[12] = src[2 * srcStride + 0];
+            tmp[13] = src[2 * srcStride + 1];
+            tmp[14] = src[2 * srcStride + 2];
+            tmp[15] = src[2 * srcStride + 3];
+            tmp[16] = src[2 * srcStride + 4];
+            tmp[17] = src[2 * srcStride + 5];
+            tmp[18] = src[3 * srcStride + 0];
+            tmp[19] = src[3 * srcStride + 1];
+            tmp[20] = src[3 * srcStride + 2];
+            tmp[21] = src[3 * srcStride + 3];
+            tmp[22] = src[3 * srcStride + 4];
+            tmp[23] = src[3 * srcStride + 5];
+            tmp[24] = src[4 * srcStride + 0];
+            tmp[25] = src[4 * srcStride + 1];
+            tmp[26] = src[4 * srcStride + 2];
+            tmp[27] = src[4 * srcStride + 3];
+            tmp[28] = src[4 * srcStride + 4];
+            tmp[29] = src[4 * srcStride + 5];
+            tmp[30] = src[5 * srcStride + 0];
+            tmp[31] = src[5 * srcStride + 1];
+            tmp[32] = src[5 * srcStride + 2];
+            tmp[33] = src[5 * srcStride + 3];
+            tmp[34] = src[5 * srcStride + 4];
+            tmp[35] = src[5 * srcStride + 5];
+            Winograd4x3SetInput1(tmp, dst, dstStride);
+        }
+
+        void Winograd4x3SetInput1n(const float * src, size_t srcStride, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
         {
             float tmp[6 * 6] = { 0 };
             for (size_t row = rowB; row < rowE; ++row)
                 for (size_t col = colB; col < colE; ++col)
                     tmp[row * 6 + col] = src[row * srcStride + col];
-            Winograd4x3SetInput1(tmp, 6, dst, dstStride);
+            Winograd4x3SetInput1(tmp, dst, dstStride);
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput1t(const float * src, size_t srcW, size_t srcC, float * dst, size_t dstStride)
+        {
+            size_t srcS = srcW * srcC;
+            for (size_t c = 0; c < srcC; ++c, src++, dst++)
+            {
+                float tmp[36];
+                tmp[0] = src[0 * srcS + 0 * srcC];
+                tmp[1] = src[0 * srcS + 1 * srcC];
+                tmp[2] = src[0 * srcS + 2 * srcC];
+                tmp[3] = src[0 * srcS + 3 * srcC];
+                tmp[4] = src[0 * srcS + 4 * srcC];
+                tmp[5] = src[0 * srcS + 5 * srcC];
+                tmp[6] = src[1 * srcS + 0 * srcC];
+                tmp[7] = src[1 * srcS + 1 * srcC];
+                tmp[8] = src[1 * srcS + 2 * srcC];
+                tmp[9] = src[1 * srcS + 3 * srcC];
+                tmp[10] = src[1 * srcS + 4 * srcC];
+                tmp[11] = src[1 * srcS + 5 * srcC];
+                tmp[12] = src[2 * srcS + 0 * srcC];
+                tmp[13] = src[2 * srcS + 1 * srcC];
+                tmp[14] = src[2 * srcS + 2 * srcC];
+                tmp[15] = src[2 * srcS + 3 * srcC];
+                tmp[16] = src[2 * srcS + 4 * srcC];
+                tmp[17] = src[2 * srcS + 5 * srcC];
+                tmp[18] = src[3 * srcS + 0 * srcC];
+                tmp[19] = src[3 * srcS + 1 * srcC];
+                tmp[20] = src[3 * srcS + 2 * srcC];
+                tmp[21] = src[3 * srcS + 3 * srcC];
+                tmp[22] = src[3 * srcS + 4 * srcC];
+                tmp[23] = src[3 * srcS + 5 * srcC];
+                tmp[24] = src[4 * srcS + 0 * srcC];
+                tmp[25] = src[4 * srcS + 1 * srcC];
+                tmp[26] = src[4 * srcS + 2 * srcC];
+                tmp[27] = src[4 * srcS + 3 * srcC];
+                tmp[28] = src[4 * srcS + 4 * srcC];
+                tmp[29] = src[4 * srcS + 5 * srcC];
+                tmp[30] = src[5 * srcS + 0 * srcC];
+                tmp[31] = src[5 * srcS + 1 * srcC];
+                tmp[32] = src[5 * srcS + 2 * srcC];
+                tmp[33] = src[5 * srcS + 3 * srcC];
+                tmp[34] = src[5 * srcS + 4 * srcC];
+                tmp[35] = src[5 * srcS + 5 * srcC];
+                Winograd4x3SetInput1(tmp, dst, dstStride);
+            }
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput1t(const float * src, size_t srcW, size_t srcC, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
+        {
+            size_t srcS = srcW * srcC;
+            for (size_t c = 0; c < srcC; ++c, src++, dst++)
+            {
+                float tmp[36] = { 0 };
+                for (size_t row = rowB; row < rowE; ++row)
+                    for (size_t col = colB; col < colE; ++col)
+                        tmp[row * 6 + col] = src[row * srcS + col * srcC];
+                Winograd4x3SetInput1(tmp, dst, dstStride);
+            }
         }
 
         void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
@@ -504,135 +567,230 @@ namespace Simd
                     dstHeightFull -= 4;
                 if (dstWidth == dstWidthFull)
                     dstWidthFull -= 4;
-                src -= srcWidth + 1;
+                src -= (srcWidth + 1)*(trans ? srcChannels : 1);
             }
             size_t tailW = dstWidth - dstWidthFull + (pad ? 1 : 2);
             size_t tailH = dstHeight - dstHeightFull + (pad ? 1 : 2);
-            for (size_t c = 0; c < srcChannels; ++c)
+            if (trans)
             {
                 size_t row = 0, col = 0;
                 if (pad)
                 {
                     if (pad)
-                        Winograd4x3SetInput1p(src, srcWidth, 1, noseH, 1, noseW, dst++, dstStride);
+                        Winograd4x3SetInput1t(src, srcWidth, srcChannels, 1, noseH, 1, noseW, dst, dstStride), dst += srcChannels;
                     for (col = start; col < dstWidthFull; col += 4)
-                        Winograd4x3SetInput1p(src + col, srcWidth, 1, noseH, 0, 6, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, 6, dst, dstStride), dst += srcChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetInput1p(src + col, srcWidth, 1, noseH, 0, tailW, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, tailW, dst, dstStride), dst += srcChannels;
                 }
                 for (row = start; row < dstHeightFull; row += 4)
                 {
                     if (pad)
-                        Winograd4x3SetInput1p(src + row * srcWidth, srcWidth, 0, 6, 1, noseW, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + row * srcWidth * srcChannels, srcWidth, srcChannels, 0, 6, 1, noseW, dst, dstStride), dst += srcChannels;
                     for (col = start; col < dstWidthFull; col += 4)
-                        Winograd4x3SetInput1(src + row * srcWidth + col, srcWidth, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, dst, dstStride), dst += srcChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetInput1p(src + row * srcWidth + col, srcWidth, 0, 6, 0, tailW, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, 6, 0, tailW, dst, dstStride), dst += srcChannels;
                 }
                 if (row < dstHeight)
                 {
                     if (pad)
-                        Winograd4x3SetInput1p(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + row * srcWidth* srcChannels, srcWidth, srcChannels, 0, tailH, 1, noseW, dst, dstStride), dst += srcChannels;
                     for (col = start; col < dstWidthFull; col += 4)
-                        Winograd4x3SetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 6, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, 6, dst, dstStride), dst += srcChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetInput1p(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst++, dstStride);
+                        Winograd4x3SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, tailW, dst, dstStride), dst += srcChannels;
                 }
-                src += srcWidth * srcHeight;
+            }
+            else
+            {
+                for (size_t c = 0; c < srcChannels; ++c)
+                {
+                    size_t row = 0, col = 0;
+                    if (pad)
+                    {
+                        if (pad)
+                            Winograd4x3SetInput1n(src, srcWidth, 1, noseH, 1, noseW, dst++, dstStride);
+                        for (col = start; col < dstWidthFull; col += 4)
+                            Winograd4x3SetInput1n(src + col, srcWidth, 1, noseH, 0, 6, dst++, dstStride);
+                        if (col < dstWidth)
+                            Winograd4x3SetInput1n(src + col, srcWidth, 1, noseH, 0, tailW, dst++, dstStride);
+                    }
+                    for (row = start; row < dstHeightFull; row += 4)
+                    {
+                        if (pad)
+                            Winograd4x3SetInput1n(src + row * srcWidth, srcWidth, 0, 6, 1, noseW, dst++, dstStride);
+                        for (col = start; col < dstWidthFull; col += 4)
+                            Winograd4x3SetInput1n(src + row * srcWidth + col, srcWidth, dst++, dstStride);
+                        if (col < dstWidth)
+                            Winograd4x3SetInput1n(src + row * srcWidth + col, srcWidth, 0, 6, 0, tailW, dst++, dstStride);
+                    }
+                    if (row < dstHeight)
+                    {
+                        if (pad)
+                            Winograd4x3SetInput1n(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst++, dstStride);
+                        for (col = start; col < dstWidthFull; col += 4)
+                            Winograd4x3SetInput1n(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 6, dst++, dstStride);
+                        if (col < dstWidth)
+                            Winograd4x3SetInput1n(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst++, dstStride);
+                    }
+                    src += srcWidth * srcHeight;
+                }
             }
         }
 
-        void Winograd4x3SetOutput1(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        void Winograd4x3SetOutput1(const float * src, size_t stride, float dst[16])
         {
-            float c1[36];
-            c1[0] = src[0 * srcStride];
-            c1[1] = src[1 * srcStride];
-            c1[2] = src[2 * srcStride];
-            c1[3] = src[3 * srcStride];
-            c1[4] = src[4 * srcStride];
-            c1[5] = src[5 * srcStride];
-            c1[6] = src[6 * srcStride];
-            c1[7] = src[7 * srcStride];
-            c1[8] = src[8 * srcStride];
-            c1[9] = src[9 * srcStride];
-            c1[10] = src[10 * srcStride];
-            c1[11] = src[11 * srcStride];
-            c1[12] = src[12 * srcStride];
-            c1[13] = src[13 * srcStride];
-            c1[14] = src[14 * srcStride];
-            c1[15] = src[15 * srcStride];
-            c1[16] = src[16 * srcStride];
-            c1[17] = src[17 * srcStride];
-            c1[18] = src[18 * srcStride];
-            c1[19] = src[19 * srcStride];
-            c1[20] = src[20 * srcStride];
-            c1[21] = src[21 * srcStride];
-            c1[22] = src[22 * srcStride];
-            c1[23] = src[23 * srcStride];
-            c1[24] = src[24 * srcStride];
-            c1[25] = src[25 * srcStride];
-            c1[26] = src[26 * srcStride];
-            c1[27] = src[27 * srcStride];
-            c1[28] = src[28 * srcStride];
-            c1[29] = src[29 * srcStride];
-            c1[30] = src[30 * srcStride];
-            c1[31] = src[31 * srcStride];
-            c1[32] = src[32 * srcStride];
-            c1[33] = src[33 * srcStride];
-            c1[34] = src[34 * srcStride];
-            c1[35] = src[35 * srcStride];
+            float s[36];
+            s[0] = src[0 * stride];
+            s[1] = src[1 * stride];
+            s[2] = src[2 * stride];
+            s[3] = src[3 * stride];
+            s[4] = src[4 * stride];
+            s[5] = src[5 * stride];
+            s[6] = src[6 * stride];
+            s[7] = src[7 * stride];
+            s[8] = src[8 * stride];
+            s[9] = src[9 * stride];
+            s[10] = src[10 * stride];
+            s[11] = src[11 * stride];
+            s[12] = src[12 * stride];
+            s[13] = src[13 * stride];
+            s[14] = src[14 * stride];
+            s[15] = src[15 * stride];
+            s[16] = src[16 * stride];
+            s[17] = src[17 * stride];
+            s[18] = src[18 * stride];
+            s[19] = src[19 * stride];
+            s[20] = src[20 * stride];
+            s[21] = src[21 * stride];
+            s[22] = src[22 * stride];
+            s[23] = src[23 * stride];
+            s[24] = src[24 * stride];
+            s[25] = src[25 * stride];
+            s[26] = src[26 * stride];
+            s[27] = src[27 * stride];
+            s[28] = src[28 * stride];
+            s[29] = src[29 * stride];
+            s[30] = src[30 * stride];
+            s[31] = src[31 * stride];
+            s[32] = src[32 * stride];
+            s[33] = src[33 * stride];
+            s[34] = src[34 * stride];
+            s[35] = src[35 * stride];
 
-            float tmp[24];
-            tmp[0] = c1[0] + c1[6] + c1[12] + c1[18] + c1[24];
-            tmp[1] = c1[1] + c1[7] + c1[13] + c1[19] + c1[25];
-            tmp[2] = c1[2] + c1[8] + c1[14] + c1[20] + c1[26];
-            tmp[3] = c1[3] + c1[9] + c1[15] + c1[21] + c1[27];
-            tmp[4] = c1[4] + c1[10] + c1[16] + c1[22] + c1[28];
-            tmp[5] = c1[5] + c1[11] + c1[17] + c1[23] + c1[29];
-            tmp[6] = c1[6] - c1[12] + 2 * c1[18] - 2 * c1[24];
-            tmp[7] = c1[7] - c1[13] + 2 * c1[19] - 2 * c1[25];
-            tmp[8] = c1[8] - c1[14] + 2 * c1[20] - 2 * c1[26];
-            tmp[9] = c1[9] - c1[15] + 2 * c1[21] - 2 * c1[27];
-            tmp[10] = c1[10] - c1[16] + 2 * c1[22] - 2 * c1[28];
-            tmp[11] = c1[11] - c1[17] + 2 * c1[23] - 2 * c1[29];
-            tmp[12] = c1[6] + c1[12] + 4 * c1[18] + 4 * c1[24];
-            tmp[13] = c1[7] + c1[13] + 4 * c1[19] + 4 * c1[25];
-            tmp[14] = c1[8] + c1[14] + 4 * c1[20] + 4 * c1[26];
-            tmp[15] = c1[9] + c1[15] + 4 * c1[21] + 4 * c1[27];
-            tmp[16] = c1[10] + c1[16] + 4 * c1[22] + 4 * c1[28];
-            tmp[17] = c1[11] + c1[17] + 4 * c1[23] + 4 * c1[29];
-            tmp[18] = c1[6] - c1[12] + 8 * c1[18] - 8 * c1[24] + c1[30];
-            tmp[19] = c1[7] - c1[13] + 8 * c1[19] - 8 * c1[25] + c1[31];
-            tmp[20] = c1[8] - c1[14] + 8 * c1[20] - 8 * c1[26] + c1[32];
-            tmp[21] = c1[9] - c1[15] + 8 * c1[21] - 8 * c1[27] + c1[33];
-            tmp[22] = c1[10] - c1[16] + 8 * c1[22] - 8 * c1[28] + c1[34];
-            tmp[23] = c1[11] - c1[17] + 8 * c1[23] - 8 * c1[29] + c1[35];
+            float t[24];
+            t[0] = s[0] + s[6] + s[12] + s[18] + s[24];
+            t[1] = s[1] + s[7] + s[13] + s[19] + s[25];
+            t[2] = s[2] + s[8] + s[14] + s[20] + s[26];
+            t[3] = s[3] + s[9] + s[15] + s[21] + s[27];
+            t[4] = s[4] + s[10] + s[16] + s[22] + s[28];
+            t[5] = s[5] + s[11] + s[17] + s[23] + s[29];
+            t[6] = s[6] - s[12] + 2 * s[18] - 2 * s[24];
+            t[7] = s[7] - s[13] + 2 * s[19] - 2 * s[25];
+            t[8] = s[8] - s[14] + 2 * s[20] - 2 * s[26];
+            t[9] = s[9] - s[15] + 2 * s[21] - 2 * s[27];
+            t[10] = s[10] - s[16] + 2 * s[22] - 2 * s[28];
+            t[11] = s[11] - s[17] + 2 * s[23] - 2 * s[29];
+            t[12] = s[6] + s[12] + 4 * s[18] + 4 * s[24];
+            t[13] = s[7] + s[13] + 4 * s[19] + 4 * s[25];
+            t[14] = s[8] + s[14] + 4 * s[20] + 4 * s[26];
+            t[15] = s[9] + s[15] + 4 * s[21] + 4 * s[27];
+            t[16] = s[10] + s[16] + 4 * s[22] + 4 * s[28];
+            t[17] = s[11] + s[17] + 4 * s[23] + 4 * s[29];
+            t[18] = s[6] - s[12] + 8 * s[18] - 8 * s[24] + s[30];
+            t[19] = s[7] - s[13] + 8 * s[19] - 8 * s[25] + s[31];
+            t[20] = s[8] - s[14] + 8 * s[20] - 8 * s[26] + s[32];
+            t[21] = s[9] - s[15] + 8 * s[21] - 8 * s[27] + s[33];
+            t[22] = s[10] - s[16] + 8 * s[22] - 8 * s[28] + s[34];
+            t[23] = s[11] - s[17] + 8 * s[23] - 8 * s[29] + s[35];
 
-            dst[0 * dstStride + 0] = tmp[0] + tmp[1] + tmp[2] + tmp[3] + tmp[4];
-            dst[0 * dstStride + 1] = tmp[1] - tmp[2] + 2 * tmp[3] - 2 * tmp[4];
-            dst[0 * dstStride + 2] = tmp[1] + tmp[2] + 4 * tmp[3] + 4 * tmp[4];
-            dst[0 * dstStride + 3] = tmp[1] - tmp[2] + 8 * tmp[3] - 8 * tmp[4] + tmp[5];
-            dst[1 * dstStride + 0] = tmp[6] + tmp[7] + tmp[8] + tmp[9] + tmp[10];
-            dst[1 * dstStride + 1] = tmp[7] - tmp[8] + 2 * tmp[9] - 2 * tmp[10];
-            dst[1 * dstStride + 2] = tmp[7] + tmp[8] + 4 * tmp[9] + 4 * tmp[10];
-            dst[1 * dstStride + 3] = tmp[7] - tmp[8] + 8 * tmp[9] - 8 * tmp[10] + tmp[11];
-            dst[2 * dstStride + 0] = tmp[12] + tmp[13] + tmp[14] + tmp[15] + tmp[16];
-            dst[2 * dstStride + 1] = tmp[13] - tmp[14] + 2 * tmp[15] - 2 * tmp[16];
-            dst[2 * dstStride + 2] = tmp[13] + tmp[14] + 4 * tmp[15] + 4 * tmp[16];
-            dst[2 * dstStride + 3] = tmp[13] - tmp[14] + 8 * tmp[15] - 8 * tmp[16] + tmp[17];
-            dst[3 * dstStride + 0] = tmp[18] + tmp[19] + tmp[20] + tmp[21] + tmp[22];
-            dst[3 * dstStride + 1] = tmp[19] - tmp[20] + 2 * tmp[21] - 2 * tmp[22];
-            dst[3 * dstStride + 2] = tmp[19] + tmp[20] + 4 * tmp[21] + 4 * tmp[22];
-            dst[3 * dstStride + 3] = tmp[19] - tmp[20] + 8 * tmp[21] - 8 * tmp[22] + tmp[23];
+            dst[0] = t[0] + t[1] + t[2] + t[3] + t[4];
+            dst[1] = t[1] - t[2] + 2 * t[3] - 2 * t[4];
+            dst[2] = t[1] + t[2] + 4 * t[3] + 4 * t[4];
+            dst[3] = t[1] - t[2] + 8 * t[3] - 8 * t[4] + t[5];
+            dst[4] = t[6] + t[7] + t[8] + t[9] + t[10];
+            dst[5] = t[7] - t[8] + 2 * t[9] - 2 * t[10];
+            dst[6] = t[7] + t[8] + 4 * t[9] + 4 * t[10];
+            dst[7] = t[7] - t[8] + 8 * t[9] - 8 * t[10] + t[11];
+            dst[8] = t[12] + t[13] + t[14] + t[15] + t[16];
+            dst[9] = t[13] - t[14] + 2 * t[15] - 2 * t[16];
+            dst[10] = t[13] + t[14] + 4 * t[15] + 4 * t[16];
+            dst[11] = t[13] - t[14] + 8 * t[15] - 8 * t[16] + t[17];
+            dst[12] = t[18] + t[19] + t[20] + t[21] + t[22];
+            dst[13] = t[19] - t[20] + 2 * t[21] - 2 * t[22];
+            dst[14] = t[19] + t[20] + 4 * t[21] + 4 * t[22];
+            dst[15] = t[19] - t[20] + 8 * t[21] - 8 * t[22] + t[23];
         }
 
-        void Winograd4x3SetOutput1p(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t rowE, size_t colE)
+        void Winograd4x3SetOutput1n(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
-            float tmp[4 * 4];
-            Winograd4x3SetOutput1(src, srcStride, tmp, 4);
+            float tmp[16];
+            Winograd4x3SetOutput1(src, srcStride, tmp);
+            dst[0 * dstStride + 0] = tmp[0];
+            dst[0 * dstStride + 1] = tmp[1];
+            dst[0 * dstStride + 2] = tmp[2];
+            dst[0 * dstStride + 3] = tmp[3];
+            dst[1 * dstStride + 0] = tmp[4];
+            dst[1 * dstStride + 1] = tmp[5];
+            dst[1 * dstStride + 2] = tmp[6];
+            dst[1 * dstStride + 3] = tmp[7];
+            dst[2 * dstStride + 0] = tmp[8];
+            dst[2 * dstStride + 1] = tmp[9];
+            dst[2 * dstStride + 2] = tmp[10];
+            dst[2 * dstStride + 3] = tmp[11];
+            dst[3 * dstStride + 0] = tmp[12];
+            dst[3 * dstStride + 1] = tmp[13];
+            dst[3 * dstStride + 2] = tmp[14];
+            dst[3 * dstStride + 3] = tmp[15];
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutput1n(const float * src, size_t srcStride, float * dst, size_t dstStride, size_t rowE, size_t colE)
+        {
+            float tmp[16];
+            Winograd4x3SetOutput1(src, srcStride, tmp);
             for (size_t row = 0; row < rowE; ++row)
                 for (size_t col = 0; col < colE; ++col)
                     dst[row*dstStride + col] = tmp[row * 4 + col];
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutput1t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC)
+        {
+            size_t dstS = dstW * dstC;
+            for (size_t d = 0; d < dstC; ++d, src++, dst++)
+            {
+                float tmp[16];
+                Winograd4x3SetOutput1(src, srcStride, tmp);
+                dst[0 * dstS + 0 * dstC] = tmp[0];
+                dst[0 * dstS + 1 * dstC] = tmp[1];
+                dst[0 * dstS + 2 * dstC] = tmp[2];
+                dst[0 * dstS + 3 * dstC] = tmp[3];
+                dst[1 * dstS + 0 * dstC] = tmp[4];
+                dst[1 * dstS + 1 * dstC] = tmp[5];
+                dst[1 * dstS + 2 * dstC] = tmp[6];
+                dst[1 * dstS + 3 * dstC] = tmp[7];
+                dst[2 * dstS + 0 * dstC] = tmp[8];
+                dst[2 * dstS + 1 * dstC] = tmp[9];
+                dst[2 * dstS + 2 * dstC] = tmp[10];
+                dst[2 * dstS + 3 * dstC] = tmp[11];
+                dst[3 * dstS + 0 * dstC] = tmp[12];
+                dst[3 * dstS + 1 * dstC] = tmp[13];
+                dst[3 * dstS + 2 * dstC] = tmp[14];
+                dst[3 * dstS + 3 * dstC] = tmp[15];
+            }
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutput1t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
+        {
+            size_t dstS = dstW * dstC;
+            for (size_t d = 0; d < dstC; ++d, src++, dst++)
+            {
+                float tmp[16];
+                Winograd4x3SetOutput1(src, srcStride, tmp);
+                for (size_t row = 0; row < rowE; ++row)
+                    for (size_t col = 0; col < colE; ++col)
+                        dst[row*dstS + col * dstC] = tmp[row * 4 + col];
+            }
         }
 
         void Winograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
@@ -640,24 +798,45 @@ namespace Simd
             size_t srcStride = ((dstHeight + 3) / 4) * ((dstWidth + 3) / 4)*dstChannels;
             size_t dstHeightFull = dstHeight / 4 * 4;
             size_t dstWidthFull = dstWidth / 4 * 4;
-            for (size_t c = 0; c < dstChannels; ++c)
+            if (trans)
             {
                 size_t row, col;
                 for (row = 0; row < dstHeightFull; row += 4)
                 {
                     for (col = 0; col < dstWidthFull; col += 4)
-                        Winograd4x3SetOutput1(src++, srcStride, dst + row * dstWidth + col, dstWidth);
+                        Winograd4x3SetOutput1t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels), src += dstChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, 4, dstWidth - col);
+                        Winograd4x3SetOutput1t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, 4, dstWidth - col), src += dstChannels;
                 }
                 if (row < dstHeight)
                 {
                     for (col = 0; col < dstWidthFull; col += 4)
-                        Winograd4x3SetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, 4);
+                        Winograd4x3SetOutput1t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, 4), src += dstChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetOutput1p(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, dstWidth - col);
+                        Winograd4x3SetOutput1t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
                 }
-                dst += dstHeight * dstWidth;
+            }
+            else
+            {
+                for (size_t c = 0; c < dstChannels; ++c)
+                {
+                    size_t row, col;
+                    for (row = 0; row < dstHeightFull; row += 4)
+                    {
+                        for (col = 0; col < dstWidthFull; col += 4)
+                            Winograd4x3SetOutput1n(src++, srcStride, dst + row * dstWidth + col, dstWidth);
+                        if (col < dstWidth)
+                            Winograd4x3SetOutput1n(src++, srcStride, dst + row * dstWidth + col, dstWidth, 4, dstWidth - col);
+                    }
+                    if (row < dstHeight)
+                    {
+                        for (col = 0; col < dstWidthFull; col += 4)
+                            Winograd4x3SetOutput1n(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, 4);
+                        if (col < dstWidth)
+                            Winograd4x3SetOutput1n(src++, srcStride, dst + row * dstWidth + col, dstWidth, dstHeight - row, dstWidth - col);
+                    }
+                    dst += dstHeight * dstWidth;
+                }
             }
         }
     }
