@@ -5417,9 +5417,11 @@ SIMD_API void SimdWinograd4x3SetInput(const float * src, size_t srcChannels, siz
     simdWinograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
 }
 
+volatile SimdWinogradSetOutputPtr simdWinograd4x3SetOutput = SIMD_FUNC1(Winograd4x3SetOutput, SIMD_SSE_FUNC);
+
 SIMD_API void SimdWinograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
-    Base::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
+    simdWinograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
 }
 
 SIMD_API void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,

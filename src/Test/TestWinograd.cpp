@@ -382,6 +382,11 @@ namespace Test
 
         result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Base::Winograd4x3SetOutput), FUNC_WO(SimdWinograd4x3SetOutput));
 
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Sse::Winograd4x3SetOutput), FUNC_WO(SimdWinograd4x3SetOutput));
+#endif 
+
         return result;
     }
 }
