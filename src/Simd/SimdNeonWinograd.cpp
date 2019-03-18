@@ -841,7 +841,7 @@ namespace Simd
 
         void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
         {
-            if (trans ? (srcChannels < 6) : (srcHeight < 6 || srcWidth < 12))
+            if (trans ? (srcChannels < 4) : (srcHeight < 6 || srcWidth < 14))
             {
                 Base::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
                 return;

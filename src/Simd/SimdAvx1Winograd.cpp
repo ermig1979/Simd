@@ -26,28 +26,13 @@
 #include "Simd/SimdWinograd.h"
 #include "Simd/SimdSse1.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        SIMD_INLINE void Load4(const float * src, size_t step, __m128 * dst)
-        {
-            __m128 a0 = _mm_loadu_ps(src + 0 * step);
-            __m128 a1 = _mm_loadu_ps(src + 1 * step);
-            __m128 a2 = _mm_loadu_ps(src + 2 * step);
-            __m128 a3 = _mm_loadu_ps(src + 3 * step);
-            __m128 b0 = _mm_unpacklo_ps(a0, a2);
-            __m128 b1 = _mm_unpackhi_ps(a0, a2);
-            __m128 b2 = _mm_unpacklo_ps(a1, a3);
-            __m128 b3 = _mm_unpackhi_ps(a1, a3);
-            dst[0] = _mm_unpacklo_ps(b0, b2);
-            dst[1] = _mm_unpackhi_ps(b0, b2);
-            dst[2] = _mm_unpacklo_ps(b1, b3);
-            dst[3] = _mm_unpackhi_ps(b1, b3);
-        }
-
         SIMD_INLINE void Winograd2x3SetFilter8t(const float * src, float * dst, size_t stride)
         {
             const __m256 r2 = _mm256_set1_ps(1.0f / 2.0f);
@@ -641,6 +626,420 @@ namespace Simd
             else
             {
                 Sse::Winograd4x3SetFilter(src, size, dst, trans);
+            }
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput8Store(const __m256 src[36], float * dst, size_t stride)
+        {
+            __m256 _2 = _mm256_set1_ps(2.0f);
+            __m256 _4 = _mm256_set1_ps(4.0f);
+            __m256 _5 = _mm256_set1_ps(5.0f);
+            __m256 tmp[36];
+            tmp[0] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[0]), _mm256_mul_ps(_5, src[12])), src[24]);
+            tmp[1] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[1]), _mm256_mul_ps(_5, src[13])), src[25]);
+            tmp[2] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[2]), _mm256_mul_ps(_5, src[14])), src[26]);
+            tmp[3] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[3]), _mm256_mul_ps(_5, src[15])), src[27]);
+            tmp[4] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[4]), _mm256_mul_ps(_5, src[16])), src[28]);
+            tmp[5] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[5]), _mm256_mul_ps(_5, src[17])), src[29]);
+            tmp[6] = _mm256_sub_ps(_mm256_add_ps(src[18], src[24]), _mm256_mul_ps(_4, _mm256_add_ps(src[6], src[12])));
+            tmp[7] = _mm256_sub_ps(_mm256_add_ps(src[19], src[25]), _mm256_mul_ps(_4, _mm256_add_ps(src[7], src[13])));
+            tmp[8] = _mm256_sub_ps(_mm256_add_ps(src[20], src[26]), _mm256_mul_ps(_4, _mm256_add_ps(src[8], src[14])));
+            tmp[9] = _mm256_sub_ps(_mm256_add_ps(src[21], src[27]), _mm256_mul_ps(_4, _mm256_add_ps(src[9], src[15])));
+            tmp[10] = _mm256_sub_ps(_mm256_add_ps(src[22], src[28]), _mm256_mul_ps(_4, _mm256_add_ps(src[10], src[16])));
+            tmp[11] = _mm256_sub_ps(_mm256_add_ps(src[23], src[29]), _mm256_mul_ps(_4, _mm256_add_ps(src[11], src[17])));
+            tmp[12] = _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(src[6], src[12])), _mm256_sub_ps(src[24], src[18]));
+            tmp[13] = _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(src[7], src[13])), _mm256_sub_ps(src[25], src[19]));
+            tmp[14] = _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(src[8], src[14])), _mm256_sub_ps(src[26], src[20]));
+            tmp[15] = _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(src[9], src[15])), _mm256_sub_ps(src[27], src[21]));
+            tmp[16] = _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(src[10], src[16])), _mm256_sub_ps(src[28], src[22]));
+            tmp[17] = _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(src[11], src[17])), _mm256_sub_ps(src[29], src[23]));
+            tmp[18] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[18], src[6])), _mm256_sub_ps(src[24], src[12]));
+            tmp[19] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[19], src[7])), _mm256_sub_ps(src[25], src[13]));
+            tmp[20] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[20], src[8])), _mm256_sub_ps(src[26], src[14]));
+            tmp[21] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[21], src[9])), _mm256_sub_ps(src[27], src[15]));
+            tmp[22] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[22], src[10])), _mm256_sub_ps(src[28], src[16]));
+            tmp[23] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[23], src[11])), _mm256_sub_ps(src[29], src[17]));
+            tmp[24] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[6], src[18])), _mm256_sub_ps(src[24], src[12]));
+            tmp[25] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[7], src[19])), _mm256_sub_ps(src[25], src[13]));
+            tmp[26] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[8], src[20])), _mm256_sub_ps(src[26], src[14]));
+            tmp[27] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[9], src[21])), _mm256_sub_ps(src[27], src[15]));
+            tmp[28] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[10], src[22])), _mm256_sub_ps(src[28], src[16]));
+            tmp[29] = _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(src[11], src[23])), _mm256_sub_ps(src[29], src[17]));
+            tmp[30] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[6]), _mm256_mul_ps(_5, src[18])), src[30]);
+            tmp[31] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[7]), _mm256_mul_ps(_5, src[19])), src[31]);
+            tmp[32] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[8]), _mm256_mul_ps(_5, src[20])), src[32]);
+            tmp[33] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[9]), _mm256_mul_ps(_5, src[21])), src[33]);
+            tmp[34] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[10]), _mm256_mul_ps(_5, src[22])), src[34]);
+            tmp[35] = _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, src[11]), _mm256_mul_ps(_5, src[23])), src[35]);
+
+            _mm256_storeu_ps(dst + 0 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[0]), _mm256_mul_ps(_5, tmp[2])), tmp[4]));
+            _mm256_storeu_ps(dst + 1 * stride, _mm256_sub_ps(_mm256_add_ps(tmp[3], tmp[4]), _mm256_mul_ps(_4, _mm256_add_ps(tmp[1], tmp[2]))));
+            _mm256_storeu_ps(dst + 2 * stride, _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(tmp[1], tmp[2])), _mm256_sub_ps(tmp[4], tmp[3])));
+            _mm256_storeu_ps(dst + 3 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[3], tmp[1])), _mm256_sub_ps(tmp[4], tmp[2])));
+            _mm256_storeu_ps(dst + 4 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[1], tmp[3])), _mm256_sub_ps(tmp[4], tmp[2])));
+            _mm256_storeu_ps(dst + 5 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[1]), _mm256_mul_ps(_5, tmp[3])), tmp[5]));
+            _mm256_storeu_ps(dst + 6 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[6]), _mm256_mul_ps(_5, tmp[8])), tmp[10]));
+            _mm256_storeu_ps(dst + 7 * stride, _mm256_sub_ps(_mm256_add_ps(tmp[9], tmp[10]), _mm256_mul_ps(_4, _mm256_add_ps(tmp[7], tmp[8]))));
+            _mm256_storeu_ps(dst + 8 * stride, _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(tmp[7], tmp[8])), _mm256_sub_ps(tmp[10], tmp[9])));
+            _mm256_storeu_ps(dst + 9 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[9], tmp[7])), _mm256_sub_ps(tmp[10], tmp[8])));
+            _mm256_storeu_ps(dst + 10 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[7], tmp[9])), _mm256_sub_ps(tmp[10], tmp[8])));
+            _mm256_storeu_ps(dst + 11 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[7]), _mm256_mul_ps(_5, tmp[9])), tmp[11]));
+            _mm256_storeu_ps(dst + 12 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[12]), _mm256_mul_ps(_5, tmp[14])), tmp[16]));
+            _mm256_storeu_ps(dst + 13 * stride, _mm256_sub_ps(_mm256_add_ps(tmp[15], tmp[16]), _mm256_mul_ps(_4, _mm256_add_ps(tmp[13], tmp[14]))));
+            _mm256_storeu_ps(dst + 14 * stride, _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(tmp[13], tmp[14])), _mm256_sub_ps(tmp[16], tmp[15])));
+            _mm256_storeu_ps(dst + 15 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[15], tmp[13])), _mm256_sub_ps(tmp[16], tmp[14])));
+            _mm256_storeu_ps(dst + 16 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[13], tmp[15])), _mm256_sub_ps(tmp[16], tmp[14])));
+            _mm256_storeu_ps(dst + 17 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[13]), _mm256_mul_ps(_5, tmp[15])), tmp[17]));
+            _mm256_storeu_ps(dst + 18 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[18]), _mm256_mul_ps(_5, tmp[20])), tmp[22]));
+            _mm256_storeu_ps(dst + 19 * stride, _mm256_sub_ps(_mm256_add_ps(tmp[21], tmp[22]), _mm256_mul_ps(_4, _mm256_add_ps(tmp[19], tmp[20]))));
+            _mm256_storeu_ps(dst + 20 * stride, _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(tmp[19], tmp[20])), _mm256_sub_ps(tmp[22], tmp[21])));
+            _mm256_storeu_ps(dst + 21 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[21], tmp[19])), _mm256_sub_ps(tmp[22], tmp[20])));
+            _mm256_storeu_ps(dst + 22 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[19], tmp[21])), _mm256_sub_ps(tmp[22], tmp[20])));
+            _mm256_storeu_ps(dst + 23 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[19]), _mm256_mul_ps(_5, tmp[21])), tmp[23]));
+            _mm256_storeu_ps(dst + 24 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[24]), _mm256_mul_ps(_5, tmp[26])), tmp[28]));
+            _mm256_storeu_ps(dst + 25 * stride, _mm256_sub_ps(_mm256_add_ps(tmp[27], tmp[28]), _mm256_mul_ps(_4, _mm256_add_ps(tmp[25], tmp[26]))));
+            _mm256_storeu_ps(dst + 26 * stride, _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(tmp[25], tmp[26])), _mm256_sub_ps(tmp[28], tmp[27])));
+            _mm256_storeu_ps(dst + 27 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[27], tmp[25])), _mm256_sub_ps(tmp[28], tmp[26])));
+            _mm256_storeu_ps(dst + 28 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[25], tmp[27])), _mm256_sub_ps(tmp[28], tmp[26])));
+            _mm256_storeu_ps(dst + 29 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[25]), _mm256_mul_ps(_5, tmp[27])), tmp[29]));
+            _mm256_storeu_ps(dst + 30 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[30]), _mm256_mul_ps(_5, tmp[32])), tmp[34]));
+            _mm256_storeu_ps(dst + 31 * stride, _mm256_sub_ps(_mm256_add_ps(tmp[33], tmp[34]), _mm256_mul_ps(_4, _mm256_add_ps(tmp[31], tmp[32]))));
+            _mm256_storeu_ps(dst + 32 * stride, _mm256_add_ps(_mm256_mul_ps(_4, _mm256_sub_ps(tmp[31], tmp[32])), _mm256_sub_ps(tmp[34], tmp[33])));
+            _mm256_storeu_ps(dst + 33 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[33], tmp[31])), _mm256_sub_ps(tmp[34], tmp[32])));
+            _mm256_storeu_ps(dst + 34 * stride, _mm256_add_ps(_mm256_mul_ps(_2, _mm256_sub_ps(tmp[31], tmp[33])), _mm256_sub_ps(tmp[34], tmp[32])));
+            _mm256_storeu_ps(dst + 35 * stride, _mm256_add_ps(_mm256_sub_ps(_mm256_mul_ps(_4, tmp[31]), _mm256_mul_ps(_5, tmp[33])), tmp[35]));
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput8t(const float * src, size_t srcS, size_t srcC, __m256 dst[36])
+        {
+            dst[0] = _mm256_loadu_ps(src + 0 * srcS + 0 * srcC);
+            dst[1] = _mm256_loadu_ps(src + 0 * srcS + 1 * srcC);
+            dst[2] = _mm256_loadu_ps(src + 0 * srcS + 2 * srcC);
+            dst[3] = _mm256_loadu_ps(src + 0 * srcS + 3 * srcC);
+            dst[4] = _mm256_loadu_ps(src + 0 * srcS + 4 * srcC);
+            dst[5] = _mm256_loadu_ps(src + 0 * srcS + 5 * srcC);
+            dst[6] = _mm256_loadu_ps(src + 1 * srcS + 0 * srcC);
+            dst[7] = _mm256_loadu_ps(src + 1 * srcS + 1 * srcC);
+            dst[8] = _mm256_loadu_ps(src + 1 * srcS + 2 * srcC);
+            dst[9] = _mm256_loadu_ps(src + 1 * srcS + 3 * srcC);
+            dst[10] = _mm256_loadu_ps(src + 1 * srcS + 4 * srcC);
+            dst[11] = _mm256_loadu_ps(src + 1 * srcS + 5 * srcC);
+            dst[12] = _mm256_loadu_ps(src + 2 * srcS + 0 * srcC);
+            dst[13] = _mm256_loadu_ps(src + 2 * srcS + 1 * srcC);
+            dst[14] = _mm256_loadu_ps(src + 2 * srcS + 2 * srcC);
+            dst[15] = _mm256_loadu_ps(src + 2 * srcS + 3 * srcC);
+            dst[16] = _mm256_loadu_ps(src + 2 * srcS + 4 * srcC);
+            dst[17] = _mm256_loadu_ps(src + 2 * srcS + 5 * srcC);
+            dst[18] = _mm256_loadu_ps(src + 3 * srcS + 0 * srcC);
+            dst[19] = _mm256_loadu_ps(src + 3 * srcS + 1 * srcC);
+            dst[20] = _mm256_loadu_ps(src + 3 * srcS + 2 * srcC);
+            dst[21] = _mm256_loadu_ps(src + 3 * srcS + 3 * srcC);
+            dst[22] = _mm256_loadu_ps(src + 3 * srcS + 4 * srcC);
+            dst[23] = _mm256_loadu_ps(src + 3 * srcS + 5 * srcC);
+            dst[24] = _mm256_loadu_ps(src + 4 * srcS + 0 * srcC);
+            dst[25] = _mm256_loadu_ps(src + 4 * srcS + 1 * srcC);
+            dst[26] = _mm256_loadu_ps(src + 4 * srcS + 2 * srcC);
+            dst[27] = _mm256_loadu_ps(src + 4 * srcS + 3 * srcC);
+            dst[28] = _mm256_loadu_ps(src + 4 * srcS + 4 * srcC);
+            dst[29] = _mm256_loadu_ps(src + 4 * srcS + 5 * srcC);
+            dst[30] = _mm256_loadu_ps(src + 5 * srcS + 0 * srcC);
+            dst[31] = _mm256_loadu_ps(src + 5 * srcS + 1 * srcC);
+            dst[32] = _mm256_loadu_ps(src + 5 * srcS + 2 * srcC);
+            dst[33] = _mm256_loadu_ps(src + 5 * srcS + 3 * srcC);
+            dst[34] = _mm256_loadu_ps(src + 5 * srcS + 4 * srcC);
+            dst[35] = _mm256_loadu_ps(src + 5 * srcS + 5 * srcC);
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput8t(const float * src, size_t srcW, size_t srcC, float * dst, size_t dstStride)
+        {
+            size_t srcS = srcW * srcC;
+            size_t srcCF = AlignLo(srcC, F);
+            for (size_t c = 0; c < srcCF; c += F)
+            {
+                __m256 tmp[36];
+                Winograd4x3SetInput8t(src + c, srcS, srcC, tmp);
+                Winograd4x3SetInput8Store(tmp, dst + c, dstStride);
+            }
+            if (srcCF < srcC)
+            {
+                __m256 tmp[36];
+                Winograd4x3SetInput8t(src + srcC - F, srcS, srcC, tmp);
+                Winograd4x3SetInput8Store(tmp, dst + srcC - F, dstStride);
+            }
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput8t(const float * src, size_t srcS, size_t srcC, size_t rowB, size_t rowE, size_t colB, size_t colE, __m256 dst[36])
+        {
+            for (size_t i = 0; i < 36; ++i)
+                dst[i] = _mm256_setzero_ps();
+            for (size_t row = rowB; row < rowE; ++row)
+                for (size_t col = colB; col < colE; ++col)
+                    dst[row * 6 + col] = _mm256_loadu_ps(src + row * srcS + col * srcC);
+        }
+
+        SIMD_INLINE void Winograd4x3SetInput8t(const float * src, size_t srcW, size_t srcC, size_t rowB, size_t rowE, size_t colB, size_t colE, float * dst, size_t dstStride)
+        {
+            size_t srcS = srcW * srcC;
+            size_t srcCF = AlignLo(srcC, F);
+            for (size_t c = 0; c < srcCF; c += F)
+            {
+                __m256 tmp[36];
+                Winograd4x3SetInput8t(src + c, srcS, srcC, rowB, rowE, colB, colE, tmp);
+                Winograd4x3SetInput8Store(tmp, dst + c, dstStride);
+            }
+            if (srcCF < srcC)
+            {
+                __m256 tmp[36];
+                Winograd4x3SetInput8t(src + srcC - F, srcS, srcC, rowB, rowE, colB, colE, tmp);
+                Winograd4x3SetInput8Store(tmp, dst + srcC - F, dstStride);
+            }
+        }
+
+        void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
+        {
+            if (trans ? (srcChannels < 8) : (srcHeight < 6 || srcWidth < 14))
+            {
+                Sse::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
+                return;
+            }
+            size_t dstH = pad ? srcHeight : srcHeight - 2;
+            size_t dstW = pad ? srcWidth : srcWidth - 2;
+            size_t tileH = (dstH + 3) / 4;
+            size_t tileW = (dstW + 3) / 4;
+            size_t dstStride = srcChannels * tileH*tileW;
+            size_t dstH4 = AlignLo(dstH, 4);
+            size_t dstW4 = AlignLo(dstW, 4);
+            if (trans)
+            {
+                size_t noseW = Simd::Min<size_t>(6, dstW + 1);
+                size_t noseH = Simd::Min<size_t>(6, dstH + 1);
+                size_t start = pad ? 4 : 0;
+                if (pad)
+                {
+                    if (dstH == dstH4)
+                        dstH4 -= 4;
+                    if (dstW == dstW4)
+                        dstW4 -= 4;
+                    src -= (srcWidth + 1)*srcChannels;
+                }
+                size_t tailW = dstW - dstW4 + (pad ? 1 : 2);
+                size_t tailH = dstH - dstH4 + (pad ? 1 : 2);
+                size_t row = 0, col = 0;
+                if (pad)
+                {
+                    if (pad)
+                        Winograd4x3SetInput8t(src, srcWidth, srcChannels, 1, noseH, 1, noseW, dst, dstStride), dst += srcChannels;
+                    for (col = start; col < dstW4; col += 4)
+                        Winograd4x3SetInput8t(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, 6, dst, dstStride), dst += srcChannels;
+                    if (col < dstW)
+                        Winograd4x3SetInput8t(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, tailW, dst, dstStride), dst += srcChannels;
+                }
+                for (row = start; row < dstH4; row += 4)
+                {
+                    if (pad)
+                        Winograd4x3SetInput8t(src + row * srcWidth * srcChannels, srcWidth, srcChannels, 0, 6, 1, noseW, dst, dstStride), dst += srcChannels;
+                    for (col = start; col < dstW4; col += 4)
+                        Winograd4x3SetInput8t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, dst, dstStride), dst += srcChannels;
+                    if (col < dstW)
+                        Winograd4x3SetInput8t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, 6, 0, tailW, dst, dstStride), dst += srcChannels;
+                }
+                if (row < dstH)
+                {
+                    if (pad)
+                        Winograd4x3SetInput8t(src + row * srcWidth* srcChannels, srcWidth, srcChannels, 0, tailH, 1, noseW, dst, dstStride), dst += srcChannels;
+                    for (col = start; col < dstW4; col += 4)
+                        Winograd4x3SetInput8t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, 6, dst, dstStride), dst += srcChannels;
+                    if (col < dstW)
+                        Winograd4x3SetInput8t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, tailW, dst, dstStride), dst += srcChannels;
+                }
+            }
+            else
+            {
+                Base::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
+            }
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutputLoad36(const float * src, size_t stride, __m256 dst[16])
+        {
+            __m256 s[36];
+            s[0] = _mm256_loadu_ps(src + 0 * stride);
+            s[1] = _mm256_loadu_ps(src + 1 * stride);
+            s[2] = _mm256_loadu_ps(src + 2 * stride);
+            s[3] = _mm256_loadu_ps(src + 3 * stride);
+            s[4] = _mm256_loadu_ps(src + 4 * stride);
+            s[5] = _mm256_loadu_ps(src + 5 * stride);
+            s[6] = _mm256_loadu_ps(src + 6 * stride);
+            s[7] = _mm256_loadu_ps(src + 7 * stride);
+            s[8] = _mm256_loadu_ps(src + 8 * stride);
+            s[9] = _mm256_loadu_ps(src + 9 * stride);
+            s[10] = _mm256_loadu_ps(src + 10 * stride);
+            s[11] = _mm256_loadu_ps(src + 11 * stride);
+            s[12] = _mm256_loadu_ps(src + 12 * stride);
+            s[13] = _mm256_loadu_ps(src + 13 * stride);
+            s[14] = _mm256_loadu_ps(src + 14 * stride);
+            s[15] = _mm256_loadu_ps(src + 15 * stride);
+            s[16] = _mm256_loadu_ps(src + 16 * stride);
+            s[17] = _mm256_loadu_ps(src + 17 * stride);
+            s[18] = _mm256_loadu_ps(src + 18 * stride);
+            s[19] = _mm256_loadu_ps(src + 19 * stride);
+            s[20] = _mm256_loadu_ps(src + 20 * stride);
+            s[21] = _mm256_loadu_ps(src + 21 * stride);
+            s[22] = _mm256_loadu_ps(src + 22 * stride);
+            s[23] = _mm256_loadu_ps(src + 23 * stride);
+            s[24] = _mm256_loadu_ps(src + 24 * stride);
+            s[25] = _mm256_loadu_ps(src + 25 * stride);
+            s[26] = _mm256_loadu_ps(src + 26 * stride);
+            s[27] = _mm256_loadu_ps(src + 27 * stride);
+            s[28] = _mm256_loadu_ps(src + 28 * stride);
+            s[29] = _mm256_loadu_ps(src + 29 * stride);
+            s[30] = _mm256_loadu_ps(src + 30 * stride);
+            s[31] = _mm256_loadu_ps(src + 31 * stride);
+            s[32] = _mm256_loadu_ps(src + 32 * stride);
+            s[33] = _mm256_loadu_ps(src + 33 * stride);
+            s[34] = _mm256_loadu_ps(src + 34 * stride);
+            s[35] = _mm256_loadu_ps(src + 35 * stride);
+
+            __m256 _2 = _mm256_set1_ps(2.0f);
+            __m256 _4 = _mm256_set1_ps(4.0f);
+            __m256 _8 = _mm256_set1_ps(8.0f);
+            __m256 t[24];
+            t[0] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(s[0], s[6]), _mm256_add_ps(s[12], s[18])), s[24]);
+            t[1] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(s[1], s[7]), _mm256_add_ps(s[13], s[19])), s[25]);
+            t[2] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(s[2], s[8]), _mm256_add_ps(s[14], s[20])), s[26]);
+            t[3] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(s[3], s[9]), _mm256_add_ps(s[15], s[21])), s[27]);
+            t[4] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(s[4], s[10]), _mm256_add_ps(s[16], s[22])), s[28]);
+            t[5] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(s[5], s[11]), _mm256_add_ps(s[17], s[23])), s[29]);
+            t[6] = _mm256_add_ps(_mm256_sub_ps(s[6], s[12]), _mm256_mul_ps(_2, _mm256_sub_ps(s[18], s[24])));
+            t[7] = _mm256_add_ps(_mm256_sub_ps(s[7], s[13]), _mm256_mul_ps(_2, _mm256_sub_ps(s[19], s[25])));
+            t[8] = _mm256_add_ps(_mm256_sub_ps(s[8], s[14]), _mm256_mul_ps(_2, _mm256_sub_ps(s[20], s[26])));
+            t[9] = _mm256_add_ps(_mm256_sub_ps(s[9], s[15]), _mm256_mul_ps(_2, _mm256_sub_ps(s[21], s[27])));
+            t[10] = _mm256_add_ps(_mm256_sub_ps(s[10], s[16]), _mm256_mul_ps(_2, _mm256_sub_ps(s[22], s[28])));
+            t[11] = _mm256_add_ps(_mm256_sub_ps(s[11], s[17]), _mm256_mul_ps(_2, _mm256_sub_ps(s[23], s[29])));
+            t[12] = _mm256_add_ps(_mm256_add_ps(s[6], s[12]), _mm256_mul_ps(_4, _mm256_add_ps(s[18], s[24])));
+            t[13] = _mm256_add_ps(_mm256_add_ps(s[7], s[13]), _mm256_mul_ps(_4, _mm256_add_ps(s[19], s[25])));
+            t[14] = _mm256_add_ps(_mm256_add_ps(s[8], s[14]), _mm256_mul_ps(_4, _mm256_add_ps(s[20], s[26])));
+            t[15] = _mm256_add_ps(_mm256_add_ps(s[9], s[15]), _mm256_mul_ps(_4, _mm256_add_ps(s[21], s[27])));
+            t[16] = _mm256_add_ps(_mm256_add_ps(s[10], s[16]), _mm256_mul_ps(_4, _mm256_add_ps(s[22], s[28])));
+            t[17] = _mm256_add_ps(_mm256_add_ps(s[11], s[17]), _mm256_mul_ps(_4, _mm256_add_ps(s[23], s[29])));
+            t[18] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(s[6], s[12]), _mm256_mul_ps(_8, _mm256_sub_ps(s[18], s[24]))), s[30]);
+            t[19] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(s[7], s[13]), _mm256_mul_ps(_8, _mm256_sub_ps(s[19], s[25]))), s[31]);
+            t[20] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(s[8], s[14]), _mm256_mul_ps(_8, _mm256_sub_ps(s[20], s[26]))), s[32]);
+            t[21] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(s[9], s[15]), _mm256_mul_ps(_8, _mm256_sub_ps(s[21], s[27]))), s[33]);
+            t[22] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(s[10], s[16]), _mm256_mul_ps(_8, _mm256_sub_ps(s[22], s[28]))), s[34]);
+            t[23] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(s[11], s[17]), _mm256_mul_ps(_8, _mm256_sub_ps(s[23], s[29]))), s[35]);
+
+            dst[0] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(t[0], t[1]), _mm256_add_ps(t[2], t[3])), t[4]);
+            dst[1] = _mm256_add_ps(_mm256_sub_ps(t[1], t[2]), _mm256_mul_ps(_2, _mm256_sub_ps(t[3], t[4])));
+            dst[2] = _mm256_add_ps(_mm256_add_ps(t[1], t[2]), _mm256_mul_ps(_4, _mm256_add_ps(t[3], t[4])));
+            dst[3] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(t[1], t[2]), _mm256_mul_ps(_8, _mm256_sub_ps(t[3], t[4]))), t[5]);
+            dst[4] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(t[6], t[7]), _mm256_add_ps(t[8], t[9])), t[10]);
+            dst[5] = _mm256_add_ps(_mm256_sub_ps(t[7], t[8]), _mm256_mul_ps(_2, _mm256_sub_ps(t[9], t[10])));
+            dst[6] = _mm256_add_ps(_mm256_add_ps(t[7], t[8]), _mm256_mul_ps(_4, _mm256_add_ps(t[9], t[10])));
+            dst[7] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(t[7], t[8]), _mm256_mul_ps(_8, _mm256_sub_ps(t[9], t[10]))), t[11]);
+            dst[8] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(t[12], t[13]), _mm256_add_ps(t[14], t[15])), t[16]);
+            dst[9] = _mm256_add_ps(_mm256_sub_ps(t[13], t[14]), _mm256_mul_ps(_2, _mm256_sub_ps(t[15], t[16])));
+            dst[10] = _mm256_add_ps(_mm256_add_ps(t[13], t[14]), _mm256_mul_ps(_4, _mm256_add_ps(t[15], t[16])));
+            dst[11] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(t[13], t[14]), _mm256_mul_ps(_8, _mm256_sub_ps(t[15], t[16]))), t[17]);
+            dst[12] = _mm256_add_ps(_mm256_add_ps(_mm256_add_ps(t[18], t[19]), _mm256_add_ps(t[20], t[21])), t[22]);
+            dst[13] = _mm256_add_ps(_mm256_sub_ps(t[19], t[20]), _mm256_mul_ps(_2, _mm256_sub_ps(t[21], t[22])));
+            dst[14] = _mm256_add_ps(_mm256_add_ps(t[19], t[20]), _mm256_mul_ps(_4, _mm256_add_ps(t[21], t[22])));
+            dst[15] = _mm256_add_ps(_mm256_add_ps(_mm256_sub_ps(t[19], t[20]), _mm256_mul_ps(_8, _mm256_sub_ps(t[21], t[22]))), t[23]);
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutputStore16(const __m256 src[16], float * dst, size_t dstS, size_t dstC)
+        {
+            _mm256_storeu_ps(dst + 0 * dstS + 0 * dstC, src[0]);
+            _mm256_storeu_ps(dst + 0 * dstS + 1 * dstC, src[1]);
+            _mm256_storeu_ps(dst + 0 * dstS + 2 * dstC, src[2]);
+            _mm256_storeu_ps(dst + 0 * dstS + 3 * dstC, src[3]);
+            _mm256_storeu_ps(dst + 1 * dstS + 0 * dstC, src[4]);
+            _mm256_storeu_ps(dst + 1 * dstS + 1 * dstC, src[5]);
+            _mm256_storeu_ps(dst + 1 * dstS + 2 * dstC, src[6]);
+            _mm256_storeu_ps(dst + 1 * dstS + 3 * dstC, src[7]);
+            _mm256_storeu_ps(dst + 2 * dstS + 0 * dstC, src[8]);
+            _mm256_storeu_ps(dst + 2 * dstS + 1 * dstC, src[9]);
+            _mm256_storeu_ps(dst + 2 * dstS + 2 * dstC, src[10]);
+            _mm256_storeu_ps(dst + 2 * dstS + 3 * dstC, src[11]);
+            _mm256_storeu_ps(dst + 3 * dstS + 0 * dstC, src[12]);
+            _mm256_storeu_ps(dst + 3 * dstS + 1 * dstC, src[13]);
+            _mm256_storeu_ps(dst + 3 * dstS + 2 * dstC, src[14]);
+            _mm256_storeu_ps(dst + 3 * dstS + 3 * dstC, src[15]);
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutput8t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                __m256 tmp[16];
+                Winograd4x3SetOutputLoad36(src + d, srcStride, tmp);
+                Winograd4x3SetOutputStore16(tmp, dst + d, dstS, dstC);
+            }
+            if (dstCF < dstC)
+            {
+                __m256 tmp[16];
+                Winograd4x3SetOutputLoad36(src + dstC - F, srcStride, tmp);
+                Winograd4x3SetOutputStore16(tmp, dst + dstC - F, dstS, dstC);
+            }
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutputStore16(const __m256 src[16], float * dst, size_t dstS, size_t dstC, size_t rowE, size_t colE)
+        {
+            for (size_t row = 0; row < rowE; ++row)
+                for (size_t col = 0; col < colE; ++col)
+                    _mm256_storeu_ps(dst + row * dstS + col * dstC, src[row * 4 + col]);
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutput8t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                __m256 tmp[16];
+                Winograd4x3SetOutputLoad36(src + d, srcStride, tmp);
+                Winograd4x3SetOutputStore16(tmp, dst + d, dstS, dstC, rowE, colE);
+            }
+            if (dstCF < dstC)
+            {
+                __m256 tmp[16];
+                Winograd4x3SetOutputLoad36(src + dstC - F, srcStride, tmp);
+                Winograd4x3SetOutputStore16(tmp, dst + dstC - F, dstS, dstC, rowE, colE);
+            }
+        }
+
+        void Winograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        {
+            if (trans ? (dstChannels < 8) : (dstHeight < 4 || dstWidth < 16))
+            {
+                Base::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
+                return;
+            }
+            size_t tileH = (dstHeight + 3) / 4;
+            size_t tileW = (dstWidth + 3) / 4;
+            size_t srcStride = dstChannels * tileH*tileW;
+            size_t dstH4 = AlignLo(dstHeight, 4);
+            size_t dstW4 = AlignLo(dstWidth, 4);
+            if (trans)
+            {
+                size_t row, col;
+                for (row = 0; row < dstH4; row += 4)
+                {
+                    for (col = 0; col < dstW4; col += 4)
+                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels), src += dstChannels;
+                    if (col < dstWidth)
+                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, 4, dstWidth - col), src += dstChannels;
+                }
+                if (row < dstHeight)
+                {
+                    for (col = 0; col < dstW4; col += 4)
+                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, 4), src += dstChannels;
+                    if (col < dstWidth)
+                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
+                }
+            }
+            else
+            {
+                Base::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
             }
         }
     }
