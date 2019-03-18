@@ -5410,14 +5410,14 @@ SIMD_API void SimdWinograd4x3SetFilter(const float * src, size_t size, float * d
     simdWinograd4x3SetFilter(src, size, dst, trans);
 }
 
-volatile SimdWinogradSetInputPtr simdWinograd4x3SetInput = SIMD_FUNC3(Winograd4x3SetInput, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+volatile SimdWinogradSetInputPtr simdWinograd4x3SetInput = SIMD_FUNC4(Winograd4x3SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdWinograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
 {
     simdWinograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
 }
 
-volatile SimdWinogradSetOutputPtr simdWinograd4x3SetOutput = SIMD_FUNC3(Winograd4x3SetOutput, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+volatile SimdWinogradSetOutputPtr simdWinograd4x3SetOutput = SIMD_FUNC4(Winograd4x3SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdWinograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {

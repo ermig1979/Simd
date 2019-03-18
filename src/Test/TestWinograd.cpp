@@ -272,6 +272,11 @@ namespace Test
             result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Avx::Winograd4x3SetInput), FUNC_WI(SimdWinograd4x3SetInput));
 #endif 
 
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Avx512f::Winograd4x3SetInput), FUNC_WI(SimdWinograd4x3SetInput));
+#endif 
+
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && WinogradSetInputAutoTest(4, 3, FUNC_WI(Simd::Neon::Winograd4x3SetInput), FUNC_WI(SimdWinograd4x3SetInput));
@@ -401,6 +406,11 @@ namespace Test
         if (Simd::Avx::Enable)
             result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Avx::Winograd4x3SetOutput), FUNC_WO(SimdWinograd4x3SetOutput));
 #endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Avx512f::Winograd4x3SetOutput), FUNC_WO(SimdWinograd4x3SetOutput));
+#endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)

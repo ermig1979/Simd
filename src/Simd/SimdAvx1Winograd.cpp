@@ -1011,7 +1011,7 @@ namespace Simd
         {
             if (trans ? (dstChannels < 8) : (dstHeight < 4 || dstWidth < 16))
             {
-                Base::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
+                Sse::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 3) / 4;
