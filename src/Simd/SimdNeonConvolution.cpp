@@ -255,31 +255,33 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
-            : Base::ConvolutionWinograd2x3p(p)
+        ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
+            : Base::ConvolutionWinograd(p)
         {
-            _setFilter = Neon::Winograd2x3SetFilter;
-            _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
-        }
-
-        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
-        {
-            const ConvParam & p = _param;
-            float * bufS = Buffer(buf);
-            float * bufD = bufS + _strideS * _count;
-            Neon::Winograd2x3SetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
-            for (size_t i = 0; i < _count; ++i)
+            if (p.IsHwc() && p.srcH >= 16 && p.srcW >= 16)
+                SetBlock(4);
+            else
+                SetBlock(2);
+            switch (_block)
             {
-                if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
-                else
-                    _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+            case 2:
+                _setFilter = Neon::Winograd2x3SetFilter;
+                _setInput = Neon::Winograd2x3SetInput;
+                _setOutput = Neon::Winograd2x3SetOutput;
+                break;
+            case 4:
+                _setFilter = Neon::Winograd4x3SetFilter;
+                _setInput = Neon::Winograd4x3SetInput;
+                _setOutput = Neon::Winograd4x3SetOutput;
+                break;
+            default:
+                assert(0);
             }
-            Neon::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
-            Neon::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+            _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
+            _biasAndActivation = Neon::ConvolutionBiasAndActivation;
         }
 
-        bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
+        bool ConvolutionWinograd::Preferable(const ConvParam & p)
         {
             return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 10 &&
                 (p.srcT ? (p.srcH >= 12 && p.srcW >= 12) : (p.srcH >= 6 && p.srcW >= 6));
@@ -1615,8 +1617,8 @@ namespace Simd
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))
                 return new ConvolutionDepthwiseDotProduct(param);
-            else if (ConvolutionWinograd2x3p::Preferable(param))
-                return new ConvolutionWinograd2x3p(param);
+            else if (ConvolutionWinograd::Preferable(param))
+                return new ConvolutionWinograd(param);
             else if (ConvolutionDirectChw::Preferable(param))
                 return new ConvolutionDirectChw(param);
             else if (ConvolutionGemmNT::Preferable(param))

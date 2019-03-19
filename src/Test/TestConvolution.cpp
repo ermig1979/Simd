@@ -128,7 +128,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, weight, bias, params, src, buf, dst2));
 
-        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
 
         return result;
     }
@@ -271,7 +271,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(320, 8, 8, 320, _5, _1, _1, _2, _2, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(640, 4, 4, 640, _5, _1, _1, _2, _2, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 32, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(3, 300, 300, 16, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(3, 224, 224, 16, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
@@ -314,7 +314,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(96, 150, 150, 96, _3, _1, _2, _0, _1, 96, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(96, 75, 75, 24, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
-#if 0
+#if 1
         result = result && ConvolutionForwardAutoTest(Param(3, 112, 96, 64, _3, _1, _2, _0, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 56, 48, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(Param(64, 56, 48, 128, _3, _1, _2, _0, _1, 1, a, t), f1, f2);

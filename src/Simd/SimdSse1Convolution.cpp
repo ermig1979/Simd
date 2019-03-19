@@ -232,28 +232,26 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
-            : Base::ConvolutionWinograd2x3p(p)
+        ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
+            : Base::ConvolutionWinograd(p)
         {
-            _setFilter = Sse::Winograd2x3SetFilter;
-            _gemm.Init(Sse::Gemm32fNN, "Sse", p.gemm, "Ext");
-        }
-
-        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
-        {
-            const ConvParam & p = _param;
-            float * bufS = Buffer(buf);
-            float * bufD = bufS + _strideS * _count;
-            Sse::Winograd2x3SetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
-            for (size_t i = 0; i < _count; ++i)
+            switch (_block)
             {
-                if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
-                else
-                    _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+            case 2:
+                _setFilter = Sse::Winograd2x3SetFilter;
+                _setInput = Sse::Winograd2x3SetInput;
+                _setOutput = Sse::Winograd2x3SetOutput;
+                break;
+            case 4:
+                _setFilter = Sse::Winograd4x3SetFilter;
+                _setInput = Sse::Winograd4x3SetInput;
+                _setOutput = Sse::Winograd4x3SetOutput;
+                break;
+            default:
+                assert(0);
             }
-            Sse::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
-            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+            _gemm.Init(Sse::Gemm32fNN, "Sse", p.gemm, "Ext");
+            _biasAndActivation = Sse::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
@@ -1591,8 +1589,8 @@ namespace Simd
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))
                 return new ConvolutionDepthwiseDotProduct(param);
-            else if (ConvolutionWinograd2x3p::Preferable(param))
-                return new ConvolutionWinograd2x3p(param);
+            else if (ConvolutionWinograd::Preferable(param))
+                return new ConvolutionWinograd(param);
             else if (ConvolutionDirectChw::Preferable(param))
                 return new ConvolutionDirectChw(param);
             else if (ConvolutionDirectHwc::Preferable(param))

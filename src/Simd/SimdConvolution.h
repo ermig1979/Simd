@@ -192,10 +192,10 @@ namespace Simd
             size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
         };
 
-        class ConvolutionWinograd2x3p : public Convolution
+        class ConvolutionWinograd : public Convolution
         {
         public:
-            ConvolutionWinograd2x3p(const ConvParam & p);
+            ConvolutionWinograd(const ConvParam & p);
             virtual size_t BufferSize() const;
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -204,12 +204,20 @@ namespace Simd
 
         protected:
             typedef void(*SetFilter)(const float * src, size_t size, float * dst, SimdBool trans);
+            typedef void(*SetInput)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
+            typedef void(*SetOutput)(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+            typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
+
+            void SetBlock(size_t block);
 
             size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K;
             SimdBool _pad;
             Array32f _weight;
             const float * _bias;
             SetFilter _setFilter;
+            SetInput _setInput;
+            SetOutput _setOutput;
+            BiasAndActivation _biasAndActivation;
         };
 
         class ConvolutionDirectChw : public Convolution
@@ -286,11 +294,10 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd2x3p : public Base::ConvolutionWinograd2x3p
+        class ConvolutionWinograd : public Base::ConvolutionWinograd
         {
         public:
-            ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void Forward(const float * src, float * buf, float * dst);
+            ConvolutionWinograd(const ConvParam & p);
         };
 
         class ConvolutionDirectChw : public Base::ConvolutionDirectChw
@@ -368,11 +375,10 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd2x3p : public Sse::ConvolutionWinograd2x3p
+        class ConvolutionWinograd : public Sse::ConvolutionWinograd
         {
         public:
-            ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void Forward(const float * src, float * buf, float * dst);
+            ConvolutionWinograd(const ConvParam & p);
         };
 
         class ConvolutionDirectChw : public Sse::ConvolutionDirectChw
@@ -428,11 +434,10 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd2x3p : public Avx::ConvolutionWinograd2x3p
+        class ConvolutionWinograd : public Avx::ConvolutionWinograd
         {
         public:
-            ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void Forward(const float * src, float * buf, float * dst);
+            ConvolutionWinograd(const ConvParam & p);
         };
 
         class ConvolutionDirectChw : public Avx::ConvolutionDirectChw
@@ -480,11 +485,10 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd2x3p : public Avx2::ConvolutionWinograd2x3p
+        class ConvolutionWinograd : public Avx2::ConvolutionWinograd
         {
         public:
-            ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void Forward(const float * src, float * buf, float * dst);
+            ConvolutionWinograd(const ConvParam & p);
         };
 
         class ConvolutionDirectChw : public Avx2::ConvolutionDirectChw
@@ -535,11 +539,10 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd2x3p : public Base::ConvolutionWinograd2x3p
+        class ConvolutionWinograd : public Base::ConvolutionWinograd
         {
         public:
-            ConvolutionWinograd2x3p(const ConvParam & p);
-            virtual void Forward(const float * src, float * buf, float * dst);
+            ConvolutionWinograd(const ConvParam & p);
 
             static bool Preferable(const ConvParam & p);
         };

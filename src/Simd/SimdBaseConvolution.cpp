@@ -513,30 +513,38 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionWinograd2x3p::ConvolutionWinograd2x3p(const ConvParam & p)
+        ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
             : Convolution(p)
-            , _block(2)
         {
-            _count = Simd::Square(_block + p.kernelX - 1);
-            _tileH = (p.dstH + _block - 1) / _block;
-            _tileW = (p.dstW + _block - 1) / _block;
-            _strideW = p.srcC * p.dstC;
-            _strideS = p.srcC * _tileH * _tileW;
-            _strideD = p.dstC * _tileH * _tileW;
-            _M = p.srcT ? _tileW * _tileH : p.dstC;
-            _N = p.srcT ? p.dstC : _tileW * _tileH;
-            _K = p.srcC;
-            _pad = (SimdBool)p.padX;
-            _setFilter = Base::Winograd2x3SetFilter;
+            if (p.IsHwc() && p.srcH >= 12 && p.srcW >= 12)
+                SetBlock(4);
+            else
+                SetBlock(2);
+            switch (_block)
+            {
+            case 2:
+                _setFilter = Base::Winograd2x3SetFilter;
+                _setInput = Base::Winograd2x3SetInput;
+                _setOutput = Base::Winograd2x3SetOutput;
+                break;
+            case 4:
+                _setFilter = Base::Winograd4x3SetFilter;
+                _setInput = Base::Winograd4x3SetInput;
+                _setOutput = Base::Winograd4x3SetOutput;
+                break;
+            default:
+                assert(0);
+            }
             _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
+            _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
         
-        size_t ConvolutionWinograd2x3p::BufferSize() const
+        size_t ConvolutionWinograd::BufferSize() const
         {
             return (_strideS + _strideD)*_count;
         }
 
-        void ConvolutionWinograd2x3p::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
         {
             const ConvParam & p = _param;
             assert(p.srcT == trans);
@@ -548,12 +556,14 @@ namespace Simd
             _params = params;
         }
         
-        void ConvolutionWinograd2x3p::Forward(const float * src, float * buf, float * dst)
+        void ConvolutionWinograd::Forward(const float * src, float * buf, float * dst)
         {
+            SIMD_PERF_BEG(_param.Info());
+
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
             float * bufD = bufS + _strideS * _count;
-            Base::Winograd2x3SetInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
+            _setInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
             for (size_t i = 0; i < _count; ++i)
             {
                 if (p.srcT)
@@ -561,14 +571,30 @@ namespace Simd
                 else
                     _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
             }
-            Base::Winograd2x3SetOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
-            Base::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+            _setOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
+            _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
-        bool ConvolutionWinograd2x3p::Preferable(const ConvParam & p)
+        bool ConvolutionWinograd::Preferable(const ConvParam & p)
         {
             return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && 
                 (p.srcT ? (p.srcH >= 12 && p.srcW >= 12) : (p.srcH >= 6 && p.srcW >= 6));
+        }
+
+        void ConvolutionWinograd::SetBlock(size_t block)
+        {
+            const ConvParam & p = _param;
+            _block = block;
+            _count = Simd::Square(_block + p.kernelX - 1);
+            _tileH = (p.dstH + _block - 1) / _block;
+            _tileW = (p.dstW + _block - 1) / _block;
+            _strideW = p.srcC * p.dstC;
+            _strideS = p.srcC * _tileH * _tileW;
+            _strideD = p.dstC * _tileH * _tileW;
+            _M = p.srcT ? _tileW * _tileH : p.dstC;
+            _N = p.srcT ? p.dstC : _tileW * _tileH;
+            _K = p.srcC;
+            _pad = (SimdBool)p.padX;
         }
 
         //---------------------------------------------------------------------
@@ -986,8 +1012,8 @@ namespace Simd
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))
                 return new ConvolutionDepthwiseDotProduct(param);
-            else if(ConvolutionWinograd2x3p::Preferable(param))
-                return new ConvolutionWinograd2x3p(param);
+            else if(ConvolutionWinograd::Preferable(param))
+                return new ConvolutionWinograd(param);
             else if (ConvolutionGemmNT::Preferable(param))
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectChw::Preferable(param))

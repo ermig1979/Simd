@@ -59,8 +59,8 @@ namespace Simd
                 return NULL;
             else if (Sse::ConvolutionDepthwiseDotProduct::Preferable(param))
                 return new Sse::ConvolutionDepthwiseDotProduct(param);
-            else if (ConvolutionWinograd2x3p::Preferable(param))
-                return new Sse::ConvolutionWinograd2x3p(param);
+            else if (ConvolutionWinograd::Preferable(param))
+                return new Sse::ConvolutionWinograd(param);
             else if (ConvolutionGemmNT::Preferable(param))
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectChw::Preferable(param))
