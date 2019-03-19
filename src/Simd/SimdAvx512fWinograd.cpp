@@ -951,22 +951,88 @@ namespace Simd
             _mm512_mask_storeu_ps(dst + 3 * dstS + 3 * dstC, tail, src[15]);
         }
 
-        SIMD_INLINE void Winograd4x3SetOutput8t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC)
+        SIMD_INLINE void Winograd4x3SetOutput16tSaveRow(const __m512 * t, float * dst, size_t dstC, __mmask16 tail)
+        {
+            _mm512_mask_storeu_ps(dst + 0 * dstC, tail, _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(t[0], t[1]), _mm512_add_ps(t[2], t[3])), t[4]));
+            _mm512_mask_storeu_ps(dst + 1 * dstC, tail, _mm512_add_ps(_mm512_sub_ps(t[1], t[2]), _mm512_mul_ps(_mm512_set1_ps(2.0f), _mm512_sub_ps(t[3], t[4]))));
+            _mm512_mask_storeu_ps(dst + 2 * dstC, tail, _mm512_add_ps(_mm512_add_ps(t[1], t[2]), _mm512_mul_ps(_mm512_set1_ps(4.0f), _mm512_add_ps(t[3], t[4]))));
+            _mm512_mask_storeu_ps(dst + 3 * dstC, tail, _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(t[1], t[2]), _mm512_mul_ps(_mm512_set1_ps(8.0f), _mm512_sub_ps(t[3], t[4]))), t[5]));
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutput16t(const float * src, size_t srcStride, float * dst, size_t dstS, size_t dstC, __mmask16 tail = -1)
+        {
+            __m512 s[36], t[6];
+            s[6] = _mm512_maskz_loadu_ps(tail, src + 6 * srcStride);
+            s[7] = _mm512_maskz_loadu_ps(tail, src + 7 * srcStride);
+            s[8] = _mm512_maskz_loadu_ps(tail, src + 8 * srcStride);
+            s[9] = _mm512_maskz_loadu_ps(tail, src + 9 * srcStride);
+            s[10] = _mm512_maskz_loadu_ps(tail, src + 10 * srcStride);
+            s[11] = _mm512_maskz_loadu_ps(tail, src + 11 * srcStride);
+            s[12] = _mm512_maskz_loadu_ps(tail, src + 12 * srcStride);
+            s[13] = _mm512_maskz_loadu_ps(tail, src + 13 * srcStride);
+            s[14] = _mm512_maskz_loadu_ps(tail, src + 14 * srcStride);
+            s[15] = _mm512_maskz_loadu_ps(tail, src + 15 * srcStride);
+            s[16] = _mm512_maskz_loadu_ps(tail, src + 16 * srcStride);
+            s[17] = _mm512_maskz_loadu_ps(tail, src + 17 * srcStride);
+            s[18] = _mm512_maskz_loadu_ps(tail, src + 18 * srcStride);
+            s[19] = _mm512_maskz_loadu_ps(tail, src + 19 * srcStride);
+            s[20] = _mm512_maskz_loadu_ps(tail, src + 20 * srcStride);
+            s[21] = _mm512_maskz_loadu_ps(tail, src + 21 * srcStride);
+            s[22] = _mm512_maskz_loadu_ps(tail, src + 22 * srcStride);
+            s[23] = _mm512_maskz_loadu_ps(tail, src + 23 * srcStride);
+            s[24] = _mm512_maskz_loadu_ps(tail, src + 24 * srcStride);
+            s[25] = _mm512_maskz_loadu_ps(tail, src + 25 * srcStride);
+            s[26] = _mm512_maskz_loadu_ps(tail, src + 26 * srcStride);
+            s[27] = _mm512_maskz_loadu_ps(tail, src + 27 * srcStride);
+            s[28] = _mm512_maskz_loadu_ps(tail, src + 28 * srcStride);
+            s[29] = _mm512_maskz_loadu_ps(tail, src + 29 * srcStride);
+
+            t[0] = _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src + 0 * srcStride), s[6]), _mm512_add_ps(s[12], s[18])), s[24]);
+            t[1] = _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src + 1 * srcStride), s[7]), _mm512_add_ps(s[13], s[19])), s[25]);
+            t[2] = _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src + 2 * srcStride), s[8]), _mm512_add_ps(s[14], s[20])), s[26]);
+            t[3] = _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src + 3 * srcStride), s[9]), _mm512_add_ps(s[15], s[21])), s[27]);
+            t[4] = _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src + 4 * srcStride), s[10]), _mm512_add_ps(s[16], s[22])), s[28]);
+            t[5] = _mm512_add_ps(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src + 5 * srcStride), s[11]), _mm512_add_ps(s[17], s[23])), s[29]);
+            Winograd4x3SetOutput16tSaveRow(t, dst, dstC, tail);
+            dst += dstS;
+
+            __m512 _2 = _mm512_set1_ps(2.0f);
+            t[0] = _mm512_add_ps(_mm512_sub_ps(s[6], s[12]), _mm512_mul_ps(_2, _mm512_sub_ps(s[18], s[24])));
+            t[1] = _mm512_add_ps(_mm512_sub_ps(s[7], s[13]), _mm512_mul_ps(_2, _mm512_sub_ps(s[19], s[25])));
+            t[2] = _mm512_add_ps(_mm512_sub_ps(s[8], s[14]), _mm512_mul_ps(_2, _mm512_sub_ps(s[20], s[26])));
+            t[3] = _mm512_add_ps(_mm512_sub_ps(s[9], s[15]), _mm512_mul_ps(_2, _mm512_sub_ps(s[21], s[27])));
+            t[4] = _mm512_add_ps(_mm512_sub_ps(s[10], s[16]), _mm512_mul_ps(_2, _mm512_sub_ps(s[22], s[28])));
+            t[5] = _mm512_add_ps(_mm512_sub_ps(s[11], s[17]), _mm512_mul_ps(_2, _mm512_sub_ps(s[23], s[29])));
+            Winograd4x3SetOutput16tSaveRow(t, dst, dstC, tail);
+            dst += dstS;
+
+            __m512 _4 = _mm512_set1_ps(4.0f);
+            t[0] = _mm512_add_ps(_mm512_add_ps(s[6], s[12]), _mm512_mul_ps(_4, _mm512_add_ps(s[18], s[24])));
+            t[1] = _mm512_add_ps(_mm512_add_ps(s[7], s[13]), _mm512_mul_ps(_4, _mm512_add_ps(s[19], s[25])));
+            t[2] = _mm512_add_ps(_mm512_add_ps(s[8], s[14]), _mm512_mul_ps(_4, _mm512_add_ps(s[20], s[26])));
+            t[3] = _mm512_add_ps(_mm512_add_ps(s[9], s[15]), _mm512_mul_ps(_4, _mm512_add_ps(s[21], s[27])));
+            t[4] = _mm512_add_ps(_mm512_add_ps(s[10], s[16]), _mm512_mul_ps(_4, _mm512_add_ps(s[22], s[28])));
+            t[5] = _mm512_add_ps(_mm512_add_ps(s[11], s[17]), _mm512_mul_ps(_4, _mm512_add_ps(s[23], s[29])));
+            Winograd4x3SetOutput16tSaveRow(t, dst, dstC, tail);
+            dst += dstS;
+
+            __m512 _8 = _mm512_set1_ps(8.0f);
+            t[0] = _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(s[6], s[12]), _mm512_mul_ps(_8, _mm512_sub_ps(s[18], s[24]))), _mm512_maskz_loadu_ps(tail, src + 30 * srcStride));
+            t[1] = _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(s[7], s[13]), _mm512_mul_ps(_8, _mm512_sub_ps(s[19], s[25]))), _mm512_maskz_loadu_ps(tail, src + 31 * srcStride));
+            t[2] = _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(s[8], s[14]), _mm512_mul_ps(_8, _mm512_sub_ps(s[20], s[26]))), _mm512_maskz_loadu_ps(tail, src + 32 * srcStride));
+            t[3] = _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(s[9], s[15]), _mm512_mul_ps(_8, _mm512_sub_ps(s[21], s[27]))), _mm512_maskz_loadu_ps(tail, src + 33 * srcStride));
+            t[4] = _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(s[10], s[16]), _mm512_mul_ps(_8, _mm512_sub_ps(s[22], s[28]))), _mm512_maskz_loadu_ps(tail, src + 34 * srcStride));
+            t[5] = _mm512_add_ps(_mm512_add_ps(_mm512_sub_ps(s[11], s[17]), _mm512_mul_ps(_8, _mm512_sub_ps(s[23], s[29]))), _mm512_maskz_loadu_ps(tail, src + 35 * srcStride));
+            Winograd4x3SetOutput16tSaveRow(t, dst, dstC, tail);
+        }
+
+        SIMD_INLINE void Winograd4x3SetOutputT(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC)
         {
             size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F), d = 0;
             for (; d < dstCF; d += F)
-            {
-                __m512 tmp[16];
-                Winograd4x3SetOutputLoad36(src + d, srcStride, tmp);
-                Winograd4x3SetOutputStore16(tmp, dst + d, dstS, dstC);
-            }
+                Winograd4x3SetOutput16t(src + d, srcStride, dst + d, dstS, dstC);
             if (d < dstC)
-            {
-                __mmask16 tail = TailMask16(dstC - d);
-                __m512 tmp[16];
-                Winograd4x3SetOutputLoad36(src + d, srcStride, tmp, tail);
-                Winograd4x3SetOutputStore16(tmp, dst + d, dstS, dstC, tail);
-            }
+                Winograd4x3SetOutput16t(src + d, srcStride, dst + d, dstS, dstC, TailMask16(dstC - d));
         }
 
         SIMD_INLINE void Winograd4x3SetOutputStore16(const __m512 src[16], float * dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, __mmask16 tail = -1)
@@ -976,7 +1042,7 @@ namespace Simd
                     _mm512_mask_storeu_ps(dst + row * dstS + col * dstC, tail, src[row * 4 + col]);
         }
 
-        SIMD_INLINE void Winograd4x3SetOutput8t(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
+        SIMD_INLINE void Winograd4x3SetOutputT(const float * src, size_t srcStride, float * dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
         {
             size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F), d = 0;
             for (; d < dstCF; d += F)
@@ -1012,16 +1078,16 @@ namespace Simd
                 for (row = 0; row < dstH4; row += 4)
                 {
                     for (col = 0; col < dstW4; col += 4)
-                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels), src += dstChannels;
+                        Winograd4x3SetOutputT(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels), src += dstChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, 4, dstWidth - col), src += dstChannels;
+                        Winograd4x3SetOutputT(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, 4, dstWidth - col), src += dstChannels;
                 }
                 if (row < dstHeight)
                 {
                     for (col = 0; col < dstW4; col += 4)
-                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, 4), src += dstChannels;
+                        Winograd4x3SetOutputT(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, 4), src += dstChannels;
                     if (col < dstWidth)
-                        Winograd4x3SetOutput8t(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
+                        Winograd4x3SetOutputT(src, srcStride, dst + (row * dstWidth + col)*dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
                 }
             }
             else
