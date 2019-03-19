@@ -647,6 +647,11 @@ namespace Test
         result = result && Compare(col1, col2, 0, true, 64, 0, "col");
         result = result && Compare(row1, row2, 0, true, 64, 0, "row");
 
+        if (!result)
+        {
+
+        }
+
         return result;
     }
 

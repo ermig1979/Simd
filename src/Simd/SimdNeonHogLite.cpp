@@ -851,12 +851,12 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 val = vaddq_f32(Load<false>(a + 0), Load<false>(b + 0));
+                idx = vbslq_u32(vcgtq_f32(val, max), cur, idx);
                 max = vmaxq_f32(max, val);
-                idx = vbslq_u32(vceqq_f32(max, val), cur, idx);
                 cur = vaddq_u32(cur, K32_00000003);
                 val = vaddq_f32(Load<false>(a + 3), Load<false>(b + 3));
+                idx = vbslq_u32(vcgtq_f32(val, max), cur, idx);
                 max = vmaxq_f32(max, val);
-                idx = vbslq_u32(vceqq_f32(max, val), cur, idx);
                 cur = vaddq_u32(cur, K32_00000005);
                 a += aStride;
                 b += bStride;
@@ -872,6 +872,11 @@ namespace Simd
                 if (_max[i] > *pValue)
                 {
                     *pValue = _max[i];
+                    *pCol = _idx[i] & 7;
+                    *pRow = _idx[i] / 8;
+                }
+                else if (_max[i] == *pValue && *pRow > _idx[i] / 8)
+                {
                     *pCol = _idx[i] & 7;
                     *pRow = _idx[i] / 8;
                 }
