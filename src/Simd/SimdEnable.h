@@ -176,18 +176,19 @@ namespace Simd
         const bool Enable = SupportedByCPU() && SupportedByOS();
 
         const unsigned int SCR_FTZ = 1 << 15;
+        const unsigned int SCR_DAZ = 1 << 6;
 
-        SIMD_INLINE SimdBool GetFlushToZero()
+        SIMD_INLINE SimdBool GetFastMode()
         {
-            return _mm_getcsr() & SCR_FTZ ? SimdTrue : SimdFalse;
+            return _mm_getcsr() & (SCR_FTZ | SCR_DAZ) ? SimdTrue : SimdFalse;
         }
 
-        SIMD_INLINE void SetFlushToZero(SimdBool value)
+        SIMD_INLINE void SetFastMode(SimdBool value)
         {
             if (value)
-                _mm_setcsr(_mm_getcsr() | SCR_FTZ);
+                _mm_setcsr(_mm_getcsr() | (SCR_FTZ | SCR_DAZ));
             else
-                _mm_setcsr(_mm_getcsr() & ~SCR_FTZ);
+                _mm_setcsr(_mm_getcsr() & ~(SCR_FTZ | SCR_DAZ));
         }
     }
 #endif
@@ -547,12 +548,12 @@ namespace Simd
 
         const unsigned int FPSCR_FTZ = 1 << 24;
 
-        SIMD_INLINE SimdBool GetFlushToZero()
+        SIMD_INLINE SimdBool GetFastMode()
         {
             return GetStatusWord() & FPSCR_FTZ ? SimdTrue : SimdFalse;
         }
 
-        SIMD_INLINE void SetFlushToZero(SimdBool value)
+        SIMD_INLINE void SetFastMode(SimdBool value)
         {
             if (value)
                 SetStatusWord(GetStatusWord() | FPSCR_FTZ);

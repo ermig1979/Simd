@@ -176,26 +176,30 @@ SIMD_API void SimdSetThreadNumber(size_t threadNumber)
     Base::SetThreadNumber(threadNumber);
 }
 
-SIMD_API SimdBool SimdGetFlushToZero()
+SIMD_API SimdBool SimdGetFastMode()
 {
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable)
-        return Sse::GetFlushToZero();
+        return Sse::GetFastMode();
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable)
-        return Neon::GetFlushToZero();
+        return Neon::GetFastMode();
     else
 #endif
         return SimdFalse;
 }
 
-SIMD_API void SimdSetFlushToZero(SimdBool value)
+SIMD_API void SimdSetFastMode(SimdBool value)
 {
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable)
-        Sse::SetFlushToZero(value);
+        Sse::SetFastMode(value);
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        Neon::SetFastMode(value);
 #endif
 }
 

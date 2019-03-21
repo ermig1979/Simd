@@ -367,23 +367,23 @@ extern "C"
 
     /*! @ingroup cpu_flags
 
-        \fn SimdBool SimdGetFlushToZero();
+        \fn SimdBool SimdGetFastMode();
 
-        \short Gets current CPU Flush-To-Zero (FTZ) flag. It is used in order to process subnormal numbers.
+        \short Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
 
-        \return current FTZ flag.
+        \return current 'fast' mode.
     */
-    SIMD_API SimdBool SimdGetFlushToZero();
+    SIMD_API SimdBool SimdGetFastMode();
 
     /*! @ingroup cpu_flags
 
-        \fn void SimdSetFlushToZero(SimdBool value);
+        \fn void SimdSetFastMode(SimdBool value);
 
-        \short Sets current CPU Flush-To-Zero (FTZ) flag. It is used in order to process subnormal numbers.
+        \short Sets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.
 
-        \param [in] value - a value of Flush-To-Zero (FTZ) flag.
+        \param [in] value - a value of 'fast' mode.
     */
-    SIMD_API void SimdSetFlushToZero(SimdBool value);
+    SIMD_API void SimdSetFastMode(SimdBool value);
 
     /*! @ingroup hash
 
