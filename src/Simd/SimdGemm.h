@@ -285,9 +285,138 @@ namespace Simd
         Kernel _k1x1, _k1x4, _k2x1, _k2x4, _k3x1, _k3x4, _k6x1, _k6x4;
     };
 
+    template <class T, class TM> class GemmNNcb
+    {
+    public:
+        typedef void(*Main)(size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, TM tail);
+        typedef void(*Tail)(size_t M, size_t N, size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, T * C, size_t ldc, TM tail);
+        typedef void(*PackB)(const T * B, size_t ldb, size_t K, size_t N, size_t microN, T * pB);
+        typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
+        typedef TM(*TailMask)(ptrdiff_t tail);
+
+        GemmNNcb(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3, size_t F,
+            Main kernelMM, Main kernelMT, Tail kernelTM, Tail kernelTT, PackB packB, ScaleC scaleC, TailMask tailMask)
+            : _0(0)
+            , _1(1)
+        {
+            _M = M;
+            _N = N;
+            _K = K;
+            _microM = microM;
+            _microN = microN;
+            _F = F;
+            _kernelMM = kernelMM;
+            _kernelMT = kernelMT;
+            _kernelTM = kernelTM;
+            _kernelTT = kernelTT;
+            _scaleC = scaleC;
+            _packB = packB;
+            _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
+            _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));
+            _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _microN));
+            size_t NF = AlignLo(_N, _F);
+            if (tailMask)
+            {
+                _main = TM(-1);
+                _tail = NF == _N ? TM(-1) : tailMask(_N - NF);
+            }
+            else
+            {
+                _main = TM(_F);
+                _tail = NF == _N ? TM(_F) : TM(_N - NF);
+            }        
+        }
+
+        SIMD_INLINE size_t BufferSize() const 
+        {
+            return AlignHiAny(_N, _microN)*_K;
+        }
+
+        void ReorderB(const T * B, size_t ldb, T * pB)
+        {
+            for (size_t j = 0; j < _N; j += _macroN)
+            {
+                size_t macroN = Simd::Min(_N, j + _macroN) - j;
+                for (size_t k = 0; k < _K; k += _macroK)
+                {
+                    size_t macroK = Simd::Min(_K, k + _macroK) - k;
+                    _packB(B + k*ldb + j, ldb, macroK, macroN, _microN, pB);
+                    pB += AlignHiAny(macroN, _microN)*macroK;
+                }
+            }
+        }
+
+        void Run(const T * A, size_t lda, const T * pB, T * C, size_t ldc)
+        {
+            for (size_t j = 0; j < _N; j += _macroN)
+            {
+                size_t macroN = Simd::Min(_N, j + _macroN) - j;
+                for (size_t k = 0; k < _K; k += _macroK)
+                {
+                    size_t macroK = Simd::Min(_K, k + _macroK) - k;
+                    for (size_t i = 0; i < _M; i += _macroM)
+                    {
+                        size_t macroM = Simd::Min(_M, i + _macroM) - i;
+                        if (k == 0)
+                            _scaleC(macroM, macroN, _0, C + i * ldc + j, ldc);
+                        MacroKernel(macroM, macroN, macroK, A + i * lda + k, lda, pB, C + i * ldc + j, ldc);
+                    }
+                    pB += AlignHiAny(macroN, _microN)*macroK;
+                }
+            }
+        }
+
+    private:
+
+        void MacroKernel(size_t M, size_t N, size_t K, const T * A, size_t lda, const T * pB, T * C, size_t ldc)
+        {
+            size_t MA = AlignLoAny(M, _microM);
+            size_t NA = AlignLoAny(N, _microN);
+            size_t j = 0;
+            for (; j < NA; j += _microN)
+            {
+                size_t i = 0;
+                for (; i < MA; i += _microM)
+                    _kernelMM(K, _1, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _main);
+                if (i < M)
+                    _kernelTM(M - i, _microN, K, _1, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _main);
+                pB += _microN * K;
+            }
+            if (j < N)
+            {
+                size_t i = 0;
+                for (; i < MA; i += _microM)
+                    _kernelMT(K, _1, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _tail);
+                if (i < M)
+                    _kernelTT(M - i, N - j, K, _1, A + i * lda, lda, pB, _microN, C + i * ldc + j, ldc, _tail);
+            }
+        }
+
+        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK, _F;
+        TM _main, _tail;
+        Main _kernelMM, _kernelMT;
+        Tail _kernelTM, _kernelTT;
+        ScaleC _scaleC;
+        PackB _packB;
+        T _0, _1;
+    };
+
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
+        void GemmKernel4x12nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel6x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernelMx12nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx4nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
+        void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
     }
 #endif//SIMD_SSE_ENABLE
@@ -295,13 +424,92 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
+        void GemmKernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernelMx24nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
         void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
-
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
-
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
     }
 #endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        void GemmKernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernelMx24nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+    }
+#endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX512F_ENABLE
+    namespace Avx512f
+    {
+        void GemmKernel4x48nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel4x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmKernel6x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmKernel8x48nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel8x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel8x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmKernel9x48nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel9x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel9x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmKernel12x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel12x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmKernel14x32nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernel14x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmKernelMx48nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernelMx32nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+        void GemmKernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask);
+
+        void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
+        void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+    }
+#endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        void GemmKernel4x12nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel4x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernel6x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmKernelMx12nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+        void GemmKernelMx4nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail);
+
+        void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
+        void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+    }
+#endif//SIMD_NEON_ENABLE
 }
 
 #endif//__SimdGemm_h__

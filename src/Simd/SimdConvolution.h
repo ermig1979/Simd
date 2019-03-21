@@ -151,6 +151,7 @@ namespace Simd
         float _0, _1;
         const float * _params;
         RuntimeGemm _gemm;
+        Array32f _hwcWeight;
     };
 
     namespace Base
@@ -209,6 +210,9 @@ namespace Simd
             typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
             void SetBlock(size_t block);
+
+            virtual void GemmChw(const float * src, float * dst);
+            virtual void GemmHwc(const float * src, float * dst);
 
             size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K;
             SimdBool _pad;
@@ -290,6 +294,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
+            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -362,6 +367,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
+            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToRow(const float * src, float * dst);
@@ -419,6 +425,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
+            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
@@ -469,6 +476,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
+            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
@@ -525,6 +533,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
+            virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };

@@ -25,12 +25,86 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512f.h"
+#include "Simd/SimdGemm.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
+        typedef Simd::GemmNNcb<float, __mmask16> HwcGemm;
+
+        HwcGemm CreateHwcGemm(size_t M, size_t N, size_t K)
+        {
+            const size_t L1 = 4*32 * 1024;
+            const size_t L2 = 1024 * 1024;
+            const size_t L3 = 2 * 1280 * 1024;
+            HwcGemm::Main kernelMM, kernelMT;
+            HwcGemm::Tail kernelTM, kernelTT;
+            size_t microM, microN;
+#if SIMD_ZMM_COUNT == 32 
+            if (M == 4 || M == 12)
+            {
+                microM = 4;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel4x48nn;
+                kernelMT = tail > DF ? Avx512f::GemmKernel4x48nn : (tail > F ? Avx512f::GemmKernel4x32nn : Avx512f::GemmKernel4x16nn);
+                kernelTM = Avx512f::GemmKernelMx48nn;
+                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+            }
+            else if (M == 8 || M == 16 || M == 32)
+            {
+                microM = 8;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel8x48nn;
+                kernelMT = tail > DF ? Avx512f::GemmKernel8x48nn : (tail > F ? Avx512f::GemmKernel8x32nn : Avx512f::GemmKernel8x16nn);
+                kernelTM = GemmKernelMx48nn;
+                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+            }            
+            else
+            {
+                microM = 14;
+                microN = 32;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel14x32nn;
+                kernelMT = tail > F ? Avx512f::GemmKernel14x32nn : Avx512f::GemmKernel14x16nn;
+                kernelTM = Avx512f::GemmKernelMx32nn;
+                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
+            }
+#elif SIMD_ZMM_COUNT == 16 
+            if (M == 4 || M == 8 || M == 16)
+            {
+                microM = 4;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel4x48nn;
+                kernelMT = tail > DF ? Avx512f::GemmKernel4x48nn : (tail > F ? Avx512f::GemmKernel4x32nn : Avx512f::GemmKernel4x16nn);
+                kernelTM = Avx512f::GemmKernelMx48nn;
+                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+            }
+            else
+            {
+                microM = 6;
+                microN = 32;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel6x32nn;
+                kernelMT = tail > F ? Avx512f::GemmKernel6x32nn : Avx512f::GemmKernel6x16nn;
+                kernelTM = Avx512f::GemmKernelMx32nn;
+                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
+            }
+#else
+            microM = 4;
+            microN = 16;
+            kernelMM = Avx512f::GemmKernel4x16nn;
+            kernelMT = Avx512f::GemmKernel4x16nn;
+            kernelTM = Avx512f::GemmKernelMx16nn;
+            kernelTT = Avx512f::GemmKernelMx16nn;
+#endif
+            return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, Avx512f::TailMask16);
+        }
+
         static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             SIMD_PERF_BEG(Simd::ToStr(count) + "-" + Simd::ToStr(size) + "-" + Simd::ToStr((int)activation) + "-" + Simd::ToStr((int)trans));
@@ -313,6 +387,23 @@ namespace Simd
                 }
             }
             _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
+            if (_param.IsHwc() && _param.group == 1)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                _hwcWeight.Resize(hwcGemm.BufferSize());
+            }
+        }
+
+        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        {
+            Base::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
+            if (_hwcWeight.data)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
+                if (internal)
+                    *internal = SimdTrue;
+            }
         }
 
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
@@ -326,7 +417,15 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
             {
                 if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                {
+                    if (_hwcWeight.data)
+                    {
+                        HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                        hwcGemm.Run(src, _K, _hwcWeight.data, dst, _N);
+                    }
+                    else
+                        _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                }
                 else
                     _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
             }

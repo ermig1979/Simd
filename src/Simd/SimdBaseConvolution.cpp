@@ -563,14 +563,11 @@ namespace Simd
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
             float * bufD = bufS + _strideS * _count;
-            _setInput(src, p.srcC, p.srcH, p.srcW, buf, _pad, p.srcT);
-            for (size_t i = 0; i < _count; ++i)
-            {
-                if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
-                else
-                    _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
-            }
+            _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _pad, p.srcT);
+            if (p.srcT)
+                GemmHwc(bufS, bufD);
+            else
+                GemmChw(bufS, bufD);
             _setOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
             _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
@@ -595,6 +592,18 @@ namespace Simd
             _N = p.srcT ? p.dstC : _tileW * _tileH;
             _K = p.srcC;
             _pad = (SimdBool)p.padX;
+        }
+
+        void ConvolutionWinograd::GemmChw(const float * src, float * dst)
+        {
+            for (size_t i = 0; i < _count; ++i)
+                _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, src + i * _strideS, _N, &_0, dst + i * _strideD, _N);
+        }
+
+        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
+        {
+            for (size_t i = 0; i < _count; ++i)
+                _gemm.Run(_M, _N, _K, &_1, src + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, dst + i * _strideD, _N);
         }
 
         //---------------------------------------------------------------------

@@ -25,12 +25,55 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx1.h"
+#include "Simd/SimdGemm.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
+        typedef Simd::GemmNNcb<float, size_t> HwcGemm;
+
+        HwcGemm CreateHwcGemm(size_t M, size_t N, size_t K)
+        {
+            const size_t L1 = 32 * 1024;
+            const size_t L2 = 256 * 1024;
+            const size_t L3 = 2 * 1024 * 1024;
+            HwcGemm::Main kernelMM, kernelMT;
+            HwcGemm::Tail kernelTM, kernelTT;
+            size_t microM, microN;
+#ifdef SIMD_X64_ENABLE
+            if (M == 4 || M == 8 || /*M == 12 || */M == 16)
+            {
+                microM = 4;
+                microN = 24;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx::GemmKernel4x24nn;
+                kernelMT = tail > DF ? Avx::GemmKernel4x24nn : (tail > F ? Avx::GemmKernel4x16nn : Avx::GemmKernel4x8nn);
+                kernelTM = Avx::GemmKernelMx24nn;
+                kernelTT = tail > DF ? Avx::GemmKernelMx24nn : (tail > F ? Avx::GemmKernelMx16nn : Avx::GemmKernelMx8nn);
+            }
+            else
+            {
+                microM = 6;
+                microN = 16;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx::GemmKernel6x16nn;
+                kernelMT = tail > F ? Avx::GemmKernel6x16nn : Avx::GemmKernel6x8nn;
+                kernelTM = Avx::GemmKernelMx16nn;
+                kernelTT = tail > F ? Avx::GemmKernelMx16nn : Avx::GemmKernelMx8nn;
+            }
+#else
+            microM = 4;
+            microN = 8;
+            kernelMM = Avx::GemmKernel4x8nn;
+            kernelMT = Avx::GemmKernel4x8nn;
+            kernelTM = Avx::GemmKernelMx8nn;
+            kernelTT = Avx::GemmKernelMx8nn;
+#endif
+            return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL);
+        }
+
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
@@ -257,6 +300,23 @@ namespace Simd
             : Sse::ConvolutionGemmNN(p)
         {
             _gemm.Init(Avx::Gemm32fNN, "Avx", p.gemm, "Ext");
+            if (_param.IsHwc() && _param.group == 1)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                _hwcWeight.Resize(hwcGemm.BufferSize());
+            }
+        }
+
+        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        {
+            Base::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
+            if (_hwcWeight.data)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
+                if (internal)
+                    *internal = SimdTrue;
+            }
         }
 
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
@@ -265,7 +325,15 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
             {
                 if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                {
+                    if (_hwcWeight.data)
+                    {
+                        HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                        hwcGemm.Run(src, _K, _hwcWeight.data, dst, _N);
+                    }
+                    else
+                        _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                }
                 else
                     _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
             }

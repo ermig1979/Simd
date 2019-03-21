@@ -26,12 +26,55 @@
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
+#include "Simd/SimdGemm.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        typedef Simd::GemmNNcb<float, size_t> HwcGemm;
+
+        HwcGemm CreateHwcGemm(size_t M, size_t N, size_t K)
+        {
+            const size_t L1 = 32 * 1024;
+            const size_t L2 = 256 * 1024;
+            const size_t L3 = 2 * 1024 * 1024;
+            HwcGemm::Main kernelMM, kernelMT;
+            HwcGemm::Tail kernelTM, kernelTT;
+            size_t microM, microN;
+#ifdef SIMD_X64_ENABLE
+            if (M == 4 || M == 8 || /*M == 12 || */M == 16)
+            {
+                microM = 4;
+                microN = 24;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx2::GemmKernel4x24nn;
+                kernelMT = tail > DF ? Avx2::GemmKernel4x24nn : (tail > F ? Avx2::GemmKernel4x16nn : Avx2::GemmKernel4x8nn);
+                kernelTM = Avx2::GemmKernelMx24nn;
+                kernelTT = tail > DF ? Avx2::GemmKernelMx24nn : (tail > F ? Avx2::GemmKernelMx16nn : Avx2::GemmKernelMx8nn);
+            }
+            else
+            {
+                microM = 6;
+                microN = 16;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx2::GemmKernel6x16nn;
+                kernelMT = tail > F ? Avx2::GemmKernel6x16nn : Avx2::GemmKernel6x8nn;
+                kernelTM = Avx2::GemmKernelMx16nn;
+                kernelTT = tail > F ? Avx2::GemmKernelMx16nn : Avx2::GemmKernelMx8nn;
+            }
+#else
+            microM = 4;
+            microN = 8;
+            kernelMM = Avx2::GemmKernel4x8nn;
+            kernelMT = Avx2::GemmKernel4x8nn;
+            kernelTM = Avx2::GemmKernelMx8nn;
+            kernelTT = Avx2::GemmKernelMx8nn;
+#endif
+            return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL);
+        }
+
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Avx::ConvolutionGemmNN(p)
         {
@@ -57,6 +100,23 @@ namespace Simd
                 _start[kx] = int(kx * p.dilationX - p.padX + _nose[kx] * p.strideX);
             }
             _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
+            if (_param.IsHwc() && _param.group == 1)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                _hwcWeight.Resize(hwcGemm.BufferSize());
+            }
+        }
+
+        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        {
+            Base::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
+            if (_hwcWeight.data)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
+                if (internal)
+                    *internal = SimdTrue;
+            }
         }
 
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
@@ -67,7 +127,15 @@ namespace Simd
             for (size_t g = 0; g < p.group; ++g)
             {
                 if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                {
+                    if (_hwcWeight.data)
+                    {
+                        HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                        hwcGemm.Run(src, _K, _hwcWeight.data, dst, _N);
+                    }
+                    else
+                        _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                }
                 else
                     _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
             }
@@ -178,6 +246,11 @@ namespace Simd
             }
             _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
+            if (_param.IsHwc() && _param.group == 1)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                _hwcWeight.Resize(hwcGemm.BufferSize()*_count);
+            }
         }
 
         //---------------------------------------------------------------------
