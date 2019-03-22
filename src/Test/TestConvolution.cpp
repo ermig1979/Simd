@@ -358,9 +358,11 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(Param(128, 3, 3, 128, _3, _1, _1, _0, _0, 128, a, t), f1, f2);
 #endif
 #if 1        
-        result = result && ConvolutionForwardAutoTest(Param(1024, 4, 3, 1024, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(512, 4, 4, 512, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(Param(1024, 2, 2, 1024, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(256, 14, 14, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(256, 14, 14, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(256, 14, 12, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(512, 7, 7, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(Param(512, 7, 6, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #else
         result = result && ConvolutionForwardAutoTest(Param(512, 7, 6, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);

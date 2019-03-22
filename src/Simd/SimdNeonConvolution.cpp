@@ -326,7 +326,7 @@ namespace Simd
         ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
             : Base::ConvolutionWinograd(p)
         {
-            if (p.IsHwc() && p.srcH >= 16 && p.srcW >= 16)
+            if (p.IsHwc() && p.srcH >= 12 && p.srcW >= 12)
                 SetBlock(4);
             else
                 SetBlock(2);
@@ -347,12 +347,37 @@ namespace Simd
             }
             _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
             _biasAndActivation = Neon::ConvolutionBiasAndActivation;
+            if (_param.IsHwc())
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                _hwcWeight.Resize(hwcGemm.BufferSize()*_count);
+            }
+        }
+
+        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        {
+            Base::ConvolutionWinograd::SetParams(weight, trans, internal, bias, params);
+            if (_hwcWeight.data)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                size_t strideW = hwcGemm.BufferSize();
+                for (size_t i = 0; i < _count; ++i)
+                    hwcGemm.ReorderB(_weight.data + i * _strideW, _N, _hwcWeight.data + i * strideW);
+            }
+        }
+
+        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
+        {
+            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+            size_t strideW = hwcGemm.BufferSize();
+            for (size_t i = 0; i < _count; ++i)
+                hwcGemm.Run(src + i * _strideS, _K, _hwcWeight.data + i * strideW, dst + i * _strideD, _N);
         }
 
         bool ConvolutionWinograd::Preferable(const ConvParam & p)
         {
             return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 10 &&
-                (p.srcT ? (p.srcH >= 12 && p.srcW >= 12) : (p.srcH >= 6 && p.srcW >= 6));
+                (p.srcT ? (p.srcH >= 6 && p.srcW >= 6) : (p.srcH >= 6 && p.srcW >= 6));
         }
 
         //---------------------------------------------------------------------

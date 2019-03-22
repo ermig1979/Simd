@@ -586,6 +586,31 @@ namespace Simd
             }
             _gemm.Init(Avx::Gemm32fNN, "Avx", p.gemm, "Ext");
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
+            if (_param.IsHwc())
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                _hwcWeight.Resize(hwcGemm.BufferSize()*_count);
+            }
+        }
+
+        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        {
+            Base::ConvolutionWinograd::SetParams(weight, trans, internal, bias, params);
+            if (_hwcWeight.data)
+            {
+                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                size_t strideW = hwcGemm.BufferSize();
+                for (size_t i = 0; i < _count; ++i)
+                    hwcGemm.ReorderB(_weight.data + i * _strideW, _N, _hwcWeight.data + i * strideW);
+            }
+        }
+
+        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
+        {
+            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+            size_t strideW = hwcGemm.BufferSize();
+            for (size_t i = 0; i < _count; ++i)
+                hwcGemm.Run(src + i * _strideS, _K, _hwcWeight.data + i * strideW, dst + i * _strideD, _N);
         }
 
         //---------------------------------------------------------------------
