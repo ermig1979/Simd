@@ -128,6 +128,8 @@ namespace Simd
             : _param(p)
             , _0(0.0f)
             , _1(1.0f)
+            , _gemmHwc(0)
+            , _biasAndActivation(0)
         {
         }
 
@@ -147,12 +149,17 @@ namespace Simd
         }
 
     protected:
+        typedef void(*GemmHwc)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C);
+        typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
+
         ConvParam _param;
         Array32f _buffer;
         float _0, _1;
         const float * _params;
         RuntimeGemm _gemm;
         Array32f _hwcWeight;
+        GemmHwc _gemmHwc;
+        BiasAndActivation _biasAndActivation;
     };
 
     namespace Base
@@ -166,11 +173,10 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
 
         protected:
-            virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
             virtual void ImgToRow(const float * src, float * dst);
 
-            bool _is1x1;
+            bool _is1x1, _merge;
             const float * _weight, * _bias;
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
         };
@@ -209,7 +215,6 @@ namespace Simd
             typedef void(*SetFilter)(const float * src, size_t size, float * dst, SimdBool trans);
             typedef void(*SetInput)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
             typedef void(*SetOutput)(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
-            typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
             void SetBlock(size_t block);
 
@@ -223,7 +228,6 @@ namespace Simd
             SetFilter _setFilter;
             SetInput _setInput;
             SetOutput _setOutput;
-            BiasAndActivation _biasAndActivation;
         };
 
         class ConvolutionDirectChw : public Convolution
@@ -298,8 +302,6 @@ namespace Simd
         public:
             ConvolutionGemmNN(const ConvParam & p);
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         class ConvolutionWinograd : public Base::ConvolutionWinograd
@@ -375,7 +377,6 @@ namespace Simd
             ConvolutionGemmNN(const ConvParam & p);
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
-            virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToRow(const float * src, float * dst);
         };
 
@@ -436,7 +437,6 @@ namespace Simd
             ConvolutionGemmNN(const ConvParam & p);
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
-            virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
         private:
             Array32i _index, _nose, _tail, _start;
@@ -490,7 +490,6 @@ namespace Simd
             ConvolutionGemmNN(const ConvParam & p);
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
         protected:
-            virtual void GemmAndBias(const float * src, float * dst);
             virtual void ImgToCol(const float * src, float * dst);
         private:
             Array32i _index;
@@ -549,8 +548,6 @@ namespace Simd
         public:
             ConvolutionGemmNN(const ConvParam & p);
             virtual void SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         class ConvolutionGemmNT : public Base::ConvolutionGemmNT

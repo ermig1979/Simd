@@ -359,19 +359,22 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 128, 5, 5, 128, _5, _1, _1, _0, _0, 128, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 128, 3, 3, 128, _3, _1, _1, _0, _0, 128, a, t), f1, f2);
 #endif
-#if 0        
+#if 1        
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 14, 14, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 14, 14, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 14, 12, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 512, 7, 7, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 512, 7, 6, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 512, 3, 3, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(10, 256, 14, 14, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(10, 256, 14, 14, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(10, 256, 14, 12, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(10, 512, 7, 7, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(10, 512, 7, 6, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(10, 512, 3, 3, 512, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
+        result = result && ConvolutionForwardAutoTest(eps, Param(2, 128, 24, 24, 8, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(2, 128, 7, 7, 128, _7, _1, _1, _0, _0, 128, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(2, 256, 2, 2, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(2, 128, 64, 64, 128, _3, _1, _1, _1, _1, 2, a, t), f1, f2);
@@ -380,7 +383,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(2, 48, 160, 160, 48, _3, _1, _2, _1, _0, 48, a, t), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(eps, Param(2, 256, 2, 2, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(2, 128, 64, 64, 128, _3, _1, _1, _1, _1, 2, a, t), f1, f2);
 #endif
         return result;
     }
@@ -399,36 +402,36 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ConvolutionForwardAutoTest(EPS, FUNC_C(Simd::Base::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+        result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Base::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && ConvolutionForwardAutoTest(EPS, FUNC_C(Simd::Sse::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Sse::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif 
 
 #ifdef SIMD_SSE3_ENABLE
         if (Simd::Sse3::Enable)
-            result = result && ConvolutionForwardAutoTest(2*EPS, FUNC_C(Simd::Sse3::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Sse3::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && ConvolutionForwardAutoTest(EPS, FUNC_C(Simd::Avx::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && ConvolutionForwardAutoTest(EPS, FUNC_C(Simd::Avx2::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx2::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && ConvolutionForwardAutoTest(EPS, FUNC_C(Simd::Avx512f::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512f::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && ConvolutionForwardAutoTest(EPS, FUNC_C(Simd::Neon::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Neon::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif
 
         return result;

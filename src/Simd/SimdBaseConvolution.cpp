@@ -152,6 +152,7 @@ namespace Simd
             : Convolution(p)
         {
             _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
+            _merge = p.IsHwc() && p.group == 1 && p.dstC*p.dstH <= 256;
             if (p.srcT)
             {
                 _M = p.dstH * p.dstW;
@@ -181,6 +182,8 @@ namespace Simd
             _sizeB = p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
             _sizeD = p.dstC*p.dstH*p.dstW;
             _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
+            _gemmHwc = NULL;
+            _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
         size_t ConvolutionGemmNN::BufferSize() const
@@ -188,7 +191,7 @@ namespace Simd
             if (_is1x1)
                 return 1;
             else
-                return _batch*_sizeB;
+                return _sizeB*(_merge ? _batch : 1);
         };
 
         void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
@@ -203,36 +206,53 @@ namespace Simd
 
         void ConvolutionGemmNN::Forward(const float * src, float * buf, float * dst)
         {
+            const ConvParam & p = _param;
             if (!_is1x1)
-            {
                 buf = Buffer(buf);
+            if (_merge)
+            {
+                if (!_is1x1)
+                {
+                    for (size_t b = 0; b < _batch; ++b)
+                        ImgToRow(src + b * _sizeS, buf + b * _sizeB);
+                    src = buf;
+                }
+                if (_hwcWeight.data)
+                    _gemmHwc(_M*_batch, _N, _K, src, _hwcWeight.data, dst);
+                else
+                    _gemm.Run(_M*_batch, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
+                for (size_t b = 0; b < _batch; ++b)
+                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdTrue, dst + b * _sizeD);
+            }
+            else
+            {
                 for (size_t b = 0; b < _batch; ++b)
                 {
-                    if (_param.srcT)
-                        ImgToRow(src + b * _sizeS, buf + b * _sizeB);
-                    else
-                        ImgToCol(src + b * _sizeS, buf + b * _sizeB);
+                    const float * tmp = src;
+                    if (!_is1x1)
+                    {
+                        if (_param.srcT)
+                            ImgToRow(src, buf);
+                        else
+                            ImgToCol(src, buf);
+                        tmp = buf;
+                    }
+                    for (size_t g = 0; g < p.group; ++g)
+                    {
+                        if (p.srcT)
+                        {
+                            if (_hwcWeight.data)
+                                _gemmHwc(_M, _N, _K, tmp, _hwcWeight.data, dst);
+                            else
+                                _gemm.Run(_M, _N, _K, &_1, tmp + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                        }
+                        else
+                            _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, tmp + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                    }
+                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+                    src += _sizeS;
+                    dst += _sizeD;
                 }
-                src = buf;
-            }
-            GemmAndBias(src, dst);
-        }
-
-        void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam & p = _param;
-            for (size_t b = 0; b < _batch; ++b)
-            {
-                for (size_t g = 0; g < p.group; ++g)
-                {
-                    if (p.srcT)
-                        _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
-                    else
-                        _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
-                }
-                ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
-                src += _sizeB;
-                dst += _sizeD;
             }
         }
 

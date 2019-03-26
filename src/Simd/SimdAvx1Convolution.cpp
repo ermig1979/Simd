@@ -74,6 +74,12 @@ namespace Simd
             return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL);
         }
 
+        void ConvolutionGemmHwc(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
+        {
+            HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
+            hwcGemm.Run(A, K, B, C, N);
+        }
+
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
@@ -304,7 +310,9 @@ namespace Simd
             {
                 HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
                 _hwcWeight.Resize(hwcGemm.BufferSize());
+                _gemmHwc = Avx::ConvolutionGemmHwc;
             }
+            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }
 
         void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
@@ -316,32 +324,6 @@ namespace Simd
                 hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
                 if (internal)
                     *internal = SimdTrue;
-            }
-        }
-
-        void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam & p = _param;
-            for (size_t b = 0; b < _batch; ++b)
-            {
-                for (size_t g = 0; g < p.group; ++g)
-                {
-                    if (p.srcT)
-                    {
-                        if (_hwcWeight.data)
-                        {
-                            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                            hwcGemm.Run(src, _K, _hwcWeight.data, dst, _N);
-                        }
-                        else
-                            _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
-                    }
-                    else
-                        _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
-                }
-                Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
-                src += _sizeB;
-                dst += _sizeD;
             }
         }
 
