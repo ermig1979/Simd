@@ -1661,10 +1661,11 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
+        \fn void * SimdConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
         
         \short Initilizes convolution algorithm.
 
+        \param [in] batch - a batch size.
         \param [in] srcC - a number of input channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
@@ -1687,7 +1688,7 @@ extern "C"
         \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
     */
-    SIMD_API void * SimdConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
+    SIMD_API void * SimdConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
         size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
         size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
 

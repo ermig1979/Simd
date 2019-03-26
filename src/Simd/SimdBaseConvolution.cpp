@@ -176,6 +176,10 @@ namespace Simd
                 _grS = _K * _N;
                 _grD = _M * _N;
             }
+            _batch = p.batch;
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeB = p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
             _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
         }
 
@@ -184,10 +188,7 @@ namespace Simd
             if (_is1x1)
                 return 1;
             else
-            {
-                const ConvParam & p = _param;
-                return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
-            }
+                return _batch*_sizeB;
         };
 
         void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
@@ -205,10 +206,13 @@ namespace Simd
             if (!_is1x1)
             {
                 buf = Buffer(buf);
-                if(_param.srcT)
-                    ImgToRow(src, buf);
-                else
-                    ImgToCol(src, buf);
+                for (size_t b = 0; b < _batch; ++b)
+                {
+                    if (_param.srcT)
+                        ImgToRow(src + b * _sizeS, buf + b * _sizeB);
+                    else
+                        ImgToCol(src + b * _sizeS, buf + b * _sizeB);
+                }
                 src = buf;
             }
             GemmAndBias(src, dst);
@@ -217,14 +221,19 @@ namespace Simd
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
+            for (size_t b = 0; b < _batch; ++b)
             {
-                if (p.srcT)
-                    _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
-                else
-                    _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                for (size_t g = 0; g < p.group; ++g)
+                {
+                    if (p.srcT)
+                        _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                    else
+                        _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                }
+                ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+                src += _sizeB;
+                dst += _sizeD;
             }
-            ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
         void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
@@ -381,18 +390,20 @@ namespace Simd
         ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
             : Convolution(p)
         {
+            _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
             _M = p.dstC / p.group;
             _N = p.dstH  * p.dstW;
             _K = p.srcC * p.kernelY * p.kernelX / p.group;
             _weightStep = p.dstC * _K / p.group;
-            _srcStep = _K * _N;
-            _dstStep = p.dstC * _N / p.group;
+            _batch = p.batch;
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeB = p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
         }
 
         size_t ConvolutionGemmNT::BufferSize() const
         {
-            const ConvParam & p = _param;
-            return p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
+            return _sizeB;
         };
 
         void ConvolutionGemmNT::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
@@ -408,13 +419,18 @@ namespace Simd
         void ConvolutionGemmNT::Forward(const float * src, float * buf, float * dst)
         {
             buf = Buffer(buf);
-            ImgToRow(src, _param, buf);
-            GemmAndBias(buf, dst);
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                ImgToRow(src, _param, buf);
+                GemmAndBias(buf, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
         }
 
         bool ConvolutionGemmNT::Preferable(const ConvParam & p)
         {
-            return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.srcT == 0 && p.dstT == 0;
+            return p.IsChw() && p.srcH < 6 && p.srcW < 6 && p.group == 1;
         }
 
         void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
@@ -563,13 +579,18 @@ namespace Simd
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
             float * bufD = bufS + _strideS * _count;
-            _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _pad, p.srcT);
-            if (p.srcT)
-                GemmHwc(bufS, bufD);
-            else
-                GemmChw(bufS, bufD);
-            _setOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
-            _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _pad, p.srcT);
+                if (p.srcT)
+                    GemmHwc(bufS, bufD);
+                else
+                    GemmChw(bufS, bufD);
+                _setOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
+                _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
         }
 
         bool ConvolutionWinograd::Preferable(const ConvParam & p)
@@ -592,6 +613,9 @@ namespace Simd
             _N = p.srcT ? p.dstC : _tileW * _tileH;
             _K = p.srcC;
             _pad = (SimdBool)p.padX;
+            _batch = p.batch;
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
         }
 
         void ConvolutionWinograd::GemmChw(const float * src, float * dst)
@@ -643,27 +667,30 @@ namespace Simd
         void ConvolutionDirectChw::Forward(const float * src, float * buf, float * dst)
         {
             const ConvParam & p = _param;
-            const float * weight = _weight;
-            const float * bias = _bias;
-            const float * params = _params;
             if(_pad)
                 buf = Buffer(buf);
-            for (size_t g = 0; g < p.group; ++g)
+            for (size_t b = 0; b < p.batch; ++b)
             {
-                if (_pad)
+                const float * weight = _weight;
+                const float * bias = _bias;
+                const float * params = _params;
+                for (size_t g = 0; g < p.group; ++g)
                 {
-                    Pad(src, buf);
-                    _convolutionBiasActivation(buf, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
+                    if (_pad)
+                    {
+                        Pad(src, buf);
+                        _convolutionBiasActivation(buf, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
+                    }
+                    else
+                        _convolutionBiasActivation(src, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
+                    weight += _grW;
+                    if (bias)
+                        bias += _dstC;
+                    if (p.activation == ::SimdConvolutionActivationPrelu)
+                        params += _dstC;
+                    src += _grS;
+                    dst += _grD;
                 }
-                else
-                    _convolutionBiasActivation(src, _srcC, _srcH, _srcW, weight, bias, params, dst, _dstC, p.dstH, p.dstW);
-                weight += _grW;
-                if(bias)
-                    bias += _dstC;
-                if (p.activation == ::SimdConvolutionActivationPrelu)
-                    params += _dstC;
-                src += _grS;
-                dst += _grD;
             }
         }
 
@@ -857,6 +884,9 @@ namespace Simd
         ConvolutionDirectHwc::ConvolutionDirectHwc(const ConvParam & p)
             : Convolution(p)
         {
+            _batch = p.batch;
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
@@ -877,7 +907,12 @@ namespace Simd
 
         void ConvolutionDirectHwc::Forward(const float * src, float * buf, float * dst)
         {
-            _convolutionBiasActivation(src, _param, _weight, _bias, _params, dst);
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                _convolutionBiasActivation(src, _param, _weight, _bias, _params, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
         }
 
         bool ConvolutionDirectHwc::Preferable(const ConvParam & p)
@@ -952,6 +987,9 @@ namespace Simd
         {
             _count = p.srcC;
             _size = p.srcH*p.srcW;
+            _batch = p.batch;
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
         }
 
         size_t ConvolutionDepthwiseDotProduct::BufferSize() const
@@ -987,18 +1025,23 @@ namespace Simd
        
         void ConvolutionDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
         {
-            if (_bias)
+            for (size_t b = 0; b < _batch; ++b)
             {
-                for (size_t i = 0; i < _count; ++i)
-                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+                if (_bias)
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+                }
+                else
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+                }
+                if (_param.activation)
+                    ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);                
+                src += _sizeS;
+                dst += _sizeD;
             }
-            else
-            {
-                for (size_t i = 0; i < _count; ++i)
-                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
-            }
-            if (_param.activation)
-                ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
         }
 
         bool ConvolutionDepthwiseDotProduct::Preferable(const ConvParam & p)
@@ -1012,11 +1055,11 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
+            ConvParam param(batch, srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
             if (!param.Valid())
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))

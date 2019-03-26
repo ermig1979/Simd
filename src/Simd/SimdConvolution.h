@@ -36,15 +36,16 @@ namespace Simd
 {
     struct ConvParam
     {
-        size_t srcC, srcH, srcW, dstC, dstH, dstW, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group;
+        size_t batch, srcC, srcH, srcW, dstC, dstH, dstW, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group;
         SimdBool srcT, dstT;
         SimdConvolutionActivationType activation;
         SimdGemm32fNNPtr gemm;
 
-        ConvParam(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
+        ConvParam(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
         {
+            this->batch = batch;
             this->srcC = srcC;
             this->srcH = srcH;
             this->srcW = srcW;
@@ -112,7 +113,7 @@ namespace Simd
         String Info() const
         {
             std::stringstream ss;
-            ss <<  srcC << "x" << srcH << "x" << srcW;
+            ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
             ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
             ss << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group << "-" << srcT;
             return ss.str();
@@ -171,7 +172,7 @@ namespace Simd
 
             bool _is1x1;
             const float * _weight, * _bias;
-            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD;
+            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
         };
 
         class ConvolutionGemmNT : public Convolution
@@ -189,8 +190,9 @@ namespace Simd
 
             static void ImgToRow(const float * src, const ConvParam & p, float * dst);
 
+            bool _is1x1;
             const float * _weight, *_bias;
-            size_t _weightStep, _srcStep, _dstStep, _M, _N, _K;
+            size_t _weightStep, _srcStep, _dstStep, _M, _N, _K, _batch, _sizeS, _sizeB, _sizeD;
         };
 
         class ConvolutionWinograd : public Convolution
@@ -214,7 +216,7 @@ namespace Simd
             virtual void GemmChw(const float * src, float * dst);
             virtual void GemmHwc(const float * src, float * dst);
 
-            size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K;
+            size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD;
             SimdBool _pad;
             Array32f _weight;
             const float * _bias;
@@ -262,6 +264,7 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation(); 
 
             const float * _weight, *_bias;
+            size_t _batch, _sizeS, _sizeD;
             ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
@@ -276,11 +279,11 @@ namespace Simd
             static bool Preferable(const ConvParam & p);
 
         protected:
-            size_t _count, _size;
+            size_t _count, _size, _batch, _sizeS, _sizeD;
             const float * _weight, * _bias;
         }; 
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
@@ -336,7 +339,7 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
@@ -355,7 +358,7 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
@@ -418,7 +421,7 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
@@ -472,7 +475,7 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
@@ -530,7 +533,7 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }
@@ -599,7 +602,7 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
     }

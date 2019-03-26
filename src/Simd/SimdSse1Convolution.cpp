@@ -280,22 +280,27 @@ namespace Simd
         void ConvolutionGemmNN::GemmAndBias(const float * src, float * dst)
         {
             const ConvParam & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
+            for (size_t b = 0; b < _batch; ++b)
             {
-                if (p.srcT)
+                for (size_t g = 0; g < p.group; ++g)
                 {
-                    if (_hwcWeight.data)
+                    if (p.srcT)
                     {
-                        HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                        hwcGemm.Run(src, _K, _hwcWeight.data, dst, _N);
+                        if (_hwcWeight.data)
+                        {
+                            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                            hwcGemm.Run(src, _K, _hwcWeight.data, dst, _N);
+                        }
+                        else
+                            _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
                     }
                     else
-                        _gemm.Run(_M, _N, _K, &_1, src + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                        _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
                 }
-                else
-                    _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, src + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+                src += _sizeB;
+                dst += _sizeD;
             }
-            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
         }
 
         //---------------------------------------------------------------------
@@ -1657,27 +1662,32 @@ namespace Simd
 
         void ConvolutionDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
         {
-            if (_bias)
+            for (size_t b = 0; b < _batch; ++b)
             {
-                for (size_t i = 0; i < _count; ++i)
-                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+                if (_bias)
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size) + _bias[i];
+                }
+                else
+                {
+                    for (size_t i = 0; i < _count; ++i)
+                        dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
+                }
+                if (_param.activation)
+                    ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
+                src += _sizeS;
+                dst += _sizeD;
             }
-            else
-            {
-                for (size_t i = 0; i < _count; ++i)
-                    dst[i] = DotProduct(src + i * _size, _weight + i * _size, _size);
-            }
-            if (_param.activation)
-                ConvolutionBiasAndActivation(NULL, _count, 1, _param.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
+            ConvParam param(batch, srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
             if (!param.Valid())
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))
