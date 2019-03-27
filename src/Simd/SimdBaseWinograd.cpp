@@ -132,11 +132,10 @@ namespace Simd
             }
         }
 
-        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
+        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans)
         {
             size_t dstHeight = pad ? srcHeight : srcHeight - 2;
             size_t dstWidth = pad ? srcWidth : srcWidth - 2;
-            size_t dstStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*srcChannels;
             size_t dstHeightFull = AlignLo(dstHeight, 2);
             size_t dstWidthFull = AlignLo(dstWidth, 2);
             size_t noseW = Simd::Min<size_t>(4, dstWidth + 1);
@@ -302,9 +301,8 @@ namespace Simd
             }
         }
 
-        void Winograd2x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        void Winograd2x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
         {
-            size_t srcStride = ((dstHeight + 1) / 2) * ((dstWidth + 1) / 2)*dstChannels;
             size_t dstHeightFull = AlignLo(dstHeight, 2);
             size_t dstWidthFull = AlignLo(dstWidth, 2);
             if (trans)
@@ -551,11 +549,10 @@ namespace Simd
             }
         }
 
-        void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
+        void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans)
         {
             size_t dstHeight = pad ? srcHeight : srcHeight - 2;
             size_t dstWidth = pad ? srcWidth : srcWidth - 2;
-            size_t dstStride = ((dstHeight + 3) / 4) * ((dstWidth + 3) / 4)*srcChannels;
             size_t dstHeightFull = dstHeight / 4 * 4;
             size_t dstWidthFull = dstWidth / 4 * 4;
             size_t noseW = Simd::Min<size_t>(6, dstWidth + 1);
@@ -793,9 +790,8 @@ namespace Simd
             }
         }
 
-        void Winograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        void Winograd4x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
         {
-            size_t srcStride = ((dstHeight + 3) / 4) * ((dstWidth + 3) / 4)*dstChannels;
             size_t dstHeightFull = dstHeight / 4 * 4;
             size_t dstWidthFull = dstWidth / 4 * 4;
             if (trans)

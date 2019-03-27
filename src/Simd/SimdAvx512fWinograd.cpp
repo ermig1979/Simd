@@ -232,18 +232,17 @@ namespace Simd
             }
         }
 
-        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
+        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans)
         {
             if (trans ? (false) : (srcHeight < 4 || srcWidth < 4))
             {
-                Avx::Winograd2x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
+                Avx::Winograd2x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, dstStride, pad, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
             size_t dstW = pad ? srcWidth : srcWidth - 2;
             size_t tileH = (dstH + 1) / 2;
             size_t tileW = (dstW + 1) / 2;
-            size_t dstStride = srcChannels * tileH*tileW;
             size_t dstH2 = AlignLo(dstH, 2);
             size_t dstW2 = AlignLo(dstW, 2);
             if (trans)
@@ -460,11 +459,10 @@ namespace Simd
             }
         }
 
-        void Winograd2x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        void Winograd2x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
         {
             size_t tileH = (dstHeight + 1) / 2;
             size_t tileW = (dstWidth + 1) / 2;
-            size_t srcStride = dstChannels * tileH*tileW;
             size_t dstH2 = AlignLo(dstHeight, 2);
             size_t dstW2 = AlignLo(dstWidth, 2);
             if (trans)
@@ -780,18 +778,17 @@ namespace Simd
             }
         }
 
-        void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans)
+        void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans)
         {
             if (trans ? (false) : (srcHeight < 6 || srcWidth < 14))
             {
-                Avx::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
+                Avx::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, dstStride, pad, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
             size_t dstW = pad ? srcWidth : srcWidth - 2;
             size_t tileH = (dstH + 3) / 4;
             size_t tileW = (dstW + 3) / 4;
-            size_t dstStride = srcChannels * tileH*tileW;
             size_t dstH4 = AlignLo(dstH, 4);
             size_t dstW4 = AlignLo(dstW, 4);
             if (trans)
@@ -840,7 +837,7 @@ namespace Simd
             }
             else
             {
-                Base::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, pad, trans);
+                Base::Winograd4x3SetInput(src, srcChannels, srcHeight, srcWidth, dst, dstStride, pad, trans);
             }
         }
 
@@ -1060,16 +1057,15 @@ namespace Simd
             }
         }
 
-        void Winograd4x3SetOutput(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        void Winograd4x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
         {
             if (trans ? (false) : (dstHeight < 4 || dstWidth < 16))
             {
-                Avx::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
+                Avx::Winograd4x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 3) / 4;
             size_t tileW = (dstWidth + 3) / 4;
-            size_t srcStride = dstChannels * tileH*tileW;
             size_t dstH4 = AlignLo(dstHeight, 4);
             size_t dstW4 = AlignLo(dstWidth, 4);
             if (trans)
@@ -1092,7 +1088,7 @@ namespace Simd
             }
             else
             {
-                Base::Winograd4x3SetOutput(src, dst, dstChannels, dstHeight, dstWidth, trans);
+                Base::Winograd4x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
             }
         }
     }

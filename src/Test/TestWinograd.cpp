@@ -152,7 +152,7 @@ namespace Test
     {
         struct FuncWI
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, SimdBool pad, SimdBool trans);
+            typedef void(*FuncPtr)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
 
             FuncPtr func;
             String description;
@@ -167,7 +167,7 @@ namespace Test
             void Call(const Tensor32f & src, size_t srcC, size_t srcH, size_t srcW, Tensor32f & dst, int pad, int trans) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.Data(), srcC, srcH, srcW, dst.Data(), (SimdBool)pad, (SimdBool)trans);
+                func(src.Data(), srcC, srcH, srcW, dst.Data(), dst.Size(1), (SimdBool)pad, (SimdBool)trans);
             }
         };
     }
@@ -289,7 +289,7 @@ namespace Test
     {
         struct FuncWO
         {
-            typedef void(*FuncPtr)(const float * src, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+            typedef void(*FuncPtr)(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
             FuncPtr func;
             String description;
@@ -304,7 +304,7 @@ namespace Test
             void Call(const Tensor32f & src, Tensor32f & dst, size_t dstC, size_t dstH, size_t dstW, int trans) const
             {
                 TEST_PERFORMANCE_TEST(description);
-                func(src.Data(), dst.Data(), dstC, dstH, dstW, (SimdBool)trans);
+                func(src.Data(), src.Size(1), dst.Data(), dstC, dstH, dstW, (SimdBool)trans);
             }
         };
     }

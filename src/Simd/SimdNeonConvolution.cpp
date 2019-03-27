@@ -75,10 +75,16 @@ namespace Simd
             return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Neon::GemmPackB, Neon::GemmScaleC, NULL);
         }
 
-        void ConvolutionGemmHwc(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
+        void HwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
         {
             HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
             hwcGemm.Run(A, K, B, C, N);
+        }
+
+        void HwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
+        {
+            HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
+            hwcGemm.ReorderB(B, N, pB);
         }
 
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
@@ -269,23 +275,12 @@ namespace Simd
             _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
             if (_param.IsHwc() && _param.group == 1)
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
                 _hwcWeight.Resize(hwcGemm.BufferSize());
-                _gemmHwc = Neon::ConvolutionGemmHwc;
+                _hwcRun = Neon::HwcRun;
+                _hwcReorderB = Neon::HwcReorderB;
             }
             _biasAndActivation = Neon::ConvolutionBiasAndActivation;
-        }
-
-        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            Base::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
-            if (_hwcWeight.data)
-            {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
-                if (internal)
-                    *internal = SimdTrue;
-            }
         }
 
         //---------------------------------------------------------------------
@@ -313,7 +308,7 @@ namespace Simd
         ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
             : Base::ConvolutionWinograd(p)
         {
-            if (p.IsHwc() && p.srcH >= 12 && p.srcW >= 12)
+            if (p.IsHwc() && p.srcH*p.srcW*p.batch >= 144)
                 SetBlock(4);
             else
                 SetBlock(2);
@@ -333,38 +328,21 @@ namespace Simd
                 assert(0);
             }
             _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
-            _biasAndActivation = Neon::ConvolutionBiasAndActivation;
             if (_param.IsHwc())
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                _hwcWeight.Resize(hwcGemm.BufferSize()*_count);
+                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                _hwcStrideW = hwcGemm.BufferSize();
+                _hwcWeight.Resize(_hwcStrideW*_count);
+                _hwcRun = Neon::HwcRun;
+                _hwcReorderB = Neon::HwcReorderB;
             }
-        }
-
-        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            Base::ConvolutionWinograd::SetParams(weight, trans, internal, bias, params);
-            if (_hwcWeight.data)
-            {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                size_t strideW = hwcGemm.BufferSize();
-                for (size_t i = 0; i < _count; ++i)
-                    hwcGemm.ReorderB(_weight.data + i * _strideW, _N, _hwcWeight.data + i * strideW);
-            }
-        }
-
-        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
-        {
-            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-            size_t strideW = hwcGemm.BufferSize();
-            for (size_t i = 0; i < _count; ++i)
-                hwcGemm.Run(src + i * _strideS, _K, _hwcWeight.data + i * strideW, dst + i * _strideD, _N);
+            _biasAndActivation = Neon::ConvolutionBiasAndActivation;
         }
 
         bool ConvolutionWinograd::Preferable(const ConvParam & p)
         {
             return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 10 &&
-                (p.srcT ? (p.srcH >= 6 && p.srcW >= 6) : (p.srcH >= 6 && p.srcW >= 6));
+                (p.srcT ? (p.srcH >= 4 && p.srcW >= 4 && p.srcH*p.srcW*p.batch >= 36) : (p.srcH >= 6 && p.srcW >= 6));
         }
 
         //---------------------------------------------------------------------

@@ -152,7 +152,7 @@ namespace Simd
             : Convolution(p)
         {
             _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
-            _merge = p.IsHwc() && p.group == 1 && p.dstC*p.dstH <= 256;
+            _merge = p.IsHwc() && p.group == 1 && p.dstH*p.dstW <= 256;
             if (p.srcT)
             {
                 _M = p.dstH * p.dstW;
@@ -182,7 +182,6 @@ namespace Simd
             _sizeB = p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
             _sizeD = p.dstC*p.dstH*p.dstW;
             _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
-            _gemmHwc = NULL;
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
@@ -197,9 +196,18 @@ namespace Simd
         void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
         {
             assert(_param.srcT == trans);
-            _weight = weight;
-            if (internal)
-                *internal = SimdFalse;
+            if (_hwcWeight.data)
+            {
+                _hwcReorderB(_M*(_merge ? _batch : 1), _N, _K, weight, _hwcWeight.data);
+                if (internal)
+                    *internal = SimdTrue;
+            }
+            else
+            {
+                _weight = weight;
+                if (internal)
+                    *internal = SimdFalse;
+            }
             _bias = bias;
             _params = params;
         }
@@ -218,7 +226,7 @@ namespace Simd
                     src = buf;
                 }
                 if (_hwcWeight.data)
-                    _gemmHwc(_M*_batch, _N, _K, src, _hwcWeight.data, dst);
+                    _hwcRun(_M*_batch, _N, _K, src, _hwcWeight.data, dst);
                 else
                     _gemm.Run(_M*_batch, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
                 for (size_t b = 0; b < _batch; ++b)
@@ -242,7 +250,7 @@ namespace Simd
                         if (p.srcT)
                         {
                             if (_hwcWeight.data)
-                                _gemmHwc(_M, _N, _K, tmp, _hwcWeight.data, dst);
+                                _hwcRun(_M, _N, _K, tmp, _hwcWeight.data, dst);
                             else
                                 _gemm.Run(_M, _N, _K, &_1, tmp + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
                         }
@@ -552,7 +560,7 @@ namespace Simd
         ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
             : Convolution(p)
         {
-            if (p.IsHwc() && p.srcH >= 12 && p.srcW >= 12)
+            if (p.IsHwc() && p.srcH >= 8 && p.srcW >= 8 && p.srcH*p.srcW*p.batch >= 144)
                 SetBlock(4);
             else
                 SetBlock(2);
@@ -577,7 +585,7 @@ namespace Simd
         
         size_t ConvolutionWinograd::BufferSize() const
         {
-            return (_strideS + _strideD)*_count;
+            return (_strideS + _strideD)*_count*(_merge ? _batch : 1);
         }
 
         void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
@@ -586,6 +594,11 @@ namespace Simd
             assert(p.srcT == trans);
             _weight.Resize(_strideW*_count);
             _setFilter(weight, p.srcC*p.dstC, _weight.data, trans);
+            if (_hwcWeight.data)
+            {
+                for (size_t i = 0; i < _count; ++i)
+                    _hwcReorderB(_M * (_merge ? _batch : 1), _N, _K, _weight.data + i * _strideW, _hwcWeight.data + i * _hwcStrideW);
+            }
             if (internal)
                 *internal = SimdTrue;
             _bias = bias;
@@ -598,25 +611,56 @@ namespace Simd
 
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
-            float * bufD = bufS + _strideS * _count;
-            for (size_t b = 0; b < _batch; ++b)
+            float * bufD = bufS + _strideS * _count * (_merge ? _batch : 1);
+            if (_merge)
             {
-                _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _pad, p.srcT);
-                if (p.srcT)
-                    GemmHwc(bufS, bufD);
-                else
-                    GemmChw(bufS, bufD);
-                _setOutput(bufD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
-                _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
-                src += _sizeS;
-                dst += _sizeD;
+                for (size_t b = 0; b < _batch; ++b)
+                    _setInput(src + b * _sizeS, p.srcC, p.srcH, p.srcW, bufS + b * _strideS, _strideS * _batch, _pad, p.srcT);
+                for (size_t i = 0; i < _count; ++i)
+                {
+                    if (_hwcWeight.data)
+                        _hwcRun(_M * _batch, _N, _K, bufS + i * _strideS * _batch, _hwcWeight.data + i * _hwcStrideW, bufD + i * _strideD * _batch);
+                    else
+                        _gemm.Run(_M * _batch, _N, _K, &_1, bufS + i * _strideS * _batch, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _batch, _N);
+                }
+                for (size_t b = 0; b < _batch; ++b)
+                {
+                    _setOutput(bufD + b * _strideD, _strideD * _batch, dst + b * _sizeD, p.dstC, p.dstH, p.dstW, p.dstT);
+                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst + b * _sizeD);
+                }
+            }
+            else
+            {
+                for (size_t b = 0; b < _batch; ++b)
+                {
+                    _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _strideS, _pad, p.srcT);
+                    if (p.srcT)
+                    {
+                        for (size_t i = 0; i < _count; ++i)
+                        {
+                            if(_hwcWeight.data)
+                                _hwcRun(_M, _N, _K, bufS + i * _strideS, _hwcWeight.data + i * _hwcStrideW, bufD + i * _strideD);
+                            else
+                                _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < _count; ++i)
+                            _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+                    }
+                    _setOutput(bufD, _strideD, dst, p.dstC, p.dstH, p.dstW, p.dstT);
+                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.dstT, dst);
+                    src += _sizeS;
+                    dst += _sizeD;
+                }
             }
         }
 
         bool ConvolutionWinograd::Preferable(const ConvParam & p)
         {
             return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && 
-                (p.srcT ? (p.srcH >= 6 && p.srcW >= 6) : (p.srcH >= 6 && p.srcW >= 6));
+                (p.srcT ? (p.srcH >= 4 && p.srcW >= 4 && p.srcH*p.srcW*p.batch >= 36) : (p.srcH >= 6 && p.srcW >= 6));
         }
 
         void ConvolutionWinograd::SetBlock(size_t block)
@@ -636,18 +680,7 @@ namespace Simd
             _batch = p.batch;
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
-        }
-
-        void ConvolutionWinograd::GemmChw(const float * src, float * dst)
-        {
-            for (size_t i = 0; i < _count; ++i)
-                _gemm.Run(_M, _N, _K, &_1, _weight.data + i * _strideW, _K, src + i * _strideS, _N, &_0, dst + i * _strideD, _N);
-        }
-
-        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
-        {
-            for (size_t i = 0; i < _count; ++i)
-                _gemm.Run(_M, _N, _K, &_1, src + i * _strideS, _K, _weight.data + i * _strideW, _N, &_0, dst + i * _strideD, _N);
+            _merge = p.IsHwc() && _M <= 25;
         }
 
         //---------------------------------------------------------------------

@@ -75,10 +75,16 @@ namespace Simd
             return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL);
         }
 
-        void ConvolutionGemmHwc(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
+        void HwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
         {
             HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
             hwcGemm.Run(A, K, B, C, N);
+        }
+
+        void HwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
+        {
+            HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
+            hwcGemm.ReorderB(B, N, pB);
         }
 
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
@@ -108,23 +114,12 @@ namespace Simd
             _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
             if (_param.IsHwc() && _param.group == 1)
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
                 _hwcWeight.Resize(hwcGemm.BufferSize());
-                _gemmHwc = Avx2::ConvolutionGemmHwc;
+                _hwcRun = Avx2::HwcRun;
+                _hwcReorderB = Avx2::HwcReorderB;
             }
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
-        }
-
-        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            Base::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
-            if (_hwcWeight.data)
-            {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
-                if (internal)
-                    *internal = SimdTrue;
-            }
         }
 
         void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
@@ -210,7 +205,7 @@ namespace Simd
         ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
             : Avx::ConvolutionWinograd(p)
         {
-            if (p.IsHwc() && p.srcH >= 16 && p.srcW >= 16)
+            if (p.IsHwc() && p.srcH >= 8 && p.srcW >= 8 && p.srcH*p.srcW*p.batch >= 256)
                 SetBlock(4);
             else
                 SetBlock(2);
@@ -230,32 +225,15 @@ namespace Simd
                 assert(0);
             }
             _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
-            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
             if (_param.IsHwc())
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                _hwcWeight.Resize(hwcGemm.BufferSize()*_count);
+                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                _hwcStrideW = hwcGemm.BufferSize();
+                _hwcWeight.Resize(_hwcStrideW*_count);
+                _hwcRun = Avx2::HwcRun;
+                _hwcReorderB = Avx2::HwcReorderB;
             }
-        }
-
-        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            Base::ConvolutionWinograd::SetParams(weight, trans, internal, bias, params);
-            if (_hwcWeight.data)
-            {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                size_t strideW = hwcGemm.BufferSize();
-                for(size_t i = 0;i < _count; ++i)
-                    hwcGemm.ReorderB(_weight.data + i * _strideW, _N, _hwcWeight.data + i * strideW);
-            }
-        }
-
-        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
-        {
-            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-            size_t strideW = hwcGemm.BufferSize();
-            for (size_t i = 0; i < _count; ++i)
-                hwcGemm.Run(src + i * _strideS, _K, _hwcWeight.data + i * strideW, dst + i * _strideD, _N);
+            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------

@@ -125,10 +125,16 @@ namespace Simd
             return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, Avx512f::TailMask16);
         }
 
-        void ConvolutionGemmHwc(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
+        void HwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
         {
             HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
             hwcGemm.Run(A, K, B, C, N);
+        }
+
+        void HwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
+        {
+            HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
+            hwcGemm.ReorderB(B, N, pB);
         }
 
         static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
@@ -415,28 +421,12 @@ namespace Simd
             _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
             if (_param.IsHwc() && _param.group == 1)
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
+                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
                 _hwcWeight.Resize(hwcGemm.BufferSize());
-                _gemmHwc = Avx512f::ConvolutionGemmHwc;
+                _hwcRun = Avx512f::HwcRun;
+                _hwcReorderB = Avx512f::HwcReorderB;
             }
             _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
-        }
-
-        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            Base::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
-            if (_hwcWeight.data)
-            {
-                if (_param.dstC == 8)
-                    Avx2::ConvolutionGemmNN::SetParams(weight, trans, internal, bias, params);
-                else
-                {
-                    HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                    hwcGemm.ReorderB(weight, _N, _hwcWeight.data);
-                    if (internal)
-                        *internal = SimdTrue;
-                }
-            }
         }
 
         void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
@@ -531,6 +521,8 @@ namespace Simd
         ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
             : Avx2::ConvolutionWinograd(p)
         {
+            if (p.dstC == 8)
+                return;
             switch (_block)
             {
             case 2:
@@ -547,34 +539,15 @@ namespace Simd
                 assert(0);
             }
             _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
-            _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
             if (_param.IsHwc())
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                _hwcWeight.Resize(hwcGemm.BufferSize()*_count);
+                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                _hwcStrideW = hwcGemm.BufferSize();
+                _hwcWeight.Resize(_hwcStrideW*_count);
+                _hwcRun = Avx512f::HwcRun;
+                _hwcReorderB = Avx512f::HwcReorderB;
             }
-        }
-
-        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
-        {
-            Base::ConvolutionWinograd::SetParams(weight, trans, internal, bias, params);
-            if (_hwcWeight.data)
-            {
-                HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-                size_t strideW = hwcGemm.BufferSize();
-                for (size_t i = 0; i < _count; ++i)
-                    hwcGemm.ReorderB(_weight.data + i * _strideW, _N, _hwcWeight.data + i * strideW);
-            }
-        }
-
-        void ConvolutionWinograd::GemmHwc(const float * src, float * dst)
-        {
-            SIMD_PERF_BEG(Simd::ToStr(_M) + "-" + Simd::ToStr(_N) + "-" + Simd::ToStr(_K));
-
-            HwcGemm hwcGemm = CreateHwcGemm(_M, _N, _K);
-            size_t strideW = hwcGemm.BufferSize();
-            for (size_t i = 0; i < _count; ++i)
-                hwcGemm.Run(src + i * _strideS, _K, _hwcWeight.data + i * strideW, dst + i * _strideD, _N);
+            _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
