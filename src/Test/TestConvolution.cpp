@@ -34,25 +34,25 @@ namespace Test
     {
         struct Param
         {
+            SimdBool trans;
             size_t batch, srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group;
-            SimdBool srcT, dstT;
             ::SimdConvolutionActivationType activation;
 
-            Param(size_t n, size_t sC, size_t sH, size_t sW, SimdBool sT, size_t dC, SimdBool dT, size_t kY, size_t kX, size_t dY, size_t dX,
+            Param(SimdBool t, size_t n, size_t sC, size_t sH, size_t sW, size_t dC, size_t kY, size_t kX, size_t dY, size_t dX,
                 size_t sY, size_t sX, size_t pY, size_t pX, size_t pH, size_t pW, size_t g, ::SimdConvolutionActivationType a)
-                : batch(n), srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(kY), kernelX(kX), dilationY(dY), dilationX(dX), 
-                strideY(sY), strideX(sX), padY(pY), padX(pX), padH(pH), padW(pW), group(g), srcT(sT), dstT(dT), activation(a)
+                : trans(t), batch(n), srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(kY), kernelX(kX), dilationY(dY), dilationX(dX), 
+                strideY(sY), strideX(sX), padY(pY), padX(pX), padH(pH), padW(pW), group(g), activation(a)
             {}
 
             Param(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size d, Size s, Size b, Size e, size_t g, ::SimdConvolutionActivationType a, ::SimdBool t)
-                : batch(n), srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(k.y), kernelX(k.x), dilationY(d.y), dilationX(d.x), 
-                strideY(s.y), strideX(s.x), padY(b.y), padX(b.x), padH(e.y), padW(e.x), group(g), srcT(t), dstT(t), activation(a)
+                : trans(t), batch(n), srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(k.y), kernelX(k.x), dilationY(d.y), dilationX(d.x),
+                strideY(s.y), strideX(s.x), padY(b.y), padX(b.x), padH(e.y), padW(e.x), group(g), activation(a)
             {}
         };
 
         struct FuncC
         {
-            typedef void*(*FuncPtr)(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+            typedef void*(*FuncPtr)(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, 
                 size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
                 size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
 
@@ -67,17 +67,17 @@ namespace Test
                 ss << description;
                 ss << "[" << p.batch << "x" << p.srcC << "x" << p.srcH << "x" << p.srcW;
                 ss << "-" << p.dstC << "x" << p.kernelY << "x" << p.kernelX;
-                ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padW) << "-" << p.group << "-" << p.srcT;
+                ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padW) << "-" << p.group << "-" << p.trans;
                 ss << "]";
                 description = ss.str();
             }
 
             void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, const Tensor32f & params, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
-                void * convolution = func(p.batch, p.srcC, p.srcH, p.srcW, p.srcT, p.dstC, p.dstT, p.kernelY, p.kernelX, 
+                void * convolution = func(p.trans, p.batch, p.srcC, p.srcH, p.srcW, p.dstC, p.kernelY, p.kernelX, 
                     p.dilationY, p.dilationX, p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.group, p.activation, NULL);
-                buf.Extend({ ::SimdConvolutionBufferSize(convolution) });
-                ::SimdConvolutionSetParams(convolution, weight.Data(), p.srcT, NULL, bias.Data(), params.Data());
+                buf.Extend({ ::SimdConvolutionExternalBufferSize(convolution) });
+                ::SimdConvolutionSetParams(convolution, weight.Data(), p.trans, NULL, bias.Data(), params.Data());
                 {
                     TEST_PERFORMANCE_TEST(description);
                     ::SimdConvolutionForward(convolution, src.Data(), buf.Data(), dst.Data());
@@ -99,11 +99,11 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << "].");
 
-        Tensor32f src({p.batch, p.srcT ? p.srcH : p.srcC, p.srcT ? p.srcW : p.srcH, p.srcT ? p.srcC : p.srcW });
+        Tensor32f src({p.batch, p.trans ? p.srcH : p.srcC, p.trans ? p.srcW : p.srcH, p.trans ? p.srcC : p.srcW });
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
 
-        Tensor32f weight({ p.srcT ? p.kernelY : p.dstC, p.srcT ? p.kernelX : p.srcC / p.group, 
-            p.srcT ? p.srcC / p.group : p.kernelY, p.srcT ? p.dstC : p.kernelX });
+        Tensor32f weight({ p.trans ? p.kernelY : p.dstC, p.trans ? p.kernelX : p.srcC / p.group,
+            p.trans ? p.srcC / p.group : p.kernelY, p.trans ? p.dstC : p.kernelX });
         FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
         Tensor32f bias({ p.dstC });
@@ -119,8 +119,8 @@ namespace Test
 
         size_t dstH = (p.srcH + p.padY + p.padH - (p.dilationY * (p.kernelY - 1) + 1)) / p.strideY + 1;
         size_t dstW = (p.srcW + p.padX + p.padW - (p.dilationX * (p.kernelX - 1) + 1)) / p.strideX + 1;
-        Tensor32f dst1({ p.batch, p.dstT ? dstH : p.dstC, p.dstT ? dstW : dstH, p.dstT ? p.dstC : dstW });
-        Tensor32f dst2({ p.batch, p.dstT ? dstH : p.dstC, p.dstT ? dstW : dstH, p.dstT ? p.dstC : dstW });
+        Tensor32f dst1({ p.batch, p.trans ? dstH : p.dstC, p.trans ? dstW : dstH, p.trans ? p.dstC : dstW });
+        Tensor32f dst2({ p.batch, p.trans ? dstH : p.dstC, p.trans ? dstW : dstH, p.trans ? p.dstC : dstW });
 
         ::SimdFill32f(dst1.Data(), dst1.Size(), params.Data() + 0);
         ::SimdFill32f(dst2.Data(), dst2.Size(), params.Data() + 1);

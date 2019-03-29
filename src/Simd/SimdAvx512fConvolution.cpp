@@ -32,15 +32,15 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        typedef Simd::GemmNNcb<float, __mmask16> HwcGemm;
+        typedef Simd::GemmNNcb<float, __mmask16> NhwcGemm;
 
-        HwcGemm CreateHwcGemm(size_t M, size_t N, size_t K)
+        NhwcGemm CreateNhwcGemm(size_t M, size_t N, size_t K)
         {
             const size_t L1 = 1*32 * 1024;
             const size_t L2 = 1024 * 1024;
             const size_t L3 = 2 * 1280 * 1024;
-            HwcGemm::Main kernelMM, kernelMT;
-            HwcGemm::Tail kernelTM, kernelTT;
+            NhwcGemm::Main kernelMM, kernelMT;
+            NhwcGemm::Tail kernelTM, kernelTT;
             size_t microM, microN;
 #if SIMD_ZMM_COUNT == 32 
             if (M == 4 || M < 8)
@@ -122,19 +122,19 @@ namespace Simd
             kernelTM = Avx512f::GemmKernelMx16nn;
             kernelTT = Avx512f::GemmKernelMx16nn;
 #endif
-            return HwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, Avx512f::TailMask16);
+            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, Avx512f::TailMask16);
         }
 
-        void HwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
+        void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
         {
-            HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
-            hwcGemm.Run(A, K, B, C, N);
+            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
+            nhwcGemm.Run(A, K, B, C, N);
         }
 
-        void HwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
+        void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
         {
-            HwcGemm hwcGemm = CreateHwcGemm(M, N, K);
-            hwcGemm.ReorderB(B, N, pB);
+            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
+            nhwcGemm.ReorderB(B, N, pB);
         }
 
         static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
@@ -419,12 +419,12 @@ namespace Simd
             if (p.dstC == 8)
                 return;
             _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
-            if (_param.IsHwc() && _param.group == 1)
+            if (_param.trans && _param.group == 1)
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
-                _hwcWeight.Resize(hwcGemm.BufferSize());
-                _hwcRun = Avx512f::HwcRun;
-                _hwcReorderB = Avx512f::HwcReorderB;
+                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                _nhwcWeight.Resize(nhwcGemm.BufferSize());
+                _nhwcRun = Avx512f::NhwcRun;
+                _nhwcReorderB = Avx512f::NhwcReorderB;
             }
             _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
         }
@@ -539,21 +539,21 @@ namespace Simd
                 assert(0);
             }
             _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
-            if (_param.IsHwc())
+            if (_param.trans)
             {
-                HwcGemm hwcGemm = CreateHwcGemm(_M*(_merge ? _batch : 1), _N, _K);
-                _hwcStrideW = hwcGemm.BufferSize();
-                _hwcWeight.Resize(_hwcStrideW*_count);
-                _hwcRun = Avx512f::HwcRun;
-                _hwcReorderB = Avx512f::HwcReorderB;
+                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                _nhwcStrideW = nhwcGemm.BufferSize();
+                _nhwcWeight.Resize(_nhwcStrideW*_count);
+                _nhwcRun = Avx512f::NhwcRun;
+                _nhwcReorderB = Avx512f::NhwcReorderB;
             }
             _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirectChw::ConvolutionDirectChw(const ConvParam & p)
-            : Avx2::ConvolutionDirectChw(p)
+        ConvolutionDirectNchw::ConvolutionDirectNchw(const ConvParam & p)
+            : Avx2::ConvolutionDirectNchw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -902,7 +902,7 @@ namespace Simd
             }
         }
 
-         bool ConvolutionDirectChw::Preferable(const ConvParam & p)
+         bool ConvolutionDirectNchw::Preferable(const ConvParam & p)
         {
             if (!p.IsDilation(1))
                 return false;
@@ -913,10 +913,10 @@ namespace Simd
 #if SIMD_ZMM_COUNT == 32
                 || p.IsKernel(4) || p.IsKernel(5)
 #endif
-                ) && p.IsChw();
+                ) && p.trans == 0;
         }
 
-        template <int kernel, int stride> ConvolutionDirectChw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        template <int kernel, int stride> ConvolutionDirectNchw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
         {
             switch (type)
             {
@@ -931,11 +931,11 @@ namespace Simd
             }
         }
 
-        ConvolutionDirectChw::ConvolutionBiasActivationPtr ConvolutionDirectChw::SetConvolutionBiasActivation()
+        ConvolutionDirectNchw::ConvolutionBiasActivationPtr ConvolutionDirectNchw::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
             if (p.dstW <= HF)
-                return Avx2::ConvolutionDirectChw::SetConvolutionBiasActivation();
+                return Avx2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -965,13 +965,13 @@ namespace Simd
                     return Avx512f::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
-            return Avx2::ConvolutionDirectChw::SetConvolutionBiasActivation();
+            return Avx2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirectHwc::ConvolutionDirectHwc(const ConvParam & p)
-            : Avx2::ConvolutionDirectHwc(p)
+        ConvolutionDirectNhwc::ConvolutionDirectNhwc(const ConvParam & p)
+            : Avx2::ConvolutionDirectNhwc(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -1558,7 +1558,7 @@ namespace Simd
             _mm512_storeu_ps(dst + 5 * F, Activate<type>(sums[5], params, 0));
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectHwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             bool is1x1x16 = p.dstC == 16 && p.kernelX == 1 && p.kernelY == 1;
             size_t noseH = p.padY, noseW = p.padX;
@@ -1623,7 +1623,7 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectHwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t size = p.group;
             size_t sizeF = AlignLo(size, F);
@@ -1798,7 +1798,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcC = p.srcC;
             size_t srcCF = AlignLo(srcC, F);
@@ -1853,7 +1853,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main1(const float * src, size_t srcS, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main1(const float * src, size_t srcS, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcCF = AlignLo(srcC, F);
             size_t c = 0;
@@ -1889,7 +1889,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main2(const float * src, size_t srcS, size_t srcX, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main2(const float * src, size_t srcS, size_t srcX, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcCF = AlignLo(srcC, F);
             size_t c = 0;
@@ -1949,7 +1949,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main4(const float * src, size_t srcS, size_t srcX, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main4(const float * src, size_t srcS, size_t srcX, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcCF = AlignLo(srcC, F);
             size_t c = 0;
@@ -2037,7 +2037,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge16(const float * src, const ConvParam & p, size_t dy, size_t dx, const __m512 * weight, __m512 bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16(const float * src, const ConvParam & p, size_t dy, size_t dx, const __m512 * weight, __m512 bias, const float * params, float * dst)
         {
             __m512 sum = bias;
             for (size_t ky = 0; ky < 3; ++ky)
@@ -2060,7 +2060,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main16x1(const float * src, size_t srcS, const __m512 * weight, __m512 bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main16x1(const float * src, size_t srcS, const __m512 * weight, __m512 bias, const float * params, float * dst)
         {
             __m512 sum = bias;
             sum = _mm512_fmadd_ps(_mm512_loadu_ps(src + 0 * F), weight[0], sum);
@@ -2078,7 +2078,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main16x2(const float * src, size_t srcS, const __m512 * weight, __m512 bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main16x2(const float * src, size_t srcS, const __m512 * weight, __m512 bias, const float * params, float * dst)
         {
             __m512 sum0 = bias;
             __m512 sum1 = bias;
@@ -2102,7 +2102,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main48(const float * src, size_t srcS, const __m512 * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main48(const float * src, size_t srcS, const __m512 * weight, const float * bias, const float * params, float * dst)
         {
             __m512 sum0, sum1, sum2;
             if (bias)
@@ -2153,7 +2153,7 @@ namespace Simd
             _mm512_storeu_ps(dst + 2 * F, Activate<type>(sum2, params, 2 * F));
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcS = p.srcC*p.srcW;
             size_t srcX = p.srcC*p.strideX;
@@ -2170,35 +2170,35 @@ namespace Simd
                 size_t dy = 0;
                 for (; dy < p.padY; ++dy)
                     for (size_t dx = 0; dx < p.dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
                 for (; dy < dstH; ++dy)
                 {
                     size_t dx = 0;
                     for (; dx < p.padX; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
                     size_t offset = ((dy * p.strideY - p.padY)*p.srcW + dx * p.strideX - p.padX)*p.srcC;
                     for (; dx < dstW2; dx += 2)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main16x2<type>(src + offset, srcS, _weight, _bias, params, dst), offset += 2*F, dst += 2*F;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main16x2<type>(src + offset, srcS, _weight, _bias, params, dst), offset += 2*F, dst += 2*F;
                     for (; dx < dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main16x1<type>(src + offset, srcS, _weight, _bias, params, dst), offset += F, dst += F;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main16x1<type>(src + offset, srcS, _weight, _bias, params, dst), offset += F, dst += F;
                     for (; dx < p.dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
                 }
                 for (; dy < p.dstH; ++dy)
                     for (size_t dx = 0; dx < p.dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16<type>(src, p, dy, dx, _weight, _bias, params, dst), dst += F;
             }
             else
             {
                 size_t dy = 0;
                 for (; dy < p.padY; ++dy)
                     for (size_t dx = 0; dx < p.dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
                 for (; dy < dstH; ++dy)
                 {
                     size_t dx = 0;
                     for (; dx < p.padX; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
                     size_t offset = ((dy * p.strideY - p.padY)*p.srcW + dx * p.strideX - p.padX)*p.srcC;
                     if (p.srcC == 48)
                     {
@@ -2206,42 +2206,42 @@ namespace Simd
                         for (size_t i = 0; i < 27; ++i)
                             _weight[i] = _mm512_loadu_ps(weight + i * F);
                         for (; dx < dstW; ++dx)
-                            ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main48<type>(src + offset, srcS, _weight, bias, params, dst), dst += p.dstC, offset += srcX;
+                            ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main48<type>(src + offset, srcS, _weight, bias, params, dst), dst += p.dstC, offset += srcX;
                     }
                     else
                         for (; dx < dstW4; dx += 4)
-                            ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main4<type>(src + offset, srcS, srcX, p.srcC, weight, bias, params, dst), dst += 4 * p.dstC, offset += 4 * srcX;
+                            ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main4<type>(src + offset, srcS, srcX, p.srcC, weight, bias, params, dst), dst += 4 * p.dstC, offset += 4 * srcX;
                     for (; dx < dstW2; dx += 2)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main2<type>(src + offset, srcS, srcX, p.srcC, weight, bias, params, dst), dst += 2 * p.dstC, offset += 2 * srcX;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main2<type>(src + offset, srcS, srcX, p.srcC, weight, bias, params, dst), dst += 2 * p.dstC, offset += 2 * srcX;
                     for (; dx < dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Main1<type>(src + offset, srcS, p.srcC, weight, bias, params, dst), dst += p.dstC, offset += srcX;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Main1<type>(src + offset, srcS, p.srcC, weight, bias, params, dst), dst += p.dstC, offset += srcX;
                     for (; dx < p.dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
                 }
                 for (; dy < p.dstH; ++dy)
                     for (size_t dx = 0; dx < p.dstW; ++dx)
-                        ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
+                        ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge<type>(src, p, dy, dx, weight, bias, params, dst), dst += p.dstC;
             }
         }
 
-        template <::SimdConvolutionActivationType type> ConvolutionDirectHwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam & p)
+        template <::SimdConvolutionActivationType type> ConvolutionDirectNhwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam & p)
         {
             if (p.group == 1)
-                return ConvolutionDirectHwcConvolutionBiasActivationDefault<type>;
+                return ConvolutionDirectNhwcConvolutionBiasActivationDefault<type>;
             else if (p.IsDepthwise())
             {
                 if(p.IsKernel(3) && p.IsDilation(1))
-                    return ConvolutionDirectHwcConvolutionBiasActivationDepthwise3x3<type>;
+                    return ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3<type>;
                 else
-                    return ConvolutionDirectHwcConvolutionBiasActivationDepthwise<type>;
+                    return ConvolutionDirectNhwcConvolutionBiasActivationDepthwise<type>;
             }
             return NULL;
         }
 
-        ConvolutionDirectHwc::ConvolutionBiasActivationPtr ConvolutionDirectHwc::SetConvolutionBiasActivation()
+        ConvolutionDirectNhwc::ConvolutionBiasActivationPtr ConvolutionDirectNhwc::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
-            ConvolutionDirectHwc::ConvolutionBiasActivationPtr func = NULL;
+            ConvolutionDirectNhwc::ConvolutionBiasActivationPtr func = NULL;
             if (p.dstC > HF && p.dstC != 24 && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
             {
                 switch (p.activation)
@@ -2253,16 +2253,16 @@ namespace Simd
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 }
             }
-            return func ? func : Avx2::ConvolutionDirectHwc::SetConvolutionBiasActivation();
+            return func ? func : Avx2::ConvolutionDirectNhwc::SetConvolutionBiasActivation();
         };
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(batch, srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
+            ConvParam param(trans, batch, srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
             if (!param.Valid())
                 return NULL;
             else if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))
@@ -2271,10 +2271,10 @@ namespace Simd
                 return new ConvolutionWinograd(param);
             else if (ConvolutionGemmNT::Preferable(param))
                 return new ConvolutionGemmNT(param);
-            else if (ConvolutionDirectChw::Preferable(param))
-                return new Avx512f::ConvolutionDirectChw(param);
-            else if (ConvolutionDirectHwc::Preferable(param))
-                return new ConvolutionDirectHwc(param);
+            else if (ConvolutionDirectNchw::Preferable(param))
+                return new Avx512f::ConvolutionDirectNchw(param);
+            else if (ConvolutionDirectNhwc::Preferable(param))
+                return new ConvolutionDirectNhwc(param);
             else
                 return new ConvolutionGemmNN(param);
         }

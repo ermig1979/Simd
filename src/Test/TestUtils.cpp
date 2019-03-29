@@ -214,6 +214,8 @@ namespace Test
         {
             const Channel * pA = (const Channel*)(a.data + row*a.stride);
             const Channel * pB = (const Channel*)(b.data + row*b.stride);
+            if (memcmp(pA, pB, width * sizeof(Channel)) == 0)
+                continue;
             for (size_t offset = 0; offset < width; ++offset)
             {
                 if (pA[offset] != pB[offset])

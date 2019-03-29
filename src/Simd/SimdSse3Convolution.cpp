@@ -37,7 +37,7 @@ namespace Simd
 
         bool ConvolutionGemmNT::Preferable(const ConvParam & p)
         {
-            return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.srcT == 0 && p.dstT == 0;
+            return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.trans == 0;
         }
 
         void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
@@ -50,11 +50,11 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+        void * ConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
             size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
             size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(batch, srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
+            ConvParam param(trans, batch, srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
             if (!param.Valid())
                 return NULL;
             else if (Sse::ConvolutionDepthwiseDotProduct::Preferable(param))
@@ -63,10 +63,10 @@ namespace Simd
                 return new Sse::ConvolutionWinograd(param);
             else if (ConvolutionGemmNT::Preferable(param))
                 return new ConvolutionGemmNT(param);
-            else if (ConvolutionDirectChw::Preferable(param))
-                return new Sse::ConvolutionDirectChw(param);
-            else if (ConvolutionDirectHwc::Preferable(param))
-                return new Sse::ConvolutionDirectHwc(param);
+            else if (ConvolutionDirectNchw::Preferable(param))
+                return new Sse::ConvolutionDirectNchw(param);
+            else if (ConvolutionDirectNhwc::Preferable(param))
+                return new Sse::ConvolutionDirectNhwc(param);
             else
                 return new Sse::ConvolutionGemmNN(param);
         }

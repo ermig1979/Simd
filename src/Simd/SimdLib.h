@@ -1661,17 +1661,16 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void * SimdConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
+        \fn void * SimdConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
         
         \short Initilizes convolution algorithm.
 
+        \param [in] trans - a flag of transposed input and output data (::SimdFalse - NCHW order, ::SimdTrue - NHWC order).
         \param [in] batch - a batch size.
         \param [in] srcC - a number of input channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
-        \param [in] srcT - a flag of transposed input data (::SimdFalse - CHW order, ::SimdTrue - HWC order).
         \param [in] dstC - a number of output channels.
-        \param [in] dstT - a flag of transposed output data (::SimdFalse - CHW order, ::SimdTrue - HWC order).
         \param [in] kernelY - a height of the convolution kernel.
         \param [in] kernelX - a width of the convolution kernel.
         \param [in] dilationY - a y-dilation of the convolution.
@@ -1686,22 +1685,33 @@ extern "C"
         \param [in] activation - a type of activation function (see ::SimdConvolutionActivationType).
         \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
         \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdConvolutionBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
+            This pointer is used in functions ::SimdConvolutionExternalBufferSize, ::SimdConvolutionInternalBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
     */
-    SIMD_API void * SimdConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT, 
+    SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,  
         size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
         size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
 
     /*! @ingroup synet
 
-        \fn size_t SimdConvolutionBufferSize(const void * convolution);
+        \fn size_t SimdConvolutionExternalBufferSize(const void * convolution);
 
-        \short Gets size of external buffer required for convolution algorithm.
+        \short Gets size of external temporary buffer required for convolution algorithm.
 
         \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease. 
-        \return size of external buffer required for convolution algorithm.
+        \return size of external temporary buffer required for convolution algorithm.
     */
-    SIMD_API size_t SimdConvolutionBufferSize(const void * convolution);
+    SIMD_API size_t SimdConvolutionExternalBufferSize(const void * convolution);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdConvolutionInternalBufferSize(const void * convolution);
+
+        \short Gets size of internal buffer used inside convolution algorithm.
+
+        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside convolution algorithm.
+    */
+    SIMD_API size_t SimdConvolutionInternalBufferSize(const void * convolution);
 
     /*! @ingroup synet
 
@@ -1726,7 +1736,7 @@ extern "C"
 
         \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
         \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to temporary buffer. The size of the temporary buffer is determined by function ::SimdConvolutionBufferSize. Can be NULL.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdConvolutionExternalBufferSize. Can be NULL (it causes usage of internal buffer).
         \param [out] dst - a pointer to output image.
     */
     SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);

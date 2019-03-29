@@ -1470,22 +1470,27 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
     Base::CopyFrame(src, srcStride, width, height, pixelSize, frameLeft, frameTop, frameRight, frameBottom, dst, dstStride);
 }
 
-typedef void* (*SimdConvolutionInitPtr) (size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+typedef void* (*SimdConvolutionInitPtr) (SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
     size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
     size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
 
 SimdConvolutionInitPtr simdConvolutionInit = SIMD_FUNC6(ConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void * SimdConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, SimdBool srcT, size_t dstC, SimdBool dstT,
+SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
     size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
     size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
 {
-    return simdConvolutionInit(batch, srcC, srcH, srcW, srcT, dstC, dstT, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
+    return simdConvolutionInit(trans, batch, srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
 }
 
-SIMD_API size_t SimdConvolutionBufferSize(const void * convolution)
+SIMD_API size_t SimdConvolutionExternalBufferSize(const void * convolution)
 {
-    return ((Convolution*)convolution)->BufferSize();
+    return ((Convolution*)convolution)->ExternalBufferSize();
+}
+
+SIMD_API size_t SimdConvolutionInternalBufferSize(const void * convolution)
+{
+    return ((Convolution*)convolution)->InternalBufferSize();
 }
 
 SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)

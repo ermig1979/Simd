@@ -41,6 +41,8 @@
  <li>Base implementation, SSE, AVX, AVX-512F and NEON optimizations of function Winograd4x3SetOutput(NHWC mode).</li>
  <li>Support of Winograd4x3 for Convolution framework (NHWC mode).</li>
  <li>Parameter 'batch' in Convolution framework.</li>
+ <li>Function ConvolutionInternalBufferSize.</li>
+ <li>Use parameter trans instead of parameters srcT and dstT  in function ConvolutionInit.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -51,6 +53,7 @@
 <ul>
  <li>Function from GetFlushToZero to GetFastMode.</li>
  <li>Function from SetFlushToZero to SetFastMode.</li>
+ <li>Function from ConvolutionBufferSize to ConvolutionExternalBufferSize.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
