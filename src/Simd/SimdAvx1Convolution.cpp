@@ -463,7 +463,7 @@ namespace Simd
             SIMD_PERF_BEG(_param.Info());
 
             const ConvParam & p = _param;
-            assert(p.srcT == ::SimdTrue);
+            assert(p.trans);
             size_t size = p.srcC / p.group;
             if (size*p.dstH*p.dstW*p.kernelY*p.kernelX >= 1024 * 512 && Aligned(dst))
             {

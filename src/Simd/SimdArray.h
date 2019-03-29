@@ -102,7 +102,10 @@ namespace Simd
             if (size_ != size)
             {
                 if (_ptr)
+                {
                     Simd::Free(_ptr);
+                    _ptr = 0;
+                }
                 *(size_t*)&size = size_;
                 if (size_)
                     _ptr = Simd::Allocate(size * sizeof(T), align);

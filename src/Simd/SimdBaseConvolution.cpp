@@ -584,6 +584,7 @@ namespace Simd
             {
                 for (size_t i = 0; i < _count; ++i)
                     _nhwcReorderB(_M * (_merge ? _batch : 1), _N, _K, _winogradWeight.data + i * _strideW, _nhwcWeight.data + i * _nhwcStrideW);
+                _winogradWeight.Resize(0);
             }
             if (internal)
                 *internal = SimdTrue;
