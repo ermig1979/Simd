@@ -244,9 +244,8 @@ namespace Simd
 
             static bool Preferable(const ConvParam & p);
 
-        protected:
             typedef void(*ConvolutionBiasActivationPtr)(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW);
-
+        protected:
             void Pad(const float * src, float * dst) const;
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
 
@@ -263,9 +262,8 @@ namespace Simd
 
             static bool Preferable(const ConvParam & p);
 
-        protected:
             typedef void(*ConvolutionBiasActivationPtr)(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst);
-
+        protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation(); 
 
             size_t _batch, _sizeS, _sizeD;
