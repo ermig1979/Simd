@@ -36,7 +36,7 @@ namespace Simd
     template<class T> SIMD_INLINE void Log(const T * data, size_t size, const std::string & name)
     {
         std::cout << name.c_str() << " = { ";
-        for (int i = 0; i < size; i++)
+        for (size_t i = 0; i < size; i++)
         {
             std::cout << int(data[i]) << " ";
         }
@@ -46,7 +46,7 @@ namespace Simd
     template<> SIMD_INLINE void Log<float>(const float * data, size_t size, const std::string & name)
     {
         std::cout << name.c_str() << " = { " << std::setprecision(3) << std::fixed;
-        for (int i = 0; i < size; i++)
+        for (size_t i = 0; i < size; i++)
         {
             std::cout << data[i] << " ";
         }
