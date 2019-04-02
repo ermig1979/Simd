@@ -712,6 +712,8 @@ namespace Simd
         {
             typedef HidHaarCascade Hid;
             const Hid::Stage * stages = hid.stages.data();
+            if (startStage >= (int)hid.stages.size())
+                return 1;
             const Hid::Node * node = hid.nodes.data() + stages[startStage].first;
             const float * leaves = hid.leaves.data() + stages[startStage].first * 2;
             for (int i = startStage, n = (int)hid.stages.size(); i < n; ++i)
