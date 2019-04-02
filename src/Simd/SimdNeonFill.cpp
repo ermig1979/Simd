@@ -93,7 +93,7 @@ namespace Simd
         template <bool align> void Fill32f(float * dst, size_t size, const float * value)
         {
             if (value == 0 || value[0] == 0)
-                memset(dst, 0, sizeof(float));
+                memset(dst, 0, size * sizeof(float));
             else
             {
                 float v = value[0];
