@@ -324,6 +324,8 @@ namespace Simd
             const typename Hid::Leave * leaves = hid.leaves.data();
             const typename Hid::Node * nodes = hid.nodes.data();
             const typename Hid::Stage * stages = hid.stages.data();
+            if (startStage >= (int)hid.stages.size())
+                return 1;
             int nodeOffset = stages[startStage].first;
             int leafOffset = 2 * nodeOffset;
             for (int i_stage = startStage, n_stages = (int)hid.stages.size(); i_stage < n_stages; i_stage++)
