@@ -235,7 +235,7 @@ namespace Simd
                     sums[2] = vmlaq_f32(sums[2], a2, a2);
                     sums[3] = vmlaq_f32(sums[3], a3, a3);
                 }
-                if (KF < F)
+                if (KF < K)
                 {
                     size_t k = K - F;
                     float32x4_t a0 = And(mask, vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[i + 0] + k))));
@@ -257,7 +257,7 @@ namespace Simd
                     float32x4_t a = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[i] + k)));
                     sum = vmlaq_f32(sum, a, a);
                 }
-                if (KF < F)
+                if (KF < K)
                 {
                     size_t k = K - F;
                     float32x4_t a = And(mask, vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[i] + k))));
@@ -336,41 +336,122 @@ namespace Simd
             Store<false>(distances + 2 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[2]))), Extract4Sums(c20, c21, c22, c23)));
         }
 
+        static void MicroCosineDistances3x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
+        {
+            size_t K4 = K & (~3);
+            float32x4_t c00 = vdupq_n_f32(0.0f);
+            float32x4_t c10 = vdupq_n_f32(0.0f);
+            float32x4_t c20 = vdupq_n_f32(0.0f);
+            float32x4_t a0, b0;
+            for (size_t k = 0; k < K4; k += 4)
+            {
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[0] + k)));
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[0] + k)));
+                c00 = vmlaq_f32(c00, a0, b0);
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[1] + k)));
+                c10 = vmlaq_f32(c10, a0, b0);
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[2] + k)));
+                c20 = vmlaq_f32(c20, a0, b0);
+            }
+            if (K4 < K)
+            {
+                size_t k = K - 4;
+                float32x4_t tail = Tail(K - K4);
+                b0 = And(tail, vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[0] + k))));
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[0] + k)));
+                c00 = vmlaq_f32(c00, a0, b0);
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[1] + k)));
+                c10 = vmlaq_f32(c10, a0, b0);
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[2] + k)));
+                c20 = vmlaq_f32(c20, a0, b0);
+            }
+            distances[0 * stride] = 1.0f - ExtractSum32f(c00) / sqrt(bb[0] * aa[0]);
+            distances[1 * stride] = 1.0f - ExtractSum32f(c10) / sqrt(bb[0] * aa[1]);
+            distances[2 * stride] = 1.0f - ExtractSum32f(c20) / sqrt(bb[0] * aa[2]);
+        }
+
+        static void MicroCosineDistances1x4(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
+        {
+            size_t K4 = K & (~3);
+            float32x4_t c00 = vdupq_n_f32(0.0f);
+            float32x4_t c01 = vdupq_n_f32(0.0f);
+            float32x4_t c02 = vdupq_n_f32(0.0f);
+            float32x4_t c03 = vdupq_n_f32(0.0f);
+            float32x4_t a0, b0;
+            for (size_t k = 0; k < K4; k += 4)
+            {
+                a0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[0] + k)));
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[0] + k)));
+                c00 = vmlaq_f32(c00, a0, b0);
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[1] + k)));
+                c01 = vmlaq_f32(c01, a0, b0);
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[2] + k)));
+                c02 = vmlaq_f32(c02, a0, b0);
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[3] + k)));
+                c03 = vmlaq_f32(c03, a0, b0);
+            }
+            if (K4 < K)
+            {
+                size_t k = K - 4;
+                float32x4_t tail = Tail(K - K4);
+                a0 = And(tail, vcvt_f32_f16((float16x4_t)LoadHalf<false>((A[0] + k))));
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[0] + k)));
+                c00 = vmlaq_f32(c00, a0, b0);
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[1] + k)));
+                c01 = vmlaq_f32(c01, a0, b0);
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[2] + k)));
+                c02 = vmlaq_f32(c02, a0, b0);
+                b0 = vcvt_f32_f16((float16x4_t)LoadHalf<false>((B[3] + k)));
+                c03 = vmlaq_f32(c03, a0, b0);
+            }
+            float32x4_t _bb = Load<false>(bb);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            Store<false>(distances + 0 * stride, vmlsq_f32(_1, ReciprocalSqrt<1>(vmulq_f32(_bb, vdupq_n_f32(aa[0]))), Extract4Sums(c00, c01, c02, c03)));
+        }
+
         static void MacroCosineDistances(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
         {
-            for (size_t i = 0; i < M; i += 3)
+            size_t M3 = AlignLoAny(M, 3);
+            size_t N4 = AlignLo(N, 4);
+            size_t i = 0;
+            for (; i < M3; i += 3)
             {
-                for (size_t j = 0; j < N; j += 4)
+                size_t j = 0;
+                for (; j < N4; j += 4)
                     MicroCosineDistances3x4(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
+                for (; j < N; j += 1)
+                    MicroCosineDistances3x1(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
                 distances += 3 * stride;
+            }
+            for (; i < M; i++)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    MicroCosineDistances1x4(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
+                for (; j < N; j += 1)
+                    CosineDistance16f(A[i], B[j], K, distances + j);
+                distances += 1 * stride;
             }
         }
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances)
         {
             const size_t L2 = 256 * 1024;
-            size_t M3 = AlignLoAny(M, 3);
-            size_t N4 = AlignLo(N, 4);
             size_t mN = AlignLoAny(L2 / 2 / K, 4);
             size_t mM = AlignLoAny(L2 / 2 / K, 3);
             Array32f aa(M), bb(N);
-            for (size_t i = 0; i < M3; i += mM)
+            for (size_t i = 0; i < M; i += mM)
             {
-                size_t dM = Simd::Min(M3, i + mM) - i;
+                size_t dM = Simd::Min(M, i + mM) - i;
                 Squares(dM, K, A + i, aa.data + i);
-                for (size_t j = 0; j < N4; j += mN)
+                for (size_t j = 0; j < N; j += mN)
                 {
-                    size_t dN = Simd::Min(N4, j + mN) - j;
+                    size_t dN = Simd::Min(N, j + mN) - j;
                     if (i == 0)
                         Squares(dN, K, B + j, bb.data + j);
                     MacroCosineDistances(dM, dN, K, A + i, B + j, aa.data + i, bb.data + j, distances + i * N + j, N);
                 }
-                for (size_t j = N4; j < N; ++j)
-                    CosineDistance16f(A[i], B[j], K, distances + i * N + j);
             }
-            for (size_t i = M3; i < M; i++)
-                for (size_t j = 0; j < N; ++j)
-                    CosineDistance16f(A[i], B[j], K, distances + i * N + j);
         }
     }
 #endif // defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)

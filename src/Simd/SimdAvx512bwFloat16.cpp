@@ -290,7 +290,7 @@ namespace Simd
                     sums[2] = _mm512_fmadd_ps(a2, a2, sums[2]);
                     sums[3] = _mm512_fmadd_ps(a3, a3, sums[3]);
                 }
-                if (KF < F)
+                if (KF < K)
                 {
                     size_t k = K - F;
                     __m512 a0 = _mm512_and_ps(mask, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[i + 0] + k))));
@@ -312,7 +312,7 @@ namespace Simd
                     __m512 a = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[i] + k)));
                     sum = _mm512_fmadd_ps(a, a, sum);
                 }
-                if (KF < F)
+                if (KF < K)
                 {
                     size_t k = K - F;
                     __m512 a = _mm512_and_ps(mask, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[i] + k))));
@@ -436,6 +436,58 @@ namespace Simd
             _mm_storeu_ps(distances + 5 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[5]))), Extract4Sums(c50, c51, c52, c53), _1));
         }
 
+        static void MicroCosineDistances6x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
+        {
+            size_t K16 = K & (~15);
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 c30 = _mm512_setzero_ps();
+            __m512 c40 = _mm512_setzero_ps();
+            __m512 c50 = _mm512_setzero_ps();
+            __m512 a0, b0;
+            for (size_t k = 0; k < K16; k += 16)
+            {
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[0] + k)));
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k)));
+                c00 = _mm512_fmadd_ps(a0, b0, c00);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[1] + k)));
+                c10 = _mm512_fmadd_ps(a0, b0, c10);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[2] + k)));
+                c20 = _mm512_fmadd_ps(a0, b0, c20);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[3] + k)));
+                c30 = _mm512_fmadd_ps(a0, b0, c30);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[4] + k)));
+                c40 = _mm512_fmadd_ps(a0, b0, c40);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[5] + k)));
+                c50 = _mm512_fmadd_ps(a0, b0, c50);
+            }
+            if (K16 < K)
+            {
+                size_t k = K - 16;
+                __m512 tail = Tail(K - K16);
+                b0 = _mm512_and_ps(tail, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[0] + k))));
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k)));
+                c00 = _mm512_fmadd_ps(a0, b0, c00);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[1] + k)));
+                c10 = _mm512_fmadd_ps(a0, b0, c10);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[2] + k)));
+                c20 = _mm512_fmadd_ps(a0, b0, c20);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[3] + k)));
+                c30 = _mm512_fmadd_ps(a0, b0, c30);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[4] + k)));
+                c40 = _mm512_fmadd_ps(a0, b0, c40);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[5] + k)));
+                c50 = _mm512_fmadd_ps(a0, b0, c50);
+            }
+            distances[0 * stride] = 1.0f - Avx512f::ExtractSum(c00) / sqrt(bb[0] * aa[0]);
+            distances[1 * stride] = 1.0f - Avx512f::ExtractSum(c10) / sqrt(bb[0] * aa[1]);
+            distances[2 * stride] = 1.0f - Avx512f::ExtractSum(c20) / sqrt(bb[0] * aa[2]);
+            distances[3 * stride] = 1.0f - Avx512f::ExtractSum(c30) / sqrt(bb[0] * aa[3]);
+            distances[4 * stride] = 1.0f - Avx512f::ExtractSum(c40) / sqrt(bb[0] * aa[4]);
+            distances[5 * stride] = 1.0f - Avx512f::ExtractSum(c50) / sqrt(bb[0] * aa[5]);
+        }
+
         static void MicroCosineDistances3x4(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
         {
             size_t K16 = K & (~15);
@@ -476,7 +528,7 @@ namespace Simd
             }
             if (K16 < K)
             {
-                size_t k = K - 8;
+                size_t k = K - 16;
                 __m512 tail = Tail(K - K16);
                 a0 = _mm512_and_ps(tail, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k))));
                 a1 = _mm512_and_ps(tail, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[1] + k))));
@@ -505,49 +557,132 @@ namespace Simd
             _mm_storeu_ps(distances + 2 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))), Extract4Sums(c20, c21, c22, c23), _1));
         }
 
+        static void MicroCosineDistances3x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
+        {
+            size_t K16 = K & (~15);
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c10 = _mm512_setzero_ps();
+            __m512 c20 = _mm512_setzero_ps();
+            __m512 a0, b0;
+            for (size_t k = 0; k < K16; k += 16)
+            {
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[0] + k)));
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k)));
+                c00 = _mm512_fmadd_ps(a0, b0, c00);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[1] + k)));
+                c10 = _mm512_fmadd_ps(a0, b0, c10);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[2] + k)));
+                c20 = _mm512_fmadd_ps(a0, b0, c20);
+            }
+            if (K16 < K)
+            {
+                size_t k = K - 16;
+                __m512 tail = Tail(K - K16);
+                b0 = _mm512_and_ps(tail, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[0] + k))));
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k)));
+                c00 = _mm512_fmadd_ps(a0, b0, c00);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[1] + k)));
+                c10 = _mm512_fmadd_ps(a0, b0, c10);
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[2] + k)));
+                c20 = _mm512_fmadd_ps(a0, b0, c20);
+            }
+            distances[0 * stride] = 1.0f - Avx512f::ExtractSum(c00) / sqrt(bb[0] * aa[0]);
+            distances[1 * stride] = 1.0f - Avx512f::ExtractSum(c10) / sqrt(bb[0] * aa[1]);
+            distances[2 * stride] = 1.0f - Avx512f::ExtractSum(c20) / sqrt(bb[0] * aa[2]);
+        }
+
+        static void MicroCosineDistances1x4(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
+        {
+            size_t K16 = K & (~15);
+            __m512 c00 = _mm512_setzero_ps();
+            __m512 c01 = _mm512_setzero_ps();
+            __m512 c02 = _mm512_setzero_ps();
+            __m512 c03 = _mm512_setzero_ps();
+            __m512 a0, b0;
+            for (size_t k = 0; k < K16; k += 16)
+            {
+                a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k)));
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[0] + k)));
+                c00 = _mm512_fmadd_ps(a0, b0, c00);
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[1] + k)));
+                c01 = _mm512_fmadd_ps(a0, b0, c01);
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[2] + k)));
+                c02 = _mm512_fmadd_ps(a0, b0, c02);
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[3] + k)));
+                c03 = _mm512_fmadd_ps(a0, b0, c03);
+            }
+            if (K16 < K)
+            {
+                size_t k = K - 16;
+                __m512 tail = Tail(K - K16);
+                a0 = _mm512_and_ps(tail, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[0] + k))));
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[0] + k)));
+                c00 = _mm512_fmadd_ps(a0, b0, c00);
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[1] + k)));
+                c01 = _mm512_fmadd_ps(a0, b0, c01);
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[2] + k)));
+                c02 = _mm512_fmadd_ps(a0, b0, c02);
+                b0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(B[3] + k)));
+                c03 = _mm512_fmadd_ps(a0, b0, c03);
+            }
+            __m128 _bb = _mm_loadu_ps(bb);
+            __m128 _1 = _mm_set1_ps(1.0f);
+            _mm_storeu_ps(distances + 0 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))), Extract4Sums(c00, c01, c02, c03), _1));
+        }
+
         static void MacroCosineDistances(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
         {
+            size_t M3 = AlignLoAny(M, 3);
             size_t M6 = AlignLoAny(M, 6);
+            size_t N4 = AlignLo(N, 4);
             size_t i = 0;
             for (; i < M6; i += 6)
             {
-                for (size_t j = 0; j < N; j += 4)
+                size_t j = 0;
+                for (; j < N4; j += 4)
                     MicroCosineDistances6x4(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
+                for (; j < N; j += 1)
+                    MicroCosineDistances6x1(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
                 distances += 6 * stride;
             }
-            for (; i < M; i += 3)
+            for (; i < M3; i += 3)
             {
-                for (size_t j = 0; j < N; j += 4)
+                size_t j = 0;
+                for (; j < N4; j += 4)
                     MicroCosineDistances3x4(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
+                for (; j < N; j += 1)
+                    MicroCosineDistances3x1(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
                 distances += 3 * stride;
+            }
+            for (; i < M; i++)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    MicroCosineDistances1x4(K, A + i, B + j, aa + i, bb + j, distances + j, stride);
+                for (; j < N; j += 1)
+                    CosineDistance16f(A[i], B[j], K, distances + j);
+                distances += 1 * stride;
             }
         }
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances)
         {
             const size_t L2 = 256 * 1024;
-            size_t M3 = AlignLoAny(M, 3);
-            size_t N4 = AlignLo(N, 4);
             size_t mN = AlignLoAny(L2 / 2 / K, 4);
-            size_t mM = AlignLoAny(L2 / 2 / K, 3);
+            size_t mM = AlignLoAny(L2 / 2 / K, 6);
             Array32f aa(M), bb(N);
-            for (size_t i = 0; i < M3; i += mM)
+            for (size_t i = 0; i < M; i += mM)
             {
-                size_t dM = Simd::Min(M3, i + mM) - i;
+                size_t dM = Simd::Min(M, i + mM) - i;
                 Squares(dM, K, A + i, aa.data + i);
-                for (size_t j = 0; j < N4; j += mN)
+                for (size_t j = 0; j < N; j += mN)
                 {
-                    size_t dN = Simd::Min(N4, j + mN) - j;
+                    size_t dN = Simd::Min(N, j + mN) - j;
                     if (i == 0)
                         Squares(dN, K, B + j, bb.data + j);
                     MacroCosineDistances(dM, dN, K, A + i, B + j, aa.data + i, bb.data + j, distances + i * N + j, N);
                 }
-                for (size_t j = N4; j < N; ++j)
-                    CosineDistance16f(A[i], B[j], K, distances + i * N + j);
             }
-            for (size_t i = M3; i < M; i++)
-                for (size_t j = 0; j < N; ++j)
-                    CosineDistance16f(A[i], B[j], K, distances + i * N + j);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

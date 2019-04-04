@@ -24,6 +24,7 @@
 #include "Test/TestUtils.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
+#include "Test/TestTensor.h"
 
 namespace Test
 {
@@ -308,10 +309,10 @@ namespace Test
             desc = desc + "[" + ToString(M) + "-" + ToString(N) + "-" + ToString(K) + "]";
         }
 
-        void Call(size_t K, const F16Ptrs & A, const F16Ptrs & B, View & D) const
+        void Call(size_t K, const F16Ptrs & A, const F16Ptrs & B, Tensor32f & D) const
         {
             TEST_PERFORMANCE_TEST(desc);
-            func(A.size(), B.size(), K, A.data(), B.data(), (float*)D.data);
+            func(A.size(), B.size(), K, A.data(), B.data(), D.Data());
         }
     };
 
@@ -327,7 +328,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
 
         View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Af, -10.0, 10.0);
+        FillRandom32f(Af, -1.0, 1.0);
         View Ai(K*2, M, View::Int16, NULL, TEST_ALIGN(K));
         F16Ptrs A(M);
         for (size_t i = 0; i < M; i++)
@@ -337,7 +338,7 @@ namespace Test
         }
 
         View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
-        FillRandom32f(Bf, -10.0, 10.0);
+        FillRandom32f(Bf, -1.0, 1.0);
         View Bi(K * 2, N, View::Int16, NULL, TEST_ALIGN(K));
         F16Ptrs B(N);
         for (size_t j = 0; j < N; j++)
@@ -346,8 +347,8 @@ namespace Test
             B[j] = Bi.Row<uint16_t>(j);
         }
 
-        View D1(M, N, View::Float, NULL, TEST_ALIGN(1));
-        View D2(M, N, View::Float, NULL, TEST_ALIGN(1));
+        Tensor32f D1({ M, N, });
+        Tensor32f D2({ M, N, });
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -365,8 +366,11 @@ namespace Test
         bool result = true;
 
         result = result && CosineDistancesMxNa16fAutoTest(1024, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1024, 129, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1023, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNa16fAutoTest(1023, 129, 1023, eps, f1, f2);
 
-#ifndef SIMD_NEON_ENABLE
+#if !defined(SIMD_NEON_ENABLE) && 0
         result = result && CosineDistancesMxNa16fAutoTest(10*1024, 128, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNa16fAutoTest(1024, 10*128, 1024, eps, f1, f2);
 #endif
