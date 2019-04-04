@@ -52,7 +52,10 @@ namespace Simd
             if (size_ != size)
             {
                 if (data)
+                {
                     Simd::Free(data);
+                    *(T**)&data = 0;
+                }
                 *(size_t*)&size = size_;
                 if (size_)
                     *(T**)&data = (T*)Simd::Allocate(size * sizeof(T), align);
