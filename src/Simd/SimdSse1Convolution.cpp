@@ -625,7 +625,6 @@ namespace Simd
             default:
                 return Base::ConvolutionDirectNchw::SetConvolutionBiasActivation();
             }
-            assert(0);
             return NULL;
         }
 

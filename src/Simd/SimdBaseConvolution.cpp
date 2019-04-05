@@ -903,7 +903,6 @@ namespace Simd
                     return Base::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
-            assert(0);
             return NULL;
         }
 

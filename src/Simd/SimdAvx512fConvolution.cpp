@@ -910,8 +910,8 @@ namespace Simd
                 return false;
             double k = double(p.srcC) / p.group * p.strideX * p.strideX * p.strideY / p.kernelX / p.kernelY;
             return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)
-#if SIMD_ZMM_COUNT == 32
-                || p.IsKernel(4) || p.IsKernel(5)
+#if SIMD_ZMM_COUNT == 32 || 1
+                || ((p.IsKernel(4) || p.IsKernel(5)) && p.dstW > F)
 #endif
                 ) && p.trans == 0;
         }
@@ -934,7 +934,7 @@ namespace Simd
         ConvolutionDirectNchw::ConvolutionBiasActivationPtr ConvolutionDirectNchw::SetConvolutionBiasActivation()
         {
             const ConvParam & p = _param;
-            if (p.dstW <= HF)
+            if (p.dstW <= HF && p.kernelX <= 3)
                 return Avx2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
