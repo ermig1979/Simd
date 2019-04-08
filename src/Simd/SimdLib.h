@@ -5579,7 +5579,7 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
+        \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans);
 
         \short This function is used for forward propagation of LrnLayer (cross channels normalization).
 
@@ -5591,9 +5591,18 @@ extern "C"
                 lo = Max(0, i - half);
                 ln = Min(count, i + half + 1);
                 sum = 0;
-                for(l = lo; l < ln; ++l)
-                    sum += Square(src[l*size + j]);
-                dst[i*size + j] = src[i*size + j]*Pow(k[0] + sum*k[1], k[2]);
+                if(trans)
+                {
+                    for(l = lo; l < ln; ++l)
+                        sum += Square(src[l + j*count]);
+                    dst[i + j*count] = src[i + j*count]*Pow(k[0] + sum*k[1], k[2]);
+                }
+                else
+                {
+                    for(l = lo; l < ln; ++l)
+                        sum += Square(src[l*size + j]);
+                    dst[i*size + j] = src[i*size + j]*Pow(k[0] + sum*k[1], k[2]);
+                }
             }
         \endverbatim
 
@@ -5605,8 +5614,9 @@ extern "C"
         \param [in] size - an internal size of the operation.
         \param [in] k - a pointer to the 32-bit float array with 3 coefficients (see algorithm details). 
         \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] trans - a flag of transposed input and output data (::SimdFalse - CHW order, ::SimdTrue - HWC order).
     */
-    SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
+    SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans);
 
     /*! @ingroup synet
 

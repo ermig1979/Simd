@@ -400,30 +400,60 @@ namespace Simd
             }
         }
 
-        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
         {
             float k0 = k[0], k1 = k[1], k2 = k[2];
-            Array32f sum(size, true), zero(size, true);
-
-            for (size_t i = 0; i < half; ++i)
+            if (trans)
             {
-                const float * pos = src + i * size;
-                for (size_t j = 0; j < size; ++j)
-                    sum[j] += Simd::Square(pos[j]);
-            }
-
-            for (size_t i = 0; i < count; ++i)
-            {
-                const float * pos = (i < count - half) ? src + half * size : zero.data;
-                const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
+                size_t beg = half + 1;
+                size_t end = count - half;
                 for (size_t j = 0; j < size; ++j)
                 {
-                    sum[j] += Simd::Square(pos[j]);
-                    sum[j] -= Simd::Square(neg[j]);
-                    dst[j] = src[j] * Pow(k0 + k1 * sum[j], k2);
+                    float sum = 0;
+                    for (size_t i = 0; i < half; ++i)
+                        sum += Simd::Square(src[i]);
+                    for (size_t i = 0; i < beg; ++i)
+                    {
+                        sum += Simd::Square(src[i + half]);
+                        dst[i] = src[i] * Pow(k0 + k1 * sum, k2);
+                    }
+                    for (size_t i = beg; i < end; ++i)
+                    {
+                        sum += Simd::Square(src[i + half]);
+                        sum -= Simd::Square(src[i - half - 1]);
+                        dst[i] = src[i] * Pow(k0 + k1 * sum, k2);
+                    }
+                    for (size_t i = end; i < count; ++i)
+                    {
+                        sum -= Simd::Square(src[i - half - 1]);
+                        dst[i] = src[i] * Pow(k0 + k1 * sum, k2);
+                    }
+                    src += count;
+                    dst += count;
                 }
-                src += size;
-                dst += size;
+            }
+            else
+            {
+                Array32f sum(size, true), zero(size, true);
+                for (size_t i = 0; i < half; ++i)
+                {
+                    const float * pos = src + i * size;
+                    for (size_t j = 0; j < size; ++j)
+                        sum[j] += Simd::Square(pos[j]);
+                }
+                for (size_t i = 0; i < count; ++i)
+                {
+                    const float * pos = (i < count - half) ? src + half * size : zero.data;
+                    const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
+                    for (size_t j = 0; j < size; ++j)
+                    {
+                        sum[j] += Simd::Square(pos[j]);
+                        sum[j] -= Simd::Square(neg[j]);
+                        dst[j] = src[j] * Pow(k0 + k1 * sum[j], k2);
+                    }
+                    src += size;
+                    dst += size;
+                }
             }
         }
 

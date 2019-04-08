@@ -774,60 +774,123 @@ namespace Simd
                 SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
         }
 
-        template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        template<int shift> SIMD_INLINE float32x4_t LoadAtEdge(const float * src)
         {
-            size_t aligned = AlignLo(size, F);
-            Array32f sum(size, true), zero(size, true);
+            static const int32_t mask[3 * F] = { 0, 0, 0, 0, -1, -1, -1, -1, 0, 0, 0, 0 };
+            return And(Load<false>(src + shift), Load<false>((float*)mask + F + shift));
+        }
 
-            for (size_t i = 0; i < half; ++i)
-            {
-                const float * pos = src + i * size;
-                size_t j = 0;
-                for (; j < aligned; j += F)
-                {
-                    float32x4_t _pos = Load<align>(pos + j);
-                    Store<true>(sum.data + j, vmlaq_f32(Load<true>(sum.data + j), _pos, _pos));
-                }
-                for (; j < size; ++j)
-                    sum[j] += Simd::Square(pos[j]);
-            }
+        SIMD_INLINE float32x4_t NoseSquareSum(const float * src)
+        {
+            float32x4_t s0 = LoadAtEdge<-2>(src);
+            float32x4_t s1 = LoadAtEdge<-1>(src);
+            float32x4_t s2 = Load<false>(src);
+            float32x4_t s3 = Load<false>(src + 1);
+            float32x4_t s4 = Load<false>(src + 2);
+            return vaddq_f32(vmlaq_f32(vmulq_f32(s0, s0), s1, s1), vmlaq_f32(vmlaq_f32(vmulq_f32(s2, s2), s3, s3), s4, s4));
+        }
 
+        SIMD_INLINE float32x4_t BodySquareSum(const float * src)
+        {
+            float32x4_t s0 = Load<false>(src - 2);
+            float32x4_t s1 = Load<false>(src - 1);
+            float32x4_t s2 = Load<false>(src);
+            float32x4_t s3 = Load<false>(src + 1);
+            float32x4_t s4 = Load<false>(src + 2);
+            return vaddq_f32(vmlaq_f32(vmulq_f32(s0, s0), s1, s1), vmlaq_f32(vmlaq_f32(vmulq_f32(s2, s2), s3, s3), s4, s4));
+        }
+
+        SIMD_INLINE float32x4_t TailSquareSum(const float * src)
+        {
+            float32x4_t s0 = Load<false>(src - 2);
+            float32x4_t s1 = Load<false>(src - 1);
+            float32x4_t s2 = Load<false>(src);
+            float32x4_t s3 = LoadAtEdge<1>(src);
+            float32x4_t s4 = LoadAtEdge<2>(src);
+            return vaddq_f32(vmlaq_f32(vmulq_f32(s0, s0), s1, s1), vmlaq_f32(vmlaq_f32(vmulq_f32(s2, s2), s3, s3), s4, s4));
+        }
+
+        template <bool align> void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
+        {
             float32x4_t k0 = vdupq_n_f32(k[0]);
             float32x4_t k1 = vdupq_n_f32(k[1]);
             float32x4_t k2 = vdupq_n_f32(k[2]);
             Pow pow;
-            for (size_t i = 0; i < count; ++i)
+            if (trans)
             {
-                const float * pos = (i < count - half) ? src + half * size : zero.data;
-                const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
-                size_t j = 0;
-                for (; j < aligned; j += F)
+                if (half != 2 || count < F + half)
                 {
-                    float32x4_t _pos = Load<align>(pos + j);
-                    float32x4_t _neg = Load<align>(neg + j);
-                    float32x4_t _sum = Load<true>(sum.data + j);
-                    _sum = vmlsq_f32(vmlaq_f32(_sum, _pos, _pos), _neg, _neg);
-                    float32x4_t _src = Load<align>(src + j);
-                    Store<true>(sum.data + j, _sum);
-                    Store<align>(dst + j, vmulq_f32(_src, pow(vmlaq_f32(k0, k1, _sum), k2)));
+                    Base::SynetLrnLayerCrossChannels(src, half, count, size, k, dst, trans);
+                    return;
                 }
-                for (; j < size; ++j)
+                size_t aligned = AlignLo(count - half, F);
+                for (size_t j = 0; j < size; ++j)
                 {
-                    sum[j] += Simd::Square(pos[j]);
-                    sum[j] -= Simd::Square(neg[j]);
-                    dst[j] = src[j] * Base::Pow(k[0] + k[1] * sum[j], k[2]);
+                    Store<align>(dst + 0, vmulq_f32(Load<align>(src + 0), pow(vmlaq_f32(k0, k1, NoseSquareSum(src + 0)), k2)));
+                    for (size_t i = F; i < aligned; i += F)
+                        Store<align>(dst + i, vmulq_f32(Load<align>(src + i), pow(vmlaq_f32(k0, k1, BodySquareSum(src + i)), k2)));
+                    if (aligned != count - half)
+                    {
+                        size_t i = count - half - F;
+                        Store<false>(dst + i, vmulq_f32(Load<false>(src + i), pow(vmlaq_f32(k0, k1, BodySquareSum(src + i)), k2)));
+                    }
+                    size_t i = count - F;
+                    Store<false>(dst + i, vmulq_f32(Load<false>(src + i), pow(vmlaq_f32(k0, k1, TailSquareSum(src + i)), k2)));
+                    src += count;
+                    dst += count;
                 }
-                src += size;
-                dst += size;
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, F);
+                Array32f sum(size, true), zero(size, true);
+
+                for (size_t i = 0; i < half; ++i)
+                {
+                    const float * pos = src + i * size;
+                    size_t j = 0;
+                    for (; j < aligned; j += F)
+                    {
+                        float32x4_t _pos = Load<align>(pos + j);
+                        Store<true>(sum.data + j, vmlaq_f32(Load<true>(sum.data + j), _pos, _pos));
+                    }
+                    for (; j < size; ++j)
+                        sum[j] += Simd::Square(pos[j]);
+                }
+
+                for (size_t i = 0; i < count; ++i)
+                {
+                    const float * pos = (i < count - half) ? src + half * size : zero.data;
+                    const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
+                    size_t j = 0;
+                    for (; j < aligned; j += F)
+                    {
+                        float32x4_t _pos = Load<align>(pos + j);
+                        float32x4_t _neg = Load<align>(neg + j);
+                        float32x4_t _sum = Load<true>(sum.data + j);
+                        _sum = vmlsq_f32(vmlaq_f32(_sum, _pos, _pos), _neg, _neg);
+                        float32x4_t _src = Load<align>(src + j);
+                        Store<true>(sum.data + j, _sum);
+                        Store<align>(dst + j, vmulq_f32(_src, pow(vmlaq_f32(k0, k1, _sum), k2)));
+                    }
+                    for (; j < size; ++j)
+                    {
+                        sum[j] += Simd::Square(pos[j]);
+                        sum[j] -= Simd::Square(neg[j]);
+                        dst[j] = src[j] * Base::Pow(k[0] + k[1] * sum[j], k[2]);
+                    }
+                    src += size;
+                    dst += size;
+                }
             }
         }
 
-        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
         {
             if (Aligned(src) && Aligned(dst) && Aligned(size))
-                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst);
+                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst, trans);
             else
-                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
+                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst, trans);
         }
 
         SIMD_INLINE void PoolingMaxHwc1(const float * src, size_t srcS, size_t srcC, size_t kH, size_t kW, const float32x4_t & min, float * dst)

@@ -5192,12 +5192,12 @@ SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float *
     simdSynetInnerProductLayerForward(src, weight, bias, count, size, dst);
 }
 
-typedef void(*SimdSynetLrnLayerCrossChannelsPtr) (const float * src, size_t half, size_t count, size_t size, const float * k, float * dst);
+typedef void(*SimdSynetLrnLayerCrossChannelsPtr) (const float * src, size_t half, size_t count, size_t size, const float * k, float * ds, SimdBool transt);
 volatile SimdSynetLrnLayerCrossChannelsPtr simdSynetLrnLayerCrossChannels = SIMD_FUNC4(SynetLrnLayerCrossChannels, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
 {
-    simdSynetLrnLayerCrossChannels(src, half, count, size, k, dst);
+    simdSynetLrnLayerCrossChannels(src, half, count, size, k, dst, trans);
 }
 
 typedef void(*SimdSynetPoolingForwardPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,

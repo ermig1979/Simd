@@ -33,6 +33,10 @@
 <h3 id="R077">May X, 2019 (version X.X.77)</h3> 
 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>Base implementation, SSE2, AVX2, AVX-512F and NEON optimizations of function SynetLrnLayerCrossChannels(NHWC mode).</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Error in SSE, AVX, AVX-512F and NEON optimizations of function Fill32f.</li>
@@ -40,6 +44,12 @@
  <li>Out of range in SSE4.1, AVX2, AVX-512BW and NEON optimizations of functions DetectionLbpDetect32fp, DetectionLbpDetect32fi, DetectionLbpDetect16ip and DetectionLbpDetect16ii.</li>
  <li>Error in AVX2, AVX-512BW and NEON optimizations of function CosineDistancesMxNa16f.</li>
  <li>Error in AVX-512F optimization of function Convolution framework.</li>
+</ul>
+
+<h4>Test framework</h4>
+<h5>New features</h5>
+<ul>
+ <li>Tests for verifying functionality of function SynetLrnLayerCrossChannels (NHWC mode).</li>
 </ul>
 
 <a href="#HOME">Home</a> 

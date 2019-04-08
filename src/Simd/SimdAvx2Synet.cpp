@@ -24,6 +24,8 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdArray.h"
@@ -248,60 +250,111 @@ namespace Simd
                 SynetInnerProductLayerForward1(src, weight + i * size, (bias ? bias + i : _bias), size, dst + i);
         }
 
-        template <bool align> SIMD_INLINE void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        template<int shift> SIMD_INLINE __m256 LoadAtEdge(const float * src)
         {
-            size_t aligned = AlignLo(size, F);
-            Array32f sum(size, true), zero(size, true);
+            static const int32_t mask[3 * F] = { 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return _mm256_and_ps(_mm256_loadu_ps(src + shift), _mm256_loadu_ps((float*)mask + F + shift));
+        }
 
-            for (size_t i = 0; i < half; ++i)
-            {
-                const float * pos = src + i * size;
-                size_t j = 0;
-                for (; j < aligned; j += F)
-                {
-                    __m256 _pos = Avx::Load<align>(pos + j);
-                    Avx::Store<true>(sum.data + j, _mm256_fmadd_ps(_pos, _pos, Avx::Load<true>(sum.data + j)));
-                }
-                for (; j < size; ++j)
-                    sum[j] += Simd::Square(pos[j]);
-            }
+        SIMD_INLINE __m256 NoseSquareSum(const float * src)
+        {
+            return _mm256_add_ps(_mm256_add_ps(Avx::Square(LoadAtEdge<-2>(src)), Avx::Square(LoadAtEdge<-1>(src))),
+                _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src)), _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src + 1)), Avx::Square(_mm256_loadu_ps(src + 2)))));
+        }
 
+        SIMD_INLINE __m256 BodySquareSum(const float * src)
+        {
+            return _mm256_add_ps(_mm256_add_ps(Avx::Square(_mm256_loadu_ps(src - 2)), Avx::Square(_mm256_loadu_ps(src - 1))),
+                _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src)), _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src + 1)), Avx::Square(_mm256_loadu_ps(src + 2)))));
+        }
+
+        SIMD_INLINE __m256 TailSquareSum(const float * src)
+        {
+            return _mm256_add_ps(_mm256_add_ps(Avx::Square(LoadAtEdge<2>(src)), Avx::Square(LoadAtEdge<1>(src))),
+                _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src)), _mm256_add_ps(Avx::Square(_mm256_loadu_ps(src - 1)), Avx::Square(_mm256_loadu_ps(src - 2)))));
+        }
+
+        template <bool align> void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
+        {
             __m256 k0 = _mm256_set1_ps(k[0]);
             __m256 k1 = _mm256_set1_ps(k[1]);
             __m256 k2 = _mm256_set1_ps(k[2]);
             Avx2::Pow pow;
-            for (size_t i = 0; i < count; ++i)
+            if (trans)
             {
-                const float * pos = (i < count - half) ? src + half * size : zero.data;
-                const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
-                size_t j = 0;
-                for (; j < aligned; j += F)
+                if (half != 2 || count < F + half)
                 {
-                    __m256 _pos = Avx::Load<align>(pos + j);
-                    __m256 _neg = Avx::Load<align>(neg + j);
-                    __m256 _sum = Avx::Load<true>(sum.data + j);
-                    _sum = _mm256_fmadd_ps(_pos, _pos, _mm256_fnmadd_ps(_neg, _neg, _sum));
-                    __m256 _src = Avx::Load<align>(src + j);
-                    Avx::Store<true>(sum.data + j, _sum);
-                    Avx::Store<align>(dst + j, _mm256_mul_ps(_src, pow(_mm256_fmadd_ps(k1, _sum, k0), k2)));
+                    Sse2::SynetLrnLayerCrossChannels(src, half, count, size, k, dst, trans);
+                    return;
                 }
-                for (; j < size; ++j)
+                size_t aligned = AlignLo(count - half, F);
+                for (size_t j = 0; j < size; ++j)
                 {
-                    sum[j] += Simd::Square(pos[j]);
-                    sum[j] -= Simd::Square(neg[j]);
-                    dst[j] = src[j] * Base::Pow(k[0] + k[1] * sum[j], k[2]);
+                    Avx::Store<align>(dst + 0, _mm256_mul_ps(Avx::Load<align>(src + 0), pow(_mm256_fmadd_ps(k1, NoseSquareSum(src + 0), k0), k2)));
+                    for (size_t i = F; i < aligned; i += F)
+                        Avx::Store<align>(dst + i, _mm256_mul_ps(Avx::Load<align>(src + i), pow(_mm256_fmadd_ps(k1, BodySquareSum(src + i), k0), k2)));
+                    if (aligned != count - half)
+                    {
+                        size_t i = count - half - F;
+                        Avx::Store<false>(dst + i, _mm256_mul_ps(Avx::Load<false>(src + i), pow(_mm256_fmadd_ps(k1, BodySquareSum(src + i), k0), k2)));
+                    }
+                    size_t i = count - F;
+                    Avx::Store<false>(dst + i, _mm256_mul_ps(Avx::Load<false>(src + i), pow(_mm256_fmadd_ps(k1, TailSquareSum(src + i), k0), k2)));
+                    src += count;
+                    dst += count;
                 }
-                src += size;
-                dst += size;
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, F);
+                Array32f sum(size, true), zero(size, true);
+
+                for (size_t i = 0; i < half; ++i)
+                {
+                    const float * pos = src + i * size;
+                    size_t j = 0;
+                    for (; j < aligned; j += F)
+                    {
+                        __m256 _pos = Avx::Load<align>(pos + j);
+                        Avx::Store<true>(sum.data + j, _mm256_fmadd_ps(_pos, _pos, Avx::Load<true>(sum.data + j)));
+                    }
+                    for (; j < size; ++j)
+                        sum[j] += Simd::Square(pos[j]);
+                }
+
+                for (size_t i = 0; i < count; ++i)
+                {
+                    const float * pos = (i < count - half) ? src + half * size : zero.data;
+                    const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
+                    size_t j = 0;
+                    for (; j < aligned; j += F)
+                    {
+                        __m256 _pos = Avx::Load<align>(pos + j);
+                        __m256 _neg = Avx::Load<align>(neg + j);
+                        __m256 _sum = Avx::Load<true>(sum.data + j);
+                        _sum = _mm256_fmadd_ps(_pos, _pos, _mm256_fnmadd_ps(_neg, _neg, _sum));
+                        __m256 _src = Avx::Load<align>(src + j);
+                        Avx::Store<true>(sum.data + j, _sum);
+                        Avx::Store<align>(dst + j, _mm256_mul_ps(_src, pow(_mm256_fmadd_ps(k1, _sum, k0), k2)));
+                    }
+                    for (; j < size; ++j)
+                    {
+                        sum[j] += Simd::Square(pos[j]);
+                        sum[j] -= Simd::Square(neg[j]);
+                        dst[j] = src[j] * Base::Pow(k[0] + k[1] * sum[j], k[2]);
+                    }
+                    src += size;
+                    dst += size;
+                }
             }
         }
 
-        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst)
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
         {
-            if (Aligned(src) && Aligned(dst) && Aligned(size))
-                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst);
+            if (Aligned(src) && Aligned(dst) && (trans ? Aligned(count) : Aligned(size)))
+                SynetLrnLayerCrossChannels<true>(src, half, count, size, k, dst, trans);
             else
-                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst);
+                SynetLrnLayerCrossChannels<false>(src, half, count, size, k, dst, trans);
         }
 
         void SynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
