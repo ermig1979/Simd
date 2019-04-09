@@ -36,7 +36,7 @@ namespace Simd
 
         NhwcGemm CreateNhwcGemm(size_t M, size_t N, size_t K)
         {
-            const size_t L1 = 1*32 * 1024;
+            const size_t L1 = 2*32 * 1024;
             const size_t L2 = 1024 * 1024;
             const size_t L3 = 2 * 1280 * 1024;
             NhwcGemm::Main kernelMM, kernelMT;
@@ -82,7 +82,17 @@ namespace Simd
                 kernelMT = tail > DF ? Avx512f::GemmKernel8x48nn : (tail > F ? Avx512f::GemmKernel8x32nn : Avx512f::GemmKernel8x16nn);
                 kernelTM = GemmKernelMx48nn;
                 kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
-            }            
+            }
+            else if (N <= 16)
+            {
+                microM = 14;
+                microN = 16;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel14x16nn;
+                kernelMT = Avx512f::GemmKernel14x16nn;
+                kernelTM = Avx512f::GetGemmTail(M, microN);
+                kernelTT = Avx512f::GetGemmTail(M, tail);
+            }
             else
             {
                 microM = 14;

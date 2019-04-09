@@ -1179,20 +1179,23 @@ namespace Simd
 
         void GemmKernel14x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            __m512 c00 = _mm512_setzero_ps();
-            __m512 c10 = _mm512_setzero_ps();
-            __m512 c20 = _mm512_setzero_ps();
-            __m512 c30 = _mm512_setzero_ps();
-            __m512 c40 = _mm512_setzero_ps();
-            __m512 c50 = _mm512_setzero_ps();
-            __m512 c60 = _mm512_setzero_ps();
-            __m512 c70 = _mm512_setzero_ps();
-            __m512 c80 = _mm512_setzero_ps();
-            __m512 c90 = _mm512_setzero_ps();
-            __m512 cA0 = _mm512_setzero_ps();
-            __m512 cB0 = _mm512_setzero_ps();
-            __m512 cC0 = _mm512_setzero_ps();
-            __m512 cD0 = _mm512_setzero_ps();
+            SIMD_PERF_BEG(Simd::ToStr(K));
+
+            __m512 c0 = _mm512_setzero_ps();
+            __m512 c1 = _mm512_setzero_ps();
+            __m512 c2 = _mm512_setzero_ps();
+            __m512 c3 = _mm512_setzero_ps();
+            __m512 c4 = _mm512_setzero_ps();
+            __m512 c5 = _mm512_setzero_ps();
+            __m512 c6 = _mm512_setzero_ps();
+            __m512 c7 = _mm512_setzero_ps();
+            __m512 c8 = _mm512_setzero_ps();
+            __m512 c9 = _mm512_setzero_ps();
+            __m512 cA = _mm512_setzero_ps();
+            __m512 cB = _mm512_setzero_ps();
+            __m512 cC = _mm512_setzero_ps();
+            __m512 cD = _mm512_setzero_ps();
+            const float * A0 = A, * A7 = A + 7*lda;
             const size_t o0 = lda * 0;
             const size_t o1 = lda * 1;
             const size_t o2 = lda * 2;
@@ -1200,77 +1203,71 @@ namespace Simd
             const size_t o4 = lda * 4;
             const size_t o5 = lda * 5;
             const size_t o6 = lda * 6;
-            const size_t o7 = lda * 7;
-            const size_t o8 = lda * 8;
-            const size_t o9 = lda * 9;
-            const size_t oA = lda * 10;
-            const size_t oB = lda * 11;
-            const size_t oC = lda * 12;
-            const size_t oD = lda * 13;
             const size_t sa = lda == 1 ? 14 : 1;
             __m512 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
                 b0 = _mm512_loadu_ps(B + 0 * F);
-                a0 = _mm512_set1_ps(A[o0]);
-                c00 = _mm512_fmadd_ps(a0, b0, c00);
-                a0 = _mm512_set1_ps(A[o1]);
-                c10 = _mm512_fmadd_ps(a0, b0, c10);
-                a0 = _mm512_set1_ps(A[o2]);
-                c20 = _mm512_fmadd_ps(a0, b0, c20);
-                a0 = _mm512_set1_ps(A[o3]);
-                c30 = _mm512_fmadd_ps(a0, b0, c30);
-                a0 = _mm512_set1_ps(A[o4]);
-                c40 = _mm512_fmadd_ps(a0, b0, c40);
-                a0 = _mm512_set1_ps(A[o5]);
-                c50 = _mm512_fmadd_ps(a0, b0, c50);
-                a0 = _mm512_set1_ps(A[o6]);
-                c60 = _mm512_fmadd_ps(a0, b0, c60);
-                a0 = _mm512_set1_ps(A[o7]);
-                c70 = _mm512_fmadd_ps(a0, b0, c70);
-                a0 = _mm512_set1_ps(A[o8]);
-                c80 = _mm512_fmadd_ps(a0, b0, c80);
-                a0 = _mm512_set1_ps(A[o9]);
-                c90 = _mm512_fmadd_ps(a0, b0, c90);
-                a0 = _mm512_set1_ps(A[oA]);
-                cA0 = _mm512_fmadd_ps(a0, b0, cA0);
-                a0 = _mm512_set1_ps(A[oB]);
-                cB0 = _mm512_fmadd_ps(a0, b0, cB0);
-                a0 = _mm512_set1_ps(A[oC]);
-                cC0 = _mm512_fmadd_ps(a0, b0, cC0);
-                a0 = _mm512_set1_ps(A[oD]);
-                cD0 = _mm512_fmadd_ps(a0, b0, cD0);
+                a0 = _mm512_set1_ps(A0[o0]);
+                c0 = _mm512_fmadd_ps(a0, b0, c0);
+                a0 = _mm512_set1_ps(A0[o1]);
+                c1 = _mm512_fmadd_ps(a0, b0, c1);
+                a0 = _mm512_set1_ps(A0[o2]);
+                c2 = _mm512_fmadd_ps(a0, b0, c2);
+                a0 = _mm512_set1_ps(A0[o3]);
+                c3 = _mm512_fmadd_ps(a0, b0, c3);
+                a0 = _mm512_set1_ps(A0[o4]);
+                c4 = _mm512_fmadd_ps(a0, b0, c4);
+                a0 = _mm512_set1_ps(A0[o5]);
+                c5 = _mm512_fmadd_ps(a0, b0, c5);
+                a0 = _mm512_set1_ps(A0[o6]);
+                c6 = _mm512_fmadd_ps(a0, b0, c6);
+                a0 = _mm512_set1_ps(A7[o0]);
+                c7 = _mm512_fmadd_ps(a0, b0, c7);
+                a0 = _mm512_set1_ps(A7[o1]);
+                c8 = _mm512_fmadd_ps(a0, b0, c8);
+                a0 = _mm512_set1_ps(A7[o2]);
+                c9 = _mm512_fmadd_ps(a0, b0, c9);
+                a0 = _mm512_set1_ps(A7[o3]);
+                cA = _mm512_fmadd_ps(a0, b0, cA);
+                a0 = _mm512_set1_ps(A7[o4]);
+                cB = _mm512_fmadd_ps(a0, b0, cB);
+                a0 = _mm512_set1_ps(A7[o5]);
+                cC = _mm512_fmadd_ps(a0, b0, cC);
+                a0 = _mm512_set1_ps(A7[o6]);
+                cD = _mm512_fmadd_ps(a0, b0, cD);
                 B += ldb;
-                A += sa;
+                A0 += sa;
+                A7 += sa;
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
-            AddProduct(C + 0 * F, _alpha, c00, mask);
+            AddProduct(C, _alpha, c0, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c10, mask);
+            AddProduct(C, _alpha, c1, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c20, mask);
+            AddProduct(C, _alpha, c2, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c30, mask);
+            AddProduct(C, _alpha, c3, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c40, mask);
+            AddProduct(C, _alpha, c4, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c50, mask);
+            AddProduct(C, _alpha, c5, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c60, mask);
+            AddProduct(C, _alpha, c6, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c70, mask);
+            AddProduct(C, _alpha, c7, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c80, mask);
+            AddProduct(C, _alpha, c8, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, c90, mask);
+            AddProduct(C, _alpha, c9, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cA0, mask);
+            AddProduct(C, _alpha, cA, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cB0, mask);
+            AddProduct(C, _alpha, cB, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cC0, mask);
+            AddProduct(C, _alpha, cC, mask);
             C += ldc;
-            AddProduct(C + 0 * F, _alpha, cD0, mask);
+            AddProduct(C, _alpha, cD, mask);
         }
 
         void GemmKernelMx48nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
@@ -1357,6 +1354,8 @@ namespace Simd
 
         void GemmKernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
+            SIMD_PERF_BEG(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K));
+
 #if SIMD_ZMM_COUNT == 32
             __m512 c[14];
             size_t o[14];
@@ -1388,6 +1387,112 @@ namespace Simd
             __m512 _alpha = _mm512_set1_ps(alpha);
             for (size_t i = 0; i < M; ++i)
                 AddProduct(C + i * ldc, _alpha, c[i], mask);
+        }
+
+        template<int M> void GemmKernelMx16nnT(size_t, size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
+        {
+            SIMD_PERF_BEG(Simd::ToStr(K));
+
+            __m512 c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, cA, cB, cC, cD, b0;
+            if (M > 0x0) c0 = _mm512_setzero_ps();
+            if (M > 0x1) c1 = _mm512_setzero_ps();
+            if (M > 0x2) c2 = _mm512_setzero_ps();
+            if (M > 0x3) c3 = _mm512_setzero_ps();
+            if (M > 0x4) c4 = _mm512_setzero_ps();
+            if (M > 0x5) c5 = _mm512_setzero_ps();
+            if (M > 0x6) c6 = _mm512_setzero_ps();
+            if (M > 0x7) c7 = _mm512_setzero_ps();
+            if (M > 0x8) c8 = _mm512_setzero_ps();
+            if (M > 0x9) c9 = _mm512_setzero_ps();
+            if (M > 0xA) cA = _mm512_setzero_ps();
+            if (M > 0xB) cB = _mm512_setzero_ps();
+            if (M > 0xC) cC = _mm512_setzero_ps();
+            if (M > 0xD) cD = _mm512_setzero_ps();
+            const float * A0 = A, *A7 = A + 7 * lda;
+            const size_t o0 = lda * 0;
+            const size_t o1 = lda * 1;
+            const size_t o2 = lda * 2;
+            const size_t o3 = lda * 3;
+            const size_t o4 = lda * 4;
+            const size_t o5 = lda * 5;
+            const size_t o6 = lda * 6;
+            const size_t sa = lda == 1 ? M : 1;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = _mm512_loadu_ps(B + 0 * F);
+                if (M > 0x0) c0 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o0]), b0, c0);
+                if (M > 0x1) c1 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o1]), b0, c1);
+                if (M > 0x2) c2 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o2]), b0, c2);
+                if (M > 0x3) c3 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o3]), b0, c3);
+                if (M > 0x4) c4 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o4]), b0, c4);
+                if (M > 0x5) c5 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o5]), b0, c5);
+                if (M > 0x6) c6 = _mm512_fmadd_ps(_mm512_set1_ps(A0[o6]), b0, c6);
+                if (M > 0x7) c7 = _mm512_fmadd_ps(_mm512_set1_ps(A7[o0]), b0, c7);
+                if (M > 0x8) c8 = _mm512_fmadd_ps(_mm512_set1_ps(A7[o1]), b0, c8);
+                if (M > 0x9) c9 = _mm512_fmadd_ps(_mm512_set1_ps(A7[o2]), b0, c9);
+                if (M > 0xA) cA = _mm512_fmadd_ps(_mm512_set1_ps(A7[o3]), b0, cA);
+                if (M > 0xB) cB = _mm512_fmadd_ps(_mm512_set1_ps(A7[o4]), b0, cB);
+                if (M > 0xC) cC = _mm512_fmadd_ps(_mm512_set1_ps(A7[o5]), b0, cC);
+                if (M > 0xD) cD = _mm512_fmadd_ps(_mm512_set1_ps(A7[o6]), b0, cD);
+                B += ldb;
+                A0 += sa;
+                A7 += sa;
+            }
+            __m512 _alpha = _mm512_set1_ps(alpha);
+            if (M > 0x0) AddProduct(C, _alpha, c0, mask), C += ldc;
+            if (M > 0x1) AddProduct(C, _alpha, c1, mask), C += ldc;
+            if (M > 0x2) AddProduct(C, _alpha, c2, mask), C += ldc;
+            if (M > 0x3) AddProduct(C, _alpha, c3, mask), C += ldc;
+            if (M > 0x4) AddProduct(C, _alpha, c4, mask), C += ldc;
+            if (M > 0x5) AddProduct(C, _alpha, c5, mask), C += ldc;
+            if (M > 0x6) AddProduct(C, _alpha, c6, mask), C += ldc;
+            if (M > 0x7) AddProduct(C, _alpha, c7, mask), C += ldc;
+            if (M > 0x8) AddProduct(C, _alpha, c8, mask), C += ldc;
+            if (M > 0x9) AddProduct(C, _alpha, c9, mask), C += ldc;
+            if (M > 0xA) AddProduct(C, _alpha, cA, mask), C += ldc;
+            if (M > 0xB) AddProduct(C, _alpha, cB, mask), C += ldc;
+            if (M > 0xC) AddProduct(C, _alpha, cC, mask), C += ldc;
+            if (M > 0xD) AddProduct(C, _alpha, cD, mask), C += ldc;
+        }
+
+        GemmTail GetGemmTail(size_t M, size_t N)
+        {
+            if (N <= 16)
+            {
+                switch (M)
+                {
+                case 0: return GemmKernelMx16nnT<0>;
+                case 1: return GemmKernelMx16nnT<1>;
+                case 2: return GemmKernelMx16nnT<2>;
+                case 3: return GemmKernelMx16nnT<3>;
+                case 4: return GemmKernelMx16nnT<4>;
+                case 5: return GemmKernelMx16nnT<5>;
+                case 6: return GemmKernelMx16nnT<6>;
+                case 7: return GemmKernelMx16nnT<7>;
+                case 8: return GemmKernelMx16nnT<8>;
+                case 9: return GemmKernelMx16nnT<9>;
+                case 10: return GemmKernelMx16nnT<10>;
+                case 11: return GemmKernelMx16nnT<11>;
+                case 12: return GemmKernelMx16nnT<12>;
+                case 13: return GemmKernelMx16nnT<13>;
+                case 14: return GemmKernelMx16nnT<14>;
+                default: 
+                    return GemmKernelMx16nn;
+                }
+            }
+            else if (N <= 32)
+            {
+                return GemmKernelMx32nn;
+            }
+            else if (N <= 48)
+            {
+                return GemmKernelMx48nn;
+            }
+            else
+            {
+                assert(0);
+                return 0;
+            }
         }
 
         void GemmPackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)

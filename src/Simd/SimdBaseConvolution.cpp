@@ -592,7 +592,7 @@ namespace Simd
         
         void ConvolutionWinograd::Forward(const float * src, float * buf, float * dst)
         {
-            SIMD_PERF_BEG(_param.Info());
+            //SIMD_PERF_BEG(_param.Info());
 
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
