@@ -25,6 +25,12 @@
 
 namespace Test
 {
+    void FillSequence(View & view)
+    {
+        for (size_t i = 0, n = view.DataSize(); i < n; ++i)
+            view.data[i] = uint8_t(i);
+    }
+
     uint8_t g_rand[UINT16_MAX];
     bool InitRand()
     {

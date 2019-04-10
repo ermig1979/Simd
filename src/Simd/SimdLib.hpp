@@ -861,6 +861,26 @@ namespace Simd
 
     /*! @ingroup bgr_conversion
 
+        \fn void BgrToRgb(const View<A> & bgr, View<A> & rgb)
+
+        \short Converts 24-bit BGR image to 24-bit RGB image (also it performs backward conversion).
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdBgrToRgb.
+
+        \param [in] bgr - an input 24-bit BGR image.
+        \param [out] rgb - an output 24-bit RGB image.
+    */
+    template<template<class> class A> SIMD_INLINE void BgrToRgb(const View<A> & bgr, View<A> & rgb)
+    {
+        assert(Compatible(bgr, rgb) && bgr.format == View<A>::Bgr24);
+
+        SimdBgrToRgb(bgr.data, bgr.stride, bgr.width, bgr.height, rgb.data, rgb.stride);
+    }
+
+    /*! @ingroup bgr_conversion
+
         \fn void BgrToYuv420p(const View<A>& bgr, View<A>& y, View<A>& u, View<A>& v)
 
         \short Converts 24-bit BGR image to YUV420P.

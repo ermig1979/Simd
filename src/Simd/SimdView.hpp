@@ -105,6 +105,8 @@ namespace Simd
             Hsv24,
             /*! A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
             Hsl24,
+            /*! A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
+            Rgb24,
         };
 
         /*!
@@ -1000,6 +1002,7 @@ namespace Simd
         case BayerBggr: return 1;
         case Hsv24:     return 3;
         case Hsl24:     return 3;
+        case Rgb24:     return 3;
         default: assert(0); return 0;
         }
     }
@@ -1029,6 +1032,7 @@ namespace Simd
         case BayerBggr: return 1;
         case Hsv24:     return 1;
         case Hsl24:     return 1;
+        case Rgb24:     return 1;
         default: assert(0); return 0;
         }
     }
@@ -1058,6 +1062,7 @@ namespace Simd
         case BayerBggr: return 1;
         case Hsv24:     return 3;
         case Hsl24:     return 3;
+        case Rgb24:     return 3;
         default: assert(0); return 0;
         }
     }

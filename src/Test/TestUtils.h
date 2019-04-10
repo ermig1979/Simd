@@ -28,6 +28,8 @@
 
 namespace Test
 {
+    void FillSequence(View & view);
+
     SIMD_INLINE int Random(int range)
     {
         return ((::rand()&INT16_MAX)*range) / INT16_MAX;

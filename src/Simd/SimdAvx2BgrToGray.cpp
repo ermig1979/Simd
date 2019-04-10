@@ -85,5 +85,5 @@ namespace Simd
                 BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
         }
     }
-#endif//SIMD_Avx2_ENABLE
+#endif//SIMD_AVX2_ENABLE
 }

@@ -189,6 +189,8 @@ typedef enum
     SimdPixelFormatHsv24,
     /*! A 24-bit (3 8-bit channels) HSL (Hue, Saturation, Lightness) pixel format. */
     SimdPixelFormatHsl24,
+    /*! A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
+    SimdPixelFormatRgb24,
 } SimdPixelFormatType;
 
 /*! @ingroup c_types
@@ -1224,6 +1226,25 @@ extern "C"
         \param [in] hsvStride - a row size of the hsv image.
     */
     SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * hsv, size_t hsvStride);
+
+    /*! @ingroup bgr_conversion
+
+        \fn void SimdBgrToRgb(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride);
+
+        \short Converts 24-bit BGR image to 24-bit RGB image (also it performs backward conversion).
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgrToRgb(const View<A> & bgr, View<A> & rgb).
+
+        \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+        \param [in] bgrStride - a row size of the bgr image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] rgb - a pointer to pixels data of output 32-bit BGRA image.
+        \param [in] rgbStride - a row size of the bgra image.
+    */
+    SIMD_API void SimdBgrToRgb(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride);
 
     /*! @ingroup bgr_conversion
 
