@@ -60,6 +60,20 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
         };
 
+        class ResizerByteArea : Resizer
+        {
+            size_t _sx, _sy, _dx, _dy, _cn, _rs;
+            Array32i _ax, _ix, _ay, _iy;
+
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
+        public:
+            ResizerByteArea(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels);
+
+            static void EstimateParams(size_t srcSize, size_t dstSize, int32_t * alpha, int32_t * index);
+
+            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) const;
+        };
+
         class ResizerFloatBilinear : Resizer
         {
         protected:

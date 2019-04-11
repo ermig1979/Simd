@@ -29,6 +29,7 @@
 namespace Test
 {
     void FillSequence(View & view);
+    void FillPicture(View & view, uint64_t flag = 0x000000000000000F);
 
     SIMD_INLINE int Random(int range)
     {

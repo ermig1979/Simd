@@ -4545,6 +4545,8 @@ extern "C"
         SimdResizeMethodBilinear,
         /*! caffe::interp compatible method. */
         SimdResizeMethodCaffeInterp,
+        /*! Area method. */
+        SimdResizeMethodArea,
     } SimdResizeMethodType;
 
     /*! @ingroup resizing

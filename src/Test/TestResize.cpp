@@ -143,7 +143,9 @@ namespace Test
     {
         switch (method)
         {
-        case SimdResizeMethodBilinear:  return "B";
+        case SimdResizeMethodBilinear: return "B";
+        case SimdResizeMethodCaffeInterp: return "C";
+        case SimdResizeMethodArea: return "A";
         default: assert(0); return "";
         }
     }
@@ -179,7 +181,11 @@ namespace Test
 
             void Call(const View & src, View & dst, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method) const
             {
-                void * resizer = func(src.width / channels, src.height, dst.width / channels, dst.height, channels, type, method);
+                void * resizer = NULL;
+                if(src.format == View::Float)
+                    resizer = func(src.width / channels, src.height, dst.width / channels, dst.height, channels, type, method);
+                else
+                    resizer = func(src.width, src.height, dst.width, dst.height, channels, type, method);
                 {
                     TEST_PERFORMANCE_TEST(description);
                     SimdResizerRun(resizer, src.data, src.stride, dst.data, dst.stride);
@@ -191,6 +197,8 @@ namespace Test
 
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
+
+#define TEST_RESIZE_REAL_IMAGE
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, int width, int height, double k, FuncRS f1, FuncRS f2)
     {
@@ -204,18 +212,36 @@ namespace Test
 
         View::Format format;
         if (type == SimdResizeChannelFloat)
+        {
             format = View::Float;
+            width *= channels;
+        }
         else if (type == SimdResizeChannelByte)
-            format = View::Gray8;
+        {
+            switch (channels)
+            {
+            case 1: format = View::Gray8; break;
+            case 2: format = View::Uv16; break;
+            case 3: format = View::Bgr24; break;
+            case 4: format = View::Bgra32; break;
+            default:
+                assert(0);
+            }
+        }
         else
             assert(0);
-        width *= channels;
 
         View s(size_t(width*k), size_t(height*k), format, NULL, TEST_ALIGN(size_t(k*width)));
         if(format == View::Float)
             FillRandom32f(s);
         else
+        {
+#ifdef TEST_RESIZE_REAL_IMAGE
+            FillPicture(s);
+#else
             FillRandom(s);
+#endif
+        }
 
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
@@ -229,6 +255,14 @@ namespace Test
         else
             result = result && Compare(d1, d2, 0, true, 64);
 
+#ifdef TEST_RESIZE_REAL_IMAGE
+        if (format == View::Bgr24)
+        {
+            s.Save("src.ppm");
+            d1.Save("dst.ppm");
+        }
+#endif
+
         return result;
     }
 
@@ -236,9 +270,13 @@ namespace Test
     {
         bool result = true;
 
+#ifdef TEST_RESIZE_REAL_IMAGE
+        result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
+#else
         result = result && ResizerAutoTest(method, type, channels, W, H, 0.9, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, W + O, H - O, 1.3, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, W - O, H + O, 0.7, f1, f2);
+#endif
 
         return result;
     }
@@ -246,7 +284,7 @@ namespace Test
     bool ResizerAutoTest(const FuncRS & f1, const FuncRS & f2)
     {
         bool result = true;
-
+#if 0
         for (SimdResizeMethodType method = SimdResizeMethodBilinear; method <= SimdResizeMethodBilinear; method = SimdResizeMethodType(method + 1))
         {
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
@@ -258,7 +296,12 @@ namespace Test
             result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 3, f1, f2);
 #endif
         }
-
+#else
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 1, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 2, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 3, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 4, f1, f2);
+#endif
         return result;
     }
 

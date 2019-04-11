@@ -22,6 +22,8 @@
 * SOFTWARE.
 */
 #include "Test/TestUtils.h"
+#include "Simd/SimdDrawing.hpp"
+#include "Simd/SimdFont.hpp"
 
 namespace Test
 {
@@ -29,6 +31,57 @@ namespace Test
     {
         for (size_t i = 0, n = view.DataSize(); i < n; ++i)
             view.data[i] = uint8_t(i);
+    }
+
+    template <size_t N> struct Color
+    {
+        uint8_t val[N];
+
+        Color(uint8_t v = 0)
+        {
+            for (size_t i = 0; i < N; ++i)
+                val[i] = v;
+        }
+    };
+
+    template <size_t N> Color<N> RandomColor(uint8_t lo = 0, uint8_t hi = 255)
+    {
+        Color<N> color;
+        for (size_t i = 0; i < N; ++i)
+            color.val[i] = lo + Random(hi - lo + 1);
+        return color;
+    }
+
+    template<size_t N> void FillPicture(View & view, uint64_t flag)
+    {
+        typedef Test::Color<N> Color;
+        if (flag & 1)
+        {
+            Simd::Fill(view, 15);
+        }
+        if (flag & 2)
+        {
+            size_t d = view.height / 20;
+            Rect rect(d, d, view.width - d, view.height - d);
+            Simd::DrawRectangle(view, rect, RandomColor<N>(), d/2);
+        }
+        if (flag & 4)
+        {
+            size_t size = Simd::Min<size_t>(view.height / 2, 256);
+            Simd::Font font(size);
+            font.Draw(view, "A1", View::MiddleCenter, RandomColor<N>(128, 255));
+        }
+    }
+
+    void FillPicture(View & view, uint64_t flag)
+    {
+        switch (view.PixelSize())
+        {
+        case 1: FillPicture<1>(view, flag); break;
+        case 2: FillPicture<2>(view, flag); break;
+        case 3: FillPicture<3>(view, flag); break;
+        case 4: FillPicture<4>(view, flag); break;
+        }
     }
 
     uint8_t g_rand[UINT16_MAX];

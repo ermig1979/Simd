@@ -69,7 +69,7 @@ namespace Simd
             if (height == _currentSize.y)
                 return true;
 
-            if (height < 4u || height > (size_t)_originalSize.y)
+            if (height < 4u || height > (size_t)_originalSize.y*4)
                 return false;
 
             _currentSize.y = height;
