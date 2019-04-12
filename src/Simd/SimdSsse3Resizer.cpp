@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -48,7 +48,7 @@ namespace Simd
             if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
                 _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
-            _ax.Resize(_param.dstW * _param.channels * 2);
+            _ax.Resize(_param.dstW * _param.channels * 2, false, _param.align);
             uint8_t * alphas = _ax.data;
             if (_blocks)
             {
@@ -122,9 +122,9 @@ namespace Simd
                     alphas += 2 * _param.channels;
                 }
             }
-            size_t size = AlignHi(_param.dstW, A)*_param.channels * 2;
-            _bx[0].Resize(size);
-            _bx[1].Resize(size);
+            size_t size = AlignHi(_param.dstW, _param.align)*_param.channels * 2;
+            _bx[0].Resize(size, false, _param.align);
+            _bx[1].Resize(size, false, _param.align);
         }
 
         template <size_t N> void ResizerByteBilinearInterpolateX(const __m128i * alpha, __m128i * buffer);

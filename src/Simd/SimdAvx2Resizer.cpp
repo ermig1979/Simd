@@ -30,6 +30,336 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE 
     namespace Avx2
     {
+        ResizerByteBilinear::ResizerByteBilinear(const ResParam & param)
+            : Ssse3::ResizerByteBilinear(param)
+        {
+        }
+
+        void ResizerByteBilinear::EstimateParams()
+        {
+            if (_ax.data)
+                return;
+            if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
+                _blocks = BlockCountMax(A);
+            float scale = (float)_param.srcW / _param.dstW;
+            _ax.Resize(_param.dstW * _param.channels * 2, false, _param.align);
+            uint8_t * alphas = _ax.data;
+            if (_blocks)
+            {
+                _ixg.Resize(_blocks);
+                int block = 0;
+                _ixg[0].src = 0;
+                _ixg[0].dst = 0;
+                for (int dstIndex = 0; dstIndex < _param.dstW; ++dstIndex)
+                {
+                    float alpha = (float)((dstIndex + 0.5)*scale - 0.5);
+                    int srcIndex = (int)::floor(alpha);
+                    alpha -= srcIndex;
+
+                    if (srcIndex < 0)
+                    {
+                        srcIndex = 0;
+                        alpha = 0;
+                    }
+
+                    if (srcIndex > _param.srcW - 2)
+                    {
+                        srcIndex = (int)_param.srcW - 2;
+                        alpha = 1;
+                    }
+
+                    int dst = 2 * dstIndex - _ixg[block].dst;
+                    int src = srcIndex - _ixg[block].src;
+                    if (src >= A - 1 || dst >= A)
+                    {
+                        block++;
+                        _ixg[block].src = Simd::Min(srcIndex, int(_param.srcW - A));
+                        _ixg[block].dst = 2 * dstIndex;
+                        dst = 0;
+                        src = srcIndex - _ixg[block].src;
+                    }
+                    _ixg[block].shuffle[dst] = src;
+                    _ixg[block].shuffle[dst + 1] = src + 1;
+
+                    alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
+                    alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
+                    alphas += 2;
+                }
+                _blocks = block + 1;
+            }
+            else
+            {
+                _ix.Resize(_param.dstW);
+                for (size_t i = 0; i < _param.dstW; ++i)
+                {
+                    float alpha = (float)((i + 0.5)*scale - 0.5);
+                    ptrdiff_t index = (ptrdiff_t)::floor(alpha);
+                    alpha -= index;
+
+                    if (index < 0)
+                    {
+                        index = 0;
+                        alpha = 0;
+                    }
+
+                    if (index >(ptrdiff_t)_param.srcW - 2)
+                    {
+                        index = _param.srcW - 2;
+                        alpha = 1;
+                    }
+
+                    _ix[i] = (int)index;
+                    alphas[1] = (uint8_t)(alpha * Base::FRACTION_RANGE + 0.5);
+                    alphas[0] = (uint8_t)(Base::FRACTION_RANGE - alphas[1]);
+                    for (size_t channel = 1; channel < _param.channels; channel++)
+                        ((uint16_t*)alphas)[channel] = *(uint16_t*)alphas;
+                    alphas += 2 * _param.channels;
+                }
+            }
+            size_t size = AlignHi(_param.dstW, _param.align)*_param.channels * 2;
+            _bx[0].Resize(size, false, _param.align);
+            _bx[1].Resize(size, false, _param.align);
+        }
+
+        template <size_t channelCount> void ResizerByteBilinearInterpolateX(const __m256i * alpha, __m256i * buffer);
+
+        template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<1>(const __m256i * alpha, __m256i * buffer)
+        {
+#ifdef SIMD_MADDUBS_ERROR
+            __m256i _buffer = _mm256_or_si256(K_ZERO, _mm256_load_si256(buffer));
+#else
+            __m256i _buffer = _mm256_load_si256(buffer);
+#endif
+            _mm256_store_si256(buffer, _mm256_maddubs_epi16(_buffer, _mm256_load_si256(alpha)));
+        }
+
+        const __m256i K8_SHUFFLE_X2 = SIMD_MM256_SETR_EPI8(0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+            0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
+
+        SIMD_INLINE void ResizerByteBilinearInterpolateX2(const __m256i * alpha, __m256i * buffer)
+        {
+            __m256i src = _mm256_shuffle_epi8(_mm256_load_si256(buffer), K8_SHUFFLE_X2);
+            _mm256_store_si256(buffer, _mm256_maddubs_epi16(src, _mm256_load_si256(alpha)));
+        }
+
+        template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<2>(const __m256i * alpha, __m256i * buffer)
+        {
+            ResizerByteBilinearInterpolateX2(alpha + 0, buffer + 0);
+            ResizerByteBilinearInterpolateX2(alpha + 1, buffer + 1);
+        }
+
+        const __m256i K8_SHUFFLE_X3_00 = SIMD_MM256_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m256i K8_SHUFFLE_X3_01 = SIMD_MM256_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1,
+            -1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1);
+        const __m256i K8_SHUFFLE_X3_02 = SIMD_MM256_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1);
+
+        const __m256i K8_SHUFFLE_X3_10 = SIMD_MM256_SETR_EPI8(0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m256i K8_SHUFFLE_X3_11 = SIMD_MM256_SETR_EPI8(-1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF,
+            0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, 0xC, 0xF, 0xD, -1);
+        const __m256i K8_SHUFFLE_X3_12 = SIMD_MM256_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0);
+
+        const __m256i K8_SHUFFLE_X3_20 = SIMD_MM256_SETR_EPI8(0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            0xF, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m256i K8_SHUFFLE_X3_21 = SIMD_MM256_SETR_EPI8(-1, 0x1, 0x2, 0x5, 0x3, 0x6, 0x4, 0x7, 0x8, 0xB, 0x9, 0xC, 0xA, 0xD, 0xE, -1,
+            -1, 0x2, 0x0, 0x3, 0x4, 0x7, 0x5, 0x8, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
+        const __m256i K8_SHUFFLE_X3_22 = SIMD_MM256_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<3>(const __m256i * alpha, __m256i * buffer)
+        {
+            __m256i src[3], shuffled;
+            src[0] = _mm256_load_si256(buffer + 0);
+            src[1] = _mm256_load_si256(buffer + 1);
+            src[2] = _mm256_load_si256(buffer + 2);
+
+            shuffled = _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[0], src[0], 0x21), K8_SHUFFLE_X3_00);
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(src[0], K8_SHUFFLE_X3_01));
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[0], src[1], 0x21), K8_SHUFFLE_X3_02));
+            _mm256_store_si256(buffer + 0, _mm256_maddubs_epi16(shuffled, _mm256_load_si256(alpha + 0)));
+
+            shuffled = _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[0], src[1], 0x21), K8_SHUFFLE_X3_10);
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(src[1], K8_SHUFFLE_X3_11));
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[1], src[2], 0x21), K8_SHUFFLE_X3_12));
+            _mm256_store_si256(buffer + 1, _mm256_maddubs_epi16(shuffled, _mm256_load_si256(alpha + 1)));
+
+            shuffled = _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[1], src[2], 0x21), K8_SHUFFLE_X3_20);
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(src[2], K8_SHUFFLE_X3_21));
+            shuffled = _mm256_or_si256(shuffled, _mm256_shuffle_epi8(_mm256_permute2x128_si256(src[2], src[2], 0x21), K8_SHUFFLE_X3_22));
+            _mm256_store_si256(buffer + 2, _mm256_maddubs_epi16(shuffled, _mm256_load_si256(alpha + 2)));
+        }
+
+        const __m256i K8_SHUFFLE_X4 = SIMD_MM256_SETR_EPI8(0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+            0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+
+        SIMD_INLINE void ResizerByteBilinearInterpolateX4(const __m256i * alpha, __m256i * buffer)
+        {
+            __m256i src = _mm256_shuffle_epi8(_mm256_load_si256(buffer), K8_SHUFFLE_X4);
+            _mm256_store_si256(buffer, _mm256_maddubs_epi16(src, _mm256_load_si256(alpha)));
+        }
+
+        template <> SIMD_INLINE void ResizerByteBilinearInterpolateX<4>(const __m256i * alpha, __m256i * buffer)
+        {
+            ResizerByteBilinearInterpolateX4(alpha + 0, buffer + 0);
+            ResizerByteBilinearInterpolateX4(alpha + 1, buffer + 1);
+            ResizerByteBilinearInterpolateX4(alpha + 2, buffer + 2);
+            ResizerByteBilinearInterpolateX4(alpha + 3, buffer + 3);
+        }
+
+        const __m256i K16_FRACTION_ROUND_TERM = SIMD_MM256_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
+
+        template<bool align> SIMD_INLINE __m256i ResizerByteBilinearInterpolateY(const __m256i * pbx0, const __m256i * pbx1, __m256i alpha[2])
+        {
+            __m256i sum = _mm256_add_epi16(_mm256_mullo_epi16(Load<align>(pbx0), alpha[0]), _mm256_mullo_epi16(Load<align>(pbx1), alpha[1]));
+            return _mm256_srli_epi16(_mm256_add_epi16(sum, K16_FRACTION_ROUND_TERM), Base::BILINEAR_SHIFT);
+        }
+
+        template<bool align> SIMD_INLINE void ResizerByteBilinearInterpolateY(const uint8_t * bx0, const uint8_t * bx1, __m256i alpha[2], uint8_t * dst)
+        {
+            __m256i lo = ResizerByteBilinearInterpolateY<align>((__m256i*)bx0 + 0, (__m256i*)bx1 + 0, alpha);
+            __m256i hi = ResizerByteBilinearInterpolateY<align>((__m256i*)bx0 + 1, (__m256i*)bx1 + 1, alpha);
+            Store<false>((__m256i*)dst, PackU16ToU8(lo, hi));
+        }
+
+        template<size_t N> void ResizerByteBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            struct One { uint8_t val[N * 1]; };
+            struct Two { uint8_t val[N * 2]; };
+
+            size_t size = 2 * _param.dstW*N;
+            size_t aligned = AlignHi(size, DA) - DA;
+            const size_t step = A * N;
+            ptrdiff_t previous = -2;
+            __m256i a[2];
+            uint8_t * bx[2] = { _bx[0].data, _bx[1].data };
+
+            for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
+            {
+                a[0] = _mm256_set1_epi16(int16_t(Base::FRACTION_RANGE - _ay[yDst]));
+                a[1] = _mm256_set1_epi16(int16_t(_ay[yDst]));
+
+                ptrdiff_t sy = _iy[yDst];
+                int k = 0;
+
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(bx[0], bx[1]);
+                    k = 1;
+                }
+
+                previous = sy;
+
+                for (; k < 2; k++)
+                {
+                    Two * pb = (Two *)bx[k];
+                    const One * psrc = (const One *)(src + (sy + k)*srcStride);
+                    for (size_t x = 0; x < _param.dstW; x++)
+                        pb[x] = *(Two *)(psrc + _ix[x]);
+
+                    uint8_t * pbx = bx[k];
+                    for (size_t i = 0; i < size; i += step)
+                        ResizerByteBilinearInterpolateX<N>((__m256i*)(_ax.data + i), (__m256i*)(pbx + i));
+                }
+
+                for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
+                    ResizerByteBilinearInterpolateY<true>(bx[0] + ib, bx[1] + ib, a, dst + id);
+                size_t i = size - DA;
+                ResizerByteBilinearInterpolateY<false>(bx[0] + i, bx[1] + i, a, dst + i / 2);
+            }
+        }
+
+        const __m256i K8_SHUFFLE_0 = SIMD_MM256_SETR_EPI8(
+            0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70,
+            0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0);
+
+        const __m256i K8_SHUFFLE_1 = SIMD_MM256_SETR_EPI8(
+            0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0,
+            0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70);
+
+        SIMD_INLINE const __m256i Shuffle(const __m256i & value, const __m256i & shuffle)
+        {
+            return _mm256_or_si256(_mm256_shuffle_epi8(value, _mm256_add_epi8(shuffle, K8_SHUFFLE_0)),
+                _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
+        }
+
+        SIMD_INLINE void ResizerByteBilinear::LoadGrayInterpolated(const uint8_t * src, const ResizerByteBilinear::Idx & index, const uint8_t * alpha, uint8_t * dst)
+        {
+            __m256i _src = _mm256_loadu_si256((__m256i*)(src + index.src));
+            __m256i _shuffle = _mm256_loadu_si256((__m256i*)&index.shuffle);
+            __m256i _alpha = _mm256_loadu_si256((__m256i*)(alpha + index.dst));
+            _mm256_storeu_si256((__m256i*)(dst + index.dst), _mm256_maddubs_epi16(Shuffle(_src, _shuffle), _alpha));
+        }
+
+        void ResizerByteBilinear::RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            size_t bufW = AlignHi(_param.dstW, A) * 2;
+            size_t size = 2 * _param.dstW;
+            size_t aligned = AlignHi(size, DA) - DA;
+            ptrdiff_t previous = -2;
+            __m256i a[2];
+            uint8_t * bx[2] = { _bx[0].data, _bx[1].data };
+
+            for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
+            {
+                a[0] = _mm256_set1_epi16(int16_t(Base::FRACTION_RANGE - _ay[yDst]));
+                a[1] = _mm256_set1_epi16(int16_t(_ay[yDst]));
+
+                ptrdiff_t sy = _iy[yDst];
+                int k = 0;
+
+                if (sy == previous)
+                    k = 2;
+                else if (sy == previous + 1)
+                {
+                    Swap(bx[0], bx[1]);
+                    k = 1;
+                }
+
+                previous = sy;
+
+                for (; k < 2; k++)
+                {
+                    const uint8_t * psrc = src + (sy + k)*srcStride;
+                    uint8_t * pdst = bx[k];
+                    for (size_t i = 0; i < _blocks; ++i)
+                        LoadGrayInterpolated(psrc, _ixg[i], _ax.data, pdst);
+                }
+
+                for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
+                    ResizerByteBilinearInterpolateY<true>(bx[0] + ib, bx[1] + ib, a, dst + id);
+                size_t i = size - DA;
+                ResizerByteBilinearInterpolateY<false>(bx[0] + i, bx[1] + i, a, dst + i / 2);
+            }
+        }
+
+        void ResizerByteBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            assert(_param.dstW >= A);
+
+            EstimateParams();
+            switch (_param.channels)
+            {
+            case 1:
+                if (_blocks)
+                    RunG(src, srcStride, dst, dstStride);
+                else
+                    Run<1>(src, srcStride, dst, dstStride);
+                break;
+            case 2: Run<2>(src, srcStride, dst, dstStride); break;
+            case 3: Run<3>(src, srcStride, dst, dstStride); break;
+            case 4: Run<4>(src, srcStride, dst, dstStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
             : Base::ResizerFloatBilinear(param)
         {
@@ -160,7 +490,9 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m256i));
-            if (type == SimdResizeChannelFloat && (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp))
+            if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear && dstX >= A)
+                return new ResizerByteBilinear(param);
+            else if (type == SimdResizeChannelFloat && (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp))
                 return new ResizerFloatBilinear(param);
             else
                 return Avx::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

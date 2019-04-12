@@ -151,13 +151,13 @@ namespace Simd
         {
         protected:
             Array8u _ax;
+            size_t _blocks;
             struct Idx
             {
                 int32_t src, dst;
                 uint8_t shuffle[A];
             };
             Array<Idx> _ixg;
-            size_t _blocks;
 
             size_t BlockCountMax(size_t align);
             void EstimateParams();
@@ -168,7 +168,6 @@ namespace Simd
             ResizerByteBilinear(const ResParam & param);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        private:
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
@@ -192,6 +191,26 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class ResizerByteBilinear : public Ssse3::ResizerByteBilinear
+        {
+        protected:
+            struct Idx
+            {
+                int32_t src, dst;
+                uint8_t shuffle[A];
+            };
+            Array<Idx> _ixg;
+
+            void EstimateParams();
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            void LoadGrayInterpolated(const uint8_t * src, const ResizerByteBilinear::Idx & index, const uint8_t * alpha, uint8_t * dst);
+            void RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        public:
+            ResizerByteBilinear(const ResParam & param);
+
+            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
