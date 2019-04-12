@@ -321,6 +321,11 @@ namespace Test
             result = result && ResizerAutoTest(FUNC_RS(Simd::Sse2::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
 
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable)
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Ssse3::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif
+
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx::ResizerInit), FUNC_RS(SimdResizerInit));

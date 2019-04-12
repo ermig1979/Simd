@@ -4241,6 +4241,11 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
         return Avx::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
     else
 #endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable)
+        return Ssse3::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if (Sse2::Enable)
         return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

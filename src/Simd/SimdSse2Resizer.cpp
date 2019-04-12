@@ -35,10 +35,14 @@ namespace Simd
         {
         }
 
-        void ResizerByteBilinear::EstimateIndexAlphaX(size_t srcW, size_t dstW, int32_t * index, int16_t * alpha)
+        void ResizerByteBilinear::EstimateParams()
         {
-            float scale = (float)srcW / dstW;
-            for (size_t dx = 0; dx < dstW; ++dx)
+            if (_ax.data)
+                return;
+            _ix.Resize(_param.dstW);
+            _ax.Resize(_param.dstW * 2);
+            float scale = (float)_param.srcW / _param.dstW;
+            for (size_t dx = 0; dx < _param.dstW; ++dx)
             {
                 float a = (float)((dx + 0.5)*scale - 0.5);
                 ptrdiff_t i = (ptrdiff_t)::floor(a);
@@ -48,16 +52,18 @@ namespace Simd
                     i = 0;
                     a = 0;
                 }
-                if (i > (ptrdiff_t)srcW - 2)
+                if (i > (ptrdiff_t)_param.srcW - 2)
                 {
-                    i = srcW - 2;
+                    i = _param.srcW - 2;
                     a = 1;
                 }
-                index[dx] = (int32_t)i;
-                alpha[1] = (int16_t)(a * Base::FRACTION_RANGE + 0.5);
-                alpha[0] = (int16_t)(Base::FRACTION_RANGE - alpha[1]);
-                alpha += 2;
+                _ix.data[dx] = (int32_t)i;
+                _ax.data[2 * dx + 1] = (int16_t)(a * Base::FRACTION_RANGE + 0.5);
+                _ax.data[2 * dx + 0] = (int16_t)(Base::FRACTION_RANGE - _ax.data[2 * dx + 1]);
             }
+            size_t size = AlignHi(_param.dstW, A)*_param.channels * 2;
+            _bx[0].Resize(size);
+            _bx[1].Resize(size);
         }
 
         template <size_t N> void ResizerByteBilinearInterpolateX(const __m128i * alpha, __m128i * buffer);
@@ -161,15 +167,7 @@ namespace Simd
 
         void ResizerByteBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            if (_ax.data == 0)
-            {
-                _ix.Resize(_param.dstW);
-                _ax.Resize(_param.dstW*2);
-                EstimateIndexAlphaX(_param.srcW, _param.dstW, _ix.data, _ax.data);
-                size_t size = AlignHi(_param.dstW, A)*_param.channels * 2;
-                _bx[0].Resize(size);
-                _bx[1].Resize(size);
-            }
+            EstimateParams();
             switch (_param.channels)
             {
             case 1: Run<1>(src, srcStride, dst, dstStride); break;
