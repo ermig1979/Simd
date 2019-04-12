@@ -284,7 +284,7 @@ namespace Test
     bool ResizerAutoTest(const FuncRS & f1, const FuncRS & f2)
     {
         bool result = true;
-#if 0
+
         for (SimdResizeMethodType method = SimdResizeMethodBilinear; method <= SimdResizeMethodBilinear; method = SimdResizeMethodType(method + 1))
         {
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
@@ -296,12 +296,12 @@ namespace Test
             result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 3, f1, f2);
 #endif
         }
-#else
+
         result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 1, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 2, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 3, f1, f2);
         result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 4, f1, f2);
-#endif
+
         return result;
     }
 
@@ -314,6 +314,11 @@ namespace Test
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Sse::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif 
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Sse2::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

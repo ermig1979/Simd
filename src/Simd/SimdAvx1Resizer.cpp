@@ -30,21 +30,20 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE 
     namespace Avx
     {
-        ResizerFloatBilinear::ResizerFloatBilinear(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, bool caffeInterp)
-            : Base::ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, sizeof(__m256), caffeInterp)
+        ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
+            : Base::ResizerFloatBilinear(param)
         {
         }
 
-        void ResizerFloatBilinear::Run(const float * src, size_t srcStride, float * dst, size_t dstStride) const
+        void ResizerFloatBilinear::Run(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
-            Array32f bx[2];
-            bx[0].Resize(_rs);
-            bx[1].Resize(_rs);
-            float * pbx[2] = { bx[0].data, bx[1].data };
+            size_t cn = _param.channels;
+            size_t rs = _param.dstW * cn;
+            float * pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
-            size_t rsa = AlignLo(_rs, Avx::F);
-            size_t rsh = AlignLo(_rs, Sse::F);
-            for (size_t dy = 0; dy < _dy; dy++, dst += dstStride)
+            size_t rsa = AlignLo(rs, Avx::F);
+            size_t rsh = AlignLo(rs, Sse::F);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 float fy1 = _ay[dy];
                 float fy0 = 1.0f - fy1;
@@ -66,7 +65,7 @@ namespace Simd
                     float * pb = pbx[k];
                     const float * ps = src + (sy + k)*srcStride;
                     size_t dx = 0;
-                    if (_cn == 1)
+                    if (cn == 1)
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
                         for (; dx < rsa; dx += Avx::F)
@@ -90,10 +89,10 @@ namespace Simd
                             _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
                         }
                     }
-                    if (_cn == 3 && _rs > 3)
+                    if (cn == 3 && rs > 3)
                     {
                         __m256 _1 = _mm256_set1_ps(1.0f);
-                        size_t rs3 = _rs - 3;
+                        size_t rs3 = rs - 3;
                         size_t rs6 = AlignLoAny(rs3, 6);
                         for (; dx < rs6; dx += 6)
                         {
@@ -112,11 +111,11 @@ namespace Simd
                             _mm_storeu_ps(pb + dx, _mm_add_ps(_mm_mul_ps(fx0, s0), _mm_mul_ps(fx1, s1)));
                         }
                     }
-                    for (; dx < _rs; dx++)
+                    for (; dx < rs; dx++)
                     {
                         int32_t sx = _ix[dx];
                         float fx = _ax[dx];
-                        pb[dx] = ps[sx] * (1.0f - fx) + ps[sx + _cn] * fx;
+                        pb[dx] = ps[sx] * (1.0f - fx) + ps[sx + cn] * fx;
                     }
                 }  
 
@@ -135,7 +134,7 @@ namespace Simd
                     __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _mm256_castps256_ps128(_fy1));
                     _mm_storeu_ps(dst + dx, _mm_add_ps(m0, m1));
                 }
-                for (; dx < _rs; dx++)
+                for (; dx < rs; dx++)
                     dst[dx] = pbx[0][dx] * fy0 + pbx[1][dx] * fy1;
             }
         }
@@ -144,12 +143,11 @@ namespace Simd
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
-            if (type == SimdResizeChannelFloat && method == SimdResizeMethodBilinear)
-                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, false);
-            else if (type == SimdResizeChannelFloat && method == SimdResizeMethodCaffeInterp)
-                return new ResizerFloatBilinear(srcX, srcY, dstX, dstY, channels, true);
+            ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m256));
+            if (type == SimdResizeChannelFloat && (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp))
+                return new ResizerFloatBilinear(param);
             else
-                return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+                return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
     }
 #endif //SIMD_AVX_ENABLE 

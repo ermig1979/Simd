@@ -4241,6 +4241,11 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
         return Avx::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
     else
 #endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable)
+        return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+    else
+#endif
 #ifdef SIMD_SSE_ENABLE
     if (Sse::Enable)
         return Sse::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
@@ -4256,7 +4261,7 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
 
 SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
-    ((const Resizer*)resizer)->Run(src, srcStride, dst, dstStride);
+    ((Resizer*)resizer)->Run(src, srcStride, dst, dstStride);
 }
 
 SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
