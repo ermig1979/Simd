@@ -89,7 +89,7 @@ namespace Simd
             }
             else
             {
-                _ix.Resize(_param.dstW);
+                _ix.Resize(AlignHi(_param.dstW, _param.align/4), true, _param.align);
                 for (size_t i = 0; i < _param.dstW; ++i)
                 {
                     float alpha = (float)((i + 0.5)*scale - 0.5);
@@ -232,9 +232,12 @@ namespace Simd
             size_t size = 2 * _param.dstW*N;
             size_t aligned = AlignHi(size, DA) - DA;
             const size_t step = A * N;
+            size_t dstW = _param.dstW;
             ptrdiff_t previous = -2;
             __m256i a[2];
             uint8_t * bx[2] = { _bx[0].data, _bx[1].data };
+            const uint8_t * ax = _ax.data;
+            const int32_t * ix = _ix.data;
 
             for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
             {
@@ -258,12 +261,12 @@ namespace Simd
                 {
                     Two * pb = (Two *)bx[k];
                     const One * psrc = (const One *)(src + (sy + k)*srcStride);
-                    for (size_t x = 0; x < _param.dstW; x++)
-                        pb[x] = *(Two *)(psrc + _ix[x]);
+                    for (size_t x = 0; x < dstW; x++)
+                        pb[x] = *(Two *)(psrc + ix[x]);
 
                     uint8_t * pbx = bx[k];
                     for (size_t i = 0; i < size; i += step)
-                        ResizerByteBilinearInterpolateX<N>((__m256i*)(_ax.data + i), (__m256i*)(pbx + i));
+                        ResizerByteBilinearInterpolateX<N>((__m256i*)(ax + i), (__m256i*)(pbx + i));
                 }
 
                 for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)
@@ -273,36 +276,17 @@ namespace Simd
             }
         }
 
-        const __m256i K8_SHUFFLE_0 = SIMD_MM256_SETR_EPI8(
-            0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70,
-            0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0);
-
-        const __m256i K8_SHUFFLE_1 = SIMD_MM256_SETR_EPI8(
-            0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0, 0xF0,
-            0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70, 0x70);
-
-        SIMD_INLINE const __m256i Shuffle(const __m256i & value, const __m256i & shuffle)
-        {
-            return _mm256_or_si256(_mm256_shuffle_epi8(value, _mm256_add_epi8(shuffle, K8_SHUFFLE_0)),
-                _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
-        }
-
-        SIMD_INLINE void ResizerByteBilinear::LoadGrayInterpolated(const uint8_t * src, const ResizerByteBilinear::Idx & index, const uint8_t * alpha, uint8_t * dst)
-        {
-            __m256i _src = _mm256_loadu_si256((__m256i*)(src + index.src));
-            __m256i _shuffle = _mm256_loadu_si256((__m256i*)&index.shuffle);
-            __m256i _alpha = _mm256_loadu_si256((__m256i*)(alpha + index.dst));
-            _mm256_storeu_si256((__m256i*)(dst + index.dst), _mm256_maddubs_epi16(Shuffle(_src, _shuffle), _alpha));
-        }
-
         void ResizerByteBilinear::RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t bufW = AlignHi(_param.dstW, A) * 2;
             size_t size = 2 * _param.dstW;
             size_t aligned = AlignHi(size, DA) - DA;
+            size_t blocks = _blocks;
             ptrdiff_t previous = -2;
             __m256i a[2];
             uint8_t * bx[2] = { _bx[0].data, _bx[1].data };
+            const uint8_t * ax = _ax.data;
+            const Idx * ixg = _ixg.data;
 
             for (size_t yDst = 0; yDst < _param.dstH; yDst++, dst += dstStride)
             {
@@ -326,8 +310,8 @@ namespace Simd
                 {
                     const uint8_t * psrc = src + (sy + k)*srcStride;
                     uint8_t * pdst = bx[k];
-                    for (size_t i = 0; i < _blocks; ++i)
-                        LoadGrayInterpolated(psrc, _ixg[i], _ax.data, pdst);
+                    for (size_t i = 0; i < blocks; ++i)
+                        ResizerByteBilinearLoadGrayInterpolated(psrc, ixg[i], ax, pdst);
                 }
 
                 for (size_t ib = 0, id = 0; ib < aligned; ib += DA, id += A)

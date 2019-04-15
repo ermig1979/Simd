@@ -244,7 +244,8 @@ namespace Test
         T sse41;
         T avx;
         T avx2;
-        T avx512;
+        T avx512f;
+        T avx512bw;
         T vmx;
         T vsx;
         T neon;
@@ -293,8 +294,10 @@ namespace Test
             AddToFunction(src, dst.avx, enable.avx);
         if (desc.find("Simd::Avx2::") != std::string::npos)
             AddToFunction(src, dst.avx2, enable.avx2);
-        if (desc.find("Simd::Avx512f::") != std::string::npos || desc.find("Simd::Avx512bw::") != std::string::npos)
-            AddToFunction(src, dst.avx512, enable.avx512);
+        if (desc.find("Simd::Avx512f::") != std::string::npos)
+            AddToFunction(src, dst.avx512f, enable.avx512f);
+        if (desc.find("Simd::Avx512bw::") != std::string::npos)
+            AddToFunction(src, dst.avx512bw, enable.avx512bw);
         if (desc.find("Simd::Vmx::") != std::string::npos)
             AddToFunction(src, dst.vmx, enable.vmx);
         if (desc.find("Simd::Vsx::") != std::string::npos)
@@ -324,7 +327,8 @@ namespace Test
         if (enable.sse41) Add(Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))), d.sse41);
         if (enable.avx) Add(Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))), d.avx);
         if (enable.avx2) Add(Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))))), d.avx2);
-        if (enable.avx512) Add(Cond(s.avx512, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))))), d.avx512);
+        if (enable.avx512f) Add(Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))))), d.avx512f);
+        if (enable.avx512bw) Add(Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))))))), d.avx512bw);
         if (enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if (enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
@@ -427,8 +431,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false };
-        StatisticNames names = { { "Simd", "S" },{ "Base", "B" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5", "A5" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "N" } };
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false, false };
+        StatisticNames names = { { "Simd", "S" },{ "Base", "B" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "N" } };
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
             const PerformanceMeasurer & pm = *it->second;

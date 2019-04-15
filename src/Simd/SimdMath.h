@@ -787,6 +787,12 @@ namespace Simd
         {
             return _mm256_or_si256(_mm256_slli_si256(odd, 1), even);
         }
+
+        SIMD_INLINE const __m256i Shuffle(const __m256i & value, const __m256i & shuffle)
+        {
+            return _mm256_or_si256(_mm256_shuffle_epi8(value, _mm256_add_epi8(shuffle, K8_SHUFFLE_0)),
+                _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 

@@ -25,6 +25,7 @@
 #define __SimdResizer_h__
 
 #include "Simd/SimdArray.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -162,7 +163,6 @@ namespace Simd
             size_t BlockCountMax(size_t align);
             void EstimateParams();
             template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-            void LoadG(const uint8_t * src, const Idx & index, uint8_t * dst);
             void RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteBilinear(const ResParam & param);
@@ -191,6 +191,14 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        template <class Idx> SIMD_INLINE void ResizerByteBilinearLoadGrayInterpolated(const uint8_t * src, const Idx & index, const uint8_t * alpha, uint8_t * dst)
+        {
+            __m256i _src = _mm256_loadu_si256((__m256i*)(src + index.src));
+            __m256i _shuffle = _mm256_loadu_si256((__m256i*)&index.shuffle);
+            __m256i _alpha = _mm256_loadu_si256((__m256i*)(alpha + index.dst));
+            _mm256_storeu_si256((__m256i*)(dst + index.dst), _mm256_maddubs_epi16(Avx2::Shuffle(_src, _shuffle), _alpha));
+        }
+
         class ResizerByteBilinear : public Ssse3::ResizerByteBilinear
         {
         protected:
@@ -203,7 +211,6 @@ namespace Simd
 
             void EstimateParams();
             template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-            void LoadGrayInterpolated(const uint8_t * src, const ResizerByteBilinear::Idx & index, const uint8_t * alpha, uint8_t * dst);
             void RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteBilinear(const ResParam & param);
@@ -235,6 +242,24 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif //SIMD_AVX512F_ENABLE 
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class ResizerByteBilinear : public Avx2::ResizerByteBilinear
+        {
+        protected:
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            void RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        public:
+            ResizerByteBilinear(const ResParam & param);
+
+            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    }
+#endif //SIMD_AVX512BW_ENABLE 
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon

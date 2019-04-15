@@ -92,9 +92,10 @@ namespace Test
 
         for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
-            result = result && ResizeAutoTest(ARGS_RB1(format, W, H, 0.9, f1, f2));
-            result = result && ResizeAutoTest(ARGS_RB1(format, W + O, H - O, 1.3, f1, f2));
-            result = result && ResizeAutoTest(ARGS_RB1(format, W - O, H + O, 0.7, f1, f2));
+            result = result && ResizeAutoTest(ARGS_RB1(format, W/3, H/3, 3.3, f1, f2));
+            //result = result && ResizeAutoTest(ARGS_RB1(format, W, H, 0.9, f1, f2));
+            //result = result && ResizeAutoTest(ARGS_RB1(format, W + O, H - O, 1.3, f1, f2));
+            //result = result && ResizeAutoTest(ARGS_RB1(format, W - O, H + O, 0.7, f1, f2));
         }
 
         return result;
@@ -339,6 +340,11 @@ namespace Test
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512f::ResizerInit), FUNC_RS(SimdResizerInit));
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512bw::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
