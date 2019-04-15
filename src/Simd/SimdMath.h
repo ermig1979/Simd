@@ -1557,6 +1557,11 @@ namespace Simd
             return vdupq_lane_f32(Half<index / 2>(a), index & 1);
         }
 
+        SIMD_INLINE uint16x8_t Hadd(uint16x8_t a, uint16x8_t b)
+        {
+            return vcombine_u16(vpadd_u16(Half<0>(a), Half<1>(a)), vpadd_u16(Half<0>(b), Half<1>(b)));
+        }
+
         SIMD_INLINE float32x4_t Hadd(float32x4_t a, float32x4_t b)
         {
             return vcombine_f32(vpadd_f32(Half<0>(a), Half<1>(a)), vpadd_f32(Half<0>(b), Half<1>(b)));

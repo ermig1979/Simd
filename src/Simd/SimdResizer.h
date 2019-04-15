@@ -264,6 +264,28 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class ResizerByteBilinear : public Base::ResizerByteBilinear
+        {
+        protected:
+            Array8u _ax, _bx[2];
+            size_t _blocks;
+            struct Idx
+            {
+                int32_t src, dst;
+                uint8_t shuffle[A];
+            };
+            Array<Idx> _ixg;
+
+            size_t BlockCountMax(size_t align);
+            void EstimateParams();
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            void RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        public:
+            ResizerByteBilinear(const ResParam & param);
+
+            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
