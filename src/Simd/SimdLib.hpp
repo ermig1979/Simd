@@ -2752,6 +2752,40 @@ namespace Simd
         }
     }
 
+    /*! @ingroup resizing
+
+        \fn void Resize(const View<A> & src, View<A> & dst, ::SimdResizerMethodType method = ::SimdResizeMethodBilinear)
+
+        \short Performs resizing of image.
+
+        All images must have the same format.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a resized output image.
+        \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
+    */
+    template<template<class> class A> SIMD_INLINE void Resize(const View<A> & src, View<A> & dst, ::SimdResizerMethodType method = ::SimdResizeMethodBilinear)
+    {
+        assert(src.format == dst.format && (src.format == View::Float || src.ChannelSize() == 1));
+
+        if (EqualSize(src, dst))
+        {
+            Copy(src, dst);
+        }
+        else
+        {
+            SimdResizeChannelType type = src.format == View::Float ? SimdResizeChannelFloat : SimdResizeChannelByte;
+            void * resizer = ResizerInit(src.width, src.height, dst.width, dst.height, src.ChannelCount(), type, method);
+            if (resizer)
+            {
+                SimdResizerRun(resizer, src, srcStride, dst, dstStride);
+                SimdRelease(resizer);
+            }
+            else
+                assert(0);
+        }
+    }
+
     /*! @ingroup segmentation
 
         \fn void SegmentationChangeIndex(View<A> & mask, uint8_t oldIndex, uint8_t newIndex)
