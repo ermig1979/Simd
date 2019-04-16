@@ -2754,7 +2754,7 @@ namespace Simd
 
     /*! @ingroup resizing
 
-        \fn void Resize(const View<A> & src, View<A> & dst, ::SimdResizerMethodType method = ::SimdResizeMethodBilinear)
+        \fn void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
 
         \short Performs resizing of image.
 
@@ -2764,7 +2764,7 @@ namespace Simd
         \param [out] dst - a resized output image.
         \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
     */
-    template<template<class> class A> SIMD_INLINE void Resize(const View<A> & src, View<A> & dst, ::SimdResizerMethodType method = ::SimdResizeMethodBilinear)
+    template<template<class> class A> SIMD_INLINE void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
     {
         assert(src.format == dst.format && (src.format == View::Float || src.ChannelSize() == 1));
 
