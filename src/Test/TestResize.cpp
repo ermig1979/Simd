@@ -199,7 +199,7 @@ namespace Test
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
 
-#define TEST_RESIZE_REAL_IMAGE
+//#define TEST_RESIZE_REAL_IMAGE
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, int channels, int width, int height, double k, FuncRS f1, FuncRS f2)
     {
@@ -271,7 +271,7 @@ namespace Test
     {
         bool result = true;
 
-#ifdef TEST_RESIZE_REAL_IMAGE
+#if 1
         result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
 #else
         result = result && ResizerAutoTest(method, type, channels, W, H, 0.9, f1, f2);

@@ -24,6 +24,8 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdSet.h"
+#include "Simd/SimdUpdate.h"
 
 namespace Simd
 {
@@ -179,11 +181,126 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ResizerByteArea::ResizerByteArea(const ResParam & param)
+            : Base::ResizerByteArea(param)
+        {
+            _by.Resize(AlignHi(_param.srcW*_param.channels, A));
+        }
+
+        template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src, size_t size, int32_t alpha, int32_t * dst)
+        {
+            __m128i _alpha = SetInt16(alpha, alpha);
+            for (size_t i = 0; i < size; i += A, dst += A)
+            {
+                __m128i s0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i i0 = UnpackU8<0>(s0);
+                __m128i i1 = UnpackU8<1>(s0);
+                Update<update, true>(dst + 0 * F, _mm_madd_epi16(_alpha, UnpackU8<0>(i0)));
+                Update<update, true>(dst + 1 * F, _mm_madd_epi16(_alpha, UnpackU8<1>(i0)));
+                Update<update, true>(dst + 2 * F, _mm_madd_epi16(_alpha, UnpackU8<0>(i1)));
+                Update<update, true>(dst + 3 * F, _mm_madd_epi16(_alpha, UnpackU8<1>(i1)));
+            }
+        }
+
+        template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, const uint8_t * src1, size_t size, int32_t alpha0, int32_t alpha1, int32_t * dst)
+        {
+            __m128i _alpha = SetInt16(alpha0, alpha1);
+            for (size_t i = 0; i < size; i += A, dst += A)
+            {
+                __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
+                __m128i s1 = _mm_loadu_si128((__m128i*)(src1 + i));
+                __m128i i0 = UnpackU8<0>(s0, s1);
+                __m128i i1 = UnpackU8<1>(s0, s1);
+                Update<update, true>(dst + 0 * F, _mm_madd_epi16(_alpha, UnpackU8<0>(i0)));
+                Update<update, true>(dst + 1 * F, _mm_madd_epi16(_alpha, UnpackU8<1>(i0)));
+                Update<update, true>(dst + 2 * F, _mm_madd_epi16(_alpha, UnpackU8<0>(i1)));
+                Update<update, true>(dst + 3 * F, _mm_madd_epi16(_alpha, UnpackU8<1>(i1)));
+            }
+        }
+
+        SIMD_INLINE void ResizerByteAreaRowSum(const uint8_t * src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t * dst)
+        {
+            if (count)
+            {
+                ResizerByteAreaRowUpdate<UpdateSet>(src, src + stride, size, curr, count == 1 ? zero - next : zero, dst), src += 2 * stride;
+                for (size_t i = 2; i < count; i += 2, src += 2 * stride)
+                    ResizerByteAreaRowUpdate<UpdateAdd>(src, src + stride, size, zero, i == count - 1 ? zero - next : zero, dst);
+                if (!(count & 1))
+                    ResizerByteAreaRowUpdate<UpdateAdd>(src, size, zero - next, dst);
+            }
+            else
+                ResizerByteAreaRowUpdate<UpdateSet>(src, size, curr - next, dst);
+        }
+
+        template<class T, size_t N> SIMD_INLINE void ResizerByteAreaSet(const int32_t * src, int32_t value, int32_t * dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] = src[c] * value;
+        }
+
+        template<class T, size_t N> SIMD_INLINE void ResizerByteAreaAdd(const int32_t * src, int32_t value, int32_t * dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] += src[c] * value;
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, int32_t round, int32_t shift, uint8_t * dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] = uint8_t((src[c] + round) >> shift);
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, int32_t shift, uint8_t * dst)
+        {
+            int32_t sum[N];
+            ResizerByteAreaSet<int32_t, N>(src, curr, sum);
+            for (size_t i = 0; i < count; ++i)
+                src += N, ResizerByteAreaAdd<int32_t, N>(src, zero, sum);
+            ResizerByteAreaAdd<int32_t, N>(src, -next, sum);
+            ResizerByteAreaRes<N>(sum, round, shift, dst);
+        }
+
+        template<size_t N> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW*N;
+            const int32_t * iy = _iy.data, * ix = _ix.data, * ay = _ay.data, * ax = _ax.data;
+            int32_t ay0 = ay[0], ax0 = ax[0];
+            int32_t round = (ay0 * ax0) / 2, shift = _shift;
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
+            {
+                int32_t * buf = _by.data;
+                size_t yn = iy[dy + 1] - iy[dy];
+                ResizerByteAreaRowSum(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], buf), src += yn * srcStride;
+                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], round, shift, dst), buf += xn * N;
+                }
+            }
+        }
+
+        void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            switch (_param.channels)
+            {
+            case 1: Run<1>(src, srcStride, dst, dstStride); return;
+            case 2: Run<2>(src, srcStride, dst, dstStride); return;
+            case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 4: Run<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m128i));
-            if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear && (channels == 1 || channels == 2) && dstX >= A)
+            if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear && (channels == 1 || channels == 2) && srcX >= A)
                 return new ResizerByteBilinear(param);
+            if (type == SimdResizeChannelByte && method == SimdResizeMethodArea)
+                return new ResizerByteArea(param);
             else
                 return Sse::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
