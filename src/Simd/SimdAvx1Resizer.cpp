@@ -147,7 +147,7 @@ namespace Simd
             if (type == SimdResizeChannelFloat && (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp))
                 return new ResizerFloatBilinear(param);
             else
-                return Ssse3::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+                return Sse41::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
     }
 #endif //SIMD_AVX_ENABLE 

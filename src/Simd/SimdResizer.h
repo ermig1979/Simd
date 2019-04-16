@@ -186,6 +186,23 @@ namespace Simd
     }
 #endif //SIMD_SSSE3_ENABLE 
 
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        class ResizerByteArea : public Sse2::ResizerByteArea
+        {
+        protected:
+            template<size_t N, size_t S> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        public:
+            ResizerByteArea(const ResParam & param);
+
+            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
+        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    }
+#endif //SIMD_SSE41_ENABLE
+
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
