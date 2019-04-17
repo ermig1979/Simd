@@ -117,6 +117,13 @@ namespace Test
         v[15] = 0.0f;
     }
 
+    static void TestResize()
+    {
+        typedef Simd::View<Simd::Allocator> View;
+        View src(128, 96, View::Bgr24), dst(40, 30, View::Bgr24);
+        Simd::Resize(src, dst, SimdResizeMethodArea);
+    }
+
     void CheckCpp()
     {
         TestCpuInfo();

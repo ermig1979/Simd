@@ -2775,10 +2775,10 @@ namespace Simd
         else
         {
             SimdResizeChannelType type = src.format == View<A>::Float ? SimdResizeChannelFloat : SimdResizeChannelByte;
-            void * resizer = ResizerInit(src.width, src.height, dst.width, dst.height, src.ChannelCount(), type, method);
+            void * resizer = SimdResizerInit(src.width, src.height, dst.width, dst.height, src.ChannelCount(), type, method);
             if (resizer)
             {
-                SimdResizerRun(resizer, src, src.stride, dst, dst.stride);
+                SimdResizerRun(resizer, src.data, src.stride, dst.data, dst.stride);
                 SimdRelease(resizer);
             }
             else
