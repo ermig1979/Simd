@@ -160,17 +160,32 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        template <UpdateType update, bool align> SIMD_INLINE void Update(float  * p, float32x4_t a)
+        template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t * p, int32x4_t a)
         {
             Store<align>(p, a);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, false>(float  * p, float32x4_t a)
+        template <> SIMD_INLINE void Update<UpdateAdd, false>(int32_t * p, int32x4_t a)
+        {
+            Store<false>(p, vaddq_s32(Load<false>(p), a));
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, true>(int32_t * p, int32x4_t a)
+        {
+            Store<true>(p, vaddq_s32(Load<true>(p), a));
+        }
+
+        template <UpdateType update, bool align> SIMD_INLINE void Update(float * p, float32x4_t a)
+        {
+            Store<align>(p, a);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, false>(float * p, float32x4_t a)
         {
             Store<false>(p, vaddq_f32(Load<false>(p), a));
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, true>(float  * p, float32x4_t a)
+        template <> SIMD_INLINE void Update<UpdateAdd, true>(float * p, float32x4_t a)
         {
             Store<true>(p, vaddq_f32(Load<true>(p), a));
         }

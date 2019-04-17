@@ -325,6 +325,18 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
+        class ResizerByteArea : public Base::ResizerByteArea
+        {
+        protected:
+            Array32i _by;
+
+            template<size_t N, size_t S> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        public:
+            ResizerByteArea(const ResParam & param);
+
+            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);

@@ -1368,6 +1368,11 @@ namespace Simd
             return vmovl_u8(Half<part>(a));
         }
 
+        template <int part> SIMD_INLINE int16x8_t UnpackU8s(uint8x16_t a)
+        {
+            return (int16x8_t)vmovl_u8(Half<part>(a));
+        }
+
         template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a)
         {
             return vmovl_u16(Half<part>(a));
