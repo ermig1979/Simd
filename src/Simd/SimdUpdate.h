@@ -107,6 +107,26 @@ namespace Simd
     }
 #endif//SIMD_AVX_ENABLE
 
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t  * p, __m256i a)
+        {
+            Store<align>((__m256i*)p, a);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, false>(int32_t  * p, __m256i a)
+        {
+            Store<false>((__m256i*)p, _mm256_add_epi32(Load<false>((__m256i*)p), a));
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, true>(int32_t  * p, __m256i a)
+        {
+            Store<true>((__m256i*)p, _mm256_add_epi32(Load<true>((__m256i*)p), a));
+        }
+    }
+#endif//SIMD_AVX2_ENABLE
+
 #ifdef SIMD_AVX512F_ENABLE
     namespace Avx512f
     {

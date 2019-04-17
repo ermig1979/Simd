@@ -224,11 +224,15 @@ namespace Simd
     std::cout.flush(); \
 }
 
+#define SIMD_LOG_LINE() std::cout << __FUNCTION__  << " : " << __LINE__ << std::endl << std::flush; 
+
 #else//SIMD_LOG_ENABLE
 
 #define SIMD_LOG(value)
 
 #define SIMD_LOG_SS(message)
+
+#define SIMD_LOG_LINE()
 
 #endif//SIMD_LOG_ENABLE 
 

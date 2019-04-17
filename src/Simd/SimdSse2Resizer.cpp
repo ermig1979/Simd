@@ -184,7 +184,7 @@ namespace Simd
         ResizerByteArea::ResizerByteArea(const ResParam & param)
             : Base::ResizerByteArea(param)
         {
-            _by.Resize(AlignHi(_param.srcW*_param.channels, _param.align));
+            _by.Resize(AlignHi(_param.srcW*_param.channels, _param.align), false, _param.align);
         }
 
         template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, size_t size, int32_t a, int32_t * dst)
