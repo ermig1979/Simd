@@ -295,6 +295,11 @@ namespace Simd
         {
             return _mm512_mask_storeu_epi32(p, m, a);
         }
+
+        template <bool align, bool mask> SIMD_INLINE void Store(int32_t * p, __m512i a, __mmask16 m)
+        {
+            return Store<align, mask>((uint32_t*)p, a, m);
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 

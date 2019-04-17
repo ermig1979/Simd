@@ -157,6 +157,41 @@ namespace Simd
     }
 #endif//SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        template <UpdateType update, bool align, bool mask> SIMD_INLINE void Update(int32_t  * p, __m512i a, __mmask16 m)
+        {
+            Store<align, mask>(p, a, m);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, false, false>(int32_t  * p, __m512i a, __mmask16 m)
+        {
+            Store<false, false>(p, _mm512_add_epi32((Load<false, false>(p, m)), a), m);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, false, true>(int32_t  * p, __m512i a, __mmask16 m)
+        {
+            Store<false, true>(p, _mm512_add_epi32((Load<false, true>(p, m)), a), m);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, true, false>(int32_t  * p, __m512i a, __mmask16 m)
+        {
+            Store<true, false>(p, _mm512_add_epi32((Load<true, false>(p, m)), a), m);
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd, true, true>(int32_t  * p, __m512i a, __mmask16 m)
+        {
+            Store<true, true>(p, _mm512_add_epi32((Load<true, true>(p, m)), a), m);
+        }
+
+        template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t  * p, __m512i a)
+        {
+            Update<update, align, false>(p, a, __mmask16(-1));
+        }
+    }
+#endif//SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
