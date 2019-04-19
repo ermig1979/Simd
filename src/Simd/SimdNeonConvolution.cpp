@@ -1240,7 +1240,9 @@ namespace Simd
             if (c < srcC)
             {
                 c = p.srcC - F;
-                float32x4_t sum = bias ? Load<false>(bias) : vdupq_n_f32(0.0f);
+                src -= srcCF - c;
+                weight -= srcCF - c;
+                float32x4_t sum = bias ? Load<false>(bias + c) : vdupq_n_f32(0.0f);
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t sy = dy * p.strideY + ky - p.padY;
@@ -1285,6 +1287,8 @@ namespace Simd
             if (c < srcC)
             {
                 c = srcC - F;
+                src -= srcCF - c;
+                weight -= srcCF - c;
                 float32x4_t sum = bias ? Load<false>(bias + c) : vdupq_n_f32(0.0f);
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
@@ -1333,6 +1337,7 @@ namespace Simd
             if (c < srcC)
             {
                 c = srcC - F;
+                src -= srcCF - c;
                 sum0 = bias ? Load<false>(bias + c) : vdupq_n_f32(0.0f);
                 sum1 = sum0;
                 const float * pw = weight + c;
@@ -1407,6 +1412,8 @@ namespace Simd
             if (c < srcC)
             {
                 c = srcC - F;
+                src -= srcCF - c;
+                dst -= srcCF - c;
                 float32x4_t sum0, sum1, sum2, sum3, w0;
                 sum0 = bias ? Load<false>(bias + c) : vdupq_n_f32(0.0f);
                 sum1 = sum0;

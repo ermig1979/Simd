@@ -1839,8 +1839,8 @@ namespace Simd
             }
             if (c < srcC)
             {
-                __mmask16 tail = TailMask16(p.srcC - srcCF);
-                __m512 sum = bias ? _mm512_maskz_loadu_ps(tail, bias) : _mm512_setzero_ps();
+                __mmask16 tail = TailMask16(srcC - c);
+                __m512 sum = bias ? _mm512_maskz_loadu_ps(tail, bias + c) : _mm512_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t sy = dy * p.strideY + ky - p.padY;

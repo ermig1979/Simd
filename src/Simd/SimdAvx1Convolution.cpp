@@ -1544,7 +1544,9 @@ namespace Simd
             if (c < srcC)
             {
                 c = p.srcC - F;
-                __m256 sum = bias ? _mm256_loadu_ps(bias) : _mm256_setzero_ps();
+                src -= srcCF - c;
+                weight -= srcCF - c;
+                __m256 sum = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t sy = dy * p.strideY + ky - p.padY;
@@ -1589,6 +1591,8 @@ namespace Simd
             if (c < srcC)
             {
                 c = srcC - F;
+                src -= srcCF - c;
+                weight -= srcCF - c;
                 __m256 sum = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
@@ -1637,6 +1641,7 @@ namespace Simd
             if (c < srcC)
             {
                 c = srcC - F;
+                src -= srcCF - c;
                 sum0 = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 sum1 = sum0;
                 const float * pw = weight + c;
@@ -1711,6 +1716,8 @@ namespace Simd
             if (c < srcC)
             {
                 c = srcC - F;
+                src -= srcCF - c;
+                dst -= srcCF - c;
                 __m256 sum0, sum1, sum2, sum3, w0;
                 sum0 = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 sum1 = sum0;

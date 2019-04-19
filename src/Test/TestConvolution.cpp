@@ -391,7 +391,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 576, 19, 19, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 576, 19, 19, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 21, 192, 192, 21, _3, _1, _1, _1, _1, 21, a, t), f1, f2);
 #endif
         return result;
     }
