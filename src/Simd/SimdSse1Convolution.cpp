@@ -1264,7 +1264,7 @@ namespace Simd
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     const float * ps = src + ky * srcS;
-                    const float * pw = weight + ky * srcC;
+                    const float * pw = weight + ky * 3 * srcC;
                     sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * srcC), _mm_loadu_ps(pw + 0 * srcC)), sum);
                     sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * srcC), _mm_loadu_ps(pw + 1 * srcC)), sum);
                     sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * srcC), _mm_loadu_ps(pw + 2 * srcC)), sum);

@@ -1293,7 +1293,7 @@ namespace Simd
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     const float * ps = src + ky * srcS;
-                    const float * pw = weight + ky * srcC;
+                    const float * pw = weight + ky * 3 * srcC;
                     sum = vmlaq_f32(sum, Load<false>(ps + 0 * srcC), Load<false>(pw + 0 * srcC));
                     sum = vmlaq_f32(sum, Load<false>(ps + 1 * srcC), Load<false>(pw + 1 * srcC));
                     sum = vmlaq_f32(sum, Load<false>(ps + 2 * srcC), Load<false>(pw + 2 * srcC));
