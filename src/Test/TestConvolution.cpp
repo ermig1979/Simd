@@ -388,12 +388,14 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 16, 8, 8, 48, _5, _1, _1, _2, _2, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 576, 19, 19, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 21, 192, 192, 21, _3, _1, _1, _1, _1, 21, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 90, 192, 192, 90, _3, _1, _2, _0, _1, 90, a, t), f1, f2);
 #endif
 #if 1
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 90, 192, 192, 90, _3, _1, _2, _0, _1, 90, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 1152, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 1156, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 90, 192, 192, 90, _3, _1, _2, _0, _1, 90, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 1156, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
         return result;
     }

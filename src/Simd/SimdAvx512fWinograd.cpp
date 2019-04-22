@@ -227,8 +227,8 @@ namespace Simd
             {
                 __mmask16 tail = TailMask16(srcC - c);
                 __m512 tmp[16];
-                Winograd2x3SetInput16t(src + srcC - F, srcS, srcC, rowB, rowE, colB, colE, tmp, tail);
-                Winograd2x3SetInput16Store<true>(tmp, dst + srcC - F, dstStride, tail);
+                Winograd2x3SetInput16t(src + c, srcS, srcC, rowB, rowE, colB, colE, tmp, tail);
+                Winograd2x3SetInput16Store<true>(tmp, dst + c, dstStride, tail);
             }
         }
 
