@@ -42,7 +42,7 @@ namespace Simd
             if (_ax.data)
                 return;
             _ix.Resize(_param.dstW);
-            _ax.Resize(_param.dstW * 2);
+            _ax.Resize(AlignHi(_param.dstW, A) * 2);
             float scale = (float)_param.srcW / _param.dstW;
             for (size_t dx = 0; dx < _param.dstW; ++dx)
             {

@@ -48,7 +48,7 @@ namespace Simd
             if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
                 _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
-            _ax.Resize(_param.dstW * _param.channels * 2, false, _param.align);
+            _ax.Resize(AlignHi(_param.dstW, A) * _param.channels * 2, false, _param.align);
             uint8_t * alphas = _ax.data;
             if (_blocks)
             {

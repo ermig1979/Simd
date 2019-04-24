@@ -37,12 +37,31 @@ namespace Simd
         {
         }
 
+        SIMD_INLINE __m128i SaveLoadTail(const uint8_t * ptr, size_t tail)
+        {
+            uint8_t buffer[DA];
+            _mm_storeu_si128((__m128i*)(buffer), _mm_loadu_si128((__m128i*)(ptr + tail - A)));
+            return _mm_loadu_si128((__m128i*)(buffer + A - tail));
+        }
+
         template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, size_t size, int32_t a, int32_t * dst)
         {
             __m128i alpha = SetInt16(a, a);
-            for (size_t i = 0; i < size; i += A, dst += A, src0 += A)
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A, dst += A)
             {
-                __m128i s0 = _mm_loadu_si128((__m128i*)src0);
+                __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
+                __m128i i0 = UnpackU8<0>(s0);
+                __m128i i1 = UnpackU8<1>(s0);
+                Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update, true>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update, true>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update, true>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
+            }
+            if (i < size)
+            {
+                __m128i s0 = SaveLoadTail(src0 + i, size - i);
                 __m128i i0 = UnpackU8<0>(s0);
                 __m128i i1 = UnpackU8<1>(s0);
                 Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
@@ -56,10 +75,23 @@ namespace Simd
         {
             __m128i alpha = SetInt16(a0, a1);
             const uint8_t * src1 = src0 + stride;
-            for (size_t i = 0; i < size; i += A, dst += A)
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A, dst += A)
             {
                 __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
                 __m128i s1 = _mm_loadu_si128((__m128i*)(src1 + i));
+                __m128i i0 = UnpackU8<0>(s0, s1);
+                __m128i i1 = UnpackU8<1>(s0, s1);
+                Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update, true>(dst + 1 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update, true>(dst + 2 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update, true>(dst + 3 * F, _mm_madd_epi16(alpha, UnpackU8<1>(i1)));
+            }
+            if (i < size)
+            {
+                __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
+                __m128i s1 = SaveLoadTail(src1 + i, size - i);
                 __m128i i0 = UnpackU8<0>(s0, s1);
                 __m128i i1 = UnpackU8<1>(s0, s1);
                 Update<update, true>(dst + 0 * F, _mm_madd_epi16(alpha, UnpackU8<0>(i0)));
@@ -76,7 +108,9 @@ namespace Simd
             const uint8_t * src1 = src0 + stride;
             const uint8_t * src2 = src1 + stride;
             const uint8_t * src3 = src2 + stride;
-            for (size_t i = 0; i < size; i += A, dst += A)
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A, dst += A)
             {
                 __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
                 __m128i s1 = _mm_loadu_si128((__m128i*)(src1 + i));
@@ -84,6 +118,21 @@ namespace Simd
                 __m128i t011 = _mm_maddubs_epi16(UnpackU8<1>(s0, s1), a01);
                 __m128i s2 = _mm_loadu_si128((__m128i*)(src2 + i));
                 __m128i s3 = _mm_loadu_si128((__m128i*)(src3 + i));
+                __m128i t230 = _mm_maddubs_epi16(UnpackU8<0>(s2, s3), a23);
+                __m128i t231 = _mm_maddubs_epi16(UnpackU8<1>(s2, s3), a23);
+                Update<update, true>(dst + 0 * F, _mm_madd_epi16(K16_0001, UnpackU16<0>(t010, t230)));
+                Update<update, true>(dst + 1 * F, _mm_madd_epi16(K16_0001, UnpackU16<1>(t010, t230)));
+                Update<update, true>(dst + 2 * F, _mm_madd_epi16(K16_0001, UnpackU16<0>(t011, t231)));
+                Update<update, true>(dst + 3 * F, _mm_madd_epi16(K16_0001, UnpackU16<1>(t011, t231)));
+            }
+            if (i < size)
+            {
+                __m128i s0 = _mm_loadu_si128((__m128i*)(src0 + i));
+                __m128i s1 = _mm_loadu_si128((__m128i*)(src1 + i));
+                __m128i t010 = _mm_maddubs_epi16(UnpackU8<0>(s0, s1), a01);
+                __m128i t011 = _mm_maddubs_epi16(UnpackU8<1>(s0, s1), a01);
+                __m128i s2 = _mm_loadu_si128((__m128i*)(src2 + i));
+                __m128i s3 = SaveLoadTail(src3 + i, size - i);
                 __m128i t230 = _mm_maddubs_epi16(UnpackU8<0>(s2, s3), a23);
                 __m128i t231 = _mm_maddubs_epi16(UnpackU8<1>(s2, s3), a23);
                 Update<update, true>(dst + 0 * F, _mm_madd_epi16(K16_0001, UnpackU16<0>(t010, t230)));

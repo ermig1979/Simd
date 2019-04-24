@@ -44,7 +44,7 @@ namespace Simd
             if (_param.channels == 1 && _param.srcW < 4 * _param.dstW)
                 _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
-            _ax.Resize(_param.dstW * _param.channels * 2, false, _param.align);
+            _ax.Resize(AlignHi(_param.dstW, A) * _param.channels * 2, false, _param.align);
             uint8_t * alphas = _ax.data;
             if (_blocks)
             {
@@ -351,12 +351,31 @@ namespace Simd
         {
         }
 
+        SIMD_INLINE __m256i SaveLoadTail(const uint8_t * ptr, size_t tail)
+        {
+            uint8_t buffer[DA];
+            _mm256_storeu_si256((__m256i*)(buffer), _mm256_loadu_si256((__m256i*)(ptr + tail - A)));
+            return _mm256_loadu_si256((__m256i*)(buffer + A - tail));
+        }
+
         template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, size_t size, int32_t a, int32_t * dst)
         {
-            __m256i alpha = SetInt16(a, a); 
-            for (size_t i = 0; i < size; i += A, dst += A, src0 += A)
+            __m256i alpha = SetInt16(a, a);
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A, dst += A)
             {
-                __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)src0), K32_TWO_UNPACK_PERMUTE);
+                __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i i0 = UnpackU8<0>(s0);
+                __m256i i1 = UnpackU8<1>(s0);
+                Update<update, true>(dst + 0 * F, _mm256_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update, true>(dst + 1 * F, _mm256_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update, true>(dst + 2 * F, _mm256_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update, true>(dst + 3 * F, _mm256_madd_epi16(alpha, UnpackU8<1>(i1)));
+            }
+            if (i < size)
+            {
+                __m256i s0 = _mm256_permutevar8x32_epi32(SaveLoadTail(src0 + i, size - i), K32_TWO_UNPACK_PERMUTE);
                 __m256i i0 = UnpackU8<0>(s0);
                 __m256i i1 = UnpackU8<1>(s0);
                 Update<update, true>(dst + 0 * F, _mm256_madd_epi16(alpha, UnpackU8<0>(i0)));
@@ -370,10 +389,23 @@ namespace Simd
         {
             __m256i alpha = SetInt16(a0, a1);
             const uint8_t * src1 = src0 + stride;
-            for (size_t i = 0; i < size; i += A, dst += A)
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A, dst += A)
             {
                 __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
                 __m256i s1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src1 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i i0 = UnpackU8<0>(s0, s1);
+                __m256i i1 = UnpackU8<1>(s0, s1);
+                Update<update, true>(dst + 0 * F, _mm256_madd_epi16(alpha, UnpackU8<0>(i0)));
+                Update<update, true>(dst + 1 * F, _mm256_madd_epi16(alpha, UnpackU8<1>(i0)));
+                Update<update, true>(dst + 2 * F, _mm256_madd_epi16(alpha, UnpackU8<0>(i1)));
+                Update<update, true>(dst + 3 * F, _mm256_madd_epi16(alpha, UnpackU8<1>(i1)));
+            }
+            if (i < size)
+            {
+                __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i s1 = _mm256_permutevar8x32_epi32(SaveLoadTail(src1 + i, size - i), K32_TWO_UNPACK_PERMUTE);
                 __m256i i0 = UnpackU8<0>(s0, s1);
                 __m256i i1 = UnpackU8<1>(s0, s1);
                 Update<update, true>(dst + 0 * F, _mm256_madd_epi16(alpha, UnpackU8<0>(i0)));
@@ -390,7 +422,9 @@ namespace Simd
             const uint8_t * src1 = src0 + stride;
             const uint8_t * src2 = src1 + stride;
             const uint8_t * src3 = src2 + stride;
-            for (size_t i = 0; i < size; i += A, dst += A)
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A, dst += A)
             {
                 __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
                 __m256i s1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src1 + i)), K32_TWO_UNPACK_PERMUTE);
@@ -398,6 +432,21 @@ namespace Simd
                 __m256i t011 = _mm256_maddubs_epi16(UnpackU8<1>(s0, s1), a01);
                 __m256i s2 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src2 + i)), K32_TWO_UNPACK_PERMUTE);
                 __m256i s3 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src3 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i t230 = _mm256_maddubs_epi16(UnpackU8<0>(s2, s3), a23);
+                __m256i t231 = _mm256_maddubs_epi16(UnpackU8<1>(s2, s3), a23);
+                Update<update, true>(dst + 0 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t010, t230)));
+                Update<update, true>(dst + 1 * F, _mm256_madd_epi16(K16_0001, UnpackU16<1>(t010, t230)));
+                Update<update, true>(dst + 2 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t011, t231)));
+                Update<update, true>(dst + 3 * F, _mm256_madd_epi16(K16_0001, UnpackU16<1>(t011, t231)));
+            }
+            if (i < size)
+            {
+                __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i s1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src1 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i t010 = _mm256_maddubs_epi16(UnpackU8<0>(s0, s1), a01);
+                __m256i t011 = _mm256_maddubs_epi16(UnpackU8<1>(s0, s1), a01);
+                __m256i s2 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src2 + i)), K32_TWO_UNPACK_PERMUTE);
+                __m256i s3 = _mm256_permutevar8x32_epi32(SaveLoadTail(src3 + i, size - i), K32_TWO_UNPACK_PERMUTE);
                 __m256i t230 = _mm256_maddubs_epi16(UnpackU8<0>(s2, s3), a23);
                 __m256i t231 = _mm256_maddubs_epi16(UnpackU8<1>(s2, s3), a23);
                 Update<update, true>(dst + 0 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t010, t230)));
