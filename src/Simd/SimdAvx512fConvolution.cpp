@@ -1471,7 +1471,7 @@ namespace Simd
             if (dc < dstC)
             {
                 __mmask16 tail = TailMask16(dstC - dstCF1);
-                __m512 sums[6][1];
+                __m512 sums[8][1];
                 __m512 bias0 = bias ? _mm512_maskz_loadu_ps(tail, bias + dc) : _mm512_setzero_ps();
                 sums[0][0] = bias0;
                 sums[1][0] = bias0;
