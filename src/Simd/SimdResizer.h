@@ -76,10 +76,13 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
+        const int32_t AREA_SHIFT = 22;
+        const int32_t AREA_RANGE = 1 << 11;
+        const int32_t AREA_ROUND = 1 << 21;
+
         class ResizerByteArea : public Resizer
         {
         protected:
-            int32_t _range, _shift;
             Array32i _ax, _ix, _ay, _iy;
 
             template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
@@ -192,7 +195,7 @@ namespace Simd
         class ResizerByteArea : public Sse2::ResizerByteArea
         {
         protected:
-            template<size_t N, size_t S> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteArea(const ResParam & param);
 
@@ -250,7 +253,7 @@ namespace Simd
         class ResizerByteArea : public Sse41::ResizerByteArea
         {
         protected:
-            template<size_t N, size_t S> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteArea(const ResParam & param);
 
@@ -299,7 +302,7 @@ namespace Simd
         class ResizerByteArea : public Avx2::ResizerByteArea
         {
         protected:
-            template<size_t N, size_t S> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteArea(const ResParam & param);
 
@@ -340,7 +343,7 @@ namespace Simd
         protected:
             Array32i _by;
 
-            template<size_t N, size_t S> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteArea(const ResParam & param);
 

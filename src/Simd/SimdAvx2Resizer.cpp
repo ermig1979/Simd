@@ -415,56 +415,12 @@ namespace Simd
             }
         }
 
-        template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, size_t stride, size_t size, int32_t a0, int32_t a12, int32_t a3, int32_t * dst)
-        {
-            __m256i a01 = SetInt8(a0, a12);
-            __m256i a23 = SetInt8(a12, a3);
-            const uint8_t * src1 = src0 + stride;
-            const uint8_t * src2 = src1 + stride;
-            const uint8_t * src3 = src2 + stride;
-            size_t sizeA = AlignLo(size, A);
-            size_t i = 0;
-            for (; i < sizeA; i += A, dst += A)
-            {
-                __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i s1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src1 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i t010 = _mm256_maddubs_epi16(UnpackU8<0>(s0, s1), a01);
-                __m256i t011 = _mm256_maddubs_epi16(UnpackU8<1>(s0, s1), a01);
-                __m256i s2 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src2 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i s3 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src3 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i t230 = _mm256_maddubs_epi16(UnpackU8<0>(s2, s3), a23);
-                __m256i t231 = _mm256_maddubs_epi16(UnpackU8<1>(s2, s3), a23);
-                Update<update, true>(dst + 0 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t010, t230)));
-                Update<update, true>(dst + 1 * F, _mm256_madd_epi16(K16_0001, UnpackU16<1>(t010, t230)));
-                Update<update, true>(dst + 2 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t011, t231)));
-                Update<update, true>(dst + 3 * F, _mm256_madd_epi16(K16_0001, UnpackU16<1>(t011, t231)));
-            }
-            if (i < size)
-            {
-                __m256i s0 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src0 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i s1 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src1 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i t010 = _mm256_maddubs_epi16(UnpackU8<0>(s0, s1), a01);
-                __m256i t011 = _mm256_maddubs_epi16(UnpackU8<1>(s0, s1), a01);
-                __m256i s2 = _mm256_permutevar8x32_epi32(_mm256_loadu_si256((__m256i*)(src2 + i)), K32_TWO_UNPACK_PERMUTE);
-                __m256i s3 = _mm256_permutevar8x32_epi32(SaveLoadTail(src3 + i, size - i), K32_TWO_UNPACK_PERMUTE);
-                __m256i t230 = _mm256_maddubs_epi16(UnpackU8<0>(s2, s3), a23);
-                __m256i t231 = _mm256_maddubs_epi16(UnpackU8<1>(s2, s3), a23);
-                Update<update, true>(dst + 0 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t010, t230)));
-                Update<update, true>(dst + 1 * F, _mm256_madd_epi16(K16_0001, UnpackU16<1>(t010, t230)));
-                Update<update, true>(dst + 2 * F, _mm256_madd_epi16(K16_0001, UnpackU16<0>(t011, t231)));
-                Update<update, true>(dst + 3 * F, _mm256_madd_epi16(K16_0001, UnpackU16<1>(t011, t231)));
-            }
-        }
-
         SIMD_INLINE void ResizerByteAreaRowSum(const uint8_t * src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t * dst)
         {
             if (count)
             {
                 size_t i = 0;
-                if (count >= 3)
-                    ResizerByteAreaRowUpdate<UpdateSet>(src, stride, size, curr, zero, count == 3 ? zero - next : zero, dst), src += 4 * stride, i += 4;
-                else
-                    ResizerByteAreaRowUpdate<UpdateSet>(src, stride, size, curr, count == 1 ? zero - next : zero, dst), src += 2 * stride, i += 2;
+                ResizerByteAreaRowUpdate<UpdateSet>(src, stride, size, curr, count == 1 ? zero - next : zero, dst), src += 2 * stride, i += 2;
                 for (; i < count; i += 2, src += 2 * stride)
                     ResizerByteAreaRowUpdate<UpdateAdd>(src, stride, size, zero, i == count - 1 ? zero - next : zero, dst);
                 if (i == count)
@@ -486,58 +442,47 @@ namespace Simd
                 dst[c] += src[c] * value;
         }
 
-        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, int32_t round, int32_t shift, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, uint8_t * dst)
         {
             for (size_t c = 0; c < N; ++c)
-                dst[c] = uint8_t((src[c] + round) >> shift);
+                dst[c] = uint8_t((src[c] + Base::AREA_ROUND) >> Base::AREA_SHIFT);
         }
 
-        template<size_t N, size_t S> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
             int32_t sum[N];
             ResizerByteAreaSet<N>(src, curr, sum);
             for (size_t i = 0; i < count; ++i)
                 src += N, ResizerByteAreaAdd<N>(src, zero, sum);
             ResizerByteAreaAdd<N>(src, -next, sum);
-            ResizerByteAreaRes<N>(sum, round, S, dst);
+            ResizerByteAreaRes<N>(sum, dst);
         }
 
-        template<size_t N, size_t S> SIMD_INLINE void ResizerByteAreaResult34(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult34(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
             __m128i sum = _mm_mullo_epi32(_mm_loadu_si128((__m128i*)src), _mm_set1_epi32(curr));
             for (size_t i = 0; i < count; ++i)
                 src += N, sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_loadu_si128((__m128i*)src), _mm_set1_epi32(zero)));
             sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_loadu_si128((__m128i*)src), _mm_set1_epi32(-next)));
-            __m128i res = _mm_srai_epi32(_mm_add_epi32(sum, _mm_set1_epi32(round)), S);
+            __m128i res = _mm_srai_epi32(_mm_add_epi32(sum, _mm_set1_epi32(Base::AREA_ROUND)), Base::AREA_SHIFT);
             *(int32_t*)dst = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packus_epi32(res, Sse2::K_ZERO), Sse2::K_ZERO));
         }
 
-        template<> SIMD_INLINE void ResizerByteAreaResult<4, 14>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<> SIMD_INLINE void ResizerByteAreaResult<4>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
-            ResizerByteAreaResult34<4, 14>(src, count, curr, zero, next, round, dst);
+            ResizerByteAreaResult34<4>(src, count, curr, zero, next, dst);
         }
 
-        template<> SIMD_INLINE void ResizerByteAreaResult<4, 22>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<> SIMD_INLINE void ResizerByteAreaResult<3>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
-            ResizerByteAreaResult34<4, 22>(src, count, curr, zero, next, round, dst);
+            ResizerByteAreaResult34<3>(src, count, curr, zero, next, dst);
         }
 
-        template<> SIMD_INLINE void ResizerByteAreaResult<3, 14>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
-        {
-            ResizerByteAreaResult34<3, 14>(src, count, curr, zero, next, round, dst);
-        }
-
-        template<> SIMD_INLINE void ResizerByteAreaResult<3, 22>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
-        {
-            ResizerByteAreaResult34<3, 22>(src, count, curr, zero, next, round, dst);
-        }
-
-        template<size_t N, size_t S> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        template<size_t N> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW * N;
             const int32_t * iy = _iy.data, *ix = _ix.data, *ay = _ay.data, *ax = _ax.data;
             int32_t ay0 = ay[0], ax0 = ax[0];
-            int32_t round = (ay0 * ax0) / 2;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
             {
                 int32_t * buf = _by.data;
@@ -546,36 +491,21 @@ namespace Simd
                 for (size_t dx = 0; dx < dstW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
-                    ResizerByteAreaResult<N, S>(buf, xn, ax[dx], ax0, ax[dx + 1], round, dst), buf += xn * N;
+                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }
 
         void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            if (_shift == 14)
+            switch (_param.channels)
             {
-                switch (_param.channels)
-                {
-                case 1: Run<1, 14>(src, srcStride, dst, dstStride); return;
-                case 2: Run<2, 14>(src, srcStride, dst, dstStride); return;
-                case 3: Run<3, 14>(src, srcStride, dst, dstStride); return;
-                case 4: Run<4, 14>(src, srcStride, dst, dstStride); return;
-                default:
-                    assert(0);
-                }
-            }
-            else
-            {
-                switch (_param.channels)
-                {
-                case 1: Run<1, 22>(src, srcStride, dst, dstStride); return;
-                case 2: Run<2, 22>(src, srcStride, dst, dstStride); return;
-                case 3: Run<3, 22>(src, srcStride, dst, dstStride); return;
-                case 4: Run<4, 22>(src, srcStride, dst, dstStride); return;
-                default:
-                    assert(0);
-                }
+            case 1: Run<1>(src, srcStride, dst, dstStride); return;
+            case 2: Run<2>(src, srcStride, dst, dstStride); return;
+            case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 4: Run<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
             }
         }
 

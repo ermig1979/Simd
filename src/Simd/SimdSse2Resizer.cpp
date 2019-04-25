@@ -245,20 +245,20 @@ namespace Simd
                 dst[c] += src[c] * value;
         }
 
-        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, int32_t round, int32_t shift, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, uint8_t * dst)
         {
             for (size_t c = 0; c < N; ++c)
-                dst[c] = uint8_t((src[c] + round) >> shift);
+                dst[c] = uint8_t((src[c] + Base::AREA_ROUND) >> Base::AREA_SHIFT);
         }
 
-        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, int32_t shift, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
             int32_t sum[N];
-            ResizerByteAreaSet< N>(src, curr, sum);
+            ResizerByteAreaSet<N>(src, curr, sum);
             for (size_t i = 0; i < count; ++i)
                 src += N, ResizerByteAreaAdd<N>(src, zero, sum);
             ResizerByteAreaAdd<N>(src, -next, sum);
-            ResizerByteAreaRes<N>(sum, round, shift, dst);
+            ResizerByteAreaRes<N>(sum, dst);
         }
 
         template<size_t N> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
@@ -266,7 +266,6 @@ namespace Simd
             size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW*N;
             const int32_t * iy = _iy.data, * ix = _ix.data, * ay = _ay.data, * ax = _ax.data;
             int32_t ay0 = ay[0], ax0 = ax[0];
-            int32_t round = (ay0 * ax0) / 2, shift = _shift;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
             {
                 int32_t * buf = _by.data;
@@ -275,7 +274,7 @@ namespace Simd
                 for (size_t dx = 0; dx < dstW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
-                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], round, shift, dst), buf += xn * N;
+                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }

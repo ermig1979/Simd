@@ -133,17 +133,14 @@ namespace Simd
             : Resizer(param)
         {
             double scale = Simd::Max(float(_param.srcW) / _param.dstW, float(_param.srcH) / _param.dstH);
-            int32_t shift = scale > 32.0f ? 11 : 7;
-            _range = 1 << shift;
-            _shift = 2 * shift;
 
             _ay.Resize(_param.dstH + 1);
             _iy.Resize(_param.dstH + 1);
-            EstimateParams(_param.srcH, _param.dstH, _range, _ay.data, _iy.data);
+            EstimateParams(_param.srcH, _param.dstH, Base::AREA_RANGE, _ay.data, _iy.data);
 
             _ax.Resize(_param.dstW + 1);
             _ix.Resize(_param.dstW + 1);
-            EstimateParams(_param.srcW, _param.dstW, _range, _ax.data, _ix.data);
+            EstimateParams(_param.srcW, _param.dstW, Base::AREA_RANGE, _ax.data, _ix.data);
         }
 
         void ResizerByteArea::EstimateParams(size_t srcSize, size_t dstSize, size_t range, int32_t * alpha, int32_t * index)
@@ -188,17 +185,16 @@ namespace Simd
             ResizerByteAreaAdd<uint8_t, N>(src, tail, dst);
         }
 
-        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, int32_t roundTerm, int shift, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, uint8_t * dst)
         {
             for (size_t c = 0; c < N; ++c)
-                dst[c] = uint8_t((src[c] + roundTerm) >> shift);
+                dst[c] = uint8_t((src[c] + Base::AREA_ROUND) >> Base::AREA_SHIFT);
         }
 
         template<size_t N> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             int32_t ts[N], rs[N];
             int32_t ayb = _ay.data[0], axb = _ax.data[0];
-            int32_t rt = (ayb*axb) / 2;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t by = _iy.data[dy], ey = _iy.data[dy + 1];
@@ -218,7 +214,7 @@ namespace Simd
                     }
                     ResizerByteAreaPixelRowSum<N>(s, sx, axn, axb, axt, rs);
                     ResizerByteAreaAdd<int32_t, N>(rs, ayt, ts);
-                    ResizerByteAreaRes<N>(ts, rt, _shift, dst + dx * N);
+                    ResizerByteAreaRes<N>(ts, dst + dx * N);
                 }
             }
         }

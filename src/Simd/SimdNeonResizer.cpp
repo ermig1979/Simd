@@ -426,58 +426,47 @@ namespace Simd
                 dst[c] += src[c] * value;
         }
 
-        template<size_t N, size_t S> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, int32_t round, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, uint8_t * dst)
         {
             for (size_t c = 0; c < N; ++c)
-                dst[c] = uint8_t((src[c] + round) >> S);
+                dst[c] = uint8_t((src[c] + Base::AREA_ROUND) >> Base::AREA_SHIFT);
         }
 
-        template<size_t N, size_t S> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
             int32_t sum[N];
             ResizerByteAreaSet<N>(src, curr, sum);
             for (size_t i = 0; i < count; ++i)
                 src += N, ResizerByteAreaAdd<N>(src, zero, sum);
             ResizerByteAreaAdd<N>(src, -next, sum);
-            ResizerByteAreaRes<N, S>(sum, round, dst);
+            ResizerByteAreaRes<N>(sum, dst);
         }
 
-        template<size_t N, size_t S> SIMD_INLINE void ResizerByteAreaResult34(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult34(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
             int32x4_t sum = vmulq_s32(Load<false>(src), vdupq_n_s32(curr));
             for (size_t i = 0; i < count; ++i)
                 src += N, sum = vmlaq_s32(sum, Load<false>(src), vdupq_n_s32(zero));
             sum = vmlaq_s32(sum, Load<false>(src), vdupq_n_s32(-next));
-            int32x4_t res = vshrq_n_s32(vaddq_s32(sum, vdupq_n_s32(round)), S);
+            int32x4_t res = vshrq_n_s32(vaddq_s32(sum, vdupq_n_s32(Base::AREA_ROUND)), Base::AREA_SHIFT);
             *(uint32_t*)dst = vget_lane_u32((uint32x2_t)vqmovn_u16(vcombine_u16(vqmovun_s32(res), vdup_n_u16(0))), 0);
         }
 
-        template<> SIMD_INLINE void ResizerByteAreaResult<4, 14>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<> SIMD_INLINE void ResizerByteAreaResult<4>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
-            ResizerByteAreaResult34<4, 14>(src, count, curr, zero, next, round, dst);
+            ResizerByteAreaResult34<4>(src, count, curr, zero, next, dst);
         }
 
-        template<> SIMD_INLINE void ResizerByteAreaResult<4, 22>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
+        template<> SIMD_INLINE void ResizerByteAreaResult<3>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
-            ResizerByteAreaResult34<4, 22>(src, count, curr, zero, next, round, dst);
+            ResizerByteAreaResult34<3>(src, count, curr, zero, next, dst);
         }
 
-        template<> SIMD_INLINE void ResizerByteAreaResult<3, 14>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
-        {
-            ResizerByteAreaResult34<3, 14>(src, count, curr, zero, next, round, dst);
-        }
-
-        template<> SIMD_INLINE void ResizerByteAreaResult<3, 22>(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, int32_t round, uint8_t * dst)
-        {
-            ResizerByteAreaResult34<3, 22>(src, count, curr, zero, next, round, dst);
-        }
-
-        template<size_t N, size_t S> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        template<size_t N> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW * N;
             const int32_t * iy = _iy.data, *ix = _ix.data, *ay = _ay.data, *ax = _ax.data;
             int32_t ay0 = ay[0], ax0 = ax[0];
-            int32_t round = (ay0 * ax0) / 2;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
             {
                 int32_t * buf = _by.data;
@@ -486,36 +475,21 @@ namespace Simd
                 for (size_t dx = 0; dx < dstW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
-                    ResizerByteAreaResult<N, S>(buf, xn, ax[dx], ax0, ax[dx + 1], round, dst), buf += xn * N;
+                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }
 
         void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            if (_shift == 14)
+            switch (_param.channels)
             {
-                switch (_param.channels)
-                {
-                case 1: Run<1, 14>(src, srcStride, dst, dstStride); return;
-                case 2: Run<2, 14>(src, srcStride, dst, dstStride); return;
-                case 3: Run<3, 14>(src, srcStride, dst, dstStride); return;
-                case 4: Run<4, 14>(src, srcStride, dst, dstStride); return;
-                default:
-                    assert(0);
-                }
-            }
-            else
-            {
-                switch (_param.channels)
-                {
-                case 1: Run<1, 22>(src, srcStride, dst, dstStride); return;
-                case 2: Run<2, 22>(src, srcStride, dst, dstStride); return;
-                case 3: Run<3, 22>(src, srcStride, dst, dstStride); return;
-                case 4: Run<4, 22>(src, srcStride, dst, dstStride); return;
-                default:
-                    assert(0);
-                }
+            case 1: Run<1>(src, srcStride, dst, dstStride); return;
+            case 2: Run<2>(src, srcStride, dst, dstStride); return;
+            case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 4: Run<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
             }
         }
 
