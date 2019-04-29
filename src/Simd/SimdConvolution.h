@@ -174,6 +174,8 @@ namespace Simd
 
     namespace Base
     {
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
+
         class ConvolutionGemmNN : public Convolution
         {
         public:

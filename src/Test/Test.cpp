@@ -243,6 +243,8 @@ namespace Test
     TEST_ADD_GROUP_AD0(InterleaveBgr);
     TEST_ADD_GROUP_AD0(InterleaveBgra);
 
+    TEST_ADD_GROUP_A00(MergedConvolutionForward);
+
     TEST_ADD_GROUP_00S(Motion);
 
     TEST_ADD_GROUP_AD0(NeuralConvert);

@@ -56,6 +56,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdMergedConvolution.h"
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
@@ -3277,6 +3278,40 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
     else
 #endif
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
+}
+
+typedef void* (*SimdMergedConvolutionInitPtr) (size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
+    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
+    SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC0(MergedConvolutionInit);
+
+SIMD_API void * SimdMergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
+    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
+    SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm)
+{
+    return simdMergedConvolutionInit(batch, srcC, srcH, srcW, dstC, kernelY, kernelX, strideY, strideX, padY, padX, padH, padW, activation0, activation1, gemm);
+}
+
+SIMD_API size_t SimdMergedConvolutionExternalBufferSize(const void * context)
+{
+    return ((MergedConvolution*)context)->ExternalBufferSize();
+}
+
+SIMD_API size_t SimdMergedConvolutionInternalBufferSize(const void * context)
+{
+    return ((MergedConvolution*)context)->InternalBufferSize();
+}
+
+SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * weight0, const float * weight1, SimdBool * internal,
+    const float * bias0, const float * bias1, const float * params0, const float * params1)
+{
+    ((MergedConvolution*)context)->SetParams(weight0, weight1, internal, bias0, bias1, params0, params1);
+}
+
+SIMD_API void SimdMergedConvolutionForward(void * context, const float * src, float * buf, float * dst)
+{
+    ((Convolution*)context)->Forward(src, buf, dst);
 }
 
 SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)

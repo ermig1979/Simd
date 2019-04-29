@@ -29,7 +29,7 @@ namespace Simd
 {
     namespace Base
     {
-        static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst)
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst)
         {
             if (activation == ::SimdConvolutionActivationIdentity)
             {
