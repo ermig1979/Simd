@@ -228,6 +228,21 @@ namespace Simd
             SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512F_ENABLE    
+    namespace Avx512f
+    {
+        class MergedConvolution : public Avx2::MergedConvolution
+        {
+        public:
+            MergedConvolution(const MergConvParam & p);
+        };
+
+        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
+            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
+            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_AVX512F_ENABLE
 }
 
 #endif//__SimMergedConvolution_h__

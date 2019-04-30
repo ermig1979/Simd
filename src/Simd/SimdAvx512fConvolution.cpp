@@ -147,7 +147,7 @@ namespace Simd
             nhwcGemm.ReorderB(B, N, pB);
         }
 
-        static void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             size_t aligned = AlignLo(trans ? count : size, F);
             __mmask16 tail = __mmask16(-1) >> (F + aligned - (trans ? count : size));

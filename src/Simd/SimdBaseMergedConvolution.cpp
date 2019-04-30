@@ -114,7 +114,7 @@ namespace Simd
         void MergedConvolution::SetSize(size_t L2)
         {
             const MergConvParam & p = _param;
-            _block = _merge ? p.dstH : Simd::RestrictRange(L2 /sizeof(float) / p.srcC / p.dstW, size_t(1), p.dstH);
+            _block = _merge ? p.dstH : Simd::RestrictRange(L2 /sizeof(float) / p.srcC / p.dstW, Simd::Min(size_t(2), p.dstH), p.dstH);
             _batch = p.batch;
             _M = _merge ? _batch * p.dstH * p.dstW : _block * p.dstW;
             _N = p.dstC;

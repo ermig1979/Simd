@@ -404,7 +404,7 @@ namespace Simd
         MergedConvolution::MergedConvolution(const MergConvParam & p)
             : Avx::MergedConvolution(p)
         {
-            _merge = p.dstH*p.dstW <= 64;
+            _merge = p.dstH*p.dstW <= 256 && p.batch > 1;
             SetSize(256 * 1024);
             switch (p.activation0)
             {
