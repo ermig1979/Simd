@@ -156,22 +156,48 @@ namespace Simd
         {
         public:
             MergedConvolution(const MergConvParam & p);
+
             virtual size_t ExternalBufferSize() const;
+            virtual size_t InternalBufferSize() const;
+            virtual void SetParams(const float * weight0, const float * weight1, SimdBool * internal, const float * bias0, const float * bias1, const float * params0, const float * params1);
             virtual void Forward(const float * src, float * buf, float * dst);
+
         protected:
+            typedef void(*Depthwise)(const float * src, const MergConvParam & p, size_t yBeg, size_t yEnd, const float * weight, const float * bias, const float * params, float * dst);
+            typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB);
+            typedef void(*NhwcRun)(size_t m, size_t M, size_t N, size_t K, const float * A, const float * B, float * C);
+            typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
-            typedef void(*DepthwisePtr)(const float * src, size_t srcH, size_t srcW, size_t srcC, size_t dstH, size_t dstW,
-                size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX,
-                const float * weight, const float * bias, const float * params, float * dst);
+            void SetSize(size_t L2);
 
-            size_t _srcSize, _dstSize;
-            DepthwisePtr _depthwise;
+            bool _merge;
+            size_t _batch, _block, _M, _N, _K, _sizeS, _sizeB, _sizeD;
+            Depthwise _depthwise;
+            Array32f _nhwcWeight;
+            NhwcRun _nhwcRun;
+            NhwcReorderB _nhwcReorderB;
+            BiasAndActivation _biasAndActivation;
         };
 
         void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
             size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
             SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
     }
+
+#ifdef SIMD_SSE_ENABLE    
+    namespace Sse
+    {
+        class MergedConvolution : public Base::MergedConvolution
+        {
+        public:
+            MergedConvolution(const MergConvParam & p);
+        };
+
+        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
+            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
+            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_SSE_ENABLE
 }
 
 #endif//__SimMergedConvolution_h__

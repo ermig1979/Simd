@@ -346,17 +346,23 @@ namespace Simd
             }
         }
 
-        void Run(const T * A, size_t lda, const T * pB, T * C, size_t ldc)
+        SIMD_INLINE void Run(const T * A, size_t lda, const T * pB, T * C, size_t ldc)
         {
+            Run(_M, A, lda, pB, C, ldc);
+        }
+
+        void Run(size_t M, const T * A, size_t lda, const T * pB, T * C, size_t ldc)
+        {
+            assert(M <= _M);
             for (size_t j = 0; j < _N; j += _macroN)
             {
                 size_t macroN = Simd::Min(_N, j + _macroN) - j;
                 for (size_t k = 0; k < _K; k += _macroK)
                 {
                     size_t macroK = Simd::Min(_K, k + _macroK) - k;
-                    for (size_t i = 0; i < _M; i += _macroM)
+                    for (size_t i = 0; i < M; i += _macroM)
                     {
-                        size_t macroM = Simd::Min(_M, i + _macroM) - i;
+                        size_t macroM = Simd::Min(M, i + _macroM) - i;
                         if (k == 0)
                             _scaleC(macroM, macroN, _0, C + i * ldc + j, ldc);
                         MacroKernel(macroM, macroN, macroK, A + i * lda + k, lda, pB, C + i * ldc + j, ldc);

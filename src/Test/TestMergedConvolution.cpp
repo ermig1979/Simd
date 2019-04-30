@@ -132,8 +132,9 @@ namespace Test
         Tensor32f dst1({ p.batch, dstH, dstW, p.dstC});
         Tensor32f dst2({ p.batch, dstH, dstW, p.dstC});
 
-        ::SimdFill32f(dst1.Data(), dst1.Size(), p0.Data() + 0);
-        ::SimdFill32f(dst2.Data(), dst2.Size(), p1.Data() + 0);
+        float fv1 = 0.01, fv2 = 0.02;
+        ::SimdFill32f(dst1.Data(), dst1.Size(), &fv1);
+        ::SimdFill32f(dst2.Data(), dst2.Size(), &fv2);
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -156,9 +157,11 @@ namespace Test
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 144, 96, 96, 24, _3, _1, _1, _1, a0, a1), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 96, 192, 192, 24, _3, _2, _1, _1, a0, a1), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 192, 192, 16, _3, _1, _1, _1, a0, a1), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 384, 24, 24, 64, _3, _1, _1, _1, a0, a1), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 576, 24, 24, 96, _3, _1, _1, _1, a0, a1), f1, f2);
 #endif
 #else
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 144, 96, 96, 24, _3, _1, _1, _1, a0, a1), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 192, 192, 16, _3, _1, _1, _1, a0, a1), f1, f2);
 #endif
         return result;
     }
@@ -167,7 +170,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && MergedConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdConvolutionActivationIdentity, f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdConvolutionActivationIdentity, f1, f2);
 
         return result;
     }
@@ -177,6 +180,11 @@ namespace Test
         bool result = true;
 
         result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Base::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Sse::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#endif 
 
         return result;
     }
