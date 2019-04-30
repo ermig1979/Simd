@@ -186,6 +186,11 @@ namespace Test
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Sse::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif 
 
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#endif 
+
         return result;
     }
 }

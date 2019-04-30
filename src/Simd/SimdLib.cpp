@@ -3284,7 +3284,7 @@ typedef void* (*SimdMergedConvolutionInitPtr) (size_t batch, size_t srcC, size_t
     size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
     SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
 
-SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC1(MergedConvolutionInit, SIMD_SSE_FUNC);
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC2(MergedConvolutionInit, SIMD_AVX_FUNC, SIMD_SSE_FUNC);
 
 SIMD_API void * SimdMergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
     size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
