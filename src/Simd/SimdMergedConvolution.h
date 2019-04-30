@@ -202,7 +202,7 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class MergedConvolution : public Base::MergedConvolution
+        class MergedConvolution : public Sse::MergedConvolution
         {
         public:
             MergedConvolution(const MergConvParam & p);
@@ -213,6 +213,21 @@ namespace Simd
             SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class MergedConvolution : public Avx::MergedConvolution
+        {
+        public:
+            MergedConvolution(const MergConvParam & p);
+        };
+
+        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
+            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
+            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_AVX2_ENABLE
 }
 
 #endif//__SimMergedConvolution_h__

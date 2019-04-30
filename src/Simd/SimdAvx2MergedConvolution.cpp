@@ -24,13 +24,13 @@
 #include "Simd/SimdMergedConvolution.h"
 #include "Simd/SimdConvolution.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdSse1.h"
+#include "Simd/SimdAvx2.h"
 #include "Simd/SimdGemm.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE 
-    namespace Sse
+#ifdef SIMD_AVX2_ENABLE 
+    namespace Avx2
     {
         typedef Simd::GemmNNcb<float, size_t> NhwcGemm;
 
@@ -46,32 +46,32 @@ namespace Simd
             if (M == 4 || M == 8 || /*M == 12 || */M == 16)
             {
                 microM = 4;
-                microN = 12;
+                microN = 24;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Sse::GemmKernel4x12nn;
-                kernelMT = tail > DF ? Sse::GemmKernel4x12nn : (tail > F ? Sse::GemmKernel4x8nn : Sse::GemmKernel4x4nn);
-                kernelTM = Sse::GemmKernelMx12nn;
-                kernelTT = tail > DF ? Sse::GemmKernelMx12nn : (tail > F ? Sse::GemmKernelMx8nn : Sse::GemmKernelMx4nn);
+                kernelMM = Avx2::GemmKernel4x24nn;
+                kernelMT = tail > DF ? Avx2::GemmKernel4x24nn : (tail > F ? Avx2::GemmKernel4x16nn : Avx2::GemmKernel4x8nn);
+                kernelTM = Avx2::GemmKernelMx24nn;
+                kernelTT = tail > DF ? Avx2::GemmKernelMx24nn : (tail > F ? Avx2::GemmKernelMx16nn : Avx2::GemmKernelMx8nn);
             }
             else
             {
                 microM = 6;
-                microN = 8;
+                microN = 16;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Sse::GemmKernel6x8nn;
-                kernelMT = tail > F ? Sse::GemmKernel6x8nn : Sse::GemmKernel6x4nn;
-                kernelTM = Sse::GemmKernelMx8nn;
-                kernelTT = tail > F ? Sse::GemmKernelMx8nn : Sse::GemmKernelMx4nn;
+                kernelMM = Avx2::GemmKernel6x16nn;
+                kernelMT = tail > F ? Avx2::GemmKernel6x16nn : Avx2::GemmKernel6x8nn;
+                kernelTM = Avx2::GemmKernelMx16nn;
+                kernelTT = tail > F ? Avx2::GemmKernelMx16nn : Avx2::GemmKernelMx8nn;
             }
 #else
             microM = 4;
-            microN = 4;
-            kernelMM = Sse::GemmKernel4x4nn;
-            kernelMT = Sse::GemmKernel4x4nn;
-            kernelTM = Sse::GemmKernelMx4nn;
-            kernelTT = Sse::GemmKernelMx4nn;
+            microN = 8;
+            kernelMM = Avx2::GemmKernel4x8nn;
+            kernelMT = Avx2::GemmKernel4x8nn;
+            kernelTM = Avx2::GemmKernelMx8nn;
+            kernelTT = Avx2::GemmKernelMx8nn;
 #endif
-            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Sse::GemmPackB, Sse::GemmScaleC, NULL);
+            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL);
         }
 
         static void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
@@ -94,31 +94,31 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const float * params, size_t offset);
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const float * params, size_t offset);
 
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationIdentity>(__m128 value, const float * params, size_t offset)
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const float * params, size_t offset)
         {
             return value;
         }
 
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationRelu>(__m128 value, const float * params, size_t offset)
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRelu>(__m256 value, const float * params, size_t offset)
         {
-            return _mm_max_ps(_mm_setzero_ps(), value);
+            return _mm256_max_ps(_mm256_setzero_ps(), value);
         }
 
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationLeakyRelu>(__m128 value, const float * params, size_t offset)
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationLeakyRelu>(__m256 value, const float * params, size_t offset)
         {
-            return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(_mm_set1_ps(params[0]), _mm_min_ps(_mm_setzero_ps(), value)));
+            return _mm256_fmadd_ps(_mm256_set1_ps(params[0]), _mm256_min_ps(_mm256_setzero_ps(), value), _mm256_max_ps(_mm256_setzero_ps(), value));
         }
 
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationRestrictRange>(__m128 value, const float * params, size_t offset)
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRestrictRange>(__m256 value, const float * params, size_t offset)
         {
-            return _mm_min_ps(_mm_max_ps(_mm_set1_ps(params[0]), value), _mm_set1_ps(params[1]));
+            return _mm256_min_ps(_mm256_max_ps(_mm256_set1_ps(params[0]), value), _mm256_set1_ps(params[1]));
         }
 
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationPrelu>(__m128 value, const float * params, size_t offset)
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const float * params, size_t offset)
         {
-            return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(_mm_loadu_ps(params + offset), _mm_min_ps(_mm_setzero_ps(), value)));
+            return _mm256_fmadd_ps(_mm256_loadu_ps(params + offset), _mm256_min_ps(_mm256_setzero_ps(), value), _mm256_max_ps(_mm256_setzero_ps(), value));
         }
 
         template<::SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolutionBiasActivation3x3Edge1(const float * src, const MergConvParam & p, 
@@ -129,7 +129,7 @@ namespace Simd
             size_t c = 0;
             for (; c < srcCF; c += F)
             {
-                __m128 sum = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                __m256 sum = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t sy = dy * p.strideY + ky - p.padY;
@@ -142,12 +142,12 @@ namespace Simd
                             {
                                 const float * pw = weight + (ky * 3 + kx) * srcC;
                                 const float * ps = src + (sy*p.srcW + sx) * srcC;
-                                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
+                                sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps), _mm256_loadu_ps(pw), sum);
                             }
                         }
                     }
                 }
-                _mm_storeu_ps(dst + c, Activate<type>(sum, params, c));
+                _mm256_storeu_ps(dst + c, Activate<type>(sum, params, c));
                 src += F;
                 weight += F;
             }
@@ -156,7 +156,7 @@ namespace Simd
                 c = srcC - F;
                 src -= srcCF - c;
                 weight -= srcCF - c;
-                __m128 sum = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                __m256 sum = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t sy = dy * p.strideY + ky - p.padY;
@@ -169,12 +169,12 @@ namespace Simd
                             {
                                 const float * pw = weight + (ky * 3 + kx) * srcC;
                                 const float * ps = src + (sy*p.srcW + sx) * srcC;
-                                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
+                                sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps), _mm256_loadu_ps(pw), sum);
                             }
                         }
                     }
                 }
-                _mm_storeu_ps(dst + c, Activate<type>(sum, params, c));
+                _mm256_storeu_ps(dst + c, Activate<type>(sum, params, c));
             }
         }
 
@@ -185,16 +185,16 @@ namespace Simd
             size_t c = 0;
             for (; c < srcCF; c += F)
             {
-                __m128 sum = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                __m256 sum = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     const float * ps = src + ky * srcS;
                     const float * pw = weight + ky * 3 * srcC;
-                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * srcC), _mm_loadu_ps(pw + 0 * srcC)), sum);
-                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * srcC), _mm_loadu_ps(pw + 1 * srcC)), sum);
-                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * srcC), _mm_loadu_ps(pw + 2 * srcC)), sum);
+                    sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps + 0 * srcC), _mm256_loadu_ps(pw + 0 * srcC), sum);
+                    sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps + 1 * srcC), _mm256_loadu_ps(pw + 1 * srcC), sum);
+                    sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps + 2 * srcC), _mm256_loadu_ps(pw + 2 * srcC), sum);
                 }
-                _mm_storeu_ps(dst + c, Activate<type>(sum, params, c));
+                _mm256_storeu_ps(dst + c, Activate<type>(sum, params, c));
                 src += F;
                 weight += F;
             }
@@ -203,16 +203,16 @@ namespace Simd
                 c = srcC - F;
                 src -= srcCF - c;
                 weight -= srcCF - c;
-                __m128 sum = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                __m256 sum = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     const float * ps = src + ky * srcS;
                     const float * pw = weight + ky * 3 * srcC;
-                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * srcC), _mm_loadu_ps(pw + 0 * srcC)), sum);
-                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * srcC), _mm_loadu_ps(pw + 1 * srcC)), sum);
-                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * srcC), _mm_loadu_ps(pw + 2 * srcC)), sum);
+                    sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps + 0 * srcC), _mm256_loadu_ps(pw + 0 * srcC), sum);
+                    sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps + 1 * srcC), _mm256_loadu_ps(pw + 1 * srcC), sum);
+                    sum = _mm256_fmadd_ps(_mm256_loadu_ps(ps + 2 * srcC), _mm256_loadu_ps(pw + 2 * srcC), sum);
                 }
-                _mm_storeu_ps(dst + c, Activate<type>(sum, params, c));
+                _mm256_storeu_ps(dst + c, Activate<type>(sum, params, c));
             }
         }
 
@@ -221,59 +221,59 @@ namespace Simd
         {
             size_t srcCF = AlignLo(srcC, F);
             size_t c = 0;
-            __m128 sum0, sum1, w0;
+            __m256 sum0, sum1, w0;
             for (; c < srcCF; c += F)
             {
-                sum0 = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                sum0 = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 sum1 = sum0;
                 const float * pw = weight + c;
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     const float * ps0 = src + ky * srcS;
                     const float * ps1 = ps0 + srcX;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + 0 * srcC), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + 0 * srcC), w0), sum1);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + 0 * srcC), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + 0 * srcC), w0, sum1);
                     pw += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + 1 * srcC), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + 1 * srcC), w0), sum1);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + 1 * srcC), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + 1 * srcC), w0, sum1);
                     pw += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + 2 * srcC), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + 2 * srcC), w0), sum1);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + 2 * srcC), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + 2 * srcC), w0, sum1);
                     pw += srcC;
                 }
-                _mm_storeu_ps(dst + c, Activate<type>(sum0, params, c));
-                _mm_storeu_ps(dst + c + srcC, Activate<type>(sum1, params, c));
+                _mm256_storeu_ps(dst + c, Activate<type>(sum0, params, c));
+                _mm256_storeu_ps(dst + c + srcC, Activate<type>(sum1, params, c));
                 src += F;
             }
             if (c < srcC)
             {
                 c = srcC - F;
                 src -= srcCF - c;
-                sum0 = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                sum0 = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 sum1 = sum0;
                 const float * pw = weight + c;
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     const float * ps0 = src + ky * srcS;
                     const float * ps1 = ps0 + srcX;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + 0 * srcC), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + 0 * srcC), w0), sum1);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + 0 * srcC), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + 0 * srcC), w0, sum1);
                     pw += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + 1 * srcC), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + 1 * srcC), w0), sum1);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + 1 * srcC), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + 1 * srcC), w0, sum1);
                     pw += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + 2 * srcC), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + 2 * srcC), w0), sum1);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + 2 * srcC), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + 2 * srcC), w0, sum1);
                     pw += srcC;
                 }
-                _mm_storeu_ps(dst + c, Activate<type>(sum0, params, c));
-                _mm_storeu_ps(dst + c + srcC, Activate<type>(sum1, params, c));
+                _mm256_storeu_ps(dst + c, Activate<type>(sum0, params, c));
+                _mm256_storeu_ps(dst + c + srcC, Activate<type>(sum1, params, c));
             }
         }
 
@@ -284,8 +284,8 @@ namespace Simd
             size_t c = 0;
             for (; c < srcCF; c += F)
             {
-                __m128 sum0, sum1, sum2, sum3, w0;
-                sum0 = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                __m256 sum0, sum1, sum2, sum3, w0;
+                sum0 = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 sum1 = sum0;
                 sum2 = sum0;
                 sum3 = sum0;
@@ -297,29 +297,29 @@ namespace Simd
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t offset = ky * srcS;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + offset), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + offset), w0), sum1);
-                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps2 + offset), w0), sum2);
-                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps3 + offset), w0), sum3);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + offset), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + offset), w0, sum1);
+                    sum2 = _mm256_fmadd_ps(_mm256_loadu_ps(ps2 + offset), w0, sum2);
+                    sum3 = _mm256_fmadd_ps(_mm256_loadu_ps(ps3 + offset), w0, sum3);
                     pw += srcC, offset += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + offset), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + offset), w0), sum1);
-                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps2 + offset), w0), sum2);
-                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps3 + offset), w0), sum3);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + offset), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + offset), w0, sum1);
+                    sum2 = _mm256_fmadd_ps(_mm256_loadu_ps(ps2 + offset), w0, sum2);
+                    sum3 = _mm256_fmadd_ps(_mm256_loadu_ps(ps3 + offset), w0, sum3);
                     pw += srcC, offset += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + offset), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + offset), w0), sum1);
-                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps2 + offset), w0), sum2);
-                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps3 + offset), w0), sum3);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + offset), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + offset), w0, sum1);
+                    sum2 = _mm256_fmadd_ps(_mm256_loadu_ps(ps2 + offset), w0, sum2);
+                    sum3 = _mm256_fmadd_ps(_mm256_loadu_ps(ps3 + offset), w0, sum3);
                     pw += srcC, offset += srcC;
                 }
-                _mm_storeu_ps(dst + 0 * srcC, Activate<type>(sum0, params, c));
-                _mm_storeu_ps(dst + 1 * srcC, Activate<type>(sum1, params, c));
-                _mm_storeu_ps(dst + 2 * srcC, Activate<type>(sum2, params, c));
-                _mm_storeu_ps(dst + 3 * srcC, Activate<type>(sum3, params, c));
+                _mm256_storeu_ps(dst + 0 * srcC, Activate<type>(sum0, params, c));
+                _mm256_storeu_ps(dst + 1 * srcC, Activate<type>(sum1, params, c));
+                _mm256_storeu_ps(dst + 2 * srcC, Activate<type>(sum2, params, c));
+                _mm256_storeu_ps(dst + 3 * srcC, Activate<type>(sum3, params, c));
                 src += F;
                 dst += F;
             }
@@ -328,8 +328,8 @@ namespace Simd
                 c = srcC - F;
                 src -= srcCF - c;
                 dst -= srcCF - c;
-                __m128 sum0, sum1, sum2, sum3, w0;
-                sum0 = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                __m256 sum0, sum1, sum2, sum3, w0;
+                sum0 = bias ? _mm256_loadu_ps(bias + c) : _mm256_setzero_ps();
                 sum1 = sum0;
                 sum2 = sum0;
                 sum3 = sum0;
@@ -341,29 +341,29 @@ namespace Simd
                 for (size_t ky = 0; ky < 3; ++ky)
                 {
                     size_t offset = ky * srcS;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + offset), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + offset), w0), sum1);
-                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps2 + offset), w0), sum2);
-                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps3 + offset), w0), sum3);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + offset), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + offset), w0, sum1);
+                    sum2 = _mm256_fmadd_ps(_mm256_loadu_ps(ps2 + offset), w0, sum2);
+                    sum3 = _mm256_fmadd_ps(_mm256_loadu_ps(ps3 + offset), w0, sum3);
                     pw += srcC, offset += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + offset), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + offset), w0), sum1);
-                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps2 + offset), w0), sum2);
-                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps3 + offset), w0), sum3);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + offset), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + offset), w0, sum1);
+                    sum2 = _mm256_fmadd_ps(_mm256_loadu_ps(ps2 + offset), w0, sum2);
+                    sum3 = _mm256_fmadd_ps(_mm256_loadu_ps(ps3 + offset), w0, sum3);
                     pw += srcC, offset += srcC;
-                    w0 = _mm_loadu_ps(pw);
-                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps0 + offset), w0), sum0);
-                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps1 + offset), w0), sum1);
-                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps2 + offset), w0), sum2);
-                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps3 + offset), w0), sum3);
+                    w0 = _mm256_loadu_ps(pw);
+                    sum0 = _mm256_fmadd_ps(_mm256_loadu_ps(ps0 + offset), w0, sum0);
+                    sum1 = _mm256_fmadd_ps(_mm256_loadu_ps(ps1 + offset), w0, sum1);
+                    sum2 = _mm256_fmadd_ps(_mm256_loadu_ps(ps2 + offset), w0, sum2);
+                    sum3 = _mm256_fmadd_ps(_mm256_loadu_ps(ps3 + offset), w0, sum3);
                     pw += srcC, offset += srcC;
                 }
-                _mm_storeu_ps(dst + 0 * srcC, Activate<type>(sum0, params, c));
-                _mm_storeu_ps(dst + 1 * srcC, Activate<type>(sum1, params, c));
-                _mm_storeu_ps(dst + 2 * srcC, Activate<type>(sum2, params, c));
-                _mm_storeu_ps(dst + 3 * srcC, Activate<type>(sum3, params, c));
+                _mm256_storeu_ps(dst + 0 * srcC, Activate<type>(sum0, params, c));
+                _mm256_storeu_ps(dst + 1 * srcC, Activate<type>(sum1, params, c));
+                _mm256_storeu_ps(dst + 2 * srcC, Activate<type>(sum2, params, c));
+                _mm256_storeu_ps(dst + 3 * srcC, Activate<type>(sum3, params, c));
             }
         }
 
@@ -402,7 +402,7 @@ namespace Simd
         }
 
         MergedConvolution::MergedConvolution(const MergConvParam & p)
-            : Base::MergedConvolution(p)
+            : Avx::MergedConvolution(p)
         {
             _merge = p.dstH*p.dstW <= 64;
             SetSize(256 * 1024);
@@ -415,12 +415,12 @@ namespace Simd
             case SimdConvolutionActivationPrelu: _depthwise = DepthwiseConvolutionBiasActivation3x3<SimdConvolutionActivationPrelu>; break;
             default: assert(0);
             }
-            _gemm.Init(Sse::Gemm32fNN, "Sse", p.gemm, "Ext");
+            _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
             NhwcGemm nhwcGemm = CreateNhwcGemm(_M, _N, _K);
             _nhwcWeight.Resize(nhwcGemm.BufferSize());
-            _nhwcRun = Sse::NhwcRun;
-            _nhwcReorderB = Sse::NhwcReorderB;
-            _biasAndActivation = Sse::ConvolutionBiasAndActivation;
+            _nhwcRun = Avx2::NhwcRun;
+            _nhwcReorderB = Avx2::NhwcReorderB;
+            _biasAndActivation = Avx2::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
@@ -433,10 +433,10 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if(param.srcC >= F && param.dstC >= F)
-                return new Sse::MergedConvolution(param);
+                return new Avx2::MergedConvolution(param);
             else
-                return new Base::MergedConvolution(param);
+                return new Sse::MergedConvolution(param);
         }
     }
- #endif//SIMD_SSE_ENABLE
+ #endif//SIMD_AVX2_ENABLE
 }

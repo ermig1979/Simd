@@ -24,8 +24,6 @@
 #include "Simd/SimdMergedConvolution.h"
 #include "Simd/SimdConvolution.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdBase.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdGemm.h"
 
@@ -404,7 +402,7 @@ namespace Simd
         }
 
         MergedConvolution::MergedConvolution(const MergConvParam & p)
-            : Base::MergedConvolution(p)
+            : Sse::MergedConvolution(p)
         {
             _merge = p.dstH*p.dstW <= 64;
             SetSize(256 * 1024);
