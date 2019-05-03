@@ -1681,6 +1681,77 @@ extern "C"
     typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
     /*! @ingroup synet
+        Describes convolution parameters. It is used in functions ::SimdConvolutionInit and ::SimdMergedConvolutionInit.
+    */
+    typedef struct SimdConvolutionParameters
+    {
+        /*!
+            A number of input channels.
+        */
+        size_t srcC;
+        /*!
+            An input height.
+        */
+        size_t srcH;
+        /*!
+            An input width.
+        */
+        size_t srcW;
+        /*!
+            A number of output channels.
+        */
+        size_t dstC;
+        /*!
+            A convolution kernel window height.
+        */
+        size_t kernelY;
+        /*!
+            A convolution kernel window width.
+        */
+        size_t kernelX; 
+        /*!
+            A convolution dilation along Y-axis.
+        */
+        size_t dilationY; 
+        /*!
+            A convolution dilation along X-axis.
+        */
+        size_t dilationX; 
+        /*!
+            A convolution stride along Y-axis.
+        */
+        size_t strideY; 
+        /*!
+            A convolution stride along X-axis.
+        */
+        size_t strideX;
+        /*!
+            An additional zero padding of input image at the beginning of Y-axis.
+        */
+        size_t padY; 
+        /*!
+            An additional zero padding of input image at the beginning of X-axis.
+        */
+        size_t padX; 
+        /*!
+            An additional zero padding of input image at the end of Y-axis.
+        */
+        size_t padH;
+        /*!
+            An additional zero padding of input image at the end of X-axis.
+        */
+        size_t padW; 
+        /*!
+            A number of convolution groups.
+        */
+        size_t group; 
+        /*!
+            An activation function type used after convolution.
+        */
+        SimdConvolutionActivationType activation;
+    } SimdConvolutionParameters;
+
+    /*! @ingroup synet
 
         \fn void * SimdConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
         
@@ -1688,29 +1759,12 @@ extern "C"
 
         \param [in] trans - a flag of transposed input and output data (::SimdFalse - NCHW order, ::SimdTrue - NHWC order).
         \param [in] batch - a batch size.
-        \param [in] srcC - a number of input channels.
-        \param [in] srcH - an input height.
-        \param [in] srcW - an input width.
-        \param [in] dstC - a number of output channels.
-        \param [in] kernelY - a height of the convolution kernel.
-        \param [in] kernelX - a width of the convolution kernel.
-        \param [in] dilationY - a y-dilation of the convolution.
-        \param [in] dilationX - a x-dilation of the convolution.
-        \param [in] strideY - a y-stride of the convolution.
-        \param [in] strideX - a x-stride of the convolution.
-        \param [in] padY - a pad to the top of the input image.
-        \param [in] padX - a pad to the left of the input image.
-        \param [in] padH - a pad to the bottom of the input image.
-        \param [in] padW - a pad to the right of the input image.
-        \param [in] group - a size of convolution group.
-        \param [in] activation - a type of activation function (see ::SimdConvolutionActivationType).
+        \param [in] params - a convolution parameters.
         \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
         \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdConvolutionExternalBufferSize, ::SimdConvolutionInternalBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
     */
-    SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,  
-        size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, 
-        size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
+    SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
 
     /*! @ingroup synet
 

@@ -1052,11 +1052,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, 
-            size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX,
-            size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm)
+        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(trans, batch, srcC, srcH, srcW, dstC, kernelY, kernelX, dilationY, dilationX, strideY, strideX, padY, padX, padH, padW, group, activation, gemm);
+            ConvParam param(trans, batch, params, gemm);
             if (!param.Valid())
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))
