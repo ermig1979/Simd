@@ -143,6 +143,8 @@ namespace Simd
 
         static void NhwcRun(size_t m, size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
         {
+            SIMD_PERF_BEG(ToStr(M) + "-" + ToStr(N) + "-" + ToStr(K));
+
             NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
             nhwcGemm.Run(m, A, K, B, C, N);
         }
@@ -337,7 +339,72 @@ namespace Simd
             size_t srcS, size_t srcX, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcCF = AlignLo(srcC, F);
+            size_t srcCDF = AlignLo(srcC, DF);
             size_t c = 0;
+            for (; c < srcCDF; c += DF)
+            {
+                __m512 sum00, sum01, sum10, sum11, sum20, sum21, sum30, sum31, w0, w1;
+                sum00 = bias ? _mm512_loadu_ps(bias + c + 0) : _mm512_setzero_ps();
+                sum01 = bias ? _mm512_loadu_ps(bias + c + F) : _mm512_setzero_ps();
+                sum10 = sum00;
+                sum11 = sum01;
+                sum20 = sum00;
+                sum21 = sum01;
+                sum30 = sum00;
+                sum31 = sum01;
+                const float * pw = weight + c;
+                const float * ps0 = src + 0 * srcX;
+                const float * ps1 = src + 1 * srcX;
+                const float * ps2 = src + 2 * srcX;
+                const float * ps3 = src + 3 * srcX;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t offset = ky * srcS;
+                    w0 = _mm512_loadu_ps(pw + 0);
+                    w1 = _mm512_loadu_ps(pw + F);
+                    sum00 = _mm512_fmadd_ps(_mm512_loadu_ps(ps0 + offset + 0), w0, sum00);
+                    sum01 = _mm512_fmadd_ps(_mm512_loadu_ps(ps0 + offset + F), w1, sum01);
+                    sum10 = _mm512_fmadd_ps(_mm512_loadu_ps(ps1 + offset + 0), w0, sum10);
+                    sum11 = _mm512_fmadd_ps(_mm512_loadu_ps(ps1 + offset + F), w1, sum11);
+                    sum20 = _mm512_fmadd_ps(_mm512_loadu_ps(ps2 + offset + 0), w0, sum20);
+                    sum21 = _mm512_fmadd_ps(_mm512_loadu_ps(ps2 + offset + F), w1, sum21);
+                    sum30 = _mm512_fmadd_ps(_mm512_loadu_ps(ps3 + offset + 0), w0, sum30);
+                    sum31 = _mm512_fmadd_ps(_mm512_loadu_ps(ps3 + offset + F), w1, sum31);
+                    pw += srcC, offset += srcC;
+                    w0 = _mm512_loadu_ps(pw + 0);
+                    w1 = _mm512_loadu_ps(pw + F);
+                    sum00 = _mm512_fmadd_ps(_mm512_loadu_ps(ps0 + offset + 0), w0, sum00);
+                    sum01 = _mm512_fmadd_ps(_mm512_loadu_ps(ps0 + offset + F), w1, sum01);
+                    sum10 = _mm512_fmadd_ps(_mm512_loadu_ps(ps1 + offset + 0), w0, sum10);
+                    sum11 = _mm512_fmadd_ps(_mm512_loadu_ps(ps1 + offset + F), w1, sum11);
+                    sum20 = _mm512_fmadd_ps(_mm512_loadu_ps(ps2 + offset + 0), w0, sum20);
+                    sum21 = _mm512_fmadd_ps(_mm512_loadu_ps(ps2 + offset + F), w1, sum21);
+                    sum30 = _mm512_fmadd_ps(_mm512_loadu_ps(ps3 + offset + 0), w0, sum30);
+                    sum31 = _mm512_fmadd_ps(_mm512_loadu_ps(ps3 + offset + F), w1, sum31);
+                    pw += srcC, offset += srcC;
+                    w0 = _mm512_loadu_ps(pw + 0);
+                    w1 = _mm512_loadu_ps(pw + F);
+                    sum00 = _mm512_fmadd_ps(_mm512_loadu_ps(ps0 + offset + 0), w0, sum00);
+                    sum01 = _mm512_fmadd_ps(_mm512_loadu_ps(ps0 + offset + F), w1, sum01);
+                    sum10 = _mm512_fmadd_ps(_mm512_loadu_ps(ps1 + offset + 0), w0, sum10);
+                    sum11 = _mm512_fmadd_ps(_mm512_loadu_ps(ps1 + offset + F), w1, sum11);
+                    sum20 = _mm512_fmadd_ps(_mm512_loadu_ps(ps2 + offset + 0), w0, sum20);
+                    sum21 = _mm512_fmadd_ps(_mm512_loadu_ps(ps2 + offset + F), w1, sum21);
+                    sum30 = _mm512_fmadd_ps(_mm512_loadu_ps(ps3 + offset + 0), w0, sum30);
+                    sum31 = _mm512_fmadd_ps(_mm512_loadu_ps(ps3 + offset + F), w1, sum31);
+                    pw += srcC, offset += srcC;
+                }
+                _mm512_storeu_ps(dst + 0 * srcC + 0, Activate<type>(sum00, params, c + 0));
+                _mm512_storeu_ps(dst + 0 * srcC + F, Activate<type>(sum01, params, c + F));
+                _mm512_storeu_ps(dst + 1 * srcC + 0, Activate<type>(sum10, params, c + 0));
+                _mm512_storeu_ps(dst + 1 * srcC + F, Activate<type>(sum11, params, c + F));
+                _mm512_storeu_ps(dst + 2 * srcC + 0, Activate<type>(sum20, params, c + 0));
+                _mm512_storeu_ps(dst + 2 * srcC + F, Activate<type>(sum21, params, c + F));
+                _mm512_storeu_ps(dst + 3 * srcC + 0, Activate<type>(sum30, params, c + 0));
+                _mm512_storeu_ps(dst + 3 * srcC + F, Activate<type>(sum31, params, c + F));
+                src += DF;
+                dst += DF;
+            }
             for (; c < srcCF; c += F)
             {
                 __m512 sum0, sum1, sum2, sum3, w0;
@@ -421,9 +488,103 @@ namespace Simd
             }
         }
 
+        template<::SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolutionBiasActivation3x3_1x1_Main4(const float * src,
+            size_t srcS, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            size_t srcCF = AlignLo(srcC, F);
+            size_t c = 0;
+            __m512 sum0, sum1, sum2, sum3, w0, w1, w2, s0, s1, s2, s3, s4, s5;
+            for (; c < srcCF; c += F)
+            {
+                sum0 = bias ? _mm512_loadu_ps(bias + c) : _mm512_setzero_ps();
+                sum1 = sum0;
+                sum2 = sum0;
+                sum3 = sum0;
+                const float * pw = weight + c;
+                const float * ps0 = src + 0 * srcC;
+                const float * ps1 = src + 1 * srcC;
+                const float * ps2 = src + 2 * srcC;
+                const float * ps3 = src + 3 * srcC;
+                const float * ps4 = src + 4 * srcC;
+                const float * ps5 = src + 5 * srcC;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t offset = ky * srcS;
+                    w0 = _mm512_loadu_ps(pw); pw += srcC;
+                    s0 = _mm512_loadu_ps(ps0 + offset);
+                    sum0 = _mm512_fmadd_ps(s0, w0, sum0);
+                    w1 = _mm512_loadu_ps(pw); pw += srcC;
+                    s1 = _mm512_loadu_ps(ps1 + offset);
+                    sum0 = _mm512_fmadd_ps(s1, w1, sum0);
+                    sum1 = _mm512_fmadd_ps(s1, w0, sum1);
+                    w2 = _mm512_loadu_ps(pw); pw += srcC;
+                    s2 = _mm512_loadu_ps(ps2 + offset);
+                    sum0 = _mm512_fmadd_ps(s2, w2, sum0);
+                    sum1 = _mm512_fmadd_ps(s2, w1, sum1);
+                    sum2 = _mm512_fmadd_ps(s2, w0, sum2);
+                    s3 = _mm512_loadu_ps(ps3 + offset);
+                    sum1 = _mm512_fmadd_ps(s3, w2, sum1);
+                    sum2 = _mm512_fmadd_ps(s3, w1, sum2);
+                    sum3 = _mm512_fmadd_ps(s3, w0, sum3);
+                    s4 = _mm512_loadu_ps(ps4 + offset);
+                    sum2 = _mm512_fmadd_ps(s4, w2, sum2);
+                    sum3 = _mm512_fmadd_ps(s4, w1, sum3);
+                    s5 = _mm512_loadu_ps(ps5 + offset);
+                    sum3 = _mm512_fmadd_ps(s5, w2, sum3);
+                }
+                _mm512_storeu_ps(dst + 0 * srcC, Activate<type>(sum0, params, c));
+                _mm512_storeu_ps(dst + 1 * srcC, Activate<type>(sum1, params, c));
+                _mm512_storeu_ps(dst + 2 * srcC, Activate<type>(sum2, params, c));
+                _mm512_storeu_ps(dst + 3 * srcC, Activate<type>(sum3, params, c));
+                src += F;
+                dst += F;
+            }
+            if (c < srcC)
+            {
+                __mmask16 tail = TailMask16(srcC - c);
+                sum0 = bias ? _mm512_maskz_loadu_ps(tail, bias + c) : _mm512_setzero_ps();
+                sum1 = sum0;
+                sum2 = sum0;
+                sum3 = sum0;
+                const float * pw = weight + c;
+                const float * ps0 = src + 0 * srcC;
+                const float * ps1 = src + 1 * srcC;
+                const float * ps2 = src + 2 * srcC;
+                const float * ps3 = src + 3 * srcC;
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t offset = ky * srcS;
+                    w0 = _mm512_maskz_loadu_ps(tail, pw);
+                    sum0 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps0 + offset), w0, sum0);
+                    sum1 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps1 + offset), w0, sum1);
+                    sum2 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps2 + offset), w0, sum2);
+                    sum3 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps3 + offset), w0, sum3);
+                    pw += srcC, offset += srcC;
+                    w1 = _mm512_maskz_loadu_ps(tail, pw);
+                    sum0 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps0 + offset), w1, sum0);
+                    sum1 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps1 + offset), w1, sum1);
+                    sum2 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps2 + offset), w1, sum2);
+                    sum3 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps3 + offset), w1, sum3);
+                    pw += srcC, offset += srcC;
+                    w2 = _mm512_maskz_loadu_ps(tail, pw);
+                    sum0 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps0 + offset), w2, sum0);
+                    sum1 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps1 + offset), w2, sum1);
+                    sum2 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps2 + offset), w2, sum2);
+                    sum3 = _mm512_fmadd_ps(_mm512_maskz_loadu_ps(tail, ps3 + offset), w2, sum3);
+                    pw += srcC, offset += srcC;
+                }
+                _mm512_mask_storeu_ps(dst + 0 * srcC, tail, Activate<type>(sum0, params, c, tail));
+                _mm512_mask_storeu_ps(dst + 1 * srcC, tail, Activate<type>(sum1, params, c, tail));
+                _mm512_mask_storeu_ps(dst + 2 * srcC, tail, Activate<type>(sum2, params, c, tail));
+                _mm512_mask_storeu_ps(dst + 3 * srcC, tail, Activate<type>(sum3, params, c, tail));
+            }
+        }
+
         template<::SimdConvolutionActivationType type> void DepthwiseConvolutionBiasActivation3x3(const float * src, const MergConvParam & p, 
             size_t yBeg, size_t yEnd, const float * weight, const float * bias, const float * params, float * dst)
         {
+            SIMD_PERF_BEG(p.Info());
+
             size_t srcC = p.srcC;
             size_t srcS = p.srcC*p.srcW;
             size_t srcX = p.srcC*p.strideX;
@@ -441,8 +602,12 @@ namespace Simd
                 for (; dx < p.padX; ++dx)
                     DepthwiseConvolutionBiasActivation3x3Edge1<type>(src, p, dy, dx, weight, bias, params, dst), dst += srcC;
                 size_t offset = ((dy * p.strideY - p.padY)*p.srcW + dx * p.strideX - p.padX)*srcC;
-                for (; dx < dstW4; dx += 4)
-                    DepthwiseConvolutionBiasActivation3x3Main4<type>(src + offset, srcS, srcX, srcC, weight, bias, params, dst), dst += 4 * srcC, offset += 4 * srcX;
+                if(srcX == srcC)
+                    for (; dx < dstW4; dx += 4)
+                        DepthwiseConvolutionBiasActivation3x3_1x1_Main4<type>(src + offset, srcS, srcC, weight, bias, params, dst), dst += 4 * srcC, offset += 4 * srcX;
+                else
+                    for (; dx < dstW4; dx += 4)
+                        DepthwiseConvolutionBiasActivation3x3Main4<type>(src + offset, srcS, srcX, srcC, weight, bias, params, dst), dst += 4 * srcC, offset += 4 * srcX;
                 for (; dx < dstW2; dx += 2)
                     DepthwiseConvolutionBiasActivation3x3Main2<type>(src + offset, srcS, srcX, srcC, weight, bias, params, dst), dst += 2 * srcC, offset += 2 * srcX;
                 for (; dx < dstW; ++dx)

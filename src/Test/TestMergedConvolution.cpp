@@ -159,6 +159,7 @@ namespace Test
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 192, 192, 16, _3, _1, _1, _1, a0, a1), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 384, 24, 24, 64, _3, _1, _1, _1, a0, a1), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 576, 24, 24, 96, _3, _1, _1, _1, a0, a1), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 96, 19, 192, 24, _3, _2, Size(0, 1), Size(0, 1), a0, a1), f1, f2);
 #endif
 #else
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 192, 192, 16, _3, _1, _1, _1, a0, a1), f1, f2);
@@ -200,6 +201,11 @@ namespace Test
         if (Simd::Avx512f::Enable)
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx512f::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Neon::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#endif 
 
         return result;
     }

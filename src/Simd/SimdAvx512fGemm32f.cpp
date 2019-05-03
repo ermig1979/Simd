@@ -1179,7 +1179,7 @@ namespace Simd
 
         void GemmKernel14x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            SIMD_PERF_BEG(Simd::ToStr(K));
+            //SIMD_PERF_BEG(Simd::ToStr(K));
 
             __m512 c0 = _mm512_setzero_ps();
             __m512 c1 = _mm512_setzero_ps();
@@ -1354,7 +1354,7 @@ namespace Simd
 
         void GemmKernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            SIMD_PERF_BEG(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K));
+            //SIMD_PERF_BEG(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K));
 
 #if SIMD_ZMM_COUNT == 32
             __m512 c[14];
@@ -1391,7 +1391,7 @@ namespace Simd
 
         template<int M> void GemmKernelMx16nnT(size_t, size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, __mmask16 mask)
         {
-            SIMD_PERF_BEG(Simd::ToStr(K));
+            //SIMD_PERF_BEG(Simd::ToStr(K));
 
             __m512 c0, c1, c2, c3, c4, c5, c6, c7, c8, c9, cA, cB, cC, cD, b0;
             if (M > 0x0) c0 = _mm512_setzero_ps();
