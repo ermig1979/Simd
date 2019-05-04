@@ -1702,6 +1702,14 @@ extern "C"
         */
         size_t dstC;
         /*!
+            An output height.
+        */
+        size_t dstH;
+        /*!
+            An output width.
+        */
+        size_t dstW;
+        /*!
             A convolution kernel window height.
         */
         size_t kernelY;
@@ -1753,18 +1761,18 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void * SimdConvolutionInit(SimdBool trans, size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t dilationY, size_t dilationX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, size_t group, SimdConvolutionActivationType activation, SimdGemm32fNNPtr gemm);
+        \fn void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
         
         \short Initilizes convolution algorithm.
 
         \param [in] trans - a flag of transposed input and output data (::SimdFalse - NCHW order, ::SimdTrue - NHWC order).
         \param [in] batch - a batch size.
-        \param [in] params - a convolution parameters.
+        \param [in] conv - a pointer to convolution parameters.
         \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
         \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdConvolutionExternalBufferSize, ::SimdConvolutionInternalBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
     */
-    SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
+    SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
     /*! @ingroup synet
 
@@ -1790,18 +1798,17 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
+        \fn void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
         \short Sets weights, beases and parameters of activation function required for convolution algorithm.
 
         \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to convolution weights.
-        \param [in] trans - a flag of transposed weight data (::SimdFalse - DCHW order, ::SimdTrue - HWCD order).
         \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
         \param [in] bias - a pointer to bias. Can be NULL.
         \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
     */
-    SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params);
+    SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
     /*! @ingroup synet
 
@@ -3564,32 +3571,19 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void * SimdMergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        \fn void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, size_t count, SimdBool add);
 
         \short Initilizes merged convolution algorithm.
 
+        \param [in] trans - a flag of transposed input and output data (::SimdFalse - NCHW order, ::SimdTrue - NHWC order).
         \param [in] batch - a batch size.
-        \param [in] srcC - a number of input channels.
-        \param [in] srcH - an input height.
-        \param [in] srcW - an input width.
-        \param [in] dstC - a number of output channels.
-        \param [in] kernelY - a height of the convolution kernel.
-        \param [in] kernelX - a width of the convolution kernel.
-        \param [in] strideY - a y-stride of the convolution.
-        \param [in] strideX - a x-stride of the convolution.
-        \param [in] padY - a pad to the top of the input image.
-        \param [in] padX - a pad to the left of the input image.
-        \param [in] padH - a pad to the bottom of the input image.
-        \param [in] padW - a pad to the right of the input image.
-        \param [in] activation0 - a type of the first activation function (see ::SimdConvolutionActivationType).
-        \param [in] activation1 - a type of the second activation function (see ::SimdConvolutionActivationType).
-        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
+        \param [in] convs - an array with convolutions parameters.
+        \param [in] count - a number of merged convolutions.
+        \param [in] add - a flag that signilizes if we need to add output to existing value.
         \return a pointer to merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
         This pointer is used in functions ::SimdMergedConvolutionExternalBufferSize, ::SimdMergedConvolutionInternalBufferSize, ::SimdMergedConvolutionSetParams and ::SimdMergedConvolutionForward.
     */
-    SIMD_API void * SimdMergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-        size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, 
-        SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+    SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
     /*! @ingroup synet
 
@@ -3615,21 +3609,17 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdMergedConvolutionSetParams(void * context, const float * weight0, const float * weight1, SimdBool * internal, const float * bias0, const float * bias1, const float * params0, const float * params1);
+        \fn void SimdMergedConvolutionSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
         \short Sets weights, beases and parameters of activation function required for merged convolution algorithm.
 
         \param [in, out] context - a pointer to merged convolution context. It must be created by function ::SimdMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] weight0 - a pointer to the first convolution weights.
-        \param [in] weight1 - a pointer to the second convolution weights.
-        \param [out] internal - a flag signalized that weight0 and weight1 are stored in the internal buffer. Can be NULL.
-        \param [in] bias0 - a pointer to the first bias. Can be NULL.
-        \param [in] bias1 - a pointer to the second bias. Can be NULL.
-        \param [in] params0 - a pointer to parameters of the first activation functions (see ::SimdConvolutionActivationType). Can be NULL.
-        \param [in] params1 - a pointer to parameters of the second activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
+        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
         */
-    SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * weight0, const float * weight1, SimdBool * internal,
-        const float * bias0, const float * bias1, const float * params0, const float * params1);
+    SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
     /*! @ingroup synet
 

@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE 
+#if defined(SIMD_NEON_ENABLE) && 0 
     namespace Neon
     {
         typedef Simd::GemmNNcb<float, size_t> NhwcGemm;

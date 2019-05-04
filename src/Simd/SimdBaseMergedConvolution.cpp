@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMergedConvolution.h"
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdUpdate.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 
@@ -57,9 +58,53 @@ namespace Simd
             return Simd::Max(0.0f, value) + params[offset] * Simd::Min(0.0f, value);
         }
 
-        template<::SimdConvolutionActivationType type> void DepthwiseConvolutionBiasActivation(const float * src, const MergConvParam & p, 
-            size_t yBeg, size_t yEnd, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type, UpdateType update> void DirectConvolutionBiasActivation(
+            const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, const float * weight, const float * bias, const float * params, float * dst)
         {
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
+            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
+            Array32f buf(dstC);
+            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < dstW; ++dx)
+                {
+                    if (bias)
+                        memcpy(buf.data, bias, dstC * sizeof(float));
+                    else
+                        memset(buf.data, 0, dstC * sizeof(float));
+                    for (size_t ky = 0; ky < kernelY; ++ky)
+                    {
+                        size_t sy = dy * strideY + ky - padY;
+                        if (sy < p.srcH)
+                        {
+                            for (size_t kx = 0; kx < kernelX; ++kx)
+                            {
+                                size_t sx = dx * strideX + kx  - padX;
+                                if (sx < p.srcW)
+                                {
+                                    const float * pw = weight + (ky*kernelX + kx)*srcC*dstC;
+                                    const float * ps = src + (sy*srcW + sx)*srcC;
+                                    for (size_t sc = 0; sc < srcC; ++sc)
+                                    {
+                                        for (size_t dc = 0; dc < dstC; ++dc)
+                                            buf[dc] += ps[sc] * pw[dc];
+                                        pw += dstC;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    for (size_t dc = 0; dc < dstC; ++dc)
+                        Update<update>(dst + dc, Activate<type>(buf[dc], params, dc));
+                    dst += p.dstC;
+                }
+            }
+        }
+
+        template<::SimdConvolutionActivationType type> void DepthwiseConvolutionBiasActivation(
+            const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            assert(p.group == p.srcC && p.group == p.dstC);
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
             for (size_t dy = yBeg; dy < yEnd; ++dy)
@@ -96,99 +141,91 @@ namespace Simd
         MergedConvolution::MergedConvolution(const MergConvParam & p)
             : Simd::MergedConvolution(p)
         {
-            _merge = p.dstH*p.dstW <= 64;
-            SetSize(-1);
-            switch (p.activation0)
+            for (size_t i = 0; i < p.count; ++i)
             {
-            case SimdConvolutionActivationIdentity: _depthwise = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationIdentity>; break;
-            case SimdConvolutionActivationRelu: _depthwise = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationRelu>; break;
-            case SimdConvolutionActivationLeakyRelu: _depthwise = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationLeakyRelu>; break;
-            case SimdConvolutionActivationRestrictRange: _depthwise = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationRestrictRange>; break;
-            case SimdConvolutionActivationPrelu: _depthwise = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationPrelu>; break;
+                _sizeS[i] = p.conv[i].srcH*p.conv[i].srcW*p.conv[i].srcC;
+                _sizeD[i] = p.conv[i].dstH*p.conv[i].dstW*p.conv[i].dstC;
+            }
+            switch (p.conv[0].activation)
+            {
+            case SimdConvolutionActivationIdentity: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationIdentity, UpdateSet>; break;
+            case SimdConvolutionActivationRelu: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationRelu, UpdateSet>; break;
+            case SimdConvolutionActivationLeakyRelu: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationLeakyRelu, UpdateSet>; break;
+            case SimdConvolutionActivationRestrictRange: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationRestrictRange, UpdateSet>; break;
+            case SimdConvolutionActivationPrelu: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationPrelu, UpdateSet>; break;
             default: assert(0);
             }
-            _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
-            _biasAndActivation = Base::ConvolutionBiasAndActivation;
-        }
-
-        void MergedConvolution::SetSize(size_t L2)
-        {
-            const MergConvParam & p = _param;
-            _block = _merge ? p.dstH : Simd::RestrictRange(L2 /sizeof(float) / p.srcC / p.dstW, Simd::Min(size_t(2), p.dstH), p.dstH);
-            _batch = p.batch;
-            _M = _merge ? _batch * p.dstH * p.dstW : _block * p.dstW;
-            _N = p.dstC;
-            _K = p.srcC;
-            _sizeS = p.srcH * p.srcW * p.srcC;
-            _sizeB = _block * p.dstW * p.srcC;
-            _sizeD = p.dstH * p.dstW * p.dstC;
+            switch (p.conv[1].activation)
+            {
+            case SimdConvolutionActivationIdentity: _convolution[1] = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: _convolution[1] = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: _convolution[1] = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: _convolution[1] = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: _convolution[1] = DepthwiseConvolutionBiasActivation<SimdConvolutionActivationPrelu>; break;
+            default: assert(0);
+            }
+            if (p.add)
+            {
+                switch (p.conv[2].activation)
+                {
+                case SimdConvolutionActivationIdentity: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationIdentity, UpdateAdd>; break;
+                case SimdConvolutionActivationRelu: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationRelu, UpdateAdd>; break;
+                case SimdConvolutionActivationLeakyRelu: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationLeakyRelu, UpdateAdd>; break;
+                case SimdConvolutionActivationRestrictRange: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationRestrictRange, UpdateAdd>; break;
+                case SimdConvolutionActivationPrelu: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationPrelu, UpdateAdd>; break;
+                default: assert(0);
+                }
+            }
+            else
+            {
+                switch (p.conv[2].activation)
+                {
+                case SimdConvolutionActivationIdentity: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationIdentity, UpdateSet>; break;
+                case SimdConvolutionActivationRelu: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationRelu, UpdateSet>; break;
+                case SimdConvolutionActivationLeakyRelu: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationLeakyRelu, UpdateSet>; break;
+                case SimdConvolutionActivationRestrictRange: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationRestrictRange, UpdateSet>; break;
+                case SimdConvolutionActivationPrelu: _convolution[2] = DirectConvolutionBiasActivation<SimdConvolutionActivationPrelu, UpdateSet>; break;
+                default: assert(0);
+                }
+            }
         }
 
         size_t MergedConvolution::ExternalBufferSize() const
         {
             const MergConvParam & p = _param;
-            return (_merge ? _batch : 1) * _sizeB;
+            return _sizeD[0] + _sizeD[1];
         }
 
         size_t MergedConvolution::InternalBufferSize() const
         {
-            return _buffer.size + _nhwcWeight.size;
+            return _buffer.size;
         }
 
-        void MergedConvolution::SetParams(const float * weight0, const float * weight1, SimdBool * internal,
-            const float * bias0, const float * bias1, const float * params0, const float * params1)
+        void MergedConvolution::SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
         {
-            Simd::MergedConvolution::SetParams(weight0, weight1, internal, bias0, bias1, params0, params1);
-            if (_nhwcWeight.data)
-            {
-                const MergConvParam & p = _param;
-                _nhwcReorderB(_M, _N, _K, weight1, _nhwcWeight.data);
-                if (internal)
-                    *internal = SimdTrue;
-            }
+            Simd::MergedConvolution::SetParams(weight, internal, bias, params);
         }
+
         void MergedConvolution::Forward(const float * src, float * buf, float * dst)
         {
             const MergConvParam & p = _param;
-            if (_merge)
+            float * buf0 = Buffer(buf);
+            float * buf1 = buf0 + _sizeD[0];
+            for (size_t b = 0; b < p.batch; ++b)
             {
-                for (size_t b = 0; b < _batch; ++b)
-                    _depthwise(src + b * _sizeS, p, 0, p.dstH, _weight0, _bias0, _params0, buf + b * _sizeB);
-                if (_nhwcWeight.data)
-                    _nhwcRun(_M, _M, _N, _K, buf, _nhwcWeight.data, dst);
-                else
-                    _gemm.Run(_M, _N, _K, &_1, buf, _K, _weight1, _N, &_0, dst, _N);
-                for (size_t b = 0; b < _batch; ++b)
-                    _biasAndActivation(_bias1, _N, p.dstH*p.dstW, p.activation1, _params1, SimdTrue, dst + b * _sizeD);
-            }
-            else
-            {
-                for (size_t b = 0; b < _batch; ++b)
-                {
-                    for (size_t dy = 0; dy < p.dstH; dy += _block)
-                    {
-                        size_t block = Simd::Min(dy + _block, p.dstH) - dy;
-                        size_t M = block * p.dstW;
-                        _depthwise(src, p, dy, dy + block, _weight0, _bias0, _params0, buf);
-                        if (_nhwcWeight.data)
-                            _nhwcRun(M, _M, _N, _K, buf, _nhwcWeight.data, dst);
-                        else
-                            _gemm.Run(M, _N, _K, &_1, buf, _K, _weight1, _N, &_0, dst, _N);
-                        _biasAndActivation(_bias1, _N, block * p.dstW, p.activation1, _params1, SimdTrue, dst);
-                        dst += block * p.dstW * p.dstC;
-                    }
-                    src += _sizeS;
-                }
+                _convolution[0](src, p.conv[0], 0, p.conv[0].dstH, _weight[0], _bias[0], _params[0], buf0);
+                _convolution[1](buf0, p.conv[1], 0, p.conv[1].dstH, _weight[1], _bias[1], _params[1], buf1);
+                _convolution[2](buf1, p.conv[2], 0, p.conv[2].dstH, _weight[2], _bias[2], _params[2], dst);
+                src += _sizeS[0];
+                dst += _sizeD[2];
             }
         }
 
         //---------------------------------------------------------------------
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm)
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
-            MergConvParam param(batch, srcC, srcH, srcW, dstC, kernelY, kernelX, strideY, strideX, padY, padX, padH, padW, activation0, activation1, gemm);
+            MergConvParam param(trans, batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
             return new MergedConvolution(param);

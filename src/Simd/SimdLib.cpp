@@ -1515,9 +1515,9 @@ SIMD_API size_t SimdConvolutionInternalBufferSize(const void * convolution)
     return ((Convolution*)convolution)->InternalBufferSize();
 }
 
-SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool * internal, const float * bias, const float * params)
 {
-    ((Convolution*)convolution)->SetParams(weight, trans, internal, bias, params);
+    ((Convolution*)convolution)->SetParams(weight, internal, bias, params);
 }
 
 SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst)
@@ -3276,17 +3276,13 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
         Base::MedianFilterSquare5x5(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-typedef void* (*SimdMergedConvolutionInitPtr) (size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-    SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+typedef void* (*SimdMergedConvolutionInitPtr) (SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC5(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC0(MergedConvolutionInit);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void * SimdMergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-    size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-    SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm)
+SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
 {
-    return simdMergedConvolutionInit(batch, srcC, srcH, srcW, dstC, kernelY, kernelX, strideY, strideX, padY, padX, padH, padW, activation0, activation1, gemm);
+    return simdMergedConvolutionInit(trans, batch, convs, count, add);
 }
 
 SIMD_API size_t SimdMergedConvolutionExternalBufferSize(const void * context)
@@ -3299,10 +3295,9 @@ SIMD_API size_t SimdMergedConvolutionInternalBufferSize(const void * context)
     return ((MergedConvolution*)context)->InternalBufferSize();
 }
 
-SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * weight0, const float * weight1, SimdBool * internal,
-    const float * bias0, const float * bias1, const float * params0, const float * params1)
+SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
 {
-    ((MergedConvolution*)context)->SetParams(weight0, weight1, internal, bias0, bias1, params0, params1);
+    ((MergedConvolution*)context)->SetParams(weight, internal, bias, params);
 }
 
 SIMD_API void SimdMergedConvolutionForward(void * context, const float * src, float * buf, float * dst)

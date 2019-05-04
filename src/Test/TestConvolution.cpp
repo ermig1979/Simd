@@ -59,6 +59,8 @@ namespace Test
                 conv.padW = pW;
                 conv.group = g;
                 conv.activation = a;
+                conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+                conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
             }
 
             Param(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size d, Size s, Size b, Size e, size_t g, ::SimdConvolutionActivationType a, ::SimdBool t)
@@ -81,12 +83,14 @@ namespace Test
                 conv.padW = e.x;
                 conv.group = g;
                 conv.activation = a;
+                conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
+                conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
             }
         };
 
         struct FuncC
         {
-            typedef void*(*FuncPtr)(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
+            typedef void*(*FuncPtr)(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
             FuncPtr func;
             String description;
@@ -109,7 +113,7 @@ namespace Test
             {
                 void * convolution = func(p.trans, p.batch, &p.conv, NULL);
                 buf.Extend({ ::SimdConvolutionExternalBufferSize(convolution) });
-                ::SimdConvolutionSetParams(convolution, weight.Data(), p.trans, NULL, bias.Data(), params.Data());
+                ::SimdConvolutionSetParams(convolution, weight.Data(), NULL, bias.Data(), params.Data());
                 {
                     TEST_PERFORMANCE_TEST(description);
                     ::SimdConvolutionForward(convolution, src.Data(), buf.Data(), dst.Data());
@@ -151,10 +155,8 @@ namespace Test
 
         Tensor32f buf;
 
-        size_t dstH = (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1)) / c.strideY + 1;
-        size_t dstW = (c.srcW + c.padX + c.padW - (c.dilationX * (c.kernelX - 1) + 1)) / c.strideX + 1;
-        Tensor32f dst1({ p.batch, p.trans ? dstH : c.dstC, p.trans ? dstW : dstH, p.trans ? c.dstC : dstW });
-        Tensor32f dst2({ p.batch, p.trans ? dstH : c.dstC, p.trans ? dstW : dstH, p.trans ? c.dstC : dstW });
+        Tensor32f dst1({ p.batch, p.trans ? c.dstH : c.dstC, p.trans ? c.dstW : c.dstH, p.trans ? c.dstC : c.dstW });
+        Tensor32f dst2({ p.batch, p.trans ? c.dstH : c.dstC, p.trans ? c.dstW : c.dstH, p.trans ? c.dstC : c.dstW });
 
         ::SimdFill32f(dst1.Data(), dst1.Size(), params.Data() + 0);
         ::SimdFill32f(dst2.Data(), dst2.Size(), params.Data() + 1);

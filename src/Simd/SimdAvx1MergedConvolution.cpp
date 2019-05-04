@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE 
+#if defined(SIMD_AVX_ENABLE) && 0 
     namespace Avx
     {
         typedef Simd::GemmNNcb<float, size_t> NhwcGemm;

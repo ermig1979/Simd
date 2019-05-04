@@ -193,9 +193,9 @@ namespace Simd
                 return _sizeB*(_merge ? _batch : 1);
         };
 
-        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        void ConvolutionGemmNN::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
-            Simd::Convolution::SetParams(weight, trans, internal, bias, params);
+            Simd::Convolution::SetParams(weight, internal, bias, params);
             if (_nhwcWeight.data)
             {
                 _nhwcReorderB(_M*(_merge ? _batch : 1), _N, _K, weight, _nhwcWeight.data);
@@ -575,11 +575,11 @@ namespace Simd
             return Simd::Convolution::InternalBufferSize() + _winogradWeight.size;
         }
 
-        void ConvolutionWinograd::SetParams(const float * weight, SimdBool trans, SimdBool * internal, const float * bias, const float * params)
+        void ConvolutionWinograd::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
-            Simd::Convolution::SetParams(weight, trans, internal, bias, params);
+            Simd::Convolution::SetParams(weight, internal, bias, params);
             _winogradWeight.Resize(_strideW*_count);
-            _setFilter(weight, _param.srcC*_param.dstC, _winogradWeight.data, trans);
+            _setFilter(weight, _param.srcC*_param.dstC, _winogradWeight.data, _param.trans);
             if (_nhwcWeight.data)
             {
                 for (size_t i = 0; i < _count; ++i)
@@ -1052,9 +1052,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
+        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(trans, batch, params, gemm);
+            ConvParam param(trans, batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
             else if (ConvolutionDepthwiseDotProduct::Preferable(param))

@@ -34,63 +34,65 @@
 
 namespace Simd
 {
+    const size_t MC_MAX_COUNT = 3;
     struct MergConvParam
     {
-        size_t batch, srcC, srcH, srcW, dstC, dstH, dstW, kernelY, kernelX, strideY, strideX, padY, padX, padH, padW;
-        SimdConvolutionActivationType activation0, activation1;
-        SimdGemm32fNNPtr gemm;
+        SimdBool trans, add;
+        size_t batch, count;
+        SimdConvolutionParameters conv[MC_MAX_COUNT];
 
-        MergConvParam(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t kernelY, size_t kernelX, 
-            size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW, 
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm)
+        MergConvParam(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
+            assert(count <= MC_MAX_COUNT);
+            this->trans = trans;
+            this->add = add;
             this->batch = batch;
-            this->srcC = srcC;
-            this->srcH = srcH;
-            this->srcW = srcW;
-            this->dstC = dstC;
-            this->dstH = (srcH + padY + padH - kernelY) / strideY + 1;
-            this->dstW = (srcW + padX + padW - kernelX) / strideX + 1;
-            this->kernelY = kernelY;
-            this->kernelX = kernelX;
-            this->strideY = strideY;
-            this->strideX = strideX;
-            this->padY = padY;
-            this->padX = padX;
-            this->padH = padH;
-            this->padW = padW;
-            this->activation0 = activation0;
-            this->activation1 = activation1;
-            this->gemm = gemm;
+            this->count = count;
+            for (size_t i = 0; i < count; ++i)
+                this->conv[i] = convs[i];
         }
 
         bool Valid()
         {
-            return dstH > 0 && dstW > 0;
+            if (trans != SimdTrue)
+                return false;
+            if (count != MC_MAX_COUNT)
+                return false;
+            for (size_t i = 0; i < count; ++i)
+            {
+                const SimdConvolutionParameters & c = conv[i];
+                if (c.dstH != (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1)) / c.strideY + 1 || c.dstH == 0)
+                    return false;
+                if (c.dstW != (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1)) / c.strideX + 1 || c.dstW == 0)
+                    return false;
+                if (c.kernelY != c.kernelX || !(c.kernelY == 1 || c.kernelY == 3))
+                    return false;
+                if (c.strideY != c.strideX || !(c.strideY == 1 || c.strideY == 2))
+                    return false;
+                if (c.dilationY != 1 || c.dilationX != 1)
+                    return false;
+            }
+            if (conv[0].group != 1)
+                return false;
+            if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || conv[1].kernelY != 3)
+                return false;
+            if (conv[2].group != 1 || conv[2].kernelY != 1 || conv[2].strideY != 1)
+                return false;
+            return true;
         }
 
-        SIMD_INLINE bool IsKernel(size_t value) const
+        SIMD_INLINE bool IsPad(size_t index, size_t value) const
         {
-            return kernelY == value && kernelX == value;
-        }
-
-        SIMD_INLINE bool IsStride(size_t value) const
-        {
-            return strideY == value && strideX == value;
-        }
-
-        SIMD_INLINE bool IsPad(size_t value) const
-        {
-            return padY == value && padX == value && padH == value && padW == value;
+            return conv[index].padY == value && conv[index].padX == value && conv[index].padH == value && conv[index].padW == value;
         }
 
 #ifdef SIMD_PERFORMANCE_STATISTIC
         String Info() const
         {
             std::stringstream ss;
-            ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
-            ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
-            ss << "-" << strideX << "-" << Simd::Max(padX, padW);
+            ss << batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
+            ss << "-" << conv[0].dstC << "x" << conv[0].kernelY << "x" << conv[0].strideY;
+            ss << "-" << conv[1].kernelY << "x" << conv[1].strideY << "-" << conv[2].dstC;
             return ss.str();
         }
 #endif
@@ -116,17 +118,16 @@ namespace Simd
             return 1;
         }
 
-        virtual void SetParams(const float * weight0, const float * weight1, SimdBool * internal, 
-            const float * bias0, const float * bias1, const float * params0, const float * params1)
+        virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
         {
-            _weight0 = weight0;
-            _weight1 = weight1;
-            if (internal)
-                *internal = SimdFalse;
-            _bias0 = bias0;
-            _bias1 = bias1;
-            _params0 = params0;
-            _params1 = params1;
+            for (size_t i = 0; i < _param.count; ++i)
+            {
+                _weight[i] = weight[i];
+                if (internal)
+                    internal[i] = SimdFalse;
+                _bias[i] = bias[i];
+                _params[i] = params[i];
+            }
         }
 
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
@@ -146,8 +147,7 @@ namespace Simd
         MergConvParam _param;
         Array32f _buffer;
         float _0, _1;
-        const float * _weight0, * _weight1, * _bias0, * _bias1, * _params0, * _params1;
-        RuntimeGemm _gemm;
+        const float * _weight[MC_MAX_COUNT], * _bias[MC_MAX_COUNT], * _params[MC_MAX_COUNT];
     };
 
     namespace Base
@@ -159,31 +159,20 @@ namespace Simd
 
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
-            virtual void SetParams(const float * weight0, const float * weight1, SimdBool * internal, const float * bias0, const float * bias1, const float * params0, const float * params1);
+            virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
         protected:
-            typedef void(*Depthwise)(const float * src, const MergConvParam & p, size_t yBeg, size_t yEnd, const float * weight, const float * bias, const float * params, float * dst);
-            typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB);
-            typedef void(*NhwcRun)(size_t m, size_t M, size_t N, size_t K, const float * A, const float * B, float * C);
-            typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
+            typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, 
+                const float * weight, const float * bias, const float * params, float * dst);
 
-            void SetSize(size_t L2);
-
-            bool _merge;
-            size_t _batch, _block, _M, _N, _K, _sizeS, _sizeB, _sizeD;
-            Depthwise _depthwise;
-            Array32f _nhwcWeight;
-            NhwcRun _nhwcRun;
-            NhwcReorderB _nhwcReorderB;
-            BiasAndActivation _biasAndActivation;
+            size_t _sizeS[MC_MAX_COUNT], _sizeD[MC_MAX_COUNT];
+            ConvolutionPtr _convolution[MC_MAX_COUNT];
         };
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
-
+#if 0
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
@@ -193,9 +182,7 @@ namespace Simd
             MergedConvolution(const MergConvParam & p);
         };
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -208,9 +195,7 @@ namespace Simd
             MergedConvolution(const MergConvParam & p);
         };
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -223,9 +208,7 @@ namespace Simd
             MergedConvolution(const MergConvParam & p);
         };
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -238,9 +221,7 @@ namespace Simd
             MergedConvolution(const MergConvParam & p);
         };
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX512F_ENABLE
 
@@ -253,11 +234,9 @@ namespace Simd
             MergedConvolution(const MergConvParam & p);
         };
 
-        void * MergedConvolutionInit(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-            size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-            SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_NEON_ENABLE
+#endif
 }
-
 #endif//__SimMergedConvolution_h__

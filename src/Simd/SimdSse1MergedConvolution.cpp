@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE 
+#if defined(SIMD_SSE_ENABLE) && 0 
     namespace Sse
     {
         typedef Simd::GemmNNcb<float, size_t> NhwcGemm;

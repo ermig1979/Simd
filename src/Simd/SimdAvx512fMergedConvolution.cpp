@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE 
+#if defined(SIMD_AVX512F_ENABLE) && 0 
     namespace Avx512f
     {
         typedef Simd::GemmNNcb<float, __mmask16> NhwcGemm;

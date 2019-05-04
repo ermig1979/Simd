@@ -1528,9 +1528,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
+        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(trans, batch, params, gemm);
+            ConvParam param(trans, batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
             else if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))

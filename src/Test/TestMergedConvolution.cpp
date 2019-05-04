@@ -34,27 +34,80 @@ namespace Test
     {
         struct Param
         {
-            size_t batch, srcC, srcH, srcW, dstC, kernelY, kernelX, strideY, strideX, padY, padX, padH, padW;
-            ::SimdConvolutionActivationType activation0, activation1;
+            SimdBool trans, add;
+            size_t batch;
+            SimdConvolutionParameters conv[3];
+            mutable float *weight[3], *bias[3], *params[3];
 
-            Param(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, size_t kY, size_t kX, size_t sY, size_t sX, 
-                size_t pY, size_t pX, size_t pH, size_t pW, ::SimdConvolutionActivationType a0, ::SimdConvolutionActivationType a1)
-                : batch(n), srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(kY), kernelX(kX), strideY(sY), strideX(sX), 
-                padY(pY), padX(pX), padH(pH), padW(pW), activation0(a0), activation1(a1)
-            {}
+            Param(size_t n, size_t c0, size_t h0, size_t w0, size_t k0, size_t s0, ::SimdConvolutionActivationType a0, 
+                size_t c1, size_t k1, size_t s1, ::SimdConvolutionActivationType a1, size_t c2, ::SimdConvolutionActivationType a2, SimdBool a) 
+            {
+                trans = ::SimdTrue;
+                batch = n;
+                this->add = a;
 
-            Param(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size s, Size b, Size e, 
-                ::SimdConvolutionActivationType a0, ::SimdConvolutionActivationType a1)
-                : batch(n), srcC(sC), srcH(sH), srcW(sW), dstC(dC), kernelY(k.y), kernelX(k.x), strideY(s.y), strideX(s.x), 
-                padY(b.y), padX(b.x), padH(e.y), padW(e.x), activation0(a0), activation1(a1)
-            {}
+                conv[0].srcC = c0;
+                conv[0].srcH = h0;
+                conv[0].srcW = w0;
+                conv[0].dstC = c1;
+                conv[0].kernelY = k0;
+                conv[0].kernelX = k0;
+                conv[0].dilationY = 1;
+                conv[0].dilationX = 1;
+                conv[0].strideY = s0;
+                conv[0].strideX = s0;
+                conv[0].padY = s0 == 1 || (conv[0].srcH & 1) ? (k0 - 1) / 2 : 0;
+                conv[0].padX = s0 == 1 || (conv[0].srcW & 1) ? (k0 - 1) / 2 : 0;
+                conv[0].padH = (k0 - 1) / 2;
+                conv[0].padW = (k0 - 1) / 2;
+                conv[0].group = 1;
+                conv[0].activation = a0;
+                conv[0].dstH = (conv[0].srcH + conv[0].padY + conv[0].padH - conv[0].kernelY) / conv[0].strideY + 1;
+                conv[0].dstW = (conv[0].srcW + conv[0].padX + conv[0].padW - conv[0].kernelX) / conv[0].strideX + 1;
+
+                conv[1].srcC = c1;
+                conv[1].srcH = conv[0].dstH;
+                conv[1].srcW = conv[0].dstW;
+                conv[1].dstC = c1;
+                conv[1].kernelY = k1;
+                conv[1].kernelX = k1;
+                conv[1].dilationY = 1;
+                conv[1].dilationX = 1;
+                conv[1].strideY = s1;
+                conv[1].strideX = s1;
+                conv[1].padY = s1 == 1 || (conv[1].srcH & 1) ? (k1 - 1) / 2 : 0;
+                conv[1].padX = s1 == 1 || (conv[1].srcW & 1) ? (k1 - 1) / 2 : 0;
+                conv[1].padH = (k1 - 1) / 2;
+                conv[1].padW = (k1 - 1) / 2;
+                conv[1].group = c1;
+                conv[1].activation = a1;
+                conv[1].dstH = (conv[1].srcH + conv[1].padY + conv[1].padH - conv[1].kernelY) / conv[1].strideY + 1;
+                conv[1].dstW = (conv[1].srcW + conv[1].padX + conv[1].padW - conv[1].kernelX) / conv[1].strideX + 1;
+
+                conv[2].srcC = c1;
+                conv[2].srcH = conv[1].dstH;
+                conv[2].srcW = conv[1].dstW;
+                conv[2].dstC = c2;
+                conv[2].kernelY = 1;
+                conv[2].kernelX = 1;
+                conv[2].dilationY = 1;
+                conv[2].dilationX = 1;
+                conv[2].strideY = 1;
+                conv[2].strideX = 1;
+                conv[2].padY = 0;
+                conv[2].padX = 0;
+                conv[2].padH = 0;
+                conv[2].padW = 0;
+                conv[2].group = 1;
+                conv[2].activation = a2;
+                conv[2].dstH = (conv[2].srcH + conv[2].padY + conv[2].padH - conv[2].kernelY) / conv[2].strideY + 1;
+                conv[2].dstW = (conv[2].srcW + conv[2].padX + conv[2].padW - conv[2].kernelX) / conv[2].strideX + 1;
+            }
         };
 
         struct FuncMC
         {
-            typedef void*(*FuncPtr)(size_t batch, size_t srcC, size_t srcH, size_t srcW, size_t dstC,
-                size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, size_t padH, size_t padW,
-                SimdConvolutionActivationType activation0, SimdConvolutionActivationType activation1, SimdGemm32fNNPtr gemm);
+            typedef void*(*FuncPtr)(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, size_t count, SimdBool add);
 
             FuncPtr func;
             String description;
@@ -65,20 +118,23 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << p.batch << "x" << p.srcC << "x" << p.srcH << "x" << p.srcW;
-                ss << "-" << p.dstC << "x" << p.kernelY << "x" << p.kernelX;
-                ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padW);
+                ss << "[" << p.batch << "x" << p.conv[0].srcC << "x" << p.conv[0].srcH << "x" << p.conv[0].srcW;
+                ss << "-" << p.conv[0].dstC << "x" << p.conv[0].kernelY << "x" << p.conv[0].strideY;
+                ss << "-" << p.conv[1].kernelY << "x" << p.conv[1].strideY << "-" << p.conv[2].dstC;
                 ss << "]";
                 description = ss.str();
             }
 
-            void Call(const Param & p, const Tensor32f & w0, const Tensor32f & w1, const Tensor32f & b0, const Tensor32f & b1, 
-                const Tensor32f & p0, const Tensor32f & p1, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
+            void Call(const Param & p, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
-                void * context = func(p.batch, p.srcC, p.srcH, p.srcW, p.dstC, p.kernelY, p.kernelX, 
-                    p.strideY, p.strideX, p.padY, p.padX, p.padH, p.padW, p.activation0, p.activation1, NULL);
+                void * context = func(p.trans, p.batch, p.conv, 3, p.add);
                 buf.Extend({ ::SimdMergedConvolutionExternalBufferSize(context) });
-                ::SimdMergedConvolutionSetParams(context, w0.Data(), w1.Data(), NULL, b0.Data(), b1.Data(), p0.Data(), p1.Data());
+                ::SimdMergedConvolutionSetParams(context, p.weight, NULL, p.bias, p.params);
+                if (p.add)
+                {
+                    float value = 1.1f;
+                    SimdFill32f(dst.Data(), dst.Size(), &value);
+                }
                 {
                     TEST_PERFORMANCE_TEST(description);
                     ::SimdMergedConvolutionForward(context, src.Data(), buf.Data(), dst.Data());
@@ -100,79 +156,55 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << "].");
 
-        Tensor32f src({p.batch, p.srcH, p.srcW, p.srcC });
+        Tensor32f src({ p.batch, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcC });
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
 
-        Tensor32f w0({ p.kernelY, p.kernelX, 1, p.srcC });
-        FillRandom(w0.Data(), w0.Size(), -1.0, 1.0f);
+        Tensor32f weight[3], bias[3], params[3];
+        for (size_t i = 0; i < 3; ++i)
+        {
+            weight[i].Reshape({ p.conv[i].kernelY, p.conv[i].kernelX, p.conv[i].srcC / p.conv[i].group, p.conv[i].dstC });
+            FillRandom(weight[i].Data(), weight[i].Size(), -1.0, 1.0f);
+            p.weight[i] = weight[i].Data();
 
-        Tensor32f b0({ p.srcC });
-        FillRandom(b0.Data(), b0.Size(), -1.0, 1.0f);
+            bias[i].Reshape({ p.conv[i].dstC });
+            FillRandom(bias[i].Data(), bias[i].Size(), -1.0, 1.0f);
+            p.bias[i] = bias[i].Data();
 
-        Tensor32f p0({ Simd::Max<size_t>(2, p.srcC) });
-        FillRandom(p0.Data(), p0.Size(), 0.0f, 2.0f);
-        p0.Data()[0] = 0.1f;
-        p0.Data()[1] = 1.1f;
-
-        Tensor32f w1({ 1, 1, p.srcC, p.dstC });
-        FillRandom(w1.Data(), w1.Size(), -1.0, 1.0f);
-
-        Tensor32f b1({ p.dstC });
-        FillRandom(b1.Data(), b1.Size(), -1.0, 1.0f);
-
-        Tensor32f p1({ Simd::Max<size_t>(2, p.dstC) });
-        FillRandom(p1.Data(), p1.Size(), 0.0f, 2.0f);
-        p1.Data()[0] = 0.2f;
-        p1.Data()[1] = 1.2f;
+            params[i].Reshape({ Simd::Max<size_t>(2, p.conv[i].dstC) });
+            FillRandom(params[i].Data(), params[i].Size(), -1.0, 1.0f);
+            params[i].Data()[0] = 0.0f + 0.1f * float(i);
+            params[i].Data()[1] = 1.0f + 0.1f * float(i);
+            p.params[i] = params[i].Data();
+        }
 
         Tensor32f buf;
 
-        size_t dstH = (p.srcH + p.padY + p.padH - p.kernelY) / p.strideY + 1;
-        size_t dstW = (p.srcW + p.padX + p.padW - p.kernelX) / p.strideX + 1;
-        Tensor32f dst1({ p.batch, dstH, dstW, p.dstC});
-        Tensor32f dst2({ p.batch, dstH, dstW, p.dstC});
-
-        float fv1 = 0.01, fv2 = 0.02;
-        ::SimdFill32f(dst1.Data(), dst1.Size(), &fv1);
-        ::SimdFill32f(dst2.Data(), dst2.Size(), &fv2);
+        Tensor32f dst1({ p.batch, p.conv[2].dstH, p.conv[2].dstW, p.conv[2].dstC}, 0.01f);
+        Tensor32f dst2({ p.batch, p.conv[2].dstH, p.conv[2].dstW, p.conv[2].dstC}, 0.02f);
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, w0, w1, b0, b1, p0, p1, src, buf, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, src, buf, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, w0, w1, b0, b1, p0, p1, src, buf, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, src, buf, dst2));
 
         result = result && Compare(dst1, dst2, eps, true, 64, DifferenceBoth);
 
         return result;
     }
 
-    bool MergedConvolutionForwardAutoTest(float eps, ::SimdConvolutionActivationType a0, ::SimdConvolutionActivationType a1, const FuncMC & f1, const FuncMC & f2)
-    {
-        bool result = true;
-
-        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
-#ifdef NDEBUG
-#if 1
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 144, 96, 96, 24, _3, _1, _1, _1, a0, a1), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 96, 192, 192, 24, _3, _2, _1, _1, a0, a1), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 192, 192, 16, _3, _1, _1, _1, a0, a1), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 384, 24, 24, 64, _3, _1, _1, _1, a0, a1), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 576, 24, 24, 96, _3, _1, _1, _1, a0, a1), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 96, 19, 192, 24, _3, _2, Size(0, 1), Size(0, 1), a0, a1), f1, f2);
-#endif
-#else
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 192, 192, 16, _3, _1, _1, _1, a0, a1), f1, f2);
-#endif
-        return result;
-    }
-
     bool MergedConvolutionForwardAutoTest(float eps, const FuncMC & f1, const FuncMC & f2)
     {
         bool result = true;
-
-        result = result && MergedConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdConvolutionActivationIdentity, f1, f2);
-
+        const SimdBool t = SimdTrue, f = SimdFalse;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
+#ifdef NDEBUG
+#if 1
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
+#endif
+#else
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
+#endif
         return result;
     }
 
@@ -181,7 +213,7 @@ namespace Test
         bool result = true;
 
         result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Base::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
-
+#if 0
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Sse::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
@@ -206,7 +238,7 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Neon::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif 
-
+#endif
         return result;
     }
 }
