@@ -158,11 +158,11 @@ namespace Simd
                 _M = p.dstH * p.dstW;
                 _N = p.dstC / p.group;
                 _K = p.srcC * p.kernelY * p.kernelX / p.group;
-                _ldS = _K;
+                _ldS = _K * p.group;
                 _ldW = p.dstC;
                 _ldD = p.dstC;
                 _grW = _N;
-                _grS = _M * _K;
+                _grS = _K;
                 _grD = _N;
             }
             else

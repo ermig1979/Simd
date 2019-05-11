@@ -201,6 +201,16 @@ namespace Test
 #ifdef NDEBUG
 #if 1
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 16, 192, 192, 1, 1, a0, 96, 3, 2, a1, 24, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 2, a1, 32, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 48, 48, 1, 1, a0, 192, 3, 1, a1, 32, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 48, 48, 1, 1, a0, 192, 3, 2, a1, 64, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 64, 24, 24, 1, 1, a0, 384, 3, 1, a1, 64, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 64, 24, 24, 1, 1, a0, 384, 3, 1, a1, 96, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 96, 24, 24, 1, 1, a0, 576, 3, 1, a1, 96, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 12, 12, 1, 1, a0, 960, 3, 1, a1, 320, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 12, 12, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
 #endif
 #else
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
