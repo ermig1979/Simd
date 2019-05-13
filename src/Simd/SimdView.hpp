@@ -573,6 +573,21 @@ namespace Simd
     */
     template <template<class> class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c);
 
+
+    /*! @ingroup cpp_view_functions
+
+        \fn template <template<class> class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
+
+        Checks four image views on the same size.
+
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [in] c - a third image.
+        \param [in] d - a fourth image.
+        \return - a result of checking.
+    */
+    template <template<class> class A> bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d);
+
     /*! @ingroup cpp_view_functions
 
         \fn template <template<class> class A, template<class> class B> bool Compatible(const View<A> & a, const View<B> & b);
@@ -1244,6 +1259,14 @@ namespace Simd
         return
             (a.width == b.width && a.height == b.height) &&
             (a.width == c.width && a.height == c.height);
+    }
+
+    template <template<class> class A> SIMD_INLINE bool EqualSize(const View<A> & a, const View<A> & b, const View<A> & c, const View<A> & d)
+    {
+        return
+            (a.width == b.width && a.height == b.height) &&
+            (a.width == c.width && a.height == c.height) &&
+            (a.width == d.width && a.height == d.height);
     }
 
     template <template<class> class A, template<class> class B> SIMD_INLINE bool Compatible(const View<A> & a, const View<B> & b)
