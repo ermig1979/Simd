@@ -139,11 +139,11 @@ namespace Simd
         MergedConvolution::MergedConvolution(const MergConvParam & p)
             : Base::MergedConvolution(p)
         {
-            for (size_t i = 0; i < p.count; ++i)
-            {
-                _sizeS[i] = p.conv[i].srcH*p.conv[i].srcW*p.conv[i].srcC;
-                _sizeD[i] = p.conv[i].dstH*p.conv[i].dstW*p.conv[i].dstC;
-            }
+            _sizeS = p.conv[0].srcH*p.conv[0].srcW*p.conv[0].srcC;
+            _sizeB0 = p.conv[1].srcH*p.conv[1].srcW*p.conv[1].srcC;
+            _sizeB1 = p.conv[1].dstH*p.conv[1].dstW*p.conv[1].dstC;
+            _sizeD = p.conv[2].dstH*p.conv[2].dstW*p.conv[2].dstC;
+
             switch (p.conv[0].activation)
             {
             case SimdConvolutionActivationIdentity: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationIdentity, UpdateSet>; break;
