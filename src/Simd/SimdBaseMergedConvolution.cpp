@@ -141,11 +141,11 @@ namespace Simd
         MergedConvolution::MergedConvolution(const MergConvParam & p)
             : Simd::MergedConvolution(p)
         {
-            for (size_t i = 0; i < p.count; ++i)
-            {
-                _sizeS[i] = p.conv[i].srcH*p.conv[i].srcW*p.conv[i].srcC;
-                _sizeD[i] = p.conv[i].dstH*p.conv[i].dstW*p.conv[i].dstC;
-            }
+            _sizeS = p.conv[0].srcH*p.conv[0].srcW*p.conv[0].srcC;
+            _sizeB0 = p.conv[1].srcH*p.conv[1].srcW*p.conv[1].srcC;
+            _sizeB1 = p.conv[1].dstH*p.conv[1].dstW*p.conv[1].dstC;
+            _sizeD = p.conv[2].dstH*p.conv[2].dstW*p.conv[2].dstC;
+
             switch (p.conv[0].activation)
             {
             case SimdConvolutionActivationIdentity: _convolution[0] = DirectConvolutionBiasActivation<SimdConvolutionActivationIdentity, UpdateSet>; break;
@@ -193,7 +193,7 @@ namespace Simd
         size_t MergedConvolution::ExternalBufferSize() const
         {
             const MergConvParam & p = _param;
-            return _sizeD[0] + _sizeD[1];
+            return _sizeB0 + _sizeB1;
         }
 
         size_t MergedConvolution::InternalBufferSize() const
@@ -210,14 +210,14 @@ namespace Simd
         {
             const MergConvParam & p = _param;
             float * buf0 = Buffer(buf);
-            float * buf1 = buf0 + _sizeD[0];
+            float * buf1 = buf0 + _sizeB0;
             for (size_t b = 0; b < p.batch; ++b)
             {
                 _convolution[0](src, p.conv[0], 0, p.conv[0].dstH, _weight[0], _bias[0], _params[0], buf0);
                 _convolution[1](buf0, p.conv[1], 0, p.conv[1].dstH, _weight[1], _bias[1], _params[1], buf1);
                 _convolution[2](buf1, p.conv[2], 0, p.conv[2].dstH, _weight[2], _bias[2], _params[2], dst);
-                src += _sizeS[0];
-                dst += _sizeD[2];
+                src += _sizeS;
+                dst += _sizeD;
             }
         }
 

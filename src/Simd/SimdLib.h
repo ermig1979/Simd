@@ -3571,7 +3571,7 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, size_t count, SimdBool add);
+        \fn void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
         \short Initilizes merged convolution algorithm.
 

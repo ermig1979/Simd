@@ -166,13 +166,13 @@ namespace Simd
             typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, 
                 const float * weight, const float * bias, const float * params, float * dst);
 
-            size_t _sizeS[MC_MAX_COUNT], _sizeD[MC_MAX_COUNT];
+            size_t _sizeS, _sizeB0, _sizeB1, _sizeD;
             ConvolutionPtr _convolution[MC_MAX_COUNT];
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
-#if 0
+
 #ifdef SIMD_SSE_ENABLE    
     namespace Sse
     {
@@ -185,7 +185,7 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_SSE_ENABLE
-
+#if 0
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
