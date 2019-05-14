@@ -34,16 +34,15 @@
 
 namespace Simd
 {
-    const size_t MC_MAX_COUNT = 3;
     struct MergConvParam
     {
         SimdBool trans, add;
         size_t batch, count;
-        SimdConvolutionParameters conv[MC_MAX_COUNT];
+        SimdConvolutionParameters conv[3];
 
         MergConvParam(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
-            assert(count <= MC_MAX_COUNT);
+            assert(count <= 3);
             this->trans = trans;
             this->add = add;
             this->batch = batch;
@@ -56,7 +55,7 @@ namespace Simd
         {
             if (trans != SimdTrue)
                 return false;
-            if (count != MC_MAX_COUNT)
+            if (count != 3)
                 return false;
             for (size_t i = 0; i < count; ++i)
             {
@@ -147,7 +146,7 @@ namespace Simd
         MergConvParam _param;
         Array32f _buffer;
         float _0, _1;
-        const float * _weight[MC_MAX_COUNT], * _bias[MC_MAX_COUNT], * _params[MC_MAX_COUNT];
+        const float * _weight[3], * _bias[3], * _params[3];
     };
 
     namespace Base
@@ -155,7 +154,7 @@ namespace Simd
         class MergedConvolution : public Simd::MergedConvolution
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            MergedConvolution(const MergConvParam & p, bool old = false);
 
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
@@ -164,10 +163,12 @@ namespace Simd
 
         protected:
             typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, 
-                const float * weight, const float * bias, const float * params, float * dst);
+                const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst);
 
-            size_t _sizeS, _sizeB0, _sizeB1, _sizeD;
-            ConvolutionPtr _convolution[MC_MAX_COUNT];
+            bool _old;
+            size_t _sizeS, _sizeD, _F, _yStep[2], _bufH[2], _rowM[2], _bufC[2], _sizeB[2];
+            ConvolutionPtr _convolution[3];
+            Array32f _weightR[3];
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
