@@ -30,7 +30,7 @@ namespace Simd
     namespace Sse
     {
         MergedConvolution::MergedConvolution(const MergConvParam & p)
-            : Base::MergedConvolution(p, true)
+            : Base::MergedConvolution(p, false)
         {
         }
 

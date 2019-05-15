@@ -166,7 +166,7 @@ namespace Simd
                 const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst);
 
             bool _old;
-            size_t _sizeS, _sizeD, _F, _yStep[2], _bufH[2], _rowM[2], _bufC[2], _sizeB[2];
+            size_t _sizeS, _sizeD, _F, _yStep[2], _bufH[2], _bufC[2], _sizeB[2];
             ConvolutionPtr _convolution[3];
             Array32f _weightR[3];
         };
