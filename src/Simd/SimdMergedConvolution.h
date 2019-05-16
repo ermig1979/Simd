@@ -107,27 +107,11 @@ namespace Simd
         {
         }
 
-        virtual size_t ExternalBufferSize() const
-        {
-            return 1;
-        }
+        virtual size_t ExternalBufferSize() const = 0;
 
-        virtual size_t InternalBufferSize() const
-        {
-            return 1;
-        }
+        virtual size_t InternalBufferSize() const = 0;
 
-        virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
-        {
-            for (size_t i = 0; i < _param.count; ++i)
-            {
-                _weight[i] = weight[i];
-                if (internal)
-                    internal[i] = SimdFalse;
-                _bias[i] = bias[i];
-                _params[i] = params[i];
-            }
-        }
+        virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params) = 0;
 
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
@@ -161,14 +145,18 @@ namespace Simd
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
-        protected:
             typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, 
                 const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst);
+            typedef void(*ReorderPtr)(const float * src, const SimdConvolutionParameters & p, float * dst);
+
+        protected:
+            void SetSize(size_t L, size_t F);
 
             bool _old;
             size_t _sizeS, _sizeD, _F, _yStep[2], _bufH[2], _bufC[2], _sizeB[2];
             ConvolutionPtr _convolution[3];
-            Array32f _weightR[3];
+            ReorderPtr _reorder[3];
+            Array32f _rWeight[3];
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);

@@ -213,7 +213,8 @@ namespace Test
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 12, 12, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
 #endif
 #else
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
+        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 16, 192, 192, 1, 1, a0, 96, 3, 2, a1, 24, a2, f), f1, f2);
 #endif
         return result;
     }
