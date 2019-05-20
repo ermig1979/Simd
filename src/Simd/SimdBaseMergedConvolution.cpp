@@ -293,19 +293,19 @@ namespace Simd
         }
 
         MergedConvolution::MergedConvolution(const MergConvParam & p, bool old)
-            : Simd::MergedConvolution(p)
+            : _param(p)
         {
+            const size_t L1 = 32 * 1024, L2 = 256 * 1024, L3 = 2048 * 1024;
             _old = old;
             _sizeS = p.conv[0].srcH*p.conv[0].srcW*p.conv[0].srcC;
             _sizeD = p.conv[2].dstH*p.conv[2].dstW*p.conv[2].dstC;
-
             if (_old)
             {
                 _sizeB[0] = p.conv[1].srcH*p.conv[1].srcW*p.conv[1].srcC;
                 _sizeB[1] = p.conv[1].dstH*p.conv[1].dstW*p.conv[1].dstC;
             }
             else
-                SetSize(256 * 1024, Base::F);
+                SetSize(L2, Base::F);
             for (size_t i = 0; i < _param.count; ++i)
             {
                 _reorder[i] = NULL;
@@ -321,9 +321,8 @@ namespace Simd
             }       
         }
 
-        void MergedConvolution::SetSize(size_t L, size_t F)
+        void MergedConvolution::SetSize(size_t L2, size_t F)
         {
-            _F = F;
             const MergConvParam & p = _param;
             for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
             {
@@ -331,12 +330,21 @@ namespace Simd
                 for (_bufH[1] = 1; _bufH[1] < _yStep[1]; _bufH[1] *= 2);
                 _yStep[0] = _yStep[1] * p.conv[1].strideY;
                 for (_bufH[0] = 1; _bufH[0] < (_yStep[1] - 1) * p.conv[1].strideY + p.conv[1].kernelY; _bufH[0] *= 2);
-                _bufC[0] = (p.conv[0].dstC + _F - 1) / _F;
-                _bufC[1] = (p.conv[1].dstC + _F - 1) / _F;
-                _sizeB[0] = _bufC[0] * _bufH[0] * p.conv[0].dstW * _F;
-                _sizeB[1] = _bufC[1] * _bufH[1] * p.conv[1].dstW * _F;
-                if ((_sizeB[0] + _sizeB[1]) * sizeof(float) <= L)
+                _sizeB[0] = _bufH[0] * p.conv[0].dstW * AlignHi(p.conv[0].dstC, F);
+                _sizeB[1] = _bufH[1] * p.conv[1].dstW * AlignHi(p.conv[1].dstC, F);
+                if ((_sizeB[0] + _sizeB[1]) * sizeof(float) <= L2)
                     break;
+            }
+        }
+
+        float * MergedConvolution::GetBuffer(float * buffer)
+        {
+            if (buffer)
+                return buffer;
+            else
+            {
+                _buffer.Resize(ExternalBufferSize());
+                return _buffer.data;
             }
         }
 
@@ -357,7 +365,6 @@ namespace Simd
                 if (_reorder[i] && _rWeight[i].data)
                 {
                     const SimdConvolutionParameters & c = _param.conv[i];
-                    //_rWeight[i].Resize(c.kernelX*c.kernelY*c.srcC*c.dstC);
                     _reorder[i](weight[i], c, _rWeight[i].data);
                     _weight[i] = _rWeight[i].data;
                     if (internal)
@@ -377,7 +384,7 @@ namespace Simd
         void MergedConvolution::Forward(const float * src, float * buf, float * dst)
         {
             const MergConvParam & p = _param;
-            float * buf0 = Buffer(buf);
+            float * buf0 = GetBuffer(buf);
             float * buf1 = buf0 + _sizeB[0];
             for (size_t b = 0; b < p.batch; ++b)
             {
