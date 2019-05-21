@@ -33,6 +33,27 @@
 /*! \namespace Simd */
 namespace Simd
 {
+	/*! @ingroup correlation
+
+		\fn void AbsDifference(const View<A>& a, const View<A>& b, const View<A>& c)
+
+		\short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
+
+		Both images must have the same width and height.
+
+		\note This function is a C++ wrapper for function ::SimdAbsDifference.
+
+		\param [in] a - a first image.
+		\param [in] b - a second image.
+		\param [out] c - a destination image.
+	*/
+	template<template<class> class A> SIMD_INLINE void AbsDifference(const View<A>& a, const View<A>& b, View<A>& c)
+	{
+		assert(Compatible(a, b) && Compatible(b, c) && a.format == View<A>::Gray8);
+
+		SimdAbsDifference(a.data, a.stride, b.data, b.stride, c.data, c.stride, a.width, a.height);
+	}
+
     /*! @ingroup correlation
 
         \fn void AbsDifferenceSum(const View<A>& a, const View<A>& b, uint64_t & sum)
