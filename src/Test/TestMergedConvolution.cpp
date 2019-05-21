@@ -235,12 +235,12 @@ namespace Test
         if (Simd::Sse::Enable)
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Sse::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif 
-#if 0
+
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif 
-
+#if 0
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx2::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));

@@ -153,7 +153,7 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_SSE_ENABLE
-#if 0
+
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
@@ -167,6 +167,7 @@ namespace Simd
     }
 #endif//SIMD_AVX_ENABLE
 
+#if 0
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
