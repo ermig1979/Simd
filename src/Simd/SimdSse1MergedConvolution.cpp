@@ -229,34 +229,6 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const float * params, size_t offset);
-
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationIdentity>(__m128 value, const float * params, size_t offset)
-        {
-            return value;
-        }
-
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationRelu>(__m128 value, const float * params, size_t offset)
-        {
-            return _mm_max_ps(_mm_setzero_ps(), value);
-        }
-
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationLeakyRelu>(__m128 value, const float * params, size_t offset)
-        {
-            return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(_mm_set1_ps(params[0]), _mm_min_ps(_mm_setzero_ps(), value)));
-        }
-
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationRestrictRange>(__m128 value, const float * params, size_t offset)
-        {
-            return _mm_min_ps(_mm_max_ps(_mm_set1_ps(params[0]), value), _mm_set1_ps(params[1]));
-        }
-
-        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationPrelu>(__m128 value, const float * params, size_t offset)
-        {
-            return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(_mm_loadu_ps(params + offset), _mm_min_ps(_mm_setzero_ps(), value)));
-        }
-
-
         template<::SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float * params, size_t offset);
 
         template<> SIMD_INLINE float Activate<SimdConvolutionActivationIdentity>(float value, const float * params, size_t offset)
@@ -532,7 +504,277 @@ namespace Simd
             }
         }
 
-        void InputReorder(const float * src, const SimdConvolutionParameters & p, float * dst)
+        template <UpdateType update> SIMD_INLINE void Update(float  * p, __m128 a, size_t tail);
+
+        template <> SIMD_INLINE void Update<UpdateSet>(float  * p, __m128 a, size_t tail)
+        {
+            float t[F];
+            _mm_storeu_ps(t, a);
+            for (size_t i = 0; i < tail; ++i)
+                p[i] = t[i];
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd>(float  * p, __m128 a, size_t tail)
+        {
+            float t[F];
+            for (size_t i = 0; i < tail; ++i)
+                t[i] = p[i];
+            _mm_storeu_ps(t, _mm_add_ps(a, _mm_loadu_ps(t)));
+            for (size_t i = 0; i < tail; ++i)
+                p[i] = t[i];
+        }
+
+        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_2x6(const float * src, size_t srcC, size_t srcS,
+            const float * weight, const __m128 * bias, const __m128 * params, float * dst, size_t dstC, size_t tail)
+        {
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            d00 = bias[0], d01 = bias[1];
+            d10 = bias[0], d11 = bias[1];
+            d20 = bias[0], d21 = bias[1];
+            d30 = bias[0], d31 = bias[1];
+            d40 = bias[0], d41 = bias[1];
+            d50 = bias[0], d51 = bias[1];
+            for (size_t c = 0; c < srcC; c += F)
+            {
+                size_t n = Simd::Min(F, srcC - c);
+                for (size_t i = 0; i < n; ++i, weight += DF)
+                {
+                    w0 = _mm_loadu_ps(weight + 0);
+                    w1 = _mm_loadu_ps(weight + F);
+                    s0 = _mm_set1_ps(src[i + 0 * F]);
+                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                    s0 = _mm_set1_ps(src[i + 1 * F]);
+                    d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                    d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
+                    s0 = _mm_set1_ps(src[i + 2 * F]);
+                    d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                    d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                    s0 = _mm_set1_ps(src[i + 3 * F]);
+                    d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                    d31 = _mm_add_ps(_mm_mul_ps(s0, w1), d31);
+                    s0 = _mm_set1_ps(src[i + 4 * F]);
+                    d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                    d41 = _mm_add_ps(_mm_mul_ps(s0, w1), d41);
+                    s0 = _mm_set1_ps(src[i + 5 * F]);
+                    d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
+                    d51 = _mm_add_ps(_mm_mul_ps(s0, w1), d51);
+                }
+                src += srcS;
+            }
+            if (tail == F)
+            {
+                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d01, params, 1));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d10, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d11, params, 1));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d20, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d21, params, 1));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d30, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d31, params, 1));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d40, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d41, params, 1));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d50, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d51, params, 1));
+            }
+            else
+            {
+                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
+                Update<update>(dst + F, Activate<type>(d01, params, 1), tail);
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d10, params, 0));
+                Update<update>(dst + F, Activate<type>(d11, params, 1), tail);
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d20, params, 0));
+                Update<update>(dst + F, Activate<type>(d21, params, 1), tail);
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d30, params, 0));
+                Update<update>(dst + F, Activate<type>(d31, params, 1), tail);
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d40, params, 0));
+                Update<update>(dst + F, Activate<type>(d41, params, 1), tail);
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d50, params, 0));
+                Update<update>(dst + F, Activate<type>(d51, params, 1), tail);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_2x1(const float * src, size_t srcC, size_t srcS,
+            const float * weight, const __m128 * bias, const __m128 * params, float * dst, size_t dstC, size_t tail)
+        {
+            __m128 d00, d01, s0, w0, w1;
+            d00 = bias[0];
+            d01 = bias[1];
+            for (size_t c = 0; c < srcC; c += F)
+            {
+                size_t n = Simd::Min(F, srcC - c);
+                for (size_t i = 0; i < n; ++i, weight += DF)
+                {
+                    w0 = _mm_loadu_ps(weight + 0);
+                    w1 = _mm_loadu_ps(weight + F);
+                    s0 = _mm_set1_ps(src[i]);
+                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                    d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                }
+                src += srcS;
+            }
+            if (tail == F)
+            {
+                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
+                Update<update, false>(dst + F, Activate<type>(d01, params, 1));
+            }
+            else
+            {
+                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
+                Update<update>(dst + F, Activate<type>(d01, params, 1), tail);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_1x6(const float * src, size_t srcC, size_t srcS,
+            const float * weight, const __m128 * bias, const __m128 * params, float * dst, size_t dstC, size_t tail)
+        {
+            __m128 d00, d10, d20, d30, d40, d50, s0, w0;
+            d00 = bias[0];
+            d10 = bias[0];
+            d20 = bias[0];
+            d30 = bias[0];
+            d40 = bias[0];
+            d50 = bias[0];
+            for (size_t c = 0; c < srcC; c += F)
+            {
+                size_t n = Simd::Min(F, srcC - c);
+                for (size_t i = 0; i < n; ++i, weight += DF)
+                {
+                    w0 = _mm_loadu_ps(weight + 0);
+                    s0 = _mm_set1_ps(src[i + 0 * F]);
+                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                    s0 = _mm_set1_ps(src[i + 1 * F]);
+                    d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                    s0 = _mm_set1_ps(src[i + 2 * F]);
+                    d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                    s0 = _mm_set1_ps(src[i + 3 * F]);
+                    d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                    s0 = _mm_set1_ps(src[i + 4 * F]);
+                    d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                    s0 = _mm_set1_ps(src[i + 5 * F]);
+                    d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
+                }
+                src += srcS;
+            }
+            if (tail == F)
+            {
+                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d10, params, 0));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d20, params, 0));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d30, params, 0));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d40, params, 0));
+                dst += dstC;
+                Update<update, false>(dst + 0, Activate<type>(d50, params, 0));
+            }
+            else
+            {
+                Update<update>(dst + 0, Activate<type>(d00, params, 0), tail);
+                dst += dstC;
+                Update<update>(dst + 0, Activate<type>(d10, params, 0), tail);
+                dst += dstC;
+                Update<update>(dst + 0, Activate<type>(d20, params, 0), tail);
+                dst += dstC;
+                Update<update>(dst + 0, Activate<type>(d30, params, 0), tail);
+                dst += dstC;
+                Update<update>(dst + 0, Activate<type>(d40, params, 0), tail);
+                dst += dstC;
+                Update<update>(dst + 0, Activate<type>(d50, params, 0), tail);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_1x1(const float * src, size_t srcC, size_t srcS,
+            const float * weight, const __m128 * bias, const __m128 * params, float * dst, size_t dstC, size_t tail)
+        {
+            __m128 d00, s0, w0;
+            d00 = bias[0];
+            for (size_t c = 0; c < srcC; c += F)
+            {
+                size_t n = Simd::Min(F, srcC - c);
+                for (size_t i = 0; i < n; ++i, weight += DF)
+                {
+                    w0 = _mm_loadu_ps(weight + 0);
+                    s0 = _mm_set1_ps(src[i]);
+                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                }
+                src += srcS;
+            }
+            if (tail == F)
+                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
+            else
+                Update<update>(dst + 0, Activate<type>(d00, params, 0), tail);
+        }
+
+        template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
+            size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+        {
+            assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
+            size_t sC = (srcC + F - 1) / F, srcM = (bufH[1] - 1), srcS = bufH[1] * srcW*F;
+            size_t dstCDF = AlignLo(dstC, DF), dstW6 = AlignLoAny(dstW, 6);
+            __m128 _params[2], _bias[2];
+            _params[0] = _mm_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange)
+                _params[1] = _mm_set1_ps(params[1]);
+
+            dst += yBeg * p.dstW * p.dstC;
+            size_t dc = 0; 
+            for (; dc < dstC; dc += DF)
+            {
+                _bias[0] = bias ? _mm_loadu_ps(bias + dc + 0) : _mm_setzero_ps();
+                _bias[1] = bias ? _mm_loadu_ps(bias + dc + F) : _mm_setzero_ps();
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = _mm_loadu_ps(params + dc + 0);
+                    _params[1] = _mm_loadu_ps(params + dc + F);
+                }
+                float * pDst = dst + dc;
+                for (size_t y = yBeg; y < yEnd; ++y)
+                {
+                    const float * pSrc = src + (y&srcM)*srcW*F;
+                    size_t x = 0;
+                    if (dc < dstCDF)
+                    {
+                        for (; x < dstW6; x += 6, pDst += 6*dstC, pSrc += 6*F)
+                            OutputConvolution_2x6<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, F);
+                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
+                            OutputConvolution_2x1<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, F);
+                    }
+                    else if(dstC - dstCDF > F)
+                    {
+                        size_t tail = dstC - dstCDF - F;
+                        for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
+                            OutputConvolution_2x6<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
+                            OutputConvolution_2x1<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                    }
+                    else
+                    {
+                        size_t tail = dstC - dstCDF;
+                        for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
+                            OutputConvolution_1x6<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
+                            OutputConvolution_1x1<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                    }
+                }
+                weight += srcC*DF;
+            }
+        }
+
+        void InputOutputReorder(const float * src, const SimdConvolutionParameters & p, float * dst)
         {
             size_t size = p.kernelY*p.kernelX*p.srcC, dstC = p.dstC;
             for (size_t c = 0; c < dstC; c += DF)
@@ -582,10 +824,10 @@ namespace Simd
                 convolution[1] = DepthwiseConvolution3x3<type>;
                 break;
             case 2:
-                //if (p.add)
-                //    convolution[2] = old ? DirectConvolutionOld<type, UpdateAdd> : OutputConvolution<type, UpdateAdd>;
-                //else
-                //    convolution[2] = old ? DirectConvolutionOld<type, UpdateSet> : OutputConvolution<type, UpdateSet>;
+                if (p.add)
+                    convolution[2] = OutputConvolution<type, UpdateAdd>;
+                else
+                    convolution[2] = OutputConvolution<type, UpdateSet>;
                 break;
             default:
                 assert(0);
@@ -611,9 +853,11 @@ namespace Simd
                 }
             }
             _rWeight[0].Resize(AlignHi(p.conv[0].dstC, DF)*p.conv[0].kernelY*p.conv[0].kernelX*p.conv[0].srcC);
-            _reorder[0] = InputReorder;
+            _reorder[0] = InputOutputReorder;
             _rWeight[1].Resize(AlignHi(p.conv[1].dstC, F)*p.conv[1].kernelY*p.conv[1].kernelX);
             _reorder[1] = DepthwiseReorder;
+            _rWeight[2].Resize(AlignHi(p.conv[2].dstC, DF)*p.conv[2].kernelY*p.conv[2].kernelX*p.conv[2].srcC);
+            _reorder[2] = InputOutputReorder;
         }
 
         //---------------------------------------------------------------------
