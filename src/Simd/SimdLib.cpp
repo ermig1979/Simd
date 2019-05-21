@@ -3289,7 +3289,7 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 
 typedef void* (*SimdMergedConvolutionInitPtr) (SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC2(MergedConvolutionInit, SIMD_AVX_FUNC, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC3(MergedConvolutionInit, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
 {
