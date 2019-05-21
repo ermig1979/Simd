@@ -179,7 +179,7 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX2_ENABLE
-#if 0
+
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
@@ -192,7 +192,7 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX512F_ENABLE
-
+#if 0
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {

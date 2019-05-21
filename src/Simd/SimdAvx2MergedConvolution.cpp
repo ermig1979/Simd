@@ -441,7 +441,8 @@ namespace Simd
             size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
             size_t srcC = p.srcC, srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
             size_t srcM = (bufH[0] - 1), dstM = (bufH[1] - 1), srcS = bufH[0] * srcW, dstS = bufH[1] * dstW;
-            size_t xStep = F * p.strideX, xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
+            size_t xStep = F * p.strideX, xStep0 = (p.strideX - p.padX)*F;
+            size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
 
             __m256 _params[2];
             _params[0] = _mm256_set1_ps(params[0]);
@@ -464,7 +465,7 @@ namespace Simd
                     const float * src1 = src + ((sy + 1)&srcM)*srcW;
                     float * pDst = dst + (dy&dstM)*dstW;
                     if (padX)
-                        ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 4, _bias, _params, pDst), pDst += F, dx++;
+                        ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 4, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0;
                     for (; dx < xMainEnd; dx++, pDst += F, src0 += xStep, src1 += xStep)
                         ConvolutionDepthwise3x3Edge2x3<type>(src0, src1, _weight + 3, _bias, _params, pDst);
                     if (padW)
@@ -479,7 +480,7 @@ namespace Simd
                     const float * src2 = src + ((sy + 2)&srcM)*srcW;
                     float * pDst = dst + (dy&dstM)*dstW;
                     if (padX)
-                        ConvolutionDepthwise3x3Edge3x2<type>(src0, src1, src2, _weight + 1, _bias, _params, pDst), pDst += F, dx++;
+                        ConvolutionDepthwise3x3Edge3x2<type>(src0, src1, src2, _weight + 1, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0, src2 += xStep0;
                     for (; dx < xMainEnd; dx++, pDst += F, src0 += xStep, src1 += xStep, src2 += xStep)
                         ConvolutionDepthwise3x3Main1x1<type>(src0, src1, src2, _weight + 0, _bias, _params, pDst);
                     if (padW)
@@ -492,7 +493,7 @@ namespace Simd
                     const float * src1 = src + ((sy + 1)&srcM)*srcW;
                     float * pDst = dst + (dy&dstM)*dstW;
                     if (padX)
-                        ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 1, _bias, _params, pDst), pDst += F, dx++;
+                        ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 1, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0;
                     for (; dx < xMainEnd; dx++, pDst += F, src0 += xStep, src1 += xStep)
                         ConvolutionDepthwise3x3Edge2x3<type>(src0, src1, _weight + 0, _bias, _params, pDst);
                     if (padW)
