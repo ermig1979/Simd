@@ -59,7 +59,7 @@ namespace Simd
                 return false;
             for (size_t i = 0; i < count; ++i)
             {
-                const SimdConvolutionParameters & c = conv[i];
+                SimdConvolutionParameters & c = conv[i];
                 if (c.dstH != (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1)) / c.strideY + 1 || c.dstH == 0)
                     return false;
                 if (c.dstW != (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1)) / c.strideX + 1 || c.dstW == 0)
@@ -70,6 +70,10 @@ namespace Simd
                     return false;
                 if (c.dilationY != 1 || c.dilationX != 1)
                     return false;
+                if (c.dstH == (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1) - 1) / c.strideY + 1)
+                    c.padH--;
+                if (c.dstW == (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1) - 1) / c.strideX + 1)
+                    c.padW--;
             }
             if (conv[0].group != 1)
                 return false;
