@@ -72,6 +72,8 @@ namespace Test
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, name##DataTest, name##SpecialTest)); return true; } \
     bool name##AtList = name##AddToList();
 
+    TEST_ADD_GROUP_AD0(AbsDifference);
+
     TEST_ADD_GROUP_AD0(AbsDifferenceSum);
     TEST_ADD_GROUP_AD0(AbsDifferenceSumMasked);
     TEST_ADD_GROUP_AD0(AbsDifferenceSums3x3);
