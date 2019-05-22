@@ -2,7 +2,8 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2019 Yermalayeu Ihar,
-*               2014-2016 Antonenka Mikhail.
+*               2014-2016 Antonenka Mikhail,
+*               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -403,25 +404,24 @@ extern "C"
 
 	/*! @ingroup correlation
 
-		\fn void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t *c, size_t cStride, size_t width, size_t height, uint64_t * sum);
+		\fn void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t * c, size_t cStride, size_t width, size_t height);
 
 		\short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
 
 		The three images must have the same width and height.
 
-		\note This function has a C++ wrapper Simd::AbsDifference(const View<A> & a, const View<A> & b, const View<A> & c).
+		\note This function has a C++ wrapper Simd::AbsDifference(const View<A> & a, const View<A> & b, View<A> & c).
 
 		\param [in] a - a pointer to pixels data of first image.
 		\param [in] aStride - a row size of first image.
 		\param [in] b - a pointer to pixels data of second image.
 		\param [in] bStride - a row size of second image.
 		\param [out] c - a pointer to pixels data of destination image.
-		\param [in]cStride - a row size of destination image.
+		\param [in] cStride - a row size of destination image.
 		\param [in] width - an image width.
 		\param [in] height - an image height.
 	*/
-	SIMD_API void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t *c, size_t cStride,
-		size_t width, size_t height);
+	SIMD_API void SimdAbsDifference(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t * c, size_t cStride, size_t width, size_t height);
 
     /*! @ingroup correlation
 
@@ -441,8 +441,7 @@ extern "C"
         \param [in] height - an image height.
         \param [out] sum - the result sum of absolute difference of two images.
     */
-    SIMD_API void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-        size_t width, size_t height, uint64_t * sum);
+    SIMD_API void SimdAbsDifferenceSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);
 
     /*! @ingroup correlation
 

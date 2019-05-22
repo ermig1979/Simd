@@ -49,6 +49,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:gadea7d6e612c1947395623569b4e5145d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d">SimdAbsDifference</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, uint8_t *c, size_t cStride, size_t width, size_t height)</td></tr>
+<tr class="memdesc:gadea7d6e612c1947395623569b4e5145d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets absolute difference of two gray 8-bit images, pyxel by pixel.  <a href="#gadea7d6e612c1947395623569b4e5145d">More...</a><br /></td></tr>
+<tr class="separator:gadea7d6e612c1947395623569b4e5145d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#gad6b60bbf1e7ac97fe80019e8edeb468c">SimdAbsDifferenceSum</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t *sum)</td></tr>
 <tr class="memdesc:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of absolute difference of two gray 8-bit images.  <a href="#gad6b60bbf1e7ac97fe80019e8edeb468c">More...</a><br /></td></tr>
 <tr class="separator:gad6b60bbf1e7ac97fe80019e8edeb468c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -76,6 +79,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga8c6c389364e696db6c8c77980f02a620"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga8c6c389364e696db6c8c77980f02a620">SimdSquaredDifferenceKahanSum32f</a> (const float *a, const float *b, size_t size, float *sum)</td></tr>
 <tr class="memdesc:ga8c6c389364e696db6c8c77980f02a620"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates sum of squared differences for two 32-bit float arrays with using Kahan summation algorithm.  <a href="#ga8c6c389364e696db6c8c77980f02a620">More...</a><br /></td></tr>
 <tr class="separator:ga8c6c389364e696db6c8c77980f02a620"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga56e481cefc391af9f067198b28483155"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga56e481cefc391af9f067198b28483155"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga56e481cefc391af9f067198b28483155">AbsDifference</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;c)</td></tr>
+<tr class="memdesc:ga56e481cefc391af9f067198b28483155"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets absolute difference of two gray 8-bit images, pyxel by pixel.  <a href="group__correlation.html#ga56e481cefc391af9f067198b28483155">More...</a><br /></td></tr>
+<tr class="separator:ga56e481cefc391af9f067198b28483155"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga720da808dbb58782a893f7b7510db8e8"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga720da808dbb58782a893f7b7510db8e8"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__correlation.html#ga720da808dbb58782a893f7b7510db8e8">AbsDifferenceSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, uint64_t &amp;sum)</td></tr>
 <tr class="memdesc:ga720da808dbb58782a893f7b7510db8e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of absolute difference of two gray 8-bit images.  <a href="group__correlation.html#ga720da808dbb58782a893f7b7510db8e8">More...</a><br /></td></tr>
@@ -104,6 +111,87 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for estimation of correlation. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="gadea7d6e612c1947395623569b4e5145d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadea7d6e612c1947395623569b4e5145d">&#9670;&nbsp;</a></span>SimdAbsDifference()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdAbsDifference </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>aStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>c</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>cStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets absolute difference of two gray 8-bit images, pyxel by pixel. </p>
+<p>The three images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__correlation.html#ga56e481cefc391af9f067198b28483155" title="Gets absolute difference of two gray 8-bit images, pyxel by pixel. ">Simd::AbsDifference(const View&lt;A&gt; &amp; a, const View&lt;A&gt; &amp; b, View&lt;A&gt; &amp; c)</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a pointer to pixels data of first image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">aStride</td><td>- a row size of first image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to pixels data of second image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bStride</td><td>- a row size of second image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">c</td><td>- a pointer to pixels data of destination image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cStride</td><td>- a row size of destination image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gad6b60bbf1e7ac97fe80019e8edeb468c"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gad6b60bbf1e7ac97fe80019e8edeb468c">&#9670;&nbsp;</a></span>SimdAbsDifferenceSum()</h2>
 
@@ -774,6 +862,52 @@ for(i = 0; i &lt; size; ++i)
     <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a pointer to the second array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">sum</td><td>- a sum of squared differences. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga56e481cefc391af9f067198b28483155"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga56e481cefc391af9f067198b28483155">&#9670;&nbsp;</a></span>AbsDifference()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void AbsDifference </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>a</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>b</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>c</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets absolute difference of two gray 8-bit images, pyxel by pixel. </p>
+<p>Both images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__correlation.html#gadea7d6e612c1947395623569b4e5145d" title="Gets absolute difference of two gray 8-bit images, pyxel by pixel. ">SimdAbsDifference</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">a</td><td>- a first image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">b</td><td>- a second image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">c</td><td>- a destination image. </td></tr>
   </table>
   </dd>
 </dl>

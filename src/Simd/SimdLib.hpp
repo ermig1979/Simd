@@ -2,7 +2,8 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2019 Yermalayeu Ihar,
-*               2014-2016 Antonenka Mikhail.
+*               2014-2016 Antonenka Mikhail,
+*               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -35,7 +36,7 @@ namespace Simd
 {
 	/*! @ingroup correlation
 
-		\fn void AbsDifference(const View<A>& a, const View<A>& b, const View<A>& c)
+		\fn void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
 
 		\short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
 
@@ -47,7 +48,7 @@ namespace Simd
 		\param [in] b - a second image.
 		\param [out] c - a destination image.
 	*/
-	template<template<class> class A> SIMD_INLINE void AbsDifference(const View<A>& a, const View<A>& b, View<A>& c)
+	template<template<class> class A> SIMD_INLINE void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
 	{
 		assert(Compatible(a, b) && Compatible(b, c) && a.format == View<A>::Gray8);
 

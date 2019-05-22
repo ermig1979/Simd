@@ -1,7 +1,8 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar,
+*               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal

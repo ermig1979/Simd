@@ -70,6 +70,7 @@ namespace Simd
                     return false;
                 if (c.dilationY != 1 || c.dilationX != 1)
                     return false;
+
                 if (c.dstH == (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1) - 1) / c.strideY + 1)
                     c.padH--;
                 if (c.dstW == (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1) - 1) / c.strideX + 1)
@@ -196,7 +197,7 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX512F_ENABLE
-#if 0
+
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
@@ -209,6 +210,5 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_NEON_ENABLE
-#endif
 }
 #endif//__SimMergedConvolution_h__

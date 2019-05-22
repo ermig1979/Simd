@@ -3,7 +3,8 @@
 *
 * Copyright (c) 2011-2019 Yermalayeu Ihar,
 *               2014-2018 Antonenka Mikhail,
-*               2018-2018 Radchenko Andrey.
+*               2018-2018 Radchenko Andrey,
+*               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -3289,7 +3290,7 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 
 typedef void* (*SimdMergedConvolutionInitPtr) (SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC4(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC);// , SIMD_NEON_FUNC);
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC5(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
 {
