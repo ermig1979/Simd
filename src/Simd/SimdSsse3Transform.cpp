@@ -176,6 +176,91 @@ namespace Simd
             }
         }
 
+        __m128i K8_SHUFFLE_BGR_TO_BGRA = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
+        __m128i K8_SHUFFLE_BGRA_TO_BGR = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
+
+        SIMD_INLINE void TransformImageTransposeRotate0_3x4x4(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            __m128i a0 = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + 0 * srcStride)), K8_SHUFFLE_BGR_TO_BGRA);
+            __m128i a1 = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + 1 * srcStride)), K8_SHUFFLE_BGR_TO_BGRA);
+            __m128i a2 = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + 2 * srcStride)), K8_SHUFFLE_BGR_TO_BGRA);
+            __m128i a3 = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + 3 * srcStride)), K8_SHUFFLE_BGR_TO_BGRA);
+            __m128i b0 = _mm_unpacklo_epi32(a0, a2);
+            __m128i b1 = _mm_unpackhi_epi32(a0, a2);
+            __m128i b2 = _mm_unpacklo_epi32(a1, a3);
+            __m128i b3 = _mm_unpackhi_epi32(a1, a3);
+            _mm_storeu_si128((__m128i*)(dst + 0 * dstStride), _mm_shuffle_epi8(_mm_unpacklo_epi32(b0, b2), K8_SHUFFLE_BGRA_TO_BGR));
+            _mm_storeu_si128((__m128i*)(dst + 1 * dstStride), _mm_shuffle_epi8(_mm_unpackhi_epi32(b0, b2), K8_SHUFFLE_BGRA_TO_BGR));
+            _mm_storeu_si128((__m128i*)(dst + 2 * dstStride), _mm_shuffle_epi8(_mm_unpacklo_epi32(b1, b3), K8_SHUFFLE_BGRA_TO_BGR));
+            _mm_storeu_si128((__m128i*)(dst + 3 * dstStride), _mm_shuffle_epi8(_mm_unpackhi_epi32(b1, b3), K8_SHUFFLE_BGRA_TO_BGR));
+        }
+
+        template<> void TransformImageTransposeRotate0<3>(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            size_t width4 = AlignLo(width - 2, 4);
+            size_t height4 = AlignLo(height, 4);
+            size_t row = 0;
+            for (; row < height4; row += 4)
+            {
+                size_t col = 0;
+                for (; col < width4; col += 4)
+                    TransformImageTransposeRotate0_3x4x4(src + col * 3, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 4; ++i)
+                        CopyPixel<3>(src + col * 3 + i * srcStride, dst + col * dstStride + i * 3);
+                src += 4 * srcStride;
+                dst += 12;
+            }
+            for (; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    CopyPixel<3>(src + col * 3, dst + col * dstStride);
+                src += srcStride;
+                dst += 3;
+            }
+        }
+
+        SIMD_INLINE void TransformImageTransposeRotate0_4x4x4(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            __m128i a0 = _mm_loadu_si128((__m128i*)(src + 0 * srcStride));
+            __m128i a1 = _mm_loadu_si128((__m128i*)(src + 1 * srcStride));
+            __m128i a2 = _mm_loadu_si128((__m128i*)(src + 2 * srcStride));
+            __m128i a3 = _mm_loadu_si128((__m128i*)(src + 3 * srcStride));
+            __m128i b0 = _mm_unpacklo_epi32(a0, a2);
+            __m128i b1 = _mm_unpackhi_epi32(a0, a2);
+            __m128i b2 = _mm_unpacklo_epi32(a1, a3);
+            __m128i b3 = _mm_unpackhi_epi32(a1, a3);
+            _mm_storeu_si128((__m128i*)(dst + 0 * dstStride), _mm_unpacklo_epi32(b0, b2));
+            _mm_storeu_si128((__m128i*)(dst + 1 * dstStride), _mm_unpackhi_epi32(b0, b2));
+            _mm_storeu_si128((__m128i*)(dst + 2 * dstStride), _mm_unpacklo_epi32(b1, b3));
+            _mm_storeu_si128((__m128i*)(dst + 3 * dstStride), _mm_unpackhi_epi32(b1, b3));
+        }
+
+        template<> void TransformImageTransposeRotate0<4>(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            size_t width4 = AlignLo(width, 4);
+            size_t height4 = AlignLo(height, 4);
+            size_t row = 0;
+            for (; row < height4; row += 4)
+            {
+                size_t col = 0;
+                for (; col < width4; col += 4)
+                    TransformImageTransposeRotate0_4x4x4(src + col * 4, srcStride,  dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 4; ++i)
+                        CopyPixel<4>(src + col * 4 + i*srcStride, dst + col * dstStride + i*4);
+                src += 4*srcStride;
+                dst += 16;
+            }
+            for (; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    CopyPixel<4>(src + col * 4, dst + col * dstStride);
+                src += srcStride;
+                dst += 4;
+            }
+        }
+
         template<size_t N> void TransformImageTransposeRotate90(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             dst += (width - A)*N;

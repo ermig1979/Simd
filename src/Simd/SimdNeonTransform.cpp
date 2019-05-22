@@ -172,6 +172,112 @@ namespace Simd
             }
         }
 
+        union Type3x4x4
+        {
+            uint8x8x4_t d4;
+            uint8x16x2_t q2;
+        };
+
+        uint8x8_t K8_ROT0_000 = SIMD_VEC_SETR_PI8(0, 1, 2, 16, 17, 18, 32, 32);
+        uint8x8_t K8_ROT0_001 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 0, 1);
+        uint8x8_t K8_ROT0_011 = SIMD_VEC_SETR_PI8(2, 16, 17, 18, 32, 32, 32, 32);
+        uint8x8_t K8_ROT0_020 = SIMD_VEC_SETR_PI8(3, 4, 5, 19, 20, 21, 32, 32);
+        uint8x8_t K8_ROT0_021 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 3, 4);
+        uint8x8_t K8_ROT0_031 = SIMD_VEC_SETR_PI8(5, 19, 20, 21, 32, 32, 32, 32);
+        uint8x8_t K8_ROT0_100 = SIMD_VEC_SETR_PI8(6, 7, 8, 22, 23, 24, 32, 32);
+        uint8x8_t K8_ROT0_101 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 6, 7);
+        uint8x8_t K8_ROT0_111 = SIMD_VEC_SETR_PI8(8, 22, 23, 24, 32, 32, 32, 32);
+        uint8x8_t K8_ROT0_120 = SIMD_VEC_SETR_PI8(9, 10, 11, 25, 26, 27, 32, 32);
+        uint8x8_t K8_ROT0_121 = SIMD_VEC_SETR_PI8(32, 32, 32, 32, 32, 32, 9, 10);
+        uint8x8_t K8_ROT0_131 = SIMD_VEC_SETR_PI8(11, 25, 26, 27, 32, 32, 32, 32);
+
+        SIMD_INLINE void TransformImageTransposeRotate0_3x4x4(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            Type3x4x4 a0, a1, b0, b1;
+            a0.q2.val[0] = Load<false>(src + 0 * srcStride);
+            a0.q2.val[1] = Load<false>(src + 1 * srcStride);
+            a1.q2.val[0] = Load<false>(src + 2 * srcStride);
+            a1.q2.val[1] = Load<false>(src + 3 * srcStride);
+            b0.d4.val[0] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_000), a1.d4, K8_ROT0_001);
+            b0.d4.val[1] = vtbl4_u8(a1.d4, K8_ROT0_011); 
+            b0.d4.val[2] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_020), a1.d4, K8_ROT0_021);
+            b0.d4.val[3] = vtbl4_u8(a1.d4, K8_ROT0_031);
+            b1.d4.val[0] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_100), a1.d4, K8_ROT0_101);
+            b1.d4.val[1] = vtbl4_u8(a1.d4, K8_ROT0_111);
+            b1.d4.val[2] = vtbx4_u8(vtbl4_u8(a0.d4, K8_ROT0_120), a1.d4, K8_ROT0_121);
+            b1.d4.val[3] = vtbl4_u8(a1.d4, K8_ROT0_131);
+            Store<false>(dst + 0 * dstStride, b0.q2.val[0]);
+            Store<false>(dst + 1 * dstStride, b0.q2.val[1]);
+            Store<false>(dst + 2 * dstStride, b1.q2.val[0]);
+            Store<false>(dst + 3 * dstStride, b1.q2.val[1]);
+        }
+
+        template<> void TransformImageTransposeRotate0<3>(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            size_t width4 = AlignLo(width - 4, 4);
+            size_t height4 = AlignLo(height, 4);
+            size_t row = 0;
+            for (; row < height4; row += 4)
+            {
+                size_t col = 0;
+                for (; col < width4; col += 4)
+                    TransformImageTransposeRotate0_3x4x4(src + col * 3, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 4; ++i)
+                        CopyPixel<3>(src + col * 3 + i * srcStride, dst + col * dstStride + i * 3);
+                src += 4 * srcStride;
+                dst += 12;
+            }
+            for (; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    CopyPixel<3>(src + col * 3, dst + col * dstStride);
+                src += srcStride;
+                dst += 3;
+            }
+        }
+
+        SIMD_INLINE void TransformImageTransposeRotate0_4x4x4(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            uint32x4_t a0 = (uint32x4_t)Load<false>(src + 0 * srcStride);
+            uint32x4_t a1 = (uint32x4_t)Load<false>(src + 1 * srcStride);
+            uint32x4_t a2 = (uint32x4_t)Load<false>(src + 2 * srcStride);
+            uint32x4_t a3 = (uint32x4_t)Load<false>(src + 3 * srcStride);
+            uint32x4x2_t b0 = vzipq_u32(a0, a2);
+            uint32x4x2_t b1 = vzipq_u32(a1, a3);
+            uint32x4x2_t c0 = vzipq_u32(b0.val[0], b1.val[0]);
+            uint32x4x2_t c1 = vzipq_u32(b0.val[1], b1.val[1]);
+            Store<false>(dst + 0 * dstStride, (uint8x16_t)c0.val[0]);
+            Store<false>(dst + 1 * dstStride, (uint8x16_t)c0.val[1]);
+            Store<false>(dst + 2 * dstStride, (uint8x16_t)c1.val[0]);
+            Store<false>(dst + 3 * dstStride, (uint8x16_t)c1.val[1]);
+        }
+
+        template<> void TransformImageTransposeRotate0<4>(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
+        {
+            size_t width4 = AlignLo(width, 4);
+            size_t height4 = AlignLo(height, 4);
+            size_t row = 0;
+            for (; row < height4; row += 4)
+            {
+                size_t col = 0;
+                for (; col < width4; col += 4)
+                    TransformImageTransposeRotate0_4x4x4(src + col * 4, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 4; ++i)
+                        CopyPixel<4>(src + col * 4 + i * srcStride, dst + col * dstStride + i * 4);
+                src += 4 * srcStride;
+                dst += 16;
+            }
+            for (; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col)
+                    CopyPixel<4>(src + col * 4, dst + col * dstStride);
+                src += srcStride;
+                dst += 4;
+            }
+        }
+
         template<size_t N> void TransformImageTransposeRotate90(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             dst += (width - HA)*N;
