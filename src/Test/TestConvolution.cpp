@@ -441,6 +441,7 @@ namespace Test
 #else
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 1156, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 32, 56, 56, 16, _1, _1, _1, _0, _0, 4, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(eps, Param(1, 96, 27, 27, 256, _5, _1, _1, _2, _2, 2, a, t), f1, f2);
 #endif
         return result;
     }

@@ -896,7 +896,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void BgrToRgb(const View<A> & bgr, View<A> & rgb)
     {
-        assert(Compatible(bgr, rgb) && bgr.format == View<A>::Bgr24);
+        assert(EqualSize(bgr, rgb) && bgr.PixelSize() == 3 && rgb.PixelSize() == 3);
 
         SimdBgrToRgb(bgr.data, bgr.stride, bgr.width, bgr.height, rgb.data, rgb.stride);
     }
