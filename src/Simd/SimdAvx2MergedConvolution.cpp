@@ -96,16 +96,16 @@ namespace Simd
                 weight += DF;
             }
             _mm256_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
-            _mm256_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
             _mm256_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
-            _mm256_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
             _mm256_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
-            _mm256_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
             _mm256_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
-            _mm256_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
             _mm256_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
-            _mm256_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
             _mm256_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
+            _mm256_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
+            _mm256_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
+            _mm256_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
+            _mm256_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
+            _mm256_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
             _mm256_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
@@ -839,7 +839,7 @@ namespace Simd
             : Avx::MergedConvolution(p)
         {
             const size_t L1 = 32 * 1024, L2 = 256 * 1024, L3 = 2048 * 1024;
-            SetSize(L2, Avx::F);
+            SetSize(L2 - L1, Avx::F);
             for (size_t i = 0; i < _param.count; ++i)
             {
                 _reorder[i] = NULL;

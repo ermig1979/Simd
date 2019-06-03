@@ -209,22 +209,28 @@ namespace Simd
             return pm;
         }
 
-        SIMD_INLINE PerformanceMeasurer * Get(const String func, const String & block)
+        SIMD_INLINE PerformanceMeasurer * Get(const String func, const String & desc)
         {
-            return Get(func + "{ " + block + " }");
+            return Get(func + "{ " + desc + " }");
         }
     };
 }
 
 #define SIMD_PERF_FUNC() Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION))
-#define SIMD_PERF_BEG(block) Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, block))
-#define SIMD_PERF_IF(cond, block) Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((cond) ? Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, block) : NULL)
-#define SIMD_PERF_END(block) Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, block)->Leave();
+#define SIMD_PERF_BEG(desc) Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc))
+#define SIMD_PERF_IF(cond, desc) Simd::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((cond) ? Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc) : NULL)
+#define SIMD_PERF_END(desc) Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc)->Leave();
+#define SIMD_PERF_INIT(name, desc) Simd::PerformanceMeasurer * name = Simd::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc);
+#define SIMD_PERF_ENTER(name) if(name) name->Enter(); 
+#define SIMD_PERF_LEAVE(name) if(name) name->Leave(); 
 #else//SIMD_PERFORMANCE_STATISTIC
 #define SIMD_PERF_FUNC()
-#define SIMD_PERF_BEG(block)
-#define SIMD_PERF_IF(cond, block)
-#define SIMD_PERF_END(block)
+#define SIMD_PERF_BEG(desc)
+#define SIMD_PERF_IF(cond, desc)
+#define SIMD_PERF_END(desc)
+#define SIMD_PERF_INIT(name, desc)
+#define SIMD_PERF_ENTER(name)
+#define SIMD_PERF_LEAVE(name)
 #endif//SIMD_PERFORMANCE_STATISTIC 
 
 #endif//__SimdPerformance_h__

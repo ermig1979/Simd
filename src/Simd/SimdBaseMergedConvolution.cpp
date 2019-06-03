@@ -326,7 +326,7 @@ namespace Simd
             const MergConvParam & p = _param;
             for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
             {
-                _yStep[1] = Simd::Min<size_t>(2, p.conv[1].dstH);
+                _yStep[1] = Simd::Max<size_t>(1, yStep);
                 for (_bufH[1] = 1; _bufH[1] < _yStep[1]; _bufH[1] *= 2);
                 _yStep[0] = _yStep[1] * p.conv[1].strideY;
                 for (_bufH[0] = 1; _bufH[0] < (_yStep[1] - 1) * p.conv[1].strideY + p.conv[1].kernelY; _bufH[0] *= 2);
@@ -384,6 +384,9 @@ namespace Simd
         void MergedConvolution::Forward(const float * src, float * buf, float * dst)
         {
             const MergConvParam & p = _param;
+            SIMD_PERF_INIT(pm0, p.Info() + " 0 (input)");
+            SIMD_PERF_INIT(pm1, p.Info() + " 1 (depth)");
+            SIMD_PERF_INIT(pm2, p.Info() + " 2 (output)");
             float * buf0 = GetBuffer(buf);
             float * buf1 = buf0 + _sizeB[0];
             for (size_t b = 0; b < p.batch; ++b)
@@ -400,9 +403,9 @@ namespace Simd
                     {
                         size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + _yStep[0], (_yStep[1] - 1)*p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY, p.conv[0].dstH);
-                        _convolution[0](src, p.conv[0], yBeg0, yEnd0, _bufH, _weight[0], _bias[0], _params[0], buf0);
-                        _convolution[1](buf0, p.conv[1], yBeg1, yEnd1, _bufH, _weight[1], _bias[1], _params[1], buf1);
-                        _convolution[2](buf1, p.conv[2], yBeg1, yEnd1, _bufH, _weight[2], _bias[2], _params[2], dst);
+                        SIMD_PERF_ENTER(pm0); _convolution[0](src, p.conv[0], yBeg0, yEnd0, _bufH, _weight[0], _bias[0], _params[0], buf0); SIMD_PERF_LEAVE(pm0);
+                        SIMD_PERF_ENTER(pm1); _convolution[1](buf0, p.conv[1], yBeg1, yEnd1, _bufH, _weight[1], _bias[1], _params[1], buf1); SIMD_PERF_LEAVE(pm1);
+                        SIMD_PERF_ENTER(pm2); _convolution[2](buf1, p.conv[2], yBeg1, yEnd1, _bufH, _weight[2], _bias[2], _params[2], dst); SIMD_PERF_LEAVE(pm2);
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
                     }
