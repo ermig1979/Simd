@@ -430,7 +430,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 1152, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 1156, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 96, 192, 192, 96, _3, _1, _2, _1, _1, 96, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 144, 96, 96, 144, _3, _1, _1, _1, _1, 144, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 96, 96, 96, 24, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
@@ -438,10 +438,16 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 96, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 144, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
+#if 1
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 17, 17, 128, _3, _1, _2, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 17, 17, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 64, 17, 17, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+#endif
 #else
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 1156, 12, 12, 12, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 32, 56, 56, 16, _1, _1, _1, _0, _0, 4, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(eps, Param(1, 32, 56, 56, 16, _1, _1, _1, _0, _0, 4, a, t), f1, f2);
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 96, 27, 27, 256, _5, _1, _1, _2, _2, 2, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 64, 17, 17, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
         return result;
     }
