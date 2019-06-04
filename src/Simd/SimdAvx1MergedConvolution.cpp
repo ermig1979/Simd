@@ -229,157 +229,287 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float * params, size_t offset);
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationIdentity>(float value, const float * params, size_t offset)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_2x1(const float * src0, const SimdConvolutionParameters & p,
+            size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
-            return value;
+            __m256 d00, d01, s0, w0, w1;
+            d00 = bias[0];
+            d01 = bias[1];
+            size_t size = kW * p.srcC, tail = DF * (p.kernelX - kW)*p.srcC, stride = p.srcW * p.srcC;
+            for (size_t ky = 0; ky < kH; ++ky)
+            {
+                for (size_t i = 0; i < size; ++i)
+                {
+                    w0 = _mm256_loadu_ps(weight + 0);
+                    w1 = _mm256_loadu_ps(weight + F);
+                    s0 = _mm256_set1_ps(src0[i]);
+                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    weight += DF;
+                }
+                weight += tail;
+                src0 += stride;
+            }
+            _mm256_storeu_ps(dst0, Activate<type>(d00, params, 0));
+            _mm256_storeu_ps(dst1, Activate<type>(d01, params, 1));
         }
 
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationRelu>(float value, const float * params, size_t offset)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_1x1(const float * src0, const SimdConvolutionParameters & p,
+            size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0)
         {
-            return Simd::Max(0.0f, value);
+            __m256 d00, s0, w0;
+            d00 = bias[0];
+            size_t size = kW * p.srcC, tail = DF * (p.kernelX - kW)*p.srcC, stride = p.srcW * p.srcC;
+            for (size_t ky = 0; ky < kH; ++ky)
+            {
+                for (size_t i = 0; i < size; ++i)
+                {
+                    w0 = _mm256_loadu_ps(weight + 0);
+                    s0 = _mm256_set1_ps(src0[i]);
+                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    weight += DF;
+                }
+                weight += tail;
+                src0 += stride;
+            }
+            _mm256_storeu_ps(dst0, Activate<type>(d00, params, 0));
         }
 
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationLeakyRelu>(float value, const float * params, size_t offset)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_2x6(const float * src0, const SimdConvolutionParameters & p,
+            size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
-            return Simd::Max(0.0f, value) + params[0] * Simd::Min(0.0f, value);
+            __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            d00 = bias[0], d01 = bias[1];
+            d10 = bias[0], d11 = bias[1];
+            d20 = bias[0], d21 = bias[1];
+            d30 = bias[0], d31 = bias[1];
+            d40 = bias[0], d41 = bias[1];
+            d50 = bias[0], d51 = bias[1];
+            size_t size = kW * p.srcC, tail = DF * (p.kernelX - kW)*p.srcC, stride = p.srcW * p.srcC, step = p.srcC*p.strideX;
+            const float * src1 = src0 + 1 * step;
+            const float * src2 = src0 + 2 * step;
+            const float * src3 = src0 + 3 * step;
+            const float * src4 = src0 + 4 * step;
+            const float * src5 = src0 + 5 * step;
+            for (size_t ky = 0; ky < kH; ++ky)
+            {
+                size_t offset = ky * stride;
+                for (size_t end = offset + size; offset < end; ++offset)
+                {
+                    w0 = _mm256_loadu_ps(weight + 0);
+                    w1 = _mm256_loadu_ps(weight + F);
+                    s0 = _mm256_set1_ps(src0[offset]);
+                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    s0 = _mm256_set1_ps(src1[offset]);
+                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                    d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                    s0 = _mm256_set1_ps(src2[offset]);
+                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                    d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                    s0 = _mm256_set1_ps(src3[offset]);
+                    d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
+                    d31 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d31);
+                    s0 = _mm256_set1_ps(src4[offset]);
+                    d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
+                    d41 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d41);
+                    s0 = _mm256_set1_ps(src5[offset]);
+                    d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                    d51 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d51);
+                    weight += DF;
+                }
+                weight += tail;
+            }
+            _mm256_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            _mm256_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
+            _mm256_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            _mm256_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
+            _mm256_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            _mm256_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
+            _mm256_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
+            _mm256_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
+            _mm256_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
+            _mm256_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
+            _mm256_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
+            _mm256_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationRestrictRange>(float value, const float * params, size_t offset)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_1x6(const float * src0, const SimdConvolutionParameters & p,
+            size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0)
         {
-            return Simd::Min(Simd::Max(params[0], value), params[1]);
-        }
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationPrelu>(float value, const float * params, size_t offset)
-        {
-            return Simd::Max(0.0f, value) + params[offset] * Simd::Min(0.0f, value);
+            __m256 d00, d10, d20, d30, d40, d50, s0, w0;
+            d00 = bias[0];
+            d10 = bias[0];
+            d20 = bias[0];
+            d30 = bias[0];
+            d40 = bias[0];
+            d50 = bias[0];
+            size_t size = kW * p.srcC, tail = DF * (p.kernelX - kW)*p.srcC, stride = p.srcW * p.srcC, step = p.srcC*p.strideX;
+            const float * src1 = src0 + 1 * step;
+            const float * src2 = src0 + 2 * step;
+            const float * src3 = src0 + 3 * step;
+            const float * src4 = src0 + 4 * step;
+            const float * src5 = src0 + 5 * step;
+            for (size_t ky = 0; ky < kH; ++ky)
+            {
+                size_t offset = ky * stride;
+                for (size_t end = offset + size; offset < end; ++offset)
+                {
+                    w0 = _mm256_loadu_ps(weight + 0);
+                    s0 = _mm256_set1_ps(src0[offset]);
+                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    s0 = _mm256_set1_ps(src1[offset]);
+                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                    s0 = _mm256_set1_ps(src2[offset]);
+                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                    s0 = _mm256_set1_ps(src3[offset]);
+                    d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
+                    s0 = _mm256_set1_ps(src4[offset]);
+                    d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
+                    s0 = _mm256_set1_ps(src5[offset]);
+                    d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                    weight += DF;
+                }
+                weight += tail;
+            }
+            _mm256_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            _mm256_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            _mm256_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            _mm256_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
+            _mm256_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
+            _mm256_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution(const float * src, const SimdConvolutionParameters & p,
             size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
-            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
-            size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW *F;
+            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX;
+            size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW * F;
             size_t dstCDF = AlignLo(dstC, DF);
             if (dstC - F > dstCDF)
                 dstCDF += DF;
 
-            size_t dy = yBeg;
-            if (yBeg == 0 && padY)
-            {
+            size_t noseH = p.padY, noseW = p.padX;
+            size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
+            size_t bodyW6 = AlignLoAny(bodyW - noseW, 6 * p.strideX) + noseW;
+            size_t tailH = bodyH + p.padH, tailW = bodyW + p.padW;
+            size_t wS = p.srcC*p.dstC;
+            size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
 
-            }
-            for (; dy < yEnd; ++dy)
+            __m256 _params[2], _bias[2];
+            _params[0] = _mm256_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange)
+                _params[1] = _mm256_set1_ps(params[1]);
+
+            size_t dc = 0;
+            for (; dc < dstCDF; dc += DF)
             {
-                for (size_t dx = 0; dx < dstW; ++dx)
+                _bias[0] = bias ? _mm256_loadu_ps(bias + dc + 0) : _mm256_setzero_ps();
+                _bias[1] = bias ? _mm256_loadu_ps(bias + dc + F) : _mm256_setzero_ps();
+                if (type == ::SimdConvolutionActivationPrelu)
                 {
-#if 1
-                    size_t dc = 0;
-                    for (; dc < dstCDF; dc += DF)
-                    {
-                        float buf[DF];
-                        if (bias)
-                            memcpy(buf, bias + dc, 2 * F * sizeof(float));
-                        else
-                            memset(buf, 0, 2 * F * sizeof(float));
-                        for (size_t ky = 0; ky < kernelY; ++ky)
-                        {
-                            size_t sy = dy * strideY + ky - padY;
-                            if (sy < p.srcH)
-                            {
-                                for (size_t kx = 0; kx < kernelX; ++kx)
-                                {
-                                    size_t sx = dx * strideX + kx - padX;
-                                    if (sx < p.srcW)
-                                    {
-                                        const float * pw = weight + (ky*kernelX + kx)*srcC*DF + dc * kernelY*kernelX*srcC;
-                                        const float * ps = src + (sy*srcW + sx)*srcC;
-                                        for (size_t sc = 0; sc < srcC; ++sc)
-                                        {
-                                            for (size_t i = 0; i < DF; ++i)
-                                                buf[i] += ps[sc] * pw[i];
-                                            pw += DF;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        float * dst0 = dst + ((dy&dstM)*dstW + dx)*F + (dc / F)*dstS, *dst1 = dst0 + dstS;
-                        for (size_t i = 0; i < F; ++i)
-                        {
-                            dst0[i] = Activate<type>(buf[i + 0], params, dc + i + 0);
-                            dst1[i] = Activate<type>(buf[i + F], params, dc + i + F);
-                        }
-                    }
-                    for (; dc < dstC; dc += F)
-                    {
-                        size_t n = Simd::Min(F, dstC - dc);
-                        float buf[F];
-                        if (bias)
-                            memcpy(buf, bias + dc, n * sizeof(float));
-                        else
-                            memset(buf, 0, n * sizeof(float));
-                        for (size_t ky = 0; ky < kernelY; ++ky)
-                        {
-                            size_t sy = dy * strideY + ky - padY;
-                            if (sy < p.srcH)
-                            {
-                                for (size_t kx = 0; kx < kernelX; ++kx)
-                                {
-                                    size_t sx = dx * strideX + kx - padX;
-                                    if (sx < p.srcW)
-                                    {
-                                        const float * pw = weight + (ky*kernelX + kx)*srcC*DF + dc * kernelY*kernelX*srcC;
-                                        const float * ps = src + (sy*srcW + sx)*srcC;
-                                        for (size_t sc = 0; sc < srcC; ++sc)
-                                        {
-                                            for (size_t i = 0; i < n; ++i)
-                                                buf[i] += ps[sc] * pw[i];
-                                            pw += DF;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        float * dst0 = dst + ((dy&dstM)*dstW + dx)*F + dc * dstS / F;
-                        for (size_t i = 0; i < n; ++i)
-                            dst0[i] = Activate<type>(buf[i + 0], params, dc + i + 0);
-                    }
-#else
-                    Array32f buf(dstC);
-                    if (bias)
-                        memcpy(buf.data, bias, dstC * sizeof(float));
-                    else
-                        memset(buf.data, 0, dstC * sizeof(float));
-                    for (size_t ky = 0; ky < kernelY; ++ky)
-                    {
-                        size_t sy = dy * strideY + ky - padY;
-                        if (sy < p.srcH)
-                        {
-                            for (size_t kx = 0; kx < kernelX; ++kx)
-                            {
-                                size_t sx = dx * strideX + kx - padX;
-                                if (sx < p.srcW)
-                                {
-                                    const float * pw = weight + (ky*kernelX + kx)*srcC*dstC;
-                                    const float * ps = src + (sy*srcW + sx)*srcC;
-                                    for (size_t sc = 0; sc < srcC; ++sc)
-                                    {
-                                        for (size_t dc = 0; dc < dstC; ++dc)
-                                            buf[dc] += ps[sc] * pw[dc];
-                                        pw += dstC;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    float * pDst = dst + ((dy&dstM)*dstW + dx)*F;
-                    for (size_t dc = 0; dc < dstC; dc += F, pDst += dstS)
-                        for (size_t i = 0, n = Simd::Min(F, dstC - dc); i < n; ++i)
-                            pDst[i] = Activate<type>(buf[dc + i], params, dc + i);
-#endif
+                    _params[0] = _mm256_loadu_ps(params + dc + 0);
+                    _params[1] = _mm256_loadu_ps(params + dc + F);
+                }
+                size_t dy = yBeg, sy = dy * strideY;
+                for (; sy < noseH && dy < yEnd; sy += strideY, dy++)
+                {
+                    float * dst0 = dst + (dy&dstM)*dstW*F + (dc / F)*dstS, *dst1 = dst0 + dstS;
+                    size_t sx = 0;
+                    const float * s = src;
+                    const float * w = weight + (noseH - sy) * kernelX * DF * srcC;
+                    for (; sx < noseW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s, p, kY + sy, kX + sx, w + (noseW - sx)*srcC*DF, _bias, _params, dst0, dst1);
+                    for (; sx < bodyW6; sx += 6 * strideX, dst0 += 6 * F, dst1 += 6 * F)
+                        InputConvolution_2x6<type>(s + (sx - noseW) * srcC, p, kY + sy, kernelX, w, _bias, _params, dst0, dst1);
+                    for (; sx < bodyW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s + (sx - noseW) * srcC, p, kY + sy, kernelX, w, _bias, _params, dst0, dst1);
+                    for (; sx < tailW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s + (sx - noseW) * srcC, p, kY + sy, kW - sx, w, _bias, _params, dst0, dst1);
+                }
+                for (; sy < bodyH && dy < yEnd; sy += strideY, dy++)
+                {
+                    float * dst0 = dst + (dy&dstM)*dstW*F + (dc / F)*dstS, *dst1 = dst0 + dstS;
+                    size_t sx = 0;
+                    const float * s = src + (sy - noseH)*srcW*srcC;
+                    const float * w = weight;
+                    for (; sx < noseW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s, p, kernelY, kX + sx, w + (noseW - sx)*srcC*DF, _bias, _params, dst0, dst1);
+                    for (; sx < bodyW6; sx += 6 * strideX, dst0 += 6 * F, dst1 += 6 * F)
+                        InputConvolution_2x6<type>(s + (sx - noseW) * srcC, p, kernelY, kernelX, w, _bias, _params, dst0, dst1);
+                    for (; sx < bodyW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s + (sx - noseW) * srcC, p, kernelY, kernelX, w, _bias, _params, dst0, dst1);
+                    for (; sx < tailW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s + (sx - noseW) * srcC, p, kernelY, kW - sx, w, _bias, _params, dst0, dst1);
+                }
+                for (; sy < tailH && dy < yEnd; sy += strideY, dy++)
+                {
+                    float * dst0 = dst + (dy&dstM)*dstW*F + (dc / F)*dstS, *dst1 = dst0 + dstS;
+                    size_t sx = 0;
+                    const float * s = src + (sy - noseH)*srcW*srcC;
+                    const float * w = weight;
+                    for (; sx < noseW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s, p, kH - sy, kX + sx, w + (noseW - sx)*srcC*DF, _bias, _params, dst0, dst1);
+                    for (; sx < bodyW6; sx += 6 * strideX, dst0 += 6 * F, dst1 += 6 * F)
+                        InputConvolution_2x6<type>(s + (sx - noseW) * srcC, p, kH - sy, kernelX, w, _bias, _params, dst0, dst1);
+                    for (; sx < bodyW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s + (sx - noseW) * srcC, p, kH - sy, kernelX, w, _bias, _params, dst0, dst1);
+                    for (; sx < tailW; sx += strideX, dst0 += F, dst1 += F)
+                        InputConvolution_2x1<type>(s + (sx - noseW) * srcC, p, kH - sy, kW - sx, w, _bias, _params, dst0, dst1);
+                }
+                weight += kernelY * kernelX*srcC*DF;
+            }
+            if (dc < dstC)
+            {
+                _bias[0] = bias ? _mm256_loadu_ps(bias + dc) : _mm256_setzero_ps();
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm256_loadu_ps(params + dc);
+                size_t dy = yBeg, sy = dy * strideY;
+                for (; sy < noseH && dy < yEnd; sy += strideY, dy++)
+                {
+                    float * dst0 = dst + (dy&dstM)*dstW*F + (dc / F)*dstS;
+                    size_t sx = 0;
+                    const float * s = src;
+                    const float * w = weight + (noseH - sy) * kernelX * DF * srcC;
+                    for (; sx < noseW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s, p, kY + sy, kX + sx, w + (noseW - sx)*srcC*DF, _bias, _params, dst0);
+                    for (; sx < bodyW6; sx += 6 * strideX, dst0 += 6 * F)
+                        InputConvolution_1x6<type>(s + (sx - noseW) * srcC, p, kY + sy, kernelX, w, _bias, _params, dst0);
+                    for (; sx < bodyW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s + (sx - noseW) * srcC, p, kY + sy, kernelX, w, _bias, _params, dst0);
+                    for (; sx < tailW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s + (sx - noseW) * srcC, p, kY + sy, kW - sx, w, _bias, _params, dst0);
+                }
+                for (; sy < bodyH && dy < yEnd; sy += strideY, dy++)
+                {
+                    float * dst0 = dst + (dy&dstM)*dstW*F + (dc / F)*dstS;
+                    size_t sx = 0;
+                    const float * s = src + (sy - noseH)*srcW*srcC;
+                    const float * w = weight;
+                    for (; sx < noseW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s, p, kernelY, kX + sx, w + (noseW - sx)*srcC*DF, _bias, _params, dst0);
+                    for (; sx < bodyW6; sx += 6 * strideX, dst0 += 6 * F)
+                        InputConvolution_1x6<type>(s + (sx - noseW) * srcC, p, kernelY, kernelX, w, _bias, _params, dst0);
+                    for (; sx < bodyW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s + (sx - noseW) * srcC, p, kernelY, kernelX, w, _bias, _params, dst0);
+                    for (; sx < tailW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s + (sx - noseW) * srcC, p, kernelY, kW - sx, w, _bias, _params, dst0);
+                }
+                for (; sy < tailH && dy < yEnd; sy += strideY, dy++)
+                {
+                    float * dst0 = dst + (dy&dstM)*dstW*F + (dc / F)*dstS;
+                    size_t sx = 0;
+                    const float * s = src + (sy - noseH)*srcW*srcC;
+                    const float * w = weight;
+                    for (; sx < noseW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s, p, kH - sy, kX + sx, w + (noseW - sx)*srcC*DF, _bias, _params, dst0);
+                    for (; sx < bodyW6; sx += 6 * strideX, dst0 += 6 * F)
+                        InputConvolution_1x6<type>(s + (sx - noseW) * srcC, p, kH - sy, kernelX, w, _bias, _params, dst0);
+                    for (; sx < bodyW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s + (sx - noseW) * srcC, p, kH - sy, kernelX, w, _bias, _params, dst0);
+                    for (; sx < tailW; sx += strideX, dst0 += F)
+                        InputConvolution_1x1<type>(s + (sx - noseW) * srcC, p, kH - sy, kW - sx, w, _bias, _params, dst0);
                 }
             }
         }
