@@ -263,6 +263,8 @@ namespace Simd
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
             size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW *F;
             size_t dstCDF = AlignLo(dstC, DF);
+            if (dstC - F > dstCDF)
+                dstCDF += DF;
 
             size_t dy = yBeg;
             if (yBeg == 0 && padY)
