@@ -362,8 +362,6 @@ namespace Simd
 
         void ConvolutionGemmNN::ImgToRow(const float * src, float * dst)
         {
-            SIMD_PERF_BEG(_param.Info());
-
             const ConvParam & p = _param;
             assert(p.trans);
             size_t size = p.srcC / p.group;
@@ -592,8 +590,6 @@ namespace Simd
         
         void ConvolutionWinograd::Forward(const float * src, float * buf, float * dst)
         {
-            //SIMD_PERF_BEG(_param.Info());
-
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
             float * bufD = bufS + _strideS * _count * (_merge ? _batch : 1);
@@ -1052,6 +1048,175 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template<::SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float * params, size_t offset);
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationIdentity>(float value, const float * params, size_t offset)
+        {
+            return value;
+        }
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationRelu>(float value, const float * params, size_t offset)
+        {
+            return Simd::Max(0.0f, value);
+        }
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationLeakyRelu>(float value, const float * params, size_t offset)
+        {
+            return Simd::Max(0.0f, value) + params[0] * Simd::Min(0.0f, value);
+        }
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationRestrictRange>(float value, const float * params, size_t offset)
+        {
+            return Simd::Min(Simd::Max(params[0], value), params[1]);
+        }
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationPrelu>(float value, const float * params, size_t offset)
+        {
+            return Simd::Max(0.0f, value) + params[offset] * Simd::Min(0.0f, value);
+        }
+
+        template<SimdConvolutionActivationType type> void ConvolutionNhwcR(const float * src, const ConvParam & p, 
+            const ConvolutionDirectNhwcR::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
+        {
+            const size_t F = 16;
+            for (size_t dc = 0; dc < p.dstC; dc += F)
+            {
+                size_t n = Simd::Min(F, p.dstC - dc);
+                float buf[F];
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                {
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                    {
+                        if (bias)
+                            for (size_t i = 0; i < n; ++i)
+                                buf[i] = bias[dc + i];
+                        else
+                            for (size_t i = 0; i < n; ++i)
+                                buf[i] = 0;
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
+                        {
+                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            if (sy < p.srcH)
+                            {
+                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                {
+                                    size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        const float * pw = weight + (ky*p.kernelX + kx)*p.srcC*p.dstC + dc;
+                                        const float * ps = src + (sy*p.srcW + sx)*p.srcC;
+                                        for (size_t sc = 0; sc < p.srcC; ++sc)
+                                        {
+                                            float s = ps[sc];
+                                            for (size_t i = 0; i < n; ++i)
+                                                buf[i] += s * pw[i];
+                                            pw += p.dstC;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        float * pDst = dst + (dy*p.dstW + dx)*p.dstC + dc;
+                        for (size_t i = 0; i < n; ++i)
+                            pDst[i] = Activate<type>(buf[i], params, dc + i);
+                    }
+                }
+            }
+        }
+
+        void ConvolutionNhwcR_old(const float * src, const ConvParam & p, const ConvolutionDirectNhwcR::AlgParam & a, 
+            const float * weight, const float * bias, const float * params, float * dst)
+        {
+            ConvolutionDirectNhwcConvolutionBiasActivationDefault(src, p, weight, bias, params, dst);
+        }
+
+        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const ConvParam & p, bool old, ConvolutionDirectNhwcR::ConvolutionPtr & convolution)
+        {
+            if (old)
+                convolution = ConvolutionNhwcR_old;
+            else
+                convolution = ConvolutionNhwcR<type>;
+        }
+
+        ConvolutionDirectNhwcR::ConvolutionDirectNhwcR(const ConvParam & p, bool old)
+            : Convolution(p)
+        {
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
+            _reorder = NULL;
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: SetConvolutionPtr<SimdConvolutionActivationIdentity>(_param, old, _convolution); break;
+            case SimdConvolutionActivationRelu: SetConvolutionPtr<SimdConvolutionActivationRelu>(_param, old, _convolution); break;
+            case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, old, _convolution); break;
+            case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, old, _convolution); break;
+            case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, old, _convolution); break;
+            default: assert(0);
+            }
+        }
+
+        void ConvolutionDirectNhwcR::SetAlgParam(size_t microD, size_t L1, size_t L2, size_t L3)
+        {
+            const ConvParam & p = _param;
+            _alg.microD = microD;
+            _alg.macroC = Simd::Min(L1 / sizeof(float) / p.kernelY / p.kernelX / microD, p.srcC);
+            for (size_t macroH = p.dstH; macroH >= 1; macroH--)
+            {
+                _alg.macroH = macroH;
+                if (_alg.macroC * p.srcW * (_alg.macroH * p.strideY + p.kernelY * p.dilationY - 1) <= L2)
+                    break;
+            }
+            _alg.macroD = Simd::Min(AlignLoAny(L3 / sizeof(float) / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
+            _rWeight.Resize(AlignHiAny(p.dstC, _alg.microD) * p.kernelY * p.kernelX * p.srcC);
+            _rBias.Resize(AlignHiAny(p.dstC, _alg.microD), true);
+            if(p.activation == ::SimdConvolutionActivationPrelu)
+                _rParams.Resize(AlignHiAny(p.dstC, _alg.microD));
+        }
+
+        size_t ConvolutionDirectNhwcR::InternalBufferSize() const
+        {
+            return _buffer.size + _rWeight.size;
+        }
+
+        void ConvolutionDirectNhwcR::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
+        {
+            Convolution::SetParams(weight, internal, bias, params);
+            if (_reorder)
+            {
+                const ConvParam & p = _param;
+                _reorder(weight, p, _alg, _rWeight.data);
+                _weight = _rWeight.data;
+                if (internal)
+                    *internal = SimdTrue;
+                if (bias)
+                    memcpy(_rBias.data, bias, p.dstC*sizeof(float));
+                _bias = _rBias.data;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                {
+                    memcpy(_rParams.data, params, p.dstC * sizeof(float));
+                    _params = _rParams.data;
+                }
+            }
+        }
+
+        void ConvolutionDirectNhwcR::Forward(const float * src, float * buf, float * dst)
+        {
+            const ConvParam & p = _param;
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                _convolution(src, _param, _alg, _weight, _bias, _params, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+        bool ConvolutionDirectNhwcR::Preferable(const ConvParam & p)
+        {
+            return false;
+        }
+
+        //---------------------------------------------------------------------
+
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             ConvParam param(trans, batch, conv, gemm);
@@ -1065,6 +1230,8 @@ namespace Simd
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectNchw::Preferable(param))
                 return new ConvolutionDirectNchw(param);
+            else if (ConvolutionDirectNhwcR::Preferable(param))
+                return new ConvolutionDirectNhwcR(param, true);
             else if (ConvolutionDirectNhwc::Preferable(param))
                 return new ConvolutionDirectNhwc(param);
             else

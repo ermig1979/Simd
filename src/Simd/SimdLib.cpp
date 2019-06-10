@@ -54,6 +54,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdConst.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdPerformance.h"
 
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdConvolution.h"
@@ -74,15 +75,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdMsa.h"
-
-#ifdef SIMD_PERFORMANCE_STATISTIC
-#include "Simd/SimdPerformance.h"
-
-namespace Simd
-{
-    PerformanceMeasurerStorage PerformanceMeasurerStorage::s_storage;
-}
-#endif//SIMD_PERFORMANCE_STATISTIC
 
 #if !defined(SIMD_VERSION)
 #include "Simd/SimdVersion.h"
@@ -141,6 +133,15 @@ SIMD_API int SimdCpuInfo()
     info |= Msa::Enable ? (1 << SimdCpuInfoMsa) : 0;
 #endif
     return info;
+}
+
+SIMD_API const char * SimdPerformanceStatistic()
+{
+#if defined(SIMD_PERFORMANCE_STATISTIC) && defined(NDEBUG)
+    return Base::PerformanceMeasurerStorage::s_storage.PerformanceStatistic();
+#else
+    return "";
+#endif
 }
 
 SIMD_API void * SimdAllocate(size_t size, size_t align)
@@ -1534,7 +1535,10 @@ SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight,
 
 SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst)
 {
-    ((Convolution*)convolution)->Forward(src, buf, dst);
+    Convolution * c = (Convolution*)convolution;
+    const ConvParam & p = c->Param();
+    SIMD_PERF_BEGF(p.Info() + " " + c->Desc(), p.Flop());
+    c->Forward(src, buf, dst);
 }
 
 SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,

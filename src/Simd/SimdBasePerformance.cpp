@@ -21,61 +21,14 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConfig_h__
-#define __SimdConfig_h__
+#include "Simd/SimdPerformance.h"
 
-//#define SIMD_SSE_DISABLE
-
-//#define SIMD_SSE2_DISABLE
-
-//#define SIMD_SSE3_DISABLE
-
-//#define SIMD_SSSE3_DISABLE
-
-//#define SIMD_SSE41_DISABLE
-
-//#define SIMD_SSE42_DISABLE
-
-//#define SIMD_AVX_DISABLE
-
-//#define SIMD_AVX2_DISABLE
-
-//#define SIMD_AVX512F_DISABLE
-
-//#define SIMD_AVX512BW_DISABLE
-
-//#define SIMD_VMX_DISABLE
-
-//#define SIMD_VSX_DISABLE
-
-//#define SIMD_NEON_DISABLE
-
-//#define SIMD_NEON_FP16_DISABLE
-
-//#define SIMD_MSA_DISABLE
-
-//#define SIMD_STATIC
-
-#define SIMD_LOG_ENABLE
-
-#define SIMD_ALLOCATE_ERROR_MESSAGE
-
-#define SIMD_ALLOCATE_ASSERT
-
-#define SIMD_NO_MANS_LAND 64
-
-#define SIMD_NEON_RCP_ITER -1
-
-#define SIMD_NEON_ASM_DISABLE
-
-#define SIMD_NEON_PREFECH_SIZE 384
-
-//#define SIMD_OPENCV_ENABLE
-
-#define SIMD_PERFORMANCE_STATISTIC
-
-//#define SIMD_RUNTIME_GEMM_STATISTIC
-
-//#define SIMD_FUTURE_DISABLE
-
-#endif//__SimdConfig_h__
+#if defined(SIMD_PERFORMANCE_STATISTIC) && defined(NDEBUG)
+namespace Simd
+{
+    namespace Base
+    {
+        PerformanceMeasurerStorage PerformanceMeasurerStorage::s_storage;
+    }
+}
+#endif//SIMD_PERFORMANCE_STATISTIC

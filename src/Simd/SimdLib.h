@@ -286,6 +286,18 @@ extern "C"
     */
     SIMD_API int SimdCpuInfo();
 
+    /*! @ingroup info
+
+        \fn const char *SimdPerformanceStatistic();
+
+        \short Gets internal performance statistics of %Simd Library.
+
+        \note %Simd Library have to be build with defined SIMD_PERFORMANCE_STATISTIC macro.
+
+        \return string with internal performance statistics of %Simd Library.
+    */
+    SIMD_API const char * SimdPerformanceStatistic();
+
     /*! @ingroup memory
 
         \fn void * SimdAllocate(size_t size, size_t align);

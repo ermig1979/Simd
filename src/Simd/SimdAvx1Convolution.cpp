@@ -460,8 +460,6 @@ namespace Simd
 
         void ConvolutionGemmNN::ImgToRow(const float * src, float * dst)
         {
-            SIMD_PERF_BEG(_param.Info());
-
             const ConvParam & p = _param;
             assert(p.trans);
             size_t size = p.srcC / p.group;
