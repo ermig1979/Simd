@@ -158,21 +158,35 @@ namespace Simd
         {
             const MergConvParam & p = _param;
             _miC = F;
-            _maC = p.conv[0].dstC;
+            size_t size = 0;
+            for (size_t i = 0; i < 3; ++i)
+                size += p.conv[i].kernelY*p.conv[i].kernelX *p.conv[i].srcC * p.conv[i].dstC / p.conv[i].group;
+            size_t count = size * sizeof(float) / (L3/2) + 1;
+            _maC = AlignHiAny(p.conv[0].dstC / count, 2 * _miC);
             for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
             {
                 _yStep[1] = Simd::Max<size_t>(1, yStep);
                 for (_bufH[1] = 1; _bufH[1] < _yStep[1]; _bufH[1] *= 2);
                 _yStep[0] = _yStep[1] * p.conv[1].strideY;
                 for (_bufH[0] = 1; _bufH[0] < (_yStep[1] - 1) * p.conv[1].strideY + p.conv[1].kernelY; _bufH[0] *= 2);
-                _sizeB[0] = _bufH[0] * p.conv[0].dstW * AlignHi(p.conv[0].dstC, F);
-                _sizeB[1] = _bufH[1] * p.conv[1].dstW * AlignHi(p.conv[1].dstC, F);
+                _sizeB[0] = _bufH[0] * p.conv[0].dstW * _maC;
+                _sizeB[1] = _bufH[1] * p.conv[1].dstW * _maC;
                 if ((_sizeB[0] + _sizeB[1]) * sizeof(float) <= L2)
                     break;
             }
-            _rWeight[0].Resize(AlignHiAny(p.conv[0].dstC, 2 * _miC)*p.conv[0].kernelY*p.conv[0].kernelX*p.conv[0].srcC);
-            _rWeight[1].Resize(AlignHiAny(p.conv[1].dstC, _miC)*p.conv[1].kernelY*p.conv[1].kernelX);
-            _rWeight[2].Resize(AlignHiAny(p.conv[2].dstC, 2 * _miC)*p.conv[2].kernelY*p.conv[2].kernelX*p.conv[2].srcC);
+            for (size_t i = 0; i < 3; ++i)
+            {
+                size_t dstC = AlignHiAny(p.conv[i].dstC, i == 1 ? _miC : 2 * _miC);
+                _rWeight[i].Resize(dstC*p.conv[i].kernelY*p.conv[i].kernelX*p.conv[i].srcC);
+                _rBias[i].Resize(dstC, true);
+                if (p.conv[i].activation == ::SimdConvolutionActivationPrelu)
+                    _rParams[i].Resize(dstC, true);
+            }
+            _dp[0] = p.conv[0].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            _dp[1] = p.conv[1].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            _dw[0] = p.conv[0].kernelY*p.conv[0].kernelX*p.conv[0].srcC;
+            _dw[1] = p.conv[1].kernelY*p.conv[1].kernelX;
+            _dw[2] = AlignHiAny(p.conv[2].dstC, 2 * _miC);
             _base = false;
         }
 
@@ -228,19 +242,24 @@ namespace Simd
         void MergedConvolution::ReorderOutputWeight(const float * src, float * dst) const
         {
             const SimdConvolutionParameters & p = _param.conv[2];
-            size_t size = p.kernelY*p.kernelX*p.srcC, dstC = p.dstC, micD = _miC * 2;
-            for (size_t c = 0; c < dstC; c += micD)
+            size_t srcC = p.srcC, dstC = p.dstC, micD = _miC * 2;
+            for (size_t m = 0; m < srcC; m += _maC)
             {
-                size_t n = Simd::Min(micD, dstC - c);
-                for (size_t s = 0; s < size; s++)
+                size_t maC = Simd::Min(srcC, m + _maC) - m;
+                for (size_t d = 0; d < dstC; d += micD)
                 {
-                    size_t i = 0;
-                    for (; i < n; ++i)
-                        dst[i] = src[s*dstC + c + i];
-                    for (; i < micD; ++i)
-                        dst[i] = 0;
-                    dst += micD;
+                    size_t n = Simd::Min(micD, dstC - d);
+                    for (size_t s = 0; s < maC; s++)
+                    {
+                        size_t i = 0;
+                        for (; i < n; ++i)
+                            dst[i] = src[s*dstC + d + i];
+                        for (; i < micD; ++i)
+                            dst[i] = 0;
+                        dst += micD;
+                    }
                 }
+                src += dstC*maC;
             }
         }
 
@@ -251,12 +270,16 @@ namespace Simd
 
         size_t MergedConvolution::InternalBufferSize() const
         {
-            return _buffer.size + _rWeight[0].size + _rWeight[1].size + _rWeight[2].size;
+            size_t size = _buffer.size;
+            for (size_t i = 0; i < 3; ++i)
+                size += _rWeight[i].size + _rBias[i].size + _rParams[i].size;
+            return size;
         }
 
         void MergedConvolution::SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
         {
-            for (size_t i = 0; i < _param.count; ++i)
+            const MergConvParam & p = _param;
+            for (size_t i = 0; i < p.count; ++i)
             {
                 if (_rWeight[i].data)
                 {
@@ -277,8 +300,21 @@ namespace Simd
                     if (internal)
                         internal[i] = SimdFalse;
                 }
-                _bias[i] = bias[i];
-                _params[i] = params[i];
+                if (_rBias[i].data)
+                {
+                    if (bias[i])
+                        memcpy(_rBias[i].data, bias[i], p.conv[i].dstC * sizeof(float));
+                    _bias[i] = _rBias[i].data;
+                }
+                else
+                    _bias[i] = bias[i];
+                if (_rParams[i].size)
+                {
+                    memcpy(_rParams[i].data, params[i], p.conv[i].dstC * sizeof(float));
+                    _params[i] = _rParams[i].data;
+                }
+                else
+                    _params[i] = params[i];
             }
         }
 
@@ -297,15 +333,26 @@ namespace Simd
                 }
                 else
                 {
-                    for (size_t yBeg1 = 0, yBeg0 = 0; yBeg1 < p.conv[1].dstH;)
+                    for (size_t c = 0, C = p.conv[1].dstC; c < C; c += _maC)
                     {
-                        size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
-                        size_t yEnd0 = Simd::RestrictRange(yBeg0 + _yStep[0], (_yStep[1] - 1)*p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY, p.conv[0].dstH);
-                        _convolution[0](src, p.conv[0], _maC, yBeg0, yEnd0, _bufH, _weight[0], _bias[0], _params[0], buf0);
-                        _convolution[1](buf0, p.conv[1], _maC, yBeg1, yEnd1, _bufH, _weight[1], _bias[1], _params[1], buf1);
-                        _convolution[2](buf1, p.conv[2], _maC, yBeg1, yEnd1, _bufH, _weight[2], _bias[2], _params[2], dst);
-                        yBeg1 = yEnd1;
-                        yBeg0 = yEnd0;
+                        size_t maC = Simd::Min(C, c + _maC) - c;
+                        for (size_t yBeg1 = 0, yBeg0 = 0; yBeg1 < p.conv[1].dstH;)
+                        {
+                            size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
+                            size_t yEnd0 = Simd::RestrictRange(yBeg0 + _yStep[0], (_yStep[1] - 1)*p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY, p.conv[0].dstH);
+                            _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
+                            _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], buf1);
+                            if(_maC == C)
+                                _convolution[2](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
+                            else if (c == 0)
+                                _convolution[3](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
+                            else if (c + maC < C)
+                                _convolution[4](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
+                            else
+                                _convolution[5](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
+                            yBeg1 = yEnd1;
+                            yBeg0 = yEnd0;
+                        }
                     }
                 }
                 src += _sizeS;

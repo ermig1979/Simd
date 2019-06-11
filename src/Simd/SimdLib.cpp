@@ -3294,7 +3294,8 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 
 typedef void* (*SimdMergedConvolutionInitPtr) (SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC5(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC1(MergedConvolutionInit, SIMD_SSE_FUNC);
+//SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC5(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
 {
@@ -3320,7 +3321,7 @@ SIMD_API void SimdMergedConvolutionForward(void * context, const float * src, fl
 {
     MergedConvolution * c = (MergedConvolution*)context;
     const MergConvParam & p = c->Param();
-    SIMD_PERF_BEGF(p.Info(), p.Flop());
+    SIMD_PERF_BEGF(p.Info() + " " + c->Desc(), p.Flop());
     c->Forward(src, buf, dst);
 }
 

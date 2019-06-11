@@ -115,6 +115,8 @@ namespace Simd
     class MergedConvolution : public Deletable
     {
     public:
+        virtual String Desc() const = 0;
+
         virtual const MergConvParam & Param() const = 0;
 
         virtual size_t ExternalBufferSize() const = 0;
@@ -133,6 +135,7 @@ namespace Simd
         public:
             MergedConvolution(const MergConvParam & p);
 
+            virtual String Desc() const { return "Base"; }
             virtual const MergConvParam & Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
@@ -151,9 +154,9 @@ namespace Simd
 
             MergConvParam _param;
             bool _base;
-            size_t _sizeS, _sizeD, _miC, _maC, _yStep[2], _bufH[2], _sizeB[2];
-            ConvolutionPtr _convolution[3];
-            Array32f _buffer, _rWeight[3];
+            size_t _sizeS, _sizeD, _miC, _maC, _yStep[2], _bufH[2], _sizeB[2], _dp[2], _dw[3];
+            ConvolutionPtr _convolution[6];
+            Array32f _buffer, _rWeight[3], _rBias[3], _rParams[3];
             const float * _weight[3], * _bias[3], * _params[3];
         };
 
@@ -167,6 +170,7 @@ namespace Simd
         {
         public:
             MergedConvolution(const MergConvParam & p);
+            virtual String Desc() const { return "Sse"; }
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
@@ -180,6 +184,7 @@ namespace Simd
         {
         public:
             MergedConvolution(const MergConvParam & p);
+            virtual String Desc() const { return "Avx"; }
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
@@ -193,6 +198,7 @@ namespace Simd
         {
         public:
             MergedConvolution(const MergConvParam & p);
+            virtual String Desc() const { return "Avx2"; }
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
@@ -206,6 +212,7 @@ namespace Simd
         {
         public:
             MergedConvolution(const MergConvParam & p);
+            virtual String Desc() const { return "Avx512f"; }
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
@@ -219,6 +226,7 @@ namespace Simd
         {
         public:
             MergedConvolution(const MergConvParam & p);
+            virtual String Desc() const { return "Neon"; }
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);

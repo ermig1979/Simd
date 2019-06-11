@@ -2057,17 +2057,19 @@ namespace Simd
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
                         if (a.macroC == p.srcC)
-                            ConvolutionNhwcR<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params + dc, dst + dc);
+                            ConvolutionNhwcR<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
                         else if(sc == 0)
-                            ConvolutionNhwcR<TermFirst, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params + dc, dst + dc);
+                            ConvolutionNhwcR<TermFirst, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
                         else if (sc + macroC == p.srcC)
-                            ConvolutionNhwcR<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params + dc, dst + dc);
+                            ConvolutionNhwcR<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
                         else 
-                            ConvolutionNhwcR<TermIterim, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params + dc, dst + dc);
+                            ConvolutionNhwcR<TermIterim, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD)*macroK;
                 }
+                if (type == ::SimdConvolutionActivationPrelu)
+                    params += macroD;
             }
         }
 
