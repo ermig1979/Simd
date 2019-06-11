@@ -131,7 +131,7 @@ namespace Simd
         class MergedConvolution : public Simd::MergedConvolution
         {
         public:
-            MergedConvolution(const MergConvParam & p, bool old = false);
+            MergedConvolution(const MergConvParam & p);
 
             virtual const MergConvParam & Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
@@ -139,19 +139,20 @@ namespace Simd
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t yBeg, size_t yEnd, 
+            typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t maC, size_t yBeg, size_t yEnd, 
                 const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst);
-            typedef void(*ReorderPtr)(const float * src, const SimdConvolutionParameters & p, float * dst);
 
         protected:
-            void SetSize(size_t L2, size_t F);
+            void SetSize(size_t L1, size_t L2, size_t L3, size_t F);
             float * GetBuffer(float * buffer);
+            virtual void ReorderInputWeight(const float * src, float * dst) const;
+            virtual void ReorderDepthwiseWeight(const float * src, float * dst) const;
+            virtual void ReorderOutputWeight(const float * src, float * dst) const;
 
             MergConvParam _param;
-            bool _old;
-            size_t _sizeS, _sizeD, _yStep[2], _bufH[2], _sizeB[2];
+            bool _base;
+            size_t _sizeS, _sizeD, _miC, _maC, _yStep[2], _bufH[2], _sizeB[2];
             ConvolutionPtr _convolution[3];
-            ReorderPtr _reorder[3];
             Array32f _buffer, _rWeight[3];
             const float * _weight[3], * _bias[3], * _params[3];
         };

@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdConvolution.h"
+#include "Simd/SimdConvolutionCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 
@@ -1047,33 +1048,6 @@ namespace Simd
         }
 
         //---------------------------------------------------------------------
-
-        template<::SimdConvolutionActivationType type> SIMD_INLINE float Activate(float value, const float * params, size_t offset);
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationIdentity>(float value, const float * params, size_t offset)
-        {
-            return value;
-        }
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationRelu>(float value, const float * params, size_t offset)
-        {
-            return Simd::Max(0.0f, value);
-        }
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationLeakyRelu>(float value, const float * params, size_t offset)
-        {
-            return Simd::Max(0.0f, value) + params[0] * Simd::Min(0.0f, value);
-        }
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationRestrictRange>(float value, const float * params, size_t offset)
-        {
-            return Simd::Min(Simd::Max(params[0], value), params[1]);
-        }
-
-        template<> SIMD_INLINE float Activate<SimdConvolutionActivationPrelu>(float value, const float * params, size_t offset)
-        {
-            return Simd::Max(0.0f, value) + params[offset] * Simd::Min(0.0f, value);
-        }
 
         template<SimdConvolutionActivationType type> void ConvolutionNhwcR(const float * src, const ConvParam & p, 
             const ConvolutionDirectNhwcR::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)

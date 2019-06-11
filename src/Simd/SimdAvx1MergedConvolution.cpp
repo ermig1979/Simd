@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMergedConvolution.h"
+#include "Simd/SimdConvolutionCommon.h"
 #include "Simd/SimdUpdate.h"
 
 namespace Simd
@@ -29,33 +30,6 @@ namespace Simd
 #if defined(SIMD_AVX_ENABLE)
     namespace Avx
     {
-        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const __m256 * params, size_t index);
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const __m256 * params, size_t index)
-        {
-            return value;
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRelu>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_max_ps(_mm256_setzero_ps(), value);
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationLeakyRelu>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[0], _mm256_min_ps(_mm256_setzero_ps(), value)));
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRestrictRange>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_min_ps(_mm256_max_ps(params[0], value), params[1]);
-        }
-
-        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const __m256 * params, size_t index)
-        {
-            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[index], _mm256_min_ps(_mm256_setzero_ps(), value)));
-        }
-
         template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x6(const float * src0, size_t srcC,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
@@ -184,7 +158,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution1x1(const float * src, const SimdConvolutionParameters & p,
-            size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
             size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW *F;
@@ -381,7 +355,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution(const float * src, const SimdConvolutionParameters & p,
-            size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX;
@@ -568,7 +542,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void DepthwiseConvolution3x3(const float * src, const SimdConvolutionParameters & p,
-            size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
             size_t srcC = p.srcC, srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
@@ -852,7 +826,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
-            size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
@@ -907,42 +881,6 @@ namespace Simd
             }
         }
 
-        void InputOutputReorder(const float * src, const SimdConvolutionParameters & p, float * dst)
-        {
-            size_t size = p.kernelY*p.kernelX*p.srcC, dstC = p.dstC;
-            for (size_t c = 0; c < dstC; c += DF)
-            {
-                size_t n = Simd::Min(DF, dstC - c);
-                for (size_t s = 0; s < size; s++)
-                {
-                    size_t i = 0;
-                    for (; i < n; ++i)
-                        dst[i] = src[s*dstC + c + i];
-                    for (; i < DF; ++i)
-                        dst[i] = 0;
-                    dst += DF;
-                }
-            }
-        }
-
-        void DepthwiseReorder(const float * src, const SimdConvolutionParameters & p, float * dst)
-        {
-            size_t dstC = p.dstC, size = p.kernelY*p.kernelX;
-            for (size_t c = 0; c < dstC; c += F)
-            {
-                size_t n = Simd::Min(F, dstC - c);
-                for (size_t s = 0; s < size; s++)
-                {
-                    size_t i = 0;
-                    for (; i < n; ++i)
-                        dst[i] = src[s*dstC + c + i];
-                    for (; i < F; ++i)
-                        dst[i] = 0;
-                    dst += F;
-                }
-            }
-        }
-
         template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam & p, size_t index, MergedConvolution::ConvolutionPtr convolution[3])
         {
             switch (index)
@@ -970,11 +908,9 @@ namespace Simd
         MergedConvolution::MergedConvolution(const MergConvParam & p)
             : Sse::MergedConvolution(p)
         {
-            const size_t L1 = 32 * 1024, L2 = 256 * 1024, L3 = 2048 * 1024;
-            SetSize(L2, Avx::F);
+            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx::F);
             for (size_t i = 0; i < _param.count; ++i)
             {
-                _reorder[i] = NULL;
                 switch (p.conv[i].activation)
                 {
                 case SimdConvolutionActivationIdentity: SetConvolutionPtr<SimdConvolutionActivationIdentity>(_param, i, _convolution); break;
@@ -985,12 +921,6 @@ namespace Simd
                 default: assert(0);
                 }
             }
-            _rWeight[0].Resize(AlignHi(p.conv[0].dstC, DF)*p.conv[0].kernelY*p.conv[0].kernelX*p.conv[0].srcC);
-            _reorder[0] = InputOutputReorder;
-            _rWeight[1].Resize(AlignHi(p.conv[1].dstC, F)*p.conv[1].kernelY*p.conv[1].kernelX);
-            _reorder[1] = DepthwiseReorder;
-            _rWeight[2].Resize(AlignHi(p.conv[2].dstC, DF)*p.conv[2].kernelY*p.conv[2].kernelX*p.conv[2].srcC);
-            _reorder[2] = InputOutputReorder;
         }
 
         //---------------------------------------------------------------------
