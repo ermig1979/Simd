@@ -3318,7 +3318,10 @@ SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * const
 
 SIMD_API void SimdMergedConvolutionForward(void * context, const float * src, float * buf, float * dst)
 {
-    ((Convolution*)context)->Forward(src, buf, dst);
+    MergedConvolution * c = (MergedConvolution*)context;
+    const MergConvParam & p = c->Param();
+    SIMD_PERF_BEGF(p.Info(), p.Flop());
+    c->Forward(src, buf, dst);
 }
 
 SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)

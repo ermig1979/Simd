@@ -99,12 +99,24 @@ namespace Simd
             ss << "-" << conv[1].kernelY << "x" << conv[1].strideY << "-" << conv[2].dstC;
             return ss.str();
         }
+
+        long long Flop(size_t i) const
+        {
+            return conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
+        }
+
+        long long Flop() const
+        {
+            return Flop(0) + Flop(1) + Flop(2);
+        }
 #endif
     };
 
     class MergedConvolution : public Deletable
     {
     public:
+        virtual const MergConvParam & Param() const = 0;
+
         virtual size_t ExternalBufferSize() const = 0;
 
         virtual size_t InternalBufferSize() const = 0;
@@ -121,6 +133,7 @@ namespace Simd
         public:
             MergedConvolution(const MergConvParam & p, bool old = false);
 
+            virtual const MergConvParam & Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);

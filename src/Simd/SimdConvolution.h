@@ -92,7 +92,7 @@ namespace Simd
 
         long long Flop() const
         {
-            return kernelY * kernelX * srcC * dstH * dstW * dstC * 2;
+            return kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
         }
 #endif
     };
