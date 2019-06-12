@@ -219,15 +219,8 @@ namespace Test
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 27, 96, 96, 1, 1, a0, 147, 3, 1, a1, 27, a2, f), f1, f2);
 #endif
 #else
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 96, 96, 3, 2, a0, 31, 3, 1, a1, 16, a2, f), f1, f2);
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 48, 48, 3, 1, a0, 33, 3, 1, a1, 16, a2, f), f1, f2);
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 16, 192, 192, 1, 1, a0, 96, 3, 2, a1, 24, a2, f), f1, f2);
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 17, 192, 192, 1, 1, a0, 99, 3, 2, a1, 27, a2, f), f1, f2);
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 75, 75, 1, 1, a0, 144, 3, 2, a1, 32, a2, f), f1, f2);
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 16, 56, 56, 1, 1, a0, 32, 3, 2, a1, 16, a2, f), f1, f2);
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 8, 160, 150, 1, 1, a0, 48, 3, 2, a1, 16, a2, f), f1, f2);
         //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 12, 12, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
 #endif
         return result;
     }
@@ -248,20 +241,20 @@ namespace Test
             result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx2::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
-//#endif
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx512f::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
-//#endif
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Neon::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
-//#endif 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx2::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Avx512f::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Neon::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#endif 
 
         return result;
     }
