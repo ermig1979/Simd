@@ -152,7 +152,7 @@ namespace Simd
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Convolution(p)
         {
-            _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
+            _is1x1 = p.Is1x1();
             _merge = p.trans && p.group == 1 && p.dstH*p.dstW <= 256;
             if (p.trans)
             {
@@ -1049,87 +1049,21 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> void ConvolutionNhwcR(const float * src, const ConvParam & p, 
-            const ConvolutionDirectNhwcR::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
-        {
-            const size_t F = 16;
-            for (size_t dc = 0; dc < p.dstC; dc += F)
-            {
-                size_t n = Simd::Min(F, p.dstC - dc);
-                float buf[F];
-                for (size_t dy = 0; dy < p.dstH; ++dy)
-                {
-                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                    {
-                        if (bias)
-                            for (size_t i = 0; i < n; ++i)
-                                buf[i] = bias[dc + i];
-                        else
-                            for (size_t i = 0; i < n; ++i)
-                                buf[i] = 0;
-                        for (size_t ky = 0; ky < p.kernelY; ++ky)
-                        {
-                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                            if (sy < p.srcH)
-                            {
-                                for (size_t kx = 0; kx < p.kernelX; ++kx)
-                                {
-                                    size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                    if (sx < p.srcW)
-                                    {
-                                        const float * pw = weight + (ky*p.kernelX + kx)*p.srcC*p.dstC + dc;
-                                        const float * ps = src + (sy*p.srcW + sx)*p.srcC;
-                                        for (size_t sc = 0; sc < p.srcC; ++sc)
-                                        {
-                                            float s = ps[sc];
-                                            for (size_t i = 0; i < n; ++i)
-                                                buf[i] += s * pw[i];
-                                            pw += p.dstC;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        float * pDst = dst + (dy*p.dstW + dx)*p.dstC + dc;
-                        for (size_t i = 0; i < n; ++i)
-                            pDst[i] = Activate<type>(buf[i], params, dc + i);
-                    }
-                }
-            }
-        }
-
-        void ConvolutionNhwcR_old(const float * src, const ConvParam & p, const ConvolutionDirectNhwcR::AlgParam & a, 
+        void ConvolutionNhwcDirectAny(const float * src, const ConvParam & p, const ConvolutionNhwcDirect::AlgParam & a, 
             const float * weight, const float * bias, const float * params, float * dst)
         {
             ConvolutionDirectNhwcConvolutionBiasActivationDefault(src, p, weight, bias, params, dst);
         }
 
-        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const ConvParam & p, bool old, ConvolutionDirectNhwcR::ConvolutionPtr & convolution)
-        {
-            if (old)
-                convolution = ConvolutionNhwcR_old;
-            else
-                convolution = ConvolutionNhwcR<type>;
-        }
-
-        ConvolutionDirectNhwcR::ConvolutionDirectNhwcR(const ConvParam & p, bool old)
+        ConvolutionNhwcDirect::ConvolutionNhwcDirect(const ConvParam & p)
             : Convolution(p)
         {
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
-            _reorder = NULL;
-            switch (p.activation)
-            {
-            case SimdConvolutionActivationIdentity: SetConvolutionPtr<SimdConvolutionActivationIdentity>(_param, old, _convolution); break;
-            case SimdConvolutionActivationRelu: SetConvolutionPtr<SimdConvolutionActivationRelu>(_param, old, _convolution); break;
-            case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, old, _convolution); break;
-            case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, old, _convolution); break;
-            case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, old, _convolution); break;
-            default: assert(0);
-            }
+            _convolution = ConvolutionNhwcDirectAny;
         }
 
-        void ConvolutionDirectNhwcR::SetAlgParam(size_t microD, size_t L1, size_t L2, size_t L3)
+        void ConvolutionNhwcDirect::SetAlgParam(size_t microD, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam & p = _param;
             _alg.microD = microD;
@@ -1147,33 +1081,70 @@ namespace Simd
                 _rParams.Resize(AlignHiAny(p.dstC, _alg.microD));
         }
 
-        size_t ConvolutionDirectNhwcR::InternalBufferSize() const
+        void ConvolutionNhwcDirect::ReorderWeight(const float * src, float * dst)
         {
-            return _buffer.size + _rWeight.size;
-        }
-
-        void ConvolutionDirectNhwcR::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
-        {
-            Convolution::SetParams(weight, internal, bias, params);
-            if (_reorder)
+            const ConvParam & p = _param;
+            const AlgParam & a = _alg;
+            for (size_t da = 0; da < p.dstC; da += a.macroD)
             {
-                const ConvParam & p = _param;
-                _reorder(weight, p, _alg, _rWeight.data);
-                _weight = _rWeight.data;
-                if (internal)
-                    *internal = SimdTrue;
-                if (bias)
-                    memcpy(_rBias.data, bias, p.dstC*sizeof(float));
-                _bias = _rBias.data;
-                if (p.activation == ::SimdConvolutionActivationPrelu)
+                size_t macroD = Simd::Min(p.dstC, da + a.macroD) - da;
+                for (size_t sa = 0; sa < p.srcC; sa += a.macroC)
                 {
-                    memcpy(_rParams.data, params, p.dstC * sizeof(float));
-                    _params = _rParams.data;
+                    size_t macroC = Simd::Min(p.srcC, sa + a.macroC) - sa;
+                    for (size_t di = 0; di < macroD; di += a.microD)
+                    {
+                        size_t microD = Simd::Min(macroD, di + a.microD) - di;
+                        for (size_t ky = 0; ky < p.kernelY; ky++)
+                        {
+                            for (size_t kx = 0; kx < p.kernelX; kx++)
+                            {
+                                for (size_t si = 0; si < macroC; si++)
+                                {
+                                    const float * s = src + ((ky * p.kernelX + kx) * p.srcC + sa + si) * p.dstC + da + di;
+                                    size_t i = 0;
+                                    for (; i < microD; i++)
+                                        dst[i] = s[i];
+                                    for (; i < a.microD; i++)
+                                        dst[i] = 0;
+                                    dst += a.microD;
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
 
-        void ConvolutionDirectNhwcR::Forward(const float * src, float * buf, float * dst)
+        size_t ConvolutionNhwcDirect::InternalBufferSize() const
+        {
+            return _buffer.size + _rWeight.size + _rBias.size + _rParams.size;
+        }
+
+        void ConvolutionNhwcDirect::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
+        {
+            Convolution::SetParams(weight, internal, bias, params);
+            if (_rWeight.data)
+            {
+                const ConvParam & p = _param;
+                ReorderWeight(weight, _rWeight.data);
+                _weight = _rWeight.data;
+                if (internal)
+                    *internal = SimdTrue;
+            }
+            if (_rBias.data)
+            {
+                if (bias)
+                    memcpy(_rBias.data, bias, _param.dstC * sizeof(float));
+                _bias = _rBias.data;
+            }
+            if (_rParams.data && _param.activation == ::SimdConvolutionActivationPrelu)
+            {
+                memcpy(_rParams.data, params, _param.dstC * sizeof(float));
+                _params = _rParams.data;
+            }
+        }
+
+        void ConvolutionNhwcDirect::Forward(const float * src, float * buf, float * dst)
         {
             const ConvParam & p = _param;
             for (size_t b = 0; b < p.batch; ++b)
@@ -1184,7 +1155,7 @@ namespace Simd
             }
         }
 
-        bool ConvolutionDirectNhwcR::Preferable(const ConvParam & p)
+        bool ConvolutionNhwcDirect::Preferable(const ConvParam & p)
         {
             return false;
         }
@@ -1204,8 +1175,8 @@ namespace Simd
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectNchw::Preferable(param))
                 return new ConvolutionDirectNchw(param);
-            else if (ConvolutionDirectNhwcR::Preferable(param))
-                return new ConvolutionDirectNhwcR(param, true);
+            else if (ConvolutionNhwcDirect::Preferable(param))
+                return new ConvolutionNhwcDirect(param);
             else if (ConvolutionDirectNhwc::Preferable(param))
                 return new ConvolutionDirectNhwc(param);
             else

@@ -79,6 +79,10 @@ namespace Simd
         {
             return srcC == group && dstC == group;
         }
+        SIMD_INLINE bool Is1x1() const
+        {
+            return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
+        }
 
 #ifdef SIMD_PERFORMANCE_STATISTIC
         String Info() const
@@ -283,11 +287,11 @@ namespace Simd
             size_t _count, _size, _batch, _sizeS, _sizeD;
         }; 
 
-        class ConvolutionDirectNhwcR : public Convolution
+        class ConvolutionNhwcDirect : public Convolution
         {
         public:
-            ConvolutionDirectNhwcR(const ConvParam & p, bool old = false);
-            virtual String Desc() const { return "Base::ConvolutionDirectNhwcR"; }
+            ConvolutionNhwcDirect(const ConvParam & p);
+            virtual String Desc() const { return "Base::ConvolutionNhwcDirect"; }
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -299,17 +303,15 @@ namespace Simd
                 size_t microD, macroH, macroC, macroD;
             };
             typedef void(*ConvolutionPtr)(const float * src, const ConvParam & p, const AlgParam & a, const float * weight, const float * bias, const float * params, float * dst);
-            typedef void(*ReorderPtr)(const float * src, const ConvParam & p, const AlgParam & a, float * dst);
 
         protected:
             void SetAlgParam(size_t microD, size_t L1, size_t L2, size_t L3);
+            void ReorderWeight(const float * src, float * dst);
 
             size_t _sizeS, _sizeD;
             AlgParam _alg;
             Array32f _rWeight, _rBias, _rParams;
-
             ConvolutionPtr _convolution;
-            ReorderPtr _reorder;
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
@@ -365,11 +367,11 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionDirectNhwcR : public Base::ConvolutionDirectNhwcR
+        class ConvolutionNhwcDirect : public Base::ConvolutionNhwcDirect
         {
         public:
-            ConvolutionDirectNhwcR(const ConvParam & p);
-            virtual String Desc() const { return "Sse::ConvolutionDirectNhwcR"; }
+            ConvolutionNhwcDirect(const ConvParam & p);
+            virtual String Desc() const { return "Sse::ConvolutionNhwcDirect"; }
 
             static bool Preferable(const ConvParam & p);
         };
