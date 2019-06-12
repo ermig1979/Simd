@@ -158,9 +158,9 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution1x1(const float * src, const SimdConvolutionParameters & p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
-            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
             size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW *F;
             size_t dstCDF = AlignLo(dstC, DF), dstW6 = AlignLoAny(dstW, 6);
             __m256 _params[2], _bias[2];
@@ -355,9 +355,9 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution(const float * src, const SimdConvolutionParameters & p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
-            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX;
             size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW * F;
             size_t dstCDF = AlignLo(dstC, DF);
@@ -542,10 +542,10 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void DepthwiseConvolution3x3(const float * src, const SimdConvolutionParameters & p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+            size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
-            size_t srcC = p.srcC, srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
+            size_t srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
             size_t srcM = (bufH[0] - 1), dstM = (bufH[1] - 1), srcS = bufH[0] * srcW, dstS = bufH[1] * dstW;
             size_t xStep = F * p.strideX, xStep0 = (p.strideX - p.padX)*F;
             size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
@@ -611,227 +611,298 @@ namespace Simd
             }
         }
 
-        template <UpdateType update> SIMD_INLINE void Update(float  * p, __m256 a, size_t tail);
-
-        template <> SIMD_INLINE void Update<UpdateSet>(float  * p, __m256 a, size_t tail)
-        {
-            float t[F];
-            _mm256_storeu_ps(t, a);
-            for (size_t i = 0; i < tail; ++i)
-                p[i] = t[i];
-        }
-
-        template <> SIMD_INLINE void Update<UpdateAdd>(float  * p, __m256 a, size_t tail)
-        {
-            float t[F];
-            for (size_t i = 0; i < tail; ++i)
-                t[i] = p[i];
-            _mm256_storeu_ps(t, _mm256_add_ps(a, _mm256_loadu_ps(t)));
-            for (size_t i = 0; i < tail; ++i)
-                p[i] = t[i];
-        }
-
-        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_2x6(const float * src, size_t srcC, size_t srcS,
+        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x6(const float * src, size_t srcC, size_t srcS,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
-            d00 = bias[0], d01 = bias[1];
-            d10 = bias[0], d11 = bias[1];
-            d20 = bias[0], d21 = bias[1];
-            d30 = bias[0], d31 = bias[1];
-            d40 = bias[0], d41 = bias[1];
-            d50 = bias[0], d51 = bias[1];
-            for (size_t c = 0; c < srcC; c += F)
+            if (tail > F)
             {
-                size_t n = Simd::Min(F, srcC - c);
-                for (size_t i = 0; i < n; ++i, weight += DF)
+                d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
+                d10 = _mm256_setzero_ps(), d11 = _mm256_setzero_ps();
+                d20 = _mm256_setzero_ps(), d21 = _mm256_setzero_ps();
+                d30 = _mm256_setzero_ps(), d31 = _mm256_setzero_ps();
+                d40 = _mm256_setzero_ps(), d41 = _mm256_setzero_ps();
+                d50 = _mm256_setzero_ps(), d51 = _mm256_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
                 {
-                    w0 = _mm256_loadu_ps(weight + 0);
-                    w1 = _mm256_loadu_ps(weight + F);
-                    s0 = _mm256_set1_ps(src[i + 0 * F]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
-                    s0 = _mm256_set1_ps(src[i + 1 * F]);
-                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
-                    d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
-                    s0 = _mm256_set1_ps(src[i + 2 * F]);
-                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
-                    d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
-                    s0 = _mm256_set1_ps(src[i + 3 * F]);
-                    d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
-                    d31 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d31);
-                    s0 = _mm256_set1_ps(src[i + 4 * F]);
-                    d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
-                    d41 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d41);
-                    s0 = _mm256_set1_ps(src[i + 5 * F]);
-                    d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
-                    d51 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d51);
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm256_loadu_ps(weight + 0);
+                        w1 = _mm256_loadu_ps(weight + F);
+                        s0 = _mm256_set1_ps(src[i + 0 * F]);
+                        d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                        d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                        s0 = _mm256_set1_ps(src[i + 1 * F]);
+                        d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                        d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                        s0 = _mm256_set1_ps(src[i + 2 * F]);
+                        d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                        d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                        s0 = _mm256_set1_ps(src[i + 3 * F]);
+                        d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
+                        d31 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d31);
+                        s0 = _mm256_set1_ps(src[i + 4 * F]);
+                        d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
+                        d41 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d41);
+                        s0 = _mm256_set1_ps(src[i + 5 * F]);
+                        d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                        d51 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d51);
+                    }
+                    src += srcS;
                 }
-                src += srcS;
-            }
-            if (tail == F)
-            {
-                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d01, params, 1));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d10, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d11, params, 1));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d20, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d21, params, 1));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d30, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d31, params, 1));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d40, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d41, params, 1));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d50, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d51, params, 1));
+                if (tail == DF)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d41, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d51, bias, params);
+                }
+                else
+                {
+                    tail -= F;
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tail);
+                }
             }
             else
             {
-                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
-                Update<update>(dst + F, Activate<type>(d01, params, 1), tail);
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d10, params, 0));
-                Update<update>(dst + F, Activate<type>(d11, params, 1), tail);
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d20, params, 0));
-                Update<update>(dst + F, Activate<type>(d21, params, 1), tail);
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d30, params, 0));
-                Update<update>(dst + F, Activate<type>(d31, params, 1), tail);
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d40, params, 0));
-                Update<update>(dst + F, Activate<type>(d41, params, 1), tail);
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d50, params, 0));
-                Update<update>(dst + F, Activate<type>(d51, params, 1), tail);
+                d00 = _mm256_setzero_ps();
+                d10 = _mm256_setzero_ps();
+                d20 = _mm256_setzero_ps();
+                d30 = _mm256_setzero_ps();
+                d40 = _mm256_setzero_ps();
+                d50 = _mm256_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm256_loadu_ps(weight + 0);
+                        s0 = _mm256_set1_ps(src[i + 0 * F]);
+                        d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                        s0 = _mm256_set1_ps(src[i + 1 * F]);
+                        d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                        s0 = _mm256_set1_ps(src[i + 2 * F]);
+                        d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                        s0 = _mm256_set1_ps(src[i + 3 * F]);
+                        d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
+                        s0 = _mm256_set1_ps(src[i + 4 * F]);
+                        d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
+                        s0 = _mm256_set1_ps(src[i + 5 * F]);
+                        d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                    }
+                    src += srcS;
+                }
+                if (tail == F)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                }
+                else
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tail);
+                }
             }
         }
 
-        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_2x1(const float * src, size_t srcC, size_t srcS,
+        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x3(const float * src, size_t srcC, size_t srcS,
+            const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
+        {
+            __m256 d00, d01, d10, d11, d20, d21, s0, w0, w1;
+            if (tail > F)
+            {
+                d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
+                d10 = _mm256_setzero_ps(), d11 = _mm256_setzero_ps();
+                d20 = _mm256_setzero_ps(), d21 = _mm256_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm256_loadu_ps(weight + 0);
+                        w1 = _mm256_loadu_ps(weight + F);
+                        s0 = _mm256_set1_ps(src[i + 0 * F]);
+                        d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                        d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                        s0 = _mm256_set1_ps(src[i + 1 * F]);
+                        d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                        d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                        s0 = _mm256_set1_ps(src[i + 2 * F]);
+                        d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                        d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                    }
+                    src += srcS;
+                }
+                if (tail == DF)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
+                }
+                else
+                {
+                    tail -= F;
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tail);
+                }
+            }
+            else
+            {
+                d00 = _mm256_setzero_ps();
+                d10 = _mm256_setzero_ps();
+                d20 = _mm256_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm256_loadu_ps(weight + 0);
+                        s0 = _mm256_set1_ps(src[i + 0 * F]);
+                        d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                        s0 = _mm256_set1_ps(src[i + 1 * F]);
+                        d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                        s0 = _mm256_set1_ps(src[i + 2 * F]);
+                        d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                    }
+                    src += srcS;
+                }
+                if (tail == F)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                }
+                else
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tail);
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x1(const float * src, size_t srcC, size_t srcS,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
         {
             __m256 d00, d01, s0, w0, w1;
-            d00 = bias[0];
-            d01 = bias[1];
-            for (size_t c = 0; c < srcC; c += F)
+            if (tail > F)
             {
-                size_t n = Simd::Min(F, srcC - c);
-                for (size_t i = 0; i < n; ++i, weight += DF)
+                d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
                 {
-                    w0 = _mm256_loadu_ps(weight + 0);
-                    w1 = _mm256_loadu_ps(weight + F);
-                    s0 = _mm256_set1_ps(src[i]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm256_loadu_ps(weight + 0);
+                        w1 = _mm256_loadu_ps(weight + F);
+                        s0 = _mm256_set1_ps(src[i + 0 * F]);
+                        d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                        d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    }
+                    src += srcS;
                 }
-                src += srcS;
-            }
-            if (tail == F)
-            {
-                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
-                Update<update, false>(dst + F, Activate<type>(d01, params, 1));
+                if (tail == DF)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                }
+                else
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail - F);
+                }
             }
             else
             {
-                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
-                Update<update>(dst + F, Activate<type>(d01, params, 1), tail);
-            }
-        }
-
-        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_1x6(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
-        {
-            __m256 d00, d10, d20, d30, d40, d50, s0, w0;
-            d00 = bias[0];
-            d10 = bias[0];
-            d20 = bias[0];
-            d30 = bias[0];
-            d40 = bias[0];
-            d50 = bias[0];
-            for (size_t c = 0; c < srcC; c += F)
-            {
-                size_t n = Simd::Min(F, srcC - c);
-                for (size_t i = 0; i < n; ++i, weight += DF)
+                d00 = _mm256_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
                 {
-                    w0 = _mm256_loadu_ps(weight + 0);
-                    s0 = _mm256_set1_ps(src[i + 0 * F]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                    s0 = _mm256_set1_ps(src[i + 1 * F]);
-                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
-                    s0 = _mm256_set1_ps(src[i + 2 * F]);
-                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
-                    s0 = _mm256_set1_ps(src[i + 3 * F]);
-                    d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
-                    s0 = _mm256_set1_ps(src[i + 4 * F]);
-                    d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
-                    s0 = _mm256_set1_ps(src[i + 5 * F]);
-                    d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm256_loadu_ps(weight + 0);
+                        s0 = _mm256_set1_ps(src[i + 0 * F]);
+                        d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    }
+                    src += srcS;
                 }
-                src += srcS;
-            }
-            if (tail == F)
-            {
-                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d10, params, 0));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d20, params, 0));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d30, params, 0));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d40, params, 0));
-                dst += dstC;
-                Update<update, false>(dst + 0, Activate<type>(d50, params, 0));
-            }
-            else
-            {
-                Update<update>(dst + 0, Activate<type>(d00, params, 0), tail);
-                dst += dstC;
-                Update<update>(dst + 0, Activate<type>(d10, params, 0), tail);
-                dst += dstC;
-                Update<update>(dst + 0, Activate<type>(d20, params, 0), tail);
-                dst += dstC;
-                Update<update>(dst + 0, Activate<type>(d30, params, 0), tail);
-                dst += dstC;
-                Update<update>(dst + 0, Activate<type>(d40, params, 0), tail);
-                dst += dstC;
-                Update<update>(dst + 0, Activate<type>(d50, params, 0), tail);
+                if (tail == F)
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                else
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
             }
         }
 
-        template<SimdConvolutionActivationType type, UpdateType update> SIMD_INLINE void OutputConvolution_1x1(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
-        {
-            __m256 d00, s0, w0;
-            d00 = bias[0];
-            for (size_t c = 0; c < srcC; c += F)
-            {
-                size_t n = Simd::Min(F, srcC - c);
-                for (size_t i = 0; i < n; ++i, weight += DF)
-                {
-                    w0 = _mm256_loadu_ps(weight + 0);
-                    s0 = _mm256_set1_ps(src[i]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                }
-                src += srcS;
-            }
-            if (tail == F)
-                Update<update, false>(dst + 0, Activate<type>(d00, params, 0));
-            else
-                Update<update>(dst + 0, Activate<type>(d00, params, 0), tail);
-        }
-
-        template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
+        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
+            size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
-            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
-            size_t sC = (srcC + F - 1) / F, srcM = (bufH[1] - 1), srcS = bufH[1] * srcW*F;
-            size_t dstCDF = AlignLo(dstC, DF), dstW6 = AlignLoAny(dstW, 6);
+            size_t srcH = p.srcH, srcW = p.srcW, dstW = p.dstW, dstC = p.dstC;
+            size_t srcM = (bufH[1] - 1), srcS = bufH[1] * srcW*F;
+            size_t dstW3 = AlignLoAny(dstW, 3), dstW6 = AlignLoAny(dstW, 6);
             __m256 _params[2], _bias[2];
             _params[0] = _mm256_set1_ps(params[0]);
             if (type == ::SimdConvolutionActivationRestrictRange)
@@ -841,8 +912,9 @@ namespace Simd
             size_t dc = 0;
             for (; dc < dstC; dc += DF)
             {
-                _bias[0] = bias ? _mm256_loadu_ps(bias + dc + 0) : _mm256_setzero_ps();
-                _bias[1] = bias ? _mm256_loadu_ps(bias + dc + F) : _mm256_setzero_ps();
+                size_t tail = Simd::Min(DF, dstC - dc);
+                _bias[0] = _mm256_loadu_ps(bias + dc + 0);
+                _bias[1] = _mm256_loadu_ps(bias + dc + F);
                 if (type == ::SimdConvolutionActivationPrelu)
                 {
                     _params[0] = _mm256_loadu_ps(params + dc + 0);
@@ -853,29 +925,12 @@ namespace Simd
                 {
                     const float * pSrc = src + (y&srcM)*srcW*F;
                     size_t x = 0;
-                    if (dc < dstCDF)
-                    {
-                        for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
-                            OutputConvolution_2x6<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, F);
-                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-                            OutputConvolution_2x1<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, F);
-                    }
-                    else if (dstC - dstCDF > F)
-                    {
-                        size_t tail = dstC - dstCDF - F;
-                        for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
-                            OutputConvolution_2x6<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-                            OutputConvolution_2x1<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                    }
-                    else
-                    {
-                        size_t tail = dstC - dstCDF;
-                        for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
-                            OutputConvolution_1x6<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-                            OutputConvolution_1x1<type, update>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                    }
+                    for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
+                        OutputConvolution_2x6<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                    for (; x < dstW3; x += 3, pDst += 3 * dstC, pSrc += 3 * F)
+                        OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                    for (; x < dstW; ++x, pDst += dstC, pSrc += F)
+                        OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
                 }
                 weight += srcC * DF;
             }
@@ -896,9 +951,19 @@ namespace Simd
                 break;
             case 2:
                 if (p.add)
-                    convolution[2] = OutputConvolution<type, UpdateAdd>;
+                {
+                    convolution[2] = OutputConvolution<TermLast, type>;
+                    convolution[3] = OutputConvolution<TermIterim, type>;
+                    convolution[4] = OutputConvolution<TermIterim, type>;
+                    convolution[5] = OutputConvolution<TermLast, type>;
+                }
                 else
-                    convolution[2] = OutputConvolution<type, UpdateSet>;
+                {
+                    convolution[2] = OutputConvolution<TermSingle, type>;
+                    convolution[3] = OutputConvolution<TermFirst, type>;
+                    convolution[4] = OutputConvolution<TermIterim, type>;
+                    convolution[5] = OutputConvolution<TermLast, type>;
+                }
                 break;
             default:
                 assert(0);
