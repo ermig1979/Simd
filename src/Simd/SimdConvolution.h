@@ -461,8 +461,6 @@ namespace Simd
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
             virtual String Desc() const { return "Avx::NhwcDirect"; }
-
-            static bool Preferable(const ConvParam & p);
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);

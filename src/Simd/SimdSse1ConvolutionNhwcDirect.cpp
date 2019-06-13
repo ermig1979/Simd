@@ -833,8 +833,9 @@ namespace Simd
         {
             if (p.trans != SimdTrue || p.group != 1 || !p.IsDilation(1))
                 return false;
-            size_t bodyW = p.dstW - p.padX - p.padY;
-            if (!p.Is1x1() && bodyW < 6)
+            if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
+                return false;
+            if (p.Is1x1() && p.srcC > p.dstC)
                 return false;
             return true;
         }

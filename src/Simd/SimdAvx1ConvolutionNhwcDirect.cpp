@@ -828,18 +828,6 @@ namespace Simd
             default: assert(0);
             }
         }
-
-        bool ConvolutionNhwcDirect::Preferable(const ConvParam & p)
-        {
-            if (p.trans != SimdTrue || p.group != 1 || !p.IsDilation(1))
-                return false;
-            size_t bodyW = p.dstW - p.padX - p.padY;
-            if (!p.Is1x1() && bodyW < 6)
-                return false;
-            if (p.Is1x1() && p.srcC > p.dstC)
-                return false;
-            return true;
-        }
     }
 #endif//SIMD_AVX_ENABLE
 }
