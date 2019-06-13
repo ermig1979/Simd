@@ -1274,8 +1274,8 @@ extern "C"
         \param [in] bgrStride - a row size of the bgr image.
         \param [in] width - an image width.
         \param [in] height - an image height.
-        \param [out] rgb - a pointer to pixels data of output 32-bit BGRA image.
-        \param [in] rgbStride - a row size of the bgra image.
+        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
+        \param [in] rgbStride - a row size of the rgb image.
     */
     SIMD_API void SimdBgrToRgb(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride);
 

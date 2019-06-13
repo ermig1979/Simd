@@ -55,6 +55,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga05e32f68b1fa2ce1c160afc5e91de3e3"><td class="memItemLeft" align="right" valign="top">SIMD_API int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#ga05e32f68b1fa2ce1c160afc5e91de3e3">SimdCpuInfo</a> ()</td></tr>
 <tr class="memdesc:ga05e32f68b1fa2ce1c160afc5e91de3e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets info about SIMD extensions supported by CPU and Simd Library.  <a href="#ga05e32f68b1fa2ce1c160afc5e91de3e3">More...</a><br /></td></tr>
 <tr class="separator:ga05e32f68b1fa2ce1c160afc5e91de3e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga033c1ca6f8a20a74552c764d688514fe"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__info.html#ga033c1ca6f8a20a74552c764d688514fe">SimdPerformanceStatistic</a> ()</td></tr>
+<tr class="memdesc:ga033c1ca6f8a20a74552c764d688514fe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets internal performance statistics of Simd Library.  <a href="#ga033c1ca6f8a20a74552c764d688514fe">More...</a><br /></td></tr>
+<tr class="separator:ga033c1ca6f8a20a74552c764d688514fe"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions with information about library. </p>
@@ -119,6 +122,27 @@ int main()
     return 0;
 }
 </pre><dl class="section return"><dt>Returns</dt><dd>an integer value which bits contains information about SIMD extensions supported by CPU and Simd Library. </dd></dl>
+
+</div>
+</div>
+<a id="ga033c1ca6f8a20a74552c764d688514fe"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga033c1ca6f8a20a74552c764d688514fe">&#9670;&nbsp;</a></span>SimdPerformanceStatistic()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * SimdPerformanceStatistic </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets internal performance statistics of Simd Library. </p>
+<dl class="section note"><dt>Note</dt><dd>Simd Library have to be build with defined SIMD_PERFORMANCE_STATISTIC macro.</dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>string with internal performance statistics of Simd Library. </dd></dl>
 
 </div>
 </div>

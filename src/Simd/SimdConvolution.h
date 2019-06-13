@@ -456,6 +456,15 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
+        class ConvolutionNhwcDirect : public Sse::ConvolutionNhwcDirect
+        {
+        public:
+            ConvolutionNhwcDirect(const ConvParam & p);
+            virtual String Desc() const { return "Avx::ConvolutionNhwcDirect"; }
+
+            static bool Preferable(const ConvParam & p);
+        };
+
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX_ENABLE
