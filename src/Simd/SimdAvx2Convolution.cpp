@@ -1541,6 +1541,8 @@ namespace Simd
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectNchw::Preferable(param))
                 return new Avx2::ConvolutionDirectNchw(param);
+            else if (ConvolutionNhwcDirect::Preferable(param))
+                return new ConvolutionNhwcDirect(param);
             else if (ConvolutionDirectNhwc::Preferable(param))
                 return new ConvolutionDirectNhwc(param);
             else
