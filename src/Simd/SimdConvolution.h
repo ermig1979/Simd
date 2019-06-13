@@ -582,6 +582,13 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
+        class ConvolutionNhwcDirect : public Avx2::ConvolutionNhwcDirect
+        {
+        public:
+            ConvolutionNhwcDirect(const ConvParam & p);
+            virtual String Desc() const { return "Avx512f::NhwcDirect"; }
+        };
+
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX512F_ENABLE
@@ -647,6 +654,15 @@ namespace Simd
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
             virtual String Desc() const { return "Neon::DepthwiseDotProduct"; }
             virtual void Forward(const float * src, float * buf, float * dst);
+        };
+
+        class ConvolutionNhwcDirect : public Base::ConvolutionNhwcDirect
+        {
+        public:
+            ConvolutionNhwcDirect(const ConvParam & p);
+            virtual String Desc() const { return "Neon::NhwcDirect"; }
+
+            static bool Preferable(const ConvParam & p);
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
