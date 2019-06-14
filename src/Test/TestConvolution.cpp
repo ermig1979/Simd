@@ -438,7 +438,7 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 96, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 144, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 17, 17, 128, _3, _1, _2, _1, _1, 1, a, t), f1, f2);
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 17, 17, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 64, 17, 17, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
@@ -461,8 +461,16 @@ namespace Test
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 576, 7, 12, 160, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 96, 14, 24, 576, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
+#if 1
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 3, 240, 135, 10, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 10, 119, 67, 16, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 16, 117, 65, 32, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 32, 115, 63, 4, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 32, 115, 63, 2, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(eps, Param(1, 256, 64, 64, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+#endif
 #else
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 192, 20, 20, 512, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 16, 117, 65, 32, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }

@@ -27,6 +27,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdRuntime.h"
+#include "Simd/SimdGemm.h"
 
 #ifdef _N
 #undef _N
@@ -470,6 +471,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C);
+        void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB);
+        size_t NhwcBufferSize(size_t M, size_t N, size_t K);
+
         class ConvolutionGemmNN : public Avx::ConvolutionGemmNN
         {
         public:

@@ -137,14 +137,35 @@ namespace Simd
 
         void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
         {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            nhwcGemm.Run(A, K, B, C, N);
+            if (N > Avx::F)
+            {
+                NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
+                nhwcGemm.Run(A, K, B, C, N);
+            }
+            else
+                Avx2::NhwcRun(M, N, K, A, B, C);
         }
 
         void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
         {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            nhwcGemm.ReorderB(B, N, pB);
+            if (N > Avx::F)
+            {
+                NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
+                nhwcGemm.ReorderB(B, N, pB);
+            }
+            else
+                Avx2::NhwcReorderB(M, N, K, B, pB);
+        }
+
+        size_t NhwcBufferSize(size_t M, size_t N, size_t K)
+        {
+            if (N > Avx::F)
+            {
+                NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
+                return nhwcGemm.BufferSize();
+            }
+            else
+                return Avx2::NhwcBufferSize(M, N, K);
         }
 
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
@@ -436,7 +457,7 @@ namespace Simd
                 _nhwcRun = Avx512f::NhwcRun;
                 _nhwcReorderB = Avx512f::NhwcReorderB;
             }
-            _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
+            _biasAndActivation = _N > Avx::F ? Avx512f::ConvolutionBiasAndActivation : Avx::ConvolutionBiasAndActivation;
         }
 
         void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)

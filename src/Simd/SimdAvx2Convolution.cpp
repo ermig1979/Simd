@@ -87,6 +87,12 @@ namespace Simd
             nhwcGemm.ReorderB(B, N, pB);
         }
 
+        size_t NhwcBufferSize(size_t M, size_t N, size_t K)
+        {
+            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
+            return nhwcGemm.BufferSize();
+        }
+
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Avx::ConvolutionGemmNN(p)
         {
