@@ -679,6 +679,83 @@ namespace Simd
                 SynetFusedLayerForward4<false>(src, bias0, scale1, bias1, count, size, dst, trans);
         }
 
+        template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, float * dst, size_t offset)
+        {
+            Store<align>(dst + offset, vmlaq_f32(Load<align>(src0 + offset), Load<align>(src1 + offset), Load<align>(src2 + offset)));
+        }
+
+        template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const float32x4_t & src2, float * dst, size_t offset)
+        {
+            Store<align>(dst + offset, vmlaq_f32(Load<align>(src0 + offset), Load<align>(src1 + offset), src2));
+        }
+
+        template <bool align> void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (align)
+                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(src2) : Aligned(size)) && Aligned(src0) && Aligned(src1) && Aligned(dst));
+            if ((trans || size == 1) && count != 1)
+            {
+                size_t aligned = AlignLo(count, QF);
+                size_t partial = AlignLo(count, F);
+                for (size_t j = 0; j < size; ++j)
+                {
+                    size_t i = 0;
+                    if (partial)
+                    {
+                        for (; i < aligned; i += QF)
+                        {
+                            SynetFusedLayerForward8<align>(src0, src1, src2, dst, i + 0 * F);
+                            SynetFusedLayerForward8<align>(src0, src1, src2, dst, i + 1 * F);
+                            SynetFusedLayerForward8<align>(src0, src1, src2, dst, i + 2 * F);
+                            SynetFusedLayerForward8<align>(src0, src1, src2, dst, i + 3 * F);
+                        }
+                        for (; i < partial; i += F)
+                            SynetFusedLayerForward8<align>(src0, src1, src2, dst, i);
+                    }
+                    for (; i < count; ++i)
+                        dst[i] = Base::SynetFusedLayerForward8(src0[i], src1[i], src2[i]);
+                    src0 += count;
+                    src1 += count;
+                    dst += count;
+                }
+            }
+            else
+            {
+                size_t aligned = AlignLo(size, QF);
+                size_t partial = AlignLo(size, F);
+                for (size_t i = 0; i < count; ++i)
+                {
+                    size_t j = 0;
+                    if (partial)
+                    {
+                        float32x4_t _src2 = vdupq_n_f32(src2[i]);
+                        for (; j < aligned; j += QF)
+                        {
+                            SynetFusedLayerForward8<align>(src0, src1, _src2, dst, j + 0 * F);
+                            SynetFusedLayerForward8<align>(src0, src1, _src2, dst, j + 1 * F);
+                            SynetFusedLayerForward8<align>(src0, src1, _src2, dst, j + 2 * F);
+                            SynetFusedLayerForward8<align>(src0, src1, _src2, dst, j + 3 * F);
+                        }
+                        for (; j < partial; j += F)
+                            SynetFusedLayerForward8<align>(src0, src1, _src2, dst, j);
+                    }
+                    for (; j < size; ++j)
+                        dst[j] = Base::SynetFusedLayerForward8(src0[j], src1[j], src2[i]);
+                    src0 += size;
+                    src1 += size;
+                    dst += size;
+                }
+            }
+        }
+
+        void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t count, size_t size, float * dst, SimdBool trans)
+        {
+            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(src2) : Aligned(size)) && Aligned(src0) && Aligned(src1) && Aligned(dst))
+                SynetFusedLayerForward8<true>(src0, src1, src2, count, size, dst, trans);
+            else
+                SynetFusedLayerForward8<false>(src0, src1, src2, count, size, dst, trans);
+        }
+
         template <bool align> SIMD_INLINE void SynetInnerProductLayerForward(const float * src, const float * weight, size_t offset, float32x4_t & sum)
         {
             float32x4_t s = Load<align>(src + offset);

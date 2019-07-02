@@ -337,6 +337,7 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetFusedLayerForward2);
     TEST_ADD_GROUP_A00(SynetFusedLayerForward3);
     TEST_ADD_GROUP_A00(SynetFusedLayerForward4);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward8);
     TEST_ADD_GROUP_A00(SynetInnerProductLayerForward);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A00(SynetPoolingForwardMax);
