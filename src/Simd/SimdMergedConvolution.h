@@ -102,7 +102,7 @@ namespace Simd
 
         long long Flop(size_t i) const
         {
-            return conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
+            return batch*conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
         }
 
         long long Flop() const
