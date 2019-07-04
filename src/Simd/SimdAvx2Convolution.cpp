@@ -44,7 +44,7 @@ namespace Simd
             NhwcGemm::Tail kernelTM, kernelTT;
             size_t microM, microN;
 #ifdef SIMD_X64_ENABLE
-            if (M == 4 || M == 8 || /*M == 12 || */M == 16)
+            if (M == 4 || M == 8 || /*M == 12 || */M == 16 || N == 24 || N == 48 || N == 96)
             {
                 microM = 4;
                 microN = 24;

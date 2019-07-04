@@ -36,7 +36,7 @@ namespace Simd
 
         NhwcGemm CreateNhwcGemm(size_t M, size_t N, size_t K)
         {
-            const size_t L1 = 2*32 * 1024;
+            const size_t L1 = 4*32 * 1024;
             const size_t L2 = 1024 * 1024;
             const size_t L3 = 2 * 1280 * 1024;
             NhwcGemm::Main kernelMM, kernelMT;
@@ -73,7 +73,7 @@ namespace Simd
                 kernelTM = Avx512f::GemmKernelMx32nn;
                 kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
             }
-            else if (M == 8 || M == 16 || M == 32 || M < 14)
+            else if (M == 8 || M == 16 || M == 32 || M < 14 || N == 48 || N == 96)
             {
                 microM = 8;
                 microN = 48;

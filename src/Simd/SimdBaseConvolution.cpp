@@ -662,7 +662,7 @@ namespace Simd
             _batch = p.batch;
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
-            _merge = p.trans && _M <= 25;
+            _merge = p.trans && _M*_batch <= 256*2;
         }
 
         //---------------------------------------------------------------------

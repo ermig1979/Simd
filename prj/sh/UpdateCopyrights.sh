@@ -9,9 +9,9 @@ git ls-tree -r --name-status HEAD | while read file_name; do
   copyright_year=$(sed '4q;d' ${file_name})
   copyright_year=${copyright_year#*-}
   copyright_year=${copyright_year:0:4}
-  if [ "${last_update_year}" != "${copyright_year}" ]; then 
+  if [ "${last_update_year}" != "${copyright_year}" ] && [ "${copyright_year:0:2}" == "20" ]; then 
     echo "update ${copyright_year} to ${last_update_year} in ${file_name}"
-    sed -i '4s/'"${copyright_year}"'/'"${last_update_year}"'/g' ${file_name}
+    sed -i '4s/'"-${copyright_year}"'/'"-${last_update_year}"'/g' ${file_name}
   else
     printf "scan ${directory}/${file_name}                            \r"
   fi
