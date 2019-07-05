@@ -214,7 +214,7 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Base::Winograd" + ToStr(_block) + "x3"; }
+            virtual String Desc() const { return "Base::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
@@ -229,8 +229,7 @@ namespace Simd
 
             void SetBlock(size_t block);
 
-            bool _merge;
-            size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW;
+            size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge;
             SimdBool _pad;
             Array32f _winogradWeight;
             SetFilter _setFilter;
@@ -499,7 +498,7 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::Winograd" + ToStr(_block) + "x3"; }
+            virtual String Desc() const { return "Avx2::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
         };
 
         class ConvolutionDirectNchw : public Avx::ConvolutionDirectNchw
@@ -561,7 +560,7 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::Winograd" + ToStr(_block) + "x3"; }
+            virtual String Desc() const { return "Avx512f::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
         };
 
         class ConvolutionDirectNchw : public Avx2::ConvolutionDirectNchw

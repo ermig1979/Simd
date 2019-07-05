@@ -566,7 +566,7 @@ namespace Simd
         
         size_t ConvolutionWinograd::ExternalBufferSize() const
         {
-            return (_strideS + _strideD)*_count*(_merge ? _batch : 1);
+            return (_strideS + _strideD)*_count*_merge;
         }
 
         size_t ConvolutionWinograd::InternalBufferSize() const
@@ -582,7 +582,7 @@ namespace Simd
             if (_nhwcWeight.data)
             {
                 for (size_t i = 0; i < _count; ++i)
-                    _nhwcReorderB(_M * (_merge ? _batch : 1), _N, _K, _winogradWeight.data + i * _strideW, _nhwcWeight.data + i * _nhwcStrideW);
+                    _nhwcReorderB(_M * _merge, _N, _K, _winogradWeight.data + i * _strideW, _nhwcWeight.data + i * _nhwcStrideW);
                 _winogradWeight.Resize(0);
             }
             if (internal)
@@ -593,22 +593,27 @@ namespace Simd
         {
             const ConvParam & p = _param;
             float * bufS = Buffer(buf);
-            float * bufD = bufS + _strideS * _count * (_merge ? _batch : 1);
-            if (_merge)
+            float * bufD = bufS + _strideS * _count * _merge;
+            if (p.trans)
             {
-                for (size_t b = 0; b < _batch; ++b)
-                    _setInput(src + b * _sizeS, p.srcC, p.srcH, p.srcW, bufS + b * _strideS, _strideS * _batch, _pad, p.trans);
-                for (size_t i = 0; i < _count; ++i)
+                for (size_t b = 0; b < _batch; b += _merge)
                 {
-                    if (_nhwcWeight.data)
-                        _nhwcRun(_M * _batch, _N, _K, bufS + i * _strideS * _batch, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * _batch);
-                    else
-                        _gemm.Run(_M * _batch, _N, _K, &_1, bufS + i * _strideS * _batch, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _batch, _N);
-                }
-                for (size_t b = 0; b < _batch; ++b)
-                {
-                    _setOutput(bufD + b * _strideD, _strideD * _batch, dst + b * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
-                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + b * _sizeD);
+                    for (size_t m = 0; m < _merge; ++m)
+                        _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, bufS + m * _strideS, _strideS * _merge, _pad, p.trans);
+                    for (size_t i = 0; i < _count; ++i)
+                    {
+                        if (_nhwcWeight.data)
+                            _nhwcRun(_M * _merge, _N, _K, bufS + i * _strideS * _merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * _merge);
+                        else
+                            _gemm.Run(_M * _merge, _N, _K, &_1, bufS + i * _strideS * _merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _merge, _N);
+                    }
+                    for (size_t m = 0; m < _merge; ++m)
+                    {
+                        _setOutput(bufD + m * _strideD, _strideD * _merge, dst + m * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
+                        _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
+                    }
+                    src += _sizeS*_merge;
+                    dst += _sizeD*_merge;
                 }
             }
             else
@@ -616,21 +621,8 @@ namespace Simd
                 for (size_t b = 0; b < _batch; ++b)
                 {
                     _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _strideS, _pad, p.trans);
-                    if (p.trans)
-                    {
-                        for (size_t i = 0; i < _count; ++i)
-                        {
-                            if(_nhwcWeight.data)
-                                _nhwcRun(_M, _N, _K, bufS + i * _strideS, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD);
-                            else
-                                _gemm.Run(_M, _N, _K, &_1, bufS + i * _strideS, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N);
-                        }
-                    }
-                    else
-                    {
-                        for (size_t i = 0; i < _count; ++i)
-                            _gemm.Run(_M, _N, _K, &_1, _winogradWeight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
-                    }
+                    for (size_t i = 0; i < _count; ++i)
+                        _gemm.Run(_M, _N, _K, &_1, _winogradWeight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
                     _setOutput(bufD, _strideD, dst, p.dstC, p.dstH, p.dstW, p.trans);
                     _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst);
                     src += _sizeS;
@@ -662,7 +654,13 @@ namespace Simd
             _batch = p.batch;
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
-            _merge = p.trans && _M*_batch <= 256*2;
+            _merge = 1;
+            if (p.trans && _batch > 1)
+            {
+                for (size_t merge = 1; merge <= _batch; ++merge)
+                    if (_batch%merge == 0 && _M*merge <= 256)
+                        _merge = merge;
+            }
         }
 
         //---------------------------------------------------------------------

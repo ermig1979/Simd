@@ -330,7 +330,7 @@ namespace Simd
             _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
             if (_param.trans)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
                 _nhwcStrideW = nhwcGemm.BufferSize();
                 _nhwcWeight.Resize(_nhwcStrideW*_count);
                 _nhwcRun = Neon::NhwcRun;
