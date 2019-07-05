@@ -314,7 +314,7 @@ namespace Simd
             _gemm.Init(Avx::Gemm32fNN, "Avx", p.gemm, "Ext");
             if (_param.trans && _param.group == 1)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
                 _nhwcWeight.Resize(nhwcGemm.BufferSize());
                 _nhwcRun = Avx::NhwcRun;
                 _nhwcReorderB = Avx::NhwcReorderB;

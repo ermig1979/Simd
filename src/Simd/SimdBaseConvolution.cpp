@@ -153,7 +153,6 @@ namespace Simd
             : Convolution(p)
         {
             _is1x1 = p.Is1x1();
-            _merge = p.trans && p.group == 1 && p.dstH*p.dstW <= 256;
             if (p.trans)
             {
                 _M = p.dstH * p.dstW;
@@ -182,6 +181,13 @@ namespace Simd
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeB = p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
             _sizeD = p.dstC*p.dstH*p.dstW;
+            _merge = 1;
+            if (p.trans && p.group == 1 && _batch > 1)
+            {
+                for (size_t merge = 1; merge <= _batch; ++merge)
+                    if (_batch%merge == 0 && _M*merge <= 256)
+                        _merge = merge;
+            }
             _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
@@ -191,7 +197,7 @@ namespace Simd
             if (_is1x1)
                 return 1;
             else
-                return _sizeB*(_merge ? _batch : 1);
+                return _sizeB*_merge;
         };
 
         void ConvolutionGemmNN::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
@@ -199,7 +205,7 @@ namespace Simd
             Simd::Convolution::SetParams(weight, internal, bias, params);
             if (_nhwcWeight.data)
             {
-                _nhwcReorderB(_M*(_merge ? _batch : 1), _N, _K, weight, _nhwcWeight.data);
+                _nhwcReorderB(_M*_merge, _N, _K, weight, _nhwcWeight.data);
                 if (internal)
                     *internal = SimdTrue;
             }
@@ -210,20 +216,26 @@ namespace Simd
             const ConvParam & p = _param;
             if (!_is1x1)
                 buf = Buffer(buf);
-            if (_merge)
+            if (_merge > 1)
             {
-                if (!_is1x1)
+                for (size_t b = 0; b < _batch; b += _merge)
                 {
-                    for (size_t b = 0; b < _batch; ++b)
-                        ImgToRow(src + b * _sizeS, buf + b * _sizeB);
-                    src = buf;
+                    const float * tmp = src;
+                    if (!_is1x1)
+                    {
+                        for (size_t m = 0; m < _merge; ++m)
+                            ImgToRow(src + m * _sizeS, buf + m * _sizeB);
+                        tmp = buf;
+                    }
+                    if (_nhwcWeight.data)
+                        _nhwcRun(_M*_merge, _N, _K, src, _nhwcWeight.data, dst);
+                    else
+                        _gemm.Run(_M*_merge, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
+                    for (size_t m = 0; m < _merge; ++m)
+                        _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
+                    src += _sizeS * _merge;
+                    dst += _sizeD * _merge;
                 }
-                if (_nhwcWeight.data)
-                    _nhwcRun(_M*_batch, _N, _K, src, _nhwcWeight.data, dst);
-                else
-                    _gemm.Run(_M*_batch, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
-                for (size_t b = 0; b < _batch; ++b)
-                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdTrue, dst + b * _sizeD);
             }
             else
             {

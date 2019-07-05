@@ -120,6 +120,7 @@ namespace Simd
             return _param;
         }
 
+        virtual String Ext() const = 0;
         virtual String Desc() const = 0;
 
         virtual size_t ExternalBufferSize() const
@@ -178,7 +179,8 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Desc() const { return "Base::GemmNN"; }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::GemmNN" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -187,15 +189,16 @@ namespace Simd
             virtual void ImgToCol(const float * src, float * dst);
             virtual void ImgToRow(const float * src, float * dst);
 
-            bool _is1x1, _merge;
-            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
+            bool _is1x1;
+            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD, _merge;
         };
 
         class ConvolutionGemmNT : public Convolution
         {
         public:
             ConvolutionGemmNT(const ConvParam & p);
-            virtual String Desc() const { return "Base::GemmNT"; }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::GemmNT"; }
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const float * src, float * buf, float * dst);
 
@@ -214,7 +217,8 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Base::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
@@ -241,7 +245,8 @@ namespace Simd
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Desc() const { return "Base::DirectNchw"; }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::DirectNchw"; }
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const float * src, float * buf, float * dst);
 
@@ -261,7 +266,8 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Desc() const { return "Base::DirectNhwc"; }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::DirectNhwc"; }
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam & p);
@@ -278,7 +284,8 @@ namespace Simd
         {
         public:
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
-            virtual String Desc() const { return "Base::DepthwiseDotProduct"; }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::DepthwiseDotProduct"; }
             virtual void Forward(const float * src, float * buf, float * dst);
 
             static bool Preferable(const ConvParam & p);
@@ -291,7 +298,8 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Desc() const { return "Base::NhwcDirect"; }
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::NhwcDirect"; }
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
@@ -326,21 +334,21 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Desc() const { return "Sse::GemmNN"; }
+            virtual String Ext() const { return "Sse"; }
         };
 
         class ConvolutionWinograd : public Base::ConvolutionWinograd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Sse::Winograd" + ToStr(_block) + "x3"; }
+            virtual String Ext() const { return "Sse"; }
         };
 
         class ConvolutionDirectNchw : public Base::ConvolutionDirectNchw
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Desc() const { return "Sse::DirectNchw"; }
+            virtual String Ext() const { return "Sse"; }
 
             static bool Preferable(const ConvParam & p);
 
@@ -352,7 +360,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Desc() const { return "Sse::DirectNhwc"; }
+            virtual String Ext() const { return "Sse"; }
 
             static bool Preferable(const ConvParam & p);
         protected:
@@ -363,7 +371,7 @@ namespace Simd
         {
         public:
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
-            virtual String Desc() const { return "Sse::DepthwiseDotProduct"; }
+            virtual String Ext() const { return "Sse"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -371,7 +379,7 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Desc() const { return "Sse::NhwcDirect"; }
+            virtual String Ext() const { return "Sse"; }
 
             static bool Preferable(const ConvParam & p);
         };
@@ -387,7 +395,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNT(const ConvParam & p);
-            virtual String Desc() const { return "Sse3::GemmNT"; }
+            virtual String Ext() const { return "Sse3"; }
 
             static bool Preferable(const ConvParam & p);
         protected:
@@ -407,7 +415,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Desc() const { return "Avx::GemmNN"; }
+            virtual String Ext() const { return "Avx"; }
         protected:
             virtual void ImgToRow(const float * src, float * dst);
         };
@@ -416,7 +424,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNT(const ConvParam & p);
-            virtual String Desc() const { return "Avx::GemmNT"; }
+            virtual String Ext() const { return "Avx"; }
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -425,14 +433,14 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Avx::Winograd" + ToStr(_block) + "x3"; }
+            virtual String Ext() const { return "Avx"; }
         };
 
         class ConvolutionDirectNchw : public Sse::ConvolutionDirectNchw
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Desc() const { return "Avx::DirectNchw"; }
+            virtual String Ext() const { return "Avx"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -441,7 +449,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Desc() const { return "Avx::DirectNhwc"; }
+            virtual String Ext() const { return "Avx"; }
         
             static bool Preferable(const ConvParam & p);
         protected:
@@ -452,7 +460,7 @@ namespace Simd
         {
         public:
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
-            virtual String Desc() const { return "Avx::DepthwiseDotProduct"; }
+            virtual String Ext() const { return "Avx"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -460,7 +468,7 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Desc() const { return "Avx::NhwcDirect"; }
+            virtual String Ext() const { return "Avx"; }
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
@@ -478,7 +486,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::GemmNN"; }
+            virtual String Ext() const { return "Avx2"; }
         protected:
             virtual void ImgToCol(const float * src, float * dst);
         private:
@@ -489,7 +497,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNT(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::GemmNT"; }
+            virtual String Ext() const { return "Avx2"; }
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -498,14 +506,14 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
+            virtual String Ext() const { return "Avx2"; }
         };
 
         class ConvolutionDirectNchw : public Avx::ConvolutionDirectNchw
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::DirectNchw"; }
+            virtual String Ext() const { return "Avx2"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -514,7 +522,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::DirectNhwc"; }
+            virtual String Ext() const { return "Avx2"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -523,7 +531,7 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Desc() const { return "Avx2::NhwcDirect"; }
+            virtual String Ext() const { return "Avx2"; }
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
@@ -539,7 +547,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::GemmNN"; }
+            virtual String Ext() const { return "Avx512f"; }
         protected:
             virtual void ImgToCol(const float * src, float * dst);
         private:
@@ -551,7 +559,7 @@ namespace Simd
         {
         public:
             ConvolutionGemmNT(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::GemmNT"; }
+            virtual String Ext() const { return "Avx512f"; }
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
@@ -560,14 +568,14 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
+            virtual String Ext() const { return "Avx512f"; }
         };
 
         class ConvolutionDirectNchw : public Avx2::ConvolutionDirectNchw
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::DirectNchw"; }
+            virtual String Ext() const { return "Avx512f"; }
 
             static bool Preferable(const ConvParam & p);
 
@@ -579,7 +587,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::DirectNhwc"; }
+            virtual String Ext() const { return "Avx512f"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
@@ -588,7 +596,7 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Desc() const { return "Avx512f::NhwcDirect"; }
+            virtual String Ext() const { return "Avx512f"; }
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
@@ -604,14 +612,14 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Desc() const { return "Neon::GemmNN"; }
+            virtual String Ext() const { return "Neon"; }
         };
 
         class ConvolutionGemmNT : public Base::ConvolutionGemmNT
         {
         public:
             ConvolutionGemmNT(const ConvParam & p);
-            virtual String Desc() const { return "Neon::GemmNT"; }
+            virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam & p);
         protected:
@@ -622,7 +630,7 @@ namespace Simd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Desc() const { return "Neon::Winograd" + ToStr(_block) + "x3"; }
+            virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam & p);
         };
@@ -631,7 +639,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Desc() const { return "Neon::DirectNchw"; }
+            virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam & p);
 
@@ -643,7 +651,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Desc() const { return "Neon::DirectNhwc"; }
+            virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam & p);
         protected:
@@ -654,7 +662,7 @@ namespace Simd
         {
         public:
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
-            virtual String Desc() const { return "Neon::DepthwiseDotProduct"; }
+            virtual String Ext() const { return "Neon"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -662,7 +670,7 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Desc() const { return "Neon::NhwcDirect"; }
+            virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam & p);
         };

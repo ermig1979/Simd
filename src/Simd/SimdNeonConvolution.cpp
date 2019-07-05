@@ -275,7 +275,7 @@ namespace Simd
             _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
             if (_param.trans && _param.group == 1)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*(_merge ? _batch : 1), _N, _K);
+                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
                 _nhwcWeight.Resize(nhwcGemm.BufferSize());
                 _nhwcRun = Neon::NhwcRun;
                 _nhwcReorderB = Neon::NhwcReorderB;
