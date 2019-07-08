@@ -356,9 +356,16 @@ namespace Test
     TEST_ADD_GROUP_A00(Winograd2x3SetFilter);
     TEST_ADD_GROUP_A00(Winograd2x3SetInput);
     TEST_ADD_GROUP_A00(Winograd2x3SetOutput);
+    TEST_ADD_GROUP_A00(Winograd3x3SetFilter);
+    TEST_ADD_GROUP_A00(Winograd3x3SetInput);
+    TEST_ADD_GROUP_A00(Winograd3x3SetOutput);
     TEST_ADD_GROUP_A00(Winograd4x3SetFilter);
     TEST_ADD_GROUP_A00(Winograd4x3SetInput);
     TEST_ADD_GROUP_A00(Winograd4x3SetOutput);
+
+    TEST_ADD_GROUP_00S(Winograd2x3);
+    TEST_ADD_GROUP_00S(Winograd3x3);
+    TEST_ADD_GROUP_00S(Winograd4x3);
 
     TEST_ADD_GROUP_AD0(Yuv444pToBgr);
     TEST_ADD_GROUP_AD0(Yuv422pToBgr);

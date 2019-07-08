@@ -119,6 +119,35 @@ namespace Test
         return result;
     }
 
+    bool Winograd3x3SetFilterAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Base::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Sse::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Avx::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Avx512f::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+//#endif
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Neon::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+//#endif 
+
+        return result;
+    }
+
     bool Winograd4x3SetFilterAutoTest()
     {
         bool result = true;
@@ -252,6 +281,35 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && WinogradSetInputAutoTest(2, 3, FUNC_WI(Simd::Neon::Winograd2x3SetInput), FUNC_WI(SimdWinograd2x3SetInput));
 #endif
+
+        return result;
+    }
+
+    bool Winograd3x3SetInputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Base::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Sse::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Avx::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Avx512f::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Neon::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+//#endif
 
         return result;
     }
@@ -391,6 +449,35 @@ namespace Test
         return result;
     }
 
+    bool Winograd3x3SetOutputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Base::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Sse::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Avx::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Avx512f::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Neon::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+//#endif
+
+        return result;
+    }
+
     bool Winograd4x3SetOutputAutoTest()
     {
         bool result = true;
@@ -418,5 +505,202 @@ namespace Test
 #endif 
 
         return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    void ImgToCol(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t core, SimdBool pad, float * dst)
+    {
+        size_t padY = pad ? (core - 1) / 2 : 0;
+        size_t padX = pad ? (core - 1) / 2 : 0;
+        size_t dstH = srcH - (pad ? 0 : core - 1);
+        size_t dstW = srcW - (pad ? 0 : core - 1);
+        const ptrdiff_t bodySize = dstW - 2*padX;
+        for (size_t c = 0; c < srcC; ++c)
+        {
+            for (size_t ky = 0; ky < core; ++ky)
+            {
+                for (size_t kx = 0; kx < core; ++kx)
+                {
+                    size_t sy = ky - padY;
+                    for (size_t dy = 0; dy < dstH; ++dy, ++sy)
+                    {
+                        if (sy < srcH)
+                        {
+                            size_t sx = kx - padX, dx = 0;
+                            const float * psrc = src + sy * srcW;
+                            for (; dx < padX; ++dx, ++sx)
+                            {
+                                if (sx < srcW)
+                                    *(dst++) = psrc[sx];
+                                else
+                                    *(dst++) = 0;
+                            }
+                            if (bodySize > 0)
+                            {
+                                memcpy(dst, psrc + sx, bodySize * sizeof(float));
+                                dst += bodySize;
+                                dx += bodySize;
+                                sx += bodySize;
+                            }
+                            for (; dx < dstW; ++dx, ++sx)
+                            {
+                                if (sx < srcW)
+                                    *(dst++) = psrc[sx];
+                                else
+                                    *(dst++) = 0;
+                            }
+                        }
+                        else
+                        {
+                            memset(dst, 0, dstW * sizeof(float));
+                            dst += dstW;
+                        }
+                    }
+                }
+            }
+            src += srcW * srcH;
+        }
+    }
+
+    void ImgToRow(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t core, SimdBool pad, float * dst)
+    {
+        size_t padY = pad ? (core - 1) / 2 : 0;
+        size_t padX = pad ? (core - 1) / 2 : 0;
+        size_t dstH = srcH - (pad ? 0 : core - 1);
+        size_t dstW = srcW - (pad ? 0 : core - 1);
+        for (size_t dy = 0; dy < dstH; ++dy)
+        {
+            for (size_t dx = 0; dx < dstW; ++dx)
+            {
+                for (size_t ky = 0; ky < core; ky++)
+                {
+                    size_t sy = dy + ky - padY;
+                    if (sy < srcH)
+                    {
+                        for (size_t kx = 0; kx < core; kx++)
+                        {
+                            size_t sx = dx + kx - padX;
+                            if (sx < srcW)
+                            {
+                                memcpy(dst, src + (sy * srcW + sx)*srcC, srcC * sizeof(float));
+                                dst += srcC;
+                            }
+                            else
+                            {
+                                memset(dst, 0, srcC * sizeof(float));
+                                dst += srcC;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        memset(dst, 0, core * srcC * sizeof(float));
+                        dst += core * srcC;
+                    }
+                }
+            }
+        }
+    }
+
+    bool WinogradSpecialTest(float eps, size_t srcC, size_t srcH, size_t srcW, size_t dstC, size_t block, size_t core, SimdBool pad, SimdBool trans, FuncWF ff, FuncWI fi, FuncWO fo)
+    {
+        bool result = true;
+
+        size_t dstW = pad ? srcW : srcW - core + 1;
+        size_t dstH = pad ? srcH : srcH - core + 1;
+        size_t count = Simd::Square(block + core - 1);
+        size_t tileH = (dstH + block - 1) / block;
+        size_t tileW = (dstW + block - 1) / block;
+
+        ff.Update(trans);
+        fi.Update(srcC, srcH, srcW, pad, trans);
+        fo.Update(dstC, dstH, dstW, trans);
+
+        TEST_LOG_SS(Info, "Test " << ff.description << ", " << fi.description << ", " << fo.description << "].");
+
+        Tensor32f src({ trans ? srcH : srcC, trans ? srcW : srcH, trans ? srcC : srcW });
+        FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
+        Tensor32f filter({ trans ? core : dstC, trans ? core : srcC, trans ? srcC : core, trans ? dstC : core });
+        FillRandom(filter.Data(), filter.Size(), -1.0, 1.0f);
+
+        Tensor32f gemmInput({ trans ? dstH : srcC, trans ? dstW : core * core, trans ? core * core : dstH, trans ? srcC : dstW });
+        Tensor32f gemmDst({ trans ? dstH : dstC, trans ? dstW : dstH, trans ? dstC : dstW });
+        Tensor32f winogradFilter({ count,  trans ? srcC : dstC, trans ? dstC : srcC });
+        Tensor32f winogradInput({ count, trans ? tileH : srcC, trans ? tileW : tileH, trans ? srcC : tileW });
+        Tensor32f winogradOutput({ count, trans ? tileH : dstC, trans ? tileW : tileH, trans ? dstC : tileW });
+        Tensor32f winogradDst({ trans ? dstH : dstC, trans ? dstW : dstH, trans ? dstC : dstW });
+
+        float _0 = 0, _1 = 1;
+        if (trans)
+        {
+            ImgToRow(src.Data(), srcC, srcH, srcW, core, pad, gemmInput.Data());
+            size_t M = dstH * dstW, N = dstC, K = srcC * core * core;
+            SimdGemm32fNN(M, N, K, &_1, gemmInput.Data(), K, filter.Data(), N, &_0, gemmDst.Data(), N);
+        }
+        else
+        {
+            ImgToCol(src.Data(), srcC, srcH, srcW, core, pad, gemmInput.Data());
+            size_t M = dstC, N = dstH * dstW, K = srcC * core * core;
+            SimdGemm32fNN(M, N, K, &_1, filter.Data(), K, gemmInput.Data(), N, &_0, gemmDst.Data(), N);
+        }
+
+        ff.func(filter.Data(), srcC*dstC, winogradFilter.Data(), trans);
+        fi.func(src.Data(), srcC, srcH, srcW, winogradInput.Data(), winogradInput.Size(1), pad, trans);
+        if (trans)
+        {
+            size_t M = tileW * tileH, N = dstC, K = srcC;
+            for (size_t i = 0; i < count; ++i)
+                SimdGemm32fNN(M, N, K, &_1, winogradInput.Data() + i * M * K, K, winogradFilter.Data() + i * K * N, N, &_0, winogradOutput.Data() + i * M * N, N);
+        }
+        else
+        {
+            size_t M = dstC, N = tileW * tileH, K = srcC;
+            for (size_t i = 0; i < count; ++i)
+                SimdGemm32fNN(M, N, K, &_1, winogradFilter.Data() + i * M * K, K, winogradInput.Data() + i * K * N, N, &_0, winogradOutput.Data() + i * M * N, N);
+        }
+        fo.func(winogradOutput.Data(), dstC * tileH * tileW, winogradDst.Data(), dstC, dstH, dstW, trans);
+
+        result = result && Compare(gemmDst, winogradDst, eps, true, 64, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool WinogradSpecialTest(size_t block, size_t core, SimdBool pad, SimdBool trans, const FuncWF & ff, const FuncWI & fi, const FuncWO & fo)
+    {
+        bool result = true;
+
+        result = result && WinogradSpecialTest(EPS*1, 72, 112, 96, 64, block, core, pad, trans, ff, fi, fo);
+        result = result && WinogradSpecialTest(EPS*1, 144, 56, 48, 128, block, core, pad, trans, ff, fi, fo);
+        result = result && WinogradSpecialTest(EPS*2, 288, 28, 24, 256, block, core, pad, trans, ff, fi, fo);
+
+        return result;
+    }
+
+    bool WinogradSpecialTest(size_t block, size_t core, const FuncWF & ff, const FuncWI & fi, const FuncWO & fo)
+    {
+        bool result = true;
+
+        result = result && WinogradSpecialTest(block, core, ::SimdFalse, ::SimdFalse, ff, fi, fo);
+        result = result && WinogradSpecialTest(block, core, ::SimdFalse, ::SimdTrue, ff, fi, fo);
+        result = result && WinogradSpecialTest(block, core, ::SimdTrue, ::SimdFalse, ff, fi, fo);
+        result = result && WinogradSpecialTest(block, core, ::SimdTrue, ::SimdTrue, ff, fi, fo);
+
+        return result;
+    }
+
+    bool Winograd2x3SpecialTest()
+    {
+        return WinogradSpecialTest(2, 3, FUNC_WF(SimdWinograd2x3SetFilter), FUNC_WI(SimdWinograd2x3SetInput), FUNC_WO(SimdWinograd2x3SetOutput));
+    }
+
+    bool Winograd3x3SpecialTest()
+    {
+        return WinogradSpecialTest(3, 3, FUNC_WF(SimdWinograd3x3SetFilter), FUNC_WI(SimdWinograd3x3SetInput), FUNC_WO(SimdWinograd3x3SetOutput));
+    }
+
+    bool Winograd4x3SpecialTest()
+    {
+        return WinogradSpecialTest(4, 3, FUNC_WF(SimdWinograd4x3SetFilter), FUNC_WI(SimdWinograd4x3SetInput), FUNC_WO(SimdWinograd4x3SetOutput));
     }
 }
