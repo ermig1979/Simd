@@ -125,11 +125,11 @@ namespace Test
 
         result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Base::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Sse::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
-//#endif 
-//
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Sse::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+#endif 
+
 //#ifdef SIMD_AVX_ENABLE
 //        if (Simd::Avx::Enable)
 //            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Avx::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
