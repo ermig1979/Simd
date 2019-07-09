@@ -457,11 +457,11 @@ namespace Test
 
         result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Base::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Sse::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
-//#endif 
-//
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Sse::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+#endif 
+
 //#ifdef SIMD_AVX_ENABLE
 //        if (Simd::Avx::Enable)
 //            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Avx::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
