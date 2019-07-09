@@ -250,6 +250,8 @@ namespace Test
     {
         bool result = true;
 
+        result = result && WinogradSetInputAutoTest(block, core, 0, 0, f1, f2);
+        result = result && WinogradSetInputAutoTest(block, core, 0, 1, f1, f2);
         result = result && WinogradSetInputAutoTest(block, core, 1, 0, f1, f2);
         result = result && WinogradSetInputAutoTest(block, core, 1, 1, f1, f2);
 
@@ -291,11 +293,11 @@ namespace Test
 
         result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Base::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Sse::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
-//#endif 
-//
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Sse::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+#endif 
+
 //#ifdef SIMD_AVX_ENABLE
 //        if (Simd::Avx::Enable)
 //            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Avx::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
