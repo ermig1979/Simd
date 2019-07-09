@@ -583,6 +583,7 @@ namespace Simd
                 }
             }
         }
+
         SIMD_INLINE void Winograd3x3SetFilter4Row(const __m128 * t, float * dst, size_t stride)
         {
             const __m128 r6 = _mm_set1_ps(1.0f / 6.0f);
