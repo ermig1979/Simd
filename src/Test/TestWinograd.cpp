@@ -140,10 +140,10 @@ namespace Test
             result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Avx512f::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
 #endif
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Neon::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
-//#endif 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Neon::Winograd3x3SetFilter), FUNC_WF(SimdWinograd3x3SetFilter));
+#endif 
 
         return result;
     }
@@ -308,10 +308,10 @@ namespace Test
             result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Avx512f::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Neon::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetInputAutoTest(3, 3, FUNC_WI(Simd::Neon::Winograd3x3SetInput), FUNC_WI(SimdWinograd3x3SetInput));
+#endif
 
         return result;
     }
@@ -472,10 +472,10 @@ namespace Test
             result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Avx512f::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Neon::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Neon::Winograd3x3SetOutput), FUNC_WO(SimdWinograd3x3SetOutput));
+#endif
 
         return result;
     }
