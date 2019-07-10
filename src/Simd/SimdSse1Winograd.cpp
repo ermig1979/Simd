@@ -737,7 +737,7 @@ namespace Simd
             _mm_storeu_ps(dst + 24 * stride, _mm_add_ps(_mm_mul_ps(_2, _mm_sub_ps(tmp[1], tmp[3])), _mm_sub_ps(tmp[4], tmp[2])));
         }
 
-        SIMD_INLINE void Winograd3x3SetInput4t(const float * src, size_t srcS, size_t srcC, __m128 dst[36])
+        SIMD_INLINE void Winograd3x3SetInput4t(const float * src, size_t srcS, size_t srcC, __m128 dst[25])
         {
             dst[0] = _mm_loadu_ps(src + 0 * srcS + 0 * srcC);
             dst[1] = _mm_loadu_ps(src + 0 * srcS + 1 * srcC);
