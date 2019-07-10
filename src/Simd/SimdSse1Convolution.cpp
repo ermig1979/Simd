@@ -293,6 +293,11 @@ namespace Simd
                 _setInput = Sse::Winograd2x3SetInput;
                 _setOutput = Sse::Winograd2x3SetOutput;
                 break;
+            case 3:
+                _setFilter = Sse::Winograd3x3SetFilter;
+                _setInput = Sse::Winograd3x3SetInput;
+                _setOutput = Sse::Winograd3x3SetOutput;
+                break;
             case 4:
                 _setFilter = Sse::Winograd4x3SetFilter;
                 _setInput = Sse::Winograd4x3SetInput;

@@ -561,6 +561,11 @@ namespace Simd
                 _setInput = Avx512f::Winograd2x3SetInput;
                 _setOutput = Avx512f::Winograd2x3SetOutput;
                 break;
+            case 3:
+                _setFilter = Avx512f::Winograd3x3SetFilter;
+                _setInput = Avx512f::Winograd3x3SetInput;
+                _setOutput = Avx512f::Winograd3x3SetOutput;
+                break;
             case 4:
                 _setFilter = Avx512f::Winograd4x3SetFilter;
                 _setInput = Avx512f::Winograd4x3SetInput;

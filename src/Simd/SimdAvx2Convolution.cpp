@@ -213,6 +213,8 @@ namespace Simd
         {
             if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH*p.srcW*p.batch >= 256)
                 SetBlock(4);
+            else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH*p.srcW*p.batch >= 144 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
+                SetBlock(3);
             else
                 SetBlock(2);
             switch (_block)
@@ -221,6 +223,11 @@ namespace Simd
                 _setFilter = Avx::Winograd2x3SetFilter;
                 _setInput = Avx::Winograd2x3SetInput;
                 _setOutput = Avx::Winograd2x3SetOutput;
+                break;
+            case 3:
+                _setFilter = Avx::Winograd3x3SetFilter;
+                _setInput = Avx::Winograd3x3SetInput;
+                _setOutput = Avx::Winograd3x3SetOutput;
                 break;
             case 4:
                 _setFilter = Avx::Winograd4x3SetFilter;
