@@ -200,7 +200,7 @@ namespace Test
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
         const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationPrelu, a2 = ::SimdConvolutionActivationPrelu;
 #ifdef NDEBUG
-#if 1
+#if 0
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 16, 192, 192, 1, 1, a0, 96, 3, 2, a1, 24, a2, f), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
@@ -218,9 +218,12 @@ namespace Test
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 17, 192, 192, 1, 1, a0, 99, 3, 2, a1, 27, a2, f), f1, f2);
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 27, 96, 96, 1, 1, a0, 147, 3, 1, a1, 27, a2, f), f1, f2);
 #endif
+#if 1
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
+#endif
 #else
-        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 12, 12, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
+        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
 #endif
         return result;
     }

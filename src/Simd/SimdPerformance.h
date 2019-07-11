@@ -61,19 +61,21 @@ namespace Simd
         class PerformanceMeasurer
         {
             String	_name;
-            double _start, _total, _min, _max;
+            double _start, _current, _total, _min, _max;
             long long _count, _flop;
-            bool _entered;
+            bool _entered, _paused;
 
         public:
             SIMD_INLINE PerformanceMeasurer(const String & name = "Unknown", long long flop = 0)
                 : _name(name)
                 , _flop(flop)
                 , _count(0)
+                , _current(0)
                 , _total(0)
                 , _min(std::numeric_limits<double>::max())
                 , _max(std::numeric_limits<double>::min())
                 , _entered(false)
+                , _paused(false)
             {
             }
 
@@ -81,10 +83,13 @@ namespace Simd
                 : _name(pm._name)
                 , _flop(pm._flop)
                 , _count(pm._count)
+                , _start(pm._start)
+                , _current(pm._current)
                 , _total(pm._total)
                 , _min(pm._min)
                 , _max(pm._max)
                 , _entered(pm._entered)
+                , _paused(pm._paused)
             {
             }
 
@@ -93,20 +98,29 @@ namespace Simd
                 if (!_entered)
                 {
                     _entered = true;
+                    _paused = false;
                     _start = Time();
                 }
             }
 
-            SIMD_INLINE void Leave()
+            SIMD_INLINE void Leave(bool pause = false)
             {
-                if (_entered)
+                if (_entered || _paused)
                 {
-                    _entered = false;
-                    double difference = Time() - _start;
-                    _total += difference;
-                    _min = std::min(_min, difference);
-                    _max = std::max(_max, difference);
-                    ++_count;
+                    if (_entered)
+                    {
+                        _entered = false;
+                        _current += Time() - _start;
+                    }
+                    if (!pause)
+                    {
+                        _total += _current;
+                        _min = std::min(_min, _current);
+                        _max = std::max(_max, _current);
+                        ++_count;
+                        _current = 0;
+                    } 
+                    _paused = pause;
                 }
             }
 
@@ -147,11 +161,23 @@ namespace Simd
             PerformanceMeasurer * _pm;
 
         public:
-            SIMD_INLINE PerformanceMeasurerHolder(PerformanceMeasurer * pm)
+            SIMD_INLINE PerformanceMeasurerHolder(PerformanceMeasurer * pm, bool enter = true)
                 : _pm(pm)
+            {
+                if (_pm && enter)
+                    _pm->Enter();
+            }
+
+            SIMD_INLINE void Enter()
             {
                 if (_pm)
                     _pm->Enter();
+            }
+
+            SIMD_INLINE void Leave(bool pause)
+            {
+                if (_pm)
+                    _pm->Leave(pause);
             }
 
             SIMD_INLINE ~PerformanceMeasurerHolder()
@@ -174,8 +200,13 @@ namespace Simd
 
             SIMD_INLINE FunctionMap & ThisThread()
             {
-                std::lock_guard<std::recursive_mutex> lock(_mutex);
-                return _map[std::this_thread::get_id()];
+                static thread_local FunctionMap * thread = NULL;
+                if (thread == NULL)
+                {
+                    std::lock_guard<std::recursive_mutex> lock(_mutex);
+                    thread = &_map[std::this_thread::get_id()];
+                }
+                return *thread;
             }
 
         public:
@@ -238,10 +269,10 @@ namespace Simd
 #define SIMD_PERF_IFF(cond, desc, flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((cond) ? Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop)) : NULL)
 #define SIMD_PERF_IF(cond, desc) SIMD_PERF_IFF(cond, desc, 0)
 #define SIMD_PERF_END(desc) Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc)->Leave();
-#define SIMD_PERF_INITF(name, desc, flop) Simd::Base::PerformanceMeasurer * name = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop));
+#define SIMD_PERF_INITF(name, desc, flop) Simd::Base::PerformanceMeasurerHolder name(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop)), false);
 #define SIMD_PERF_INIT(name, desc)  SIMD_PERF_INITF(name, desc, 0);
-#define SIMD_PERF_ENTER(name) if(name) name->Enter(); 
-#define SIMD_PERF_LEAVE(name) if(name) name->Leave(); 
+#define SIMD_PERF_START(name) name.Enter(); 
+#define SIMD_PERF_PAUSE(name) name.Leave(true); 
 #else//SIMD_PERFORMANCE_STATISTIC
 #define SIMD_PERF_FUNCF(flop)
 #define SIMD_PERF_FUNC()
@@ -252,8 +283,8 @@ namespace Simd
 #define SIMD_PERF_END(desc)
 #define SIMD_PERF_INITF(name, desc, flop)
 #define SIMD_PERF_INIT(name, desc)
-#define SIMD_PERF_ENTER(name)
-#define SIMD_PERF_LEAVE(name)
+#define SIMD_PERF_START(name)
+#define SIMD_PERF_PAUSE(name)
 #endif//SIMD_PERFORMANCE_STATISTIC 
 
 #endif//__SimdPerformance_h__

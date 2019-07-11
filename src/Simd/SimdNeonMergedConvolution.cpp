@@ -83,6 +83,77 @@ namespace Simd
             Store<false>(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x4(const float * src0, size_t srcC,
+            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1)
+        {
+            float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, s0, w0, w1;
+            d00 = bias[0], d01 = bias[1];
+            d10 = bias[0], d11 = bias[1];
+            d20 = bias[0], d21 = bias[1];
+            d30 = bias[0], d31 = bias[1];
+            const float * src1 = src0 + 1 * srcC;
+            const float * src2 = src0 + 2 * srcC;
+            const float * src3 = src0 + 3 * srcC;
+            for (size_t sc = 0; sc < srcC; ++sc)
+            {
+                w0 = Load<false>(weight + 0);
+                w1 = Load<false>(weight + F);
+                s0 = vdupq_n_f32(src0[sc]);
+                d00 = vmlaq_f32(d00, s0, w0);
+                d01 = vmlaq_f32(d01, s0, w1);
+                s0 = vdupq_n_f32(src1[sc]);
+                d10 = vmlaq_f32(d10, s0, w0);
+                d11 = vmlaq_f32(d11, s0, w1);
+                s0 = vdupq_n_f32(src2[sc]);
+                d20 = vmlaq_f32(d20, s0, w0);
+                d21 = vmlaq_f32(d21, s0, w1);
+                s0 = vdupq_n_f32(src3[sc]);
+                d30 = vmlaq_f32(d30, s0, w0);
+                d31 = vmlaq_f32(d31, s0, w1);
+                weight += DF;
+            }
+            Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            Store<false>(dst1 + 0 * F, Activate<type>(d01, params, 1));
+            Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            Store<false>(dst1 + 1 * F, Activate<type>(d11, params, 1));
+            Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            Store<false>(dst1 + 2 * F, Activate<type>(d21, params, 1));
+            Store<false>(dst0 + 3 * F, Activate<type>(d30, params, 0));
+            Store<false>(dst1 + 3 * F, Activate<type>(d31, params, 1));
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x3(const float * src0, size_t srcC,
+            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1)
+        {
+            float32x4_t d00, d01, d10, d11, d20, d21, s0, w0, w1;
+            d00 = bias[0], d01 = bias[1];
+            d10 = bias[0], d11 = bias[1];
+            d20 = bias[0], d21 = bias[1];
+            const float * src1 = src0 + 1 * srcC;
+            const float * src2 = src0 + 2 * srcC;
+            for (size_t sc = 0; sc < srcC; ++sc)
+            {
+                w0 = Load<false>(weight + 0);
+                w1 = Load<false>(weight + F);
+                s0 = vdupq_n_f32(src0[sc]);
+                d00 = vmlaq_f32(d00, s0, w0);
+                d01 = vmlaq_f32(d01, s0, w1);
+                s0 = vdupq_n_f32(src1[sc]);
+                d10 = vmlaq_f32(d10, s0, w0);
+                d11 = vmlaq_f32(d11, s0, w1);
+                s0 = vdupq_n_f32(src2[sc]);
+                d20 = vmlaq_f32(d20, s0, w0);
+                d21 = vmlaq_f32(d21, s0, w1);
+                weight += DF;
+            }
+            Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            Store<false>(dst1 + 0 * F, Activate<type>(d01, params, 1));
+            Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            Store<false>(dst1 + 1 * F, Activate<type>(d11, params, 1));
+            Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            Store<false>(dst1 + 2 * F, Activate<type>(d21, params, 1));
+        }
+
         template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x1(const float * src0, size_t srcC,
             const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1)
         {
@@ -142,6 +213,31 @@ namespace Simd
             Store<false>(dst0 + 5 * F, Activate<type>(d50, params, 0));
         }
 
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x3(const float * src0, size_t srcC,
+            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0)
+        {
+            float32x4_t d00, d10, d20, s0, w0;
+            d00 = bias[0];
+            d10 = bias[0];
+            d20 = bias[0];
+            const float * src1 = src0 + 1 * srcC;
+            const float * src2 = src0 + 2 * srcC;
+            for (size_t sc = 0; sc < srcC; ++sc)
+            {
+                w0 = Load<false>(weight + 0);
+                s0 = vdupq_n_f32(src0[sc]);
+                d00 = vmlaq_f32(d00, s0, w0);
+                s0 = vdupq_n_f32(src1[sc]);
+                d10 = vmlaq_f32(d10, s0, w0);
+                s0 = vdupq_n_f32(src2[sc]);
+                d20 = vmlaq_f32(d20, s0, w0);
+                weight += DF;
+            }
+            Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
+        }
+
         template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x1(const float * src0, size_t srcC,
             const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0)
         {
@@ -162,7 +258,7 @@ namespace Simd
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
             size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW *F;
-            size_t dstCDF = AlignLo(dstC, DF), dstW6 = AlignLoAny(dstW, 6);
+            size_t dstCDF = AlignLo(dstC, DF), dstW3 = AlignLoAny(dstW, 3), dstW6 = AlignLoAny(dstW, 6);
             float32x4_t _params[2], _bias[2];
             _params[0] = vdupq_n_f32(params[0]);
             if (type == ::SimdConvolutionActivationRestrictRange)
@@ -189,13 +285,22 @@ namespace Simd
                     {
                         for (; dx < dstW6; dx += 6, pS += 6 * srcC, dst0 += 6 * F)
                             InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
-                        for (; dx < dstW; dx += 1, pS += srcC, dst0 += F)
-                            InputConvolution1x1_2x1<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
+                        if (dstW - dstW6 == 4)
+                            InputConvolution1x1_2x4<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += 4 * srcC;
+                        else
+                        {
+                            for (; dx < dstW3; dx += 3, pS += 3 * srcC, dst0 += 3 * F)
+                                InputConvolution1x1_2x3<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
+                            for (; dx < dstW; dx += 1, pS += srcC, dst0 += F)
+                                InputConvolution1x1_2x1<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
+                        }
                     }
                     else
                     {
                         for (; dx < dstW6; dx += 6, pS += 6 * srcC, dst0 += 6 * F)
                             InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst0);
+                        for (; dx < dstW3; dx += 3, pS += 3 * srcC, dst0 += 3 * F)
+                            InputConvolution1x1_1x3<type>(pS, srcC, pW, _bias, _params, dst0);
                         for (; dx < dstW; dx += 1, pS += srcC, dst0 += F)
                             InputConvolution1x1_1x1<type>(pS, srcC, pW, _bias, _params, dst0);
                     }
@@ -753,6 +858,114 @@ namespace Simd
             }
         }
 
+        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x4(const float * src, size_t srcC, size_t srcS,
+            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst, size_t dstC, size_t tail)
+        {
+            float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, s0, w0, w1;
+            if (tail > F)
+            {
+                d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = Load<false>(weight + 0);
+                        w1 = Load<false>(weight + F);
+                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        d00 = vmlaq_f32(d00, s0, w0);
+                        d01 = vmlaq_f32(d01, s0, w1);
+                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        d10 = vmlaq_f32(d10, s0, w0);
+                        d11 = vmlaq_f32(d11, s0, w1);
+                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        d20 = vmlaq_f32(d20, s0, w0);
+                        d21 = vmlaq_f32(d21, s0, w1);
+                        s0 = vdupq_n_f32(src[i + 3 * F]);
+                        d30 = vmlaq_f32(d30, s0, w0);
+                        d31 = vmlaq_f32(d31, s0, w1);
+                    }
+                    src += srcS;
+                }
+                if (tail == DF)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params);
+                }
+                else
+                {
+                    tail -= F;
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tail);
+                }
+            }
+            else
+            {
+                d00 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f);
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = Load<false>(weight + 0);
+                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        d00 = vmlaq_f32(d00, s0, w0);
+                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        d10 = vmlaq_f32(d10, s0, w0);
+                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        d20 = vmlaq_f32(d20, s0, w0);
+                        s0 = vdupq_n_f32(src[i + 3 * F]);
+                        d30 = vmlaq_f32(d30, s0, w0);
+                    }
+                    src += srcS;
+                }
+                if (tail == F)
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                }
+                else
+                {
+                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tail);
+                    dst += dstC;
+                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tail);
+                }
+            }
+        }
+
         template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x3(const float * src, size_t srcC, size_t srcS,
             const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst, size_t dstC, size_t tail)
         {
@@ -927,10 +1140,15 @@ namespace Simd
                     size_t x = 0;
                     for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
                         OutputConvolution_2x6<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                    for (; x < dstW3; x += 3, pDst += 3 * dstC, pSrc += 3 * F)
-                        OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                    for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-                        OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                    if (dstW - dstW6 == 4)
+                        OutputConvolution_2x4<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail), pDst += 4 * dstC;
+                    else
+                    {
+                        for (; x < dstW3; x += 3, pDst += 3 * dstC, pSrc += 3 * F)
+                            OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
+                            OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                    }
                 }
                 weight += srcC * DF;
             }
