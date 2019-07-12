@@ -228,9 +228,9 @@ namespace Simd
                         tmp = buf;
                     }
                     if (_nhwcWeight.data)
-                        _nhwcRun(_M*_merge, _N, _K, src, _nhwcWeight.data, dst);
+                        _nhwcRun(_M*_merge, _N, _K, tmp, _nhwcWeight.data, dst);
                     else
-                        _gemm.Run(_M*_merge, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
+                        _gemm.Run(_M*_merge, _N, _K, &_1, tmp, _ldS, _weight, _ldW, &_0, dst, _ldD);
                     for (size_t m = 0; m < _merge; ++m)
                         _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
                     src += _sizeS * _merge;
