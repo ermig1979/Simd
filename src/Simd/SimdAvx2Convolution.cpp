@@ -117,7 +117,7 @@ namespace Simd
                 }
                 _start[kx] = int(kx * p.dilationX - p.padX + _nose[kx] * p.strideX);
             }
-            _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
                 NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
@@ -237,7 +237,7 @@ namespace Simd
             default:
                 assert(0);
             }
-            _gemm.Init(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
             if (_param.trans)
             {
                 NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);

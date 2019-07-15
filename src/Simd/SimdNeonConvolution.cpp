@@ -272,7 +272,7 @@ namespace Simd
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Base::ConvolutionGemmNN(p)
         {
-            _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Neon::Gemm32fNN, "Neon", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
                 NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
@@ -334,7 +334,7 @@ namespace Simd
             default:
                 assert(0);
             }
-            _gemm.Init(Neon::Gemm32fNN, "Neon", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Neon::Gemm32fNN, "Neon", p.gemm, "Ext"));
             if (_param.trans)
             {
                 NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);

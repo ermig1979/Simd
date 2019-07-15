@@ -188,7 +188,7 @@ namespace Simd
                     if (_batch%merge == 0 && _M*merge <= 256)
                         _merge = merge;
             }
-            _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
@@ -230,7 +230,7 @@ namespace Simd
                     if (_nhwcWeight.data)
                         _nhwcRun(_M*_merge, _N, _K, tmp, _nhwcWeight.data, dst);
                     else
-                        _gemm.Run(_M*_merge, _N, _K, &_1, tmp, _ldS, _weight, _ldW, &_0, dst, _ldD);
+                        _gemm.Run(GemmArgs(_M*_merge, _N, _K, &_1, tmp, _ldS, _weight, _ldW, &_0, dst, _ldD));
                     for (size_t m = 0; m < _merge; ++m)
                         _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
                     src += _sizeS * _merge;
@@ -257,10 +257,10 @@ namespace Simd
                             if (_nhwcWeight.data)
                                 _nhwcRun(_M, _N, _K, tmp, _nhwcWeight.data, dst);
                             else
-                                _gemm.Run(_M, _N, _K, &_1, tmp + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD);
+                                _gemm.Run(GemmArgs(_M, _N, _K, &_1, tmp + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD));
                         }
                         else
-                            _gemm.Run(_M, _N, _K, &_1, _weight + _grW * g, _ldW, tmp + _grS * g, _ldS, &_0, dst + _grD * g, _ldD);
+                            _gemm.Run(GemmArgs(_M, _N, _K, &_1, _weight + _grW * g, _ldW, tmp + _grS * g, _ldS, &_0, dst + _grD * g, _ldD));
                     }
                     _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst);
                     src += _sizeS;
@@ -579,7 +579,7 @@ namespace Simd
             default:
                 assert(0);
             }
-            _gemm.Init(Base::Gemm32fNN, "Base", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
         
@@ -624,7 +624,7 @@ namespace Simd
                         if (_nhwcWeight.data)
                             _nhwcRun(_M * _merge, _N, _K, bufS + i * _strideS * _merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * _merge);
                         else
-                            _gemm.Run(_M * _merge, _N, _K, &_1, bufS + i * _strideS * _merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _merge, _N);
+                            _gemm.Run(GemmArgs(_M * _merge, _N, _K, &_1, bufS + i * _strideS * _merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _merge, _N));
                     }
                     for (size_t m = 0; m < _merge; ++m)
                     {
@@ -641,7 +641,7 @@ namespace Simd
                 {
                     _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _strideS, _pad, p.trans);
                     for (size_t i = 0; i < _count; ++i)
-                        _gemm.Run(_M, _N, _K, &_1, _winogradWeight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N);
+                        _gemm.Run(GemmArgs(_M, _N, _K, &_1, _winogradWeight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N));
                     _setOutput(bufD, _strideD, dst, p.dstC, p.dstH, p.dstW, p.trans);
                     _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst);
                     src += _sizeS;

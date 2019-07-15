@@ -30,56 +30,60 @@
 #include <limits>
 #include <algorithm>
 #include <string>
-#ifdef SIMD_RUNTIME_GEMM_STATISTIC
+#ifdef SIMD_RUNTIME_STATISTIC
+#include <sstream>
 #include <iostream>
 #include <iomanip>
 #endif
 
 namespace Simd
 {
-    struct RuntimeGemm
-    {
-        typedef SimdGemm32fNNPtr Func;
-        typedef std::string Name;
+    typedef ::std::string String;
 
-        RuntimeGemm()
+    template <class Func, class Args> struct Runtime
+    {
+        Runtime()
             : _best(NULL)
-            , _m(0)
-            , _n(0)
-            , _k(0)
         {
         }
 
-        ~RuntimeGemm()
+        ~Runtime()
         {
-#ifdef SIMD_RUNTIME_GEMM_STATISTIC
-            if (_m && _n && _k)
+#ifdef SIMD_RUNTIME_STATISTIC
+            if (!_info.empty())
             {
-                std::cout << std::setprecision(3) << std::fixed;
-                std::cout << "Simd::RuntimeGemm [" << _m << ", " << _n << ", " << _k << "]  ";
                 std::sort(_candidates.begin(), _candidates.end(), [](const Candidate & a, const Candidate & b) { return a.Mean() < b.Mean(); });
+                std::cout << std::setprecision(3) << std::fixed;
+                std::cout << "Simd::Runtime " << _info << " : ";
                 for (size_t i = 0; i < _candidates.size(); ++i)
-                    std::cout<< _candidates[i].name << ": " << _candidates[i].Mean()*1000.0 << "  ";
+                    std::cout << _candidates[i].func.Name() << ": " << _candidates[i].Mean()*1000.0 << "  ";
                 std::cout << std::endl;
             }
 #endif
         }
 
-        void Init(const Func & func1, const Name & name1, const Func & func2 = NULL, const Name & name2 = Name())
+        void Init(const Func & func)
         {
             _candidates.clear();
-            _candidates.push_back(Candidate(func1, name1));
-            if (func2)
-                _candidates.push_back(Candidate(func2, name2));
-            _best = _candidates.size() > 1 ? NULL : _candidates[0].func;
+            _candidates.push_back(Candidate(func));
+            _best = &_candidates[0].func;
         }
 
-        SIMD_INLINE void Run(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
+        void Init(const std::vector<Func> & funcs)
+        {
+            assert(funcs.size() >= 1);
+            _candidates.clear();
+            for (size_t i = 0; i < funcs.size(); ++i)
+                _candidates.push_back(Candidate(funcs[i]));
+            _best = funcs.size() == 1 ? &_candidates[0].func : NULL;
+        }
+
+        SIMD_INLINE void Run(const Args & args)
         {
             if (_best)
-                _best(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+                _best->Run(args);
             else
-                Test(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+                Test(args);
         }
 
     private:
@@ -88,16 +92,13 @@ namespace Simd
         struct Candidate
         {
             Func func;
-            Name name;
             size_t count;
-            double sum, sqsum, min, max;
+            double sum, min, max;
 
-            Candidate(const Func & f, const Name & n)
+            Candidate(const Func & f)
                 : func(f)
-                , name(n)
                 , count(0)
                 , sum(0)
-                , sqsum(0)
                 , min(std::numeric_limits<double>::max())
                 , max(std::numeric_limits<double>::min())
             {
@@ -107,7 +108,6 @@ namespace Simd
             {
                 count += 1;
                 sum += value;
-                sqsum += value * value;
                 min = std::min(min, value);
                 max = std::max(max, value);
             }
@@ -119,34 +119,29 @@ namespace Simd
         };
         typedef std::vector<Candidate> Candidates;
 
-        Func _best;
+        Func * _best;
         Candidates _candidates;
-        size_t _m, _n, _k;
+        String _info;
 
-        SIMD_INLINE void Test(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
+        SIMD_INLINE void Test(const Args & args)
         {
             assert(_candidates.size());
             Candidate * current = Current();
             if (current)
             {
-                Set(M, N, K);
+#ifdef SIMD_RUNTIME_STATISTIC
+                if (_info.empty())
+                    _info = args.Info();
+#endif
                 double start = Simd::Time();
-                current->func(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+                current->func.Run(args);
                 current->Update(Simd::Time() - start);
             }
             else
             {
-                _best = Best()->func;
-                _best(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+                _best = &Best()->func;
+                _best->Run(args);
             }
-        }
-
-        SIMD_INLINE void Set(size_t m, size_t n, size_t k)
-        {
-            assert((_m == 0 && _n == 0 && _k == 0) || (_m == m && _n == n && _k == k));
-            _m = m;
-            _n = n;
-            _k = k;
         }
 
         SIMD_INLINE Candidate * Current()
@@ -180,6 +175,60 @@ namespace Simd
             return best;
         }
     };
+
+    struct GemmArgs
+    {
+        size_t M, N, K, lda, ldb, ldc;
+        const float *alpha, *A, *B, *beta;
+        float *C;
+
+        GemmArgs(size_t M_, size_t N_, size_t K_, const float * alpha_, const float * A_, size_t lda_, const float * B_, size_t ldb_, const float * beta_, float * C_, size_t ldc_)
+            :M(M_), N(N_), K(K_), lda(lda_), ldb(ldb_), ldc(ldc_), alpha(alpha_), A(A_), B(B_), beta(beta_), C(C_) 
+        {}
+
+#ifdef SIMD_RUNTIME_STATISTIC
+        String Info() const
+        {
+            std::stringstream ss;
+            ss << "Gemm [" << M << ", " << N << ", " << K << "]";
+            return ss.str();
+        }
+#endif
+    };
+
+    struct GemmFunc
+    {
+        typedef SimdGemm32fNNPtr Func;
+
+        GemmFunc(const Func & func, const String & name)
+            : _func(func)
+            , _name(name)
+        {
+        }
+
+        String Name() const { return _name; }
+
+        void Run(const GemmArgs & args)
+        {
+            _func(args.M, args.N, args.K, args.alpha, args.A, args.lda, args.B, args.ldb, args.beta, args.C, args.ldc);
+        }
+
+    private:
+        Func _func;
+        String _name;
+    };
+    typedef std::vector<GemmFunc> GemmFuncs;
+
+    SIMD_INLINE GemmFuncs InitGemmFuncs(const GemmFunc::Func & func1, const String & name1, const GemmFunc::Func & func2 = NULL, const String & name2 = String())
+    {
+        GemmFuncs funcs;
+        funcs.push_back(GemmFunc(func1, name1));
+        if (func2)
+            funcs.push_back(GemmFunc(func2, name2));
+        return funcs;
+    }
+
+    typedef Runtime<GemmFunc, GemmArgs> RuntimeGemm;
 }
 
 #endif//__SimdRuntime_h__

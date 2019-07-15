@@ -449,7 +449,7 @@ namespace Simd
             }
             if (p.dstC == 8)
                 return;
-            _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
                 NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
@@ -574,7 +574,7 @@ namespace Simd
             default:
                 assert(0);
             }
-            _gemm.Init(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext");
+            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext"));
             if (_param.trans)
             {
                 NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
