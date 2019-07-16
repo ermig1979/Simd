@@ -35,6 +35,8 @@
 
 namespace Simd
 {
+    const bool NHWC_GEMM_COMPATIBLE = false;
+
     struct ConvParam : public SimdConvolutionParameters
     {
         SimdBool trans;
@@ -232,6 +234,7 @@ namespace Simd
             typedef void(*SetOutput)(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
             void SetBlock(size_t block);
+            void ForwardMerged(const float * src, float * bufS, float * bufD, float * dst, size_t merge);
 
             size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge;
             SimdBool _pad;
@@ -239,6 +242,34 @@ namespace Simd
             SetFilter _setFilter;
             SetInput _setInput;
             SetOutput _setOutput;
+#if 0
+            struct WinArgs
+            {
+                const float * src; float * bufS; float * bufD; float * dst;
+                SIMD_INLINE WinArgs(const float * src_, float * bufS_, float * bufD_, float * dst_)
+                    :src(src_), bufS(bufS_), bufD(bufD_), dst(dst_)
+                {}
+            };  
+            
+            struct WinFunc
+            {
+                SIMD_INLINE WinFunc(const ConvolutionWinograd * win, const String & name)
+                    : _win(win)
+                    , _name(name)
+                {
+                }
+
+                SIMD_INLINE String Name() const { return _name; }
+
+                SIMD_INLINE void Run(const WinArgs & args)
+                {
+                }
+
+            private:
+                const ConvolutionWinograd * _win;
+                String _name;
+            };
+#endif
         };
 
         class ConvolutionDirectNchw : public Convolution

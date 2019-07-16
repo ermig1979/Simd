@@ -71,7 +71,7 @@ namespace Simd
             kernelTM = Avx::GemmKernelMx8nn;
             kernelTT = Avx::GemmKernelMx8nn;
 #endif
-            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL);
+            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL, Simd::NHWC_GEMM_COMPATIBLE);
         }
 
         void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)

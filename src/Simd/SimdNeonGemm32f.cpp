@@ -48,7 +48,7 @@ namespace Simd
             }
         }
 
-        void GemmKernel4x12nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel4x12nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c00 = vdupq_n_f32(0);
             float32x4_t c10 = vdupq_n_f32(0);
@@ -63,33 +63,36 @@ namespace Simd
             float32x4_t c22 = vdupq_n_f32(0);
             float32x4_t c32 = vdupq_n_f32(0);
             float32x4_t b0, b1, b2, a0;
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
             const size_t sa = lda == 1 ? 4 : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
+            const size_t ob2 = ldb * 2;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B + 0 * F);
-                b1 = Load<false>(B + 1 * F);
-                b2 = Load<false>(B + 2 * F);
-                a0 = vdupq_n_f32(A[o0]);
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
+                b2 = Load<false>(B + ob2);
+                a0 = vdupq_n_f32(A[oa0]);
                 c00 = vmlaq_f32(c00, a0, b0);
                 c01 = vmlaq_f32(c01, a0, b1);
                 c02 = vmlaq_f32(c02, a0, b2);
-                a0 = vdupq_n_f32(A[o1]);
+                a0 = vdupq_n_f32(A[oa1]);
                 c10 = vmlaq_f32(c10, a0, b0);
                 c11 = vmlaq_f32(c11, a0, b1);
                 c12 = vmlaq_f32(c12, a0, b2);
-                a0 = vdupq_n_f32(A[o2]);
+                a0 = vdupq_n_f32(A[oa2]);
                 c20 = vmlaq_f32(c20, a0, b0);
                 c21 = vmlaq_f32(c21, a0, b1);
                 c22 = vmlaq_f32(c22, a0, b2);
-                a0 = vdupq_n_f32(A[o3]);
+                a0 = vdupq_n_f32(A[oa3]);
                 c30 = vmlaq_f32(c30, a0, b0);
                 c31 = vmlaq_f32(c31, a0, b1);
                 c32 = vmlaq_f32(c32, a0, b2);
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -110,7 +113,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32, tail);
         }
 
-        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c00 = vdupq_n_f32(0);
             float32x4_t c10 = vdupq_n_f32(0);
@@ -120,29 +123,31 @@ namespace Simd
             float32x4_t c11 = vdupq_n_f32(0);
             float32x4_t c21 = vdupq_n_f32(0);
             float32x4_t c31 = vdupq_n_f32(0);
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
             const size_t sa = lda == 1 ? 4 : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
             float32x4_t b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B + 0 * F);
-                b1 = Load<false>(B + 1 * F);
-                a0 = vdupq_n_f32(A[o0]);
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
+                a0 = vdupq_n_f32(A[oa0]);
                 c00 = vmlaq_f32(c00, a0, b0);
                 c01 = vmlaq_f32(c01, a0, b1);
-                a0 = vdupq_n_f32(A[o1]);
+                a0 = vdupq_n_f32(A[oa1]);
                 c10 = vmlaq_f32(c10, a0, b0);
                 c11 = vmlaq_f32(c11, a0, b1);
-                a0 = vdupq_n_f32(A[o2]);
+                a0 = vdupq_n_f32(A[oa2]);
                 c20 = vmlaq_f32(c20, a0, b0);
                 c21 = vmlaq_f32(c21, a0, b1);
-                a0 = vdupq_n_f32(A[o3]);
+                a0 = vdupq_n_f32(A[oa3]);
                 c30 = vmlaq_f32(c30, a0, b0);
                 c31 = vmlaq_f32(c31, a0, b1);
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -159,26 +164,27 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31, tail);
         }
 
-        void GemmKernel4x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel4x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c0 = vdupq_n_f32(0);
             float32x4_t c1 = vdupq_n_f32(0);
             float32x4_t c2 = vdupq_n_f32(0);
             float32x4_t c3 = vdupq_n_f32(0);
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
             const size_t sa = lda == 1 ? 4 : 1;
+            const size_t ob0 = ldb * 0;
             float32x4_t b0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B);
-                c0 = vmlaq_f32(c0, b0, vdupq_n_f32(A[o0]));
-                c1 = vmlaq_f32(c1, b0, vdupq_n_f32(A[o1]));
-                c2 = vmlaq_f32(c2, b0, vdupq_n_f32(A[o2]));
-                c3 = vmlaq_f32(c3, b0, vdupq_n_f32(A[o3]));
-                B += ldb;
+                b0 = Load<false>(B + ob0);
+                c0 = vmlaq_f32(c0, b0, vdupq_n_f32(A[oa0]));
+                c1 = vmlaq_f32(c1, b0, vdupq_n_f32(A[oa1]));
+                c2 = vmlaq_f32(c2, b0, vdupq_n_f32(A[oa2]));
+                c3 = vmlaq_f32(c3, b0, vdupq_n_f32(A[oa3]));
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -188,7 +194,7 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3, tail);
         }
 
-        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c00 = vdupq_n_f32(0);
             float32x4_t c10 = vdupq_n_f32(0);
@@ -202,37 +208,39 @@ namespace Simd
             float32x4_t c31 = vdupq_n_f32(0);
             float32x4_t c41 = vdupq_n_f32(0);
             float32x4_t c51 = vdupq_n_f32(0);
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
-            const size_t o4 = lda * 4;
-            const size_t o5 = lda * 5;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
+            const size_t oa4 = lda * 4;
+            const size_t oa5 = lda * 5;
             const size_t sa = lda == 1 ? 6 : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
             float32x4_t b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B + 0 * F);
-                b1 = Load<false>(B + 1 * F);
-                a0 = vdupq_n_f32(A[o0]);
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
+                a0 = vdupq_n_f32(A[oa0]);
                 c00 = vmlaq_f32(c00, a0, b0);
                 c01 = vmlaq_f32(c01, a0, b1);
-                a0 = vdupq_n_f32(A[o1]);
+                a0 = vdupq_n_f32(A[oa1]);
                 c10 = vmlaq_f32(c10, a0, b0);
                 c11 = vmlaq_f32(c11, a0, b1);
-                a0 = vdupq_n_f32(A[o2]);
+                a0 = vdupq_n_f32(A[oa2]);
                 c20 = vmlaq_f32(c20, a0, b0);
                 c21 = vmlaq_f32(c21, a0, b1);
-                a0 = vdupq_n_f32(A[o3]);
+                a0 = vdupq_n_f32(A[oa3]);
                 c30 = vmlaq_f32(c30, a0, b0);
                 c31 = vmlaq_f32(c31, a0, b1);
-                a0 = vdupq_n_f32(A[o4]);
+                a0 = vdupq_n_f32(A[oa4]);
                 c40 = vmlaq_f32(c40, a0, b0);
                 c41 = vmlaq_f32(c41, a0, b1);
-                a0 = vdupq_n_f32(A[o5]);
+                a0 = vdupq_n_f32(A[oa5]);
                 c50 = vmlaq_f32(c50, a0, b0);
                 c51 = vmlaq_f32(c51, a0, b1);
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -255,7 +263,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51, tail);
 }
 
-        void GemmKernel6x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel6x4nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c0 = vdupq_n_f32(0);
             float32x4_t c1 = vdupq_n_f32(0);
@@ -263,24 +271,25 @@ namespace Simd
             float32x4_t c3 = vdupq_n_f32(0);
             float32x4_t c4 = vdupq_n_f32(0);
             float32x4_t c5 = vdupq_n_f32(0);
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
-            const size_t o4 = lda * 4;
-            const size_t o5 = lda * 5;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
+            const size_t oa4 = lda * 4;
+            const size_t oa5 = lda * 5;
             const size_t sa = lda == 1 ? 6 : 1;
+            const size_t ob0 = ldb * 0;
             float32x4_t b0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B);
-                c0 = vmlaq_f32(c0, b0, vdupq_n_f32(A[o0]));
-                c1 = vmlaq_f32(c1, b0, vdupq_n_f32(A[o1]));
-                c2 = vmlaq_f32(c2, b0, vdupq_n_f32(A[o2]));
-                c3 = vmlaq_f32(c3, b0, vdupq_n_f32(A[o3]));
-                c4 = vmlaq_f32(c4, b0, vdupq_n_f32(A[o4]));
-                c5 = vmlaq_f32(c5, b0, vdupq_n_f32(A[o5]));
-                B += ldb;
+                b0 = Load<false>(B + ob0);
+                c0 = vmlaq_f32(c0, b0, vdupq_n_f32(A[oa0]));
+                c1 = vmlaq_f32(c1, b0, vdupq_n_f32(A[oa1]));
+                c2 = vmlaq_f32(c2, b0, vdupq_n_f32(A[oa2]));
+                c3 = vmlaq_f32(c3, b0, vdupq_n_f32(A[oa3]));
+                c4 = vmlaq_f32(c4, b0, vdupq_n_f32(A[oa4]));
+                c5 = vmlaq_f32(c5, b0, vdupq_n_f32(A[oa5]));
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -292,32 +301,35 @@ namespace Simd
             AddProduct(C + 5 * ldc, _alpha, c5, tail);
         }
 
-        void GemmKernelMx12nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernelMx12nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c[4][3];
-            size_t o[4];
+            size_t oa[4];
             const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
+            const size_t ob2 = ldb * 2;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = vdupq_n_f32(0);
                 c[i][1] = vdupq_n_f32(0);
                 c[i][2] = vdupq_n_f32(0);
-                o[i] = lda * i;
+                oa[i] = lda * i;
             }
             float32x4_t b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B + 0 * F);
-                b1 = Load<false>(B + 1 * F);
-                b2 = Load<false>(B + 2 * F);
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
+                b2 = Load<false>(B + ob2);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = vdupq_n_f32(A[o[i]]);
+                    a0 = vdupq_n_f32(A[oa[i]]);
                     c[i][0] = vmlaq_f32(c[i][0], b0, a0);
                     c[i][1] = vmlaq_f32(c[i][1], b1, a0);
                     c[i][2] = vmlaq_f32(c[i][2], b2, a0);
                 }
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -330,29 +342,31 @@ namespace Simd
             }
         }
 
-        void GemmKernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernelMx8nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c[6][2];
-            size_t o[6];
+            size_t oa[6];
             const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = vdupq_n_f32(0);
                 c[i][1] = vdupq_n_f32(0);
-                o[i] = lda * i;
+                oa[i] = lda * i;
             }
             float32x4_t b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B + 0 * F);
-                b1 = Load<false>(B + 1 * F);
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = vdupq_n_f32(A[o[i]]);
+                    a0 = vdupq_n_f32(A[oa[i]]);
                     c[i][0] = vmlaq_f32(c[i][0], b0, a0);
                     c[i][1] = vmlaq_f32(c[i][1], b1, a0);
                 }
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             float32x4_t _alpha = vdupq_n_f32(alpha);
@@ -364,23 +378,24 @@ namespace Simd
             }
         }
 
-        void GemmKernelMx4nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernelMx4nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             float32x4_t c[6];
-            size_t o[6];
+            size_t oa[6];
             const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i] = vdupq_n_f32(0);
-                o[i] = lda * i;
+                oa[i] = lda * i;
             }
             float32x4_t b0, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = Load<false>(B + 0 * F);
+                b0 = Load<false>(B + ob0);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = vdupq_n_f32(A[o[i]]);
+                    a0 = vdupq_n_f32(A[oa[i]]);
                     c[i] = vmlaq_f32(c[i], b0, a0);
                 }
                 B += ldb;

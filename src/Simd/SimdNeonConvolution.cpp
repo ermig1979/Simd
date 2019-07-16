@@ -72,7 +72,7 @@ namespace Simd
             kernelTM = Neon::GemmKernelMx4nn;
             kernelTT = Neon::GemmKernelMx4nn;
 #endif
-            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Neon::GemmPackB, Neon::GemmScaleC, NULL);
+            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Neon::GemmPackB, Neon::GemmScaleC, NULL, Simd::NHWC_GEMM_COMPATIBLE);
         }
 
         void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)

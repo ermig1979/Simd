@@ -48,10 +48,8 @@ namespace Simd
             }
         }
 
-        void GemmKernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
-            _mm_prefetch((char*)A, _MM_HINT_T1);
-            _mm_prefetch((char*)B, _MM_HINT_T0);
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
             __m256 c20 = _mm256_setzero_ps();
@@ -64,36 +62,39 @@ namespace Simd
             __m256 c12 = _mm256_setzero_ps();
             __m256 c22 = _mm256_setzero_ps();
             __m256 c32 = _mm256_setzero_ps();
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
             const size_t sa = lda == 1 ? 4 : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
+            const size_t ob2 = ldb * 2;
             __m256 b0, b1, b2, a0;
             for (size_t k = 0; k < K; ++k)
             {
-                _mm_prefetch((char*)B + 384, _MM_HINT_T0);
-                _mm_prefetch((char*)A + 384, _MM_HINT_T1);
-                b0 = _mm256_loadu_ps(B + 0 * F);
-                b1 = _mm256_loadu_ps(B + 1 * F);
-                b2 = _mm256_loadu_ps(B + 2 * F);
-                a0 = _mm256_set1_ps(A[o0]);
+                //_mm_prefetch((char*)B + 384, _MM_HINT_T0);
+                //_mm_prefetch((char*)A + 384, _MM_HINT_T1);
+                b0 = _mm256_loadu_ps(B + ob0);
+                b1 = _mm256_loadu_ps(B + ob1);
+                b2 = _mm256_loadu_ps(B + ob2);
+                a0 = _mm256_set1_ps(A[oa0]);
                 c00 = _mm256_fmadd_ps(a0, b0, c00);
                 c01 = _mm256_fmadd_ps(a0, b1, c01);
                 c02 = _mm256_fmadd_ps(a0, b2, c02);
-                a0 = _mm256_set1_ps(A[o1]);
+                a0 = _mm256_set1_ps(A[oa1]);
                 c10 = _mm256_fmadd_ps(a0, b0, c10);
                 c11 = _mm256_fmadd_ps(a0, b1, c11);
                 c12 = _mm256_fmadd_ps(a0, b2, c12);
-                a0 = _mm256_set1_ps(A[o2]);
+                a0 = _mm256_set1_ps(A[oa2]);
                 c20 = _mm256_fmadd_ps(a0, b0, c20);
                 c21 = _mm256_fmadd_ps(a0, b1, c21);
                 c22 = _mm256_fmadd_ps(a0, b2, c22);
-                a0 = _mm256_set1_ps(A[o3]);
+                a0 = _mm256_set1_ps(A[oa3]);
                 c30 = _mm256_fmadd_ps(a0, b0, c30);
                 c31 = _mm256_fmadd_ps(a0, b1, c31);
                 c32 = _mm256_fmadd_ps(a0, b2, c32);
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -114,7 +115,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32, tail);
         }
 
-        void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -124,29 +125,31 @@ namespace Simd
             __m256 c11 = _mm256_setzero_ps();
             __m256 c21 = _mm256_setzero_ps();
             __m256 c31 = _mm256_setzero_ps();
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
             const size_t sa = lda == 1 ? 4 : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
             __m256 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B + 0 * F);
-                b1 = _mm256_loadu_ps(B + 1 * F);
-                a0 = _mm256_set1_ps(A[o0]);
+                b0 = _mm256_loadu_ps(B + ob0);
+                b1 = _mm256_loadu_ps(B + ob1);
+                a0 = _mm256_set1_ps(A[oa0]);
                 c00 = _mm256_fmadd_ps(a0, b0, c00);
                 c01 = _mm256_fmadd_ps(a0, b1, c01);
-                a0 = _mm256_set1_ps(A[o1]);
+                a0 = _mm256_set1_ps(A[oa1]);
                 c10 = _mm256_fmadd_ps(a0, b0, c10);
                 c11 = _mm256_fmadd_ps(a0, b1, c11);
-                a0 = _mm256_set1_ps(A[o2]);
+                a0 = _mm256_set1_ps(A[oa2]);
                 c20 = _mm256_fmadd_ps(a0, b0, c20);
                 c21 = _mm256_fmadd_ps(a0, b1, c21);
-                a0 = _mm256_set1_ps(A[o3]);
+                a0 = _mm256_set1_ps(A[oa3]);
                 c30 = _mm256_fmadd_ps(a0, b0, c30);
                 c31 = _mm256_fmadd_ps(a0, b1, c31);
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -163,26 +166,27 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31, tail);
         }
 
-        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c0 = _mm256_setzero_ps();
             __m256 c1 = _mm256_setzero_ps();
             __m256 c2 = _mm256_setzero_ps();
             __m256 c3 = _mm256_setzero_ps();
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
             const size_t sa = lda == 1 ? 4 : 1;
+            const size_t ob0 = ldb * 0;
             __m256 b0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B);
-                c0 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o0]), c0);
-                c1 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o1]), c1);
-                c2 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o2]), c2);
-                c3 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o3]), c3);
-                B += ldb;
+                b0 = _mm256_loadu_ps(B + ob0);
+                c0 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa0]), c0);
+                c1 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa1]), c1);
+                c2 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa2]), c2);
+                c3 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa3]), c3);
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -192,9 +196,8 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3, tail);
         }
 
-        void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
-            _mm_prefetch((char*)B, _MM_HINT_T0);
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
             __m256 c20 = _mm256_setzero_ps();
@@ -207,38 +210,41 @@ namespace Simd
             __m256 c31 = _mm256_setzero_ps();
             __m256 c41 = _mm256_setzero_ps();
             __m256 c51 = _mm256_setzero_ps();
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
-            const size_t o4 = lda * 4;
-            const size_t o5 = lda * 5;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
+            const size_t oa4 = lda * 4;
+            const size_t oa5 = lda * 5;
             const size_t sa = lda == 1 ? 6 : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
             __m256 b0, b1, a0, a1;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B + 0 * F);
-                b1 = _mm256_loadu_ps(B + 1 * F);
-                _mm_prefetch((char*)B + 256, _MM_HINT_T0);
-                a0 = _mm256_set1_ps(A[o0]);
-                a1 = _mm256_set1_ps(A[o1]);
+                //_mm_prefetch((char*)B + ob0 + 256, _MM_HINT_T0);
+                //_mm_prefetch((char*)B + ob1 + 256, _MM_HINT_T0);
+                b0 = _mm256_loadu_ps(B + ob0);
+                b1 = _mm256_loadu_ps(B + ob1);
+                a0 = _mm256_set1_ps(A[oa0]);
+                a1 = _mm256_set1_ps(A[oa1]);
                 c00 = _mm256_fmadd_ps(a0, b0, c00);
                 c01 = _mm256_fmadd_ps(a0, b1, c01);
                 c10 = _mm256_fmadd_ps(a1, b0, c10);
                 c11 = _mm256_fmadd_ps(a1, b1, c11);
-                a0 = _mm256_set1_ps(A[o2]);
-                a1 = _mm256_set1_ps(A[o3]);
+                a0 = _mm256_set1_ps(A[oa2]);
+                a1 = _mm256_set1_ps(A[oa3]);
                 c20 = _mm256_fmadd_ps(a0, b0, c20);
                 c21 = _mm256_fmadd_ps(a0, b1, c21);
                 c30 = _mm256_fmadd_ps(a1, b0, c30);
                 c31 = _mm256_fmadd_ps(a1, b1, c31);
-                a0 = _mm256_set1_ps(A[o4]);
-                a1 = _mm256_set1_ps(A[o5]);
+                a0 = _mm256_set1_ps(A[oa4]);
+                a1 = _mm256_set1_ps(A[oa5]);
                 c40 = _mm256_fmadd_ps(a0, b0, c40);
                 c41 = _mm256_fmadd_ps(a0, b1, c41);
                 c50 = _mm256_fmadd_ps(a1, b0, c50);
                 c51 = _mm256_fmadd_ps(a1, b1, c51);
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -261,7 +267,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51, tail);
         }
 
-        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c0 = _mm256_setzero_ps();
             __m256 c1 = _mm256_setzero_ps();
@@ -269,24 +275,25 @@ namespace Simd
             __m256 c3 = _mm256_setzero_ps();
             __m256 c4 = _mm256_setzero_ps();
             __m256 c5 = _mm256_setzero_ps();
-            const size_t o0 = lda * 0;
-            const size_t o1 = lda * 1;
-            const size_t o2 = lda * 2;
-            const size_t o3 = lda * 3;
-            const size_t o4 = lda * 4;
-            const size_t o5 = lda * 5;
+            const size_t oa0 = lda * 0;
+            const size_t oa1 = lda * 1;
+            const size_t oa2 = lda * 2;
+            const size_t oa3 = lda * 3;
+            const size_t oa4 = lda * 4;
+            const size_t oa5 = lda * 5;
             const size_t sa = lda == 1 ? 6 : 1;
+            const size_t ob0 = ldb * 0;
             __m256 b0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B);
-                c0 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o0]), c0);
-                c1 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o1]), c1);
-                c2 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o2]), c2);
-                c3 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o3]), c3);
-                c4 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o4]), c4);
-                c5 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[o5]), c5);
-                B += ldb;
+                b0 = _mm256_loadu_ps(B + ob0);
+                c0 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa0]), c0);
+                c1 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa1]), c1);
+                c2 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa2]), c2);
+                c3 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa3]), c3);
+                c4 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa4]), c4);
+                c5 = _mm256_fmadd_ps(b0, _mm256_set1_ps(A[oa5]), c5);
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -298,32 +305,35 @@ namespace Simd
             AddProduct(C + 5 * ldc, _alpha, c5, tail);
         }
 
-        void GemmKernelMx24nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernelMx24nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[4][3];
-            size_t o[4];
+            size_t oa[4];
             const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
+            const size_t ob2 = ldb * 2;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm256_setzero_ps();
                 c[i][1] = _mm256_setzero_ps();
                 c[i][2] = _mm256_setzero_ps();
-                o[i] = lda * i;
+                oa[i] = lda * i;
             }
             __m256 b0, b1, b2, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B + 0 * F);
-                b1 = _mm256_loadu_ps(B + 1 * F);
-                b2 = _mm256_loadu_ps(B + 2 * F);
+                b0 = _mm256_loadu_ps(B + ob0);
+                b1 = _mm256_loadu_ps(B + ob1);
+                b2 = _mm256_loadu_ps(B + ob2);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm256_set1_ps(A[o[i]]);
+                    a0 = _mm256_set1_ps(A[oa[i]]);
                     c[i][0] = _mm256_add_ps(_mm256_mul_ps(b0, a0), c[i][0]);
                     c[i][1] = _mm256_add_ps(_mm256_mul_ps(b1, a0), c[i][1]);
                     c[i][2] = _mm256_add_ps(_mm256_mul_ps(b2, a0), c[i][2]);
                 }
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -336,29 +346,31 @@ namespace Simd
             }
         }
 
-        void GemmKernelMx16nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernelMx16nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[6][2];
-            size_t o[6];
+            size_t oa[6];
             const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i][0] = _mm256_setzero_ps();
                 c[i][1] = _mm256_setzero_ps();
-                o[i] = lda * i;
+                oa[i] = lda * i;
             }
             __m256 b0, b1, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B + 0 * F);
-                b1 = _mm256_loadu_ps(B + 1 * F);
+                b0 = _mm256_loadu_ps(B + ob0);
+                b1 = _mm256_loadu_ps(B + ob1);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm256_set1_ps(A[o[i]]);
+                    a0 = _mm256_set1_ps(A[oa[i]]);
                     c[i][0] = _mm256_fmadd_ps(b0, a0, c[i][0]);
                     c[i][1] = _mm256_fmadd_ps(b1, a0, c[i][1]);
                 }
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);
@@ -370,31 +382,32 @@ namespace Simd
             }
         }
 
-        void GemmKernelMx8nn(size_t M, size_t N, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc, size_t tail)
+        void GemmKernelMx8nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
 #ifdef SIMD_X64_ENABLE
             __m256 c[6];
-            size_t o[6];
+            size_t oa[6];
 #else
             __m256 c[4];
-            size_t o[4];
+            size_t oa[4];
 #endif
             const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
             for (size_t i = 0; i < M; ++i)
             {
                 c[i] = _mm256_setzero_ps();
-                o[i] = lda * i;
+                oa[i] = lda * i;
             }
             __m256 b0, a0;
             for (size_t k = 0; k < K; k++)
             {
-                b0 = _mm256_loadu_ps(B + 0 * F);
+                b0 = _mm256_loadu_ps(B + ob0);
                 for (size_t i = 0; i < M; ++i)
                 {
-                    a0 = _mm256_set1_ps(A[o[i]]);
+                    a0 = _mm256_set1_ps(A[oa[i]]);
                     c[i] = _mm256_fmadd_ps(b0, a0, c[i]);
                 }
-                B += ldb;
+                B += sb;
                 A += sa;
             }
             __m256 _alpha = _mm256_set1_ps(alpha);

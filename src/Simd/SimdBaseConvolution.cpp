@@ -615,25 +615,7 @@ namespace Simd
             float * bufD = bufS + _strideS * _count * _merge;
             if (p.trans)
             {
-                for (size_t b = 0; b < _batch; b += _merge)
-                {
-                    for (size_t m = 0; m < _merge; ++m)
-                        _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, bufS + m * _strideS, _strideS * _merge, _pad, p.trans);
-                    for (size_t i = 0; i < _count; ++i)
-                    {
-                        if (_nhwcWeight.data)
-                            _nhwcRun(_M * _merge, _N, _K, bufS + i * _strideS * _merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * _merge);
-                        else
-                            _gemm.Run(GemmArgs(_M * _merge, _N, _K, &_1, bufS + i * _strideS * _merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _merge, _N));
-                    }
-                    for (size_t m = 0; m < _merge; ++m)
-                    {
-                        _setOutput(bufD + m * _strideD, _strideD * _merge, dst + m * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
-                        _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
-                    }
-                    src += _sizeS*_merge;
-                    dst += _sizeD*_merge;
-                }
+                ForwardMerged(src, bufS, bufD, dst, _merge);
             }
             else
             {
@@ -679,6 +661,30 @@ namespace Simd
                 for (size_t merge = 1; merge <= _batch; ++merge)
                     if (_batch%merge == 0 && _M*merge <= 256)
                         _merge = merge;
+            }
+        }
+
+        void ConvolutionWinograd::ForwardMerged(const float * src, float * bufS, float * bufD, float * dst, size_t merge)
+        {
+            const ConvParam & p = _param;
+            for (size_t b = 0; b < _batch; b += merge)
+            {
+                for (size_t m = 0; m < merge; ++m)
+                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, bufS + m * _strideS, _strideS * merge, _pad, p.trans);
+                for (size_t i = 0; i < _count; ++i)
+                {
+                    if (_nhwcWeight.data)
+                        _nhwcRun(_M * merge, _N, _K, bufS + i * _strideS * merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * merge);
+                    else
+                        _gemm.Run(GemmArgs(_M * merge, _N, _K, &_1, bufS + i * _strideS * merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * merge, _N));
+                }
+                for (size_t m = 0; m < merge; ++m)
+                {
+                    _setOutput(bufD + m * _strideD, _strideD * merge, dst + m * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
+                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
+                }
+                src += _sizeS * merge;
+                dst += _sizeD * merge;
             }
         }
 

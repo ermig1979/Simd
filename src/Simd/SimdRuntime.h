@@ -42,12 +42,12 @@ namespace Simd
 
     template <class Func, class Args> struct Runtime
     {
-        Runtime()
+        SIMD_INLINE Runtime()
             : _best(NULL)
         {
         }
 
-        ~Runtime()
+        SIMD_INLINE ~Runtime()
         {
 #ifdef SIMD_RUNTIME_STATISTIC
             if (!_info.empty())
@@ -62,14 +62,14 @@ namespace Simd
 #endif
         }
 
-        void Init(const Func & func)
+        SIMD_INLINE void Init(const Func & func)
         {
             _candidates.clear();
             _candidates.push_back(Candidate(func));
             _best = &_candidates[0].func;
         }
 
-        void Init(const std::vector<Func> & funcs)
+        SIMD_INLINE void Init(const std::vector<Func> & funcs)
         {
             assert(funcs.size() >= 1);
             _candidates.clear();
@@ -95,7 +95,7 @@ namespace Simd
             size_t count;
             double sum, min, max;
 
-            Candidate(const Func & f)
+            SIMD_INLINE Candidate(const Func & f)
                 : func(f)
                 , count(0)
                 , sum(0)
@@ -131,7 +131,7 @@ namespace Simd
             {
 #ifdef SIMD_RUNTIME_STATISTIC
                 if (_info.empty())
-                    _info = args.Info();
+                    _info = current->Info(args);
 #endif
                 double start = Simd::Time();
                 current->func.Run(args);
@@ -178,40 +178,37 @@ namespace Simd
 
     struct GemmArgs
     {
-        size_t M, N, K, lda, ldb, ldc;
-        const float *alpha, *A, *B, *beta;
-        float *C;
-
-        GemmArgs(size_t M_, size_t N_, size_t K_, const float * alpha_, const float * A_, size_t lda_, const float * B_, size_t ldb_, const float * beta_, float * C_, size_t ldc_)
-            :M(M_), N(N_), K(K_), lda(lda_), ldb(ldb_), ldc(ldc_), alpha(alpha_), A(A_), B(B_), beta(beta_), C(C_) 
+        size_t M; size_t N; size_t K; const float * alpha; const float * A; size_t lda; const float * B; size_t ldb; const float * beta; float * C; size_t ldc;
+        SIMD_INLINE GemmArgs(size_t M_, size_t N_, size_t K_, const float * alpha_, const float * A_, size_t lda_, const float * B_, size_t ldb_, const float * beta_, float * C_, size_t ldc_)
+            :M(M_), N(N_), K(K_), alpha(alpha_), A(A_), lda(lda_), B(B_), ldb(ldb_), beta(beta_), ldc(ldc_), C(C_) 
         {}
-
-#ifdef SIMD_RUNTIME_STATISTIC
-        String Info() const
-        {
-            std::stringstream ss;
-            ss << "Gemm [" << M << ", " << N << ", " << K << "]";
-            return ss.str();
-        }
-#endif
     };
 
     struct GemmFunc
     {
         typedef SimdGemm32fNNPtr Func;
 
-        GemmFunc(const Func & func, const String & name)
+        SIMD_INLINE GemmFunc(const Func & func, const String & name)
             : _func(func)
             , _name(name)
         {
         }
 
-        String Name() const { return _name; }
+        SIMD_INLINE String Name() const { return _name; }
 
-        void Run(const GemmArgs & args)
+        SIMD_INLINE void Run(const GemmArgs & args)
         {
             _func(args.M, args.N, args.K, args.alpha, args.A, args.lda, args.B, args.ldb, args.beta, args.C, args.ldc);
         }
+
+#ifdef SIMD_RUNTIME_STATISTIC
+        SIMD_INLINE String Info(const GemmArgs & args) const
+        {
+            std::stringstream ss;
+            ss << "Gemm [" << args.M << ", " << args.N << ", " << args.K << "]";
+            return ss.str();
+        }
+#endif
 
     private:
         Func _func;
