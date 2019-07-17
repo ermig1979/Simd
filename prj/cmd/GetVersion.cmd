@@ -1,13 +1,13 @@
-@echo off
+@echo on
 
 echo Extract project version:
 
 set TRUNK_DIR=%1
-set USER_VERSION_TXT="%TRUNK_DIR%\prj\txt\UserVersion.txt"
-set FULL_VERSION_TXT="%TRUNK_DIR%\prj\txt\FullVersion.txt"
-set SIMD_VERSION_H_TXT="%TRUNK_DIR%\prj\txt\SimdVersion.h.txt"
-set SIMD_VERSION_H="%TRUNK_DIR%\src\Simd\SimdVersion.h"
-set FIND_AND_REPLACE_CMD="%TRUNK_DIR%\prj\cmd\FindAndReplace.cmd"
+set USER_VERSION_TXT=%TRUNK_DIR%\prj\txt\UserVersion.txt
+set FULL_VERSION_TXT=%TRUNK_DIR%\prj\txt\FullVersion.txt
+set SIMD_VERSION_H_TXT=%TRUNK_DIR%\prj\txt\SimdVersion.h.txt
+set SIMD_VERSION_H=%TRUNK_DIR%\src\Simd\SimdVersion.h
+set FIND_AND_REPLACE_CMD=%TRUNK_DIR%\prj\cmd\FindAndReplace.cmd
 
 set /p USER_VERSION=<%USER_VERSION_TXT%
 
