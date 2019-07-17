@@ -632,6 +632,73 @@ namespace Simd
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
 
+        //---------------------------------------------------------------------
+
+        typedef Simd::GemmNNcb<float, size_t> Gemm32fNNcb;
+
+        SIMD_INLINE Gemm32fNNcb CreateGemm32fNNcb(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
+        {
+            const size_t L1 = 32 * 1024;
+            const size_t L2 = 256 * 1024;
+            const size_t L3 = 2 * 1024 * 1024;
+            Gemm32fNNcb::Main kernelMM, kernelMT;
+            Gemm32fNNcb::Tail kernelTM, kernelTT;
+            size_t microM, microN;
+            if (type == GemmKernelF3 || (type == GemmKernelAny && (M == 4 || M == 8 || M == 16) && N > 8))
+            {
+                microM = 4;
+                microN = 12;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Neon::GemmKernel4x12nn;
+                kernelMT = tail > DF ? Neon::GemmKernel4x12nn : (tail > F ? Neon::GemmKernel4x8nn : Neon::GemmKernel4x4nn);
+                kernelTM = Neon::GemmKernelMx12nn;
+                kernelTT = tail > DF ? Neon::GemmKernelMx12nn : (tail > F ? Neon::GemmKernelMx8nn : Neon::GemmKernelMx4nn);
+                type = GemmKernelF3;
+            }
+            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 4))
+            {
+                microM = 6;
+                microN = 8;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Neon::GemmKernel6x8nn;
+                kernelMT = tail > F ? Neon::GemmKernel6x8nn : Neon::GemmKernel6x4nn;
+                kernelTM = Neon::GemmKernelMx8nn;
+                kernelTT = tail > F ? Neon::GemmKernelMx8nn : Neon::GemmKernelMx4nn;
+                type = GemmKernelF2;
+            }
+            if (type == GemmKernelF1 || type == GemmKernelAny)
+            {
+                microM = 6;
+                microN = 4;
+                kernelMM = Neon::GemmKernel6x4nn;
+                kernelMT = Neon::GemmKernel6x4nn;
+                kernelTM = Neon::GemmKernelMx4nn;
+                kernelTT = Neon::GemmKernelMx4nn;
+                type = GemmKernelF1;
+            }
+            return Gemm32fNNcb(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Neon::GemmPackB, Neon::GemmScaleC, NULL, compatibility);
+        }
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
+        {
+            Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
+            return gemm.BufferSize();
+        }
+
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility)
+        {
+            Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
+            gemm.ReorderB(B, N, pB);
+        }
+
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility)
+        {
+            Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
+            gemm.Run(A, K, pB, C, N);
+        }
+
+        //---------------------------------------------------------------------
+
         SIMD_INLINE float32x4_t Tail(size_t tail)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };

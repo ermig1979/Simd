@@ -33,66 +33,6 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        typedef Simd::GemmNNcb<float, size_t> NhwcGemm;
-
-        NhwcGemm CreateNhwcGemm(size_t M, size_t N, size_t K)
-        {
-            const size_t L1 = 32 * 1024;
-            const size_t L2 = 256 * 1024;
-            const size_t L3 = 2 * 1024 * 1024;
-            NhwcGemm::Main kernelMM, kernelMT;
-            NhwcGemm::Tail kernelTM, kernelTT;
-            size_t microM, microN;
-#ifdef SIMD_X64_ENABLE
-            if (M == 4 || M == 8 || /*M == 12 || */M == 16 || N == 24 || N == 48 || N == 96)
-            {
-                microM = 4;
-                microN = 24;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx2::GemmKernel4x24nn;
-                kernelMT = tail > DF ? Avx2::GemmKernel4x24nn : (tail > F ? Avx2::GemmKernel4x16nn : Avx2::GemmKernel4x8nn);
-                kernelTM = Avx2::GemmKernelMx24nn;
-                kernelTT = tail > DF ? Avx2::GemmKernelMx24nn : (tail > F ? Avx2::GemmKernelMx16nn : Avx2::GemmKernelMx8nn);
-            }
-            else
-            {
-                microM = 6;
-                microN = 16;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx2::GemmKernel6x16nn;
-                kernelMT = tail > F ? Avx2::GemmKernel6x16nn : Avx2::GemmKernel6x8nn;
-                kernelTM = Avx2::GemmKernelMx16nn;
-                kernelTT = tail > F ? Avx2::GemmKernelMx16nn : Avx2::GemmKernelMx8nn;
-            }
-#else
-            microM = 4;
-            microN = 8;
-            kernelMM = Avx2::GemmKernel4x8nn;
-            kernelMT = Avx2::GemmKernel4x8nn;
-            kernelTM = Avx2::GemmKernelMx8nn;
-            kernelTT = Avx2::GemmKernelMx8nn;
-#endif
-            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL, Simd::NHWC_GEMM_COMPATIBLE);
-        }
-
-        void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
-        {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            nhwcGemm.Run(A, K, B, C, N);
-        }
-
-        void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
-        {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            nhwcGemm.ReorderB(B, N, pB);
-        }
-
-        size_t NhwcBufferSize(size_t M, size_t N, size_t K)
-        {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            return nhwcGemm.BufferSize();
-        }
-
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Avx::ConvolutionGemmNN(p)
         {
@@ -120,10 +60,9 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
-                _nhwcWeight.Resize(nhwcGemm.BufferSize());
-                _nhwcRun = Avx2::NhwcRun;
-                _nhwcReorderB = Avx2::NhwcReorderB;
+                _nhwcWeight.Resize(Avx2::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Avx2::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx2::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }
@@ -240,11 +179,10 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
             if (_param.trans)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
-                _nhwcStrideW = nhwcGemm.BufferSize();
+                _nhwcStrideW = Avx2::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 _nhwcWeight.Resize(_nhwcStrideW*_count);
-                _nhwcRun = Avx2::NhwcRun;
-                _nhwcReorderB = Avx2::NhwcReorderB;
+                _nhwcRun = Avx2::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx2::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }

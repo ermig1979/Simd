@@ -32,142 +32,6 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        typedef Simd::GemmNNcb<float, __mmask16> NhwcGemm;
-
-        NhwcGemm CreateNhwcGemm(size_t M, size_t N, size_t K)
-        {
-            const size_t L1 = 4*32 * 1024;
-            const size_t L2 = 1024 * 1024;
-            const size_t L3 = 2 * 1280 * 1024;
-            NhwcGemm::Main kernelMM, kernelMT;
-            NhwcGemm::Tail kernelTM, kernelTT;
-            size_t microM, microN;
-#if SIMD_ZMM_COUNT == 32 
-            if (M == 4 || M < 8)
-            {
-                microM = 4;
-                microN = 48;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel4x48nn;
-                kernelMT = tail > DF ? Avx512f::GemmKernel4x48nn : (tail > F ? Avx512f::GemmKernel4x32nn : Avx512f::GemmKernel4x16nn);
-                kernelTM = Avx512f::GemmKernelMx48nn;
-                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
-            }
-            else if (M == 6)
-            {
-                microM = 6;
-                microN = 32;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel6x32nn;
-                kernelMT = tail > F ? Avx512f::GemmKernel6x32nn : Avx512f::GemmKernel6x16nn;
-                kernelTM = Avx512f::GemmKernelMx32nn;
-                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
-            }
-            else if (M == 12 || M == 24)
-            {
-                microM = 12;
-                microN = 32;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel12x32nn;
-                kernelMT = tail > F ? Avx512f::GemmKernel12x32nn : Avx512f::GemmKernel12x16nn;
-                kernelTM = Avx512f::GemmKernelMx32nn;
-                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
-            }
-            else if (M == 8 || M == 16 || M == 32 || M < 14 || N == 48 || N == 96)
-            {
-                microM = 8;
-                microN = 48;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel8x48nn;
-                kernelMT = tail > DF ? Avx512f::GemmKernel8x48nn : (tail > F ? Avx512f::GemmKernel8x32nn : Avx512f::GemmKernel8x16nn);
-                kernelTM = GemmKernelMx48nn;
-                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
-            }
-            else if (N <= 16)
-            {
-                microM = 14;
-                microN = 16;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel14x16nn;
-                kernelMT = Avx512f::GemmKernel14x16nn;
-                kernelTM = Avx512f::GetGemmTail(M, microN);
-                kernelTT = Avx512f::GetGemmTail(M, tail);
-            }
-            else
-            {
-                microM = 14;
-                microN = 32;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel14x32nn;
-                kernelMT = tail > F ? Avx512f::GemmKernel14x32nn : Avx512f::GemmKernel14x16nn;
-                kernelTM = Avx512f::GemmKernelMx32nn;
-                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
-            }
-#elif SIMD_ZMM_COUNT == 16 
-            if (M == 4 || M == 8 || M == 16)
-            {
-                microM = 4;
-                microN = 48;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel4x48nn;
-                kernelMT = tail > DF ? Avx512f::GemmKernel4x48nn : (tail > F ? Avx512f::GemmKernel4x32nn : Avx512f::GemmKernel4x16nn);
-                kernelTM = Avx512f::GemmKernelMx48nn;
-                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
-            }
-            else
-            {
-                microM = 6;
-                microN = 32;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx512f::GemmKernel6x32nn;
-                kernelMT = tail > F ? Avx512f::GemmKernel6x32nn : Avx512f::GemmKernel6x16nn;
-                kernelTM = Avx512f::GemmKernelMx32nn;
-                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
-            }
-#else
-            microM = 4;
-            microN = 16;
-            kernelMM = Avx512f::GemmKernel4x16nn;
-            kernelMT = Avx512f::GemmKernel4x16nn;
-            kernelTM = Avx512f::GemmKernelMx16nn;
-            kernelTT = Avx512f::GemmKernelMx16nn;
-#endif
-            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, Avx512f::TailMask16, Simd::NHWC_GEMM_COMPATIBLE);
-        }
-
-        void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
-        {
-            if (N > Avx::F)
-            {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-                nhwcGemm.Run(A, K, B, C, N);
-            }
-            else
-                Avx2::NhwcRun(M, N, K, A, B, C);
-        }
-
-        void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
-        {
-            if (N > Avx::F)
-            {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-                nhwcGemm.ReorderB(B, N, pB);
-            }
-            else
-                Avx2::NhwcReorderB(M, N, K, B, pB);
-        }
-
-        size_t NhwcBufferSize(size_t M, size_t N, size_t K)
-        {
-            if (N > Avx::F)
-            {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-                return nhwcGemm.BufferSize();
-            }
-            else
-                return Avx2::NhwcBufferSize(M, N, K);
-        }
-
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             size_t aligned = AlignLo(trans ? count : size, F);
@@ -452,10 +316,9 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
-                _nhwcWeight.Resize(nhwcGemm.BufferSize());
-                _nhwcRun = Avx512f::NhwcRun;
-                _nhwcReorderB = Avx512f::NhwcReorderB;
+                _nhwcWeight.Resize(Avx512f::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Avx512f::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx512f::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = _N > Avx::F ? Avx512f::ConvolutionBiasAndActivation : Avx::ConvolutionBiasAndActivation;
         }
@@ -577,11 +440,10 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f", p.gemm, "Ext"));
             if (_param.trans)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
-                _nhwcStrideW = nhwcGemm.BufferSize();
+                _nhwcStrideW = Avx512f::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 _nhwcWeight.Resize(_nhwcStrideW*_count);
-                _nhwcRun = Avx512f::NhwcRun;
-                _nhwcReorderB = Avx512f::NhwcReorderB;
+                _nhwcRun = Avx512f::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx512f::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
         }

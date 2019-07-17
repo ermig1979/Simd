@@ -1752,6 +1752,167 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        typedef Simd::GemmNNcb<float, __mmask16> Gemm32fNNcb;
+
+        SIMD_INLINE Gemm32fNNcb CreateGemm32fNNcb(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
+        {
+            const size_t L1 = 32 * 1024;
+            const size_t L2 = 256 * 1024;
+            const size_t L3 = 2 * 1024 * 1024;
+            Gemm32fNNcb::Main kernelMM, kernelMT;
+            Gemm32fNNcb::Tail kernelTM, kernelTT;
+            size_t microM, microN;
+#if SIMD_ZMM_COUNT == 32
+            if (type == GemmKernelF3 || (type == GemmKernelAny && (M == 4 || M == 8 || M == 9 || M == 16 || M == 18 || M == 32 || N == 48 || N == 96 || (M < 14 && M != 6 && M != 12)) && N > 32))
+            {
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                if (M == 4)
+                {
+                    microM = 4;
+                    kernelMM = Avx512f::GemmKernel4x48nn;
+                    kernelMT = tail > DF ? Avx512f::GemmKernel4x48nn : (tail > F ? Avx512f::GemmKernel4x32nn : Avx512f::GemmKernel4x16nn);
+                    kernelTM = Avx512f::GemmKernelMx48nn;
+                    kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+                }
+                else if (M == 8 || M == 16 || M == 32)
+                {
+                    microM = 8;
+                    kernelMM = Avx512f::GemmKernel8x48nn;
+                    kernelMT = tail > DF ? Avx512f::GemmKernel8x48nn : (tail > F ? Avx512f::GemmKernel8x32nn : Avx512f::GemmKernel8x16nn);
+                    kernelTM = GemmKernelMx48nn;
+                    kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+                }
+                else
+                {
+                    microM = 9;
+                    kernelMM = Avx512f::GemmKernel9x48nn;
+                    kernelMT = tail > DF ? Avx512f::GemmKernel9x48nn : (tail > F ? Avx512f::GemmKernel9x32nn : Avx512f::GemmKernel9x16nn);
+                    kernelTM = GemmKernelMx48nn;
+                    kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+                }
+                type = GemmKernelF3;
+            }
+            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 16))
+            {
+                microN = 32;
+                size_t tail = N - AlignLoAny(N, microN);
+                if (M <= 6)
+                {
+                    microM = 6;
+                    kernelMM = Avx512f::GemmKernel6x32nn;
+                    kernelMT = tail > F ? Avx512f::GemmKernel6x32nn : Avx512f::GemmKernel6x16nn;
+                    kernelTM = Avx512f::GemmKernelMx32nn;
+                    kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
+                }
+                else if (M <= 12 || M == 24)
+                {
+                    microM = 12;
+                    kernelMM = Avx512f::GemmKernel12x32nn;
+                    kernelMT = tail > F ? Avx512f::GemmKernel12x32nn : Avx512f::GemmKernel12x16nn;
+                    kernelTM = Avx512f::GemmKernelMx32nn;
+                    kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
+                }
+                else
+                {
+                    microM = 14;
+                    kernelMM = Avx512f::GemmKernel14x32nn;
+                    kernelMT = tail > F ? Avx512f::GemmKernel14x32nn : Avx512f::GemmKernel14x16nn;
+                    kernelTM = Avx512f::GemmKernelMx32nn;
+                    kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
+                }
+                type = GemmKernelF2;
+            }
+            if (type == GemmKernelF1 || type == GemmKernelAny)
+            {
+                microM = 14;
+                microN = 16;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel14x16nn;
+                kernelMT = Avx512f::GemmKernel14x16nn;
+                kernelTM = Avx512f::GetGemmTail(M, microN);
+                kernelTT = Avx512f::GetGemmTail(M, tail);
+                type = GemmKernelF1;
+            }
+#elif SIMD_ZMM_COUNT == 16
+            if (type == GemmKernelF3 || (type == GemmKernelAny && (M == 4 || M == 8 || M == 16 || N == 48 || N == 96) && N > 32))
+            {
+                microM = 4;
+                microN = 48;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel4x48nn;
+                kernelMT = tail > DF ? Avx512f::GemmKernel4x48nn : (tail > F ? Avx512f::GemmKernel4x32nn : Avx512f::GemmKernel4x16nn);
+                kernelTM = Avx512f::GemmKernelMx48nn;
+                kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
+                type = GemmKernelF3;
+            }
+            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 16))
+            {
+                microM = 6;
+                microN = 32;
+                size_t tail = N - AlignLoAny(N, microN);
+                kernelMM = Avx512f::GemmKernel6x32nn;
+                kernelMT = tail > F ? Avx512f::GemmKernel6x32nn : Avx512f::GemmKernel6x16nn;
+                kernelTM = Avx512f::GemmKernelMx32nn;
+                kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
+                type = GemmKernelF2;
+            }
+            if (type == GemmKernelF1 || type == GemmKernelAny)
+            {
+                microM = 6;
+                microN = 16;
+                kernelMM = Avx512f::GemmKernel6x16nn;
+                kernelMT = Avx512f::GemmKernel6x16nn;
+                kernelTM = Avx512f::GemmKernelMx16nn;
+                kernelTT = Avx512f::GemmKernelMx16nn;
+                type = GemmKernelF1;
+            }
+#else
+            microM = 4;
+            microN = 16;
+            kernelMM = Avx512f::GemmKernel4x16nn;
+            kernelMT = Avx512f::GemmKernel4x16nn;
+            kernelTM = Avx512f::GemmKernelMx16nn;
+            kernelTT = Avx512f::GemmKernelMx16nn;
+#endif
+            return Gemm32fNNcb(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, TailMask16, compatibility);
+        }
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
+        {
+            if (N > Avx::F)
+            {
+                Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
+                return gemm.BufferSize();
+            }
+            else
+                return Avx2::Gemm32fNNcbBufferSize(M, N, K, type, compatibility);
+        }
+
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility)
+        {
+            if (N > Avx::F)
+            {
+                Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
+                gemm.ReorderB(B, N, pB);
+            }
+            else
+                Avx2::Gemm32fNNcbReorderB(M, N, K, B, pB, type, compatibility);
+        }
+
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility)
+        {
+            if (N > Avx::F)
+            {
+                Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);
+                gemm.Run(A, K, pB, C, N);
+            }
+            else
+                Avx2::Gemm32fNNcbRun(M, N, K, A, pB, C, type, compatibility);
+        }
+
+        //---------------------------------------------------------------------
+
         SIMD_INLINE void Add4ExtractedSums(const __m512 & sum0, const __m512 & sum1, const __m512 & sum2, const __m512 & sum3, const __m128 & alpha, float * dst)
         {
             __m512 sum02 = _mm512_add_ps(_mm512_unpacklo_ps(sum0, sum2), _mm512_unpackhi_ps(sum0, sum2));

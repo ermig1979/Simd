@@ -158,8 +158,8 @@ namespace Simd
         }
 
     protected:
-        typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB);
-        typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C);
+        typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
         typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
         ConvParam _param;

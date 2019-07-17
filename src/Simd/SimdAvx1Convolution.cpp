@@ -32,60 +32,6 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        typedef Simd::GemmNNcb<float, size_t> NhwcGemm;
-
-        NhwcGemm CreateNhwcGemm(size_t M, size_t N, size_t K)
-        {
-            const size_t L1 = 32 * 1024;
-            const size_t L2 = 256 * 1024;
-            const size_t L3 = 2 * 1024 * 1024;
-            NhwcGemm::Main kernelMM, kernelMT;
-            NhwcGemm::Tail kernelTM, kernelTT;
-            size_t microM, microN;
-#ifdef SIMD_X64_ENABLE
-            if (M == 4 || M == 8 || /*M == 12 || */M == 16)
-            {
-                microM = 4;
-                microN = 24;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx::GemmKernel4x24nn;
-                kernelMT = tail > DF ? Avx::GemmKernel4x24nn : (tail > F ? Avx::GemmKernel4x16nn : Avx::GemmKernel4x8nn);
-                kernelTM = Avx::GemmKernelMx24nn;
-                kernelTT = tail > DF ? Avx::GemmKernelMx24nn : (tail > F ? Avx::GemmKernelMx16nn : Avx::GemmKernelMx8nn);
-            }
-            else
-            {
-                microM = 6;
-                microN = 16;
-                size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Avx::GemmKernel6x16nn;
-                kernelMT = tail > F ? Avx::GemmKernel6x16nn : Avx::GemmKernel6x8nn;
-                kernelTM = Avx::GemmKernelMx16nn;
-                kernelTT = tail > F ? Avx::GemmKernelMx16nn : Avx::GemmKernelMx8nn;
-            }
-#else
-            microM = 4;
-            microN = 8;
-            kernelMM = Avx::GemmKernel4x8nn;
-            kernelMT = Avx::GemmKernel4x8nn;
-            kernelTM = Avx::GemmKernelMx8nn;
-            kernelTT = Avx::GemmKernelMx8nn;
-#endif
-            return NhwcGemm(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Avx::GemmPackB, Avx::GemmScaleC, NULL, Simd::NHWC_GEMM_COMPATIBLE);
-        }
-
-        void NhwcRun(size_t M, size_t N, size_t K, const float * A, const float * B, float * C)
-        {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            nhwcGemm.Run(A, K, B, C, N);
-        }
-
-        void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB)
-        {
-            NhwcGemm nhwcGemm = CreateNhwcGemm(M, N, K);
-            nhwcGemm.ReorderB(B, N, pB);
-        }
-
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
             size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
@@ -314,10 +260,9 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
-                _nhwcWeight.Resize(nhwcGemm.BufferSize());
-                _nhwcRun = Avx::NhwcRun;
-                _nhwcReorderB = Avx::NhwcReorderB;
+                _nhwcWeight.Resize(Avx::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Avx::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }
@@ -572,11 +517,10 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans)
             {
-                NhwcGemm nhwcGemm = CreateNhwcGemm(_M*_merge, _N, _K);
-                _nhwcStrideW = nhwcGemm.BufferSize();
+                _nhwcStrideW = Avx::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 _nhwcWeight.Resize(_nhwcStrideW*_count);
-                _nhwcRun = Avx::NhwcRun;
-                _nhwcReorderB = Avx::NhwcReorderB;
+                _nhwcRun = Avx::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }

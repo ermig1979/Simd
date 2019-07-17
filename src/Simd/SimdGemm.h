@@ -444,6 +444,14 @@ namespace Simd
         bool _compatible;
     };
 
+    enum GemmKernelType
+    {
+        GemmKernelAny = 0,
+        GemmKernelF1,
+        GemmKernelF2,
+        GemmKernelF3,
+    };
+
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
@@ -461,6 +469,10 @@ namespace Simd
         void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility);
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -481,6 +493,10 @@ namespace Simd
         void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility);
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -497,6 +513,10 @@ namespace Simd
         void GemmKernelMx24nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail);
         void GemmKernelMx16nn(size_t M,size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail);
         void GemmKernelMx8nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail);
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility);
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -534,6 +554,10 @@ namespace Simd
         void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility);
     }
 #endif//SIMD_AVX512F_ENABLE
 
@@ -554,6 +578,10 @@ namespace Simd
         void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);
+
+        size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbReorderB(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility);
     }
 #endif//SIMD_NEON_ENABLE
 }
