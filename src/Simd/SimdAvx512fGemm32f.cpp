@@ -1793,7 +1793,7 @@ namespace Simd
                 }
                 type = GemmKernelF3;
             }
-            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 16))
+            if (type == GemmKernelF2 || (type == GemmKernelF3 && N <= 32) || (type == GemmKernelAny && N > 16))
             {
                 microN = 32;
                 size_t tail = N - AlignLoAny(N, microN);
@@ -1823,7 +1823,7 @@ namespace Simd
                 }
                 type = GemmKernelF2;
             }
-            if (type == GemmKernelF1 || type == GemmKernelAny)
+            if (type == GemmKernelF1 || (type == GemmKernelF2 && N <= 16) || type == GemmKernelAny)
             {
                 microM = 14;
                 microN = 16;
@@ -1846,7 +1846,7 @@ namespace Simd
                 kernelTT = tail > DF ? Avx512f::GemmKernelMx48nn : (tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn);
                 type = GemmKernelF3;
             }
-            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 16))
+            if (type == GemmKernelF2 || (type == GemmKernelF3 && N <= 32) || (type == GemmKernelAny && N > 16))
             {
                 microM = 6;
                 microN = 32;
@@ -1857,7 +1857,7 @@ namespace Simd
                 kernelTT = tail > F ? Avx512f::GemmKernelMx32nn : Avx512f::GemmKernelMx16nn;
                 type = GemmKernelF2;
             }
-            if (type == GemmKernelF1 || type == GemmKernelAny)
+            if (type == GemmKernelF1 || (type == GemmKernelF2 && N <= 16) || type == GemmKernelAny)
             {
                 microM = 6;
                 microN = 16;

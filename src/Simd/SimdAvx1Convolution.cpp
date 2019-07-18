@@ -260,7 +260,13 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                _nhwcWeight.Resize(Avx::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                if (NHWC_GEMM_RUNTIME)
+                {
+                    _gemmCb.Init(InitGemmCbFuncs(Avx::Gemm32fNNcbBufferSize, Avx::Gemm32fNNcbReorderB, Avx::Gemm32fNNcbRun, "Avx", GemmKernelF2, GemmKernelF3));
+                    _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
+                }
+                else
+                    _nhwcWeight.Resize(Avx::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
                 _nhwcRun = Avx::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx::Gemm32fNNcbReorderB;
             }
@@ -517,7 +523,13 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans)
             {
-                _nhwcStrideW = Avx::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                if (NHWC_GEMM_RUNTIME)
+                {
+                    _gemmCb.Init(InitGemmCbFuncs(Avx::Gemm32fNNcbBufferSize, Avx::Gemm32fNNcbReorderB, Avx::Gemm32fNNcbRun, "Avx", GemmKernelF2, GemmKernelF3));
+                    _nhwcStrideW = _gemmCb.At(0).BufferSize(_M*_merge, _N, _K);
+                }
+                else
+                    _nhwcStrideW = Avx::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 _nhwcWeight.Resize(_nhwcStrideW*_count);
                 _nhwcRun = Avx::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx::Gemm32fNNcbReorderB;

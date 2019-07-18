@@ -25,6 +25,7 @@
 #define __SimdRuntime_h__
 
 #include "Simd/SimdTime.h"
+#include "Simd/SimdGemm.h"
 
 #include <vector>
 #include <limits>
@@ -86,6 +87,16 @@ namespace Simd
                 Test(args);
         }
 
+        SIMD_INLINE size_t Size() const
+        {
+            return _candidates.size();
+        }
+
+        SIMD_INLINE const Func & At(size_t index) const
+        {
+            return _candidates[index].func;
+        }
+
     private:
         static const size_t TEST_COUNT = 3 + 2;
 
@@ -131,7 +142,7 @@ namespace Simd
             {
 #ifdef SIMD_RUNTIME_STATISTIC
                 if (_info.empty())
-                    _info = current->Info(args);
+                    _info = current->func.Info(args);
 #endif
                 double start = Simd::Time();
                 current->func.Run(args);
@@ -175,6 +186,8 @@ namespace Simd
             return best;
         }
     };
+
+    //-------------------------------------------------------------------------
 
     struct GemmArgs
     {
@@ -226,6 +239,79 @@ namespace Simd
     }
 
     typedef Runtime<GemmFunc, GemmArgs> RuntimeGemm;
+
+    //-------------------------------------------------------------------------
+
+    struct GemmCbArgs
+    {
+        size_t M; size_t N; size_t K; const float * A; const float * pB; float * C;
+        SIMD_INLINE GemmCbArgs(size_t M_, size_t N_, size_t K_, const float * A_, const float * pB_, float * C_)
+            :M(M_), N(N_), K(K_), A(A_), pB(pB_), C(C_)
+        {}
+    };
+
+    struct GemmCbFunc
+    {
+        typedef size_t (*BufferSizePtr)(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility);
+        typedef void (*ReorderBPtr)(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
+        typedef void (*RunPtr)(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility);
+
+        SIMD_INLINE GemmCbFunc(BufferSizePtr bufferSize, ReorderBPtr reorderB, RunPtr run, GemmKernelType type, const String & name)
+            : _bufferSize(bufferSize)
+            , _reorderB(reorderB)
+            , _run(run)
+            , _type(type)
+            , _name(name)
+        {
+        }
+
+        SIMD_INLINE String Name() const { return _name; }
+
+        SIMD_INLINE void Run(const GemmCbArgs & args)
+        {
+            _run(args.M, args.N, args.K, args.A, args.pB, args.C, _type, _type != GemmKernelAny);
+        }
+
+#ifdef SIMD_RUNTIME_STATISTIC
+        SIMD_INLINE String Info(const GemmCbArgs & args) const
+        {
+            std::stringstream ss;
+            ss << "GemmCb [" << args.M << ", " << args.N << ", " << args.K << "]";
+            return ss.str();
+        }
+#endif 
+        
+        SIMD_INLINE GemmKernelType Type() const { return _type; }
+
+        SIMD_INLINE size_t BufferSize(size_t M, size_t N, size_t K) const
+        {
+            return _bufferSize(M, N, K, _type, _type != GemmKernelAny);
+        }
+
+        SIMD_INLINE void ReorderB(size_t M, size_t N, size_t K, const float * B, float * pB) const
+        {
+            _reorderB(M, N, K, B, pB, _type, _type != GemmKernelAny);
+        }
+
+    private:
+        BufferSizePtr _bufferSize;
+        ReorderBPtr _reorderB;
+        RunPtr _run;
+        GemmKernelType _type;
+        String _name;
+    };
+    typedef std::vector<GemmCbFunc> GemmCbFuncs;
+
+    SIMD_INLINE GemmCbFuncs InitGemmCbFuncs(GemmCbFunc::BufferSizePtr bufferSize, GemmCbFunc::ReorderBPtr reorderB, GemmCbFunc::RunPtr run, 
+        const String & name, GemmKernelType begin, GemmKernelType end)
+    {
+        GemmCbFuncs funcs;
+        for (int i = (int)begin, n = (int)end; i <= n; ++i)
+            funcs.push_back(GemmCbFunc(bufferSize, reorderB, run, GemmKernelType(i), name + "-" + ToStr(i)));
+        return funcs;
+    }
+
+    typedef Runtime<GemmCbFunc, GemmCbArgs> RuntimeGemmCb;
 }
 
 #endif//__SimdRuntime_h__

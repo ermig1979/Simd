@@ -697,6 +697,7 @@ namespace Simd
             Gemm32fNNcb::Main kernelMM, kernelMT;
             Gemm32fNNcb::Tail kernelTM, kernelTT;
             size_t microM, microN;
+            i
 #ifdef SIMD_X64_ENABLE
             if (type == GemmKernelF3 || (type == GemmKernelAny && (M == 4 || M == 8 || M == 16) && N > 16))
             {
@@ -709,7 +710,7 @@ namespace Simd
                 kernelTT = tail > DF ? Avx::GemmKernelMx24nn : (tail > F ? Avx::GemmKernelMx16nn : Avx::GemmKernelMx8nn);
                 type = GemmKernelF3;
             }
-            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 8))
+            if (type == GemmKernelF2 || (type == GemmKernelF3 && N <= 16) || (type == GemmKernelAny && N > 8))
             {
                 microM = 6;
                 microN = 16;
@@ -720,7 +721,7 @@ namespace Simd
                 kernelTT = tail > F ? Avx::GemmKernelMx16nn : Avx::GemmKernelMx8nn;
                 type = GemmKernelF2;
             }
-            if (type == GemmKernelF1 || type == GemmKernelAny)
+            if (type == GemmKernelF1 || (type == GemmKernelF2 && N <= 8) || type == GemmKernelAny)
             {
                 microM = 6;
                 microN = 8;

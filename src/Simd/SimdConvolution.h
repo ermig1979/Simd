@@ -36,6 +36,7 @@
 namespace Simd
 {
     const bool NHWC_GEMM_COMPATIBLE = false;
+    const bool NHWC_GEMM_RUNTIME = true;
 
     struct ConvParam : public SimdConvolutionParameters
     {
@@ -167,6 +168,7 @@ namespace Simd
         float _0, _1;
         const float * _weight, * _bias, * _params;
         RuntimeGemm _gemm;
+        RuntimeGemmCb _gemmCb;
         Array32f _nhwcWeight;
         NhwcRun _nhwcRun;
         NhwcReorderB _nhwcReorderB;

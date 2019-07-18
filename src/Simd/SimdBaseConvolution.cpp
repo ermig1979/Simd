@@ -205,7 +205,10 @@ namespace Simd
             Simd::Convolution::SetParams(weight, internal, bias, params);
             if (_nhwcWeight.data)
             {
-                _nhwcReorderB(_M*_merge, _N, _K, weight, _nhwcWeight.data, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                if (_gemmCb.Size())
+                    _gemmCb.At(0).ReorderB(_M*_merge, _N, _K, weight, _nhwcWeight.data);
+                else
+                    _nhwcReorderB(_M*_merge, _N, _K, weight, _nhwcWeight.data, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 if (internal)
                     *internal = SimdTrue;
             }
@@ -228,7 +231,12 @@ namespace Simd
                         tmp = buf;
                     }
                     if (_nhwcWeight.data)
-                        _nhwcRun(_M*_merge, _N, _K, tmp, _nhwcWeight.data, dst, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    {
+                        if (_gemmCb.Size())
+                            _gemmCb.Run(GemmCbArgs(_M*_merge, _N, _K, tmp, _nhwcWeight.data, dst));
+                        else
+                            _nhwcRun(_M*_merge, _N, _K, tmp, _nhwcWeight.data, dst, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    }
                     else
                         _gemm.Run(GemmArgs(_M*_merge, _N, _K, &_1, tmp, _ldS, _weight, _ldW, &_0, dst, _ldD));
                     for (size_t m = 0; m < _merge; ++m)
@@ -255,7 +263,12 @@ namespace Simd
                         if (p.trans)
                         {
                             if (_nhwcWeight.data)
-                                _nhwcRun(_M, _N, _K, tmp, _nhwcWeight.data, dst, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                            {
+                                if (_gemmCb.Size())
+                                    _gemmCb.Run(GemmCbArgs(_M, _N, _K, tmp, _nhwcWeight.data, dst));
+                                else
+                                    _nhwcRun(_M, _N, _K, tmp, _nhwcWeight.data, dst, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                            }
                             else
                                 _gemm.Run(GemmArgs(_M, _N, _K, &_1, tmp + _grS * g, _ldS, _weight + _grW * g, _ldW, &_0, dst + _grD * g, _ldD));
                         }
@@ -601,7 +614,12 @@ namespace Simd
             if (_nhwcWeight.data)
             {
                 for (size_t i = 0; i < _count; ++i)
-                    _nhwcReorderB(_M * _merge, _N, _K, _winogradWeight.data + i * _strideW, _nhwcWeight.data + i * _nhwcStrideW, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                {
+                    if (_gemmCb.Size())
+                        _gemmCb.At(0).ReorderB(_M * _merge, _N, _K, _winogradWeight.data + i * _strideW, _nhwcWeight.data + i * _nhwcStrideW);
+                    else
+                        _nhwcReorderB(_M * _merge, _N, _K, _winogradWeight.data + i * _strideW, _nhwcWeight.data + i * _nhwcStrideW, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                }
                 _winogradWeight.Resize(0);
             }
             if (internal)
@@ -674,7 +692,12 @@ namespace Simd
                 for (size_t i = 0; i < _count; ++i)
                 {
                     if (_nhwcWeight.data)
-                        _nhwcRun(_M * merge, _N, _K, bufS + i * _strideS * merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * merge, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    {
+                        if (_gemmCb.Size())
+                            _gemmCb.Run(GemmCbArgs(_M * merge, _N, _K, bufS + i * _strideS * merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * merge));
+                        else
+                            _nhwcRun(_M * merge, _N, _K, bufS + i * _strideS * merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * merge, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    }
                     else
                         _gemm.Run(GemmArgs(_M * merge, _N, _K, &_1, bufS + i * _strideS * merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * merge, _N));
                 }

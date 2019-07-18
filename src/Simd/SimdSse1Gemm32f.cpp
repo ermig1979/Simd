@@ -676,7 +676,7 @@ namespace Simd
                 kernelTT = tail > DF ? Sse::GemmKernelMx12nn : (tail > F ? Sse::GemmKernelMx8nn : Sse::GemmKernelMx4nn);
                 type = GemmKernelF3;
             }
-            if (type == GemmKernelF2 || (type == GemmKernelAny && N > 4))
+            if (type == GemmKernelF2 || (type == GemmKernelF3 && N <= 8) || (type == GemmKernelAny && N > 4))
             {
                 microM = 6;
                 microN = 8;
@@ -687,7 +687,7 @@ namespace Simd
                 kernelTT = tail > F ? Sse::GemmKernelMx8nn : Sse::GemmKernelMx4nn;
                 type = GemmKernelF2;
             }
-            if (type == GemmKernelF1 || type == GemmKernelAny)
+            if (type == GemmKernelF1 || (type == GemmKernelF2 && N <= 4) || type == GemmKernelAny)
             {
                 microM = 6;
                 microN = 4;
