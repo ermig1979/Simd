@@ -548,9 +548,6 @@ namespace Simd
         void GemmKernelMx32nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, __mmask16 mask);
         void GemmKernelMx16nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, __mmask16 mask);
 
-        typedef void(*GemmTail)(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, __mmask16 mask);
-        GemmTail GetGemmTail(size_t M, size_t N);
-
         void GemmPackA(const float * A, size_t lda, size_t M, size_t K, size_t microM, float * pA);
         void GemmPackB(const float * B, size_t ldb, size_t K, size_t N, size_t microN, float * pB);
         void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc);

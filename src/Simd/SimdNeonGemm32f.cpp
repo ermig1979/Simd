@@ -406,6 +406,161 @@ namespace Simd
                 AddProduct(C + i * ldc, _alpha, c[i], tail);
         }
 
+        template<int M> void GemmKernelMx12nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        {
+            float32x4_t c00, c01, c02, c03, c10, c11, c12, c13, c20, c21, c22, c23, b0, b1, b2, a0;
+            if (M > 0) c00 = vdupq_n_f32(0.0), c10 = vdupq_n_f32(0.0), c20 = vdupq_n_f32(0.0);
+            if (M > 1) c01 = vdupq_n_f32(0.0), c11 = vdupq_n_f32(0.0), c21 = vdupq_n_f32(0.0);
+            if (M > 2) c02 = vdupq_n_f32(0.0), c12 = vdupq_n_f32(0.0), c22 = vdupq_n_f32(0.0);
+            if (M > 3) c03 = vdupq_n_f32(0.0), c13 = vdupq_n_f32(0.0), c23 = vdupq_n_f32(0.0);
+            size_t oa0, oa1, oa2, oa3;
+            if (M > 0) oa0 = lda * 0;
+            if (M > 1) oa1 = lda * 1;
+            if (M > 2) oa2 = lda * 2;
+            if (M > 3) oa3 = lda * 3;
+            const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
+            const size_t ob2 = ldb * 2;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
+                b2 = Load<false>(B + ob2);
+                if (M > 0) a0 = vdupq_n_f32(A[oa0]), c00 = vmlaq_f32(c00, b0, a0), c10 = vmlaq_f32(c10, b1, a0), c20 = vmlaq_f32(c20, b2, a0);
+                if (M > 1) a0 = vdupq_n_f32(A[oa1]), c01 = vmlaq_f32(c01, b0, a0), c11 = vmlaq_f32(c11, b1, a0), c21 = vmlaq_f32(c21, b2, a0);
+                if (M > 2) a0 = vdupq_n_f32(A[oa2]), c02 = vmlaq_f32(c02, b0, a0), c12 = vmlaq_f32(c12, b1, a0), c22 = vmlaq_f32(c22, b2, a0);
+                if (M > 3) a0 = vdupq_n_f32(A[oa3]), c03 = vmlaq_f32(c03, b0, a0), c13 = vmlaq_f32(c13, b1, a0), c23 = vmlaq_f32(c23, b2, a0);
+                B += sb;
+                A += sa;
+            }
+            float32x4_t _alpha = vdupq_n_f32(alpha);
+            if (M > 0) AddProduct(C + 0 * F, _alpha, c00), AddProduct(C + 1 * F, _alpha, c10), AddProduct(C + 2 * F, _alpha, c20, tail), C += ldc;
+            if (M > 1) AddProduct(C + 0 * F, _alpha, c01), AddProduct(C + 1 * F, _alpha, c11), AddProduct(C + 2 * F, _alpha, c21, tail), C += ldc;
+            if (M > 2) AddProduct(C + 0 * F, _alpha, c02), AddProduct(C + 1 * F, _alpha, c12), AddProduct(C + 2 * F, _alpha, c22, tail), C += ldc;
+            if (M > 3) AddProduct(C + 0 * F, _alpha, c03), AddProduct(C + 1 * F, _alpha, c13), AddProduct(C + 2 * F, _alpha, c23, tail), C += ldc;
+        }
+
+        template<int M> void GemmKernelMx8nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        {
+            float32x4_t c00, c01, c02, c03, c04, c05, c10, c11, c12, c13, c14, c15, b0, b1, a0;
+            if (M > 0) c00 = vdupq_n_f32(0.0), c10 = vdupq_n_f32(0.0);
+            if (M > 1) c01 = vdupq_n_f32(0.0), c11 = vdupq_n_f32(0.0);
+            if (M > 2) c02 = vdupq_n_f32(0.0), c12 = vdupq_n_f32(0.0);
+            if (M > 3) c03 = vdupq_n_f32(0.0), c13 = vdupq_n_f32(0.0);
+            if (M > 4) c04 = vdupq_n_f32(0.0), c14 = vdupq_n_f32(0.0);
+            if (M > 5) c05 = vdupq_n_f32(0.0), c15 = vdupq_n_f32(0.0);
+            size_t oa0, oa1, oa2, oa3, oa4, oa5;
+            if (M > 0) oa0 = lda * 0;
+            if (M > 1) oa1 = lda * 1;
+            if (M > 2) oa2 = lda * 2;
+            if (M > 3) oa3 = lda * 3;
+            if (M > 4) oa4 = lda * 4;
+            if (M > 5) oa5 = lda * 5;
+            const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            const size_t ob1 = ldb * 1;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = Load<false>(B + ob0);
+                b1 = Load<false>(B + ob1);
+                if (M > 0) a0 = vdupq_n_f32(A[oa0]), c00 = vmlaq_f32(c00, b0, a0), c10 = vmlaq_f32(c10, b1, a0);
+                if (M > 1) a0 = vdupq_n_f32(A[oa1]), c01 = vmlaq_f32(c01, b0, a0), c11 = vmlaq_f32(c11, b1, a0);
+                if (M > 2) a0 = vdupq_n_f32(A[oa2]), c02 = vmlaq_f32(c02, b0, a0), c12 = vmlaq_f32(c12, b1, a0);
+                if (M > 3) a0 = vdupq_n_f32(A[oa3]), c03 = vmlaq_f32(c03, b0, a0), c13 = vmlaq_f32(c13, b1, a0);
+                if (M > 4) a0 = vdupq_n_f32(A[oa4]), c04 = vmlaq_f32(c04, b0, a0), c14 = vmlaq_f32(c14, b1, a0);
+                if (M > 5) a0 = vdupq_n_f32(A[oa5]), c05 = vmlaq_f32(c00, b0, a0), c15 = vmlaq_f32(c15, b1, a0);
+                B += sb;
+                A += sa;
+            }
+            float32x4_t _alpha = vdupq_n_f32(alpha);
+            if (M > 0) AddProduct(C + 0 * F, _alpha, c00), AddProduct(C + 1 * F, _alpha, c10, tail), C += ldc;
+            if (M > 1) AddProduct(C + 0 * F, _alpha, c01), AddProduct(C + 1 * F, _alpha, c11, tail), C += ldc;
+            if (M > 2) AddProduct(C + 0 * F, _alpha, c02), AddProduct(C + 1 * F, _alpha, c12, tail), C += ldc;
+            if (M > 3) AddProduct(C + 0 * F, _alpha, c03), AddProduct(C + 1 * F, _alpha, c13, tail), C += ldc;
+            if (M > 4) AddProduct(C + 0 * F, _alpha, c04), AddProduct(C + 1 * F, _alpha, c14, tail), C += ldc;
+            if (M > 5) AddProduct(C + 0 * F, _alpha, c05), AddProduct(C + 1 * F, _alpha, c15, tail), C += ldc;
+        }
+
+        template<int M> void GemmKernelMx4nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        {
+            float32x4_t c00, c01, c02, c03, c04, c05, b0;
+            if (M > 0) c00 = vdupq_n_f32(0.0);
+            if (M > 1) c01 = vdupq_n_f32(0.0);
+            if (M > 2) c02 = vdupq_n_f32(0.0);
+            if (M > 3) c03 = vdupq_n_f32(0.0);
+            if (M > 4) c04 = vdupq_n_f32(0.0);
+            if (M > 5) c05 = vdupq_n_f32(0.0);
+            size_t oa0, oa1, oa2, oa3, oa4, oa5;
+            if (M > 0) oa0 = lda * 0;
+            if (M > 1) oa1 = lda * 1;
+            if (M > 2) oa2 = lda * 2;
+            if (M > 3) oa3 = lda * 3;
+            if (M > 4) oa4 = lda * 4;
+            if (M > 5) oa5 = lda * 5;
+            const size_t sa = lda == 1 ? M : 1;
+            const size_t ob0 = ldb * 0;
+            for (size_t k = 0; k < K; k++)
+            {
+                b0 = Load<false>(B + ob0);
+                if (M > 0) c00 = vmlaq_f32(c00, b0, vdupq_n_f32(A[oa0]));
+                if (M > 1) c01 = vmlaq_f32(c01, b0, vdupq_n_f32(A[oa1]));
+                if (M > 2) c02 = vmlaq_f32(c02, b0, vdupq_n_f32(A[oa2]));
+                if (M > 3) c03 = vmlaq_f32(c03, b0, vdupq_n_f32(A[oa3]));
+                if (M > 4) c04 = vmlaq_f32(c04, b0, vdupq_n_f32(A[oa4]));
+                if (M > 5) c05 = vmlaq_f32(c05, b0, vdupq_n_f32(A[oa5]));
+                B += sb;
+                A += sa;
+            }
+            float32x4_t _alpha = vdupq_n_f32(alpha);
+            if (M > 0) AddProduct(C + 0 * ldc, _alpha, c00, tail);
+            if (M > 1) AddProduct(C + 1 * ldc, _alpha, c01, tail);
+            if (M > 2) AddProduct(C + 2 * ldc, _alpha, c02, tail);
+            if (M > 3) AddProduct(C + 3 * ldc, _alpha, c03, tail);
+            if (M > 4) AddProduct(C + 4 * ldc, _alpha, c04, tail);
+            if (M > 5) AddProduct(C + 5 * ldc, _alpha, c05, tail);
+        }
+
+        SIMD_INLINE Simd::GemmNN<float, size_t>::Tail GetGemmTail(size_t M, size_t N)
+        {
+            if (N <= 4)
+            {
+                switch (M)
+                {
+                case 0: return GemmKernelMx4nnT<0>;
+                case 1: return GemmKernelMx4nnT<1>;
+                case 2: return GemmKernelMx4nnT<2>;
+                case 3: return GemmKernelMx4nnT<3>;
+                case 4: return GemmKernelMx4nnT<4>;
+                case 5: return GemmKernelMx4nnT<5>;
+                }
+            }
+            else if (N <= 8)
+            {
+                switch (M)
+                {
+                case 0: return GemmKernelMx8nnT<0>;
+                case 1: return GemmKernelMx8nnT<1>;
+                case 2: return GemmKernelMx8nnT<2>;
+                case 3: return GemmKernelMx8nnT<3>;
+                case 4: return GemmKernelMx8nnT<4>;
+                case 5: return GemmKernelMx8nnT<5>;
+                }
+            }
+            else if (N <= 12)
+            {
+                switch (M)
+                {
+                case 0: return GemmKernelMx12nnT<0>;
+                case 1: return GemmKernelMx12nnT<1>;
+                case 2: return GemmKernelMx12nnT<2>;
+                case 3: return GemmKernelMx12nnT<3>;
+                }
+            }
+            assert(0);
+            return NULL;
+        }
+
         void GemmPackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)
         {
             for (size_t i = 0; i < M; i += cell)
@@ -651,8 +806,8 @@ namespace Simd
                 size_t tail = N - AlignLoAny(N, microN);
                 kernelMM = Neon::GemmKernel4x12nn;
                 kernelMT = tail > DF ? Neon::GemmKernel4x12nn : (tail > F ? Neon::GemmKernel4x8nn : Neon::GemmKernel4x4nn);
-                kernelTM = Neon::GemmKernelMx12nn;
-                kernelTT = tail > DF ? Neon::GemmKernelMx12nn : (tail > F ? Neon::GemmKernelMx8nn : Neon::GemmKernelMx4nn);
+                kernelTM = Neon::GetGemmTail(M%microM, microN);
+                kernelTT = Neon::GetGemmTail(M%microM, tail);
                 type = GemmKernelF3;
             }
             if (type == GemmKernelF2 || (type == GemmKernelF3 && N <= 8) || (type == GemmKernelAny && N > 4))
@@ -662,8 +817,8 @@ namespace Simd
                 size_t tail = N - AlignLoAny(N, microN);
                 kernelMM = Neon::GemmKernel6x8nn;
                 kernelMT = tail > F ? Neon::GemmKernel6x8nn : Neon::GemmKernel6x4nn;
-                kernelTM = Neon::GemmKernelMx8nn;
-                kernelTT = tail > F ? Neon::GemmKernelMx8nn : Neon::GemmKernelMx4nn;
+                kernelTM = Neon::GetGemmTail(M%microM, microN);
+                kernelTT = Neon::GetGemmTail(M%microM, tail);
                 type = GemmKernelF2;
             }
             if (type == GemmKernelF1 || (type == GemmKernelF2 && N <= 4) || type == GemmKernelAny)
@@ -672,8 +827,8 @@ namespace Simd
                 microN = 4;
                 kernelMM = Neon::GemmKernel6x4nn;
                 kernelMT = Neon::GemmKernel6x4nn;
-                kernelTM = Neon::GemmKernelMx4nn;
-                kernelTT = Neon::GemmKernelMx4nn;
+                kernelTM = Neon::GetGemmTail(M%microM, microN);
+                kernelTT = Neon::GetGemmTail(M%microM, microN);
                 type = GemmKernelF1;
             }
             return Gemm32fNNcb(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Neon::GemmPackB, Neon::GemmScaleC, NULL, compatibility);
