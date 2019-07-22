@@ -32,6 +32,8 @@
 #undef _N
 #endif
 
+#define SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
+
 namespace Simd
 {
     struct MergConvParam

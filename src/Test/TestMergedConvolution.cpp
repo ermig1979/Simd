@@ -222,8 +222,9 @@ namespace Test
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
 #endif
 #else
-        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
+        //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
         //result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
+        result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 32, 22, 22, 1, 1, a0, 175, 3, 2, a1, 64, a2, f), f1, f2);
 #endif
         return result;
     }
