@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 option(AVX512 "AVX512 enable" ON)
 option(SIMD_TEST "Test framework enable" ON)
 option(PRINT_INFO "Print build information" ON)
+option(SIMD_PERF "Internal performance statistic" OFF)
 
 set(TRUNK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
 
@@ -58,6 +59,10 @@ elseif(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O0")
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_BUILD_TYPE!")
+endif()
+
+if(SIMD_PERF)
+	add_definitions(-DSIMD_PERFORMANCE_STATISTIC)
 endif()
 
 if((CMAKE_SYSTEM_PROCESSOR STREQUAL "i686") OR (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64"))
