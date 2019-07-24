@@ -83,94 +83,56 @@ namespace Simd
             Store<false>(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x4(const float * src0, size_t srcC,
+        template<SimdConvolutionActivationType type, int M> SIMD_INLINE void InputConvolution1x1_2xM(const float * src0, size_t srcC,
             const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1)
         {
-            float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, s0, w0, w1;
-            d00 = bias[0], d01 = bias[1];
-            d10 = bias[0], d11 = bias[1];
-            d20 = bias[0], d21 = bias[1];
-            d30 = bias[0], d31 = bias[1];
+            float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            if (M > 0) d00 = bias[0], d01 = bias[1];
+            if (M > 1) d10 = bias[0], d11 = bias[1];
+            if (M > 2) d20 = bias[0], d21 = bias[1];
+            if (M > 3) d30 = bias[0], d31 = bias[1];
+            if (M > 4) d40 = bias[0], d41 = bias[1];
+            if (M > 5) d50 = bias[0], d51 = bias[1];
             const float * src1 = src0 + 1 * srcC;
             const float * src2 = src0 + 2 * srcC;
             const float * src3 = src0 + 3 * srcC;
+            const float * src4 = src0 + 4 * srcC;
+            const float * src5 = src0 + 5 * srcC;
             for (size_t sc = 0; sc < srcC; ++sc)
             {
                 w0 = Load<false>(weight + 0);
                 w1 = Load<false>(weight + F);
-                s0 = vdupq_n_f32(src0[sc]);
-                d00 = vmlaq_f32(d00, s0, w0);
-                d01 = vmlaq_f32(d01, s0, w1);
-                s0 = vdupq_n_f32(src1[sc]);
-                d10 = vmlaq_f32(d10, s0, w0);
-                d11 = vmlaq_f32(d11, s0, w1);
-                s0 = vdupq_n_f32(src2[sc]);
-                d20 = vmlaq_f32(d20, s0, w0);
-                d21 = vmlaq_f32(d21, s0, w1);
-                s0 = vdupq_n_f32(src3[sc]);
-                d30 = vmlaq_f32(d30, s0, w0);
-                d31 = vmlaq_f32(d31, s0, w1);
+                if (M > 0) s0 = vdupq_n_f32(src0[sc]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                if (M > 1) s0 = vdupq_n_f32(src1[sc]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                if (M > 2) s0 = vdupq_n_f32(src2[sc]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                if (M > 3) s0 = vdupq_n_f32(src3[sc]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                if (M > 4) s0 = vdupq_n_f32(src4[sc]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
+                if (M > 5) s0 = vdupq_n_f32(src5[sc]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
                 weight += DF;
             }
-            Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
-            Store<false>(dst1 + 0 * F, Activate<type>(d01, params, 1));
-            Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
-            Store<false>(dst1 + 1 * F, Activate<type>(d11, params, 1));
-            Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
-            Store<false>(dst1 + 2 * F, Activate<type>(d21, params, 1));
-            Store<false>(dst0 + 3 * F, Activate<type>(d30, params, 0));
-            Store<false>(dst1 + 3 * F, Activate<type>(d31, params, 1));
+            if (M > 0) Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0)), Store<false>(dst1 + 0 * F, Activate<type>(d01, params, 1));
+            if (M > 1) Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0)), Store<false>(dst1 + 1 * F, Activate<type>(d11, params, 1));
+            if (M > 2) Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0)), Store<false>(dst1 + 2 * F, Activate<type>(d21, params, 1));
+            if (M > 3) Store<false>(dst0 + 3 * F, Activate<type>(d30, params, 0)), Store<false>(dst1 + 3 * F, Activate<type>(d31, params, 1));
+            if (M > 4) Store<false>(dst0 + 4 * F, Activate<type>(d40, params, 0)), Store<false>(dst1 + 4 * F, Activate<type>(d41, params, 1));
+            if (M > 5) Store<false>(dst0 + 5 * F, Activate<type>(d50, params, 0)), Store<false>(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x3(const float * src0, size_t srcC,
-            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1)
-        {
-            float32x4_t d00, d01, d10, d11, d20, d21, s0, w0, w1;
-            d00 = bias[0], d01 = bias[1];
-            d10 = bias[0], d11 = bias[1];
-            d20 = bias[0], d21 = bias[1];
-            const float * src1 = src0 + 1 * srcC;
-            const float * src2 = src0 + 2 * srcC;
-            for (size_t sc = 0; sc < srcC; ++sc)
-            {
-                w0 = Load<false>(weight + 0);
-                w1 = Load<false>(weight + F);
-                s0 = vdupq_n_f32(src0[sc]);
-                d00 = vmlaq_f32(d00, s0, w0);
-                d01 = vmlaq_f32(d01, s0, w1);
-                s0 = vdupq_n_f32(src1[sc]);
-                d10 = vmlaq_f32(d10, s0, w0);
-                d11 = vmlaq_f32(d11, s0, w1);
-                s0 = vdupq_n_f32(src2[sc]);
-                d20 = vmlaq_f32(d20, s0, w0);
-                d21 = vmlaq_f32(d21, s0, w1);
-                weight += DF;
-            }
-            Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
-            Store<false>(dst1 + 0 * F, Activate<type>(d01, params, 1));
-            Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
-            Store<false>(dst1 + 1 * F, Activate<type>(d11, params, 1));
-            Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
-            Store<false>(dst1 + 2 * F, Activate<type>(d21, params, 1));
-        }
+        typedef void(*InputConvolution1x1_2xM_Ptr)(const float * src0, size_t srcC, const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1);
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x1(const float * src0, size_t srcC,
-            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0, float * dst1)
+        template<SimdConvolutionActivationType type> InputConvolution1x1_2xM_Ptr GetInputConvolution1x1_2xM(size_t M)
         {
-            float32x4_t d00, d01, s0, w0, w1;
-            d00 = bias[0];
-            d01 = bias[1];
-            for (size_t sc = 0; sc < srcC; ++sc)
+            switch (M)
             {
-                w0 = Load<false>(weight + 0);
-                w1 = Load<false>(weight + F);
-                s0 = vdupq_n_f32(src0[sc]);
-                d00 = vmlaq_f32(d00, s0, w0);
-                d01 = vmlaq_f32(d01, s0, w1);
-                weight += DF;
+            case 0: return InputConvolution1x1_2xM<type, 0>;
+            case 1: return InputConvolution1x1_2xM<type, 1>;
+            case 2: return InputConvolution1x1_2xM<type, 2>;
+            case 3: return InputConvolution1x1_2xM<type, 3>;
+            case 4: return InputConvolution1x1_2xM<type, 4>;
+            case 5: return InputConvolution1x1_2xM<type, 5>;
             }
-            Store<false>(dst0, Activate<type>(d00, params, 0));
-            Store<false>(dst1, Activate<type>(d01, params, 1));
+            assert(0);
+            return NULL;
         }
 
         template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x6(const float * src0, size_t srcC,
@@ -213,44 +175,55 @@ namespace Simd
             Store<false>(dst0 + 5 * F, Activate<type>(d50, params, 0));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x3(const float * src0, size_t srcC,
+        template<SimdConvolutionActivationType type, int M> SIMD_INLINE void InputConvolution1x1_1xM(const float * src0, size_t srcC,
             const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0)
         {
-            float32x4_t d00, d10, d20, s0, w0;
-            d00 = bias[0];
-            d10 = bias[0];
-            d20 = bias[0];
+            float32x4_t d00, d10,d20, d30, d40, d50, s0, w0;
+            if (M > 0) d00 = bias[0];
+            if (M > 1) d10 = bias[0];
+            if (M > 2) d20 = bias[0];
+            if (M > 3) d30 = bias[0];
+            if (M > 4) d40 = bias[0];
+            if (M > 5) d50 = bias[0];
             const float * src1 = src0 + 1 * srcC;
             const float * src2 = src0 + 2 * srcC;
+            const float * src3 = src0 + 3 * srcC;
+            const float * src4 = src0 + 4 * srcC;
+            const float * src5 = src0 + 5 * srcC;
             for (size_t sc = 0; sc < srcC; ++sc)
             {
                 w0 = Load<false>(weight + 0);
-                s0 = vdupq_n_f32(src0[sc]);
-                d00 = vmlaq_f32(d00, s0, w0);
-                s0 = vdupq_n_f32(src1[sc]);
-                d10 = vmlaq_f32(d10, s0, w0);
-                s0 = vdupq_n_f32(src2[sc]);
-                d20 = vmlaq_f32(d20, s0, w0);
+                if (M > 0) s0 = vdupq_n_f32(src0[sc]), d00 = vmlaq_f32(d00, s0, w0);
+                if (M > 1) s0 = vdupq_n_f32(src1[sc]), d10 = vmlaq_f32(d10, s0, w0);
+                if (M > 2) s0 = vdupq_n_f32(src2[sc]), d20 = vmlaq_f32(d20, s0, w0);
+                if (M > 3) s0 = vdupq_n_f32(src3[sc]), d30 = vmlaq_f32(d30, s0, w0);
+                if (M > 4) s0 = vdupq_n_f32(src4[sc]), d40 = vmlaq_f32(d40, s0, w0);
+                if (M > 5) s0 = vdupq_n_f32(src5[sc]), d50 = vmlaq_f32(d50, s0, w0);
                 weight += DF;
             }
-            Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
-            Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
-            Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            if (M > 0) Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            if (M > 1) Store<false>(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            if (M > 2) Store<false>(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            if (M > 3) Store<false>(dst0 + 3 * F, Activate<type>(d30, params, 0));
+            if (M > 4) Store<false>(dst0 + 4 * F, Activate<type>(d40, params, 0));
+            if (M > 5) Store<false>(dst0 + 5 * F, Activate<type>(d50, params, 0));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x1(const float * src0, size_t srcC,
-            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0)
+        typedef void(*InputConvolution1x1_1xM_Ptr)(const float * src0, size_t srcC, const float * weight, const float32x4_t * bias, const float32x4_t * params, float * dst0);
+
+        template<SimdConvolutionActivationType type> InputConvolution1x1_1xM_Ptr GetInputConvolution1x1_1xM(size_t M)
         {
-            float32x4_t d00, s0, w0;
-            d00 = bias[0];
-            for (size_t sc = 0; sc < srcC; ++sc)
+            switch (M)
             {
-                w0 = Load<false>(weight + 0);
-                s0 = vdupq_n_f32(src0[sc]);
-                d00 = vmlaq_f32(d00, s0, w0);
-                weight += DF;
+            case 0: return InputConvolution1x1_1xM<type, 0>;
+            case 1: return InputConvolution1x1_1xM<type, 1>;
+            case 2: return InputConvolution1x1_1xM<type, 2>;
+            case 3: return InputConvolution1x1_1xM<type, 3>;
+            case 4: return InputConvolution1x1_1xM<type, 4>;
+            case 5: return InputConvolution1x1_1xM<type, 5>;
             }
-            Store<false>(dst0, Activate<type>(d00, params, 0));
+            assert(0);
+            return NULL;
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution1x1(const float * src, const SimdConvolutionParameters & p,
@@ -258,11 +231,21 @@ namespace Simd
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
             size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW *F;
-            size_t dstCDF = AlignLo(dstC, DF), dstW3 = AlignLoAny(dstW, 3), dstW6 = AlignLoAny(dstW, 6);
+            size_t dstCDF = AlignLo(dstC, DF);
             float32x4_t _params[2], _bias[2];
             _params[0] = vdupq_n_f32(params[0]);
             if (type == ::SimdConvolutionActivationRestrictRange)
                 _params[1] = vdupq_n_f32(params[1]);
+#ifdef SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
+            size_t yInt = Simd::Max(yBeg, yEnd&(~dstM)), nBeg = yBeg * dstW, nInt = yInt * dstW, nEnd = yEnd * dstW;
+            size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
+            InputConvolution1x1_2xM_Ptr tailInt_2 = GetInputConvolution1x1_2xM<type>(nIntTail);
+            InputConvolution1x1_2xM_Ptr tailEnd_2 = GetInputConvolution1x1_2xM<type>(nEndTail);
+#else
+            size_t dstW6 = AlignLoAny(dstW, 6), wTail = dstW - dstW6;
+            InputConvolution1x1_2xM_Ptr tailW_2 = GetInputConvolution1x1_2xM<type>(wTail);
+            InputConvolution1x1_1xM_Ptr tailW_1 = GetInputConvolution1x1_1xM<type>(wTail);
+#endif
 
             size_t dc = 0;
             for (; dc < dstC; dc += DF)
@@ -277,6 +260,35 @@ namespace Simd
                 const float * pS = src + yBeg * srcW*srcC;
                 const float * pW = weight + dc * srcC;
                 float * pD = dst + (dc / F)*dstS;
+#ifdef SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
+                float * dst0 = pD + (yBeg&dstM)*dstW*F;
+                float * dst1 = pD + (yInt&dstM)*dstW*F;
+                size_t dn = nBeg;
+                if (dstC - dc > F)
+                {
+                    for (; dn < nInt6; dn += 6, pS += 6 * srcC, dst0 += 6 * F)
+                        InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
+                    if (nIntTail)
+                        tailInt_2(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += nIntTail * srcC, dn += nIntTail;
+                    for (; dn < nEnd6; dn += 6, pS += 6 * srcC, dst1 += 6 * F)
+                        InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS);
+                    if (nEndTail)
+                        tailEnd_2(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS), pS += nEndTail * srcC, dn += nEndTail;
+                }
+                else
+                {
+                    InputConvolution1x1_1xM_Ptr tailInt_1 = GetInputConvolution1x1_1xM<type>(nIntTail);
+                    InputConvolution1x1_1xM_Ptr tailEnd_1 = GetInputConvolution1x1_1xM<type>(nEndTail);
+                    for (; dn < nInt6; dn += 6, pS += 6 * srcC, dst0 += 6 * F)
+                        InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst0);
+                    if (nIntTail)
+                        tailInt_1(pS, srcC, pW, _bias, _params, dst0), pS += nIntTail * srcC, dn += nIntTail;
+                    for (; dn < nEnd6; dn += 6, pS += 6 * srcC, dst1 += 6 * F)
+                        InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst1);
+                    if (nEndTail)
+                        tailEnd_1(pS, srcC, pW, _bias, _params, dst1), pS += nEndTail * srcC, dn += nEndTail;
+                }
+#else
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
                     float * dst0 = pD + (dy&dstM)*dstW*F;
@@ -285,26 +297,18 @@ namespace Simd
                     {
                         for (; dx < dstW6; dx += 6, pS += 6 * srcC, dst0 += 6 * F)
                             InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
-                        if (dstW - dstW6 == 4)
-                            InputConvolution1x1_2x4<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += 4 * srcC;
-                        else
-                        {
-                            for (; dx < dstW3; dx += 3, pS += 3 * srcC, dst0 += 3 * F)
-                                InputConvolution1x1_2x3<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
-                            for (; dx < dstW; dx += 1, pS += srcC, dst0 += F)
-                                InputConvolution1x1_2x1<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
-                        }
+                        if (wTail)
+                            tailW_2(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += wTail * srcC, dx += wTail;
                     }
                     else
                     {
                         for (; dx < dstW6; dx += 6, pS += 6 * srcC, dst0 += 6 * F)
                             InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst0);
-                        for (; dx < dstW3; dx += 3, pS += 3 * srcC, dst0 += 3 * F)
-                            InputConvolution1x1_1x3<type>(pS, srcC, pW, _bias, _params, dst0);
-                        for (; dx < dstW; dx += 1, pS += srcC, dst0 += F)
-                            InputConvolution1x1_1x1<type>(pS, srcC, pW, _bias, _params, dst0);
+                        if (wTail)
+                            tailW_1(pS, srcC, pW, _bias, _params, dst0), pS += wTail * srcC, dx += wTail;
                     }
                 }
+#endif
             }
         }
 

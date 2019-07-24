@@ -475,7 +475,8 @@ namespace Test
         //result = result && ConvolutionForwardAutoTest(eps*10, Param(1, 1024, 128, 128, 1024, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #if 1
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 768, 10, 4, 128, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);

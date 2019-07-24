@@ -80,6 +80,11 @@ namespace Simd
             return src0 + src1 * src2;
         }
 
+        SIMD_INLINE float SynetFusedLayerForward9(float src, float scale, float bias)
+        {
+            return Simd::Max(0.0f, src * scale + bias);
+        }
+
         SIMD_INLINE float SynetPreluLayerForward(float value, float slope)
         {
             return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);

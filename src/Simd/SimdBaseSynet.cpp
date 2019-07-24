@@ -424,6 +424,60 @@ namespace Simd
             }
         }
 
+        void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans)
+        {
+            const float * scale1 = scale0 + count0;
+            const float * bias1 = bias0 + count0;
+            if (trans || size == 1)
+            {
+                if (dst1)
+                {
+                    for (size_t j = 0; j < size; ++j)
+                    {
+                        for (size_t i = 0; i < count0; ++i)
+                            dst0[i] = SynetFusedLayerForward9(src0[i], scale0[i], bias0[i]), dst1[i] = src0[i];
+                        src0 += count0, dst0 += count0, dst1 += count0;
+                        for (size_t i = 0; i < count1; ++i)
+                            dst0[i] = SynetFusedLayerForward9(src1[i], scale1[i], bias1[i]), dst1[i] = src1[i];
+                        src1 += count1, dst0 += count1, dst1 += count1;
+                    }
+                }
+                else
+                {
+                    for (size_t j = 0; j < size; ++j)
+                    {
+                        for (size_t i = 0; i < count0; ++i)
+                            dst0[i] = SynetFusedLayerForward9(src0[i], scale0[i], bias0[i]);
+                        src0 += count0, dst0 += count0;
+                        for (size_t i = 0; i < count1; ++i)
+                            dst0[i] = SynetFusedLayerForward9(src1[i], scale1[i], bias1[i]);
+                        src1 += count1, dst0 += count1;
+                    }
+                }
+            }
+            else
+            {
+                if (dst1)
+                {
+                    for (size_t i = 0; i < count0; ++i, src0 += size, dst0 += size, dst1 += size)
+                        for (size_t j = 0; j < size; ++j)
+                            dst0[j] = SynetFusedLayerForward9(src0[j], scale0[i], bias0[i]), dst1[j] = src0[j];
+                    for (size_t i = 0; i < count1; ++i, src1 += size, dst0 += size, dst1 += size)
+                        for (size_t j = 0; j < size; ++j)
+                            dst0[j] = SynetFusedLayerForward9(src1[j], scale1[i], bias1[i]), dst1[j] = src1[j];
+                }
+                else
+                {
+                    for (size_t i = 0; i < count0; ++i, src0 += size, dst0 += size)
+                        for (size_t j = 0; j < size; ++j)
+                            dst0[j] = SynetFusedLayerForward9(src0[j], scale0[i], bias0[i]);
+                    for (size_t i = 0; i < count1; ++i, src1 += size, dst0 += size)
+                        for (size_t j = 0; j < size; ++j)
+                            dst0[j] = SynetFusedLayerForward9(src1[j], scale1[i], bias1[i]);
+                }
+            }
+        }
+
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
         {
             size_t aligned = Simd::AlignLo(size, 4);

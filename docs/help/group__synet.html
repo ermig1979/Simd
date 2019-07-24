@@ -146,6 +146,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga9ac26cda8011b0575f50719ef4d9dee9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9ac26cda8011b0575f50719ef4d9dee9">SimdSynetFusedLayerForward8</a> (const float *src0, const float *src1, const float *src2, size_t count, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:ga9ac26cda8011b0575f50719ef4d9dee9"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 8).  <a href="#ga9ac26cda8011b0575f50719ef4d9dee9">More...</a><br /></td></tr>
 <tr class="separator:ga9ac26cda8011b0575f50719ef4d9dee9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3503fef550541fdc7021f522a19f1c18"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga3503fef550541fdc7021f522a19f1c18">SimdSynetFusedLayerForward9</a> (const float *src0, const float *src1, const float *scale, const float *bias, size_t count0, size_t count1, size_t size, float *dst0, float *dst1, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
+<tr class="memdesc:ga3503fef550541fdc7021f522a19f1c18"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 9).  <a href="#ga3503fef550541fdc7021f522a19f1c18">More...</a><br /></td></tr>
+<tr class="separator:ga3503fef550541fdc7021f522a19f1c18"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of InnerProductLayer.  <a href="#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1400,6 +1403,122 @@ else
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a channel size. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a spatial size. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga3503fef550541fdc7021f522a19f1c18"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3503fef550541fdc7021f522a19f1c18">&#9670;&nbsp;</a></span>SimdSynetFusedLayerForward9()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetFusedLayerForward9 </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bias</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>count1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst0</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst1</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>trans</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of FusedLayer (type 9). </p>
+<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; count0; ++i)
+    for(j = 0; j &lt; size; ++j)
+    {
+        if(trans)
+            s = i + j*count0, d = i + j*(count0 + count1);
+        else
+            s = i*size + j, d = i*size + j;
+        dst0[d] = src0[s]*scale[i] + bias[i] + src1[o]*src2[i];
+        if(dst1)
+            dst1[d] = src0[s];
+    }
+for(i = 0; i &lt; count1; ++i)
+    for(j = 0; j &lt; size; ++j)
+    {
+        if(trans)
+            s = i + j*count1, d = i + count0 + j*(count0 + count1);
+        else
+            s = i*size + j, d = (i + count0)*size + j;
+        dst0[d] = src1[s]*scale[count0 + i] + bias[count0 + i] + src1[o]*src2[i];
+        if(dst1)
+            dst1[d] = src1[s];
+    }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src0</td><td>- a pointer to the first input 32-bit float array. The size of the array must be equal to count0*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src1</td><td>- a pointer to the second input 32-bit float array. The size of the array must be equal to count1*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the 32-bit float array with bias coefficients. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count0</td><td>- a channel size of the first input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">count1</td><td>- a channel size of the second input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a spatial size. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst0</td><td>- a pointer to the first output 32-bit float array. The size of the array must be equal to (count0 + count1)*size. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst1</td><td>- a pointer to the second output 32-bit float array. The size of the array must be equal to (count0 + count1)*size. The pointer can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
   </table>
   </dd>

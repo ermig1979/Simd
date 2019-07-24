@@ -5765,6 +5765,53 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans);
+
+        \short This function is used for forward propagation of FusedLayer (type 9).
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < count0; ++i)
+            for(j = 0; j < size; ++j)
+            {
+                if(trans)
+                    s = i + j*count0, d = i + j*(count0 + count1);
+                else
+                    s = i*size + j, d = i*size + j;
+                dst0[d] = src0[s]*scale[i] + bias[i] + src1[o]*src2[i];
+                if(dst1)
+                    dst1[d] = src0[s];
+            }
+        for(i = 0; i < count1; ++i)
+            for(j = 0; j < size; ++j)
+            {
+                if(trans)
+                    s = i + j*count1, d = i + count0 + j*(count0 + count1);
+                else
+                    s = i*size + j, d = (i + count0)*size + j;
+                dst0[d] = src1[s]*scale[count0 + i] + bias[count0 + i] + src1[o]*src2[i];
+                if(dst1)
+                    dst1[d] = src1[s];
+            }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src0 - a pointer to the first input 32-bit float array. The size of the array must be equal to count0*size.
+        \param [in] src1 - a pointer to the second input 32-bit float array. The size of the array must be equal to count1*size.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients.
+        \param [in] count0 - a channel size of the first input image.
+        \param [in] count1 - a channel size of the second input image.
+        \param [in] size - a spatial size.
+        \param [out] dst0 - a pointer to the first output 32-bit float array. The size of the array must be equal to (count0 + count1)*size.
+        \param [out] dst1 - a pointer to the second output 32-bit float array. The size of the array must be equal to (count0 + count1)*size. The pointer can be NULL.
+        \param [in] trans - a flag of transposed data.
+    */
+    SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
 
         \short This function is used for forward propagation of InnerProductLayer.
