@@ -77,6 +77,68 @@ typedef enum
 } SimdBool;
 
 /*! @ingroup c_types
+    Describes types of compare operation.
+    Operation compare(a, b) is
+*/
+typedef enum
+{
+    /*! equal to: a == b */
+    SimdCompareEqual,
+    /*! equal to: a != b */
+    SimdCompareNotEqual,
+    /*! equal to: a > b */
+    SimdCompareGreater,
+    /*! equal to: a >= b */
+    SimdCompareGreaterOrEqual,
+    /*! equal to: a < b */
+    SimdCompareLesser,
+    /*! equal to: a <= b */
+    SimdCompareLesserOrEqual,
+} SimdCompareType;
+
+/*! @ingroup synet
+    Describes type of activation function. It is used in ::SimdConvolutionInit and ::SimdConvolutionSetParams.
+*/
+typedef enum
+{
+    /*!
+        Identity (activation function is absent).
+    */
+    SimdConvolutionActivationIdentity = 0,
+    /*!
+        ReLU activation function.
+        \verbatim
+        dst[i] = Max(0, src[i]);
+        \endverbatim
+    */
+    SimdConvolutionActivationRelu,
+    /*!
+        Leaky ReLU activation function.
+        It has one parameter: slope (params[0]).
+        \verbatim
+        dst[i] = src[i] > 0 ? src[i] : slope*src[i];
+        \endverbatim
+    */
+    SimdConvolutionActivationLeakyRelu,
+    /*!
+        The activation function restricts range.
+        It has two parameters: lower (params[0]) and upper (params[1]) bound.
+        \verbatim
+        dst[i] = Min(Max(lower, src[i]), upper);
+        \endverbatim
+    */
+    SimdConvolutionActivationRestrictRange,
+    /*!
+        Leaky PReLU activation function.
+        It has m parameters: slopes[m] (m = dstC, n = dstH*dstW).
+        \verbatim
+        dst[i*n + j] = src[i*n + j] > 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
+        \endverbatim
+    */
+    SimdConvolutionActivationPrelu,
+} SimdConvolutionActivationType;
+
+/*! @ingroup c_types
     Describes types of SIMD extensions which supported by current CPU and Simd Library (see function ::SimdCpuInfo).
 */
 typedef enum
@@ -98,24 +160,22 @@ typedef enum
 } SimdCpuInfoFlags;
 
 /*! @ingroup c_types
-    Describes types of compare operation.
-    Operation compare(a, b) is
+    Describes types and flags to get information about classifier cascade with using function ::SimdDetectionInfo.
+    \note This type is used for implementation of Simd::Detection.
 */
 typedef enum
 {
-    /*! equal to: a == b */
-    SimdCompareEqual,
-    /*! equal to: a != b */
-    SimdCompareNotEqual,
-    /*! equal to: a > b */
-    SimdCompareGreater,
-    /*! equal to: a >= b */
-    SimdCompareGreaterOrEqual,
-    /*! equal to: a < b */
-    SimdCompareLesser,
-    /*! equal to: a <= b */
-    SimdCompareLesserOrEqual,
-} SimdCompareType;
+    /*! A HAAR cascade classifier type. */
+    SimdDetectionInfoFeatureHaar = 0,
+    /*! A LBP cascade classifier type. */
+    SimdDetectionInfoFeatureLbp,
+    /*! A mask to select cascade classifier type. */
+    SimdDetectionInfoFeatureMask = 3,
+    /*! A flag which defines existence of tilted features in the HAAR cascade. */
+    SimdDetectionInfoHasTilted = 4,
+    /*! A flag which defines possibility to use 16-bit integers for calculation. */
+    SimdDetectionInfoCanInt16 = 8,
+} SimdDetectionInfoFlags;
 
 /*! @ingroup c_types
     Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
@@ -195,24 +255,6 @@ typedef enum
 } SimdPixelFormatType;
 
 /*! @ingroup c_types
-    Describes types and flags to get information about classifier cascade with using function ::SimdDetectionInfo.
-    \note This type is used for implementation of Simd::Detection.
-*/
-typedef enum
-{
-    /*! A HAAR cascade classifier type. */
-    SimdDetectionInfoFeatureHaar = 0,
-    /*! A LBP cascade classifier type. */
-    SimdDetectionInfoFeatureLbp,
-    /*! A mask to select cascade classifier type. */
-    SimdDetectionInfoFeatureMask = 3,
-    /*! A flag which defines existence of tilted features in the HAAR cascade. */
-    SimdDetectionInfoHasTilted = 4,
-    /*! A flag which defines possibility to use 16-bit integers for calculation. */
-    SimdDetectionInfoCanInt16 = 8,
-} SimdDetectionInfoFlags;
-
-/*! @ingroup c_types
     Describes type of algorithm used for image reducing (downscale in 2 times) (see function Simd::ReduceGray).
 */
 enum SimdReduceType
@@ -222,6 +264,176 @@ enum SimdReduceType
     SimdReduce4x4, /*!< Using of function ::SimdReduceGray4x4 for image reducing. */
     SimdReduce5x5, /*!< Using of function ::SimdReduceGray5x5 for image reducing. */
 };
+
+/*! @ingroup resizing
+    Describes resized image channel types.
+*/
+typedef enum
+{
+    /*! 8-bit integer channel type.  */
+    SimdResizeChannelByte,
+    /*! 32-bit float channel type.  */
+    SimdResizeChannelFloat,
+} SimdResizeChannelType;
+
+/*! @ingroup resizing
+    Describes methods used in oreder to resize image.
+*/
+typedef enum
+{
+    /*! Bilinear method. */
+    SimdResizeMethodBilinear,
+    /*! caffe::interp compatible method. */
+    SimdResizeMethodCaffeInterp,
+    /*! Area method. */
+    SimdResizeMethodArea,
+} SimdResizeMethodType;
+
+/*! @ingroup synet
+    Describes operation type used in function ::SimdSynetEltwiseLayerForward.
+*/
+typedef enum
+{
+    SimdSynetEltwiseOperationProduct, /*!< Product. */
+    SimdSynetEltwiseOperationSum, /*!< Weighted sum. */
+    SimdSynetEltwiseOperationMax, /*!< Maximum. */
+    SimdSynetEltwiseOperationMin, /*!< Minimum. */
+} SimdSynetEltwiseOperationType;
+
+/*! @ingroup synet
+    Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor tensor format type.
+*/
+typedef enum
+{
+    SimdTensorFormatUnknown = -1, /*!< Unknown tensor format. */
+    SimdTensorFormatNchw, /*!< NCHW (N - batch, C - channels, H - height, W - width) 4D-tensor format of (input/output) image. */
+    SimdTensorFormatNhwc, /*!< NHWC (N - batch, H - height, W - width, C - channels) 4D-tensor format of (input/output) image. */
+    SimdTensorFormatNchw4c, /*!< NCHW4c (N - batch, C - (channels + 3) / 4, H - height, W - width, 4c - channels gropped by 4) special 5D-tensor format of (input/output) image optimized for SSE and NEON. */
+    SimdTensorFormatNchw8c, /*!< NCHW8c (N - batch, C - (channels + 7) / 8, H - height, W - width, 8c - channels gropped by 8) special 5D-tensor format of (input/output) image optimized for AVX and AVX2. */
+    SimdTensorFormatNchw16c, /*!< NCHW16c (N - batch, C - (channels + 15) / 16, H - height, W - width, 16c - channels gropped by 16) special 5D-tensor format of (input/output) image optimized for AVX-512. */
+    SimdTensorFormatOiyx, /*!< OIYX (O - output channels, I - input channels, Y - kernel height, X - kernel width) 4D-tensor format of 2D-convolution filter. */
+    SimdTensorFormatYxio, /*!< YXIO (Y - kernel height, X - kernel width, I - input channels, O - output channels) 4D-tensor format of 2D-convolution filter. */
+    SimdTensorFormatOyxi4o, /*!< OYXI4o (O - (output channels + 3)/4, Y - kernel height, X - kernel width, I - input channels, 4o - output channels gropped by 4) special 5D-tensor format of 2D-convolution filter optimized for SSE and NEON. */
+    SimdTensorFormatOyxi8o, /*!< OYXI8o (O - (output channels + 7)/8, Y - kernel height, X - kernel width, I - input channels, 8o - output channels gropped by 8) special 5D-tensor format of 2D-convolution filter optimized for AVX and AVX2. */
+    SimdTensorFormatOyxi16o, /*!< OYXI16o (O - (output channels + 15)/16, Y - kernel height, X - kernel width, I - input channels, 16o - output channels gropped by 16) special 5D-tensor format of 2D-convolution filter optimized for AVX-512. */
+} SimdTensorFormatType;
+
+/*! @ingroup transform
+    Describes transform type used in function ::SimdTransformImage in order to describe result of transformation.
+*/
+typedef enum
+{
+    SimdTransformRotate0 = 0, /*!< An original image. The output image has the same size as input image.*/
+    SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformRotate180, /*!< Image rotated 180 degrees counterclockwise. The output image has the same size as input image. */
+    SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and widht. */
+    SimdTransformTransposeRotate90, /*!< Image transposed and rotated 90 degrees counterclockwise. It is equal to horizontal mirroring of image. The output image has the same size as input image.*/
+    SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and widht. */
+    SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
+} SimdTransformType;
+
+/*! @ingroup synet
+    \brief Callback function type "SimdGemm32fNNPtr";
+
+    The function has to perform general matrix multiplication (for 32-bit float numbers).
+
+    \verbatim
+    C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
+    \endverbatim
+
+    \param [in] M - a height of A and height of C matrices.
+    \param [in] N - a width of B and width of C matrices.
+    \param [in] K - a width of A and height of B matrices.
+    \param [in] alpha - a pointer to multiplier of the first term.
+    \param [in] A - a pointer to input A matrix.
+    \param [in] lda - a leading dimension of A matrix.
+    \param [in] B - a pointer to input B matrix.
+    \param [in] ldb - a leading dimension of B matrix.
+    \param [in] beta - a pointer to multiplier of the second term.
+    \param [out] C - a pointer to output C matrix.
+    \param [in] ldc - a leading dimension of C matrix.
+*/
+typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
+
+/*! @ingroup synet
+    Describes convolution parameters. It is used in functions ::SimdConvolutionInit and ::SimdMergedConvolutionInit.
+*/
+typedef struct SimdConvolutionParameters
+{
+    /*!
+        A number of input channels.
+    */
+    size_t srcC;
+    /*!
+        An input height.
+    */
+    size_t srcH;
+    /*!
+        An input width.
+    */
+    size_t srcW;
+    /*!
+        A number of output channels.
+    */
+    size_t dstC;
+    /*!
+        An output height.
+    */
+    size_t dstH;
+    /*!
+        An output width.
+    */
+    size_t dstW;
+    /*!
+        A convolution kernel window height.
+    */
+    size_t kernelY;
+    /*!
+        A convolution kernel window width.
+    */
+    size_t kernelX;
+    /*!
+        A convolution dilation along Y-axis.
+    */
+    size_t dilationY;
+    /*!
+        A convolution dilation along X-axis.
+    */
+    size_t dilationX;
+    /*!
+        A convolution stride along Y-axis.
+    */
+    size_t strideY;
+    /*!
+        A convolution stride along X-axis.
+    */
+    size_t strideX;
+    /*!
+        An additional zero padding of input image at the beginning of Y-axis.
+    */
+    size_t padY;
+    /*!
+        An additional zero padding of input image at the beginning of X-axis.
+    */
+    size_t padX;
+    /*!
+        An additional zero padding of input image at the end of Y-axis.
+    */
+    size_t padH;
+    /*!
+        An additional zero padding of input image at the end of X-axis.
+    */
+    size_t padW;
+    /*!
+        A number of convolution groups.
+    */
+    size_t group;
+    /*!
+        An activation function type used after convolution.
+    */
+    SimdConvolutionActivationType activation;
+} SimdConvolutionParameters;
 
 #if defined(WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
@@ -1646,151 +1858,6 @@ extern "C"
     */
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup synet
-        Describes type of activation function. It is used in ::SimdConvolutionInit and ::SimdConvolutionSetParams.
-    */
-    typedef enum
-    {
-        /*!
-            Identity (activation function is absent).
-        */
-        SimdConvolutionActivationIdentity = 0,
-        /*!
-            ReLU activation function.
-            \verbatim
-            dst[i] = Max(0, src[i]);
-            \endverbatim
-        */
-        SimdConvolutionActivationRelu,
-        /*!
-            Leaky ReLU activation function.
-            It has one parameter: slope (params[0]).
-            \verbatim
-            dst[i] = src[i] > 0 ? src[i] : slope*src[i];
-            \endverbatim
-        */
-        SimdConvolutionActivationLeakyRelu,
-        /*!
-            The activation function restricts range.
-            It has two parameters: lower (params[0]) and upper (params[1]) bound.
-            \verbatim
-            dst[i] = Min(Max(lower, src[i]), upper);
-            \endverbatim
-        */
-        SimdConvolutionActivationRestrictRange,
-        /*!
-            Leaky PReLU activation function.
-            It has m parameters: slopes[m] (m = dstC, n = dstH*dstW).
-            \verbatim
-            dst[i*n + j] = src[i*n + j] > 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
-            \endverbatim
-        */
-        SimdConvolutionActivationPrelu,
-    } SimdConvolutionActivationType;
-
-    /*! @ingroup synet
-
-        \brief Callback function type "SimdGemm32fNNPtr";
-
-        The function has to perform general matrix multiplication (for 32-bit float numbers).
-
-        \verbatim
-        C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
-        \endverbatim
-
-        \param [in] M - a height of A and height of C matrices.
-        \param [in] N - a width of B and width of C matrices.
-        \param [in] K - a width of A and height of B matrices.
-        \param [in] alpha - a pointer to multiplier of the first term.
-        \param [in] A - a pointer to input A matrix.
-        \param [in] lda - a leading dimension of A matrix.
-        \param [in] B - a pointer to input B matrix.
-        \param [in] ldb - a leading dimension of B matrix.
-        \param [in] beta - a pointer to multiplier of the second term.
-        \param [out] C - a pointer to output C matrix.
-        \param [in] ldc - a leading dimension of C matrix.
-    */
-    typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
-
-    /*! @ingroup synet
-        Describes convolution parameters. It is used in functions ::SimdConvolutionInit and ::SimdMergedConvolutionInit.
-    */
-    typedef struct SimdConvolutionParameters
-    {
-        /*!
-            A number of input channels.
-        */
-        size_t srcC;
-        /*!
-            An input height.
-        */
-        size_t srcH;
-        /*!
-            An input width.
-        */
-        size_t srcW;
-        /*!
-            A number of output channels.
-        */
-        size_t dstC;
-        /*!
-            An output height.
-        */
-        size_t dstH;
-        /*!
-            An output width.
-        */
-        size_t dstW;
-        /*!
-            A convolution kernel window height.
-        */
-        size_t kernelY;
-        /*!
-            A convolution kernel window width.
-        */
-        size_t kernelX; 
-        /*!
-            A convolution dilation along Y-axis.
-        */
-        size_t dilationY; 
-        /*!
-            A convolution dilation along X-axis.
-        */
-        size_t dilationX; 
-        /*!
-            A convolution stride along Y-axis.
-        */
-        size_t strideY; 
-        /*!
-            A convolution stride along X-axis.
-        */
-        size_t strideX;
-        /*!
-            An additional zero padding of input image at the beginning of Y-axis.
-        */
-        size_t padY; 
-        /*!
-            An additional zero padding of input image at the beginning of X-axis.
-        */
-        size_t padX; 
-        /*!
-            An additional zero padding of input image at the end of Y-axis.
-        */
-        size_t padH;
-        /*!
-            An additional zero padding of input image at the end of X-axis.
-        */
-        size_t padW; 
-        /*!
-            A number of convolution groups.
-        */
-        size_t group; 
-        /*!
-            An activation function type used after convolution.
-        */
-        SimdConvolutionActivationType activation;
-    } SimdConvolutionParameters;
 
     /*! @ingroup synet
 
@@ -4685,30 +4752,6 @@ extern "C"
         uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
     /*! @ingroup resizing
-        Describes resized image channel types.
-    */
-    typedef enum
-    {
-        /*! 8-bit integer channel type.  */
-        SimdResizeChannelByte,
-        /*! 32-bit float channel type.  */
-        SimdResizeChannelFloat,
-    } SimdResizeChannelType;
-
-    /*! @ingroup resizing
-        Describes methods used in oreder to resize image.
-    */
-    typedef enum
-    {
-        /*! Bilinear method. */
-        SimdResizeMethodBilinear,
-        /*! caffe::interp compatible method. */
-        SimdResizeMethodCaffeInterp,
-        /*! Area method. */
-        SimdResizeMethodArea,
-    } SimdResizeMethodType;
-
-    /*! @ingroup resizing
 
         \fn void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
 
@@ -5500,15 +5543,40 @@ extern "C"
     SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup synet
-        Describes operation type used in function ::SimdSynetEltwiseLayerForward.
+
+        \fn void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+
+        \short Converts (input/output) image between different formats of 4D-tensor.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between SimdTensorFormatNchw4c, SimdTensorFormatNchw8c, SimdTensorFormatNchw16c is not supported.
+
+        \param [in] batch - a batch (number of images in the batch).
+        \param [in] channels - a number of image channels.
+        \param [in] spatial - a spatial size (height*width) of image.
+        \param [in] src - a pointer to input image data.
+        \param [in] srcFormat - a format of input image. It can be SimdTensorFormatNchw, SimdTensorFormatNhwc, SimdTensorFormatNchw4c, SimdTensorFormatNchw8c, SimdTensorFormatNchw16c.
+        \param [out] dst - a pointer to output image data.
+        \param [in] dstFormat - a format of output image. It can be SimdTensorFormatNchw, SimdTensorFormatNhwc, SimdTensorFormatNchw4c, SimdTensorFormatNchw8c, SimdTensorFormatNchw16c.
     */
-    typedef enum
-    {
-        SimdSynetEltwiseOperationProduct, /*!< Product. */
-        SimdSynetEltwiseOperationSum, /*!< Weighted sum. */
-        SimdSynetEltwiseOperationMax, /*!< Maximum. */
-        SimdSynetEltwiseOperationMin, /*!< Minimum. */
-    } SimdSynetEltwiseOperationType;
+    SIMD_API void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+
+        \short Converts 2d-convolution filter weight between different formats of 4D-tensor.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between SimdTensorFormatOyxi4o, SimdTensorFormatOyxi8o, SimdTensorFormatOyxi16o is not supported.
+
+        \param [in] output - a number of output channels in filter.
+        \param [in] input - a number of intput channels in filter.
+        \param [in] kernel - a size (width*height) of filter kernel.
+        \param [in] src - a pointer to input filter data.  
+        \param [in] srcFormat - a format of input filter. It can be SimdTensorFormatOiyx, SimdTensorFormatYxio, SimdTensorFormatOyxi4o, SimdTensorFormatOyxi8o, SimdTensorFormatOyxi16o.
+        \param [out] dst - a pointer to output filter data.
+        \param [in] dstFormat - a format of output filter. It can be SimdTensorFormatOiyx, SimdTensorFormatYxio, SimdTensorFormatOyxi4o, SimdTensorFormatOyxi8o, SimdTensorFormatOyxi16o. 
+    */
+    SIMD_API void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
 
     /*! @ingroup synet
 
@@ -6115,21 +6183,6 @@ extern "C"
     */
     SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         int32_t shift, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup transform
-        Describes transform type used in function ::SimdTransformImage in order to describe result of transformation.
-    */
-    typedef enum
-    {
-        SimdTransformRotate0 = 0, /*!< An original image. The output image has the same size as input image.*/
-        SimdTransformRotate90, /*!< Image rotated 90 degrees counterclockwise. The output width and height are equal to the input height and widht. */
-        SimdTransformRotate180, /*!< Image rotated 180 degrees counterclockwise. The output image has the same size as input image. */
-        SimdTransformRotate270, /*!< Image rotated 270 degrees counterclockwise. The output width and height are equal to the input height and widht. */
-        SimdTransformTransposeRotate0, /*!< Transposed image. The output width and height are equal to the input height and widht. */
-        SimdTransformTransposeRotate90, /*!< Image transposed and rotated 90 degrees counterclockwise. It is equal to horizontal mirroring of image. The output image has the same size as input image.*/
-        SimdTransformTransposeRotate180, /*!< Image transposed and rotated 180 degrees counterclockwise. The output width and height are equal to the input height and widht. */
-        SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
-    } SimdTransformType;
 
     /*! @ingroup transform
 

@@ -69,6 +69,80 @@ namespace Simd
                 }
             }
         }
+        
+        void SynetConvertImageStub(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+        }
+
+        void SynetConvertImage_Nchw_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+            for (size_t s = 0; s < spatial; ++s, src += 1, dst += channels)
+                for (size_t c = 0; c < channels; ++c)
+                    dst[c] = src[c*spatial];
+        }
+       
+        
+        void SynetConvertImage_Nhwc_Nchw(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+            for (size_t c = 0; c < channels; ++c, src += 1, dst += spatial)
+                for (size_t s = 0; s < spatial; ++s)
+                    dst[s] = src[s*channels];
+        }
+
+        template<size_t N> void SynetConvertImage_Nhwc_NchwXc(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N, src += N)
+            {
+                size_t n = Simd::Min(channels, c + N) - c;
+                for (size_t s = 0; s < spatial; ++s, dst += N)
+                {
+                    const float * ps = src + s * channels;
+                    size_t i = 0;
+                    for (; i < n; ++i)
+                        dst[i] = ps[i];
+                    for (; i < N; ++i)
+                        dst[i] = 0;
+                }
+            }
+        } 
+
+        typedef void(*SynetImageConverterPtr)(size_t channels, size_t spatial, const float * src, float * dst);
+        SynetImageConverterPtr GetImageConverter(SimdTensorFormatType src, SimdTensorFormatType dst)
+        {
+            if (src == SimdTensorFormatNchw && dst == SimdTensorFormatNhwc)
+                return SynetConvertImage_Nchw_Nhwc;
+            if (src == SimdTensorFormatNhwc)
+            {
+                if(dst == SimdTensorFormatNchw)
+                    return SynetConvertImage_Nhwc_Nchw;
+                if (dst == SimdTensorFormatNchw4c)
+                    return SynetConvertImage_Nhwc_NchwXc<4>;
+                if (dst == SimdTensorFormatNchw8c)
+                    return SynetConvertImage_Nhwc_NchwXc<8>;
+                if (dst == SimdTensorFormatNchw16c)
+                    return SynetConvertImage_Nhwc_NchwXc<16>;
+            }
+            return SynetConvertImageStub;
+        }
+
+        void SynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
+        {
+            SynetImageConverterPtr imageConverter = GetImageConverter(srcFormat, dstFormat);
+            assert(imageConverter);
+            size_t srcStride = AlignHi(channels, SynetTensorAlignment(srcFormat))*spatial;
+            size_t dstStride = AlignHi(channels, SynetTensorAlignment(dstFormat))*spatial;
+            for (size_t n = 0; n < batch; ++n)
+            {
+                imageConverter(channels, spatial, src, dst);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void SynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
+        {
+
+        }
 
         template <SimdSynetEltwiseOperationType type> void SynetEltwiseLayerForward(float const * const * src, size_t count, size_t size, float * dst)
         {

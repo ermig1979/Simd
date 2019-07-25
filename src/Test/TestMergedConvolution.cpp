@@ -179,8 +179,8 @@ namespace Test
 
         Tensor32f buf;
 
-        Tensor32f dst1({ p.batch, p.conv[2].dstH, p.conv[2].dstW, p.conv[2].dstC}, 0.01f);
-        Tensor32f dst2({ p.batch, p.conv[2].dstH, p.conv[2].dstW, p.conv[2].dstC}, 0.02f);
+        Tensor32f dst1({ p.batch, p.conv[2].dstH, p.conv[2].dstW, p.conv[2].dstC}, SimdTensorFormatNhwc, 0.01f);
+        Tensor32f dst2({ p.batch, p.conv[2].dstH, p.conv[2].dstW, p.conv[2].dstC}, SimdTensorFormatNhwc, 0.02f);
 
         TEST_ALIGN(SIMD_ALIGN);
 

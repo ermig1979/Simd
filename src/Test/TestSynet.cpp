@@ -122,6 +122,151 @@ namespace Test
         return result;
     }
 
+    namespace
+    {
+        struct FuncCT
+        {
+            typedef void(*FuncPtr)(size_t n, size_t c, size_t hw, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+
+            FuncPtr func;
+            String desc;
+
+            FuncCT(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Update(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType src, SimdTensorFormatType dst)
+            {
+                desc = desc + "[" + ToString(n) + "x" + ToString(c) + "x" + ToString(h) + "x" + ToString(w) + ":" + ToString(src) + "->" + ToString(dst) + "]";
+            }
+
+            void Call(size_t n, size_t c, size_t h, size_t w, const Tensor32f & src, Tensor32f & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(n, c, h*w, src.Data(), src.Format(), dst.Data(), dst.Format());
+            }
+        };
+    }
+
+#define FUNC_CT(function) FuncCT(function, #function)
+
+    bool SynetConvertTensorAutoTest(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType srcFormat, SimdTensorFormatType dstFormat, FuncCT f1, FuncCT f2)
+    {
+        bool result = true;
+
+        f1.Update(n, c, h, w, srcFormat, dstFormat);
+        f2.Update(n, c, h, w, srcFormat, dstFormat);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        Tensor32f src(ToShape(n, c, h, w, srcFormat), srcFormat);
+        Tensor32f dst1(ToShape(n, c, h, w, dstFormat), dstFormat);
+        Tensor32f dst2(ToShape(n, c, h, w, dstFormat), dstFormat);
+        TEST_ALIGN(SIMD_ALIGN);
+
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(n, c, h, w, src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(n, c, h, w, src, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetConvertImageAutoTest(int mask, const FuncCT & f1, const FuncCT & f2)
+    {
+        bool result = true;
+
+        for (int src = (int)SimdTensorFormatNchw; src <= (int)SimdTensorFormatNchw16c && result; ++src)
+        {
+            for (int dst = (int)SimdTensorFormatNchw; dst <= (int)SimdTensorFormatNchw16c && result; ++dst)
+            {
+                if (src == dst || (src >= (int)SimdTensorFormatNchw4c && dst >= (int)SimdTensorFormatNchw4c) || ((Alignment((SimdTensorFormatType)src)&mask) == 0))
+                    continue;
+                result = result && SynetConvertTensorAutoTest(9, 128, H / 32, W / 32, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(9, 127, H / 33, W / 31, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+            }
+        }
+
+        return result;
+    }
+
+    bool SynetConvertImageAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetConvertImageAutoTest(29, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && SynetConvertImageAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && SynetConvertImageAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+//#endif
+
+        return result;
+    }
+
+    bool SynetConvertFilterAutoTest(int mask, const FuncCT & f1, const FuncCT & f2)
+    {
+        bool result = true;
+
+        for (int src = (int)SimdTensorFormatOiyx; src <= (int)SimdTensorFormatOyxi16o && result; ++src)
+        {
+            for (int dst = (int)SimdTensorFormatOiyx; dst <= (int)SimdTensorFormatOyxi16o && result; ++dst)
+            {
+                if (src == dst || (src >= (int)SimdTensorFormatOyxi4o && dst >= (int)SimdTensorFormatOyxi4o) || ((Alignment((SimdTensorFormatType)src)&mask) == 0))
+                    continue;
+                result = result && SynetConvertTensorAutoTest(576, 448, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(575, 449, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+            }
+        }
+
+        return result;
+    }
+
+    bool SynetConvertFilterAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetConvertFilterAutoTest(29, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+
+        //#ifdef SIMD_SSE_ENABLE
+        //        if (Simd::Sse::Enable)
+        //            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX_ENABLE
+        //        if (Simd::Avx::Enable)
+        //            result = result && SynetConvertFilterAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX512F_ENABLE
+        //        if (Simd::Avx512f::Enable)
+        //            result = result && SynetConvertFilterAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        //#endif 
+        //
+        //#ifdef SIMD_NEON_ENABLE
+        //        if (Simd::Neon::Enable)
+        //            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        //#endif
+
+        return result;
+    }
+
     SIMD_INLINE String ToString(SimdSynetEltwiseOperationType type)
     {
         switch (type)

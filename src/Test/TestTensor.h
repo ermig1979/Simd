@@ -38,17 +38,20 @@ namespace Test
 
         SIMD_INLINE Tensor()
             : _size(0)
+            , _format(SimdTensorFormatUnknown)
         {
         }
 
-        SIMD_INLINE Tensor(const Test::Shape & shape, const Type & value = Type())
+        SIMD_INLINE Tensor(const Test::Shape & shape, SimdTensorFormatType format = SimdTensorFormatUnknown, const Type & value = Type())
             : _shape(shape)
+            , _format(format)
         {
             Resize(value);
         }
 
-        SIMD_INLINE Tensor(std::initializer_list<size_t> shape, const Type & value = Type())
+        SIMD_INLINE Tensor(std::initializer_list<size_t> shape, SimdTensorFormatType format = SimdTensorFormatUnknown, const Type & value = Type())
             : _shape(shape.begin(), shape.end())
+            , _format(format)
         {
             Resize(value);
         }
@@ -57,15 +60,17 @@ namespace Test
         {
         }
 
-        SIMD_INLINE void Reshape(const Test::Shape & shape, const Type & value = Type())
+        SIMD_INLINE void Reshape(const Test::Shape & shape, SimdTensorFormatType format = SimdTensorFormatUnknown, const Type & value = Type())
         {
             _shape = shape;
+            _format = format;
             Resize(value);
         }
 
-        SIMD_INLINE void Reshape(std::initializer_list<size_t> shape, const Type & value = Type())
+        SIMD_INLINE void Reshape(std::initializer_list<size_t> shape, SimdTensorFormatType format = SimdTensorFormatUnknown, const Type & value = Type())
         {
             _shape.assign(shape.begin(), shape.end());
+            _format = format;
             Resize(value);
         }
 
@@ -79,6 +84,11 @@ namespace Test
         {
             _shape.assign(shape.begin(), shape.end());
             Extend();
+        }
+
+        SIMD_INLINE SimdTensorFormatType Format() const
+        {
+            return _format;
         }
 
         SIMD_INLINE const Test::Shape & Shape() const
@@ -284,6 +294,7 @@ namespace Test
 
         typedef std::vector<Type, Simd::Allocator<Type>> Vector;
 
+        SimdTensorFormatType _format;
         Test::Shape _shape;
         size_t _size;
         Vector _data;
@@ -347,6 +358,64 @@ namespace Test
         if (printError && errorCount > 0)
             TEST_LOG_SS(Error, message.str());
         return errorCount == 0;
+    }
+
+    inline String ToString(SimdTensorFormatType format)
+    {
+        switch (format)
+        {
+        case SimdTensorFormatUnknown: return "Unknown";
+        case SimdTensorFormatNchw: return "Nchw";
+        case SimdTensorFormatNhwc: return "Nhwc";
+        case SimdTensorFormatNchw4c: return "Nchw4c";
+        case SimdTensorFormatNchw8c: return "Nchw8c";
+        case SimdTensorFormatNchw16c: return "Nchw16c";
+        case SimdTensorFormatOiyx: return "Oiyx";
+        case SimdTensorFormatYxio: return "Yxio";
+        case SimdTensorFormatOyxi4o: return "Oyxi4o";
+        case SimdTensorFormatOyxi8o: return "Oyxi8o";
+        case SimdTensorFormatOyxi16o: return "Oyxi16o";
+        }
+        assert(0);
+        return "Assert";
+    }
+
+    inline Shape ToShape(size_t batchOutput, size_t channelsInput, size_t height, size_t width, SimdTensorFormatType format)
+    {
+        switch (format)
+        {
+        case SimdTensorFormatNchw: return Shape({ batchOutput, channelsInput, height, width });
+        case SimdTensorFormatNhwc: return Shape({ batchOutput, height, width, channelsInput });
+        case SimdTensorFormatNchw4c: return Shape({ batchOutput, (channelsInput + 3) / 4, height, width, 4 });
+        case SimdTensorFormatNchw8c: return Shape({ batchOutput, (channelsInput + 7) / 8, height, width, 8 });
+        case SimdTensorFormatNchw16c: return Shape({ batchOutput, (channelsInput + 15) / 16, height, width, 16 });
+        case SimdTensorFormatOiyx: return Shape({ batchOutput, channelsInput, height, width });
+        case SimdTensorFormatYxio: return Shape({ height, width, channelsInput, batchOutput });
+        case SimdTensorFormatOyxi4o: return Shape({ (batchOutput + 3) / 4, height, width, channelsInput, 4 });
+        case SimdTensorFormatOyxi8o: return Shape({ (batchOutput + 7) / 8, height, width, channelsInput, 8 });
+        case SimdTensorFormatOyxi16o: return Shape({ (batchOutput + 15) / 16, height, width, channelsInput, 16 });
+        }
+        assert(0);
+        return Shape();
+    }
+
+    inline int Alignment(SimdTensorFormatType format)
+    {
+        switch (format)
+        {
+        case SimdTensorFormatNchw: return 1;
+        case SimdTensorFormatNhwc: return 1;
+        case SimdTensorFormatNchw4c: return 4;
+        case SimdTensorFormatNchw8c: return 8;
+        case SimdTensorFormatNchw16c: return 16;
+        case SimdTensorFormatOiyx: return 1;
+        case SimdTensorFormatYxio: return 1;
+        case SimdTensorFormatOyxi4o: return 4;
+        case SimdTensorFormatOyxi8o: return 8;
+        case SimdTensorFormatOyxi16o: return 16;
+        }
+        assert(0);
+        return 0;
     }
 }
 

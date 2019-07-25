@@ -30,6 +30,25 @@ namespace Simd
 {
     namespace Base
     {
+        SIMD_INLINE int SynetTensorAlignment(SimdTensorFormatType format)
+        {
+            switch (format)
+            {
+            case SimdTensorFormatNchw: return 1;
+            case SimdTensorFormatNhwc: return 1;
+            case SimdTensorFormatNchw4c: return 4;
+            case SimdTensorFormatNchw8c: return 8;
+            case SimdTensorFormatNchw16c: return 16;
+            case SimdTensorFormatOiyx: return 1;
+            case SimdTensorFormatYxio: return 1;
+            case SimdTensorFormatOyxi4o: return 4;
+            case SimdTensorFormatOyxi8o: return 8;
+            case SimdTensorFormatOyxi16o: return 16;
+            }
+            assert(0);
+            return 0;
+        }
+
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
 
         template <> SIMD_INLINE float SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(float a, float b)
