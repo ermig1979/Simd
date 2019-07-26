@@ -69,10 +69,6 @@ namespace Simd
                 }
             }
         }
-        
-        void SynetConvertImageStub(size_t channels, size_t spatial, const float * src, float * dst)
-        {
-        }
 
         void SynetConvertImage_Nchw_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
@@ -80,7 +76,23 @@ namespace Simd
                 for (size_t c = 0; c < channels; ++c)
                     dst[c] = src[c*spatial];
         }
-       
+
+        template<size_t N> void SynetConvertImage_Nchw_NchwXc(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N, src += N*spatial)
+            {
+                size_t n = Simd::Min(channels, c + N) - c;
+                const float * ps = src;
+                for (size_t s = 0; s < spatial; ++s, dst += N, ps += 1)
+                {
+                    size_t i = 0;
+                    for (; i < n; ++i)
+                        dst[i] = ps[i*spatial];
+                    for (; i < N; ++i)
+                        dst[i] = 0;
+                }
+            }
+        }
         
         void SynetConvertImage_Nhwc_Nchw(size_t channels, size_t spatial, const float * src, float * dst)
         {
@@ -104,13 +116,49 @@ namespace Simd
                         dst[i] = 0;
                 }
             }
-        } 
+        }
+
+        template<size_t N> void SynetConvertImage_NchwXc_Nchw(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N, src += N * spatial)
+            {
+                const float * ps = src;
+                for (size_t i = 0, n = Simd::Min(channels, c + N) - c; i < n; ++i, ps += 1, dst += spatial)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                        dst[s] = ps[s*N];
+                }
+            }
+        }
+
+        template<size_t N> void SynetConvertImage_NchwXc_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
+        {
+            for (size_t s = 0; s < spatial; ++s, src += N)
+            {
+                for (size_t c = 0; c < channels; c += N)
+                {
+                    size_t n = Simd::Min(channels, c + N) - c;
+                    const float * ps = src + c * spatial;
+                    for (size_t i = 0; i < n; ++i)
+                        *(dst++) = ps[i];
+                }
+            }
+        }
 
         typedef void(*SynetImageConverterPtr)(size_t channels, size_t spatial, const float * src, float * dst);
         SynetImageConverterPtr GetImageConverter(SimdTensorFormatType src, SimdTensorFormatType dst)
         {
-            if (src == SimdTensorFormatNchw && dst == SimdTensorFormatNhwc)
-                return SynetConvertImage_Nchw_Nhwc;
+            if (src == SimdTensorFormatNchw)
+            {
+                if(dst == SimdTensorFormatNhwc)
+                    return SynetConvertImage_Nchw_Nhwc;
+                if (dst == SimdTensorFormatNchw4c)
+                    return SynetConvertImage_Nchw_NchwXc<4>;
+                if (dst == SimdTensorFormatNchw8c)
+                    return SynetConvertImage_Nchw_NchwXc<8>;
+                if (dst == SimdTensorFormatNchw16c)
+                    return SynetConvertImage_Nchw_NchwXc<16>;
+            }
             if (src == SimdTensorFormatNhwc)
             {
                 if(dst == SimdTensorFormatNchw)
@@ -122,25 +170,215 @@ namespace Simd
                 if (dst == SimdTensorFormatNchw16c)
                     return SynetConvertImage_Nhwc_NchwXc<16>;
             }
-            return SynetConvertImageStub;
+            if (src == SimdTensorFormatNchw4c)
+            {
+                if (dst == SimdTensorFormatNchw)
+                    return SynetConvertImage_NchwXc_Nchw<4>;
+                if (dst == SimdTensorFormatNhwc)
+                    return SynetConvertImage_NchwXc_Nhwc<4>;
+            }
+            if (src == SimdTensorFormatNchw8c)
+            {
+                if (dst == SimdTensorFormatNchw)
+                    return SynetConvertImage_NchwXc_Nchw<8>;
+                if (dst == SimdTensorFormatNhwc)
+                    return SynetConvertImage_NchwXc_Nhwc<8>;
+            }
+            if (src == SimdTensorFormatNchw16c)
+            {
+                if (dst == SimdTensorFormatNchw)
+                    return SynetConvertImage_NchwXc_Nchw<16>;
+                if (dst == SimdTensorFormatNhwc)
+                    return SynetConvertImage_NchwXc_Nhwc<16>;
+            }
+            return NULL;
         }
 
         void SynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
         {
             SynetImageConverterPtr imageConverter = GetImageConverter(srcFormat, dstFormat);
-            assert(imageConverter);
             size_t srcStride = AlignHi(channels, SynetTensorAlignment(srcFormat))*spatial;
             size_t dstStride = AlignHi(channels, SynetTensorAlignment(dstFormat))*spatial;
             for (size_t n = 0; n < batch; ++n)
             {
-                imageConverter(channels, spatial, src, dst);
+                if (srcFormat == dstFormat)
+                    memcpy(dst, src, srcStride*sizeof(float));
+                else
+                {
+                    assert(imageConverter);
+                    imageConverter(channels, spatial, src, dst);
+                }
                 src += srcStride;
                 dst += dstStride;
             }
         }
 
+        void SynetConvertFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        {
+            size_t stride = input * kernel;
+            for (size_t k = 0; k < kernel; ++k, src += 1)
+            {
+                const float * ps = src;
+                for (size_t i = 0; i < input; ++i, ps += kernel)
+                {
+                    for (size_t o = 0; o < output; ++o)
+                        *(dst++) = ps[o * stride];
+                }
+            }
+        }
+
+        template<size_t N> void SynetConvertFilter_Oiyx_OyxiXo(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        {
+            for (size_t o = 0; o < output; o += N)
+            {
+                size_t n = Simd::Min(output, o + N) - o;
+                for (size_t k = 0; k < kernel; ++k)
+                {
+                    for (size_t i = 0; i < input; ++i)
+                    {
+                        size_t j = 0;
+                        for (; j < n; ++j)
+                            *(dst++) = src[((o + j) * input + i)*kernel + k];
+                        for (; j < N; ++j)
+                            *(dst++) = 0;
+                    }
+                }
+            }
+        }
+
+        void SynetConvertFilter_Yxio_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        {
+            size_t stride = input * output;
+            for (size_t o = 0; o < output; ++o, src += 1)
+            {
+                const float * ps = src;
+                for (size_t i = 0; i < input; ++i, ps += output)
+                {
+                    for (size_t k = 0; k < kernel; ++k)
+                        *(dst++) = ps[k * stride];
+                }
+            }
+        }
+
+        template<size_t N> void SynetConvertFilter_Yxio_OyxiXo(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        {
+            for (size_t o = 0; o < output; o += N)
+            {
+                size_t n = Simd::Min(output, o + N) - o;
+                for (size_t k = 0; k < kernel; ++k)
+                {
+                    for (size_t i = 0; i < input; ++i)
+                    {
+                        size_t j = 0;
+                        for (; j < n; ++j)
+                            *(dst++) = src[(k * input + i)*output + o + j];
+                        for (; j < N; ++j)
+                            *(dst++) = 0;
+                    }
+                }
+            }
+        }
+
+        template<size_t N> void SynetConvertFilter_OyxiXo_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        {
+            for (size_t o = 0; o < output; o += N, src += N*kernel*input)
+            {
+                for (size_t j = 0, n = Simd::Min(output, o + N) - o; j < n; ++j)
+                {
+                    for (size_t i = 0; i < input; ++i)
+                    {                
+                        for (size_t k = 0; k < kernel; ++k)
+                            *(dst++) = src[ (k*input + i)*N + j];
+                    }
+                }
+            }
+        }
+
+        template<size_t N> void SynetConvertFilter_OyxiXo_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        {
+            size_t outputN = AlignLo(output, N);
+            size_t tail = output - outputN;
+            for (size_t k = 0; k < kernel; ++k)
+            {
+                for (size_t i = 0; i < input; ++i)
+                {
+                    size_t o = 0;
+                    for (; o < outputN; o += N)
+                    {
+                        const float * ps = src + o * kernel*input + (k*input + i)*N;
+                        for (size_t j = 0; j < N; ++j)
+                            *(dst++) = ps[j];
+                    }
+                    if(o < output)
+                    {
+                        const float * ps = src + o * kernel*input + (k*input + i)*N;
+                        for (size_t j = 0; j < tail; ++j)
+                            *(dst++) = ps[j];
+                    }
+                }
+            }
+        }
+
+        typedef void(*SynetFilterConverterPtr)(size_t output, size_t input, size_t kernel, const float * src, float * dst);
+        SynetFilterConverterPtr GetFilterConverter(SimdTensorFormatType src, SimdTensorFormatType dst)
+        {
+            if (src == SimdTensorFormatOiyx)
+            {
+                if (dst == SimdTensorFormatYxio)
+                    return SynetConvertFilter_Oiyx_Yxio;
+                if (dst == SimdTensorFormatOyxi4o)
+                    return SynetConvertFilter_Oiyx_OyxiXo<4>;
+                if (dst == SimdTensorFormatOyxi8o)
+                    return SynetConvertFilter_Oiyx_OyxiXo<8>;
+                if (dst == SimdTensorFormatOyxi16o)
+                    return SynetConvertFilter_Oiyx_OyxiXo<16>;
+            }
+            if (src == SimdTensorFormatYxio)
+            {
+                if (dst == SimdTensorFormatOiyx)
+                    return SynetConvertFilter_Yxio_Oiyx;
+                if (dst == SimdTensorFormatOyxi4o)
+                    return SynetConvertFilter_Yxio_OyxiXo<4>;
+                if (dst == SimdTensorFormatOyxi8o)
+                    return SynetConvertFilter_Yxio_OyxiXo<8>;
+                if (dst == SimdTensorFormatOyxi16o)
+                    return SynetConvertFilter_Yxio_OyxiXo<16>;
+            }
+            if (src == SimdTensorFormatOyxi4o)
+            {
+                if (dst == SimdTensorFormatOiyx)
+                    return SynetConvertFilter_OyxiXo_Oiyx<4>;
+                if (dst == SimdTensorFormatYxio)
+                    return SynetConvertFilter_OyxiXo_Yxio<4>;
+            }
+            if (src == SimdTensorFormatOyxi8o)
+            {
+                if (dst == SimdTensorFormatOiyx)
+                    return SynetConvertFilter_OyxiXo_Oiyx<8>;
+                if (dst == SimdTensorFormatYxio)
+                    return SynetConvertFilter_OyxiXo_Yxio<8>;
+            }
+            if (src == SimdTensorFormatOyxi16o)
+            {
+                if (dst == SimdTensorFormatOiyx)
+                    return SynetConvertFilter_OyxiXo_Oiyx<16>;
+                if (dst == SimdTensorFormatYxio)
+                    return SynetConvertFilter_OyxiXo_Yxio<16>;
+            }
+            return NULL;
+        }
+
         void SynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
         {
+            if (srcFormat == dstFormat)
+            {
+                size_t aligned = AlignHi(output, SynetTensorAlignment(srcFormat));
+                memcpy(dst, src, aligned * input * kernel * sizeof(float));
+                return;
+            }
+            SynetFilterConverterPtr filterConverter = GetFilterConverter(srcFormat, dstFormat);
+            assert(filterConverter);
+            filterConverter(output, input, kernel, src, dst);
 
         }
 

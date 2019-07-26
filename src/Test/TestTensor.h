@@ -360,6 +360,28 @@ namespace Test
         return errorCount == 0;
     }
 
+    inline void FillDebug(Tensor32f & dst, Shape index, size_t order)
+    {
+        if (order == dst.Count())
+        {
+            float value = 0.0f;
+            for (int i = (int)index.size() - 1, n = 1; i >= 0; --i, n *= 10)
+                value += float(index[i]%10*n);
+            *dst.Data(index) = value;
+        }
+        else
+        {
+            for (index[order] = 0; index[order] < dst.Axis(order); ++index[order])
+                FillDebug(dst, index, order + 1);
+        }
+    }
+
+    inline void FillDebug(Tensor32f & dst)
+    {
+        Index index(dst.Count(), 0);
+        FillDebug(dst, index, 0);
+    }
+
     inline String ToString(SimdTensorFormatType format)
     {
         switch (format)
