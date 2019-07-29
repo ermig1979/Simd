@@ -173,7 +173,7 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(n, c, h, w, src1, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth, "forward");
-#if 1
+#if 0
         if (srcFormat == SimdTensorFormatNchw || srcFormat == SimdTensorFormatNhwc || srcFormat == SimdTensorFormatOiyx || srcFormat == SimdTensorFormatYxio)
         {
             Tensor32f src2(ToShape(n, c, h, w, srcFormat), srcFormat);
@@ -192,7 +192,8 @@ namespace Test
         {
             for (int dst = (int)SimdTensorFormatNchw; dst <= (int)SimdTensorFormatNchw16c && result; ++dst)
             {
-                if (src == dst || (src >= (int)SimdTensorFormatNchw4c && dst >= (int)SimdTensorFormatNchw4c) || ((Alignment((SimdTensorFormatType)src)&mask) == 0))
+                if (src == dst || (src >= (int)SimdTensorFormatNchw4c && dst >= (int)SimdTensorFormatNchw4c) || 
+                    ((Alignment((SimdTensorFormatType)src)&mask) == 0) || ((Alignment((SimdTensorFormatType)dst)&mask) == 0))
                     continue;
                 result = result && SynetConvertTensorAutoTest(9, W / 15 + 0, W / 60, W / 30, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
                 result = result && SynetConvertTensorAutoTest(9, W / 15 - 1, W / 59, W / 31, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
@@ -208,11 +209,11 @@ namespace Test
 
         result = result && SynetConvertImageAutoTest(29, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
-//#endif 
-//
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+#endif 
+
 //#ifdef SIMD_AVX_ENABLE
 //        if (Simd::Avx::Enable)
 //            result = result && SynetConvertImageAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
@@ -239,7 +240,8 @@ namespace Test
         {
             for (int dst = (int)SimdTensorFormatOiyx; dst <= (int)SimdTensorFormatOyxi16o && result; ++dst)
             {
-                if (src == dst || (src >= (int)SimdTensorFormatOyxi4o && dst >= (int)SimdTensorFormatOyxi4o) || ((Alignment((SimdTensorFormatType)src)&mask) == 0))
+                if (src == dst || (src >= (int)SimdTensorFormatOyxi4o && dst >= (int)SimdTensorFormatOyxi4o) || 
+                    ((Alignment((SimdTensorFormatType)src)&mask) == 0) || ((Alignment((SimdTensorFormatType)dst)&mask) == 0))
                     continue;
                 result = result && SynetConvertTensorAutoTest(W * 9 / 30 + 0, W * 7 / 30 + 0, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
                 result = result && SynetConvertTensorAutoTest(W * 9 / 30 - 1, W * 7 / 30 + 1, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
@@ -255,11 +257,11 @@ namespace Test
 
         result = result && SynetConvertFilterAutoTest(29, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 
-        //#ifdef SIMD_SSE_ENABLE
-        //        if (Simd::Sse::Enable)
-        //            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
-        //#endif 
-        //
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+#endif 
+        
         //#ifdef SIMD_AVX_ENABLE
         //        if (Simd::Avx::Enable)
         //            result = result && SynetConvertFilterAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));

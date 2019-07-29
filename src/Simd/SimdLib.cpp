@@ -5227,7 +5227,7 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, fl
 }
 
 typedef void(*SimdSynetConvertImagePtr) (size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-volatile SimdSynetConvertImagePtr simdSynetConvertImage = SIMD_FUNC0(SynetConvertImage);// , SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+volatile SimdSynetConvertImagePtr simdSynetConvertImage = SIMD_FUNC1(SynetConvertImage, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
 {
@@ -5235,7 +5235,7 @@ SIMD_API void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatia
 }
 
 typedef void(*SimdSynetConvertFilterPtr) (size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-volatile SimdSynetConvertFilterPtr simdSynetConvertFilter = SIMD_FUNC0(SynetConvertFilter);// , SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+volatile SimdSynetConvertFilterPtr simdSynetConvertFilter = SIMD_FUNC1(SynetConvertFilter, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
 {

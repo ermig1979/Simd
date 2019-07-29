@@ -63,6 +63,22 @@ namespace Simd
             __m128 old = Load<align>(p);
             Store<align>(p, Combine(mask, value, old));
         }
+
+        template<bool align> SIMD_INLINE void Transpose4x4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 s0 = Load<align>(src + 0 * srcStride);
+            __m128 s1 = Load<align>(src + 1 * srcStride);
+            __m128 s2 = Load<align>(src + 2 * srcStride);
+            __m128 s3 = Load<align>(src + 3 * srcStride);
+            __m128 s00 = _mm_unpacklo_ps(s0, s2);
+            __m128 s01 = _mm_unpacklo_ps(s1, s3);
+            __m128 s10 = _mm_unpackhi_ps(s0, s2);
+            __m128 s11 = _mm_unpackhi_ps(s1, s3);
+            Store<align>(dst + 0 * dstStride, _mm_unpacklo_ps(s00, s01));
+            Store<align>(dst + 1 * dstStride, _mm_unpackhi_ps(s00, s01));
+            Store<align>(dst + 2 * dstStride, _mm_unpacklo_ps(s10, s11));
+            Store<align>(dst + 3 * dstStride, _mm_unpackhi_ps(s10, s11));
+        }
     }
 #endif//SIMD_SSE_ENABLE
 

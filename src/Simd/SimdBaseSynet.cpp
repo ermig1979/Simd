@@ -70,6 +70,12 @@ namespace Simd
             }
         }
 
+        template<size_t N> SIMD_INLINE void Copy(const float * src, float * dst)
+        {
+            for (size_t i = 0; i < N; ++i)
+                dst[i] = src[i];
+        }
+
         void SynetConvertImage_Nchw_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             for (size_t s = 0; s < spatial; ++s, src += 1, dst += channels)
@@ -96,22 +102,27 @@ namespace Simd
         
         void SynetConvertImage_Nhwc_Nchw(size_t channels, size_t spatial, const float * src, float * dst)
         {
-            for (size_t c = 0; c < channels; ++c, src += 1, dst += spatial)
-                for (size_t s = 0; s < spatial; ++s)
-                    dst[s] = src[s*channels];
+            SynetConvertImage_Nchw_Nhwc(spatial, channels, src, dst);
         }
 
         template<size_t N> void SynetConvertImage_Nhwc_NchwXc(size_t channels, size_t spatial, const float * src, float * dst)
         {
-            for (size_t c = 0; c < channels; c += N, src += N)
+            size_t channelsN = AlignLo(channels, N);
+            size_t tail = channels - channelsN;
+            for (size_t c = 0; c < channelsN; c += N, src += N)
             {
-                size_t n = Simd::Min(channels, c + N) - c;
-                for (size_t s = 0; s < spatial; ++s, dst += N)
+                const float * psrc = src;
+                for (size_t s = 0; s < spatial; ++s, psrc += channels, dst += N)
+                    Copy<N>(psrc, dst);
+            }
+            if(tail)
+            {
+                const float * psrc = src;
+                for (size_t s = 0; s < spatial; ++s, psrc += channels, dst += N)
                 {
-                    const float * ps = src + s * channels;
                     size_t i = 0;
-                    for (; i < n; ++i)
-                        dst[i] = ps[i];
+                    for (; i < tail; ++i)
+                        dst[i] = psrc[i];
                     for (; i < N; ++i)
                         dst[i] = 0;
                 }
@@ -133,14 +144,18 @@ namespace Simd
 
         template<size_t N> void SynetConvertImage_NchwXc_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
+            size_t stride = N * spatial;
+            size_t channelsN = AlignLo(channels, N);
+            size_t tail = channels - channelsN;
             for (size_t s = 0; s < spatial; ++s, src += N)
             {
-                for (size_t c = 0; c < channels; c += N)
+                const float * psrc = src;
+                for (size_t c = 0; c < channelsN; c += N, psrc += stride, dst += N)
+                    Copy<N>(psrc, dst);
+                if (tail)
                 {
-                    size_t n = Simd::Min(channels, c + N) - c;
-                    const float * ps = src + c * spatial;
-                    for (size_t i = 0; i < n; ++i)
-                        *(dst++) = ps[i];
+                    for (size_t i = 0; i < tail; ++i)
+                        *(dst++) = psrc[i];
                 }
             }
         }
@@ -262,16 +277,24 @@ namespace Simd
 
         template<size_t N> void SynetConvertFilter_Yxio_OyxiXo(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
-            for (size_t o = 0; o < output; o += N)
+            size_t outputN = AlignLo(output, N);
+            for (size_t o = 0; o < outputN; o += N, src += N)
             {
-                size_t n = Simd::Min(output, o + N) - o;
+                const float * psrc = src;
+                for (size_t k = 0; k < kernel; ++k)
+                    for (size_t i = 0; i < input; ++i, dst += N, psrc += output)
+                        Copy<N>(psrc, dst);
+            }
+            if(outputN < output)
+            {
+                size_t tail = output - outputN;
                 for (size_t k = 0; k < kernel; ++k)
                 {
-                    for (size_t i = 0; i < input; ++i)
+                    for (size_t i = 0; i < input; ++i, src += output)
                     {
                         size_t j = 0;
-                        for (; j < n; ++j)
-                            *(dst++) = src[(k * input + i)*output + o + j];
+                        for (; j < tail; ++j)
+                            *(dst++) = src[j];
                         for (; j < N; ++j)
                             *(dst++) = 0;
                     }
@@ -298,22 +321,18 @@ namespace Simd
         {
             size_t outputN = AlignLo(output, N);
             size_t tail = output - outputN;
+            size_t stride = kernel * input * N;
             for (size_t k = 0; k < kernel; ++k)
             {
-                for (size_t i = 0; i < input; ++i)
+                for (size_t i = 0; i < input; ++i, src += N)
                 {
-                    size_t o = 0;
-                    for (; o < outputN; o += N)
+                    const float * psrc = src;
+                    for (size_t o = 0; o < outputN; o += N, psrc += stride, dst += N)
+                        Copy<N>(psrc, dst);
+                    if(outputN < output)
                     {
-                        const float * ps = src + o * kernel*input + (k*input + i)*N;
-                        for (size_t j = 0; j < N; ++j)
-                            *(dst++) = ps[j];
-                    }
-                    if(o < output)
-                    {
-                        const float * ps = src + o * kernel*input + (k*input + i)*N;
                         for (size_t j = 0; j < tail; ++j)
-                            *(dst++) = ps[j];
+                            *(dst++) = psrc[j];
                     }
                 }
             }
