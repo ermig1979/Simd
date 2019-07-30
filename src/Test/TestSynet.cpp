@@ -244,7 +244,7 @@ namespace Test
                     ((Alignment((SimdTensorFormatType)src)&mask) == 0) || ((Alignment((SimdTensorFormatType)dst)&mask) == 0))
                     continue;
                 result = result && SynetConvertTensorAutoTest(W * 9 / 30 + 0, W * 7 / 30 + 0, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
-                result = result && SynetConvertTensorAutoTest(W * 9 / 30 - 1, W * 7 / 30 + 1, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(W * 9 / 10 - 1, W * 7 / 10 + 1, 1, 1, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
             }
         }
 

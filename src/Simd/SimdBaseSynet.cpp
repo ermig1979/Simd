@@ -76,14 +76,14 @@ namespace Simd
                 dst[i] = src[i];
         }
 
-        void SynetConvertImage_Nchw_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
+        void SynetConvertImage_Chw_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             for (size_t s = 0; s < spatial; ++s, src += 1, dst += channels)
                 for (size_t c = 0; c < channels; ++c)
                     dst[c] = src[c*spatial];
         }
 
-        template<size_t N> void SynetConvertImage_Nchw_NchwXc(size_t channels, size_t spatial, const float * src, float * dst)
+        template<size_t N> void SynetConvertImage_Chw_ChwXc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             for (size_t c = 0; c < channels; c += N, src += N*spatial)
             {
@@ -100,12 +100,12 @@ namespace Simd
             }
         }
         
-        void SynetConvertImage_Nhwc_Nchw(size_t channels, size_t spatial, const float * src, float * dst)
+        void SynetConvertImage_Hwc_Chw(size_t channels, size_t spatial, const float * src, float * dst)
         {
-            SynetConvertImage_Nchw_Nhwc(spatial, channels, src, dst);
+            SynetConvertImage_Chw_Hwc(spatial, channels, src, dst);
         }
 
-        template<size_t N> void SynetConvertImage_Nhwc_NchwXc(size_t channels, size_t spatial, const float * src, float * dst)
+        template<size_t N> void SynetConvertImage_Hwc_ChwXc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t channelsN = AlignLo(channels, N);
             size_t tail = channels - channelsN;
@@ -129,7 +129,7 @@ namespace Simd
             }
         }
 
-        template<size_t N> void SynetConvertImage_NchwXc_Nchw(size_t channels, size_t spatial, const float * src, float * dst)
+        template<size_t N> void SynetConvertImage_ChwXc_Chw(size_t channels, size_t spatial, const float * src, float * dst)
         {
             for (size_t c = 0; c < channels; c += N, src += N * spatial)
             {
@@ -142,7 +142,7 @@ namespace Simd
             }
         }
 
-        template<size_t N> void SynetConvertImage_NchwXc_Nhwc(size_t channels, size_t spatial, const float * src, float * dst)
+        template<size_t N> void SynetConvertImage_ChwXc_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t stride = N * spatial;
             size_t channelsN = AlignLo(channels, N);
@@ -166,45 +166,45 @@ namespace Simd
             if (src == SimdTensorFormatNchw)
             {
                 if(dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_Nchw_Nhwc;
+                    return SynetConvertImage_Chw_Hwc;
                 if (dst == SimdTensorFormatNchw4c)
-                    return SynetConvertImage_Nchw_NchwXc<4>;
+                    return SynetConvertImage_Chw_ChwXc<4>;
                 if (dst == SimdTensorFormatNchw8c)
-                    return SynetConvertImage_Nchw_NchwXc<8>;
+                    return SynetConvertImage_Chw_ChwXc<8>;
                 if (dst == SimdTensorFormatNchw16c)
-                    return SynetConvertImage_Nchw_NchwXc<16>;
+                    return SynetConvertImage_Chw_ChwXc<16>;
             }
             if (src == SimdTensorFormatNhwc)
             {
                 if(dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_Nhwc_Nchw;
+                    return SynetConvertImage_Hwc_Chw;
                 if (dst == SimdTensorFormatNchw4c)
-                    return SynetConvertImage_Nhwc_NchwXc<4>;
+                    return SynetConvertImage_Hwc_ChwXc<4>;
                 if (dst == SimdTensorFormatNchw8c)
-                    return SynetConvertImage_Nhwc_NchwXc<8>;
+                    return SynetConvertImage_Hwc_ChwXc<8>;
                 if (dst == SimdTensorFormatNchw16c)
-                    return SynetConvertImage_Nhwc_NchwXc<16>;
+                    return SynetConvertImage_Hwc_ChwXc<16>;
             }
             if (src == SimdTensorFormatNchw4c)
             {
                 if (dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_NchwXc_Nchw<4>;
+                    return SynetConvertImage_ChwXc_Chw<4>;
                 if (dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_NchwXc_Nhwc<4>;
+                    return SynetConvertImage_ChwXc_Hwc<4>;
             }
             if (src == SimdTensorFormatNchw8c)
             {
                 if (dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_NchwXc_Nchw<8>;
+                    return SynetConvertImage_ChwXc_Chw<8>;
                 if (dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_NchwXc_Nhwc<8>;
+                    return SynetConvertImage_ChwXc_Hwc<8>;
             }
             if (src == SimdTensorFormatNchw16c)
             {
                 if (dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_NchwXc_Nchw<16>;
+                    return SynetConvertImage_ChwXc_Chw<16>;
                 if (dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_NchwXc_Nhwc<16>;
+                    return SynetConvertImage_ChwXc_Hwc<16>;
             }
             return NULL;
         }
@@ -263,16 +263,7 @@ namespace Simd
 
         void SynetConvertFilter_Yxio_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
-            size_t stride = input * output;
-            for (size_t o = 0; o < output; ++o, src += 1)
-            {
-                const float * ps = src;
-                for (size_t i = 0; i < input; ++i, ps += output)
-                {
-                    for (size_t k = 0; k < kernel; ++k)
-                        *(dst++) = ps[k * stride];
-                }
-            }
+            SynetConvertFilter_Oiyx_Yxio(kernel, input, output, src, dst);
         }
 
         template<size_t N> void SynetConvertFilter_Yxio_OyxiXo(size_t output, size_t input, size_t kernel, const float * src, float * dst)

@@ -79,6 +79,48 @@ namespace Simd
             Store<align>(dst + 2 * dstStride, _mm_unpacklo_ps(s10, s11));
             Store<align>(dst + 3 * dstStride, _mm_unpackhi_ps(s10, s11));
         }
+
+        template<bool align> SIMD_INLINE void Transpose4x4x4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m128 buf00 = Load<align>(src + 0 * F);
+            __m128 buf01 = Load<align>(src + 1 * F);
+            __m128 buf02 = Load<align>(src + 2 * F);
+            __m128 buf03 = Load<align>(src + 3 * F);
+            src += srcStride;
+            __m128 buf10 = Load<align>(src + 0 * F);
+            __m128 buf11 = Load<align>(src + 1 * F);
+            __m128 buf12 = Load<align>(src + 2 * F);
+            __m128 buf13 = Load<align>(src + 3 * F);
+            src += srcStride;
+            __m128 buf20 = Load<align>(src + 0 * F);
+            __m128 buf21 = Load<align>(src + 1 * F);
+            __m128 buf22 = Load<align>(src + 2 * F);
+            __m128 buf23 = Load<align>(src + 3 * F);
+            src += srcStride;
+            __m128 buf30 = Load<align>(src + 0 * F);
+            __m128 buf31 = Load<align>(src + 1 * F);
+            __m128 buf32 = Load<align>(src + 2 * F);
+            __m128 buf33 = Load<align>(src + 3 * F);
+            Store<align>(dst + 0 * F, buf00);
+            Store<align>(dst + 1 * F, buf10);
+            Store<align>(dst + 2 * F, buf20);
+            Store<align>(dst + 3 * F, buf30);
+            dst += dstStride;
+            Store<align>(dst + 0 * F, buf01);
+            Store<align>(dst + 1 * F, buf11);
+            Store<align>(dst + 2 * F, buf21);
+            Store<align>(dst + 3 * F, buf31);
+            dst += dstStride;
+            Store<align>(dst + 0 * F, buf02);
+            Store<align>(dst + 1 * F, buf12);
+            Store<align>(dst + 2 * F, buf22);
+            Store<align>(dst + 3 * F, buf32);
+            dst += dstStride;
+            Store<align>(dst + 0 * F, buf03);
+            Store<align>(dst + 1 * F, buf13);
+            Store<align>(dst + 2 * F, buf23);
+            Store<align>(dst + 3 * F, buf33);
+        }
     }
 #endif//SIMD_SSE_ENABLE
 
