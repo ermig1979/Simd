@@ -44,8 +44,8 @@
  <li>Runtime choice of best micro kernel in Convolution Framework (GemmNN and Winograd methods).</li>
  <li>Base implementation, SSE, AVX, AVX-512F and NEON optimizations of function SynetFusedLayerForward9.</li>
  <li>SimdTensorFormatType enumeration.</li>
- <li>Base implementation, SSE optimization of function SynetConvertImage.</li>
- <li>Base implementation, SSE optimization of function SynetConvertFilter.</li>
+ <li>Base implementation, SSE, AVX optimizations of function SynetConvertImage.</li>
+ <li>Base implementation, SSE, AVX optimizations of function SynetConvertFilter.</li>
 </ul>
 
 <h5>Improving</h5>
@@ -59,6 +59,7 @@
 <ul>
  <li>Error in Convolution Framework (GemmNN method).</li>
  <li>Low performance of NEON optimization in Convolution Framework (GemmNN and Winograd methods).</li>
+ <li>Crash in base implementation of in functions FillPixel, FillBgra, FillUv (GCC, -O3).</li>
 </ul>
 
 <h4>Test framework</h4>
