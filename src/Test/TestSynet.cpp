@@ -219,11 +219,11 @@ namespace Test
             result = result && SynetConvertImageAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 #endif 
 
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetConvertImageAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
-//#endif 
-//
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetConvertImageAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
@@ -267,11 +267,11 @@ namespace Test
             result = result && SynetConvertFilterAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 #endif 
         
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetConvertFilterAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
-//#endif 
-//
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetConvertFilterAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));

@@ -450,6 +450,16 @@ namespace Simd
             return _mm512_maskz_load_ps(m, p);
         }
 
+        template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1)
+        {
+            return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(Avx::Load<align>(p0))), _mm256_castps_pd(Avx::Load<align>(p1)), 1));
+        }
+
+        template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
+        {
+            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse::Load<align>(p0)), Sse::Load<align>(p1), 1), Sse::Load<align>(p2), 2), Sse::Load<align>(p3), 3);
+        }
+
         const __m512i K32_GATHER_ANY = SIMD_MM512_SET1_EPI32(1);
         const __m512i K32_GATHER_3A = SIMD_MM512_SETR_EPI32(0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0, 0, 0, 0, 0);
         const __m512i K32_GATHER_3B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 7, 10, 13);
