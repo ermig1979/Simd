@@ -28,69 +28,73 @@
 
 namespace Test
 {
-    const int TEST_TF_MASK = (SIMD_ALIGN == 64 ? 16 + 8 + 4 + 1 : (SIMD_ALIGN == 32 ? 8 + 4 + 1 : (SIMD_ALIGN == 16 ? 4 + 1 : 1)));
-
     namespace
     {
         struct FuncAB
         {
-            typedef void(*FuncPtr)(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+            typedef void(*FuncPtr)(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
             FuncPtr func;
             String desc;
 
             FuncAB(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdBool trans)
+            void Update(SimdTensorFormatType format)
             {
-                desc = desc + (trans ? "[1]" : "[0]" );
+                desc = desc + "[" + ToString(format) + "]";
             }
 
-            void Call(const View & bias, size_t count, size_t size, SimdBool trans, const View & dstSrc, View & dstDst) const
+            void Call(const Tensor32f & bias, size_t channels, size_t spatial, SimdTensorFormatType format, const Tensor32f & dstSrc, Tensor32f & dstDst) const
             {
-                Simd::Copy(dstSrc, dstDst);
+                Copy(dstSrc, dstDst);
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)bias.data, count, size, (float*)dstDst.data, trans);
+                func(bias.Data(), channels, spatial, dstDst.Data(), format);
             }
         };
     }
 
 #define FUNC_AB(function) FuncAB(function, #function)
 
-    bool SynetAddBiasAutoTest(size_t count, size_t size, SimdBool trans, FuncAB f1, FuncAB f2)
+    bool SynetAddBiasAutoTest(size_t channels, size_t spatial, SimdTensorFormatType format, FuncAB f1, FuncAB f2)
     {
         bool result = true;
 
-        f1.Update(trans);
-        f2.Update(trans);
+        f1.Update(format);
+        f2.Update(format);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << spatial << "].");
 
-        View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstSrc(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstDst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstDst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        Tensor32f bias( ToShape(channels, format) );
+        Tensor32f dstSrc(ToShape(channels, spatial, format));
+        Tensor32f dstDst1(ToShape(channels, spatial, format));
+        Tensor32f dstDst2(ToShape(channels, spatial, format));
 
-        FillRandom32f(bias, -10.0, 10.0);
-        FillRandom32f(dstSrc, -10.0, 10.0);
+        TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bias, count, size, trans, dstSrc, dstDst1));
+        FillRandom(bias.Data(), bias.Size(), -10.0, 10.0);
+        FillRandom(dstSrc.Data(), dstSrc.Size(), -10.0, 10.0);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bias, count, size, trans, dstSrc, dstDst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bias, channels, spatial, format, dstSrc, dstDst1));
 
-        result = result && Compare(dstDst1, dstDst2, EPS, true, 32, false);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(bias, channels, spatial, format, dstSrc, dstDst2));
+
+        result = result && Compare(dstDst1, dstDst2, EPS, true, 32, DifferenceBoth);
 
         return result;
     }
 
-    bool SynetAddBiasAutoTest(const FuncAB & f1, const FuncAB & f2)
+    bool SynetAddBiasAutoTest(int mask, const FuncAB & f1, const FuncAB & f2)
     {
         bool result = true;
 
-        result = result && SynetAddBiasAutoTest(H, W, SimdFalse, f1, f2);
-        result = result && SynetAddBiasAutoTest(H - O, W + O, SimdFalse, f1, f2);
-        result = result && SynetAddBiasAutoTest(H, W, SimdTrue, f1, f2);
-        result = result && SynetAddBiasAutoTest(H - O, W + O, SimdTrue, f1, f2);
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc/*SimdTensorFormatNchw16c*/ && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            if(SimdSynetTensorAlignment(format)&mask)
+            {
+                result = result && SynetAddBiasAutoTest(H, W, format, f1, f2);
+                result = result && SynetAddBiasAutoTest(H - O, W + O, format, f1, f2);
+            }
+        }
 
         return result;
     }
@@ -99,26 +103,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+        result = result && SynetAddBiasAutoTest(TFM_ANY, FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Sse::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+            result = result && SynetAddBiasAutoTest(TFM_128, FUNC_AB(Simd::Sse::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Avx::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+            result = result && SynetAddBiasAutoTest(TFM_256, FUNC_AB(Simd::Avx::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Avx512f::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+            result = result && SynetAddBiasAutoTest(TFM_512, FUNC_AB(Simd::Avx512f::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetAddBiasAutoTest(FUNC_AB(Simd::Neon::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+            result = result && SynetAddBiasAutoTest(TFM_128, FUNC_AB(Simd::Neon::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif
 
         return result;
@@ -190,15 +194,15 @@ namespace Test
     {
         bool result = true;
 
-        for (int src = (int)SimdTensorFormatNchw; src <= (int)SimdTensorFormatNchw16c && result; ++src)
+        for (SimdTensorFormatType src = SimdTensorFormatNchw; src <= SimdTensorFormatNchw16c && result; src = (SimdTensorFormatType)((int)src + 1))
         {
-            for (int dst = (int)SimdTensorFormatNchw; dst <= (int)SimdTensorFormatNchw16c && result; ++dst)
+            for (SimdTensorFormatType dst = SimdTensorFormatNchw; dst <= SimdTensorFormatNchw16c && result; dst = (SimdTensorFormatType)((int)dst + 1))
             {
-                if (src == dst || (src >= (int)SimdTensorFormatNchw4c && dst >= (int)SimdTensorFormatNchw4c) || 
-                    ((Alignment((SimdTensorFormatType)src)&mask) == 0) || ((Alignment((SimdTensorFormatType)dst)&mask) == 0))
+                if (src == dst || (src >= SimdTensorFormatNchw4c && dst >= SimdTensorFormatNchw4c) || 
+                    ((SimdSynetTensorAlignment(src)&mask) == 0) || ((SimdSynetTensorAlignment(dst)&mask) == 0))
                     continue;
-                result = result && SynetConvertTensorAutoTest(9, W / 15 + 0, W / 60, W / 30, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
-                result = result && SynetConvertTensorAutoTest(9, W / 15 - 1, W / 58, W / 31, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(9, W / 15 + 0, W / 60, W / 30, src, dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(9, W / 15 - 1, W / 58, W / 31, src, dst, f1, f2);
             }
         }
 
@@ -209,26 +213,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvertImageAutoTest(TEST_TF_MASK, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+        result = result && SynetConvertImageAutoTest(TFM_ANY, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+            result = result && SynetConvertImageAutoTest(TFM_128, FUNC_CT(Simd::Sse::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetConvertImageAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+            result = result && SynetConvertImageAutoTest(TFM_256, FUNC_CT(Simd::Avx::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetConvertImageAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+            result = result && SynetConvertImageAutoTest(TFM_512, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+            result = result && SynetConvertImageAutoTest(TFM_128, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 #endif
 
         return result;
@@ -238,15 +242,15 @@ namespace Test
     {
         bool result = true;
 
-        for (int src = (int)SimdTensorFormatOiyx; src <= (int)SimdTensorFormatOyxi16o && result; ++src)
+        for (SimdTensorFormatType src = SimdTensorFormatOiyx; src <= SimdTensorFormatOyxi16o && result; src = (SimdTensorFormatType)((int)src + 1))
         {
-            for (int dst = (int)SimdTensorFormatOiyx; dst <= (int)SimdTensorFormatOyxi16o && result; ++dst)
+            for (SimdTensorFormatType dst = SimdTensorFormatOiyx; dst <= SimdTensorFormatOyxi16o && result; dst = (SimdTensorFormatType)((int)dst + 1))
             {
-                if (src == dst || (src >= (int)SimdTensorFormatOyxi4o && dst >= (int)SimdTensorFormatOyxi4o) || 
-                    ((Alignment((SimdTensorFormatType)src)&mask) == 0) || ((Alignment((SimdTensorFormatType)dst)&mask) == 0))
+                if (src == dst || (src >= SimdTensorFormatOyxi4o && dst >= SimdTensorFormatOyxi4o) ||
+                    ((SimdSynetTensorAlignment(src)&mask) == 0) || ((SimdSynetTensorAlignment(dst)&mask) == 0))
                     continue;
-                result = result && SynetConvertTensorAutoTest(W * 9 / 30 + 0, W * 7 / 30 + 0, 3, 3, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
-                result = result && SynetConvertTensorAutoTest(W * 9 / 10 - 1, W * 7 / 10 + 1, 1, 1, (SimdTensorFormatType)src, (SimdTensorFormatType)dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(W * 9 / 30 + 0, W * 7 / 30 + 0, 3, 3, src, dst, f1, f2);
+                result = result && SynetConvertTensorAutoTest(W * 9 / 10 - 1, W * 7 / 10 + 1, 1, 1, src, dst, f1, f2);
             }
         }
 
@@ -257,26 +261,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvertFilterAutoTest(TEST_TF_MASK, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        result = result && SynetConvertFilterAutoTest(TFM_ANY, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Sse::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+            result = result && SynetConvertFilterAutoTest(TFM_128, FUNC_CT(Simd::Sse::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 #endif 
         
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetConvertFilterAutoTest(9, FUNC_CT(Simd::Avx::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+            result = result && SynetConvertFilterAutoTest(TFM_256, FUNC_CT(Simd::Avx::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 #endif 
         
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetConvertFilterAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+            result = result && SynetConvertFilterAutoTest(TFM_512, FUNC_CT(Simd::Avx512f::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+            result = result && SynetConvertFilterAutoTest(TFM_128, FUNC_CT(Simd::Neon::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 #endif
 
         return result;
@@ -1784,53 +1788,6 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
-
-    bool SynetAddBiasDataTest(bool create, size_t count, size_t size, SimdBool trans, const FuncAB & f)
-    {
-        bool result = true;
-
-        Data data(f.desc);
-
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << count << ", " << size << "].");
-
-        View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstSrc(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstDst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dstDst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-
-        if (create)
-        {
-            FillRandom32f(bias, -10.0, 10.0);
-            FillRandom32f(dstSrc, -10.0, 10.0);
-
-            TEST_SAVE(bias);
-            TEST_SAVE(dstSrc);
-
-            f.Call(bias, count, size, trans, dstSrc, dstDst1);
-
-            TEST_SAVE(dstDst1);
-        }
-        else
-        {
-            TEST_LOAD(bias);
-            TEST_LOAD(dstSrc);
-
-            TEST_LOAD(dstDst1);
-
-            f.Call(bias, count, size, trans, dstSrc, dstDst2);
-
-            TEST_SAVE(dstDst2);
-
-            result = result && Compare(dstDst1, dstDst2, EPS, true, 32, false);
-        }
-
-        return result;
-    }
-
-    bool SynetAddBiasDataTest(bool create)
-    {
-        return SynetAddBiasDataTest(create, DH, DW, SimdFalse, FUNC_AB(SimdSynetAddBias));
-    }
 
     bool SynetEltwiseLayerForwardDataTest(bool create, size_t size, size_t count, SimdSynetEltwiseOperationType type, const FuncELF & f)
     {

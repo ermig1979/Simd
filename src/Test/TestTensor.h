@@ -304,6 +304,12 @@ namespace Test
 
     //-------------------------------------------------------------------------
 
+    template<class T> inline void Copy(const Tensor<T> & src, Tensor<T> & dst)
+    {
+        assert(src.Size() == dst.Size());
+        memcpy(dst.Data(), src.Data(), src.Size() * sizeof(T));
+    }
+
     inline void Compare(const Tensor32f & a, const Tensor32f & b, float differenceMax, bool printError, int errorCountMax, DifferenceType differenceType, const String & description,
         Shape index, size_t order, int & errorCount, std::stringstream & message)
     {
@@ -402,43 +408,48 @@ namespace Test
         return "Assert";
     }
 
-    inline Shape ToShape(size_t batchOutput, size_t channelsInput, size_t height, size_t width, SimdTensorFormatType format)
+    inline Shape ToShape(size_t batchOrOutput, size_t channelsOrInput, size_t height, size_t width, SimdTensorFormatType format)
     {
         switch (format)
         {
-        case SimdTensorFormatNchw: return Shape({ batchOutput, channelsInput, height, width });
-        case SimdTensorFormatNhwc: return Shape({ batchOutput, height, width, channelsInput });
-        case SimdTensorFormatNchw4c: return Shape({ batchOutput, (channelsInput + 3) / 4, height, width, 4 });
-        case SimdTensorFormatNchw8c: return Shape({ batchOutput, (channelsInput + 7) / 8, height, width, 8 });
-        case SimdTensorFormatNchw16c: return Shape({ batchOutput, (channelsInput + 15) / 16, height, width, 16 });
-        case SimdTensorFormatOiyx: return Shape({ batchOutput, channelsInput, height, width });
-        case SimdTensorFormatYxio: return Shape({ height, width, channelsInput, batchOutput });
-        case SimdTensorFormatOyxi4o: return Shape({ (batchOutput + 3) / 4, height, width, channelsInput, 4 });
-        case SimdTensorFormatOyxi8o: return Shape({ (batchOutput + 7) / 8, height, width, channelsInput, 8 });
-        case SimdTensorFormatOyxi16o: return Shape({ (batchOutput + 15) / 16, height, width, channelsInput, 16 });
+        case SimdTensorFormatNchw: return Shape({ batchOrOutput, channelsOrInput, height, width });
+        case SimdTensorFormatNhwc: return Shape({ batchOrOutput, height, width, channelsOrInput });
+        case SimdTensorFormatNchw4c: return Shape({ batchOrOutput, (channelsOrInput + 3) / 4, height, width, 4 });
+        case SimdTensorFormatNchw8c: return Shape({ batchOrOutput, (channelsOrInput + 7) / 8, height, width, 8 });
+        case SimdTensorFormatNchw16c: return Shape({ batchOrOutput, (channelsOrInput + 15) / 16, height, width, 16 });
+        case SimdTensorFormatOiyx: return Shape({ batchOrOutput, channelsOrInput, height, width });
+        case SimdTensorFormatYxio: return Shape({ height, width, channelsOrInput, batchOrOutput });
+        case SimdTensorFormatOyxi4o: return Shape({ (batchOrOutput + 3) / 4, height, width, channelsOrInput, 4 });
+        case SimdTensorFormatOyxi8o: return Shape({ (batchOrOutput + 7) / 8, height, width, channelsOrInput, 8 });
+        case SimdTensorFormatOyxi16o: return Shape({ (batchOrOutput + 15) / 16, height, width, channelsOrInput, 16 });
         }
         assert(0);
         return Shape();
     }
 
-    inline int Alignment(SimdTensorFormatType format)
+    inline Shape ToShape(size_t channels, size_t spatial, SimdTensorFormatType format)
     {
         switch (format)
         {
-        case SimdTensorFormatNchw: return 1;
-        case SimdTensorFormatNhwc: return 1;
-        case SimdTensorFormatNchw4c: return 4;
-        case SimdTensorFormatNchw8c: return 8;
-        case SimdTensorFormatNchw16c: return 16;
-        case SimdTensorFormatOiyx: return 1;
-        case SimdTensorFormatYxio: return 1;
-        case SimdTensorFormatOyxi4o: return 4;
-        case SimdTensorFormatOyxi8o: return 8;
-        case SimdTensorFormatOyxi16o: return 16;
+        case SimdTensorFormatNchw: return Shape({ channels, spatial });
+        case SimdTensorFormatNhwc: return Shape({ spatial, channels });
+        case SimdTensorFormatNchw4c: return Shape({ (channels + 3) / 4, spatial, 4 });
+        case SimdTensorFormatNchw8c: return Shape({ (channels + 7) / 8, spatial, 8 });
+        case SimdTensorFormatNchw16c: return Shape({ (channels + 15) / 16, spatial, 16 });
         }
         assert(0);
-        return 0;
+        return Shape();
     }
+
+    inline Shape ToShape(size_t channels, SimdTensorFormatType format)
+    {
+        return Shape({ SimdAlign(channels, SimdSynetTensorAlignment(format)) });
+    }
+
+    const int TFM_ANY = (SIMD_ALIGN == 64 ? 29 : (SIMD_ALIGN == 32 ? 13 : (SIMD_ALIGN == 16 ? 5 : 1)));
+    const int TFM_128 = 5;
+    const int TFM_256 = 9;
+    const int TFM_512 = 17;
 }
 
 #endif// __TestTensor_h__

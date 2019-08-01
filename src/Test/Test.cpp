@@ -330,7 +330,7 @@ namespace Test
 
     TEST_ADD_GROUP_AD0(SvmSumLinear);
 
-    TEST_ADD_GROUP_AD0(SynetAddBias);
+    TEST_ADD_GROUP_A00(SynetAddBias);
     TEST_ADD_GROUP_A00(SynetConvertImage);
     TEST_ADD_GROUP_A00(SynetConvertFilter);
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);

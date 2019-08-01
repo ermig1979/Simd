@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 2.8)
 
-option(AVX512 "AVX512 enable" ON)
+option(SIMD_AVX512 "AVX512 enable" ON)
 option(SIMD_TEST "Test framework enable" ON)
-option(PRINT_INFO "Print build information" ON)
+option(SIMD_INFO "Print build information" ON)
 option(SIMD_PERF "Internal performance statistic" OFF)
 
 set(TRUNK_DIR "${CMAKE_CURRENT_SOURCE_DIR}/../..")
@@ -26,7 +26,7 @@ if(NOT TOOLCHAIN STREQUAL "")
 	string(REGEX REPLACE "\n$" "" CMAKE_CXX_COMPILER_VERSION "${CMAKE_CXX_COMPILER_VERSION}")
 endif()
 
-if(PRINT_INFO)
+if(SIMD_INFO)
 	message("Simd Library:")
 	message("Build type: '${CMAKE_BUILD_TYPE}'")
 	message("Target: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -114,7 +114,7 @@ endif()
         file(GLOB_RECURSE SIMD_AVX512BW_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512bw*.cpp)
         set_source_files_properties(${SIMD_AVX512BW_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512bw -mavx512vl -mavx512dq -mbmi -mlzcnt -mfma")
 
-        if(UNIX AND AVX512)
+        if(UNIX AND SIMD_AVX512)
             set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mavx512bw")
             set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AVX512F_SRC} ${SIMD_AVX512BW_SRC})
             message("Use AVX-512F and AVX-512BW")

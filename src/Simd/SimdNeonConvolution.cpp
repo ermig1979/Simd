@@ -39,7 +39,7 @@ namespace Simd
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    Neon::SynetAddBias(bias, count, size, dst, trans);
+                    Neon::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {

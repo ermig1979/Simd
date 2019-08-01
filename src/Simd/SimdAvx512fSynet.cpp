@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdSynet.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdBase.h"
@@ -48,63 +49,83 @@ namespace Simd
             Store<align, mask>(dst, _mm512_add_ps(_dst, _bias), tail);
         }
 
-        template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
+        template <bool align> void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)
         {
             if (align)
-                assert(((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(bias) : Aligned(size)) && Aligned(dst));
-            if ((trans || size == 1) && count != 1)
+                assert(Aligned(spatial) && Aligned(dst));
+
+            size_t aligned = AlignLo(spatial, QF);
+            size_t partial = AlignLo(spatial, F);
+            __mmask16 tail = TailMask16(spatial - partial);
+            for (size_t c = 0; c < channels; ++c)
             {
-                size_t aligned = AlignLo(count, QF);
-                size_t partial = AlignLo(count, F);
-                __mmask16 tail = __mmask16(-1) >> (F + partial - count);
-                for (size_t j = 0; j < size; ++j)
+                size_t s = 0;
+                __m512 _bias = _mm512_set1_ps(bias[c]);
+                for (; s < aligned; s += QF)
                 {
-                    size_t i = 0;
-                    for (; i < aligned; i += QF)
-                    {
-                        SynetAddBias<align, false>(bias + i + F * 0, dst + i + F * 0);
-                        SynetAddBias<align, false>(bias + i + F * 1, dst + i + F * 1);
-                        SynetAddBias<align, false>(bias + i + F * 2, dst + i + F * 2);
-                        SynetAddBias<align, false>(bias + i + F * 3, dst + i + F * 3);
-                    }
-                    for (; i < partial; i += F)
-                        SynetAddBias<align, false>(bias + i, dst + i);
-                    if (i < count)
-                        SynetAddBias<align, true>(bias + i, dst + i, tail);
-                    dst += count;
+                    SynetAddBias<align, false>(_bias, dst + s + F * 0);
+                    SynetAddBias<align, false>(_bias, dst + s + F * 1);
+                    SynetAddBias<align, false>(_bias, dst + s + F * 2);
+                    SynetAddBias<align, false>(_bias, dst + s + F * 3);
                 }
-            }
-            else
-            {
-                size_t aligned = AlignLo(size, QF);
-                size_t partial = AlignLo(size, F);
-                __mmask16 tail = __mmask16(-1) >> (F + partial - size);
-                for (size_t i = 0; i < count; ++i)
-                {
-                    size_t j = 0;
-                    __m512 _bias = _mm512_set1_ps(bias[i]);
-                    for (; j < aligned; j += QF)
-                    {
-                        SynetAddBias<align, false>(_bias, dst + j + F * 0);
-                        SynetAddBias<align, false>(_bias, dst + j + F * 1);
-                        SynetAddBias<align, false>(_bias, dst + j + F * 2);
-                        SynetAddBias<align, false>(_bias, dst + j + F * 3);
-                    }
-                    for (; j < partial; j += F)
-                        SynetAddBias<align, false>(_bias, dst + j);
-                    if(j < size)
-                        SynetAddBias<align, true>(_bias, dst + j, tail);
-                    dst += size;
-                }
+                for (; s < partial; s += F)
+                    SynetAddBias<align, false>(_bias, dst + s);
+                if (s < spatial)
+                    SynetAddBias<align, true>(_bias, dst + s, tail);
+                dst += spatial;
             }
         }
 
-        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
+        SIMD_INLINE void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)
         {
-            if (((trans || size == 1) && count != 1 ? Aligned(count) && Aligned(bias) : Aligned(size)) && Aligned(dst))
-                SynetAddBias<true>(bias, count, size, dst, trans);
+            if (Aligned(spatial) && Aligned(dst))
+                SynetAddBiasNchw<true>(bias, channels, spatial, dst);
             else
-                SynetAddBias<false>(bias, count, size, dst, trans);
+                SynetAddBiasNchw<false>(bias, channels, spatial, dst);
+        }
+
+        template <bool align> void SynetAddBiasNhwc(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            if (align)
+                assert(Aligned(channels) && Aligned(bias) && Aligned(dst));
+
+            size_t aligned = AlignLo(channels, QF);
+            size_t partial = AlignLo(channels, F);
+            __mmask16 tail = TailMask16(channels - partial);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += QF)
+                {
+                    SynetAddBias<align, false>(bias + c + F * 0, dst + c + F * 0);
+                    SynetAddBias<align, false>(bias + c + F * 1, dst + c + F * 1);
+                    SynetAddBias<align, false>(bias + c + F * 2, dst + c + F * 2);
+                    SynetAddBias<align, false>(bias + c + F * 3, dst + c + F * 3);
+                }
+                for (; c < partial; c += F)
+                    SynetAddBias<align, false>(bias + c, dst + c);
+                if (c < channels)
+                    SynetAddBias<align, true>(bias + c, dst + c, tail);
+                dst += channels;
+            }
+        }
+
+        SIMD_INLINE void SynetAddBiasNhwc(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            if (Aligned(bias) && Aligned(channels) && Aligned(dst))
+                SynetAddBiasNhwc<true>(bias, channels, spatial, dst);
+            else
+                SynetAddBiasNhwc<false>(bias, channels, spatial, dst);
+        }
+
+        void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetAddBiasNchw(bias, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetAddBiasNhwc(bias, channels, spatial, dst);
+            else
+                assert(0);
         }
 
         template <SimdSynetEltwiseOperationType type> __m512 SynetEltwiseLayerForward(__m512 src0, __m512 src1);

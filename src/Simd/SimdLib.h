@@ -5520,29 +5520,26 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+        \fn void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         \short Adds a bias to given vector.
 
-        Algorithm's details:
+        Algorithm's details (for NCHW tensor format):
         \verbatim
-        for(i = 0; i < count; ++i)
-            for(j = 0; j < size; ++j)
-                if(trans)
-                    dst[i + j*count] += bias[i];
-                else
-                    dst[i*size + j] += bias[i];
+        for(c = 0; c < channels; ++c)
+            for(j = 0; j < spatial; ++j)
+                 dst[c*spatial + s] += bias[c];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients.
-        \param [in] count - a size of bias array.
-        \param [in] size - an internal size of bias addition.
-        \param [in, out] dst - a pointer to cumulative 32-bit float array. The size of the array must be equal to count*size.
-        \param [in] trans - a flag of transposed data.
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign(channels, ::SimdSynetTensorAlignment(format));
+        \param [in] channels - a number of channels in the image tensor.
+        \param [in] spatial - a spatial size of image tensor.
+        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is ::SimdAlign(channels, ::SimdSynetTensorAlignment(format))*spatial;
+        \param [in] format - a format of image tensor.
     */
-    SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+    SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
     /*! @ingroup synet
 
@@ -6081,6 +6078,19 @@ extern "C"
         \return specified hardware optimized 5D-tensor format. 
     */
     SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
+
+        \short Gets alignment requred for current tensor format.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] format - a tensor format.
+        \return alignment requred for current tensor format.
+    */
+    SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
 
     /*! @ingroup texture_estimation
 

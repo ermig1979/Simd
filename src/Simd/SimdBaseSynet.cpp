@@ -29,46 +29,56 @@ namespace Simd
 {
     namespace Base
     {
-        void SynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
+        void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)
         {
-            if ((trans || size == 1) && count != 1)
+            size_t aligned = Simd::AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; ++c)
             {
-                size_t aligned = Simd::AlignLo(count, 4);
-                for (size_t j = 0; j < size; ++j)
+                float value = bias[c];
+                size_t s = 0;
+                for (; s < aligned; s += 4)
                 {
-                    size_t i = 0;
-                    for (; i < aligned; i += 4)
-                    {
-                        dst[i + 0] += bias[i + 0];
-                        dst[i + 1] += bias[i + 1];
-                        dst[i + 2] += bias[i + 2];
-                        dst[i + 3] += bias[i + 3];
-                    }
-                    for (; i < count; ++i)
-                        dst[i] += bias[i];
-                    dst += count;
+                    dst[s + 0] += value;
+                    dst[s + 1] += value;
+                    dst[s + 2] += value;
+                    dst[s + 3] += value;
                 }
-            }
-            else
-            {
-                size_t aligned = Simd::AlignLo(size, 4);
-                for (size_t i = 0; i < count; ++i)
-                {
-                    float value = bias[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
-                    {
-                        dst[j + 0] += value;
-                        dst[j + 1] += value;
-                        dst[j + 2] += value;
-                        dst[j + 3] += value;
-                    }
-                    for (; j < size; ++j)
-                        dst[j] += value;
-                    dst += size;
-                }
+                for (; s < spatial; ++s)
+                    dst[s] += value;
+                dst += spatial;
             }
         }
+
+        void SynetAddBiasNhwc(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            size_t aligned = Simd::AlignLo(channels, 4);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += 4)
+                {
+                    dst[c + 0] += bias[c + 0];
+                    dst[c + 1] += bias[c + 1];
+                    dst[c + 2] += bias[c + 2];
+                    dst[c + 3] += bias[c + 3];
+                }
+                for (; c < channels; ++c)
+                    dst[c] += bias[c];
+                dst += channels;
+            }
+        }
+
+        void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetAddBiasNchw(bias, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetAddBiasNhwc(bias, channels, spatial, dst);
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
 
         template <SimdSynetEltwiseOperationType type> void SynetEltwiseLayerForward(float const * const * src, size_t count, size_t size, float * dst)
         {

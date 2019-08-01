@@ -26,6 +26,10 @@
 */
 #include "Simd/SimdConfig.h"
 
+#ifndef SIMD_LIB_CPP
+#define SIMD_LIB_CPP
+#endif
+
 #if defined(WIN32) && !defined(SIMD_STATIC)
 
 #define SIMD_EXPORTS
@@ -59,6 +63,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdConvolution.h"
 #include "Simd/SimdMergedConvolution.h"
+#include "Simd/SimdSynet.h"
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
@@ -5218,12 +5223,12 @@ SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float *
         Base::SvmSumLinear(x, svs, weights, length, count, sum);
 }
 
-typedef void(*SimdSynetAddBiasPtr) (const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+typedef void(*SimdSynetAddBiasPtr) (const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 volatile SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC4(SynetAddBias, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetAddBias(const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
+SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
-    simdSynetAddBias(bias, count, size, dst, trans);
+    simdSynetAddBias(bias, channels, spatial, dst, format);
 }
 
 typedef void(*SimdSynetConvertImagePtr) (size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
@@ -5367,25 +5372,12 @@ SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size
 
 SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format)
 {
-    if (format == SimdTensorFormatNchwXc)
-    {
-        switch (Simd::ALIGNMENT)
-        {
-        case 16: return SimdTensorFormatNchw4c;
-        case 32: return SimdTensorFormatNchw8c;
-        case 64: return SimdTensorFormatNchw16c;
-        }
-    }
-    if (format == SimdTensorFormatOyxiXo)
-    {
-        switch (Simd::ALIGNMENT)
-        {
-        case 16: return SimdTensorFormatOyxi4o;
-        case 32: return SimdTensorFormatOyxi8o;
-        case 64: return SimdTensorFormatOyxi16o;
-        }
-    }
-    return SimdTensorFormatUnknown;
+    return Base::SynetSpecifyTensorFormat(format);
+}
+
+SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format)
+{
+    return Base::SynetTensorAlignment(format);
 }
 
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,

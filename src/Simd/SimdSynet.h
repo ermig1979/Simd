@@ -25,12 +25,36 @@
 #define __SimdSynet_h__
 
 #include "Simd/SimdMath.h"
+#include "Simd/SimdEnable.h"
 
 namespace Simd
 {
     namespace Base
     {
-        SIMD_INLINE int SynetTensorAlignment(SimdTensorFormatType format)
+        SIMD_INLINE SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNchwXc)
+            {
+                switch (Simd::ALIGNMENT)
+                {
+                case 16: return SimdTensorFormatNchw4c;
+                case 32: return SimdTensorFormatNchw8c;
+                case 64: return SimdTensorFormatNchw16c;
+                }
+            }
+            if (format == SimdTensorFormatOyxiXo)
+            {
+                switch (Simd::ALIGNMENT)
+                {
+                case 16: return SimdTensorFormatOyxi4o;
+                case 32: return SimdTensorFormatOyxi8o;
+                case 64: return SimdTensorFormatOyxi16o;
+                }
+            }
+            return SimdTensorFormatUnknown;
+        }
+
+        SIMD_INLINE size_t SynetTensorAlignment(SimdTensorFormatType format)
         {
             switch (format)
             {
@@ -47,6 +71,19 @@ namespace Simd
             }
             assert(0);
             return 0;
+        }
+    }
+#ifndef SIMD_LIB_CPP
+    namespace Base
+    {
+        SIMD_INLINE bool NchwCompatible(size_t channels, size_t spatial, SimdTensorFormatType format)
+        {
+            return (format == SimdTensorFormatNchw && spatial != 1) || (format == SimdTensorFormatNhwc && channels == 1);
+        }
+
+        SIMD_INLINE bool NhwcCompatible(size_t channels, size_t spatial, SimdTensorFormatType format)
+        {
+            return (format == SimdTensorFormatNhwc && channels != 1) || (format == SimdTensorFormatNchw && spatial == 1);
         }
 
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
@@ -157,6 +194,7 @@ namespace Simd
         }
     }
 #endif//SIMD_NEON_ENABLE
+#endif //SIMD_LIB_CPP
 }
 
 #endif//__SimdSynet_h__
