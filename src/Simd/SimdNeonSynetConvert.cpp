@@ -24,45 +24,25 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdTranspose.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdSse1.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
     {
         template<bool align> void SynetConvertImage_Chw_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
+            size_t channels4 = AlignLo(channels, 4);
             size_t spatial4 = AlignLo(spatial, 4);
-            size_t channels8 = AlignLo(channels, 8);
-            size_t spatial8 = AlignLo(spatial, 8);
             size_t s = 0;
-            for (; s < spatial8; s += 8, src += 8, dst += 8 * channels)
-            {
-                size_t c = 0;
-                const float * ps = src;
-                float * pd = dst;
-                for (; c < channels8; c += 8, ps += 8 * spatial, pd += 8)
-                    Transpose8x8<align>(ps, spatial, pd, channels);
-                for (; c < channels; ++c, ps += spatial, pd += 1)
-                {
-                    pd[0 * channels] = ps[0];
-                    pd[1 * channels] = ps[1];
-                    pd[2 * channels] = ps[2];
-                    pd[3 * channels] = ps[3];
-                    pd[4 * channels] = ps[4];
-                    pd[5 * channels] = ps[5];
-                    pd[6 * channels] = ps[6];
-                    pd[7 * channels] = ps[7];
-                }
-            }
             for (; s < spatial4; s += 4, src += 4, dst += 4 * channels)
             {
                 size_t c = 0;
                 const float * ps = src;
                 float * pd = dst;
-                for (; c < channels8; c += 8, ps += 8 * spatial, pd += 8)
-                    Transpose4x8<align>(ps, spatial, pd, channels);
+                for (; c < channels4; c += 4, ps += 4 * spatial, pd += 4)
+                    Transpose4x4<align>(ps, spatial, pd, channels);
                 for (; c < channels; ++c, ps += spatial, pd += 1)
                 {
                     pd[0 * channels] = ps[0];
@@ -76,31 +56,27 @@ namespace Simd
                     dst[c] = src[c*spatial];
         }
 
-        template<bool align> void SynetConvertImage_Chw_Chw8c(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetConvertImage_Chw_Chw4c(size_t channels, size_t spatial, const float * src, float * dst)
         {
-            size_t channels8 = AlignLo(channels, 8);
-            size_t spatial8 = AlignLo(spatial, 8);
-            size_t tail = channels - channels8;
+            size_t channels4 = AlignLo(channels, 4);
+            size_t spatial4 = AlignLo(spatial, 4);
+            size_t tail = channels - channels4;
             size_t c = 0;
-            for (; c < channels8; c += 8, src += 8 * spatial)
+            for (; c < channels4; c += 4, src += 4 * spatial)
             {
                 size_t s = 0;
                 const float * ps = src;
-                for (; s < spatial8; s += 8, dst += 8 * F, ps += 8)
-                    Transpose8x8<align>(ps, spatial, dst, 8);
+                for (; s < spatial4; s += 4, dst += 4 * F, ps += 4)
+                    Transpose4x4<align>(ps, spatial, dst, 4);
                 for (; s < spatial; ++s, dst += F, ps += 1)
                 {
                     dst[0] = ps[0 * spatial];
                     dst[1] = ps[1 * spatial];
                     dst[2] = ps[2 * spatial];
                     dst[3] = ps[3 * spatial];
-                    dst[4] = ps[4 * spatial];
-                    dst[5] = ps[5 * spatial];
-                    dst[6] = ps[6 * spatial];
-                    dst[7] = ps[7 * spatial];
                 }
             }
-            if (tail)
+            if(tail)
             {
                 const float * ps = src;
                 for (size_t s = 0; s < spatial; ++s, dst += F, ps += 1)
@@ -119,15 +95,15 @@ namespace Simd
             SynetConvertImage_Chw_Hwc<align>(spatial, channels, src, dst);
         }
 
-        template<bool align> void SynetConvertImage_Hwc_Chw8c(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetConvertImage_Hwc_Chw4c(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t channelsF = AlignLo(channels, F);
-            size_t channelsF4 = AlignLo(channels, 4 * F);
+            size_t channelsF4 = AlignLo(channels, 4*F);
             size_t tail = channels - channelsF;
             size_t spatial4 = AlignLo(spatial, 4);
             size_t stride = spatial * F;
             size_t c = 0;
-            for (; c < channelsF4; c += 4 * F, src += 4 * F)
+            for (; c < channelsF4; c += 4*F, src += 4*F)
             {
                 const float * ps = src;
                 float * pd = dst;
@@ -163,31 +139,27 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertImage_Chw8c_Chw(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetConvertImage_Chw4c_Chw(size_t channels, size_t spatial, const float * src, float * dst)
         {
-            size_t channels8 = AlignLo(channels, 8);
-            size_t spatial8 = AlignLo(spatial, 8);
-            size_t tail = channels - channels8;
+            size_t channels4 = AlignLo(channels, 4);
+            size_t spatial4 = AlignLo(spatial, 4);
+            size_t tail = channels - channels4;
             size_t c = 0;
-            for (; c < channels8; c += 8, dst += 8 * spatial, src += 8 * spatial)
+            for (; c < channels4; c += 4, dst += 4 * spatial, src += 4*spatial)
             {
                 const float * ps = src;
                 size_t s = 0;
-                for (; s < spatial8; s += 8, ps += 8 * F)
-                    Transpose8x8<align>(ps, 8, dst + s, spatial);
-                for (; s < spatial; ++s, ps += 8)
+                for (; s < spatial4; s += 4, ps += 4*F)
+                    Transpose4x4<align>(ps, 4, dst + s, spatial);
+                for (; s < spatial; ++s, ps += 4)
                 {
                     dst[s + 0 * spatial] = ps[0];
                     dst[s + 1 * spatial] = ps[1];
                     dst[s + 2 * spatial] = ps[2];
                     dst[s + 3 * spatial] = ps[3];
-                    dst[s + 4 * spatial] = ps[4];
-                    dst[s + 5 * spatial] = ps[5];
-                    dst[s + 6 * spatial] = ps[6];
-                    dst[s + 7 * spatial] = ps[7];
                 }
             }
-            if (tail)
+            if(tail)
             {
                 const float * ps = src;
                 for (size_t i = 0; i < tail; ++i, ps += 1, dst += spatial)
@@ -198,20 +170,20 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertImage_Chw8c_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetConvertImage_Chw4c_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t stride = F * spatial;
             size_t channelsF = AlignLo(channels, F);
-            size_t channelsF4 = AlignLo(channels, 4 * F);
+            size_t channelsF4 = AlignLo(channels, 4*F);
             size_t tail = channels - channelsF;
             size_t spatial4 = AlignLo(spatial, 4);
             size_t s = 0;
-            for (; s < spatial4; s += 4, src += 4 * F, dst += 4 * channels)
+            for (; s < spatial4; s += 4, src += 4*F, dst += 4 * channels)
             {
                 const float * ps = src;
                 float * pd = dst;
                 size_t c = 0;
-                for (; c < channelsF4; c += 4 * F, ps += 4 * stride, pd += 4 * F)
+                for (; c < channelsF4; c += 4*F, ps += 4 * stride, pd += 4*F)
                     Transpose4x4xF<align>(ps, stride, pd, channels);
                 for (; c < channelsF; c += F, ps += stride, pd += F)
                 {
@@ -251,22 +223,22 @@ namespace Simd
             {
                 if (dst == SimdTensorFormatNhwc)
                     return SynetConvertImage_Chw_Hwc<false>;
-                if (dst == SimdTensorFormatNchw8c)
-                    return SynetConvertImage_Chw_Chw8c<false>;
+                if (dst == SimdTensorFormatNchw4c)
+                    return SynetConvertImage_Chw_Chw4c<false>;
             }
             if (src == SimdTensorFormatNhwc)
             {
                 if (dst == SimdTensorFormatNchw)
                     return SynetConvertImage_Hwc_Chw<false>;
-                if (dst == SimdTensorFormatNchw8c)
-                    return SynetConvertImage_Hwc_Chw8c<false>;
+                if (dst == SimdTensorFormatNchw4c)
+                    return SynetConvertImage_Hwc_Chw4c<false>;
             }
-            if (src == SimdTensorFormatNchw8c)
+            if (src == SimdTensorFormatNchw4c)
             {
                 if (dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_Chw8c_Chw<false>;
+                    return SynetConvertImage_Chw4c_Chw<false>;
                 if (dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_Chw8c_Hwc<false>;
+                    return SynetConvertImage_Chw4c_Hwc<false>;
             }
             return NULL;
         }
@@ -286,7 +258,7 @@ namespace Simd
                 }
             }
             else
-                return Sse::SynetConvertImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
+                return Base::SynetConvertImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
         }
 
         template<bool align> void SynetConvertFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
@@ -296,29 +268,25 @@ namespace Simd
                 SynetConvertImage_Chw_Hwc<align>(output, input, src, dst);
                 return;
             }
-            size_t output8 = AlignLo(output, 8);
-            size_t kernel8 = AlignLo(kernel, 8);
+            size_t output4 = AlignLo(output, 4);
+            size_t kernel4 = AlignLo(kernel, 4);
             size_t ik = input * kernel, oi = output * input;
             for (size_t i = 0; i < input; ++i, src += kernel, dst += output)
             {
                 const float * ps = src;
                 float * pd = dst;
                 size_t k = 0;
-                for (; k < kernel8; k += 8, ps += 8, pd += 8 * oi)
+                for (; k < kernel4; k += 4, ps += 4, pd += 4*oi)
                 {
                     size_t o = 0;
-                    for (; o < output8; o += 8)
-                        Transpose8x8<align>(ps + o * ik, ik, pd + o, oi);
+                    for (; o < output4; o += 4)
+                        Transpose4x4<align>(ps + o * ik, ik, pd + o, oi);
                     for (; o < output; ++o)
                     {
                         pd[0 * oi + o] = ps[o * ik + 0];
                         pd[1 * oi + o] = ps[o * ik + 1];
                         pd[2 * oi + o] = ps[o * ik + 2];
                         pd[3 * oi + o] = ps[o * ik + 3];
-                        pd[4 * oi + o] = ps[o * ik + 4];
-                        pd[5 * oi + o] = ps[o * ik + 5];
-                        pd[6 * oi + o] = ps[o * ik + 6];
-                        pd[7 * oi + o] = ps[o * ik + 7];
                     }
                 }
                 for (; k < kernel; ++k, ps += 1, pd += oi)
@@ -327,11 +295,11 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Oiyx_Oyxi8o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetConvertFilter_Oiyx_Oyxi4o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             if (kernel == 1)
             {
-                SynetConvertImage_Chw_Chw8c<align>(output, input, src, dst);
+                SynetConvertImage_Chw_Chw4c<align>(output, input, src, dst);
                 return;
             }
             size_t outputF = AlignLo(output, F);
@@ -343,17 +311,17 @@ namespace Simd
             {
                 for (size_t i = 0; i < input; ++i)
                 {
-                    const float * ps = src + o * ik + i * kernel;
+                    const float * ps = src + o * ik + i*kernel;
                     float * pd = dst + o * ik + i * F;
                     size_t k = 0;
                     for (; k < kernelF; k += F, ps += F, pd += F * stride)
-                        Transpose8x8<align>(ps, ik, pd, stride);
+                        Transpose4x4<align>(ps, ik, pd, stride);
                     for (; k < kernel; ++k, ps += 1, pd += stride)
                         for (size_t j = 0; j < F; ++j)
                             pd[j] = ps[j*ik];
                 }
             }
-            if (tail)
+            if(tail)
             {
                 for (size_t i = 0; i < input; ++i)
                 {
@@ -381,15 +349,15 @@ namespace Simd
             SynetConvertFilter_Oiyx_Yxio<align>(kernel, input, output, src, dst);
         }
 
-        template<bool align> void SynetConvertFilter_Yxio_Oyxi8o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetConvertFilter_Yxio_Oyxi4o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             size_t outputF = AlignLo(output, F);
-            size_t outputF4 = AlignLo(output, F * 4);
+            size_t outputF4 = AlignLo(output, F*4);
             size_t ki = kernel * input;
             size_t stride = ki * F;
             size_t ki4 = AlignLo(ki, 4);
             size_t o = 0;
-            for (; o < outputF4; o += 4 * F, src += 4 * F)
+            for (; o < outputF4; o += 4*F, src += 4*F)
             {
                 const float * ps = src;
                 float * pd = dst;
@@ -431,13 +399,13 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Oyxi8o_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetConvertFilter_Oyxi4o_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             if (kernel == 1)
             {
-                SynetConvertImage_Chw8c_Chw<align>(output, input, src, dst);
+                SynetConvertImage_Chw4c_Chw<align>(output, input, src, dst);
                 return;
-            }
+            } 
             size_t outputF = AlignLo(output, F);
             size_t tail = output - outputF;
             size_t kernelF = AlignLo(kernel, F);
@@ -452,22 +420,18 @@ namespace Simd
                 {
                     size_t k = 0;
                     for (; k < kernelF; k += F, pd += F)
-                        Transpose8x8<align>(ps + k * stride, stride, pd, ik);
+                        Transpose4x4<align>(ps + k * stride, stride, pd, ik);
                     for (; k < kernel; ++k, pd++)
                     {
                         pd[0 * ik] = ps[k*stride + 0];
                         pd[1 * ik] = ps[k*stride + 1];
                         pd[2 * ik] = ps[k*stride + 2];
                         pd[3 * ik] = ps[k*stride + 3];
-                        pd[4 * ik] = ps[k*stride + 4];
-                        pd[5 * ik] = ps[k*stride + 5];
-                        pd[6 * ik] = ps[k*stride + 6];
-                        pd[7 * ik] = ps[k*stride + 7];
                     }
                 }
-                dst += F * ik;
+                dst += F*ik;
             }
-            if (tail)
+            if(tail)
             {
                 for (size_t j = 0; j < tail; ++j)
                 {
@@ -479,16 +443,16 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Oyxi8o_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetConvertFilter_Oyxi4o_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             size_t outputF = AlignLo(output, F);
-            size_t outputF4 = AlignLo(output, 4 * F);
+            size_t outputF4 = AlignLo(output, 4*F);
             size_t tail = output - outputF;
             size_t ki = kernel * input;
             size_t ki4 = AlignLo(ki, 4);
             size_t stride = ki * F;
             size_t i = 0;
-            for (; i < ki4; i += 4, src += 4 * F)
+            for (; i < ki4; i += 4, src += 4*F)
             {
                 const float * ps = src;
                 float * pd = dst;
@@ -534,22 +498,22 @@ namespace Simd
             {
                 if (dst == SimdTensorFormatYxio)
                     return SynetConvertFilter_Oiyx_Yxio<false>;
-                if (dst == SimdTensorFormatOyxi8o)
-                    return SynetConvertFilter_Oiyx_Oyxi8o<false>;
+                if (dst == SimdTensorFormatOyxi4o)
+                    return SynetConvertFilter_Oiyx_Oyxi4o<false>;
             }
             if (src == SimdTensorFormatYxio)
             {
                 if (dst == SimdTensorFormatOiyx)
                     return SynetConvertFilter_Yxio_Oiyx<false>;
-                if (dst == SimdTensorFormatOyxi8o)
-                    return SynetConvertFilter_Yxio_Oyxi8o<false>;
+                if (dst == SimdTensorFormatOyxi4o)
+                    return SynetConvertFilter_Yxio_Oyxi4o<false>;
             }
-            if (src == SimdTensorFormatOyxi8o)
+            if (src == SimdTensorFormatOyxi4o)
             {
                 if (dst == SimdTensorFormatOiyx)
-                    return SynetConvertFilter_Oyxi8o_Oiyx<false>;
+                    return SynetConvertFilter_Oyxi4o_Oiyx<false>;
                 if (dst == SimdTensorFormatYxio)
-                    return SynetConvertFilter_Oyxi8o_Yxio<false>;
+                    return SynetConvertFilter_Oyxi4o_Yxio<false>;
             }
             return NULL;
         }
@@ -560,8 +524,8 @@ namespace Simd
             if (filterConverter)
                 filterConverter(output, input, kernel, src, dst);
             else
-                Sse::SynetConvertFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
+                Base::SynetConvertFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
         }
     }
-#endif// SIMD_AVX_ENABLE
+#endif// SIMD_NEON_ENABLE
 }

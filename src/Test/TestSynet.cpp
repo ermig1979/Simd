@@ -203,11 +203,13 @@ namespace Test
         return result;
     }
 
+    const int TEST_CVT_MASK = (SIMD_ALIGN == 64 ? 29 : (SIMD_ALIGN == 32 ? 13 : (SIMD_ALIGN == 16 ? 5 : 1)));
+
     bool SynetConvertImageAutoTest()
     {
         bool result = true;
 
-        result = result && SynetConvertImageAutoTest(29, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+        result = result && SynetConvertImageAutoTest(TEST_CVT_MASK, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
@@ -224,10 +226,10 @@ namespace Test
             result = result && SynetConvertImageAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetConvertImageAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+#endif
 
         return result;
     }
@@ -255,7 +257,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvertFilterAutoTest(29, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        result = result && SynetConvertFilterAutoTest(TEST_CVT_MASK, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
@@ -272,10 +274,10 @@ namespace Test
             result = result && SynetConvertFilterAutoTest(17, FUNC_CT(Simd::Avx512f::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetConvertFilterAutoTest(5, FUNC_CT(Simd::Neon::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+#endif
 
         return result;
     }

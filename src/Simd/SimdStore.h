@@ -234,6 +234,14 @@ namespace Simd
             Avx::Store<align>(p0, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 0)));
             Avx::Store<align>(p1, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 1)));
         }
+
+        template <bool align> SIMD_INLINE void Store(float * p0, float * p1, float * p2, float * p3, __m512 a)
+        {
+            Sse::Store<align>(p0, _mm512_extractf32x4_ps(a, 0));
+            Sse::Store<align>(p1, _mm512_extractf32x4_ps(a, 1));
+            Sse::Store<align>(p2, _mm512_extractf32x4_ps(a, 2));
+            Sse::Store<align>(p3, _mm512_extractf32x4_ps(a, 3));
+        }
     }
 #endif//SIMD_AVX512F_ENABLE
 

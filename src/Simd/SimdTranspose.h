@@ -154,6 +154,56 @@ namespace Simd
             Store<align>(dst + 7 * dstStride, b7);
         }
 
+        template<bool align> SIMD_INLINE void Transpose8x4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m256 a0, a1, a2, a3, b0, b1, b2, b3;
+
+            a0 = Load<align>(src + 0 * srcStride);
+            a1 = Load<align>(src + 1 * srcStride);
+            a2 = Load<align>(src + 2 * srcStride);
+            a3 = Load<align>(src + 3 * srcStride);
+
+            b0 = _mm256_unpacklo_ps(a0, a2);
+            b1 = _mm256_unpacklo_ps(a1, a3);
+            b2 = _mm256_unpackhi_ps(a0, a2);
+            b3 = _mm256_unpackhi_ps(a1, a3);
+
+            a0 = _mm256_unpacklo_ps(b0, b1);
+            a1 = _mm256_unpackhi_ps(b0, b1);
+            a2 = _mm256_unpacklo_ps(b2, b3);
+            a3 = _mm256_unpackhi_ps(b2, b3);
+
+            Store<align>(dst + 0 * dstStride, dst + 4 * dstStride, a0);
+            Store<align>(dst + 1 * dstStride, dst + 5 * dstStride, a1);
+            Store<align>(dst + 2 * dstStride, dst + 6 * dstStride, a2);
+            Store<align>(dst + 3 * dstStride, dst + 7 * dstStride, a3);
+        }
+
+        template<bool align> SIMD_INLINE void Transpose4x8(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m256 a0, a1, a2, a3, b0, b1, b2, b3;
+
+            a0 = Load<align>(src + 0 * srcStride, src + 4 * srcStride);
+            a1 = Load<align>(src + 1 * srcStride, src + 5 * srcStride);
+            a2 = Load<align>(src + 2 * srcStride, src + 6 * srcStride);
+            a3 = Load<align>(src + 3 * srcStride, src + 7 * srcStride);
+
+            b0 = _mm256_unpacklo_ps(a0, a2);
+            b1 = _mm256_unpacklo_ps(a1, a3);
+            b2 = _mm256_unpackhi_ps(a0, a2);
+            b3 = _mm256_unpackhi_ps(a1, a3);
+
+            a0 = _mm256_unpacklo_ps(b0, b1);
+            a1 = _mm256_unpackhi_ps(b0, b1);
+            a2 = _mm256_unpacklo_ps(b2, b3);
+            a3 = _mm256_unpackhi_ps(b2, b3);
+
+            Store<align>(dst + 0 * dstStride, a0);
+            Store<align>(dst + 1 * dstStride, a1);
+            Store<align>(dst + 2 * dstStride, a2);
+            Store<align>(dst + 3 * dstStride, a3);
+        }
+
         template<bool align> SIMD_INLINE void Transpose4x4xF(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
             __m256 buf00 = Load<align>(src + 0 * F);
@@ -373,6 +423,31 @@ namespace Simd
             Store<align>(dst + 0x7 * dstStride, b7);
         }
 
+        template<bool align> SIMD_INLINE void Transpose4x16(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m512 a0, a1, a2, a3, b0, b1, b2, b3;
+
+            a0 = Load<align>(src + 0x0 * srcStride, src + 0x4 * srcStride, src + 0x8 * srcStride, src + 0xC * srcStride);
+            a1 = Load<align>(src + 0x1 * srcStride, src + 0x5 * srcStride, src + 0x9 * srcStride, src + 0xD * srcStride);
+            a2 = Load<align>(src + 0x2 * srcStride, src + 0x6 * srcStride, src + 0xA * srcStride, src + 0xE * srcStride);
+            a3 = Load<align>(src + 0x3 * srcStride, src + 0x7 * srcStride, src + 0xB * srcStride, src + 0xF * srcStride);
+
+            b0 = _mm512_unpacklo_ps(a0, a2);
+            b1 = _mm512_unpacklo_ps(a1, a3);
+            b2 = _mm512_unpackhi_ps(a0, a2);
+            b3 = _mm512_unpackhi_ps(a1, a3);
+
+            a0 = _mm512_unpacklo_ps(b0, b1);
+            a1 = _mm512_unpackhi_ps(b0, b1);
+            a2 = _mm512_unpacklo_ps(b2, b3);
+            a3 = _mm512_unpackhi_ps(b2, b3);
+
+            Store<align>(dst + 0x0 * dstStride, a0);
+            Store<align>(dst + 0x1 * dstStride, a1);
+            Store<align>(dst + 0x2 * dstStride, a2);
+            Store<align>(dst + 0x3 * dstStride, a3);
+        }
+
         template<bool align> SIMD_INLINE void Transpose16x8(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
             __m512 a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
@@ -432,6 +507,31 @@ namespace Simd
             Store<align>(dst + 0xB * dstStride, dst + 0xF * dstStride, a7);
         }
 
+        template<bool align> SIMD_INLINE void Transpose16x4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            __m512 a0, a1, a2, a3, b0, b1, b2, b3;
+
+            a0 = Load<align>(src + 0x0 * srcStride);
+            a1 = Load<align>(src + 0x1 * srcStride);
+            a2 = Load<align>(src + 0x2 * srcStride);
+            a3 = Load<align>(src + 0x3 * srcStride);
+
+            b0 = _mm512_unpacklo_ps(a0, a2);
+            b1 = _mm512_unpacklo_ps(a1, a3);
+            b2 = _mm512_unpackhi_ps(a0, a2);
+            b3 = _mm512_unpackhi_ps(a1, a3);
+
+            a0 = _mm512_unpacklo_ps(b0, b1);
+            a1 = _mm512_unpackhi_ps(b0, b1);
+            a2 = _mm512_unpacklo_ps(b2, b3);
+            a3 = _mm512_unpackhi_ps(b2, b3);
+
+            Store<align>(dst + 0x0 * dstStride, dst + 0x4 * dstStride, dst + 0x8 * dstStride, dst + 0xC * dstStride, a0);
+            Store<align>(dst + 0x1 * dstStride, dst + 0x5 * dstStride, dst + 0x9 * dstStride, dst + 0xD * dstStride, a1);
+            Store<align>(dst + 0x2 * dstStride, dst + 0x6 * dstStride, dst + 0xA * dstStride, dst + 0xE * dstStride, a2);
+            Store<align>(dst + 0x3 * dstStride, dst + 0x7 * dstStride, dst + 0xB * dstStride, dst + 0xF * dstStride, a3);
+        }
+
         template<bool align> SIMD_INLINE void Transpose4x4xF(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
             __m512 buf00 = Load<align>(src + 0 * F);
@@ -479,6 +579,69 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+        template <bool align> SIMD_INLINE void Copy(const float * src, float * dst)
+        {
+            Store<align>(dst, Load<align>(src));
+        }
+
+        template<bool align> SIMD_INLINE void Transpose4x4(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            float32x4x2_t a0, a1, b0, b1;
+            a0.val[0] = Load<align>(src + 0 * srcStride);
+            a0.val[1] = Load<align>(src + 1 * srcStride);
+            a1.val[0] = Load<align>(src + 2 * srcStride);
+            a1.val[1] = Load<align>(src + 3 * srcStride);
+            b0 = vzipq_f32(a0.val[0], a1.val[0]);
+            b1 = vzipq_f32(a0.val[1], a1.val[1]);
+            a0 = vzipq_f32(b0.val[0], b1.val[0]);
+            a1 = vzipq_f32(b0.val[1], b1.val[1]);
+            Store<align>(dst + 0 * dstStride, a0.val[0]);
+            Store<align>(dst + 1 * dstStride, a0.val[1]);
+            Store<align>(dst + 2 * dstStride, a1.val[0]);
+            Store<align>(dst + 3 * dstStride, a1.val[1]);
+        }
+
+        template<bool align> SIMD_INLINE void Transpose4x4xF(const float * src, size_t srcStride, float * dst, size_t dstStride)
+        {
+            float32x4_t buf00 = Load<align>(src + 0 * F);
+            float32x4_t buf01 = Load<align>(src + 1 * F);
+            float32x4_t buf02 = Load<align>(src + 2 * F);
+            float32x4_t buf03 = Load<align>(src + 3 * F);
+            src += srcStride;
+            float32x4_t buf10 = Load<align>(src + 0 * F);
+            float32x4_t buf11 = Load<align>(src + 1 * F);
+            float32x4_t buf12 = Load<align>(src + 2 * F);
+            float32x4_t buf13 = Load<align>(src + 3 * F);
+            src += srcStride;
+            float32x4_t buf20 = Load<align>(src + 0 * F);
+            float32x4_t buf21 = Load<align>(src + 1 * F);
+            float32x4_t buf22 = Load<align>(src + 2 * F);
+            float32x4_t buf23 = Load<align>(src + 3 * F);
+            src += srcStride;
+            float32x4_t buf30 = Load<align>(src + 0 * F);
+            float32x4_t buf31 = Load<align>(src + 1 * F);
+            float32x4_t buf32 = Load<align>(src + 2 * F);
+            float32x4_t buf33 = Load<align>(src + 3 * F);
+            Store<align>(dst + 0 * F, buf00);
+            Store<align>(dst + 1 * F, buf10);
+            Store<align>(dst + 2 * F, buf20);
+            Store<align>(dst + 3 * F, buf30);
+            dst += dstStride;
+            Store<align>(dst + 0 * F, buf01);
+            Store<align>(dst + 1 * F, buf11);
+            Store<align>(dst + 2 * F, buf21);
+            Store<align>(dst + 3 * F, buf31);
+            dst += dstStride;
+            Store<align>(dst + 0 * F, buf02);
+            Store<align>(dst + 1 * F, buf12);
+            Store<align>(dst + 2 * F, buf22);
+            Store<align>(dst + 3 * F, buf32);
+            dst += dstStride;
+            Store<align>(dst + 0 * F, buf03);
+            Store<align>(dst + 1 * F, buf13);
+            Store<align>(dst + 2 * F, buf23);
+            Store<align>(dst + 3 * F, buf33);
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }
