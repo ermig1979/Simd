@@ -311,11 +311,13 @@ typedef enum
     SimdTensorFormatNchw4c, /*!< NCHW4c (N - batch, C - (channels + 3) / 4, H - height, W - width, 4c - channels gropped by 4) special 5D-tensor format of (input/output) image optimized for SSE and NEON. */
     SimdTensorFormatNchw8c, /*!< NCHW8c (N - batch, C - (channels + 7) / 8, H - height, W - width, 8c - channels gropped by 8) special 5D-tensor format of (input/output) image optimized for AVX and AVX2. */
     SimdTensorFormatNchw16c, /*!< NCHW16c (N - batch, C - (channels + 15) / 16, H - height, W - width, 16c - channels gropped by 16) special 5D-tensor format of (input/output) image optimized for AVX-512. */
+    SimdTensorFormatNchwXc, /*!< Unspecified hardware optimized 5D-tensor format of (input/output) image. Specific format (::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c or ::SimdTensorFormatNchw16c) is determinated by function ::SimdSynetSpecifyTensorFormat. */
     SimdTensorFormatOiyx, /*!< OIYX (O - output channels, I - input channels, Y - kernel height, X - kernel width) 4D-tensor format of 2D-convolution filter. */
     SimdTensorFormatYxio, /*!< YXIO (Y - kernel height, X - kernel width, I - input channels, O - output channels) 4D-tensor format of 2D-convolution filter. */
     SimdTensorFormatOyxi4o, /*!< OYXI4o (O - (output channels + 3)/4, Y - kernel height, X - kernel width, I - input channels, 4o - output channels gropped by 4) special 5D-tensor format of 2D-convolution filter optimized for SSE and NEON. */
     SimdTensorFormatOyxi8o, /*!< OYXI8o (O - (output channels + 7)/8, Y - kernel height, X - kernel width, I - input channels, 8o - output channels gropped by 8) special 5D-tensor format of 2D-convolution filter optimized for AVX and AVX2. */
     SimdTensorFormatOyxi16o, /*!< OYXI16o (O - (output channels + 15)/16, Y - kernel height, X - kernel width, I - input channels, 16o - output channels gropped by 16) special 5D-tensor format of 2D-convolution filter optimized for AVX-512. */
+    SimdTensorFormatOyxiXo, /*!< Unspecified hardware optimized 5D-tensor format of 2D-convolution filter. Specific format (::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o or ::SimdTensorFormatOyxi16o) is determinated by function ::SimdSynetSpecifyTensorFormat. */
 } SimdTensorFormatType;
 
 /*! @ingroup transform
@@ -6066,6 +6068,19 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to outer*count*inner.
     */
     SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+
+    /*! @ingroup synet
+
+        \fn SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
+
+        \short Specifies hardware optimized tensor format of 5D-tensor for (input/output) image or 2D-convolution filter.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. 
+
+        \param [in] format - an unspecified hardware optimized 5D-tensor format of (input/output) image or 2D-convolution filter. It can be ::SimdTensorFormatNchwXc or ::SimdTensorFormatOyxiXo.
+        \return specified hardware optimized 5D-tensor format. 
+    */
+    SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
 
     /*! @ingroup texture_estimation
 

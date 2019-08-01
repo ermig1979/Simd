@@ -5365,6 +5365,29 @@ SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size
     simdSynetSoftmaxLayerForward(src, outer, count, inner, dst);
 }
 
+SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format)
+{
+    if (format == SimdTensorFormatNchwXc)
+    {
+        switch (Simd::ALIGNMENT)
+        {
+        case 16: return SimdTensorFormatNchw4c;
+        case 32: return SimdTensorFormatNchw8c;
+        case 64: return SimdTensorFormatNchw16c;
+        }
+    }
+    if (format == SimdTensorFormatOyxiXo)
+    {
+        switch (Simd::ALIGNMENT)
+        {
+        case 16: return SimdTensorFormatOyxi4o;
+        case 32: return SimdTensorFormatOyxi8o;
+        case 64: return SimdTensorFormatOyxi16o;
+        }
+    }
+    return SimdTensorFormatUnknown;
+}
+
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                      uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
 {

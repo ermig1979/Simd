@@ -28,6 +28,8 @@
 
 namespace Test
 {
+    const int TEST_TF_MASK = (SIMD_ALIGN == 64 ? 16 + 8 + 4 + 1 : (SIMD_ALIGN == 32 ? 8 + 4 + 1 : (SIMD_ALIGN == 16 ? 4 + 1 : 1)));
+
     namespace
     {
         struct FuncAB
@@ -203,13 +205,11 @@ namespace Test
         return result;
     }
 
-    const int TEST_CVT_MASK = (SIMD_ALIGN == 64 ? 29 : (SIMD_ALIGN == 32 ? 13 : (SIMD_ALIGN == 16 ? 5 : 1)));
-
     bool SynetConvertImageAutoTest()
     {
         bool result = true;
 
-        result = result && SynetConvertImageAutoTest(TEST_CVT_MASK, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
+        result = result && SynetConvertImageAutoTest(TEST_TF_MASK, FUNC_CT(Simd::Base::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
@@ -257,7 +257,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetConvertFilterAutoTest(TEST_CVT_MASK, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
+        result = result && SynetConvertFilterAutoTest(TEST_TF_MASK, FUNC_CT(Simd::Base::SynetConvertFilter), FUNC_CT(SimdSynetConvertFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
