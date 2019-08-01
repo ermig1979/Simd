@@ -118,15 +118,46 @@ namespace Simd
                 SynetAddBiasNhwc<false>(bias, channels, spatial, dst);
         }
 
+        template <bool align> void SynetAddBiasNchw4c(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            size_t spatial4 = AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; c += F)
+            {
+                __m128 _bias = Load<false>(bias + c);
+                size_t s = 0;
+                for (; s < spatial4; s += 4, dst += 4*F)
+                {
+                    SynetAddBias<align>(_bias, dst + 0 * F);
+                    SynetAddBias<align>(_bias, dst + 1 * F);
+                    SynetAddBias<align>(_bias, dst + 2 * F);
+                    SynetAddBias<align>(_bias, dst + 3 * F);
+                }
+                for (; s < spatial; ++s, dst += F)
+                    SynetAddBias<align>(_bias, dst);
+            }
+        }
+
+        SIMD_INLINE void SynetAddBiasNchw4c(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            if (Aligned(dst))
+                SynetAddBiasNchw4c<true>(bias, channels, spatial, dst);
+            else
+                SynetAddBiasNchw4c<false>(bias, channels, spatial, dst);
+        }
+
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetAddBiasNchw(bias, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetAddBiasNhwc(bias, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetAddBiasNchw4c(bias, channels, spatial, dst);
             else
-                assert(0);
+                Base::SynetAddBias(bias, channels, spatial, dst, format);
         }
+
+        //---------------------------------------------------------------------
 
         template <SimdSynetEltwiseOperationType type> __m128 SynetEltwiseLayerForward(__m128 src0, __m128 src1);
 

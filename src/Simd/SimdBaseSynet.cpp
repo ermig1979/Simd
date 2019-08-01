@@ -68,12 +68,32 @@ namespace Simd
             }
         }
 
+        template<int N> void SynetAddBiasNchwXc(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t i = 0; i < N; ++i)
+                        dst[i] += bias[i];
+                    dst += N;
+                }
+                bias += N;
+            }
+        }
+
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetAddBiasNchw(bias, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetAddBiasNhwc(bias, channels, spatial, dst);
+            else if(format == SimdTensorFormatNchw4c)
+                SynetAddBiasNchwXc<4>(bias, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetAddBiasNchwXc<8>(bias, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetAddBiasNchwXc<16>(bias, channels, spatial, dst);
             else
                 assert(0);
         }

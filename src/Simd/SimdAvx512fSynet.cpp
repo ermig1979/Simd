@@ -28,6 +28,8 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSse1.h"
+#include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"
 #include "Simd/SimdArray.h"
@@ -118,15 +120,50 @@ namespace Simd
                 SynetAddBiasNhwc<false>(bias, channels, spatial, dst);
         }
 
+        template <bool align> void SynetAddBiasNchw16c(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            size_t spatial4 = AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; c += F)
+            {
+                __m512 _bias = Load<false>(bias + c);
+                size_t s = 0;
+                for (; s < spatial4; s += 4, dst += 4 * F)
+                {
+                    SynetAddBias<align, false>(_bias, dst + 0 * F);
+                    SynetAddBias<align, false>(_bias, dst + 1 * F);
+                    SynetAddBias<align, false>(_bias, dst + 2 * F);
+                    SynetAddBias<align, false>(_bias, dst + 3 * F);
+                }
+                for (; s < spatial; ++s, dst += F)
+                    SynetAddBias<align, false>(_bias, dst);
+            }
+        }
+
+        SIMD_INLINE void SynetAddBiasNchw16c(const float * bias, size_t channels, size_t spatial, float * dst)
+        {
+            if (Aligned(dst))
+                SynetAddBiasNchw16c<true>(bias, channels, spatial, dst);
+            else
+                SynetAddBiasNchw16c<false>(bias, channels, spatial, dst);
+        }
+
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
         {
             if (Base::NchwCompatible(channels, spatial, format))
                 SynetAddBiasNchw(bias, channels, spatial, dst);
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetAddBiasNhwc(bias, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                Sse::SynetAddBias(bias, channels, spatial, dst, format);
+            else if (format == SimdTensorFormatNchw8c)
+                Avx::SynetAddBias(bias, channels, spatial, dst, format);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetAddBiasNchw16c(bias, channels, spatial, dst);
             else
-                assert(0);
+                Base::SynetAddBias(bias, channels, spatial, dst, format);
         }
+
+        //---------------------------------------------------------------------
 
         template <SimdSynetEltwiseOperationType type> __m512 SynetEltwiseLayerForward(__m512 src0, __m512 src1);
 

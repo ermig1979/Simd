@@ -87,7 +87,7 @@ namespace Test
     {
         bool result = true;
 
-        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc/*SimdTensorFormatNchw16c*/ && result; format = (SimdTensorFormatType)((int)format + 1))
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
         {
             if(SimdSynetTensorAlignment(format)&mask)
             {
