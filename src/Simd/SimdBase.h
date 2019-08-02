@@ -564,7 +564,7 @@ namespace Simd
 
         void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
-        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+        void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
 

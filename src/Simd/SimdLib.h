@@ -5524,7 +5524,7 @@ extern "C"
 
         \short Adds a bias to given vector.
 
-        Algorithm's details (for NCHW tensor format):
+        Algorithm's details (example for NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
             for(j = 0; j < spatial; ++j)
@@ -5533,10 +5533,10 @@ extern "C"
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign(channels, ::SimdSynetTensorAlignment(format));
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)).
         \param [in] channels - a number of channels in the image tensor.
         \param [in] spatial - a spatial size of image tensor.
-        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is ::SimdAlign(channels, ::SimdSynetTensorAlignment(format))*spatial;
+        \param [in, out] dst - a pointer to cumulative 32-bit image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
         \param [in] format - a format of image tensor.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
@@ -6024,31 +6024,28 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of ScaleLayer.
 
-        Algorithm's details:
+        Algorithm's details (example for NCHW tensor format):
         \verbatim
-        for(i = 0; i < count; ++i)
-            for(j = 0; j < size; ++j)
-                if(trans)
-                    dst[i + j*count] = src[i + j*count]*scale[i] + (bias ? bias[i] : 0);
-                else
-                    dst[i*size + j] = src[i*size + j]*scale[i] + (bias ? bias[i] : 0);
+        for(c = 0; c < channels; ++c)
+            for(s = 0; s < spatial; ++s)
+                dst[c*spatial + s] = src[c*spatial + s]*scale[c] + (bias ? bias[c] : 0);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. Can be NULL.
-        \param [in] count - a size of scale and bias arrays.
-        \param [in] size - an internal size of the operation.
-        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
-        \param [in] trans - a flag of transposed data.
-    */
-    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+        \param [in] src - a pointer to the 32-bit float array with input image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)).
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)). Can be NULL.
+        \param [in] channels - a number of channels in the (input/output) image tensor.
+        \param [in] spatial - a spatial size of (input/output) image tensor.
+        \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in] format - a format of (input/output) image tensor.
+        */
+    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
     /*! @ingroup synet
 

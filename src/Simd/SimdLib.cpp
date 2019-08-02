@@ -5354,12 +5354,12 @@ SIMD_API void SimdSynetRestrictRange(const float * src, size_t size, const float
     simdSynetRestrictRange(src, size, lower, upper, dst);
 }
 
-typedef void(*SimdSynetScaleLayerForwardPtr) (const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans);
+typedef void(*SimdSynetScaleLayerForwardPtr) (const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 volatile SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t count, size_t size, float * dst, SimdBool trans)
+SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
-    simdSynetScaleLayerForward(src, scale, bias, count, size, dst, trans);
+    simdSynetScaleLayerForward(src, scale, bias, channels, spatial, dst, format);
 }
 
 typedef void(*SimdSynetSoftmaxLayerForwardPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
