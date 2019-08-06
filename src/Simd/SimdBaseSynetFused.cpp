@@ -182,49 +182,81 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float * slope, float * dst, SimdBool trans)
+        void SynetFusedLayerForward2Nchw(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
         {
             float _slope = slope[0];
-            if ((trans || size == 1) && count != 1)
+            size_t aligned = Simd::AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; ++c)
             {
-                size_t aligned = Simd::AlignLo(count, 4);
-                for (size_t j = 0; j < size; ++j)
+                float _scale = scale[c];
+                float _bias = bias[c];
+                size_t s = 0;
+                for (; s < aligned; s += 4)
                 {
-                    size_t i = 0;
-                    for (; i < aligned; i += 4)
-                    {
-                        dst[i + 0] = SynetFusedLayerForward2(src[i + 0], scale[i + 0], bias[i + 0], _slope);
-                        dst[i + 1] = SynetFusedLayerForward2(src[i + 1], scale[i + 1], bias[i + 1], _slope);
-                        dst[i + 2] = SynetFusedLayerForward2(src[i + 2], scale[i + 2], bias[i + 2], _slope);
-                        dst[i + 3] = SynetFusedLayerForward2(src[i + 3], scale[i + 3], bias[i + 3], _slope);
-                    }
-                    for (; i < count; ++i)
+                    dst[s + 0] = SynetFusedLayerForward2(src[s + 0], _scale, _bias, _slope);
+                    dst[s + 1] = SynetFusedLayerForward2(src[s + 1], _scale, _bias, _slope);
+                    dst[s + 2] = SynetFusedLayerForward2(src[s + 2], _scale, _bias, _slope);
+                    dst[s + 3] = SynetFusedLayerForward2(src[s + 3], _scale, _bias, _slope);
+                }
+                for (; s < spatial; ++s)
+                    dst[s] = SynetFusedLayerForward2(src[s], _scale, _bias, _slope);
+                src += spatial;
+                dst += spatial;
+            }
+        }
+
+        void SynetFusedLayerForward2Nhwc(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
+        {
+            float _slope = slope[0];
+            size_t aligned = Simd::AlignLo(channels, 4);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += 4)
+                {
+                    dst[c + 0] = SynetFusedLayerForward2(src[c + 0], scale[c + 0], bias[c + 0], _slope);
+                    dst[c + 1] = SynetFusedLayerForward2(src[c + 1], scale[c + 1], bias[c + 1], _slope);
+                    dst[c + 2] = SynetFusedLayerForward2(src[c + 2], scale[c + 2], bias[c + 2], _slope);
+                    dst[c + 3] = SynetFusedLayerForward2(src[c + 3], scale[c + 3], bias[c + 3], _slope);
+                }
+                for (; c < channels; ++c)
+                    dst[c] = SynetFusedLayerForward2(src[c], scale[c], bias[c], _slope);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        template<int N> void SynetFusedLayerForward2NchwXc(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
+        {
+            float _slope = slope[0];
+            for (size_t c = 0; c < channels; c += N)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t i = 0; i < N; ++i)
                         dst[i] = SynetFusedLayerForward2(src[i], scale[i], bias[i], _slope);
-                    src += count;
-                    dst += count;
+                    src += N;
+                    dst += N;
                 }
+                scale += N;
+                bias += N;
             }
+        }
+
+        void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetFusedLayerForward2Nchw(src, scale, bias, channels, spatial, slope, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetFusedLayerForward2Nhwc(src, scale, bias, channels, spatial, slope, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetFusedLayerForward2NchwXc<4>(src, scale, bias, channels, spatial, slope, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetFusedLayerForward2NchwXc<8>(src, scale, bias, channels, spatial, slope, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetFusedLayerForward2NchwXc<16>(src, scale, bias, channels, spatial, slope, dst);
             else
-            {
-                size_t aligned = Simd::AlignLo(size, 4);
-                for (size_t i = 0; i < count; ++i)
-                {
-                    float _scale = scale[i];
-                    float _bias = bias[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
-                    {
-                        dst[j + 0] = SynetFusedLayerForward2(src[j + 0], _scale, _bias, _slope);
-                        dst[j + 1] = SynetFusedLayerForward2(src[j + 1], _scale, _bias, _slope);
-                        dst[j + 2] = SynetFusedLayerForward2(src[j + 2], _scale, _bias, _slope);
-                        dst[j + 3] = SynetFusedLayerForward2(src[j + 3], _scale, _bias, _slope);
-                    }
-                    for (; j < size; ++j)
-                        dst[j] = SynetFusedLayerForward2(src[j], _scale, _bias, _slope);
-                    src += size;
-                    dst += size;
-                }
-            }
+                assert(0);
         }
 
         //---------------------------------------------------------------------

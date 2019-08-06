@@ -169,9 +169,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga557fec9d7475d205385f66f21bbf4ce4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga557fec9d7475d205385f66f21bbf4ce4">SimdSynetFusedLayerForward1</a> (const float *src, const float *bias0, const float *scale1, const float *bias1, size_t channels, size_t spatial, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga557fec9d7475d205385f66f21bbf4ce4"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 1).  <a href="#ga557fec9d7475d205385f66f21bbf4ce4">More...</a><br /></td></tr>
 <tr class="separator:ga557fec9d7475d205385f66f21bbf4ce4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae06e2301df6dd877d23bdeff0cdf79de"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gae06e2301df6dd877d23bdeff0cdf79de">SimdSynetFusedLayerForward2</a> (const float *src, const float *scale, const float *bias, size_t count, size_t size, const float *slope, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
-<tr class="memdesc:gae06e2301df6dd877d23bdeff0cdf79de"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 2).  <a href="#gae06e2301df6dd877d23bdeff0cdf79de">More...</a><br /></td></tr>
-<tr class="separator:gae06e2301df6dd877d23bdeff0cdf79de"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga1f764842f2b5e2e687c3cf66998bef6f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga1f764842f2b5e2e687c3cf66998bef6f">SimdSynetFusedLayerForward2</a> (const float *src, const float *scale, const float *bias, size_t channels, size_t spatial, const float *slope, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga1f764842f2b5e2e687c3cf66998bef6f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 2).  <a href="#ga1f764842f2b5e2e687c3cf66998bef6f">More...</a><br /></td></tr>
+<tr class="separator:ga1f764842f2b5e2e687c3cf66998bef6f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaf75726156332460e316bac80bf388fe7"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaf75726156332460e316bac80bf388fe7">SimdSynetFusedLayerForward3</a> (const float *src, const float *bias, const float *scale, size_t count, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:gaf75726156332460e316bac80bf388fe7"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of FusedLayer (type 3).  <a href="#gaf75726156332460e316bac80bf388fe7">More...</a><br /></td></tr>
 <tr class="separator:gaf75726156332460e316bac80bf388fe7"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1280,8 +1280,8 @@ for(i = 0; i &lt; count; ++i)
 
 </div>
 </div>
-<a id="gae06e2301df6dd877d23bdeff0cdf79de"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae06e2301df6dd877d23bdeff0cdf79de">&#9670;&nbsp;</a></span>SimdSynetFusedLayerForward2()</h2>
+<a id="ga1f764842f2b5e2e687c3cf66998bef6f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga1f764842f2b5e2e687c3cf66998bef6f">&#9670;&nbsp;</a></span>SimdSynetFusedLayerForward2()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1308,13 +1308,13 @@ for(i = 0; i &lt; count; ++i)
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>count</em>, </td>
+          <td class="paramname"><em>channels</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>size</em>, </td>
+          <td class="paramname"><em>spatial</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1331,8 +1331,8 @@ for(i = 0; i &lt; count; ++i)
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
-          <td class="paramname"><em>trans</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1343,27 +1343,24 @@ for(i = 0; i &lt; count; ++i)
 </div><div class="memdoc">
 
 <p>This function is used for forward propagation of FusedLayer (type 2). </p>
-<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; count; ++i)
-    for(j = 0; j &lt; size; ++j)
+<p>Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    for(s = 0; s &lt; spatial; ++s)
     {
-        if(trans)
-            o = i + j*count;
-        else
-            o = i*size + j;
-        x = src[o]*scale[i]  + bias[i];
+        o = c*spatial + s;
+        x = src[o]*scale[c]  + bias[c];
         dst[o] = max(0, x) + min(0, x)*slope[0];
     }
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to count*size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the 32-bit float array with bias coefficients. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of bias and scale arrays. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of the operation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the 32-bit float array with bias coefficients. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float slope coefficient. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed data. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
   </table>
   </dd>
 </dl>

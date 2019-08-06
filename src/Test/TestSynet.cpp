@@ -607,65 +607,71 @@ namespace Test
     {
         struct FuncFLF2
         {
-            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t count, size_t size, const float *slope, float * dst, SimdBool trans);
+            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format);
 
             FuncPtr func;
             String desc;
 
             FuncFLF2(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdBool trans)
+            void Update(SimdTensorFormatType format)
             {
-                desc = desc + (trans ? "[1]" : "[0]");
+                desc = desc + "[" + ToString(format) + "]";
             }
 
-            void Call(const View & src, const View & scale, const View & bias, size_t count, size_t size, float slope, SimdBool trans, View & dst) const
+            void Call(const Tensor32f & src, const Tensor32f & scale, const Tensor32f & bias, size_t channels, size_t spatial, float slope, SimdTensorFormatType format, Tensor32f & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)src.data, (float*)scale.data, (float*)bias.data, count, size, &slope, (float*)dst.data, trans);
+                func(src.Data(), scale.Data(), bias.Data(), channels, spatial, &slope, dst.Data(), format);
             }
         };
     }
 
 #define FUNC_FLF2(function) FuncFLF2(function, #function)
 
-    bool SynetFusedLayerForward2AutoTest(size_t count, size_t size, SimdBool trans, FuncFLF2 f1, FuncFLF2 f2)
+    bool SynetFusedLayerForward2AutoTest(size_t channels, size_t spatial, SimdTensorFormatType format, FuncFLF2 f1, FuncFLF2 f2)
     {
         bool result = true;
 
-        f1.Update(trans);
-        f2.Update(trans);
+        f1.Update(format);
+        f2.Update(format);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << spatial << "].");
 
-        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View scale(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View bias(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        Tensor32f src(ToShape(channels, spatial, format));
+        Tensor32f scale(ToShape(channels, format));
+        Tensor32f bias(ToShape(channels, format));
+        Tensor32f dst1(ToShape(channels, spatial, format));
+        Tensor32f dst2(ToShape(channels, spatial, format));
 
-        FillRandom32f(src, -10.0, 10.0);
-        FillRandom32f(scale, -10.0, 10.0);
-        FillRandom32f(bias, -10.0, 10.0);
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0);
+        FillRandom(scale.Data(), scale.Size(), -10.0, 10.0);
+        FillRandom(bias.Data(), bias.Size(), -10.0, 10.0);
         const float slope = 0.1;
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, count, size, slope, trans, dst1));
+        TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, count, size, slope, trans, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, channels, spatial, slope, format, dst1));
 
-        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, channels, spatial, slope, format, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
 
         return result;
     }
 
-    bool SynetFusedLayerForward2AutoTest(const FuncFLF2 & f1, const FuncFLF2 & f2)
+    bool SynetFusedLayerForward2AutoTest(int mask, const FuncFLF2 & f1, const FuncFLF2 & f2)
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward2AutoTest(H, W, SimdFalse, f1, f2);
-        result = result && SynetFusedLayerForward2AutoTest(H - O, W + O, SimdFalse, f1, f2);
-        result = result && SynetFusedLayerForward2AutoTest(H, W, SimdTrue, f1, f2);
-        result = result && SynetFusedLayerForward2AutoTest(H - O, W + O, SimdTrue, f1, f2);
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            if (SimdSynetTensorAlignment(format)&mask)
+            {
+                result = result && SynetFusedLayerForward2AutoTest(H, W, format, f1, f2);
+                result = result && SynetFusedLayerForward2AutoTest(H - O, W + O, format, f1, f2);
+            }
+        }
 
         return result;
     }
@@ -674,26 +680,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Base::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+        result = result && SynetFusedLayerForward2AutoTest(TFM_ANY, FUNC_FLF2(Simd::Base::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Sse::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+            result = result && SynetFusedLayerForward2AutoTest(TFM_128, FUNC_FLF2(Simd::Sse::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Avx::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+            result = result && SynetFusedLayerForward2AutoTest(TFM_256, FUNC_FLF2(Simd::Avx::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Avx512f::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+            result = result && SynetFusedLayerForward2AutoTest(TFM_512, FUNC_FLF2(Simd::Avx512f::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetFusedLayerForward2AutoTest(FUNC_FLF2(Simd::Neon::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+            result = result && SynetFusedLayerForward2AutoTest(TFM_128, FUNC_FLF2(Simd::Neon::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
         return result;
