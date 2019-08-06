@@ -757,6 +757,7 @@ namespace Simd
             case Frame<A>::Nv12:
                 Copy(src.planes[0], dst.planes[0]);
                 Fill(dst.planes[1], 128);
+                break;
             case Frame<A>::Yuv420p:
                 Copy(src.planes[0], dst.planes[0]);
                 Fill(dst.planes[1], 128);
