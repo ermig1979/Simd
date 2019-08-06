@@ -104,49 +104,80 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t count, size_t size, float * dst, SimdBool trans)
+        void SynetFusedLayerForward1Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
         {
-            if ((trans || size == 1) && count != 1)
+            size_t aligned = Simd::AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; ++c)
             {
-                size_t aligned = Simd::AlignLo(count, 4);
-                for (size_t j = 0; j < size; ++j)
+                float _bias0 = bias0[c];
+                float _scale1 = scale1[c];
+                float _bias1 = bias1[c];
+                size_t s = 0;
+                for (; s < aligned; s += 4)
                 {
-                    size_t i = 0;
-                    for (; i < aligned; i += 4)
-                    {
-                        dst[i + 0] = SynetFusedLayerForward1(src[i + 0] + bias0[i + 0], scale1[i + 0], bias1[i + 0]);
-                        dst[i + 1] = SynetFusedLayerForward1(src[i + 1] + bias0[i + 1], scale1[i + 1], bias1[i + 1]);
-                        dst[i + 2] = SynetFusedLayerForward1(src[i + 2] + bias0[i + 2], scale1[i + 2], bias1[i + 2]);
-                        dst[i + 3] = SynetFusedLayerForward1(src[i + 3] + bias0[i + 3], scale1[i + 3], bias1[i + 3]);
-                    }
-                    for (; i < count; ++i)
+                    dst[s + 0] = SynetFusedLayerForward1(src[s + 0] + _bias0, _scale1, _bias1);
+                    dst[s + 1] = SynetFusedLayerForward1(src[s + 1] + _bias0, _scale1, _bias1);
+                    dst[s + 2] = SynetFusedLayerForward1(src[s + 2] + _bias0, _scale1, _bias1);
+                    dst[s + 3] = SynetFusedLayerForward1(src[s + 3] + _bias0, _scale1, _bias1);
+                }
+                for (; s < spatial; ++s)
+                    dst[s] = SynetFusedLayerForward1(src[s] + _bias0, _scale1, _bias1);
+                src += spatial;
+                dst += spatial;
+            }
+        }
+
+        void SynetFusedLayerForward1Nhwc(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
+        {
+            size_t aligned = Simd::AlignLo(channels, 4);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += 4)
+                {
+                    dst[c + 0] = SynetFusedLayerForward1(src[c + 0] + bias0[c + 0], scale1[c + 0], bias1[c + 0]);
+                    dst[c + 1] = SynetFusedLayerForward1(src[c + 1] + bias0[c + 1], scale1[c + 1], bias1[c + 1]);
+                    dst[c + 2] = SynetFusedLayerForward1(src[c + 2] + bias0[c + 2], scale1[c + 2], bias1[c + 2]);
+                    dst[c + 3] = SynetFusedLayerForward1(src[c + 3] + bias0[c + 3], scale1[c + 3], bias1[c + 3]);
+                }
+                for (; c < channels; ++c)
+                    dst[c] = SynetFusedLayerForward1(src[c] + bias0[c], scale1[c], bias1[c]);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        template<int N> void SynetFusedLayerForward1NchwXc(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t i = 0; i < N; ++i)
                         dst[i] = SynetFusedLayerForward1(src[i] + bias0[i], scale1[i], bias1[i]);
-                    src += count;
-                    dst += count;
+                    src += N;
+                    dst += N;
                 }
+                bias0 += N;
+                scale1 += N;
+                bias1 += N;
             }
+        }
+
+        void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetFusedLayerForward1Nchw(src, bias0, scale1, bias1, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetFusedLayerForward1Nhwc(src, bias0, scale1, bias1, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetFusedLayerForward1NchwXc<4>(src, bias0, scale1, bias1, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetFusedLayerForward1NchwXc<8>(src, bias0, scale1, bias1, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetFusedLayerForward1NchwXc<16>(src, bias0, scale1, bias1, channels, spatial, dst);
             else
-            {
-                size_t aligned = Simd::AlignLo(size, 4);
-                for (size_t i = 0; i < count; ++i)
-                {
-                    float b0 = bias0[i];
-                    float s1 = scale1[i];
-                    float b1 = bias1[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
-                    {
-                        dst[j + 0] = SynetFusedLayerForward1(src[j + 0] + b0, s1, b1);
-                        dst[j + 1] = SynetFusedLayerForward1(src[j + 1] + b0, s1, b1);
-                        dst[j + 2] = SynetFusedLayerForward1(src[j + 2] + b0, s1, b1);
-                        dst[j + 3] = SynetFusedLayerForward1(src[j + 3] + b0, s1, b1);
-                    }
-                    for (; j < size; ++j)
-                        dst[j] = SynetFusedLayerForward1(src[j] + b0, s1, b1);
-                    src += size;
-                    dst += size;
-                }
-            }
+                assert(0);
         }
 
         //---------------------------------------------------------------------
