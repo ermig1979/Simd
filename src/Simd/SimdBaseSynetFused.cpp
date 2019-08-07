@@ -437,49 +437,79 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t count, size_t size, float * dst, SimdBool trans)
+        void SynetFusedLayerForward8Nchw(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
         {
-            if ((trans || size == 1) && count != 1)
+            size_t aligned = Simd::AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; ++c)
             {
-                size_t aligned = Simd::AlignLo(count, 4);
-                for (size_t j = 0; j < size; ++j)
+                float _src2 = src2[c];
+                size_t s = 0;
+                for (; s < aligned; s += 4)
                 {
-                    size_t i = 0;
-                    for (; i < aligned; i += 4)
-                    {
-                        dst[i + 0] = SynetFusedLayerForward8(src0[i + 0], src1[i + 0], src2[i + 0]);
-                        dst[i + 1] = SynetFusedLayerForward8(src0[i + 1], src1[i + 1], src2[i + 1]);
-                        dst[i + 2] = SynetFusedLayerForward8(src0[i + 2], src1[i + 2], src2[i + 2]);
-                        dst[i + 3] = SynetFusedLayerForward8(src0[i + 3], src1[i + 3], src2[i + 3]);
-                    }
-                    for (; i < count; ++i)
+                    dst[s + 0] = SynetFusedLayerForward8(src0[s + 0], src1[s + 0], _src2);
+                    dst[s + 1] = SynetFusedLayerForward8(src0[s + 1], src1[s + 1], _src2);
+                    dst[s + 2] = SynetFusedLayerForward8(src0[s + 2], src1[s + 2], _src2);
+                    dst[s + 3] = SynetFusedLayerForward8(src0[s + 3], src1[s + 3], _src2);
+                }
+                for (; s < spatial; ++s)
+                    dst[s] = SynetFusedLayerForward8(src0[s], src1[s], _src2);
+                src0 += spatial;
+                src1 += spatial;
+                dst += spatial;
+            }
+        }
+
+        void SynetFusedLayerForward8Nhwc(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
+        {
+            size_t aligned = Simd::AlignLo(channels, 4);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += 4)
+                {
+                    dst[c + 0] = SynetFusedLayerForward8(src0[c + 0], src1[c + 0], src2[c + 0]);
+                    dst[c + 1] = SynetFusedLayerForward8(src0[c + 1], src1[c + 1], src2[c + 1]);
+                    dst[c + 2] = SynetFusedLayerForward8(src0[c + 2], src1[c + 2], src2[c + 2]);
+                    dst[c + 3] = SynetFusedLayerForward8(src0[c + 3], src1[c + 3], src2[c + 3]);
+                }
+                for (; c < channels; ++c)
+                    dst[c] = SynetFusedLayerForward8(src0[c], src1[c], src2[c]);
+                src0 += channels;
+                src1 += channels;
+                dst += channels;
+            }
+        }
+
+        template<int N> void SynetFusedLayerForward8NchwXc(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t i = 0; i < N; ++i)
                         dst[i] = SynetFusedLayerForward8(src0[i], src1[i], src2[i]);
-                    src0 += count;
-                    src1 += count;
-                    dst += count;
+                    src0 += N;
+                    src1 += N;
+                    dst += N;
                 }
+                src2 += N;
             }
+        }
+
+        void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetFusedLayerForward8Nchw(src0, src1, src2, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetFusedLayerForward8Nhwc(src0, src1, src2, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetFusedLayerForward8NchwXc<4>(src0, src1, src2, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetFusedLayerForward8NchwXc<8>(src0, src1, src2, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetFusedLayerForward8NchwXc<16>(src0, src1, src2, channels, spatial, dst);
             else
-            {
-                size_t aligned = Simd::AlignLo(size, 4);
-                for (size_t i = 0; i < count; ++i)
-                {
-                    float s2 = src2[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
-                    {
-                        dst[j + 0] = SynetFusedLayerForward8(src0[j + 0], src1[j + 0], s2);
-                        dst[j + 1] = SynetFusedLayerForward8(src0[j + 1], src1[j + 1], s2);
-                        dst[j + 2] = SynetFusedLayerForward8(src0[j + 2], src1[j + 2], s2);
-                        dst[j + 3] = SynetFusedLayerForward8(src0[j + 3], src1[j + 3], s2);
-                    }
-                    for (; j < size; ++j)
-                        dst[j] = SynetFusedLayerForward8(src0[j], src1[j], s2);
-                    src0 += size;
-                    src1 += size;
-                    dst += size;
-                }
-            }
+                assert(0);
         }
 
         //---------------------------------------------------------------------

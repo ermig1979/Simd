@@ -121,7 +121,7 @@ namespace Simd
 
         void SynetFusedLayerForward4(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-        void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t count, size_t size, float * dst, SimdBool trans);
+        void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans);
 

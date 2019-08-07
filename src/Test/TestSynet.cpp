@@ -913,64 +913,70 @@ namespace Test
     {
         struct FuncFLF8
         {
-            typedef void(*FuncPtr)(const float * src0, const float * src1, const float * src2, size_t count, size_t size, float * dst, SimdBool trans);
+            typedef void(*FuncPtr)(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
             FuncPtr func;
             String desc;
 
             FuncFLF8(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdBool trans)
+            void Update(SimdTensorFormatType format)
             {
-                desc = desc + (trans ? "[1]" : "[0]");
+                desc = desc + "[" + ToString(format) + "]";
             }
 
-            void Call(const View & src0, const View & src1, const View & src2, size_t count, size_t size, SimdBool trans, View & dst) const
+            void Call(const Tensor32f & src0, const Tensor32f & src1, const Tensor32f & src2, size_t channels, size_t spatial, SimdTensorFormatType format, Tensor32f & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)src0.data, (float*)src1.data, (float*)src2.data, count, size, (float*)dst.data, trans);
+                func(src0.Data(), src1.Data(), src2.Data(), channels, spatial, dst.Data(), format);
             }
         };
     }
 
 #define FUNC_FLF8(function) FuncFLF8(function, #function)
 
-    bool SynetFusedLayerForward8AutoTest(size_t count, size_t size, SimdBool trans, FuncFLF8 f1, FuncFLF8 f2)
+    bool SynetFusedLayerForward8AutoTest(size_t channels, size_t spatial, SimdTensorFormatType format, FuncFLF8 f1, FuncFLF8 f2)
     {
         bool result = true;
 
-        f1.Update(trans);
-        f2.Update(trans);
+        f1.Update(format);
+        f2.Update(format);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << spatial << "].");
 
-        View src0(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View src1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View src2(count, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        Tensor32f src0(ToShape(channels, spatial, format));
+        Tensor32f src1(ToShape(channels, spatial, format));
+        Tensor32f src2(ToShape(channels, format));
+        Tensor32f dst1(ToShape(2 * channels, spatial, format));
+        Tensor32f dst2(ToShape(2 * channels, spatial, format));
 
-        FillRandom32f(src0, -10.0, 10.0);
-        FillRandom32f(src1, -10.0, 10.0);
-        FillRandom32f(src2, -10.0, 10.0);
+        FillRandom(src0.Data(), src0.Size(), -10.0, 10.0);
+        FillRandom(src1.Data(), src1.Size(), -10.0, 10.0);
+        FillRandom(src2.Data(), src2.Size(), -10.0, 10.0);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src0, src1, src2, count, size, trans, dst1));
+        TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src0, src1, src2, count, size, trans, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src0, src1, src2, channels, spatial, format, dst1));
 
-        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src0, src1, src2, channels, spatial, format, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
 
         return result;
     }
 
-    bool SynetFusedLayerForward8AutoTest(const FuncFLF8 & f1, const FuncFLF8 & f2)
+    bool SynetFusedLayerForward8AutoTest(int mask, const FuncFLF8 & f1, const FuncFLF8 & f2)
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward8AutoTest(H, W, SimdFalse, f1, f2);
-        result = result && SynetFusedLayerForward8AutoTest(H - O, W + O, SimdFalse, f1, f2);
-        result = result && SynetFusedLayerForward8AutoTest(H, W, SimdTrue, f1, f2);
-        result = result && SynetFusedLayerForward8AutoTest(H - O, W + O, SimdTrue, f1, f2);
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            if (SimdSynetTensorAlignment(format)&mask)
+            {
+                result = result && SynetFusedLayerForward8AutoTest(H, W, format, f1, f2);
+                result = result && SynetFusedLayerForward8AutoTest(H - O, W + O, format, f1, f2);
+            }
+        }
 
         return result;
     }
@@ -979,26 +985,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Base::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+        result = result && SynetFusedLayerForward8AutoTest(TFM_ANY, FUNC_FLF8(Simd::Base::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Sse::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+            result = result && SynetFusedLayerForward8AutoTest(TFM_128, FUNC_FLF8(Simd::Sse::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Avx::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+            result = result && SynetFusedLayerForward8AutoTest(TFM_256, FUNC_FLF8(Simd::Avx::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Avx512f::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+            result = result && SynetFusedLayerForward8AutoTest(TFM_512, FUNC_FLF8(Simd::Avx512f::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetFusedLayerForward8AutoTest(FUNC_FLF8(Simd::Neon::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+            result = result && SynetFusedLayerForward8AutoTest(TFM_128, FUNC_FLF8(Simd::Neon::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
         return result;
