@@ -626,7 +626,7 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward4Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
         {
             if (align)
-                assert(Aligned(src) && Aligned(spatial) && Aligned(dst));
+                assert(Aligned(src) && Aligned(spatial) && Aligned(dst0));
 
             __m256 _bias1 = _mm256_set1_ps(bias1[0]);
             __m256 _scale1 = _mm256_set1_ps(scale1[0]);
@@ -668,7 +668,7 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward4Nhwc(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
         {
             if (align)
-                assert(Aligned(src) && Aligned(bias0) && Aligned(channels) && Aligned(dst));
+                assert(Aligned(src) && Aligned(bias0) && Aligned(channels) && Aligned(dst0));
 
             __m256 _bias1 = _mm256_set1_ps(bias1[0]);
             __m256 _scale1 = _mm256_set1_ps(scale1[0]);
@@ -709,7 +709,7 @@ namespace Simd
         template <bool align> void SynetFusedLayerForward4Nchw8cA(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
         {
             if (align)
-                assert(Aligned(src) && Aligned(dst));
+                assert(Aligned(src) && Aligned(dst0));
 
             __m256 _bias1 = _mm256_set1_ps(bias1[0]);
             __m256 _scale1 = _mm256_set1_ps(scale1[0]);
@@ -737,7 +737,7 @@ namespace Simd
 
         SIMD_INLINE void SynetFusedLayerForward4Nchw8cA(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
         {
-            assert(Aligned(channels));
+            assert(Aligned(channels, F));
             if (Aligned(src) && Aligned(dst))
                 SynetFusedLayerForward4Nchw8cA<true>(src, bias0, scale1, bias1, channels, spatial, dst);
             else
@@ -752,7 +752,7 @@ namespace Simd
                 SynetFusedLayerForward4Nhwc(src, bias0, scale1, bias1, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
                 Sse::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
-            else if (format == SimdTensorFormatNchw8c && Aligned(channels))
+            else if (format == SimdTensorFormatNchw8c && Aligned(channels, F))
                 SynetFusedLayerForward4Nchw8cA(src, bias0, scale1, bias1, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
@@ -923,188 +923,317 @@ namespace Simd
             Store<align>(dst0 + offset, _mm256_max_ps(_mm256_setzero_ps(), _mm256_add_ps(_mm256_mul_ps(_src, scale), bias)));
         }
 
-        template<bool align> void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans)
+        template<bool align> void SynetFusedLayerForward9Nchw(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
         {
             if (align)
-                assert((trans || size == 1 ? Aligned(count0) && Aligned(count1) && Aligned(scale0) && Aligned(bias0) : Aligned(size)) && Aligned(src0) && Aligned(src1) && Aligned(dst0) && Aligned(dst1));
-            const float * scale1 = scale0 + count0;
-            const float * bias1 = bias0 + count0;
-            if (trans || size == 1)
+                assert(Aligned(src0) && Aligned(src1) && Aligned(spatial) && Aligned(dst0) && Aligned(dst1));
+            const float * scale1 = scale0 + channels0;
+            const float * bias1 = bias0 + channels0;
+            size_t aligned = AlignLo(spatial, QF);
+            size_t partial = AlignLo(spatial, F);
+            if (dst1)
             {
-                size_t aligned0 = AlignLo(count0, QF);
-                size_t partial0 = AlignLo(count0, F);
-                size_t aligned1 = AlignLo(count1, QF);
-                size_t partial1 = AlignLo(count1, F);
-                if (dst1)
+                for (size_t c = 0; c < channels0; ++c)
                 {
-                    for (size_t j = 0; j < size; ++j)
+                    size_t s = 0;
+                    if (partial)
                     {
-                        size_t i = 0;
-                        for (; i < aligned0; i += QF)
+                        __m256 _scale0 = _mm256_set1_ps(scale0[c]);
+                        __m256 _bias0 = _mm256_set1_ps(bias0[c]);
+                        for (; s < aligned; s += QF)
                         {
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, i + 0 * F);
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, i + 1 * F);
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, i + 2 * F);
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, i + 3 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + 0 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + 1 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + 2 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + 3 * F);
                         }
-                        for (; i < partial0; i += F)
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, i);
-                        for (; i < count0; ++i)
-                            dst0[i] = Base::SynetFusedLayerForward9(src0[i], scale0[i], bias0[i]), dst1[i] = src0[i];
-                        src0 += count0;
-                        dst0 += count0;
-                        dst1 += count0;
-                        i = 0;
-                        for (; i < aligned1; i += QF)
-                        {
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, i + 0 * F);
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, i + 1 * F);
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, i + 2 * F);
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, i + 3 * F);
-                        }
-                        for (; i < partial1; i += F)
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, i);
-                        for (; i < count1; ++i)
-                            dst0[i] = Base::SynetFusedLayerForward9(src1[i], scale1[i], bias1[i]), dst1[i] = src1[i];
-                        src1 += count1;
-                        dst0 += count1;
-                        dst1 += count1;
+                        for (; s < partial; s += F)
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s);
                     }
+                    for (; s < spatial; ++s)
+                        dst0[s] = Base::SynetFusedLayerForward9(src0[s], scale0[c], bias0[c]), dst1[s] = src0[s];
+                    src0 += spatial;
+                    dst0 += spatial;
+                    dst1 += spatial;
                 }
-                else
+                for (size_t c = 0; c < channels1; ++c)
                 {
-                    for (size_t j = 0; j < size; ++j)
+                    size_t s = 0;
+                    if (partial)
                     {
-                        size_t i = 0;
-                        for (; i < aligned0; i += QF)
+                        __m256 _scale1 = _mm256_set1_ps(scale1[c]);
+                        __m256 _bias1 = _mm256_set1_ps(bias1[c]);
+                        for (; s < aligned; s += QF)
                         {
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, i + 0 * F);
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, i + 1 * F);
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, i + 2 * F);
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, i + 3 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + 0 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + 1 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + 2 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + 3 * F);
                         }
-                        for (; i < partial0; i += F)
-                            SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, i);
-                        for (; i < count0; ++i)
-                            dst0[i] = Base::SynetFusedLayerForward9(src0[i], scale0[i], bias0[i]);
-                        src0 += count0;
-                        dst0 += count0;
-                        i = 0;
-                        for (; i < aligned1; i += QF)
-                        {
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, i + 0 * F);
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, i + 1 * F);
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, i + 2 * F);
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, i + 3 * F);
-                        }
-                        for (; i < partial1; i += F)
-                            SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, i);
-                        for (; i < count1; ++i)
-                            dst0[i] = Base::SynetFusedLayerForward9(src1[i], scale1[i], bias1[i]);
-                        src1 += count1;
-                        dst0 += count1;
+                        for (; s < partial; s += F)
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s);
                     }
+                    for (; s < spatial; ++s)
+                        dst0[s] = Base::SynetFusedLayerForward9(src1[s], scale1[c], bias1[c]), dst1[s] = src1[s];
+                    src1 += spatial;
+                    dst0 += spatial;
+                    dst1 += spatial;
                 }
             }
             else
             {
-                size_t aligned = AlignLo(size, QF);
-                size_t partial = AlignLo(size, F);
-                if (dst1)
+                for (size_t c = 0; c < channels0; ++c)
                 {
-                    for (size_t i = 0; i < count0; ++i, src0 += size, dst0 += size, dst1 += size)
+                    size_t s = 0;
+                    if (partial)
                     {
-                        size_t j = 0;
-                        if (partial)
+                        __m256 _scale0 = _mm256_set1_ps(scale0[c]);
+                        __m256 _bias0 = _mm256_set1_ps(bias0[c]);
+                        for (; s < aligned; s += QF)
                         {
-                            __m256 _scale0 = _mm256_set1_ps(scale0[i]);
-                            __m256 _bias0 = _mm256_set1_ps(bias0[i]);
-                            for (; j < aligned; j += QF)
-                            {
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, j + 0 * F);
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, j + 1 * F);
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, j + 2 * F);
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, j + 3 * F);
-                            }
-                            for (; j < partial; j += F)
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, j);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + 0 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + 1 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + 2 * F);
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + 3 * F);
                         }
-                        for (; j < size; ++j)
-                            dst0[j] = Base::SynetFusedLayerForward9(src0[j], scale0[i], bias0[i]), dst1[j] = src0[j];
+                        for (; s < partial; s += F)
+                            SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s);
                     }
-                    for (size_t i = 0; i < count1; ++i, src1 += size, dst0 += size, dst1 += size)
-                    {
-                        size_t j = 0;
-                        if (partial)
-                        {
-                            __m256 _scale1 = _mm256_set1_ps(scale1[i]);
-                            __m256 _bias1 = _mm256_set1_ps(bias1[i]);
-                            for (; j < aligned; j += QF)
-                            {
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, j + 0 * F);
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, j + 1 * F);
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, j + 2 * F);
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, j + 3 * F);
-                            }
-                            for (; j < partial; j += F)
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, j);
-                        }
-                        for (; j < size; ++j)
-                            dst0[j] = Base::SynetFusedLayerForward9(src1[j], scale1[i], bias1[i]), dst1[j] = src1[j];
-                    }
+                    for (; s < spatial; ++s)
+                        dst0[s] = Base::SynetFusedLayerForward9(src0[s], scale0[c], bias0[c]);
+                    src0 += spatial;
+                    dst0 += spatial;
                 }
-                else
+                for (size_t c = 0; c < channels1; ++c)
                 {
-                    for (size_t i = 0; i < count0; ++i, src0 += size, dst0 += size)
+                    size_t s = 0;
+                    if (partial)
                     {
-                        size_t j = 0;
-                        if (partial)
+                        __m256 _scale1 = _mm256_set1_ps(scale1[c]);
+                        __m256 _bias1 = _mm256_set1_ps(bias1[c]);
+                        for (; s < aligned; s += QF)
                         {
-                            __m256 _scale0 = _mm256_set1_ps(scale0[i]);
-                            __m256 _bias0 = _mm256_set1_ps(bias0[i]);
-                            for (; j < aligned; j += QF)
-                            {
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, j + 0 * F);
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, j + 1 * F);
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, j + 2 * F);
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, j + 3 * F);
-                            }
-                            for (; j < partial; j += F)
-                                SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, j);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + 0 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + 1 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + 2 * F);
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + 3 * F);
                         }
-                        for (; j < size; ++j)
-                            dst0[j] = Base::SynetFusedLayerForward9(src0[j], scale0[i], bias0[i]);
+                        for (; s < partial; s += F)
+                            SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s);
                     }
-                    for (size_t i = 0; i < count1; ++i, src1 += size, dst0 += size)
-                    {
-                        size_t j = 0;
-                        if (partial)
-                        {
-                            __m256 _scale1 = _mm256_set1_ps(scale1[i]);
-                            __m256 _bias1 = _mm256_set1_ps(bias1[i]);
-                            for (; j < aligned; j += QF)
-                            {
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, j + 0 * F);
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, j + 1 * F);
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, j + 2 * F);
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, j + 3 * F);
-                            }
-                            for (; j < partial; j += F)
-                                SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, j);
-                        }
-                        for (; j < size; ++j)
-                            dst0[j] = Base::SynetFusedLayerForward9(src1[j], scale1[i], bias1[i]);
-                    }
+                    for (; s < spatial; ++s)
+                        dst0[s] = Base::SynetFusedLayerForward9(src1[s], scale1[c], bias1[c]);
+                    src1 += spatial;
+                    dst0 += spatial;
                 }
             }
         }
 
-        void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans)
+        SIMD_INLINE void SynetFusedLayerForward9Nchw(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
         {
-            if ((trans || size == 1 ? Aligned(count0) && Aligned(count1) && Aligned(scale0) && Aligned(bias0) : Aligned(size)) && Aligned(src0) && Aligned(src1) && Aligned(dst0) && Aligned(dst1))
-                SynetFusedLayerForward9<true>(src0, src1, scale0, bias0, count0, count1, size, dst0, dst1, trans);
+            if (Aligned(src0) && Aligned(src1) && Aligned(spatial) && Aligned(dst0) && Aligned(dst1))
+                SynetFusedLayerForward9Nchw<true>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else
-                SynetFusedLayerForward9<false>(src0, src1, scale0, bias0, count0, count1, size, dst0, dst1, trans);
+                SynetFusedLayerForward9Nchw<false>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+        }
+
+        template<bool align> void SynetFusedLayerForward9Nhwc(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
+        {
+            if (align)
+                assert(Aligned(src0) && Aligned(src1) && Aligned(scale0) && Aligned(bias0) && Aligned(channels0) && Aligned(channels1) && Aligned(dst0) && Aligned(dst1));
+            const float * scale1 = scale0 + channels0;
+            const float * bias1 = bias0 + channels0;
+            size_t aligned0 = AlignLo(channels0, QF);
+            size_t partial0 = AlignLo(channels0, F);
+            size_t aligned1 = AlignLo(channels1, QF);
+            size_t partial1 = AlignLo(channels1, F);
+            if (dst1)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t c = 0;
+                    for (; c < aligned0; c += QF)
+                    {
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, c + 0 * F);
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, c + 1 * F);
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, c + 2 * F);
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, c + 3 * F);
+                    }
+                    for (; c < partial0; c += F)
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, dst1, c);
+                    for (; c < channels0; ++c)
+                        dst0[c] = Base::SynetFusedLayerForward9(src0[c], scale0[c], bias0[c]), dst1[c] = src0[c];
+                    src0 += channels0;
+                    dst0 += channels0;
+                    dst1 += channels0;
+                    c = 0;
+                    for (; c < aligned1; c += QF)
+                    {
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, c + 0 * F);
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, c + 1 * F);
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, c + 2 * F);
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, c + 3 * F);
+                    }
+                    for (; c < partial1; c += F)
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, dst1, c);
+                    for (; c < channels1; ++c)
+                        dst0[c] = Base::SynetFusedLayerForward9(src1[c], scale1[c], bias1[c]), dst1[c] = src1[c];
+                    src1 += channels1;
+                    dst0 += channels1;
+                    dst1 += channels1;
+                }
+            }
+            else
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t c = 0;
+                    for (; c < aligned0; c += QF)
+                    {
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, c + 0 * F);
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, c + 1 * F);
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, c + 2 * F);
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, c + 3 * F);
+                    }
+                    for (; c < partial0; c += F)
+                        SynetFusedLayerForward9<align>(src0, scale0, bias0, dst0, c);
+                    for (; c < channels0; ++c)
+                        dst0[c] = Base::SynetFusedLayerForward9(src0[c], scale0[c], bias0[c]);
+                    src0 += channels0;
+                    dst0 += channels0;
+                    c = 0;
+                    for (; c < aligned1; c += QF)
+                    {
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, c + 0 * F);
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, c + 1 * F);
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, c + 2 * F);
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, c + 3 * F);
+                    }
+                    for (; c < partial1; c += F)
+                        SynetFusedLayerForward9<align>(src1, scale1, bias1, dst0, c);
+                    for (; c < channels1; ++c)
+                        dst0[c] = Base::SynetFusedLayerForward9(src1[c], scale1[c], bias1[c]);
+                    src1 += channels1;
+                    dst0 += channels1;
+                }
+            }
+        }
+
+        SIMD_INLINE void SynetFusedLayerForward9Nhwc(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
+        {
+            if (Aligned(src0) && Aligned(src1) && Aligned(scale) && Aligned(bias) && Aligned(channels0) && Aligned(channels1) && Aligned(dst0) && Aligned(dst1))
+                SynetFusedLayerForward9Nhwc<true>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+            else
+                SynetFusedLayerForward9Nhwc<false>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+        }
+
+        template <bool align> void SynetFusedLayerForward9Nchw8cA(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
+        {
+            if (align)
+                assert(Aligned(src0) && Aligned(src1) && Aligned(dst0) && Aligned(dst1));
+            const float * scale1 = scale0 + channels0;
+            const float * bias1 = bias0 + channels0;
+            size_t spatialF = spatial * F;
+            size_t spatial4F = AlignLo(spatial, 4)*F;
+            if (dst1)
+            {
+                for (size_t c = 0; c < channels0; c += F)
+                {
+                    __m256 _scale0 = Load<false>(scale0 + c);
+                    __m256 _bias0 = Load<false>(bias0 + c);
+                    size_t s = 0;
+                    for (; s < spatial4F; s += 4 * F)
+                    {
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 0);
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 1);
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 2);
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s + F * 3);
+                    }
+                    for (; s < spatialF; s += F)
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, dst1, s);
+                    src0 += spatialF;
+                    dst0 += spatialF;
+                    dst1 += spatialF;
+                }
+                for (size_t c = 0; c < channels1; c += F)
+                {
+                    __m256 _scale1 = Load<false>(scale1 + c);
+                    __m256 _bias1 = Load<false>(bias1 + c);
+                    size_t s = 0;
+                    for (; s < spatial4F; s += 4 * F)
+                    {
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 0);
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 1);
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 2);
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s + F * 3);
+                    }
+                    for (; s < spatialF; s += F)
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, dst1, s);
+                    src1 += spatialF;
+                    dst0 += spatialF;
+                    dst1 += spatialF;
+                }
+            }
+            else
+            {
+                for (size_t c = 0; c < channels0; c += F)
+                {
+                    __m256 _scale0 = Load<false>(scale0 + c);
+                    __m256 _bias0 = Load<false>(bias0 + c);
+                    size_t s = 0;
+                    for (; s < spatial4F; s += 4 * F)
+                    {
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 0);
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 1);
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 2);
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s + F * 3);
+                    }
+                    for (; s < spatialF; s += F)
+                        SynetFusedLayerForward9<align>(src0, _scale0, _bias0, dst0, s);
+                    src0 += spatialF;
+                    dst0 += spatialF;
+                }
+                for (size_t c = 0; c < channels1; c += F)
+                {
+                    __m256 _scale1 = Load<false>(scale1 + c);
+                    __m256 _bias1 = Load<false>(bias1 + c);
+                    size_t s = 0;
+                    for (; s < spatial4F; s += 4 * F)
+                    {
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 0);
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 1);
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 2);
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s + F * 3);
+                    }
+                    for (; s < spatialF; s += F)
+                        SynetFusedLayerForward9<align>(src1, _scale1, _bias1, dst0, s);
+                    src1 += spatialF;
+                    dst0 += spatialF;
+                }
+            }
+        }
+
+        SIMD_INLINE void SynetFusedLayerForward9Nchw8cA(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
+        {
+            assert(Aligned(channels0, F));
+            if (Aligned(src0) && Aligned(src1) && Aligned(dst0) && Aligned(dst1))
+                SynetFusedLayerForward9Nchw8cA<true>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+            else
+                SynetFusedLayerForward9Nchw8cA<false>(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+        }
+
+        void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels0 + channels1, spatial, format))
+                SynetFusedLayerForward9Nchw(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+            else if (Base::NhwcCompatible(channels0 + channels1, spatial, format))
+                SynetFusedLayerForward9Nhwc(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+            else if (format == SimdTensorFormatNchw4c)
+                Sse::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
+            else if (format == SimdTensorFormatNchw8c && Aligned(channels0, F))
+                SynetFusedLayerForward9Nchw8cA(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
+            else
+                Base::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
         }
     }
 #endif// SIMD_AVX_ENABLE

@@ -5303,12 +5303,12 @@ SIMD_API void SimdSynetFusedLayerForward8(const float * src0, const float * src1
     simdSynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
 }
 
-typedef void(*SimdSynetFusedLayerForward9Ptr) (const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans);
+typedef void(*SimdSynetFusedLayerForward9Ptr) (const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
 volatile SimdSynetFusedLayerForward9Ptr simdSynetFusedLayerForward9 = SIMD_FUNC4(SynetFusedLayerForward9, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans)
+SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format)
 {
-    simdSynetFusedLayerForward9(src0, src1, scale, bias, count0, count1, size, dst0, dst1, trans);
+    simdSynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
 }
 
 typedef void(*SimdSynetInnerProductLayerForwardPtr) (const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);

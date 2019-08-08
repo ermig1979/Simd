@@ -5808,50 +5808,42 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans);
+        \fn void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of FusedLayer (type 9).
 
-        Algorithm's details:
+        Algorithm's details (example for NCHW tensor format):
         \verbatim
-        for(i = 0; i < count0; ++i)
+        for(c = 0; c < channels0; ++c)
             for(j = 0; j < size; ++j)
             {
-                if(trans)
-                    s = i + j*count0, d = i + j*(count0 + count1);
-                else
-                    s = i*size + j, d = i*size + j;
-                dst0[d] = src0[s]*scale[i] + bias[i] + src1[o]*src2[i];
+                dst0[c*spatial + s] = max(0, src0[c*spatial + s]*scale[c] + bias[c]);
                 if(dst1)
-                    dst1[d] = src0[s];
+                    dst1[c*spatial + s] = src0[c*spatial + s];
             }
-        for(i = 0; i < count1; ++i)
+        for(c = 0; c < channels1; ++c)
             for(j = 0; j < size; ++j)
             {
-                if(trans)
-                    s = i + j*count1, d = i + count0 + j*(count0 + count1);
-                else
-                    s = i*size + j, d = (i + count0)*size + j;
-                dst0[d] = src1[s]*scale[count0 + i] + bias[count0 + i] + src1[o]*src2[i];
+                dst0[(c + channels0)*spatial + s] = max(0, src1[c*spatial + s]*scale[count0 + c] + bias[count0 + c]);
                 if(dst1)
-                    dst1[d] = src1[s];
+                    dst1[(c + channels0)*spatial + s] = src1[c*spatial + s];
             }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src0 - a pointer to the first input 32-bit float array. The size of the array must be equal to count0*size.
-        \param [in] src1 - a pointer to the second input 32-bit float array. The size of the array must be equal to count1*size.
-        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
-        \param [in] bias - a pointer to the 32-bit float array with bias coefficients.
-        \param [in] count0 - a channel size of the first input image.
-        \param [in] count1 - a channel size of the second input image.
-        \param [in] size - a spatial size.
-        \param [out] dst0 - a pointer to the first output 32-bit float array. The size of the array must be equal to (count0 + count1)*size.
-        \param [out] dst1 - a pointer to the second output 32-bit float array. The size of the array must be equal to (count0 + count1)*size. The pointer can be NULL.
-        \param [in] trans - a flag of transposed data.
+        \param [in] src0 - a pointer to the first input 32-bit float array. The size of the array is ::SimdAlign (channels0, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in] src1 - a pointer to the second input 32-bit float array. The size of the array is ::SimdAlign (channels1, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)).
+        \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)).
+        \param [in] channels0 - a number of channels in the first input image tensor.
+        \param [in] channels1 - a number of channels in the second input image tensor.
+        \param [in] spatial - a spatial size of (input/output) image tensor.
+        \param [out] dst0 - a pointer to the first output 32-bit float array. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [out] dst1 - a pointer to the second output 32-bit float array. The size of the array is ::SimdAlign (channels0 + channels1, ::SimdSynetTensorAlignment (format)) * spatial. The pointer can be NULL.
+        \param [in] format - a format of (input/output) image tensor.
     */
-    SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t count0, size_t count1, size_t size, float * dst0, float * dst1, SimdBool trans);
+    SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
 
     /*! @ingroup synet
 
