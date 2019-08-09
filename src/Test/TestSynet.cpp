@@ -1227,61 +1227,70 @@ namespace Test
     {
         struct FuncLLCC
         {
-            typedef void(*FuncPtr)(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans);
+            typedef void(*FuncPtr)(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
             FuncPtr func;
             String desc;
 
             FuncLLCC(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdBool trans)
+            void Update(SimdTensorFormatType format)
             {
-                desc = desc + (trans ? "[1]" : "[0]");
+                desc = desc + "[" + ToString(format) + "]";
             }
 
-            void Call(const View & src, size_t half, size_t count, size_t size, const float * k, View & dst, SimdBool trans) const
+            void Call(const Tensor32f & src, size_t half, size_t channels, size_t spatial, const float * k, Tensor32f & dst, SimdTensorFormatType format) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func((float*)src.data, half, count, size, k, (float*)dst.data, trans);
+                func(src.Data(), half, channels, spatial, k, dst.Data(), format);
             }
         };
     }
 
 #define FUNC_LLCC(function) FuncLLCC(function, #function)
 
-    bool SynetLrnLayerCrossChannelsAutoTest(size_t half, size_t count, size_t size, SimdBool trans, FuncLLCC f1, FuncLLCC f2)
+    bool SynetLrnLayerCrossChannelsAutoTest(size_t half, size_t channels, size_t spatial, SimdTensorFormatType format, FuncLLCC f1, FuncLLCC f2)
     {
         bool result = true;
 
-        f1.Update(trans);
-        f2.Update(trans);
+        if (format >= SimdTensorFormatNchw4c)
+            return result;
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << count << ", " << size << "].");
+        f1.Update(format);
+        f2.Update(format);
 
-        View src(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst1(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
-        View dst2(count*size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << spatial << "].");
 
-        FillRandom32f(src, -10.0, 10.0);
+        Tensor32f src(ToShape(channels, spatial, format));
+        Tensor32f dst1(ToShape(channels, spatial, format));
+        Tensor32f dst2(ToShape(channels, spatial, format));
+
+        FillRandom(src.Data(), src.Size(), -10.0, 10.0);
         float k[3] = { 1.00, 0.10, -0.75 };
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, half, count, size, k, dst1, trans));
+        TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, half, count, size, k, dst2, trans));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, half, channels, spatial, k, dst1, format));
 
-        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, half, channels, spatial, k, dst2, format));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
 
         return result;
     }
 
-    bool SynetLrnLayerCrossChannelsAutoTest(const FuncLLCC & f1, const FuncLLCC & f2)
+    bool SynetLrnLayerCrossChannelsAutoTest(int mask, const FuncLLCC & f1, const FuncLLCC & f2)
     {
         bool result = true;
 
-        result = result && SynetLrnLayerCrossChannelsAutoTest(2, H, W, ::SimdFalse, f1, f2);
-        result = result && SynetLrnLayerCrossChannelsAutoTest(2, H - O, W + O, ::SimdFalse, f1, f2);
-        result = result && SynetLrnLayerCrossChannelsAutoTest(2, H, W, ::SimdTrue, f1, f2);
-        result = result && SynetLrnLayerCrossChannelsAutoTest(2, H - O, W + O, ::SimdTrue, f1, f2);
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            if (SimdSynetTensorAlignment(format)&mask)
+            {
+                result = result && SynetLrnLayerCrossChannelsAutoTest(2, H, W, format, f1, f2);
+                result = result && SynetLrnLayerCrossChannelsAutoTest(2, H - O, W + O, format, f1, f2);
+            }
+        }
 
         return result;
     }
@@ -1290,26 +1299,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Base::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+        result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_ANY, FUNC_LLCC(Simd::Base::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 
 #ifdef SIMD_SSE2_ENABLE
         if (Simd::Sse2::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Sse2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_128, FUNC_LLCC(Simd::Sse2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_256, FUNC_LLCC(Simd::Avx2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_512, FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(FUNC_LLCC(Simd::Neon::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_128, FUNC_LLCC(Simd::Neon::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
         return result;

@@ -5815,16 +5815,16 @@ extern "C"
         Algorithm's details (example for NCHW tensor format):
         \verbatim
         for(c = 0; c < channels0; ++c)
-            for(j = 0; j < size; ++j)
+            for(s = 0; s < spatial; ++s)
             {
                 dst0[c*spatial + s] = max(0, src0[c*spatial + s]*scale[c] + bias[c]);
                 if(dst1)
                     dst1[c*spatial + s] = src0[c*spatial + s];
             }
         for(c = 0; c < channels1; ++c)
-            for(j = 0; j < size; ++j)
+            for(s = 0; s < spatial; ++s)
             {
-                dst0[(c + channels0)*spatial + s] = max(0, src1[c*spatial + s]*scale[count0 + c] + bias[count0 + c]);
+                dst0[(c + channels0)*spatial + s] = max(0, src1[c*spatial + s]*scale[channels0 + c] + bias[channels0 + c]);
                 if(dst1)
                     dst1[(c + channels0)*spatial + s] = src1[c*spatial + s];
             }
@@ -5874,44 +5874,35 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans);
+        \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of LrnLayer (cross channels normalization).
 
-        Algorithm's details:
+        Algorithm's details (example for NCHW tensor format):
         \verbatim
-        for(i = 0; i < count; ++i)
-            for(j = 0; j < size; ++j)
+        for(c = 0; c < channels; ++c)
+            for(s = 0; s < spatial; ++s)
             {
-                lo = Max(0, i - half);
-                ln = Min(count, i + half + 1);
+                lo = Max(0, c - half);
+                hi = Min(channels, c + half + 1);
                 sum = 0;
-                if(trans)
-                {
-                    for(l = lo; l < ln; ++l)
-                        sum += Square(src[l + j*count]);
-                    dst[i + j*count] = src[i + j*count]*Pow(k[0] + sum*k[1], k[2]);
-                }
-                else
-                {
-                    for(l = lo; l < ln; ++l)
-                        sum += Square(src[l*size + j]);
-                    dst[i*size + j] = src[i*size + j]*Pow(k[0] + sum*k[1], k[2]);
-                }
+                for(i = lo; i < ln; ++i)
+                    sum += Square(src[i*spatial + s]);
+                dst[c*spatial + s] = src[c*spatial + s]*Pow(k[0] + sum*k[1], k[2]);
             }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to count*size.
+        \param [in] src - a pointer to the input 32-bit float array. The size of the array is equal to ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
         \param [in] half - a local normalization half size.
-        \param [in] count - a channels count.
-        \param [in] size - an internal size of the operation.
+        \param [in] channels - a number of channels in the (input/output) image tensor
+        \param [in] spatial - a spatial size of (input/output) image tensor.
         \param [in] k - a pointer to the 32-bit float array with 3 coefficients (see algorithm details). 
-        \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to count*size.
-        \param [in] trans - a flag of transposed input and output data (::SimdFalse - CHW order, ::SimdTrue - HWC order).
+        \param [out] dst - a pointer to the output 32-bit float array. The size of the array is equal to ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
+        \param [in] format - a format of (input/output) image tensor.
     */
-    SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans);
+    SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
     /*! @ingroup synet
 

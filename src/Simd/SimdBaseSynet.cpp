@@ -206,62 +206,86 @@ namespace Simd
             }
         }
 
-        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t count, size_t size, const float * k, float * dst, SimdBool trans)
+        //---------------------------------------------------------------------
+
+        void SynetLrnLayerCrossChannelsNchw(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)
         {
             float k0 = k[0], k1 = k[1], k2 = k[2];
-            if (trans)
+            Array32f sum(spatial, true), zero(spatial, true);
+            for (size_t c = 0; c < half; ++c)
             {
-                size_t beg = half + 1;
-                size_t end = count - half;
-                for (size_t j = 0; j < size; ++j)
-                {
-                    float sum = 0;
-                    for (size_t i = 0; i < half; ++i)
-                        sum += Simd::Square(src[i]);
-                    for (size_t i = 0; i < beg; ++i)
-                    {
-                        sum += Simd::Square(src[i + half]);
-                        dst[i] = src[i] * Pow(k0 + k1 * sum, k2);
-                    }
-                    for (size_t i = beg; i < end; ++i)
-                    {
-                        sum += Simd::Square(src[i + half]);
-                        sum -= Simd::Square(src[i - half - 1]);
-                        dst[i] = src[i] * Pow(k0 + k1 * sum, k2);
-                    }
-                    for (size_t i = end; i < count; ++i)
-                    {
-                        sum -= Simd::Square(src[i - half - 1]);
-                        dst[i] = src[i] * Pow(k0 + k1 * sum, k2);
-                    }
-                    src += count;
-                    dst += count;
-                }
+                const float * pos = src + c * spatial;
+                for (size_t s = 0; s < spatial; ++s)
+                    sum[s] += Simd::Square(pos[s]);
             }
-            else
+            for (size_t c = 0; c < channels; ++c)
             {
-                Array32f sum(size, true), zero(size, true);
-                for (size_t i = 0; i < half; ++i)
+                const float * pos = (c < channels - half) ? src + half * spatial : zero.data;
+                const float * neg = (c > half) ? src - (half + 1) * spatial : zero.data;
+                for (size_t s = 0; s < spatial; ++s)
                 {
-                    const float * pos = src + i * size;
-                    for (size_t j = 0; j < size; ++j)
-                        sum[j] += Simd::Square(pos[j]);
+                    sum[s] += Simd::Square(pos[s]);
+                    sum[s] -= Simd::Square(neg[s]);
+                    dst[s] = src[s] * Pow(k0 + k1 * sum[s], k2);
                 }
-                for (size_t i = 0; i < count; ++i)
-                {
-                    const float * pos = (i < count - half) ? src + half * size : zero.data;
-                    const float * neg = (i > half) ? src - (half + 1) * size : zero.data;
-                    for (size_t j = 0; j < size; ++j)
-                    {
-                        sum[j] += Simd::Square(pos[j]);
-                        sum[j] -= Simd::Square(neg[j]);
-                        dst[j] = src[j] * Pow(k0 + k1 * sum[j], k2);
-                    }
-                    src += size;
-                    dst += size;
-                }
+                src += spatial;
+                dst += spatial;
             }
         }
+
+        void SynetLrnLayerCrossChannelsNhwc(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)
+        {
+            float k0 = k[0], k1 = k[1], k2 = k[2];
+            size_t beg = half + 1;
+            size_t end = channels - half;
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                float sum = 0;
+                for (size_t c = 0; c < half; ++c)
+                    sum += Simd::Square(src[c]);
+                for (size_t c = 0; c < beg; ++c)
+                {
+                    sum += Simd::Square(src[c + half]);
+                    dst[c] = src[c] * Pow(k0 + k1 * sum, k2);
+                }
+                for (size_t c = beg; c < end; ++c)
+                {
+                    sum += Simd::Square(src[c + half]);
+                    sum -= Simd::Square(src[c - half - 1]);
+                    dst[c] = src[c] * Pow(k0 + k1 * sum, k2);
+                }
+                for (size_t c = end; c < channels; ++c)
+                {
+                    sum -= Simd::Square(src[c - half - 1]);
+                    dst[c] = src[c] * Pow(k0 + k1 * sum, k2);
+                }
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        template<int N> void SynetLrnLayerCrossChannelsNchwXc(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)
+        {
+            assert(0);
+        }
+
+        void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNchw)
+                SynetLrnLayerCrossChannelsNchw(src, half, channels, spatial, k, dst);
+            else if (format == SimdTensorFormatNhwc)
+                SynetLrnLayerCrossChannelsNhwc(src, half, channels, spatial, k, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetLrnLayerCrossChannelsNchwXc<4>(src, half, channels, spatial, k, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetLrnLayerCrossChannelsNchwXc<8>(src, half, channels, spatial, k, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetLrnLayerCrossChannelsNchwXc<16>(src, half, channels, spatial, k, dst);
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
 
         void SynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)

@@ -187,9 +187,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of InnerProductLayer.  <a href="#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gadf52e573bc4fa9affcc06df053e620ea"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gadf52e573bc4fa9affcc06df053e620ea">SimdSynetLrnLayerCrossChannels</a> (const float *src, size_t half, size_t count, size_t size, const float *k, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
-<tr class="memdesc:gadf52e573bc4fa9affcc06df053e620ea"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of LrnLayer (cross channels normalization).  <a href="#gadf52e573bc4fa9affcc06df053e620ea">More...</a><br /></td></tr>
-<tr class="separator:gadf52e573bc4fa9affcc06df053e620ea"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gafe109c39f05fcaf7d856b068b8e45f1e">SimdSynetLrnLayerCrossChannels</a> (const float *src, size_t half, size_t channels, size_t spatial, const float *k, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of LrnLayer (cross channels normalization).  <a href="#gafe109c39f05fcaf7d856b068b8e45f1e">More...</a><br /></td></tr>
+<tr class="separator:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9cac56e3742e9b87142286c26824016d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9cac56e3742e9b87142286c26824016d">SimdSynetPoolingForwardMax</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float *dst, size_t dstH, size_t dstW, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:ga9cac56e3742e9b87142286c26824016d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling).  <a href="#ga9cac56e3742e9b87142286c26824016d">More...</a><br /></td></tr>
 <tr class="separator:ga9cac56e3742e9b87142286c26824016d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1689,16 +1689,16 @@ for(i = 0; i &lt; count; ++i)
 
 <p>This function is used for forward propagation of FusedLayer (type 9). </p>
 <p>Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels0; ++c)
-    for(j = 0; j &lt; size; ++j)
+    for(s = 0; s &lt; spatial; ++s)
     {
         dst0[c*spatial + s] = max(0, src0[c*spatial + s]*scale[c] + bias[c]);
         if(dst1)
             dst1[c*spatial + s] = src0[c*spatial + s];
     }
 for(c = 0; c &lt; channels1; ++c)
-    for(j = 0; j &lt; size; ++j)
+    for(s = 0; s &lt; spatial; ++s)
     {
-        dst0[(c + channels0)*spatial + s] = max(0, src1[c*spatial + s]*scale[count0 + c] + bias[count0 + c]);
+        dst0[(c + channels0)*spatial + s] = max(0, src1[c*spatial + s]*scale[channels0 + c] + bias[channels0 + c]);
         if(dst1)
             dst1[(c + channels0)*spatial + s] = src1[c*spatial + s];
     }
@@ -1793,8 +1793,8 @@ for(c = 0; c &lt; channels1; ++c)
 
 </div>
 </div>
-<a id="gadf52e573bc4fa9affcc06df053e620ea"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gadf52e573bc4fa9affcc06df053e620ea">&#9670;&nbsp;</a></span>SimdSynetLrnLayerCrossChannels()</h2>
+<a id="gafe109c39f05fcaf7d856b068b8e45f1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gafe109c39f05fcaf7d856b068b8e45f1e">&#9670;&nbsp;</a></span>SimdSynetLrnLayerCrossChannels()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1815,13 +1815,13 @@ for(c = 0; c &lt; channels1; ++c)
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>count</em>, </td>
+          <td class="paramname"><em>channels</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>size</em>, </td>
+          <td class="paramname"><em>spatial</em>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -1838,8 +1838,8 @@ for(c = 0; c &lt; channels1; ++c)
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
-          <td class="paramname"><em>trans</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -1850,35 +1850,26 @@ for(c = 0; c &lt; channels1; ++c)
 </div><div class="memdoc">
 
 <p>This function is used for forward propagation of LrnLayer (cross channels normalization). </p>
-<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; count; ++i)
-    for(j = 0; j &lt; size; ++j)
+<p>Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    for(s = 0; s &lt; spatial; ++s)
     {
-        lo = Max(0, i - half);
-        ln = Min(count, i + half + 1);
+        lo = Max(0, c - half);
+        hi = Min(channels, c + half + 1);
         sum = 0;
-        if(trans)
-        {
-            for(l = lo; l &lt; ln; ++l)
-                sum += Square(src[l + j*count]);
-            dst[i + j*count] = src[i + j*count]*Pow(k[0] + sum*k[1], k[2]);
-        }
-        else
-        {
-            for(l = lo; l &lt; ln; ++l)
-                sum += Square(src[l*size + j]);
-            dst[i*size + j] = src[i*size + j]*Pow(k[0] + sum*k[1], k[2]);
-        }
+        for(i = lo; i &lt; ln; ++i)
+            sum += Square(src[i*spatial + s]);
+        dst[c*spatial + s] = src[c*spatial + s]*Pow(k[0] + sum*k[1], k[2]);
     }
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to count*size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array is equal to <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">half</td><td>- a local normalization half size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a channels count. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- an internal size of the operation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">k</td><td>- a pointer to the 32-bit float array with 3 coefficients (see algorithm details). </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count*size. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed input and output data (<a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> - CHW order, <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> - HWC order). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array is equal to <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
   </table>
   </dd>
 </dl>
