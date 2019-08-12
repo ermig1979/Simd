@@ -145,7 +145,7 @@ namespace Simd
                     }
                 }
                 else
-                    Base::SynetPreluLayerForward(dst, params, count, size, dst, trans);
+                    Base::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
         }
 

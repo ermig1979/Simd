@@ -344,48 +344,82 @@ namespace Simd
             }
         }
 
-        void SynetPreluLayerForward(const float * src, const float * slope, size_t count, size_t size, float * dst, SimdBool trans)
+        //---------------------------------------------------------------------
+
+        void SynetPreluLayerForwardNchw(const float * src, const float * slope, size_t channels, size_t spatial, float * dst)
         {
-            if ((trans || size == 1) && count != 1)
+            size_t aligned = Simd::AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; ++c)
             {
-                size_t aligned = Simd::AlignLo(count, 4);
-                for (size_t j = 0; j < size; ++j)
+                float _slope = slope[c];
+                size_t s = 0;
+                for (; s < aligned; s += 4)
                 {
-                    size_t i = 0;
-                    for (; i < aligned; i += 4)
-                    {
-                        dst[i + 0] = SynetPreluLayerForward(src[i + 0], slope[i + 0]);
-                        dst[i + 1] = SynetPreluLayerForward(src[i + 1], slope[i + 1]);
-                        dst[i + 2] = SynetPreluLayerForward(src[i + 2], slope[i + 2]);
-                        dst[i + 3] = SynetPreluLayerForward(src[i + 3], slope[i + 3]);
-                    }
-                    for (; i < count; ++i)
-                        dst[i] = SynetPreluLayerForward(src[i], slope[i]);
-                    src += count;
-                    dst += count;
+                    dst[s + 0] = SynetPreluLayerForward(src[s + 0], _slope);
+                    dst[s + 1] = SynetPreluLayerForward(src[s + 1], _slope);
+                    dst[s + 2] = SynetPreluLayerForward(src[s + 2], _slope);
+                    dst[s + 3] = SynetPreluLayerForward(src[s + 3], _slope);
                 }
-            }
-            else
-            {
-                size_t aligned = Simd::AlignLo(size, 4);
-                for (size_t i = 0; i < count; ++i)
-                {
-                    float s = slope[i];
-                    size_t j = 0;
-                    for (; j < aligned; j += 4)
-                    {
-                        dst[j + 0] = SynetPreluLayerForward(src[j + 0], s);
-                        dst[j + 1] = SynetPreluLayerForward(src[j + 1], s);
-                        dst[j + 2] = SynetPreluLayerForward(src[j + 2], s);
-                        dst[j + 3] = SynetPreluLayerForward(src[j + 3], s);
-                    }
-                    for (; j < size; ++j)
-                        dst[j] = SynetPreluLayerForward(src[j], s);
-                    src += size;
-                    dst += size;
-                }
+                for (; s < spatial; ++s)
+                    dst[s] = SynetPreluLayerForward(src[s], _slope);
+                src += spatial;
+                dst += spatial;
             }
         }
+
+        void SynetPreluLayerForwardNhwc(const float * src, const float * slope, size_t channels, size_t spatial, float * dst)
+        {
+            size_t aligned = Simd::AlignLo(channels, 4);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += 4)
+                {
+                    dst[c + 0] = SynetPreluLayerForward(src[c + 0], slope[c + 0]);
+                    dst[c + 1] = SynetPreluLayerForward(src[c + 1], slope[c + 1]);
+                    dst[c + 2] = SynetPreluLayerForward(src[c + 2], slope[c + 2]);
+                    dst[c + 3] = SynetPreluLayerForward(src[c + 3], slope[c + 3]);
+                }
+                for (; c < channels; ++c)
+                    dst[c] = SynetPreluLayerForward(src[c], slope[c]);
+                src += channels;
+                dst += channels;
+
+            }
+        }
+
+        template<int N> void SynetPreluLayerForwardNchwXc(const float * src, const float * slope, size_t channels, size_t spatial, float * dst)
+        {
+            for (size_t c = 0; c < channels; c += N)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t i = 0; i < N; ++i)
+                        dst[i] = SynetPreluLayerForward(src[i], slope[i]);
+                    src += N;
+                    dst += N;
+                }
+                slope += N;
+            }
+        }
+
+        void SynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNchw(src, slope, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetPreluLayerForwardNchwXc<4>(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetPreluLayerForwardNchwXc<8>(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetPreluLayerForwardNchwXc<16>(src, slope, channels, spatial, dst);
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
 
         void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {

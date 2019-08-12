@@ -248,7 +248,7 @@ namespace Simd
                     }
                 }
                 else
-                    Avx::SynetPreluLayerForward(dst, params, count, size, dst, trans);
+                    Avx::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
         }
 

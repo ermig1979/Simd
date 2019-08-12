@@ -209,7 +209,7 @@ namespace Simd
                     }
                 }
                 else
-                    Neon::SynetPreluLayerForward(dst, params, count, size, dst, trans);
+                    Neon::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
         }
 
