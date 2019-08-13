@@ -117,6 +117,13 @@ namespace Simd
     class MergedConvolution : public Deletable
     {
     public:
+        MergedConvolution()
+        {
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+            _perf = NULL;
+#endif
+        }
+
         virtual String Desc() const = 0;
 
         virtual const MergConvParam & Param() const = 0;
@@ -128,6 +135,20 @@ namespace Simd
         virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params) = 0;
 
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
+
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+        Base::PerformanceMeasurer * Perf(const String & func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            return _perf;
+    }
+#endif
+
+    private:
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+        Base::PerformanceMeasurer * _perf;
+#endif
     };
 
     namespace Base

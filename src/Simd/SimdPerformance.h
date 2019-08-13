@@ -41,7 +41,7 @@ namespace Simd
     }
 }
 
-#if defined(SIMD_PERFORMANCE_STATISTIC) && defined(NDEBUG)
+#if defined(SIMD_PERFORMANCE_STATISTIC)// && defined(NDEBUG)
 
 #include "Simd/SimdTime.h"
 
@@ -272,7 +272,8 @@ namespace Simd
 #define SIMD_PERF_INITF(name, desc, flop) Simd::Base::PerformanceMeasurerHolder name(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop)), false);
 #define SIMD_PERF_INIT(name, desc)  SIMD_PERF_INITF(name, desc, 0);
 #define SIMD_PERF_START(name) name.Enter(); 
-#define SIMD_PERF_PAUSE(name) name.Leave(true); 
+#define SIMD_PERF_PAUSE(name) name.Leave(true);
+#define SIMD_PERF_EXT(ext) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((ext)->Perf(SIMD_FUNCTION)) 
 #else//SIMD_PERFORMANCE_STATISTIC
 #define SIMD_PERF_FUNCF(flop)
 #define SIMD_PERF_FUNC()
@@ -285,6 +286,7 @@ namespace Simd
 #define SIMD_PERF_INIT(name, desc)
 #define SIMD_PERF_START(name)
 #define SIMD_PERF_PAUSE(name)
+#define SIMD_PERF_EXT(ext)
 #endif//SIMD_PERFORMANCE_STATISTIC 
 
 #endif//__SimdPerformance_h__

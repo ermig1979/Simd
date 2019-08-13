@@ -115,6 +115,9 @@ namespace Simd
             , _nhwcRun(0)
             , _nhwcReorderB(0)
             , _biasAndActivation(0)
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+            , _perf(NULL)
+#endif
         {
         }
 
@@ -158,6 +161,15 @@ namespace Simd
             }
         }
 
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+        Base::PerformanceMeasurer * Perf(const String & func)
+        {
+            if (_perf == NULL)
+                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+            return _perf;
+        }
+#endif
+
     protected:
         typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
         typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
@@ -173,6 +185,9 @@ namespace Simd
         NhwcRun _nhwcRun;
         NhwcReorderB _nhwcReorderB;
         BiasAndActivation _biasAndActivation;
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+        Base::PerformanceMeasurer * _perf;
+#endif
     };
 
     namespace Base

@@ -1541,8 +1541,7 @@ SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight,
 SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst)
 {
     Convolution * c = (Convolution*)convolution;
-    const ConvParam & p = c->Param();
-    SIMD_PERF_BEGF(p.Info() + " " + c->Desc(), p.Flop());
+    SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 }
 
@@ -3324,8 +3323,7 @@ SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * const
 SIMD_API void SimdMergedConvolutionForward(void * context, const float * src, float * buf, float * dst)
 {
     MergedConvolution * c = (MergedConvolution*)context;
-    const MergConvParam & p = c->Param();
-    SIMD_PERF_BEGF(p.Info() + " " + c->Desc(), p.Flop());
+    SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 }
 
