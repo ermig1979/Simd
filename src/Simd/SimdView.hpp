@@ -496,8 +496,8 @@ namespace Simd
             Loads image from file.
             
             Supported formats:
-             - PGM(Portable Gray Map) binary(P5) (the file is loaded as 8-bit gray image).
-             - PPM(Portable Pixel Map) binary(P6) (the file is loaded as 32-bit BGRA image).
+             - PGM(Portable Gray Map) text(P2) or binary(P5) (the file is loaded as 8-bit gray image).
+             - PPM(Portable Pixel Map) text(P3) or binary(P6) (the file is loaded as 32-bit BGRA image).
 
             \note PGM and PPM files with comments are not supported.
 
@@ -1139,7 +1139,7 @@ namespace Simd
         {
             std::string type;
             ifs >> type;
-            if (type == "P5")
+            if (type == "P2" || type == "P5")
             {
                 size_t w, h, d;
                 ifs >> w >> h >> d;
@@ -1147,11 +1147,26 @@ namespace Simd
                     return false;
                 ifs.get();
                 Recreate(w, h, View<A>::Gray8);
-                for (size_t row = 0; row < height; ++row)
-                    ifs.read((char*)(data + row*stride), width);
+                if (type == "P2")
+                {
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        for (size_t col = 0; col < width; ++col)
+                        {
+                            int gray;
+                            ifs >> gray;
+                            data[row * stride + col] = (uint8_t)gray;
+                        }
+                    }
+                }
+                else
+                {
+                    for (size_t row = 0; row < height; ++row)
+                        ifs.read((char*)(data + row*stride), width);
+                }
                 return true;
             }
-            if (type == "P6")
+            if (type == "P3" || type == "P6")
             {
                 size_t w, h, d;
                 ifs >> w >> h >> d;
@@ -1159,18 +1174,37 @@ namespace Simd
                     return false;
                 ifs.get();
                 Recreate(w, h, View<A>::Bgra32);
-                View buffer(width, 1, Bgr24);
-                for (size_t row = 0; row < height; ++row)
+                if (type == "P3")
                 {
-                    ifs.read((char*)buffer.data, width*3);
-                    const uint8_t * rgb = buffer.data;
-                    uint8_t * bgra = data + row*stride;
-                    for (size_t col = 0; col < width; ++col, rgb += 3, bgra += 4)
+                    for (size_t row = 0; row < height; ++row)
                     {
-                        bgra[0] = rgb[2];
-                        bgra[1] = rgb[1];
-                        bgra[2] = rgb[0];
-                        bgra[3] = 0xFF;
+                        uint8_t * bgra = data + row * stride;
+                        for (size_t col = 0; col < width; ++col, bgra += 4)
+                        {
+                            int blue, green, red;
+                            ifs >> red >> green >> blue;
+                            bgra[0] = (uint8_t)blue;
+                            bgra[1] = (uint8_t)green;
+                            bgra[2] = (uint8_t)red;
+                            bgra[3] = 0xFF;
+                        }
+                    }
+                }
+                else
+                {
+                    View buffer(width, 1, Bgr24);
+                    for (size_t row = 0; row < height; ++row)
+                    {
+                        ifs.read((char*)buffer.data, width*3);
+                        const uint8_t * rgb = buffer.data;
+                        uint8_t * bgra = data + row*stride;
+                        for (size_t col = 0; col < width; ++col, rgb += 3, bgra += 4)
+                        {
+                            bgra[0] = rgb[2];
+                            bgra[1] = rgb[1];
+                            bgra[2] = rgb[0];
+                            bgra[3] = 0xFF;
+                        }
                     }
                 }
                 return true;
