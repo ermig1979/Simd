@@ -339,7 +339,7 @@ namespace Simd
                         for (size_t yBeg1 = 0, yBeg0 = 0; yBeg1 < p.conv[1].dstH;)
                         {
                             size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
-                            size_t yEnd0 = Simd::RestrictRange(yBeg0 + _yStep[0], (_yStep[1] - 1)*p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY, p.conv[0].dstH);
+                            size_t yEnd0 = Simd::Min(Simd::Max(yBeg0 + _yStep[0], (_yStep[1] - 1)*p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY), p.conv[0].dstH);
                             _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
                             _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], buf1);
                             if(maC == C)
