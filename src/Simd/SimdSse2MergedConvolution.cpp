@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE_ENABLE)
-    namespace Sse
+#if defined(SIMD_SSE2_ENABLE)
+    namespace Sse2
     {
         template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x6(const float * src0, size_t srcC,
             const float * weight, const __m128 * bias, const __m128 * params, float * dst0, float * dst1)
@@ -1205,6 +1205,7 @@ namespace Simd
                 case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
                 case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
+                case SimdConvolutionActivationElu: SetConvolutionPtr<SimdConvolutionActivationElu>(_param, i, _convolution); break;
                 default: assert(0);
                 }
             }
@@ -1217,8 +1218,8 @@ namespace Simd
             MergConvParam param(trans, batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
-            return new Sse::MergedConvolution(param);
+            return new Sse2::MergedConvolution(param);
         }
     }
- #endif//SIMD_SSE_ENABLE
+ #endif//SIMD_SSE2_ENABLE
 }

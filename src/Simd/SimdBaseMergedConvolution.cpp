@@ -149,6 +149,7 @@ namespace Simd
                 case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
                 case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
+                case SimdConvolutionActivationElu: SetConvolutionPtr<SimdConvolutionActivationElu>(_param, i, _convolution); break;
                 default: assert(0);
                 }
             }       

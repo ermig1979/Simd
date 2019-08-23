@@ -1516,7 +1516,7 @@ SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width,
 
 typedef void* (*SimdConvolutionInitPtr) (SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
 
-SimdConvolutionInitPtr simdConvolutionInit = SIMD_FUNC6(ConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+SimdConvolutionInitPtr simdConvolutionInit = SIMD_FUNC6(ConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
 {
@@ -3298,7 +3298,7 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 
 typedef void* (*SimdMergedConvolutionInitPtr) (SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC5(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+SimdMergedConvolutionInitPtr simdMergedConvolutionInit = SIMD_FUNC5(MergedConvolutionInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
 {

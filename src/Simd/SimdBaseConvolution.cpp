@@ -147,6 +147,35 @@ namespace Simd
                 else
                     Base::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
+            else if (activation == ::SimdConvolutionActivationElu)
+            {
+                float alpha = params[0];
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = SynetElu32f(dst[i] + bias[i], alpha);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = SynetElu32f(dst[j] + bias[i], alpha);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetElu32f(dst, size*count, &alpha, dst);
+            }
+            else
+                assert(0);
         }
 
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
@@ -916,6 +945,7 @@ namespace Simd
             case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
             case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             default:
                 assert(0);
                 return NULL;

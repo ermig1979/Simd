@@ -1204,9 +1204,11 @@ namespace Simd
                 case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
                 case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
+                case SimdConvolutionActivationElu: SetConvolutionPtr<SimdConvolutionActivationElu>(_param, i, _convolution); break;
                 default: assert(0);
                 }
             }
+            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx::F);
         }
 
         //---------------------------------------------------------------------
@@ -1217,7 +1219,7 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if (param.conv[2].dstC < F)
-                return new Sse::MergedConvolution(param);
+                return new Sse2::MergedConvolution(param);
             else
                 return new Avx2::MergedConvolution(param);
         }

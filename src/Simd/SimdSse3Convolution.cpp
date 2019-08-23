@@ -45,7 +45,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Sse3::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Sse::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
+            Sse2::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -55,20 +55,20 @@ namespace Simd
             ConvParam param(trans, batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
-            else if (Sse::ConvolutionDepthwiseDotProduct::Preferable(param))
-                return new Sse::ConvolutionDepthwiseDotProduct(param);
+            else if (Sse2::ConvolutionDepthwiseDotProduct::Preferable(param))
+                return new Sse2::ConvolutionDepthwiseDotProduct(param);
             else if (ConvolutionWinograd::Preferable(param))
-                return new Sse::ConvolutionWinograd(param);
+                return new Sse2::ConvolutionWinograd(param);
             else if (ConvolutionGemmNT::Preferable(param))
                 return new ConvolutionGemmNT(param);
             else if (ConvolutionDirectNchw::Preferable(param))
-                return new Sse::ConvolutionDirectNchw(param);
+                return new Sse2::ConvolutionDirectNchw(param);
             else if (ConvolutionNhwcDirect::Preferable(param))
                 return new ConvolutionNhwcDirect(param);
             else if (ConvolutionDirectNhwc::Preferable(param))
-                return new Sse::ConvolutionDirectNhwc(param);
+                return new Sse2::ConvolutionDirectNhwc(param);
             else
-                return new Sse::ConvolutionGemmNN(param);
+                return new Sse2::ConvolutionGemmNN(param);
         }
     }
 #endif//SIMD_SSE3_ENABLE

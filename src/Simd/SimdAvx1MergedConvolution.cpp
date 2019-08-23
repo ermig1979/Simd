@@ -1193,9 +1193,8 @@ namespace Simd
         }
 
         MergedConvolution::MergedConvolution(const MergConvParam & p)
-            : Sse::MergedConvolution(p)
+            : Sse2::MergedConvolution(p)
         {
-            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx::F);
             for (size_t i = 0; i < _param.count; ++i)
             {
                 switch (p.conv[i].activation)
@@ -1205,20 +1204,24 @@ namespace Simd
                 case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
                 case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
-                default: assert(0);
+                default: return;
                 }
             }
+            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx::F);
         }
 
         //---------------------------------------------------------------------
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
+            for(size_t i = 0; i < count; ++i)
+                if (convs[i].activation == SimdConvolutionActivationElu)
+                    return Sse2::MergedConvolutionInit(trans, batch, convs, count, add);
             MergConvParam param(trans, batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
             if (param.conv[2].dstC < F)
-                return new Sse::MergedConvolution(param);
+                return new Sse2::MergedConvolution(param);
             else
                 return new Avx::MergedConvolution(param);
         }

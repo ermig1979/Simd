@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float * src0, const ConvParam & p,
             size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float * weight, const __m128 * bias, const __m128 * params, float * dst)
@@ -817,7 +817,6 @@ namespace Simd
             : Base::ConvolutionNhwcDirect(p)
         {
             size_t microD = 2 * F;
-            SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, microD, _convolution); break;
@@ -825,8 +824,10 @@ namespace Simd
             case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, microD, _convolution); break;
             default: assert(0);
             }
+            SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
         }
 
         bool ConvolutionNhwcDirect::Preferable(const ConvParam & p)
@@ -840,5 +841,5 @@ namespace Simd
             return true;
         }
     }
-#endif//SIMD_SSE_ENABLE
+#endif//SIMD_SSE2_ENABLE
 }

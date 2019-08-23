@@ -198,7 +198,7 @@ namespace Test
         bool result = true;
         const SimdBool t = SimdTrue, f = SimdFalse;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationPrelu, a2 = ::SimdConvolutionActivationPrelu;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationElu, a2 = ::SimdConvolutionActivationPrelu;
 #ifdef NDEBUG
 #if 0
         result = result && MergedConvolutionForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
@@ -235,9 +235,9 @@ namespace Test
 
         result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Base::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Sse::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && MergedConvolutionForwardAutoTest(EPS, FUNC_MC(Simd::Sse2::MergedConvolutionInit), FUNC_MC(SimdMergedConvolutionInit));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

@@ -477,9 +477,11 @@ namespace Test
 #if 1
         //result = result && ConvolutionForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && ConvolutionForwardAutoTest(eps, Param(1, 768, 10, 4, 128, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 3, 240, 135, 27, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && ConvolutionForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && ConvolutionForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, Param(1, 3, 240, 135, 10, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }
@@ -489,8 +491,8 @@ namespace Test
         bool result = true;
 
         //result = result && ConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
-        //result = result && ConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
-        result = result && ConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
+        result = result && ConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
+        //result = result && ConvolutionForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
 
         return result;
     }
@@ -501,9 +503,9 @@ namespace Test
 
         result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Base::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Sse::ConvolutionInit), FUNC_C(SimdConvolutionInit));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && ConvolutionForwardAutoTest(2 * EPS, FUNC_C(Simd::Sse2::ConvolutionInit), FUNC_C(SimdConvolutionInit));
 #endif 
 
 #ifdef SIMD_SSE3_ENABLE

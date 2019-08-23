@@ -26,6 +26,8 @@
 
 #include "Simd/SimdMath.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdSynet.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -65,10 +67,15 @@ namespace Simd
         {
             return Simd::Max(0.0f, value) + params[offset] * Simd::Min(0.0f, value);
         }
+
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationElu>(float value, const float * params, size_t offset)
+        {
+            return SynetElu32f(value, params[0]);
+        }
     }
 
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const __m128 * params, size_t index);
 
@@ -95,6 +102,11 @@ namespace Simd
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationPrelu>(__m128 value, const __m128 * params, size_t index)
         {
             return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(params[index], _mm_min_ps(_mm_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationElu>(__m128 value, const __m128 * params, size_t index)
+        {
+            return Sse2::Elu(value, params[0]);
         }
 
         template <TermType term> struct Term
@@ -167,7 +179,7 @@ namespace Simd
             }
         };
     }
-#endif//SIMD_SSE_ENABLE
+#endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
@@ -301,6 +313,11 @@ namespace Simd
             return _mm256_fmadd_ps(params[index], _mm256_min_ps(_mm256_setzero_ps(), value), _mm256_max_ps(_mm256_setzero_ps(), value));
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationElu>(__m256 value, const __m256 * params, size_t index)
+        {
+            return Avx2::Elu(value, params[0]);
+        }
+
         template <TermType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params);
@@ -403,6 +420,11 @@ namespace Simd
             return _mm512_fmadd_ps(params[index], _mm512_min_ps(_mm512_setzero_ps(), value), _mm512_max_ps(_mm512_setzero_ps(), value));
         }
 
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationElu>(__m512 value, const __m512 * params, size_t index)
+        {
+            return Avx512f::Elu(value, params[0]);
+        }
+
         template <TermType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1));
@@ -470,6 +492,11 @@ namespace Simd
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationPrelu>(float32x4_t value, const float32x4_t * params, size_t index)
         {
             return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), params[index], vminq_f32(vdupq_n_f32(0.0f), value));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationElu>(float32x4_t value, const float32x4_t * params, size_t index)
+        {
+            return Neon::Elu(value, params[0]);
         }
 
         template <TermType term> struct Term

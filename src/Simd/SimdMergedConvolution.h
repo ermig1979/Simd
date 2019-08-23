@@ -186,24 +186,24 @@ namespace Simd
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         class MergedConvolution : public Base::MergedConvolution
         {
         public:
             MergedConvolution(const MergConvParam & p);
-            virtual String Desc() const { return "Sse"; }
+            virtual String Desc() const { return "Sse2"; }
         };
 
         void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
-#endif//SIMD_SSE_ENABLE
+#endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class MergedConvolution : public Sse::MergedConvolution
+        class MergedConvolution : public Sse2::MergedConvolution
         {
         public:
             MergedConvolution(const MergConvParam & p);

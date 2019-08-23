@@ -814,10 +814,9 @@ namespace Simd
         }
 
         ConvolutionNhwcDirect::ConvolutionNhwcDirect(const ConvParam & p)
-            : Sse::ConvolutionNhwcDirect(p)
+            : Sse2::ConvolutionNhwcDirect(p)
         {
             size_t microD = 2 * F;
-            SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, microD, _convolution); break;
@@ -825,8 +824,9 @@ namespace Simd
             case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
-            default: assert(0);
+            default: return;
             }
+            SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
         }
     }
 #endif//SIMD_AVX_ENABLE

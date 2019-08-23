@@ -103,6 +103,18 @@ namespace Simd
     }
 #endif //SIMD_AVX2_ENABLE
 
+#ifdef SIMD_AVX512F_ENABLE
+    namespace Avx512f
+    {
+        SIMD_INLINE void Log(const __m512 & value, const std::string & name)
+        {
+            float buffer[F];
+            _mm512_storeu_ps(buffer, value);
+            Simd::Log<float>(buffer, F, name);
+        }
+    }
+#endif //SIMD_AVX2512F_ENABLE
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {

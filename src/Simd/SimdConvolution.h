@@ -373,8 +373,8 @@ namespace Simd
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst);
 
@@ -382,21 +382,21 @@ namespace Simd
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
-            virtual String Ext() const { return "Sse"; }
+            virtual String Ext() const { return "Sse2"; }
         };
 
         class ConvolutionWinograd : public Base::ConvolutionWinograd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
-            virtual String Ext() const { return "Sse"; }
+            virtual String Ext() const { return "Sse2"; }
         };
 
         class ConvolutionDirectNchw : public Base::ConvolutionDirectNchw
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Ext() const { return "Sse"; }
+            virtual String Ext() const { return "Sse2"; }
 
             static bool Preferable(const ConvParam & p);
 
@@ -408,7 +408,7 @@ namespace Simd
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
-            virtual String Ext() const { return "Sse"; }
+            virtual String Ext() const { return "Sse2"; }
 
             static bool Preferable(const ConvParam & p);
         protected:
@@ -419,7 +419,7 @@ namespace Simd
         {
         public:
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
-            virtual String Ext() const { return "Sse"; }
+            virtual String Ext() const { return "Sse2"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
@@ -427,14 +427,14 @@ namespace Simd
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);
-            virtual String Ext() const { return "Sse"; }
+            virtual String Ext() const { return "Sse2"; }
 
             static bool Preferable(const ConvParam & p);
         };
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
-#endif//SIMD_SSE_ENABLE
+#endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSE3_ENABLE    
     namespace Sse3
@@ -459,7 +459,7 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionGemmNN : public Sse::ConvolutionGemmNN
+        class ConvolutionGemmNN : public Sse2::ConvolutionGemmNN
         {
         public:
             ConvolutionGemmNN(const ConvParam & p);
@@ -477,14 +477,14 @@ namespace Simd
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd : public Sse::ConvolutionWinograd
+        class ConvolutionWinograd : public Sse2::ConvolutionWinograd
         {
         public:
             ConvolutionWinograd(const ConvParam & p);
             virtual String Ext() const { return "Avx"; }
         };
 
-        class ConvolutionDirectNchw : public Sse::ConvolutionDirectNchw
+        class ConvolutionDirectNchw : public Sse2::ConvolutionDirectNchw
         {
         public:
             ConvolutionDirectNchw(const ConvParam & p);
@@ -493,7 +493,7 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDirectNhwc : public Sse::ConvolutionDirectNhwc
+        class ConvolutionDirectNhwc : public Sse2::ConvolutionDirectNhwc
         {
         public:
             ConvolutionDirectNhwc(const ConvParam & p);
@@ -504,7 +504,7 @@ namespace Simd
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDepthwiseDotProduct : public Sse::ConvolutionDepthwiseDotProduct
+        class ConvolutionDepthwiseDotProduct : public Sse2::ConvolutionDepthwiseDotProduct
         {
         public:
             ConvolutionDepthwiseDotProduct(const ConvParam & p);
@@ -512,7 +512,7 @@ namespace Simd
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionNhwcDirect : public Sse::ConvolutionNhwcDirect
+        class ConvolutionNhwcDirect : public Sse2::ConvolutionNhwcDirect
         {
         public:
             ConvolutionNhwcDirect(const ConvParam & p);

@@ -854,7 +854,6 @@ namespace Simd
             : Avx2::ConvolutionNhwcDirect(p)
         {
             size_t microD = 2 * F;
-            SetAlgParam(microD, 32 * 1024, 512 * 1024, 2 * 1024 * 1024);
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, microD, _convolution); break;
@@ -862,8 +861,10 @@ namespace Simd
             case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, microD, _convolution); break;
             default: assert(0);
             }
+            SetAlgParam(microD, 32 * 1024, 512 * 1024, 2 * 1024 * 1024);
         }
     }
 #endif//SIMD_AVX512F_ENABLE

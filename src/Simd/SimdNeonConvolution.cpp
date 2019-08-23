@@ -27,6 +27,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdNeon.h"
 #include "Simd/SimdGemm.h"
+#include "Simd/SimdExp.h"
 
 namespace Simd
 {
@@ -211,6 +212,50 @@ namespace Simd
                 else
                     Neon::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
+            else if (activation == ::SimdConvolutionActivationElu)
+            {
+                float alpha = params[0];
+                if (bias)
+                {
+                    float32x4_t _0 = vdupq_n_f32(0.0f);
+                    float32x4_t _alpha = vdupq_n_f32(alpha);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Neon::Elu(value, _alpha));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetElu32f(dst[i] + bias[i], alpha);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float32x4_t _bias = vdupq_n_f32(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Neon::Elu(value, _alpha));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetElu32f(dst[j] + bias[i], alpha);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    Neon::SynetElu32f(dst, size*count, &alpha, dst);
+            }
+            else
+                assert(0);
         }
 
         //---------------------------------------------------------------------
@@ -440,6 +485,11 @@ namespace Simd
             return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), params[0], vminq_f32(vdupq_n_f32(0.0f), value));
         }
 
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationElu>(float32x4_t value, const float32x4_t * params)
+        {
+            return Neon::Elu(value, params[0]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type>
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight,
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -582,6 +632,7 @@ namespace Simd
             case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
             case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             default:
                 assert(0);
                 return NULL;
@@ -671,6 +722,11 @@ namespace Simd
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationPrelu>(float32x4_t value, const float * params, size_t offset)
         {
             return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), Load<false>(params + offset), vminq_f32(vdupq_n_f32(0.0f), value));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationElu>(float32x4_t value, const float * params, size_t offset)
+        {
+            return Neon::Elu(value, vdupq_n_f32(params[0]));
         }
 
         SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam & p, size_t kH, size_t kW, const float * weight, float32x4_t & sum)
@@ -1570,6 +1626,7 @@ namespace Simd
                 case ::SimdConvolutionActivationLeakyRelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationLeakyRelu>(p); break;
                 case ::SimdConvolutionActivationRestrictRange: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRestrictRange>(p); break;
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
+                case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 }
             }
             return func ? func : Base::ConvolutionDirectNhwc::SetConvolutionBiasActivation();

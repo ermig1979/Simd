@@ -27,12 +27,65 @@
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdGemm.h"
+#include "Simd/SimdExp.h"
+#include "Simd/SimdSynet.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
+        {
+            size_t aligned = trans ? AlignLo(count, F) : AlignLo(size, F);
+            if (activation == ::SimdConvolutionActivationElu)
+            {
+                float alpha = params[0];
+                if (bias)
+                {
+                    __m256 _alpha = _mm256_set1_ps(alpha);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                _mm256_storeu_ps(dst + i, Avx2::Elu(value, _alpha));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetElu32f(dst[i] + bias[i], alpha);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, Avx2::Elu(value, _alpha));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetElu32f(dst[j] + bias[i], alpha);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetElu32f(dst, size*count, &alpha, dst);
+            }
+            else
+                Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+        }
+
+        //---------------------------------------------------------------------
+
+
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
             : Avx::ConvolutionGemmNN(p)
         {
@@ -70,7 +123,7 @@ namespace Simd
                 _nhwcRun = Avx2::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx2::Gemm32fNNcbReorderB;
             }
-            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
+            _biasAndActivation = Avx2::ConvolutionBiasAndActivation;
         }
 
         void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
@@ -148,7 +201,7 @@ namespace Simd
             const ConvParam & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx2::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
+            Avx2::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
         }
 
         //---------------------------------------------------------------------
@@ -196,7 +249,7 @@ namespace Simd
                 _nhwcRun = Avx2::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx2::Gemm32fNNcbReorderB;
             }
-            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
+            _biasAndActivation = Avx2::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
@@ -340,6 +393,11 @@ namespace Simd
             return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[0], _mm256_min_ps(_mm256_setzero_ps(), value)));
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationElu>(__m256 value, const __m256 * params)
+        {
+            return Avx2::Elu(value, params[0]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight,
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -472,6 +530,7 @@ namespace Simd
             case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
             case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             default:
                 assert(0);
                 return NULL;
@@ -482,7 +541,7 @@ namespace Simd
         {
             const ConvParam & p = _param;
             if (p.dstW < F)
-                return Sse::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+                return Sse2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -504,7 +563,7 @@ namespace Simd
                     return Avx2::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
-            return Sse::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+            return Sse2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------
@@ -540,6 +599,11 @@ namespace Simd
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const float * params, size_t offset)
         {
             return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(_mm256_loadu_ps(params + offset), _mm256_min_ps(_mm256_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationElu>(__m256 value, const float * params, size_t offset)
+        {
+            return Avx2::Elu(value, _mm256_set1_ps(params[0]));
         }
 
         SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam & p, size_t kH, size_t kW, const float * weight, __m256 & sum)
@@ -1484,6 +1548,7 @@ namespace Simd
                 case ::SimdConvolutionActivationLeakyRelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationLeakyRelu>(p); break;
                 case ::SimdConvolutionActivationRestrictRange: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRestrictRange>(p); break;
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
+                case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 }
             }
             return func ? func : Avx::ConvolutionDirectNhwc::SetConvolutionBiasActivation();

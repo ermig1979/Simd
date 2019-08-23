@@ -250,12 +250,14 @@ namespace Simd
                 else
                     Avx::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
+            else
+                assert(0);
         }
 
         //---------------------------------------------------------------------
 
         ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
-            : Sse::ConvolutionGemmNN(p)
+            : Sse2::ConvolutionGemmNN(p)
         {
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
@@ -498,7 +500,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
-            : Sse::ConvolutionWinograd(p)
+            : Sse2::ConvolutionWinograd(p)
         {
             switch (_block)
             {
@@ -540,7 +542,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         ConvolutionDirectNchw::ConvolutionDirectNchw(const ConvParam & p)
-            : Sse::ConvolutionDirectNchw(p)
+            : Sse2::ConvolutionDirectNchw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -763,7 +765,7 @@ namespace Simd
         {
             const ConvParam & p = _param;
             if (p.dstW < F)
-                return Sse::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+                return Sse2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -775,13 +777,13 @@ namespace Simd
                     return Avx::SetConvolutionBiasActivation<3, 1>(p.activation);
                 break;
             }
-            return Sse::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+            return Sse2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------
 
         ConvolutionDirectNhwc::ConvolutionDirectNhwc(const ConvParam & p)
-            : Sse::ConvolutionDirectNhwc(p)
+            : Sse2::ConvolutionDirectNhwc(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -1872,13 +1874,13 @@ namespace Simd
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 }
             }
-            return func ? func : Sse::ConvolutionDirectNhwc::SetConvolutionBiasActivation();
+            return func ? func : Sse2::ConvolutionDirectNhwc::SetConvolutionBiasActivation();
         };
 
         //---------------------------------------------------------------------
 
         ConvolutionDepthwiseDotProduct::ConvolutionDepthwiseDotProduct(const ConvParam & p)
-            : Sse::ConvolutionDepthwiseDotProduct(p)
+            : Sse2::ConvolutionDepthwiseDotProduct(p)
         {
         }
 
@@ -1943,6 +1945,8 @@ namespace Simd
 
         void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
+            if (conv->activation == SimdConvolutionActivationElu)
+                return Sse2::ConvolutionInit(trans, batch, conv, gemm);
             ConvParam param(trans, batch, conv, gemm);
             if (!param.Valid())
                 return NULL;

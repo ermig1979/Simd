@@ -136,6 +136,14 @@ typedef enum
         \endverbatim
     */
     SimdConvolutionActivationPrelu,
+    /*!
+        Leaky ELU activation function.
+        It has one parameter: alpha (params[0]).
+        \verbatim
+        dst[i] = src[i] >= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+        \endverbatim
+    */
+    SimdConvolutionActivationElu,
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types

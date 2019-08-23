@@ -81,7 +81,9 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a">SimdConvolutionActivationRestrictRange</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce">SimdConvolutionActivationPrelu</a>
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce">SimdConvolutionActivationPrelu</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0">SimdConvolutionActivationElu</a>
 <br />
  }</td></tr>
 <tr class="separator:gac0134d6cef9d64de8b89171e79ef4568"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -315,6 +317,8 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568af0178437d631bd382323a1f4491afe5a"></a>SimdConvolutionActivationRestrictRange&#160;</td><td class="fielddoc"><p>The activation function restricts range. It has two parameters: lower (params[0]) and upper (params[1]) bound. </p><pre class="fragment">dst[i] = Min(Max(lower, src[i]), upper);
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce"></a>SimdConvolutionActivationPrelu&#160;</td><td class="fielddoc"><p>Leaky PReLU activation function. It has m parameters: slopes[m] (m = dstC, n = dstH*dstW). </p><pre class="fragment">dst[i*n + j] = src[i*n + j] &gt; 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0"></a>SimdConvolutionActivationElu&#160;</td><td class="fielddoc"><p>Leaky ELU activation function. It has one parameter: alpha (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(exp(src[i]) - 1);
 </pre> </td></tr>
 </table>
 
