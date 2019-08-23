@@ -293,6 +293,8 @@ namespace Simd
         void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+        void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
+
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);

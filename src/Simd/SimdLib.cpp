@@ -5253,6 +5253,14 @@ SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const floa
     simdSynetEltwiseLayerForward(src, weight, count, size, type, dst);
 }
 
+typedef void(*SimdSynetElu32fPtr) (const float * src, size_t size, const float * alpha, float * dst);
+volatile SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC4(SynetElu32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst)
+{
+    simdSynetElu32f(src, size, alpha, dst);
+}
+
 typedef void(*SimdSynetFusedLayerForward0Ptr) (const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 volatile SimdSynetFusedLayerForward0Ptr simdSynetFusedLayerForward0 = SIMD_FUNC4(SynetFusedLayerForward0, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 

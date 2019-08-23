@@ -103,6 +103,11 @@ namespace Simd
             return Simd::Min(a, b);
         }
 
+        SIMD_INLINE float SynetElu32f(float src, float alpha)
+        {
+            return src >= 0.0f ? src : alpha * (::exp(src) - 1.0f);
+        }
+
         SIMD_INLINE float SynetFusedLayerForward0(float x, float s)
         {
             return (x - Simd::Abs(x))*s + Simd::Max(0.0f, x);

@@ -44,7 +44,7 @@ namespace Simd
             __m128i _exponent, _mantissa, _127;
             __m128 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
-            SIMD_INLINE __m128 Poly5(__m128 x)
+            SIMD_INLINE __m128 Poly5(__m128 x) const
             {
                 __m128 p = _exp5;
                 p = _mm_add_ps(_mm_mul_ps(x, p), _exp4);
@@ -55,7 +55,7 @@ namespace Simd
                 return p;
             }
 
-            SIMD_INLINE __m128 Exp2(__m128 x)
+            SIMD_INLINE __m128 Exp2(__m128 x) const
             {
                 x = _mm_max_ps(_mm_min_ps(x, _max), _min);
                 __m128i ipart = _mm_cvtps_epi32(_mm_sub_ps(x, _0_5));
@@ -85,21 +85,29 @@ namespace Simd
                 _k = _mm_set1_ps(k / 0.69314718056f);
             }
 
-            SIMD_INLINE __m128 Exponent(__m128 value)
+            SIMD_INLINE __m128 Exponent(__m128 value) const
             {
                 return Exp2(_mm_mul_ps(_k, value));
             }
 
-            SIMD_INLINE __m128 Sigmoid(__m128 value)
+            SIMD_INLINE __m128 Sigmoid(__m128 value) const
             {
                 __m128 exp = Exp2(_mm_mul_ps(_k, value));
                 return _mm_div_ps(_1_0, _mm_add_ps(_1_0, exp));
             }
 
-            SIMD_INLINE __m128 Tanh(__m128 value)
+            SIMD_INLINE __m128 Tanh(__m128 value) const
             {
                 __m128 exp = Exp2(_mm_mul_ps(_k, value));
                 return _mm_div_ps(_mm_sub_ps(_1_0, exp), _mm_add_ps(_1_0, exp));
+            }
+
+            SIMD_INLINE __m128 Elu(__m128 value, __m128 alpha) const
+            {
+                __m128 exp = Exp2(_mm_mul_ps(_k, value));
+                __m128 neg = _mm_mul_ps(alpha, _mm_sub_ps(exp, _1_0));
+                __m128 mask = _mm_cmpgt_ps(_mm_setzero_ps(), value);
+                return Sse::Combine(mask, neg, value);
             }
         };
     }
@@ -113,7 +121,7 @@ namespace Simd
             __m256i _exponent, _mantissa, _127;
             __m256 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
-            SIMD_INLINE __m256 Poly5(__m256 x)
+            SIMD_INLINE __m256 Poly5(__m256 x) const
             {
                 __m256 p = _exp5;
                 p = _mm256_fmadd_ps(x, p, _exp4);
@@ -124,7 +132,7 @@ namespace Simd
                 return p;
             }
 
-            SIMD_INLINE __m256 Exp2(__m256 x)
+            SIMD_INLINE __m256 Exp2(__m256 x) const
             {
                 x = _mm256_max_ps(_mm256_min_ps(x, _max), _min);
                 __m256i ipart = _mm256_cvtps_epi32(_mm256_sub_ps(x, _0_5));
@@ -154,21 +162,29 @@ namespace Simd
                 _k = _mm256_set1_ps(k / 0.69314718056f);
             }
 
-            SIMD_INLINE __m256 Exponent(__m256 value)
+            SIMD_INLINE __m256 Exponent(__m256 value) const
             {
                 return Exp2(_mm256_mul_ps(_k, value));
             }
 
-            SIMD_INLINE __m256 Sigmoid(__m256 value)
+            SIMD_INLINE __m256 Sigmoid(__m256 value) const
             {
                 __m256 exp = Exp2(_mm256_mul_ps(_k, value));
                 return _mm256_div_ps(_1_0, _mm256_add_ps(_1_0, exp));
             }
 
-            SIMD_INLINE __m256 Tanh(__m256 value)
+            SIMD_INLINE __m256 Tanh(__m256 value) const
             {
                 __m256 exp = Exp2(_mm256_mul_ps(_k, value));
                 return _mm256_div_ps(_mm256_sub_ps(_1_0, exp), _mm256_add_ps(_1_0, exp));
+            }
+
+            SIMD_INLINE __m256 Elu(__m256 value, __m256 alpha) const
+            {
+                __m256 exp = Exp2(_mm256_mul_ps(_k, value));
+                __m256 neg = _mm256_mul_ps(alpha, _mm256_sub_ps(exp, _1_0));
+                __m256 mask = _mm256_cmp_ps(_mm256_setzero_ps(), value, _CMP_GT_OS);
+                return _mm256_blendv_ps(value, neg, mask);
             }
         };
     }
@@ -182,7 +198,7 @@ namespace Simd
             __m512i _exponent, _mantissa, _127;
             __m512 _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
-            SIMD_INLINE __m512 Poly5(__m512 x)
+            SIMD_INLINE __m512 Poly5(__m512 x) const
             {
                 __m512 p = _exp5;
                 p = _mm512_fmadd_ps(x, p, _exp4);
@@ -193,7 +209,7 @@ namespace Simd
                 return p;
             }
 
-            SIMD_INLINE __m512 Exp2(__m512 x)
+            SIMD_INLINE __m512 Exp2(__m512 x) const
             {
                 x = _mm512_max_ps(_mm512_min_ps(x, _max), _min);
                 __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _0_5));
@@ -223,21 +239,29 @@ namespace Simd
                 _k = _mm512_set1_ps(k / 0.69314718056f);
             }
 
-            SIMD_INLINE __m512 Exponent(__m512 value)
+            SIMD_INLINE __m512 Exponent(__m512 value) const
             {
                 return Exp2(_mm512_mul_ps(_k, value));
             }
 
-            SIMD_INLINE __m512 Sigmoid(__m512 value)
+            SIMD_INLINE __m512 Sigmoid(__m512 value) const
             {
                 __m512 exp = Exp2(_mm512_mul_ps(_k, value));
                 return _mm512_div_ps(_1_0, _mm512_add_ps(_1_0, exp));
             }
 
-            SIMD_INLINE __m512 Tanh(__m512 value)
+            SIMD_INLINE __m512 Tanh(__m512 value) const
             {
                 __m512 exp = Exp2(_mm512_mul_ps(_k, value));
                 return _mm512_div_ps(_mm512_sub_ps(_1_0, exp), _mm512_add_ps(_1_0, exp));
+            }
+
+            SIMD_INLINE __m512 Elu(__m512 value, __m512 alpha) const
+            {
+                __m512 exp = Exp2(_mm512_mul_ps(_k, value));
+                __m512 neg = _mm512_mul_ps(alpha, _mm512_sub_ps(exp, _1_0));
+                __mmask16 mask = _mm512_cmp_ps_mask(_mm512_setzero_ps(), value, _CMP_GT_OQ);
+                return _mm512_mask_blend_ps(mask, value, neg);
             }
         };
     }
@@ -251,7 +275,7 @@ namespace Simd
             int32x4_t _exponent, _mantissa, _127;
             float32x4_t _1_0, _0_5, _min, _max, _exp0, _exp1, _exp2, _exp3, _exp4, _exp5, _k;
 
-            SIMD_INLINE float32x4_t Poly5(float32x4_t x)
+            SIMD_INLINE float32x4_t Poly5(float32x4_t x) const
             {
                 float32x4_t p = _exp5;
                 p = vmlaq_f32(_exp4, x, p);
@@ -262,7 +286,7 @@ namespace Simd
                 return p;
             }
 
-            SIMD_INLINE float32x4_t Exp2(float32x4_t x)
+            SIMD_INLINE float32x4_t Exp2(float32x4_t x) const
             {
                 x = vmaxq_f32(vminq_f32(x, _max), _min);
                 int32x4_t ipart = vcvtq_s32_f32(vsubq_f32(x, _0_5));
@@ -292,21 +316,29 @@ namespace Simd
                 _k = vdupq_n_f32(k / 0.69314718056f);
             }
 
-            SIMD_INLINE float32x4_t Exponent(float32x4_t value)
+            SIMD_INLINE float32x4_t Exponent(float32x4_t value) const
             {
                 return Exp2(vmulq_f32(_k, value));
             }
 
-            template<int iter> SIMD_INLINE float32x4_t Sigmoid(float32x4_t value)
+            template<int iter> SIMD_INLINE float32x4_t Sigmoid(float32x4_t value) const
             {
                 float32x4_t exp = Exp2(vmulq_f32(_k, value));
                 return Reciprocal<iter>(vaddq_f32(_1_0, exp));
             }
 
-            template<int iter> SIMD_INLINE float32x4_t Tanh(float32x4_t value)
+            template<int iter> SIMD_INLINE float32x4_t Tanh(float32x4_t value) const
             {
                 float32x4_t exp = Exp2(vmulq_f32(_k, value));
                 return Div<iter>(vsubq_f32(_1_0, exp), vaddq_f32(_1_0, exp));
+            }
+
+            SIMD_INLINE float32x4_t Elu(float32x4_t value, float32x4_t alpha) const
+            {
+                float32x4_t exp = Exp2(vmulq_f32(_k, value));
+                float32x4_t neg = vmulq_f32(alpha, vsubq_f32(exp, _1_0));
+                uint32x4_t mask = vcgtq_f32(vdupq_n_f32(0.0f), value);
+                return vbslq_f32(mask, neg, value);
             }
         };
     }

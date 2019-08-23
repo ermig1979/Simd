@@ -74,6 +74,8 @@
 
 namespace Test
 {
+    template <class T> class Tensor;
+
     typedef std::string String;
     typedef std::vector<String> Strings;
     typedef Simd::View<Simd::Allocator> View;
@@ -88,6 +90,7 @@ namespace Test
     typedef std::vector<uint64_t> Sums64;
     typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
     typedef std::vector<float*> FloatPtrs;
+    typedef Tensor<float> Tensor32f;
 
     const int E = 10;
     const int O = 9;

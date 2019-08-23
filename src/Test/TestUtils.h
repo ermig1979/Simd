@@ -55,6 +55,8 @@ namespace Test
 
     void FillRandom(float * data, size_t size, float lo = 0, float hi = 4096.0f);
 
+    void FillRandom(Tensor32f & tensor, float lo = -10.0f, float hi = 10.0f);
+
     bool Compare(const View & a, const View & b,
         int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0,
         const String & description = "");

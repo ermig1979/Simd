@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestUtils.h"
+#include "Test/TestTensor.h"
 #include "Simd/SimdDrawing.hpp"
 #include "Simd/SimdFont.hpp"
 
@@ -260,6 +261,11 @@ namespace Test
     void FillRandom(Buffer32f & buffer, float lo, float hi)
     {
         FillRandom(buffer.data(), buffer.size(), lo, hi);
+    }
+
+    void FillRandom(Tensor32f & tensor, float lo, float hi)
+    {
+        FillRandom(tensor.Data(), tensor.Size(), lo, hi);
     }
 
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle,

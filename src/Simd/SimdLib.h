@@ -5630,6 +5630,28 @@ extern "C"
     */
     SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
+    /*! @ingroup synet_activation
+
+        \fn void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
+
+        \short Calculates ELU for 32-bit float array.
+
+        All arrays must have the same size.
+
+        For every element:
+        \verbatim
+        dst[i] = src[i] >= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] alpha - a pointer to alpha parameter.
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
+
     /*! @ingroup synet
 
         \fn void SimdSynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
