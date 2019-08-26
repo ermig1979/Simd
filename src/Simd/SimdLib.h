@@ -3689,7 +3689,7 @@ extern "C"
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add output to existing value.
+        \param [in] add - a flag that signilizes if we need to add output to source value.
         \return a pointer to merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
         This pointer is used in functions ::SimdMergedConvolutionExternalBufferSize, ::SimdMergedConvolutionInternalBufferSize, ::SimdMergedConvolutionSetParams and ::SimdMergedConvolutionForward.
     */

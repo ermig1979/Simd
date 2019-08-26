@@ -84,6 +84,8 @@ namespace Simd
                 return false;
             if (conv[2].group != 1 || conv[2].kernelY != 1 || conv[2].strideY != 1)
                 return false;
+            if (add && (conv[0].srcC != conv[2].dstC || conv[0].srcH != conv[2].dstH || conv[0].srcW != conv[2].dstW))
+                return false;
             return true;
         }
 
