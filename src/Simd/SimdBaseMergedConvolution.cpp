@@ -330,6 +330,8 @@ namespace Simd
                 {
                     _convolution[0](src, p.conv[0], 0, 0, p.conv[0].dstH, _bufH, _weight[0], _bias[0], _params[0], buf0);
                     _convolution[1](buf0, p.conv[1], 0, 0, p.conv[1].dstH, _bufH, _weight[1], _bias[1], _params[1], buf1);
+                    if (p.add)
+                        memcpy(dst, src, sizeof(float)*_sizeS);
                     _convolution[2](buf1, p.conv[2], 0, 0, p.conv[2].dstH, _bufH, _weight[2], _bias[2], _params[2], dst);
                 }
                 else
