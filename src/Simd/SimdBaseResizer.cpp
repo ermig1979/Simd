@@ -152,7 +152,7 @@ namespace Simd
                 float a = (float)ds*scale;
                 size_t i = (size_t)::floor(a);
                 a -= i;
-                if (ds == dstSize)
+                if (i == srcSize)
                 {
                     i--;
                     a = 1.0f;
