@@ -878,7 +878,7 @@ namespace Simd
 
         SIMD_INLINE __m512 Rcp14(const __m512 & a)
         {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER<1922
             return _mm512_maskz_rcp14_ps(_MM_K0_REG, a);
 #else
             return _mm512_rcp14_ps(a);
@@ -887,7 +887,7 @@ namespace Simd
 
         SIMD_INLINE __m512 Rsqrt14(const __m512 & a)
         {
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && _MSC_VER<1922
             return _mm512_maskz_rsqrt14_ps(_MM_K0_REG, a);
 #else
             return _mm512_rsqrt14_ps(a);
