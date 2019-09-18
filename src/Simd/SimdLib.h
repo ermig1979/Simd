@@ -2917,7 +2917,13 @@ extern "C"
 
         \short Changes colors for 8-bit gray image with using of color map.
 
-        The input and output 8-bit gray images must have the same size. 
+        The input and output 8-bit gray images must have the same size.
+        Algorithm description:
+        \verbatim
+        for(y = 0; y < height; ++y)
+            for(x = 0; x < width; ++x)
+                dst[x, y] = colors[src[x, y]];
+        \endverbatim
 
         \note This function has a C++ wrapper Simd::ChangeColors(const View<A> & src, const uint8_t * colors, View<A> & dst).
 
