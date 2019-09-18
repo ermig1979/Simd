@@ -160,7 +160,7 @@ namespace Simd
             return _mm_andnot_si128(_mm_cmpeq_epi16(a, b), K_INV_ZERO);
         }
 
-        SIMD_INLINE __m128i GreaterOrEqual16i(__m128i a, __m128i b)
+        SIMD_INLINE __m128i GreaterOrEqual16i_m128(__m128i a, __m128i b)
         {
             return _mm_andnot_si128(_mm_cmplt_epi16(a, b), K_INV_ZERO);
         }
@@ -189,7 +189,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i Compare16i<SimdCompareGreaterOrEqual>(__m128i a, __m128i b)
         {
-            return GreaterOrEqual16i(a, b);
+            return GreaterOrEqual16i_m128(a, b);
         }
 
         template<> SIMD_INLINE __m128i Compare16i<SimdCompareLesser>(__m128i a, __m128i b)
@@ -269,7 +269,7 @@ namespace Simd
             return _mm256_andnot_si256(_mm256_cmpeq_epi16(a, b), K_INV_ZERO);
         }
 
-        SIMD_INLINE __m256i GreaterOrEqual16i(__m256i a, __m256i b)
+        SIMD_INLINE __m256i GreaterOrEqual16i_m256(__m256i a, __m256i b)
         {
             return _mm256_andnot_si256(_mm256_cmpgt_epi16(b, a), K_INV_ZERO);
         }
@@ -298,7 +298,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m256i Compare16i<SimdCompareGreaterOrEqual>(__m256i a, __m256i b)
         {
-            return GreaterOrEqual16i(a, b);
+            return GreaterOrEqual16i_m256(a, b);
         }
 
         template<> SIMD_INLINE __m256i Compare16i<SimdCompareLesser>(__m256i a, __m256i b)
