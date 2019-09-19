@@ -2,7 +2,8 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2019 Yermalayeu Ihar,
-*               2018-2018 Dmitry Fedorov,
+*               2014-2019 Antonenka Mikhail,
+*               2018-2019 Dmitry Fedorov,
 *               2019-2019 Artur Voronkov.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -236,9 +237,16 @@ namespace Simd
         View * Clone() const;
 
         /*!
+            Gets a copy of current image view using buffer as a storage.
+
+            \return a pointer to the new View structure (not owner). The user must free this pointer after usage.
+        */
+        View * Clone(View & buffer) const;
+
+        /*!
             Creates view which references to other View structure.
 
-            \note This function is not create copy of image view! It only create a reference to the same image.
+            \note This function does not create a copy of image view! It only creates a reference to the same image.
 
             \param [in] view - an original image view.
             \return a reference to itself.
@@ -822,6 +830,18 @@ namespace Simd
     template <template<class> class A> SIMD_INLINE View<A> * View<A>::Clone() const
     {
         View<A> * view = new View<A>(width, height, format);
+        size_t size = width*PixelSize();
+        for (size_t row = 0; row < height; ++row)
+            memcpy(view->data + view->stride*row, data + stride*row, size);
+        return view;
+    }
+
+    template <template<class> class A> SIMD_INLINE View<A> * View<A>::Clone(View & buffer) const
+    {
+        if (buffer.width < width || buffer.height < height)
+            buffer.Recreate(width, height, format);
+
+        View<A> * view = new View<A>(width, height, format, buffer.data);
         size_t size = width*PixelSize();
         for (size_t row = 0; row < height; ++row)
             memcpy(view->data + view->stride*row, data + stride*row, size);
