@@ -21,15 +21,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConvolution.h"
-#include "Simd/SimdConvolutionCommon.h"
+#include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdSynetConvolution32fCommon.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE    
-    namespace Avx
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
     {
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float * weight, const __m256 * bias, const __m256 * params, float * dst)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -56,23 +56,23 @@ namespace Simd
                             w0 = _mm256_loadu_ps(weight + 0);
                             w1 = _mm256_loadu_ps(weight + F);
                             s0 = _mm256_set1_ps(src0[offset]);
-                            d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                            d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                            d00 = _mm256_fmadd_ps(s0, w0, d00);
+                            d01 = _mm256_fmadd_ps(s0, w1, d01);
                             s0 = _mm256_set1_ps(src1[offset]);
-                            d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
-                            d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                            d10 = _mm256_fmadd_ps(s0, w0, d10);
+                            d11 = _mm256_fmadd_ps(s0, w1, d11);
                             s0 = _mm256_set1_ps(src2[offset]);
-                            d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
-                            d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                            d20 = _mm256_fmadd_ps(s0, w0, d20);
+                            d21 = _mm256_fmadd_ps(s0, w1, d21);
                             s0 = _mm256_set1_ps(src3[offset]);
-                            d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
-                            d31 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d31);
+                            d30 = _mm256_fmadd_ps(s0, w0, d30);
+                            d31 = _mm256_fmadd_ps(s0, w1, d31);
                             s0 = _mm256_set1_ps(src4[offset]);
-                            d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
-                            d41 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d41);
+                            d40 = _mm256_fmadd_ps(s0, w0, d40);
+                            d41 = _mm256_fmadd_ps(s0, w1, d41);
                             s0 = _mm256_set1_ps(src5[offset]);
-                            d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
-                            d51 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d51);
+                            d50 = _mm256_fmadd_ps(s0, w0, d50);
+                            d51 = _mm256_fmadd_ps(s0, w1, d51);
                             weight += DF;
                         }
                     }
@@ -136,17 +136,17 @@ namespace Simd
                         {
                             w0 = _mm256_loadu_ps(weight + 0);
                             s0 = _mm256_set1_ps(src0[offset]);
-                            d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                            d00 = _mm256_fmadd_ps(s0, w0, d00);
                             s0 = _mm256_set1_ps(src1[offset]);
-                            d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                            d10 = _mm256_fmadd_ps(s0, w0, d10);
                             s0 = _mm256_set1_ps(src2[offset]);
-                            d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                            d20 = _mm256_fmadd_ps(s0, w0, d20);
                             s0 = _mm256_set1_ps(src3[offset]);
-                            d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
+                            d30 = _mm256_fmadd_ps(s0, w0, d30);
                             s0 = _mm256_set1_ps(src4[offset]);
-                            d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
+                            d40 = _mm256_fmadd_ps(s0, w0, d40);
                             s0 = _mm256_set1_ps(src5[offset]);
-                            d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                            d50 = _mm256_fmadd_ps(s0, w0, d50);
                             weight += DF;
                         }
                     }
@@ -183,7 +183,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x3(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x3(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float * weight, const __m256 * bias, const __m256 * params, float * dst)
         {
             __m256 d00, d01, d10, d11, d20, d21, s0, w0, w1;
@@ -204,14 +204,14 @@ namespace Simd
                             w0 = _mm256_loadu_ps(weight + 0);
                             w1 = _mm256_loadu_ps(weight + F);
                             s0 = _mm256_set1_ps(src0[offset]);
-                            d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                            d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                            d00 = _mm256_fmadd_ps(s0, w0, d00);
+                            d01 = _mm256_fmadd_ps(s0, w1, d01);
                             s0 = _mm256_set1_ps(src1[offset]);
-                            d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
-                            d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                            d10 = _mm256_fmadd_ps(s0, w0, d10);
+                            d11 = _mm256_fmadd_ps(s0, w1, d11);
                             s0 = _mm256_set1_ps(src2[offset]);
-                            d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
-                            d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                            d20 = _mm256_fmadd_ps(s0, w0, d20);
+                            d21 = _mm256_fmadd_ps(s0, w1, d21);
                             weight += DF;
                         }
                     }
@@ -254,11 +254,11 @@ namespace Simd
                         {
                             w0 = _mm256_loadu_ps(weight + 0);
                             s0 = _mm256_set1_ps(src0[offset]);
-                            d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                            d00 = _mm256_fmadd_ps(s0, w0, d00);
                             s0 = _mm256_set1_ps(src1[offset]);
-                            d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                            d10 = _mm256_fmadd_ps(s0, w0, d10);
                             s0 = _mm256_set1_ps(src2[offset]);
-                            d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                            d20 = _mm256_fmadd_ps(s0, w0, d20);
                             weight += DF;
                         }
                     }
@@ -283,7 +283,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float * weight, const __m256 * bias, const __m256 * params, float * dst)
         {
             __m256 d00, d01, s0, w0, w1;
@@ -301,8 +301,8 @@ namespace Simd
                             w0 = _mm256_loadu_ps(weight + 0);
                             w1 = _mm256_loadu_ps(weight + F);
                             s0 = _mm256_set1_ps(src0[offset]);
-                            d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                            d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                            d00 = _mm256_fmadd_ps(s0, w0, d00);
+                            d01 = _mm256_fmadd_ps(s0, w1, d01);
                             weight += DF;
                         }
                     }
@@ -330,7 +330,7 @@ namespace Simd
                         {
                             w0 = _mm256_loadu_ps(weight + 0);
                             s0 = _mm256_set1_ps(src0[offset]);
-                            d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                            d00 = _mm256_fmadd_ps(s0, w0, d00);
                             weight += DF;
                         }
                     }
@@ -343,7 +343,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam32f & p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t noseH = p.padY, noseW = p.padX;
@@ -422,8 +422,8 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam & p,
-            const ConvolutionNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
+        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam32f & p,
+            const SynetConvolution32fNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
         {
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
@@ -454,7 +454,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float * src0, const ConvParam32f & p,
             size_t srcC, size_t dstC, const float * weight, const __m256 * bias, const __m256 * params, float * dst)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -477,23 +477,23 @@ namespace Simd
                     w0 = _mm256_loadu_ps(weight + 0);
                     w1 = _mm256_loadu_ps(weight + F);
                     s0 = _mm256_set1_ps(src0[offset]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
+                    d01 = _mm256_fmadd_ps(s0, w1, d01);
                     s0 = _mm256_set1_ps(src1[offset]);
-                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
-                    d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                    d10 = _mm256_fmadd_ps(s0, w0, d10);
+                    d11 = _mm256_fmadd_ps(s0, w1, d11);
                     s0 = _mm256_set1_ps(src2[offset]);
-                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
-                    d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                    d20 = _mm256_fmadd_ps(s0, w0, d20);
+                    d21 = _mm256_fmadd_ps(s0, w1, d21);
                     s0 = _mm256_set1_ps(src3[offset]);
-                    d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
-                    d31 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d31);
+                    d30 = _mm256_fmadd_ps(s0, w0, d30);
+                    d31 = _mm256_fmadd_ps(s0, w1, d31);
                     s0 = _mm256_set1_ps(src4[offset]);
-                    d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
-                    d41 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d41);
+                    d40 = _mm256_fmadd_ps(s0, w0, d40);
+                    d41 = _mm256_fmadd_ps(s0, w1, d41);
                     s0 = _mm256_set1_ps(src5[offset]);
-                    d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
-                    d51 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d51);
+                    d50 = _mm256_fmadd_ps(s0, w0, d50);
+                    d51 = _mm256_fmadd_ps(s0, w1, d51);
                     weight += DF;
                 }
                 if (dstC == DF)
@@ -550,17 +550,17 @@ namespace Simd
                 {
                     w0 = _mm256_loadu_ps(weight + 0);
                     s0 = _mm256_set1_ps(src0[offset]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
                     s0 = _mm256_set1_ps(src1[offset]);
-                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                    d10 = _mm256_fmadd_ps(s0, w0, d10);
                     s0 = _mm256_set1_ps(src2[offset]);
-                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                    d20 = _mm256_fmadd_ps(s0, w0, d20);
                     s0 = _mm256_set1_ps(src3[offset]);
-                    d30 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d30);
+                    d30 = _mm256_fmadd_ps(s0, w0, d30);
                     s0 = _mm256_set1_ps(src4[offset]);
-                    d40 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d40);
+                    d40 = _mm256_fmadd_ps(s0, w0, d40);
                     s0 = _mm256_set1_ps(src5[offset]);
-                    d50 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d50);
+                    d50 = _mm256_fmadd_ps(s0, w0, d50);
                     weight += DF;
                 }
                 if (dstC == F)
@@ -594,7 +594,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x3(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x3(const float * src0, const ConvParam32f & p,
             size_t srcC, size_t dstC, const float * weight, const __m256 * bias, const __m256 * params, float * dst)
         {
             __m256 d00, d01, d10, d11, d20, d21, s0, w0, w1;
@@ -611,14 +611,14 @@ namespace Simd
                     w0 = _mm256_loadu_ps(weight + 0);
                     w1 = _mm256_loadu_ps(weight + F);
                     s0 = _mm256_set1_ps(src0[offset]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
+                    d01 = _mm256_fmadd_ps(s0, w1, d01);
                     s0 = _mm256_set1_ps(src1[offset]);
-                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
-                    d11 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d11);
+                    d10 = _mm256_fmadd_ps(s0, w0, d10);
+                    d11 = _mm256_fmadd_ps(s0, w1, d11);
                     s0 = _mm256_set1_ps(src2[offset]);
-                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
-                    d21 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d21);
+                    d20 = _mm256_fmadd_ps(s0, w0, d20);
+                    d21 = _mm256_fmadd_ps(s0, w1, d21);
                     weight += DF;
                 }
                 if (dstC == DF)
@@ -654,11 +654,11 @@ namespace Simd
                 {
                     w0 = _mm256_loadu_ps(weight + 0);
                     s0 = _mm256_set1_ps(src0[offset]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
                     s0 = _mm256_set1_ps(src1[offset]);
-                    d10 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d10);
+                    d10 = _mm256_fmadd_ps(s0, w0, d10);
                     s0 = _mm256_set1_ps(src2[offset]);
-                    d20 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d20);
+                    d20 = _mm256_fmadd_ps(s0, w0, d20);
                     weight += DF;
                 }
                 if (dstC == F)
@@ -680,7 +680,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const float * src0, const ConvParam32f & p,
             size_t srcC, size_t dstC, const float * weight, const __m256 * bias, const __m256 * params, float * dst)
         {
             __m256 d00, d01, s0, w0, w1;
@@ -692,8 +692,8 @@ namespace Simd
                     w0 = _mm256_loadu_ps(weight + 0);
                     w1 = _mm256_loadu_ps(weight + F);
                     s0 = _mm256_set1_ps(src0[offset]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
-                    d01 = _mm256_add_ps(_mm256_mul_ps(s0, w1), d01);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
+                    d01 = _mm256_fmadd_ps(s0, w1, d01);
                     weight += DF;
                 }
                 if (dstC == DF)
@@ -715,7 +715,7 @@ namespace Simd
                 {
                     w0 = _mm256_loadu_ps(weight + 0);
                     s0 = _mm256_set1_ps(src0[offset]);
-                    d00 = _mm256_add_ps(_mm256_mul_ps(s0, w0), d00);
+                    d00 = _mm256_fmadd_ps(s0, w0, d00);
                     weight += DF;
                 }
                 if (dstC == F)
@@ -725,7 +725,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam32f & p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t n1 = (yEnd - yBeg)*p.dstW;
@@ -760,8 +760,8 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam & p,
-            const ConvolutionNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
+        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam32f & p,
+            const SynetConvolution32fNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
         {
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
@@ -791,7 +791,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <SimdConvolutionActivationType type> void Set(const ConvParam & p, size_t microD, ConvolutionNhwcDirect::ConvolutionPtr & convolution)
+        template <SimdConvolutionActivationType type> void Set(const ConvParam32f & p, size_t microD, SynetConvolution32fNhwcDirect::ConvolutionPtr & convolution)
         {
             if (p.Is1x1())
             {
@@ -813,8 +813,8 @@ namespace Simd
             }
         }
 
-        ConvolutionNhwcDirect::ConvolutionNhwcDirect(const ConvParam & p)
-            : Sse2::ConvolutionNhwcDirect(p)
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f & p)
+            : Avx::SynetConvolution32fNhwcDirect(p)
         {
             size_t microD = 2 * F;
             switch (p.activation)
@@ -824,10 +824,11 @@ namespace Simd
             case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
-            default: return;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, microD, _convolution); break;
+            default: assert(0);
             }
             SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
         }
     }
-#endif//SIMD_AVX_ENABLE
+#endif//SIMD_AVX2_ENABLE
 }

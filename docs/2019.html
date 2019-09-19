@@ -32,9 +32,32 @@
 
 <h3 id="R082">October X, 2019 (version X.X.82)</h3> 
 <h4>Algorithms</h4>
+<h5>Renaming</h5>
+<ul>
+ <li>Function from ConvolutionInit to SynetConvolution32fInit.</li>
+ <li>Function from ConvolutionExternalBufferSize to SynetConvolution32fExternalBufferSize.</li>
+ <li>Function from ConvolutionInternalBufferSize to SynetConvolution32fInternalBufferSize.</li>
+ <li>Function from ConvolutionSetParams to SynetConvolution32fSetParams.</li>
+ <li>Function from ConvolutionForward to SynetConvolution32fForward.</li>
+ <li>Function from MergedConvolutionInit to SynetMergedConvolution32fInit.</li>
+ <li>Function from MergedConvolutionExternalBufferSize to SynetMergedConvolution32fExternalBufferSize.</li>
+ <li>Function from MergedConvolutionInternalBufferSize to SynetMergedConvolution32fInternalBufferSize.</li>
+ <li>Function from MergedConvolutionSetParams to SynetMergedConvolution32fSetParams.</li>
+ <li>Function from MergedConvolutionForward to SynetMergedConvolution32fForward.</li>
+</ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>Error in Resizer framework (in file SimdBaseResizer.cpp).</li>
+</ul>
+
+<h4>Infrastructure</h4>
+<h5>New features</h5>
+<ul>
+ <li>Project files for Microsoft Visual Studio 2019.</li>
+</ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Some Microsoft Visual Studio project properties can cause program crash at old CPUs.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

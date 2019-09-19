@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMergedConvolution.h"
-#include "Simd/SimdConvolutionCommon.h"
+#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
 
 namespace Simd
@@ -1050,7 +1050,7 @@ namespace Simd
             }
         }
 
-        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam & p, size_t index, MergedConvolution::ConvolutionPtr convolution[3])
+        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam32f & p, size_t index, SynetMergedConvolution32f::ConvolutionPtr convolution[3])
         {
             switch (index)
             {
@@ -1084,8 +1084,8 @@ namespace Simd
             }
         }
 
-        MergedConvolution::MergedConvolution(const MergConvParam & p)
-            : Avx2::MergedConvolution(p)
+        SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f & p)
+            : Avx2::SynetMergedConvolution32f(p)
         {
             SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx512f::F);
             for (size_t i = 0; i < _param.count; ++i)
@@ -1105,15 +1105,15 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
-            MergConvParam param(trans, batch, convs, count, add);
+            MergConvParam32f param(batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
             if (param.conv[2].dstC <= HF)
-                return new Avx2::MergedConvolution(param);
+                return new Avx2::SynetMergedConvolution32f(param);
             else
-                return new Avx512f::MergedConvolution(param);
+                return new Avx512f::SynetMergedConvolution32f(param);
         }
     }
  #endif//SIMD_AVX512f_ENABLE

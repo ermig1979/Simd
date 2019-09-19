@@ -499,8 +499,10 @@ histogram[max(dx, dy)]++;
 </div><div class="memdoc">
 
 <p>Changes colors for 8-bit gray image with using of color map. </p>
-<p>The input and output 8-bit gray images must have the same size.</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__histogram.html#ga00ad36779c654b3f2299fbc06a5fd849" title="Changes colors for 8-bit gray image with using of color map. ">Simd::ChangeColors(const View&lt;A&gt; &amp; src, const uint8_t * colors, View&lt;A&gt; &amp; dst)</a>.</dd></dl>
+<p>The input and output 8-bit gray images must have the same size. Algorithm description: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+    for(x = 0; x &lt; width; ++x)
+        dst[x, y] = colors[src[x, y]];
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__histogram.html#ga00ad36779c654b3f2299fbc06a5fd849" title="Changes colors for 8-bit gray image with using of color map. ">Simd::ChangeColors(const View&lt;A&gt; &amp; src, const uint8_t * colors, View&lt;A&gt; &amp; dst)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of input 8-bit gray image. </td></tr>
@@ -825,8 +827,10 @@ histogram[max(dx, dy)]++;
 </div><div class="memdoc">
 
 <p>Changes colors for 8-bit gray image with using of color map. </p>
-<p>The input and output 8-bit gray images must have the same size.</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887" title="Changes colors for 8-bit gray image with using of color map. ">SimdChangeColors</a>.</dd></dl>
+<p>The input and output 8-bit gray images must have the same size. Algorithm description: </p><pre class="fragment">for(y = 0; y &lt; height; ++y)
+    for(x = 0; x &lt; width; ++x)
+        dst[x, y] = colors[src[x, y]];
+</pre> <dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__histogram.html#ga4d076898d69045d87c018b625b37a887" title="Changes colors for 8-bit gray image with using of color map. ">SimdChangeColors</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input 8-bit gray image. </td></tr>

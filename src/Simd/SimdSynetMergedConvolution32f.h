@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdMergedConvolution_h__
-#define __SimdMergedConvolution_h__
+#ifndef __SimdSynetMergedConvolution32f_h__
+#define __SimdSynetMergedConvolution32f_h__
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
@@ -36,16 +36,16 @@
 
 namespace Simd
 {
-    struct MergConvParam
+    struct MergConvParam32f
     {
         SimdBool trans, add;
         size_t batch, count;
         SimdConvolutionParameters conv[3];
 
-        MergConvParam(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
+        MergConvParam32f(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
             assert(count <= 3);
-            this->trans = trans;
+            this->trans = (convs[0].dstF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
             this->add = add;
             this->batch = batch;
             this->count = count;
@@ -61,7 +61,11 @@ namespace Simd
                 return false;
             for (size_t i = 0; i < count; ++i)
             {
-                SimdConvolutionParameters & c = conv[i];
+                SimdConvolutionParameters & c = conv[i];                
+                if (c.srcT != SimdTensorData32f || c.dstT != SimdTensorData32f)
+                    return false;
+                if (c.srcF != SimdTensorFormatNhwc || c.dstF != SimdTensorFormatNhwc)
+                    return false;
                 if (c.dstH != (c.srcH + c.padY + c.padH - (c.dilationY * (c.kernelY - 1) + 1)) / c.strideY + 1 || c.dstH == 0)
                     return false;
                 if (c.dstW != (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1)) / c.strideX + 1 || c.dstW == 0)
@@ -116,10 +120,10 @@ namespace Simd
 #endif
     };
 
-    class MergedConvolution : public Deletable
+    class SynetMergedConvolution32f : public Deletable
     {
     public:
-        MergedConvolution()
+        SynetMergedConvolution32f()
         {
 #if defined(SIMD_PERFORMANCE_STATISTIC)
             _perf = NULL;
@@ -128,7 +132,7 @@ namespace Simd
 
         virtual String Desc() const = 0;
 
-        virtual const MergConvParam & Param() const = 0;
+        virtual const MergConvParam32f & Param() const = 0;
 
         virtual size_t ExternalBufferSize() const = 0;
 
@@ -155,13 +159,13 @@ namespace Simd
 
     namespace Base
     {
-        class MergedConvolution : public Simd::MergedConvolution
+        class SynetMergedConvolution32f : public Simd::SynetMergedConvolution32f
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            SynetMergedConvolution32f(const MergConvParam32f & p);
 
             virtual String Desc() const { return "Base"; }
-            virtual const MergConvParam & Param() const { return _param; }
+            virtual const MergConvParam32f & Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
@@ -177,7 +181,7 @@ namespace Simd
             virtual void ReorderDepthwiseWeight(const float * src, float * dst) const;
             virtual void ReorderOutputWeight(const float * src, float * dst) const;
 
-            MergConvParam _param;
+            MergConvParam32f _param;
             bool _base;
             size_t _sizeS, _sizeD, _miC, _maC, _yStep[2], _bufH[2], _sizeB[2], _dp[2], _dw[3];
             ConvolutionPtr _convolution[6];
@@ -185,77 +189,77 @@ namespace Simd
             const float * _weight[3], * _bias[3], * _params[3];
         };
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        class MergedConvolution : public Base::MergedConvolution
+        class SynetMergedConvolution32f : public Base::SynetMergedConvolution32f
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            SynetMergedConvolution32f(const MergConvParam32f & p);
             virtual String Desc() const { return "Sse2"; }
         };
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class MergedConvolution : public Sse2::MergedConvolution
+        class SynetMergedConvolution32f : public Sse2::SynetMergedConvolution32f
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            SynetMergedConvolution32f(const MergConvParam32f & p);
             virtual String Desc() const { return "Avx"; }
         };
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class MergedConvolution : public Avx::MergedConvolution
+        class SynetMergedConvolution32f : public Avx::SynetMergedConvolution32f
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            SynetMergedConvolution32f(const MergConvParam32f & p);
             virtual String Desc() const { return "Avx2"; }
         };
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        class MergedConvolution : public Avx2::MergedConvolution
+        class SynetMergedConvolution32f : public Avx2::SynetMergedConvolution32f
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            SynetMergedConvolution32f(const MergConvParam32f & p);
             virtual String Desc() const { return "Avx512f"; }
         };
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX512F_ENABLE
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        class MergedConvolution : public Base::MergedConvolution
+        class SynetMergedConvolution32f : public Base::SynetMergedConvolution32f
         {
         public:
-            MergedConvolution(const MergConvParam & p);
+            SynetMergedConvolution32f(const MergConvParam32f & p);
             virtual String Desc() const { return "Neon"; }
         };
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_NEON_ENABLE
 }
-#endif//__SimMergedConvolution_h__
+#endif//__SimdSynetMergedConvolution32f_h__

@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConvolution.h"
+#include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512f.h"
@@ -340,8 +340,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
-            : Avx2::ConvolutionGemmNN(p)
+        SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
+            : Avx2::SynetConvolution32fGemmNN(p)
         {
             _index.Resize(F);
             for (size_t i = 0; i < F; ++i)
@@ -381,9 +381,9 @@ namespace Simd
             _biasAndActivation = _N > Avx::F ? Avx512f::ConvolutionBiasAndActivation : Avx::ConvolutionBiasAndActivation;
         }
 
-        void ConvolutionGemmNN::ImgToCol(const float * src, float * dst)
+        void SynetConvolution32fGemmNN::ImgToCol(const float * src, float * dst)
         {
-            const ConvParam & p = _param;
+            const ConvParam32f & p = _param;
             size_t srcSize = p.srcW * p.srcH;
             if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
             {
@@ -449,20 +449,20 @@ namespace Simd
             }
             else
             {
-                Base::ConvolutionGemmNN::ImgToCol(src, dst);
+                Base::SynetConvolution32fGemmNN::ImgToCol(src, dst);
             }
         }
 
         //---------------------------------------------------------------------
 
-        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
-            : Avx2::ConvolutionGemmNT(p)
+        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
+            : Avx2::SynetConvolution32fGemmNT(p)
         {
         }
 
-        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
+        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
         {
-            const ConvParam & p = _param;
+            const ConvParam32f & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Avx512f::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
             Avx512f::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
@@ -470,8 +470,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
-            : Avx2::ConvolutionWinograd(p)
+        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
+            : Avx2::SynetConvolution32fWinograd(p)
         {
             if (p.dstC == 8)
                 return;
@@ -514,8 +514,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirectNchw::ConvolutionDirectNchw(const ConvParam & p)
-            : Avx2::ConvolutionDirectNchw(p)
+        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam32f & p)
+            : Avx2::SynetConvolution32fDirectNchw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -528,12 +528,12 @@ namespace Simd
 
         template<int kernel, int stride> struct Kernel
         {
-            static __m512 Convolution(const float * src, size_t step, const __m512  * weight);
+            static __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight);
         };
 
         template<> struct Kernel<1, 1>
         {
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_mul_ps(_mm512_loadu_ps(src), weight[0]);
             }
@@ -541,7 +541,7 @@ namespace Simd
 
         template<> struct Kernel<1, 2>
         {
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 __m512 s0 = _mm512_loadu_ps(src + 0);
                 __m512 s1 = _mm512_loadu_ps(src + F);
@@ -557,7 +557,7 @@ namespace Simd
                     _mm512_mul_ps(_mm512_loadu_ps(src + 1), weight[1]));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2));
             }
@@ -573,7 +573,7 @@ namespace Simd
                     _mm512_mul_ps(_mm512_shuffle_ps(s0, s1, 0xDD), weight[1]));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight), RowConv(src + step, weight + 2)));
             }
@@ -588,7 +588,7 @@ namespace Simd
                         _mm512_mul_ps(_mm512_loadu_ps(src + 2), weight[2])));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_add_ps(RowConv(src, weight),
                     _mm512_add_ps(RowConv(src + step, weight + 3),
@@ -609,7 +609,7 @@ namespace Simd
                         _mm512_mul_ps(_mm512_shuffle_ps(s02, s12, 0x88), weight[2])));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight),
                     _mm512_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6))));
@@ -637,7 +637,7 @@ namespace Simd
                 return _mm512_fmadd_ps(s0, weight[0], _mm512_fmadd_ps(s1, weight[1], _mm512_mul_ps(s2, weight[2])));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 3), RowConv(src + 2 * step, weight + 6)));
             }
@@ -651,7 +651,7 @@ namespace Simd
                         _mm512_fmadd_ps(_mm512_loadu_ps(src + 2), weight[2], _mm512_mul_ps(_mm512_loadu_ps(src + 3), weight[3]))));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 4),
                     _mm512_add_ps(RowConv(src + 2 * step, weight + 8), RowConv(src + 3 * step, weight + 12))));
@@ -670,7 +670,7 @@ namespace Simd
                     _mm512_fmadd_ps(_mm512_shuffle_ps(s02, s12, 0x88), weight[2], _mm512_mul_ps(_mm512_shuffle_ps(s02, s12, 0xDD), weight[3]))));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight),
                     _mm512_add_ps(RowConv(src + step, weight + 4), _mm512_add_ps(RowConv(src + 2 * step, weight + 8), RowConv(src + 3 * step, weight + 12)))));
@@ -686,7 +686,7 @@ namespace Simd
                         _mm512_mul_ps(_mm512_loadu_ps(src + 4), weight[4])))));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 5),
                     _mm512_add_ps(RowConv(src + 2 * step, weight + 10), _mm512_add_ps(RowConv(src + 3 * step, weight + 15), 
@@ -709,7 +709,7 @@ namespace Simd
                         _mm512_mul_ps(_mm512_shuffle_ps(s04, s14, 0x88), weight[4])))));
             }
 
-            static SIMD_INLINE __m512 Convolution(const float * src, size_t step, const __m512  * weight)
+            static SIMD_INLINE __m512 SynetConvolution32f(const float * src, size_t step, const __m512  * weight)
             {
                 return _mm512_permutexvar_ps(K32_PERMUTE_FOR_PACK, _mm512_add_ps(RowConv(src, weight), _mm512_add_ps(RowConv(src + step, weight + 5), 
                     _mm512_add_ps(RowConv(src + 2 * step, weight + 10), _mm512_add_ps(RowConv(src + 3 * step, weight + 15), RowConv(src + 4 * step, weight + 20))))));
@@ -774,12 +774,12 @@ namespace Simd
                         size_t x = 0;
                         for (; x < dstWF; x += F)
                         {
-                            __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                             _mm512_storeu_ps(pd + x, Activate<type>(_mm512_add_ps(_bias, conv), _params));
                         }
                         if (x < dstW)
                         {
-                            __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                             _mm512_mask_storeu_ps(pd + x, tail, Activate<type>(_mm512_add_ps(_bias, conv), _params));
                         }
                         ps += srcW * stride;
@@ -801,12 +801,12 @@ namespace Simd
                             size_t x = 0;
                             for (; x < dstWF; x += F)
                             {
-                                __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 _mm512_storeu_ps(pd + x, _mm512_add_ps(_bias, conv));
                             }
                             if (x < dstW)
                             {
-                                __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 _mm512_mask_storeu_ps(pd + x, tail, _mm512_add_ps(_bias, conv));
                             }
                             ps += srcW * stride;
@@ -825,13 +825,13 @@ namespace Simd
                             for (; x < dstWF; x += F)
                             {
                                 __m512 _dst = _mm512_loadu_ps(pd + x);
-                                __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 _mm512_storeu_ps(pd + x, _mm512_add_ps(_dst, conv));
                             }
                             if (x < dstW)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, pd + x);
-                                __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 _mm512_mask_storeu_ps(pd + x, tail, _mm512_add_ps(_dst, conv));
                             }
                             ps += srcW * stride;
@@ -850,13 +850,13 @@ namespace Simd
                             for (; x < dstWF; x += F)
                             {
                                 __m512 _dst = _mm512_loadu_ps(pd + x);
-                                __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 _mm512_storeu_ps(pd + x, Activate<type>(_mm512_add_ps(_dst, conv), _params));
                             }
                             if (x < dstW)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, pd + x);
-                                __m512 conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                __m512 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 _mm512_mask_storeu_ps(pd + x, tail, Activate<type>(_mm512_add_ps(_dst, conv), _params));
                             }
                             ps += srcW * stride;
@@ -869,7 +869,7 @@ namespace Simd
             }
         }
 
-         bool ConvolutionDirectNchw::Preferable(const ConvParam & p)
+         bool SynetConvolution32fDirectNchw::Preferable(const ConvParam32f & p)
         {
             if (!p.IsDilation(1))
                 return false;
@@ -883,7 +883,7 @@ namespace Simd
                 ) && p.trans == 0;
         }
 
-        template <int kernel, int stride> ConvolutionDirectNchw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        template <int kernel, int stride> SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
         {
             switch (type)
             {
@@ -899,11 +899,11 @@ namespace Simd
             }
         }
 
-        ConvolutionDirectNchw::ConvolutionBiasActivationPtr ConvolutionDirectNchw::SetConvolutionBiasActivation()
+        SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SynetConvolution32fDirectNchw::SetConvolutionBiasActivation()
         {
-            const ConvParam & p = _param;
+            const ConvParam32f & p = _param;
             if (p.dstW <= HF && p.kernelX <= 3)
-                return Avx2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+                return Avx2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -933,13 +933,13 @@ namespace Simd
                     return Avx512f::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
-            return Avx2::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+            return Avx2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
         }
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirectNhwc::ConvolutionDirectNhwc(const ConvParam & p)
-            : Avx2::ConvolutionDirectNhwc(p)
+        SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam32f & p)
+            : Avx2::SynetConvolution32fDirectNhwc(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -976,7 +976,7 @@ namespace Simd
             return Avx512f::Elu(value, _mm512_set1_ps(params[0]));
         }
 
-        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam & p, size_t kH, size_t kW, const float * weight, __m512 & sum, __mmask16 tail = -1)
+        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, __m512 & sum, __mmask16 tail = -1)
         {
             size_t size = kW * p.srcC, rest = (p.kernelX - kW)*p.srcC*p.dstC, dstC = p.dstC, stride = p.srcW * p.srcC;
             for (size_t ky = 0; ky < kH; ++ky)
@@ -989,7 +989,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam & p, size_t kH, size_t kW, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF = AlignLo(dstC, F);
@@ -1010,7 +1010,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody2x2(const float * src, const ConvParam & p, const float * weight, __m512 sums[2][2])
+        SIMD_INLINE void KernelHwcDefaultBody2x2(const float * src, const ConvParam32f & p, const float * weight, __m512 sums[2][2])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1034,7 +1034,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody2x1(const float * src, const ConvParam & p, const float * weight, __m512 sums[2][1], __mmask16 tail = -1)
+        SIMD_INLINE void KernelHwcDefaultBody2x1(const float * src, const ConvParam32f & p, const float * weight, __m512 sums[2][1], __mmask16 tail = -1)
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1056,7 +1056,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultBody2(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultBody2(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF1 = AlignLo(dstC, 1 * F);
@@ -1100,7 +1100,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody6x2(const float * src, const ConvParam & p, const float * weight, __m512 sums[6][2])
+        SIMD_INLINE void KernelHwcDefaultBody6x2(const float * src, const ConvParam32f & p, const float * weight, __m512 sums[6][2])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1140,7 +1140,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody6x1(const float * src, const ConvParam & p, const float * weight, __m512 sums[6][1], __mmask16 tail = -1)
+        SIMD_INLINE void KernelHwcDefaultBody6x1(const float * src, const ConvParam32f & p, const float * weight, __m512 sums[6][1], __mmask16 tail = -1)
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1174,7 +1174,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultBody6(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultBody6(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF1 = AlignLo(dstC, 1 * F);
@@ -1250,7 +1250,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody8x3(const float * src, const ConvParam & p, const float * weight, __m512 sums[8][3])
+        SIMD_INLINE void KernelHwcDefaultBody8x3(const float * src, const ConvParam32f & p, const float * weight, __m512 sums[8][3])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1307,7 +1307,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody8x1(const float * src, const ConvParam & p, const float * weight, __m512 sums[8][1])
+        SIMD_INLINE void KernelHwcDefaultBody8x1(const float * src, const ConvParam32f & p, const float * weight, __m512 sums[8][1])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1347,7 +1347,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultBody8(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultBody8(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF1 = AlignLo(dstC, 1 * F);
@@ -1457,7 +1457,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultBody6_1x1x16(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultBody6_1x1x16(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t size = p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -1531,7 +1531,7 @@ namespace Simd
             _mm512_storeu_ps(dst + 5 * F, Activate<type>(sums[5], params, 0));
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDefault(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             bool is1x1x16 = p.dstC == 16 && p.kernelX == 1 && p.kernelY == 1;
             size_t noseH = p.padY, noseW = p.padX;
@@ -1596,7 +1596,7 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t size = p.group;
             size_t sizeF = AlignLo(size, F);
@@ -1771,7 +1771,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam32f & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcC = p.srcC;
             size_t srcCF = AlignLo(srcC, F);
@@ -2010,7 +2010,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type> 
-        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16(const float * src, const ConvParam & p, size_t dy, size_t dx, const __m512 * weight, __m512 bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge16(const float * src, const ConvParam32f & p, size_t dy, size_t dx, const __m512 * weight, __m512 bias, const float * params, float * dst)
         {
             __m512 sum = bias;
             for (size_t ky = 0; ky < 3; ++ky)
@@ -2126,7 +2126,7 @@ namespace Simd
             _mm512_storeu_ps(dst + 2 * F, Activate<type>(sum2, params, 2 * F));
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcS = p.srcC*p.srcW;
             size_t srcX = p.srcC*p.strideX;
@@ -2197,7 +2197,7 @@ namespace Simd
             }
         }
 
-        template <::SimdConvolutionActivationType type> ConvolutionDirectNhwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam & p)
+        template <::SimdConvolutionActivationType type> SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam32f & p)
         {
             if (p.group == 1)
                 return ConvolutionDirectNhwcConvolutionBiasActivationDefault<type>;
@@ -2211,10 +2211,10 @@ namespace Simd
             return NULL;
         }
 
-        ConvolutionDirectNhwc::ConvolutionBiasActivationPtr ConvolutionDirectNhwc::SetConvolutionBiasActivation()
+        SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation()
         {
-            const ConvParam & p = _param;
-            ConvolutionDirectNhwc::ConvolutionBiasActivationPtr func = NULL;
+            const ConvParam32f & p = _param;
+            SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr func = NULL;
             if (p.dstC > HF && p.dstC != 24 && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
             {
                 switch (p.activation)
@@ -2227,30 +2227,30 @@ namespace Simd
                 case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 }
             }
-            return func ? func : Avx2::ConvolutionDirectNhwc::SetConvolutionBiasActivation();
+            return func ? func : Avx2::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
         };
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(trans, batch, conv, gemm);
+            ConvParam32f param(batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
-            else if (Avx::ConvolutionDepthwiseDotProduct::Preferable(param))
-                return new Avx::ConvolutionDepthwiseDotProduct(param);
-            else if (ConvolutionWinograd::Preferable(param))
-                return new ConvolutionWinograd(param);
-            else if (ConvolutionGemmNT::Preferable(param))
-                return new ConvolutionGemmNT(param);
-            else if (ConvolutionDirectNchw::Preferable(param))
-                return new Avx512f::ConvolutionDirectNchw(param);
-            else if (ConvolutionNhwcDirect::Preferable(param))
-                return new ConvolutionNhwcDirect(param);
-            else if (ConvolutionDirectNhwc::Preferable(param))
-                return new ConvolutionDirectNhwc(param);
+            else if (Avx::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+                return new Avx::SynetConvolution32fDepthwiseDotProduct(param);
+            else if (SynetConvolution32fWinograd::Preferable(param))
+                return new SynetConvolution32fWinograd(param);
+            else if (SynetConvolution32fGemmNT::Preferable(param))
+                return new SynetConvolution32fGemmNT(param);
+            else if (SynetConvolution32fDirectNchw::Preferable(param))
+                return new Avx512f::SynetConvolution32fDirectNchw(param);
+            else if (SynetConvolution32fNhwcDirect::Preferable(param))
+                return new SynetConvolution32fNhwcDirect(param);
+            else if (SynetConvolution32fDirectNhwc::Preferable(param))
+                return new SynetConvolution32fDirectNhwc(param);
             else
-                return new ConvolutionGemmNN(param);
+                return new SynetConvolution32fGemmNN(param);
         }
     }
 #endif//SIMD_AVX512F_ENABLE

@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdMergedConvolutionCommon_h__
-#define __SimdMergedConvolutionCommon_h__
+#ifndef __SimdSynetConvolution32fCommon_h__
+#define __SimdSynetConvolution32fCommon_h__
 
 #include "Simd/SimdMath.h"
 #include "Simd/SimdStore.h"
@@ -571,4 +571,4 @@ namespace Simd
     }
 #endif//SIMD_NEON_ENABLE
 }
-#endif//__SimdMergedConvolutionCommon_h__
+#endif//__SimdSynetConvolution32fCommon_h__

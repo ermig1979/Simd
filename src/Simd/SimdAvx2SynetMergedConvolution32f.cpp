@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMergedConvolution.h"
-#include "Simd/SimdConvolutionCommon.h"
+#include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
 
 namespace Simd
@@ -1158,7 +1158,7 @@ namespace Simd
             }
         }
 
-        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam & p, size_t index, MergedConvolution::ConvolutionPtr convolution[3])
+        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam32f & p, size_t index, SynetMergedConvolution32f::ConvolutionPtr convolution[3])
         {
             switch (index)
             {
@@ -1192,8 +1192,8 @@ namespace Simd
             }
         }
 
-        MergedConvolution::MergedConvolution(const MergConvParam & p)
-            : Avx::MergedConvolution(p)
+        SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f & p)
+            : Avx::SynetMergedConvolution32f(p)
         {
             for (size_t i = 0; i < _param.count; ++i)
             {
@@ -1213,15 +1213,15 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * MergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
-            MergConvParam param(trans, batch, convs, count, add);
+            MergConvParam32f param(batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
             if (param.conv[2].dstC < F)
-                return new Sse2::MergedConvolution(param);
+                return new Sse2::SynetMergedConvolution32f(param);
             else
-                return new Avx2::MergedConvolution(param);
+                return new Avx2::SynetMergedConvolution32f(param);
         }
     }
  #endif//SIMD_AVX2_ENABLE

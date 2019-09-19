@@ -21,8 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdConvolution_h__
-#define __SimdConvolution_h__
+#ifndef __SimdSynetConvolution32f_h__
+#define __SimdSynetConvolution32f_h__
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
@@ -38,16 +38,16 @@ namespace Simd
     const bool NHWC_GEMM_COMPATIBLE = false;
     const bool NHWC_GEMM_RUNTIME = true;
 
-    struct ConvParam : public SimdConvolutionParameters
+    struct ConvParam32f : public SimdConvolutionParameters
     {
         SimdBool trans;
         size_t batch;
         SimdGemm32fNNPtr gemm;
 
-        ConvParam(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        ConvParam32f(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             *((SimdConvolutionParameters*)this) = *conv;
-            this->trans = trans;
+            this->trans = (srcF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
             this->batch = batch;
             this->gemm = gemm;
         }
@@ -56,7 +56,8 @@ namespace Simd
         {
             return 
                 dstH == (srcH + padY + padH - (dilationY * (kernelY - 1) + 1)) / strideY + 1 && dstH > 0 &&
-                dstW == (srcW + padX + padW - (dilationX * (kernelX - 1) + 1)) / strideX + 1 && dstW > 0;
+                dstW == (srcW + padX + padW - (dilationX * (kernelX - 1) + 1)) / strideX + 1 && dstW > 0 &&
+                srcT == SimdTensorData32f && dstT == SimdTensorData32f && srcF == dstF && (srcF == SimdTensorFormatNchw || srcF == SimdTensorFormatNhwc);
         }
 
         SIMD_INLINE bool IsKernel(size_t value) const
@@ -105,10 +106,10 @@ namespace Simd
 #endif
     };
 
-    class Convolution : public Deletable
+    class SynetConvolution32f : public Deletable
     {
     public:
-        Convolution(const ConvParam & p) 
+        SynetConvolution32f(const ConvParam32f & p) 
             : _param(p)
             , _0(0.0f)
             , _1(1.0f)
@@ -121,7 +122,7 @@ namespace Simd
         {
         }
 
-        const ConvParam & Param() const 
+        const ConvParam32f & Param() const 
         {
             return _param;
         }
@@ -175,7 +176,7 @@ namespace Simd
         typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
         typedef void(*BiasAndActivation)(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
-        ConvParam _param;
+        ConvParam32f _param;
         Array32f _buffer;
         float _0, _1;
         const float * _weight, * _bias, * _params;
@@ -194,10 +195,10 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst);
 
-        class ConvolutionGemmNN : public Convolution
+        class SynetConvolution32fGemmNN : public SynetConvolution32f
         {
         public:
-            ConvolutionGemmNN(const ConvParam & p);
+            SynetConvolution32fGemmNN(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmNN" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
@@ -212,30 +213,30 @@ namespace Simd
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD, _merge;
         };
 
-        class ConvolutionGemmNT : public Convolution
+        class SynetConvolution32fGemmNT : public SynetConvolution32f
         {
         public:
-            ConvolutionGemmNT(const ConvParam & p);
+            SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmNT"; }
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
 
-            static void ImgToRow(const float * src, const ConvParam & p, float * dst);
+            static void ImgToRow(const float * src, const ConvParam32f & p, float * dst);
 
             bool _is1x1;
             size_t _weightStep, _srcStep, _dstStep, _M, _N, _K, _batch, _sizeS, _sizeB, _sizeD;
         };
 
-        class ConvolutionWinograd : public Convolution
+        class SynetConvolution32fWinograd : public SynetConvolution32f
         {
         public:
-            ConvolutionWinograd(const ConvParam & p);
+            SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
@@ -243,7 +244,7 @@ namespace Simd
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
         protected:
             typedef void(*SetFilter)(const float * src, size_t size, float * dst, SimdBool trans);
@@ -270,7 +271,7 @@ namespace Simd
             
             struct WinFunc
             {
-                SIMD_INLINE WinFunc(const ConvolutionWinograd * win, const String & name)
+                SIMD_INLINE WinFunc(const SynetConvolution32fWinograd * win, const String & name)
                     : _win(win)
                     , _name(name)
                 {
@@ -283,22 +284,22 @@ namespace Simd
                 }
 
             private:
-                const ConvolutionWinograd * _win;
+                const SynetConvolution32fWinograd * _win;
                 String _name;
             };
 #endif
         };
 
-        class ConvolutionDirectNchw : public Convolution
+        class SynetConvolution32fDirectNchw : public SynetConvolution32f
         {
         public:
-            ConvolutionDirectNchw(const ConvParam & p);
+            SynetConvolution32fDirectNchw(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::DirectNchw"; }
             virtual size_t ExternalBufferSize() const;
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
             typedef void(*ConvolutionBiasActivationPtr)(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW);
         protected:
@@ -310,17 +311,17 @@ namespace Simd
             ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
-        class ConvolutionDirectNhwc : public Convolution
+        class SynetConvolution32fDirectNhwc : public SynetConvolution32f
         {
         public:
-            ConvolutionDirectNhwc(const ConvParam & p);
+            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::DirectNhwc"; }
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
-            typedef void(*ConvolutionBiasActivationPtr)(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst);
+            typedef void(*ConvolutionBiasActivationPtr)(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation(); 
 
@@ -328,37 +329,37 @@ namespace Simd
             ConvolutionBiasActivationPtr _convolutionBiasActivation;
         };
 
-        class ConvolutionDepthwiseDotProduct : public Convolution
+        class SynetConvolution32fDepthwiseDotProduct : public SynetConvolution32f
         {
         public:
-            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::DepthwiseDotProduct"; }
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
         protected:
             size_t _count, _size, _batch, _sizeS, _sizeD;
         }; 
 
-        class ConvolutionNhwcDirect : public Convolution
+        class SynetConvolution32fNhwcDirect : public SynetConvolution32f
         {
         public:
-            ConvolutionNhwcDirect(const ConvParam & p);
+            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::NhwcDirect"; }
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
             struct AlgParam
             {
                 size_t microD, macroH, macroC, macroD;
             };
-            typedef void(*ConvolutionPtr)(const float * src, const ConvParam & p, const AlgParam & a, const float * weight, const float * bias, const float * params, float * dst);
+            typedef void(*ConvolutionPtr)(const float * src, const ConvParam32f & p, const AlgParam & a, const float * weight, const float * bias, const float * params, float * dst);
 
         protected:
             void SetAlgParam(size_t microD, size_t L1, size_t L2, size_t L3);
@@ -370,7 +371,7 @@ namespace Simd
             ConvolutionPtr _convolution;
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -378,79 +379,79 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionGemmNN : public Base::ConvolutionGemmNN
+        class SynetConvolution32fGemmNN : public Base::SynetConvolution32fGemmNN
         {
         public:
-            ConvolutionGemmNN(const ConvParam & p);
+            SynetConvolution32fGemmNN(const ConvParam32f & p);
             virtual String Ext() const { return "Sse2"; }
         };
 
-        class ConvolutionWinograd : public Base::ConvolutionWinograd
+        class SynetConvolution32fWinograd : public Base::SynetConvolution32fWinograd
         {
         public:
-            ConvolutionWinograd(const ConvParam & p);
+            SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Sse2"; }
         };
 
-        class ConvolutionDirectNchw : public Base::ConvolutionDirectNchw
+        class SynetConvolution32fDirectNchw : public Base::SynetConvolution32fDirectNchw
         {
         public:
-            ConvolutionDirectNchw(const ConvParam & p);
+            SynetConvolution32fDirectNchw(const ConvParam32f & p);
             virtual String Ext() const { return "Sse2"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDirectNhwc : public Base::ConvolutionDirectNhwc
+        class SynetConvolution32fDirectNhwc : public Base::SynetConvolution32fDirectNhwc
         {
         public:
-            ConvolutionDirectNhwc(const ConvParam & p);
+            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
             virtual String Ext() const { return "Sse2"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDepthwiseDotProduct : public Base::ConvolutionDepthwiseDotProduct
+        class SynetConvolution32fDepthwiseDotProduct : public Base::SynetConvolution32fDepthwiseDotProduct
         {
         public:
-            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p);
             virtual String Ext() const { return "Sse2"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionNhwcDirect : public Base::ConvolutionNhwcDirect
+        class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
         {
         public:
-            ConvolutionNhwcDirect(const ConvParam & p);
+            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Sse2"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSE3_ENABLE    
     namespace Sse3
     {
-        class ConvolutionGemmNT : public Base::ConvolutionGemmNT
+        class SynetConvolution32fGemmNT : public Base::SynetConvolution32fGemmNT
         {
         public:
-            ConvolutionGemmNT(const ConvParam & p);
+            SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Sse3"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_SSE3_ENABLE
 
@@ -459,67 +460,67 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType type, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionGemmNN : public Sse2::ConvolutionGemmNN
+        class SynetConvolution32fGemmNN : public Sse2::SynetConvolution32fGemmNN
         {
         public:
-            ConvolutionGemmNN(const ConvParam & p);
+            SynetConvolution32fGemmNN(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         protected:
             virtual void ImgToRow(const float * src, float * dst);
         };
 
-        class ConvolutionGemmNT : public Sse3::ConvolutionGemmNT
+        class SynetConvolution32fGemmNT : public Sse3::SynetConvolution32fGemmNT
         {
         public:
-            ConvolutionGemmNT(const ConvParam & p);
+            SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd : public Sse2::ConvolutionWinograd
+        class SynetConvolution32fWinograd : public Sse2::SynetConvolution32fWinograd
         {
         public:
-            ConvolutionWinograd(const ConvParam & p);
+            SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         };
 
-        class ConvolutionDirectNchw : public Sse2::ConvolutionDirectNchw
+        class SynetConvolution32fDirectNchw : public Sse2::SynetConvolution32fDirectNchw
         {
         public:
-            ConvolutionDirectNchw(const ConvParam & p);
+            SynetConvolution32fDirectNchw(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDirectNhwc : public Sse2::ConvolutionDirectNhwc
+        class SynetConvolution32fDirectNhwc : public Sse2::SynetConvolution32fDirectNhwc
         {
         public:
-            ConvolutionDirectNhwc(const ConvParam & p);
+            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDepthwiseDotProduct : public Sse2::ConvolutionDepthwiseDotProduct
+        class SynetConvolution32fDepthwiseDotProduct : public Sse2::SynetConvolution32fDepthwiseDotProduct
         {
         public:
-            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionNhwcDirect : public Sse2::ConvolutionNhwcDirect
+        class SynetConvolution32fNhwcDirect : public Sse2::SynetConvolution32fNhwcDirect
         {
         public:
-            ConvolutionNhwcDirect(const ConvParam & p);
+            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -530,10 +531,10 @@ namespace Simd
         void NhwcReorderB(size_t M, size_t N, size_t K, const float * B, float * pB);
         size_t NhwcBufferSize(size_t M, size_t N, size_t K);
 
-        class ConvolutionGemmNN : public Avx::ConvolutionGemmNN
+        class SynetConvolution32fGemmNN : public Avx::SynetConvolution32fGemmNN
         {
         public:
-            ConvolutionGemmNN(const ConvParam & p);
+            SynetConvolution32fGemmNN(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         protected:
             virtual void ImgToCol(const float * src, float * dst);
@@ -541,48 +542,48 @@ namespace Simd
             Array32i _index, _nose, _tail, _start;
         };
 
-        class ConvolutionGemmNT : public Avx::ConvolutionGemmNT
+        class SynetConvolution32fGemmNT : public Avx::SynetConvolution32fGemmNT
         {
         public:
-            ConvolutionGemmNT(const ConvParam & p);
+            SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd : public Avx::ConvolutionWinograd
+        class SynetConvolution32fWinograd : public Avx::SynetConvolution32fWinograd
         {
         public:
-            ConvolutionWinograd(const ConvParam & p);
+            SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         };
 
-        class ConvolutionDirectNchw : public Avx::ConvolutionDirectNchw
+        class SynetConvolution32fDirectNchw : public Avx::SynetConvolution32fDirectNchw
         {
         public:
-            ConvolutionDirectNchw(const ConvParam & p);
-            virtual String Ext() const { return "Avx2"; }
-        protected:
-            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
-        };
-
-        class ConvolutionDirectNhwc : public Avx::ConvolutionDirectNhwc
-        {
-        public:
-            ConvolutionDirectNhwc(const ConvParam & p);
+            SynetConvolution32fDirectNchw(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionNhwcDirect : public Avx::ConvolutionNhwcDirect
+        class SynetConvolution32fDirectNhwc : public Avx::SynetConvolution32fDirectNhwc
         {
         public:
-            ConvolutionNhwcDirect(const ConvParam & p);
+            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
+            virtual String Ext() const { return "Avx2"; }
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
+        class SynetConvolution32fNhwcDirect : public Avx::SynetConvolution32fNhwcDirect
+        {
+        public:
+            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -591,10 +592,10 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionGemmNN : public Avx2::ConvolutionGemmNN
+        class SynetConvolution32fGemmNN : public Avx2::SynetConvolution32fGemmNN
         {
         public:
-            ConvolutionGemmNN(const ConvParam & p);
+            SynetConvolution32fGemmNN(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
         protected:
             virtual void ImgToCol(const float * src, float * dst);
@@ -603,51 +604,51 @@ namespace Simd
             Array16u _nose, _tail;
         };
 
-        class ConvolutionGemmNT : public Avx2::ConvolutionGemmNT
+        class SynetConvolution32fGemmNT : public Avx2::SynetConvolution32fGemmNT
         {
         public:
-            ConvolutionGemmNT(const ConvParam & p);
+            SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd : public Avx2::ConvolutionWinograd
+        class SynetConvolution32fWinograd : public Avx2::SynetConvolution32fWinograd
         {
         public:
-            ConvolutionWinograd(const ConvParam & p);
+            SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
         };
 
-        class ConvolutionDirectNchw : public Avx2::ConvolutionDirectNchw
+        class SynetConvolution32fDirectNchw : public Avx2::SynetConvolution32fDirectNchw
         {
         public:
-            ConvolutionDirectNchw(const ConvParam & p);
+            SynetConvolution32fDirectNchw(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDirectNhwc : public Avx2::ConvolutionDirectNhwc
+        class SynetConvolution32fDirectNhwc : public Avx2::SynetConvolution32fDirectNhwc
         {
         public:
-            ConvolutionDirectNhwc(const ConvParam & p);
+            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionNhwcDirect : public Avx2::ConvolutionNhwcDirect
+        class SynetConvolution32fNhwcDirect : public Avx2::SynetConvolution32fNhwcDirect
         {
         public:
-            ConvolutionNhwcDirect(const ConvParam & p);
+            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_AVX512F_ENABLE
 
@@ -656,76 +657,76 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst);
 
-        class ConvolutionGemmNN : public Base::ConvolutionGemmNN
+        class SynetConvolution32fGemmNN : public Base::SynetConvolution32fGemmNN
         {
         public:
-            ConvolutionGemmNN(const ConvParam & p);
+            SynetConvolution32fGemmNN(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
         };
 
-        class ConvolutionGemmNT : public Base::ConvolutionGemmNT
+        class SynetConvolution32fGemmNT : public Base::SynetConvolution32fGemmNT
         {
         public:
-            ConvolutionGemmNT(const ConvParam & p);
+            SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         protected:
             virtual void GemmAndBias(const float * src, float * dst);
         };
 
-        class ConvolutionWinograd : public Base::ConvolutionWinograd
+        class SynetConvolution32fWinograd : public Base::SynetConvolution32fWinograd
         {
         public:
-            ConvolutionWinograd(const ConvParam & p);
+            SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         };
 
-        class ConvolutionDirectNchw : public Base::ConvolutionDirectNchw
+        class SynetConvolution32fDirectNchw : public Base::SynetConvolution32fDirectNchw
         {
         public:
-            ConvolutionDirectNchw(const ConvParam & p);
+            SynetConvolution32fDirectNchw(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
 
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDirectNhwc : public Base::ConvolutionDirectNhwc
+        class SynetConvolution32fDirectNhwc : public Base::SynetConvolution32fDirectNhwc
         {
         public:
-            ConvolutionDirectNhwc(const ConvParam & p);
+            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         protected:
             virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
         };
 
-        class ConvolutionDepthwiseDotProduct : public Base::ConvolutionDepthwiseDotProduct
+        class SynetConvolution32fDepthwiseDotProduct : public Base::SynetConvolution32fDepthwiseDotProduct
         {
         public:
-            ConvolutionDepthwiseDotProduct(const ConvParam & p);
+            SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
             virtual void Forward(const float * src, float * buf, float * dst);
         };
 
-        class ConvolutionNhwcDirect : public Base::ConvolutionNhwcDirect
+        class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
         {
         public:
-            ConvolutionNhwcDirect(const ConvParam & p);
+            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
 
-            static bool Preferable(const ConvParam & p);
+            static bool Preferable(const ConvParam32f & p);
         };
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
 #endif//SIMD_NEON_ENABLE
 }
 
-#endif//__SimConvolution_h__
+#endif//__SimdSynetConvolution32f_h__

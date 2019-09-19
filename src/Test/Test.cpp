@@ -142,8 +142,6 @@ namespace Test
     TEST_ADD_GROUP_AD0(Copy);
     TEST_ADD_GROUP_AD0(CopyFrame);
 
-    TEST_ADD_GROUP_A00(ConvolutionForward);
-
     TEST_ADD_GROUP_AD0(Crc32c);
 
     TEST_ADD_GROUP_AD0(DeinterleaveUv);
@@ -245,8 +243,6 @@ namespace Test
     TEST_ADD_GROUP_AD0(InterleaveUv);
     TEST_ADD_GROUP_AD0(InterleaveBgr);
     TEST_ADD_GROUP_AD0(InterleaveBgra);
-
-    TEST_ADD_GROUP_A00(MergedConvolutionForward);
 
     TEST_ADD_GROUP_00S(Motion);
 
@@ -350,6 +346,10 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
 
     TEST_ADD_GROUP_A00(SynetElu32f);
+
+    TEST_ADD_GROUP_A00(SynetConvolution32fForward);
+
+    TEST_ADD_GROUP_A00(SynetMergedConvolution32fForward);
 
     TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
     TEST_ADD_GROUP_AD0(TextureBoostedUv);

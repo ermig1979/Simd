@@ -97,7 +97,7 @@ typedef enum
 } SimdCompareType;
 
 /*! @ingroup synet
-    Describes type of activation function. It is used in ::SimdConvolutionInit and ::SimdConvolutionSetParams.
+    Describes type of activation function. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit and ::SimdSynetMergedConvolution32fInit.
 */
 typedef enum
 {
@@ -309,7 +309,7 @@ typedef enum
 } SimdSynetEltwiseOperationType;
 
 /*! @ingroup synet
-    Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor tensor format type.
+    Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor format type.
 */
 typedef enum
 {
@@ -327,6 +327,18 @@ typedef enum
     SimdTensorFormatOyxi16o, /*!< OYXI16o (O - (output channels + 15)/16, Y - kernel height, X - kernel width, I - input channels, 16o - output channels gropped by 16) special 5D-tensor format of 2D-convolution filter optimized for AVX-512. */
     SimdTensorFormatOyxiXo, /*!< Unspecified hardware optimized 5D-tensor format of 2D-convolution filter. Specific format (::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o or ::SimdTensorFormatOyxi16o) is determinated by function ::SimdSynetSpecifyTensorFormat. */
 } SimdTensorFormatType;
+
+/*! @ingroup synet
+    Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> tensor data type.
+*/
+typedef enum
+{
+    SimdTensorDataUnknown = -1, /*!< Unknown tensor data type. */
+    SimdTensorData32f, /*!< 32-bit float point. */
+    SimdTensorData32i, /*!< 32-bit signed integer. */
+    SimdTensorData8i, /*!< 8-bit signed integer. */
+    SimdTensorData8u, /*!< 8-bit unsigned integer. */
+} SimdTensorDataType;
 
 /*! @ingroup transform
     Describes transform type used in function ::SimdTransformImage in order to describe result of transformation.
@@ -367,34 +379,50 @@ typedef enum
 typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
 /*! @ingroup synet
-    Describes convolution parameters. It is used in functions ::SimdConvolutionInit and ::SimdMergedConvolutionInit.
+    Describes convolution parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit and ::SimdSynetMergedConvolution32fInit.
 */
 typedef struct SimdConvolutionParameters
 {
     /*!
-        A number of input channels.
+        A number of input tensor channels.
     */
     size_t srcC;
     /*!
-        An input height.
+        An input tensor height.
     */
     size_t srcH;
     /*!
-        An input width.
+        An input tensor width.
     */
     size_t srcW;
     /*!
-        A number of output channels.
+        An input tensor data type.
+    */
+    SimdTensorDataType srcT;
+    /*!
+        An input tensor data format.
+    */
+    SimdTensorFormatType srcF;
+    /*!
+        A number of output tensor channels.
     */
     size_t dstC;
     /*!
-        An output height.
+        An output tensor height.
     */
     size_t dstH;
     /*!
-        An output width.
+        An output tensor width.
     */
     size_t dstW;
+    /*!
+        An output tensor data type.
+    */
+    SimdTensorDataType dstT;
+    /*!
+        An output tensor data format.
+    */
+    SimdTensorFormatType dstF;
     /*!
         A convolution kernel window height.
     */
@@ -1868,70 +1896,6 @@ extern "C"
     */
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup synet
-
-        \fn void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
-        
-        \short Initilizes convolution algorithm.
-
-        \param [in] trans - a flag of transposed input and output data (::SimdFalse - NCHW order, ::SimdTrue - NHWC order).
-        \param [in] batch - a batch size.
-        \param [in] conv - a pointer to convolution parameters.
-        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
-        \return a pointer to convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-            This pointer is used in functions ::SimdConvolutionExternalBufferSize, ::SimdConvolutionInternalBufferSize, ::SimdConvolutionSetParams and ::SimdConvolutionForward.
-    */
-    SIMD_API void * SimdConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
-
-    /*! @ingroup synet
-
-        \fn size_t SimdConvolutionExternalBufferSize(const void * convolution);
-
-        \short Gets size of external temporary buffer required for convolution algorithm.
-
-        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease. 
-        \return size of external temporary buffer required for convolution algorithm.
-    */
-    SIMD_API size_t SimdConvolutionExternalBufferSize(const void * convolution);
-
-    /*! @ingroup synet
-
-        \fn size_t SimdConvolutionInternalBufferSize(const void * convolution);
-
-        \short Gets size of internal buffer used inside convolution algorithm.
-
-        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside convolution algorithm.
-    */
-    SIMD_API size_t SimdConvolutionInternalBufferSize(const void * convolution);
-
-    /*! @ingroup synet
-
-        \fn void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool * internal, const float * bias, const float * params);
-
-        \short Sets weights, beases and parameters of activation function required for convolution algorithm.
-
-        \param [in, out] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to convolution weights.
-        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
-        \param [in] bias - a pointer to bias. Can be NULL.
-        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
-    */
-    SIMD_API void SimdConvolutionSetParams(void * convolution, const float * weight, SimdBool * internal, const float * bias, const float * params);
-
-    /*! @ingroup synet
-
-        \fn void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);
-
-        \short Performs forward propagation of convolution algorithm.
-
-        \param [in] convolution - a pointer to convolution context. It must be created by function ::SimdConvolutionInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdConvolutionExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output image.
-    */
-    SIMD_API void SimdConvolutionForward(void * convolution, const float * src, float * buf, float * dst);
 
     /*! @ingroup other_conversion
 
@@ -3684,71 +3648,6 @@ extern "C"
     */
     SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
-
-    /*! @ingroup synet
-
-        \fn void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
-
-        \short Initilizes merged convolution algorithm.
-
-        \param [in] trans - a flag of transposed input and output data (::SimdFalse - NCHW order, ::SimdTrue - NHWC order).
-        \param [in] batch - a batch size.
-        \param [in] convs - an array with convolutions parameters.
-        \param [in] count - a number of merged convolutions.
-        \param [in] add - a flag that signilizes if we need to add output to source value.
-        \return a pointer to merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
-        This pointer is used in functions ::SimdMergedConvolutionExternalBufferSize, ::SimdMergedConvolutionInternalBufferSize, ::SimdMergedConvolutionSetParams and ::SimdMergedConvolutionForward.
-    */
-    SIMD_API void * SimdMergedConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
-
-    /*! @ingroup synet
-
-        \fn size_t SimdMergedConvolutionExternalBufferSize(const void * context);
-
-        \short Gets size of external temporary buffer required for merged convolution algorithm.
-
-        \param [in] context - a pointer to merged convolution context. It must be created by function ::SimdMergedConvolutionInit and released by function ::SimdRelease.
-        \return size of external temporary buffer required for merged convolution algorithm.
-    */
-    SIMD_API size_t SimdMergedConvolutionExternalBufferSize(const void * context);
-
-    /*! @ingroup synet
-
-        \fn size_t SimdMergedConvolutionInternalBufferSize(const void * context);
-
-        \short Gets size of internal buffer used inside merged convolution algorithm.
-
-        \param [in] context - a pointer to merged convolution context. It must be created by function ::SimdMergedConvolutionInit and released by function ::SimdRelease.
-        \return size of internal buffer used inside merged convolution algorithm.
-    */
-    SIMD_API size_t SimdMergedConvolutionInternalBufferSize(const void * context);
-
-    /*! @ingroup synet
-
-        \fn void SimdMergedConvolutionSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
-
-        \short Sets weights, beases and parameters of activation function required for merged convolution algorithm.
-
-        \param [in, out] context - a pointer to merged convolution context. It must be created by function ::SimdMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
-        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
-        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
-        */
-    SIMD_API void SimdMergedConvolutionSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
-
-    /*! @ingroup synet
-
-        \fn void SimdMergedConvolutionForward(void * context, const float * src, float * buf, float * dst);
-
-        \short Performs forward propagation of merged convolution algorithm.
-
-        \param [in] context - a pointer to merged convolution context. It must be created by function ::SimdMergedConvolutionInit and released by function ::SimdRelease.
-        \param [in] src - a pointer to input image.
-        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdMergedConvolutionExternalBufferSize. Can be NULL (it causes usage of internal buffer).
-        \param [out] dst - a pointer to output image.
-    */
-    SIMD_API void SimdMergedConvolutionForward(void * context, const float * src, float * buf, float * dst);
 
     /*! @ingroup neural
 
@@ -5593,6 +5492,131 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+
+        \short Initilizes FP32 convolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] conv - a pointer to convolution parameters.
+        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
+        \return a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetConvolution32fExternalBufferSize, ::SimdSynetConvolution32fInternalBufferSize, ::SimdSynetConvolution32fSetParams and ::SimdSynetConvolution32fForward.
+    */
+    SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
+
+        \short Gets size of external temporary buffer required for FP32 convolution algorithm.
+
+        \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
+        \return size of external temporary buffer required for FP32 convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside FP32 convolution algorithm.
+
+        \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside FP32 convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
+
+        \short Sets weights, beases and parameters of activation function required for FP32 convolution algorithm.
+
+        \param [in, out] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to convolution weights.
+        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [in] bias - a pointer to bias. Can be NULL.
+        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+    */
+    SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
+
+        \short Performs forward propagation of FP32 convolution algorithm.
+
+        \param [in] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
+
+    /*! @ingroup synet
+
+        \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
+
+        \short Initilizes INT8 convolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] conv - a pointer to convolution parameters.
+        \return a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetConvolution8iExternalBufferSize, ::SimdSynetConvolution8iInternalBufferSize, ::SimdSynetConvolution8iSetParams and ::SimdSynetConvolution8iForward.
+    */
+    SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
+
+        \short Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.
+
+        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
+        \return size of external temporary buffer required for INT8 convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside INT8 convolution algorithm.
+
+        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside INT8 convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const stats);
+
+        \short Sets weights, beases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.
+
+        \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to original (32-bit float point) convolution weights.
+        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
+        \param [in] params - a pointer to original (32-bit float point) parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors.
+    */
+    SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const stats);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
+
+        \short Performs forward propagation of INT8 convolution algorithm.
+
+        \param [in] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
 
         \short This function is used for forward propagation of EltwiseLayer.
@@ -5939,6 +5963,70 @@ extern "C"
         \param [in] format - a format of (input/output) image tensor.
     */
     SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
+
+    /*! @ingroup synet
+
+        \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+
+        \short Initilizes FP32 merged convolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] convs - an array with convolutions parameters.
+        \param [in] count - a number of merged convolutions.
+        \param [in] add - a flag that signilizes if we need to add output to source value.
+        \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetMergedConvolution32fExternalBufferSize, ::SimdSynetMergedConvolution32fInternalBufferSize, ::SimdSynetMergedConvolution32fSetParams and ::SimdSynetMergedConvolution32fForward.
+    */
+    SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context);
+
+        \short Gets size of external temporary buffer required for FP32 merged convolution algorithm.
+
+        \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
+        \return size of external temporary buffer required for FP32 merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside FP32 merged convolution algorithm.
+
+        \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside FP32 merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
+
+        \short Sets weights, beases and parameters of activation function required for FP32 merged convolution algorithm.
+
+        \param [in, out] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
+        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
+    */
+    SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
+
+        \short Performs forward propagation of FP32 merged convolution algorithm.
+
+        \param [in] context - a pointer to FP32 merged convolution context. It must be created by function ::SimdSynetMergedConvolution32fInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input image.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetMergedConvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output image.
+    */
+    SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
     /*! @ingroup synet
 

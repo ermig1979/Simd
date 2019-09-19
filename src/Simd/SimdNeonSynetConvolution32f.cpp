@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConvolution.h"
+#include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
@@ -260,8 +260,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionGemmNN::ConvolutionGemmNN(const ConvParam & p)
-            : Base::ConvolutionGemmNN(p)
+        SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
+            : Base::SynetConvolution32fGemmNN(p)
         {
             _gemm.Init(InitGemmFuncs(Neon::Gemm32fNN, "Neon", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
@@ -281,19 +281,19 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
-            : Base::ConvolutionGemmNT(p)
+        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
+            : Base::SynetConvolution32fGemmNT(p)
         {
         }
 
-        bool ConvolutionGemmNT::Preferable(const ConvParam & p)
+        bool SynetConvolution32fGemmNT::Preferable(const ConvParam32f & p)
         {
             return p.srcH < 4 && p.srcW < 4 && p.group == 1 && p.trans == 0;
         }
 
-        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
+        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
         {
-            const ConvParam & p = _param;
+            const ConvParam32f & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
             ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
@@ -301,8 +301,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionWinograd::ConvolutionWinograd(const ConvParam & p)
-            : Base::ConvolutionWinograd(p)
+        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
+            : Base::SynetConvolution32fWinograd(p)
         {
             if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH*p.srcW*p.batch >= 144)
                 SetBlock(4);
@@ -347,7 +347,7 @@ namespace Simd
             _biasAndActivation = Neon::ConvolutionBiasAndActivation;
         }
 
-        bool ConvolutionWinograd::Preferable(const ConvParam & p)
+        bool SynetConvolution32fWinograd::Preferable(const ConvParam32f & p)
         {
             return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 10 &&
                 (p.trans ? (p.srcH >= 4 && p.srcW >= 4 && p.srcH*p.srcW*p.batch >= 36) : (p.srcH >= 6 && p.srcW >= 6));
@@ -355,8 +355,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirectNchw::ConvolutionDirectNchw(const ConvParam & p)
-            : Base::ConvolutionDirectNchw(p)
+        SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam32f & p)
+            : Base::SynetConvolution32fDirectNchw(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -369,12 +369,12 @@ namespace Simd
 
         template<int kernel, int stride> struct Kernel
         {
-            static float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight);
+            static float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight);
         };
 
         template<> struct Kernel<1, 1>
         {
-            static SIMD_INLINE float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight)
+            static SIMD_INLINE float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight)
             {
                 return vmulq_f32(Load<false>(src), weight[0]);
             }
@@ -387,7 +387,7 @@ namespace Simd
                 return vmlaq_f32(vmulq_f32(Load<false>(src + 0), weight[0]), Load<false>(src + 1), weight[1]);
             }
 
-            static SIMD_INLINE float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight)
+            static SIMD_INLINE float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight)
             {
                 return vaddq_f32(RowConv(src, weight), RowConv(src + step, weight + 2));
             }
@@ -401,7 +401,7 @@ namespace Simd
                 return vmlaq_f32(vmulq_f32(s.val[0], weight[0]), s.val[1], weight[1]);
             }
 
-            static SIMD_INLINE float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight)
+            static SIMD_INLINE float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight)
             {
                 return vaddq_f32(RowConv(src, weight), RowConv(src + step, weight + 2));
             }
@@ -415,7 +415,7 @@ namespace Simd
                     Load<false>(src + 1), weight[1]), Load<false>(src + 2), weight[2]);
             }
 
-            static SIMD_INLINE float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight)
+            static SIMD_INLINE float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight)
             {
                 return vaddq_f32(RowConv(src, weight),
                     vaddq_f32(RowConv(src + step, weight + 3),
@@ -433,7 +433,7 @@ namespace Simd
                     s0.val[1], weight[1]), s2.val[0], weight[2]);
             }
 
-            static SIMD_INLINE float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight)
+            static SIMD_INLINE float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight)
             {
                 return vaddq_f32(RowConv(src, weight),
                     vaddq_f32(RowConv(src + step, weight + 3),
@@ -450,7 +450,7 @@ namespace Simd
                     s.val[1], weight[1]), s.val[2], weight[2]);
             }
 
-            static SIMD_INLINE float32x4_t Convolution(const float * src, size_t step, const float32x4_t  * weight)
+            static SIMD_INLINE float32x4_t SynetConvolution32f(const float * src, size_t step, const float32x4_t  * weight)
             {
                 return vaddq_f32(RowConv(src, weight), 
                     vaddq_f32(RowConv(src + step, weight + 3), 
@@ -515,14 +515,14 @@ namespace Simd
                     {
                         for (size_t x = 0; x < dstWF; x += F)
                         {
-                            float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                             Store<false>(pd + x, Activate<type>(vaddq_f32(_bias, conv), _params));
                         }
                         if (dstWF < dstW)
                         {
                             size_t x = dstW - F;
                             float32x4_t _dst = Load<false>(pd + x);
-                            float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                            float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                             Store<false>(pd + x, vbslq_f32(vreinterpretq_u32_f32(tail), Activate<type>(vaddq_f32(_bias, conv), _params), _dst));
                         }
                         ps += srcW * stride;
@@ -543,14 +543,14 @@ namespace Simd
                         {
                             for (size_t x = 0; x < dstWF; x += F)
                             {
-                                float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 Store<false>(pd + x, vaddq_f32(_bias, conv));
                             }
                             if (dstWF < dstW)
                             {
                                 size_t x = dstW - F;
                                 float32x4_t _dst = Load<false>(pd + x);
-                                float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 Store<false>(pd + x, vbslq_f32(vreinterpretq_u32_f32(tail), vaddq_f32(_bias, conv), _dst));
                             }
                             ps += srcW * stride;
@@ -568,14 +568,14 @@ namespace Simd
                             for (size_t x = 0; x < dstWF; x += F)
                             {
                                 float32x4_t _dst = Load<false>(pd + x);
-                                float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 Store<false>(pd + x, vaddq_f32(_dst, conv));
                             }
                             if (dstWF < dstW)
                             {
                                 size_t x = dstW - F;
                                 float32x4_t _dst = Load<false>(pd + x);
-                                float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 Store<false>(pd + x, vaddq_f32(_dst, And(conv, tail)));
                             }
                             ps += srcW * stride;
@@ -593,14 +593,14 @@ namespace Simd
                             for (size_t x = 0; x < dstWF; x += F)
                             {
                                 float32x4_t _dst = Load<false>(pd + x);
-                                float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 Store<false>(pd + x, Activate<type>(vaddq_f32(_dst, conv), _params));
                             }
                             if (dstWF < dstW)
                             {
                                 size_t x = dstW - F;
                                 float32x4_t _dst = Load<false>(pd + x);
-                                float32x4_t conv = Kernel<kernel, stride>::Convolution(ps + x * stride, srcW, _weight);
+                                float32x4_t conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
                                 Store<false>(pd + x, vbslq_f32(vreinterpretq_u32_f32(tail), Activate<type>(vaddq_f32(_dst, conv), _params), _dst));
                             }
                             ps += srcW * stride;
@@ -613,7 +613,7 @@ namespace Simd
             }
         }
 
-        bool ConvolutionDirectNchw::Preferable(const ConvParam & p)
+        bool SynetConvolution32fDirectNchw::Preferable(const ConvParam32f & p)
         {
             if (!p.IsDilation(1))
                 return false;
@@ -623,7 +623,7 @@ namespace Simd
             return k < 2.0 && ((p.IsStride(1) && p.IsKernel(1)) || p.IsKernel(2) || p.IsKernel(3)) && p.trans == 0;
         }
 
-        template <int kernel, int stride> ConvolutionDirectNchw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
+        template <int kernel, int stride> SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SetConvolutionBiasActivation(::SimdConvolutionActivationType type)
         {
             switch (type)
             {
@@ -639,11 +639,11 @@ namespace Simd
             }
         }
 
-        ConvolutionDirectNchw::ConvolutionBiasActivationPtr ConvolutionDirectNchw::SetConvolutionBiasActivation()
+        SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SynetConvolution32fDirectNchw::SetConvolutionBiasActivation()
         {
-            const ConvParam & p = _param;
+            const ConvParam32f & p = _param;
             if (p.dstW < F)
-                return Base::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+                return Base::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -665,7 +665,7 @@ namespace Simd
                     return Neon::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             default:
-                return Base::ConvolutionDirectNchw::SetConvolutionBiasActivation();
+                return Base::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             }
             assert(0);
             return NULL;
@@ -673,13 +673,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        ConvolutionDirectNhwc::ConvolutionDirectNhwc(const ConvParam & p)
-            : Base::ConvolutionDirectNhwc(p)
+        SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam32f & p)
+            : Base::SynetConvolution32fDirectNhwc(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
 
-        bool ConvolutionDirectNhwc::Preferable(const ConvParam & p)
+        bool SynetConvolution32fDirectNhwc::Preferable(const ConvParam32f & p)
         {
             if (!p.IsDilation(1) || p.trans == 0)
                 return false;
@@ -729,7 +729,7 @@ namespace Simd
             return Neon::Elu(value, vdupq_n_f32(params[0]));
         }
 
-        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam & p, size_t kH, size_t kW, const float * weight, float32x4_t & sum)
+        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, float32x4_t & sum)
         {
             size_t size = kW * p.srcC, tail = (p.kernelX - kW)*p.srcC*p.dstC, dstC = p.dstC, stride = p.srcW * p.srcC;
             for (size_t ky = 0; ky < kH; ++ky)
@@ -742,7 +742,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam & p, size_t kH, size_t kW, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF = AlignLo(dstC, F);
@@ -762,7 +762,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody2x2(const float * src, const ConvParam & p, const float * weight, float32x4_t sums[2][2])
+        SIMD_INLINE void KernelHwcDefaultBody2x2(const float * src, const ConvParam32f & p, const float * weight, float32x4_t sums[2][2])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -786,7 +786,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody2x1(const float * src, const ConvParam & p, const float * weight, float32x4_t sums[2][1])
+        SIMD_INLINE void KernelHwcDefaultBody2x1(const float * src, const ConvParam32f & p, const float * weight, float32x4_t sums[2][1])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -808,7 +808,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultBody2(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultBody2(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF1 = AlignLo(dstC, 1 * F);
@@ -852,7 +852,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody6x2(const float * src, const ConvParam & p, const float * weight, float32x4_t sums[6][2])
+        SIMD_INLINE void KernelHwcDefaultBody6x2(const float * src, const ConvParam32f & p, const float * weight, float32x4_t sums[6][2])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -892,7 +892,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void KernelHwcDefaultBody6x1(const float * src, const ConvParam & p, const float * weight, float32x4_t sums[6][1])
+        SIMD_INLINE void KernelHwcDefaultBody6x1(const float * src, const ConvParam32f & p, const float * weight, float32x4_t sums[6][1])
         {
             size_t size = p.kernelX * p.srcC, dstC = p.dstC, stride = p.srcW * p.srcC, step = p.srcC * p.strideX;
             const float * src0 = src + 0 * step;
@@ -926,7 +926,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void KernelHwcDefaultBody6(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void KernelHwcDefaultBody6(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t dstC = p.dstC;
             size_t dstCF1 = AlignLo(dstC, 1 * F);
@@ -1002,7 +1002,7 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDefault(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDefault(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t noseH = p.padY, noseW = p.padX;
             size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
@@ -1052,7 +1052,7 @@ namespace Simd
             }
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t size = p.group;
             size_t sizeF = AlignLo(size, F);
@@ -1227,7 +1227,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge(const float * src, const ConvParam32f & p, size_t dy, size_t dx, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcC = p.srcC;
             size_t srcCF = AlignLo(srcC, F);
@@ -1473,7 +1473,7 @@ namespace Simd
         }
 
         template<::SimdConvolutionActivationType type>
-        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge4(const float * src, const ConvParam & p, size_t dy, size_t dx, const float32x4_t * weight, float32x4_t bias, const float * params, float * dst)
+        SIMD_INLINE void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3Edge4(const float * src, const ConvParam32f & p, size_t dy, size_t dx, const float32x4_t * weight, float32x4_t bias, const float * params, float * dst)
         {
             float32x4_t sum = bias;
             for (size_t ky = 0; ky < 3; ++ky)
@@ -1537,7 +1537,7 @@ namespace Simd
             Store<false>(dst + F, Activate<type>(sum1, params, 0));
         }
 
-        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3(const float * src, const ConvParam & p, const float * weight, const float * bias, const float * params, float * dst)
+        template<::SimdConvolutionActivationType type> void ConvolutionDirectNhwcConvolutionBiasActivationDepthwise3x3(const float * src, const ConvParam32f & p, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcS = p.srcC*p.srcW;
             size_t srcX = p.srcC*p.strideX;
@@ -1599,7 +1599,7 @@ namespace Simd
             }
         }
 
-        template <::SimdConvolutionActivationType type> ConvolutionDirectNhwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam & p)
+        template <::SimdConvolutionActivationType type> SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr GetConvolutionBiasActivation(const ConvParam32f & p)
         {
             if (p.group == 1)
                 return ConvolutionDirectNhwcConvolutionBiasActivationDefault<type>;
@@ -1613,10 +1613,10 @@ namespace Simd
             return NULL;
         }
 
-        ConvolutionDirectNhwc::ConvolutionBiasActivationPtr ConvolutionDirectNhwc::SetConvolutionBiasActivation()
+        SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation()
         {
-            const ConvParam & p = _param;
-            ConvolutionDirectNhwc::ConvolutionBiasActivationPtr func = NULL;
+            const ConvParam32f & p = _param;
+            SynetConvolution32fDirectNhwc::ConvolutionBiasActivationPtr func = NULL;
             if (p.dstC >= F && p.dstH >= p.padY + p.padH && p.dstW >= p.padX + p.padW)
             {
                 switch (p.activation)
@@ -1629,13 +1629,13 @@ namespace Simd
                 case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 }
             }
-            return func ? func : Base::ConvolutionDirectNhwc::SetConvolutionBiasActivation();
+            return func ? func : Base::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
         };
 
         //---------------------------------------------------------------------
 
-        ConvolutionDepthwiseDotProduct::ConvolutionDepthwiseDotProduct(const ConvParam & p)
-            : Base::ConvolutionDepthwiseDotProduct(p)
+        SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p)
+            : Base::SynetConvolution32fDepthwiseDotProduct(p)
         {
         }
 
@@ -1675,7 +1675,7 @@ namespace Simd
             return sum;
         }
 
-        void ConvolutionDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
+        void SynetConvolution32fDepthwiseDotProduct::Forward(const float * src, float * buf, float * dst)
         {
             for (size_t b = 0; b < _batch; ++b)
             {
@@ -1698,25 +1698,25 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(trans, batch, conv, gemm);
+            ConvParam32f param(batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
-            else if (ConvolutionDepthwiseDotProduct::Preferable(param))
-                return new ConvolutionDepthwiseDotProduct(param);
-            else if (ConvolutionWinograd::Preferable(param))
-                return new ConvolutionWinograd(param);
-            else if (ConvolutionDirectNchw::Preferable(param))
-                return new ConvolutionDirectNchw(param);
-            else if (ConvolutionGemmNT::Preferable(param))
-                return new ConvolutionGemmNT(param);
-            else if (ConvolutionNhwcDirect::Preferable(param))
-                return new ConvolutionNhwcDirect(param);
-            else if (ConvolutionDirectNhwc::Preferable(param))
-                return new ConvolutionDirectNhwc(param);
+            else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+                return new SynetConvolution32fDepthwiseDotProduct(param);
+            else if (SynetConvolution32fWinograd::Preferable(param))
+                return new SynetConvolution32fWinograd(param);
+            else if (SynetConvolution32fDirectNchw::Preferable(param))
+                return new SynetConvolution32fDirectNchw(param);
+            else if (SynetConvolution32fGemmNT::Preferable(param))
+                return new SynetConvolution32fGemmNT(param);
+            else if (SynetConvolution32fNhwcDirect::Preferable(param))
+                return new SynetConvolution32fNhwcDirect(param);
+            else if (SynetConvolution32fDirectNhwc::Preferable(param))
+                return new SynetConvolution32fDirectNhwc(param);
             else
-                return new ConvolutionGemmNN(param);
+                return new SynetConvolution32fGemmNN(param);
         }
     }
 #endif// SIMD_NEON_ENABLE

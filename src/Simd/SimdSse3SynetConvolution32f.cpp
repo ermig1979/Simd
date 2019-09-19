@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConvolution.h"
+#include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSse1.h"
 #include "Simd/SimdSse3.h"
 
@@ -30,19 +30,19 @@ namespace Simd
 #ifdef SIMD_SSE3_ENABLE    
     namespace Sse3
     {
-        ConvolutionGemmNT::ConvolutionGemmNT(const ConvParam & p)
-            : Base::ConvolutionGemmNT(p)
+        SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
+            : Base::SynetConvolution32fGemmNT(p)
         {
         }
 
-        bool ConvolutionGemmNT::Preferable(const ConvParam & p)
+        bool SynetConvolution32fGemmNT::Preferable(const ConvParam32f & p)
         {
             return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.trans == 0;
         }
 
-        void ConvolutionGemmNT::GemmAndBias(const float * src, float * dst)
+        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
         {
-            const ConvParam & p = _param;
+            const ConvParam32f & p = _param;
             for (size_t g = 0; g < p.group; ++g)
                 Sse3::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
             Sse2::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
@@ -50,25 +50,25 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * ConvolutionInit(SimdBool trans, size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
-            ConvParam param(trans, batch, conv, gemm);
+            ConvParam32f param(batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
-            else if (Sse2::ConvolutionDepthwiseDotProduct::Preferable(param))
-                return new Sse2::ConvolutionDepthwiseDotProduct(param);
-            else if (ConvolutionWinograd::Preferable(param))
-                return new Sse2::ConvolutionWinograd(param);
-            else if (ConvolutionGemmNT::Preferable(param))
-                return new ConvolutionGemmNT(param);
-            else if (ConvolutionDirectNchw::Preferable(param))
-                return new Sse2::ConvolutionDirectNchw(param);
-            else if (ConvolutionNhwcDirect::Preferable(param))
-                return new ConvolutionNhwcDirect(param);
-            else if (ConvolutionDirectNhwc::Preferable(param))
-                return new Sse2::ConvolutionDirectNhwc(param);
+            else if (Sse2::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
+                return new Sse2::SynetConvolution32fDepthwiseDotProduct(param);
+            else if (SynetConvolution32fWinograd::Preferable(param))
+                return new Sse2::SynetConvolution32fWinograd(param);
+            else if (SynetConvolution32fGemmNT::Preferable(param))
+                return new SynetConvolution32fGemmNT(param);
+            else if (SynetConvolution32fDirectNchw::Preferable(param))
+                return new Sse2::SynetConvolution32fDirectNchw(param);
+            else if (SynetConvolution32fNhwcDirect::Preferable(param))
+                return new SynetConvolution32fNhwcDirect(param);
+            else if (SynetConvolution32fDirectNhwc::Preferable(param))
+                return new Sse2::SynetConvolution32fDirectNhwc(param);
             else
-                return new Sse2::ConvolutionGemmNN(param);
+                return new Sse2::SynetConvolution32fGemmNN(param);
         }
     }
 #endif//SIMD_SSE3_ENABLE

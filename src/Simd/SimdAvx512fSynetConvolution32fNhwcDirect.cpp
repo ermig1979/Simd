@@ -21,15 +21,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdConvolution.h"
-#include "Simd/SimdConvolutionCommon.h"
+#include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdSynetConvolution32fCommon.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x12(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x12(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, s0, w0, w1;
@@ -214,7 +214,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -327,7 +327,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x3(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x3(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, d10, d11, d20, d21, s0, w0, w1;
@@ -401,7 +401,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float * src0, const ConvParam32f & p,
             size_t kernelH, size_t kernelW, size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, s0, w0, w1;
@@ -450,7 +450,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam32f & p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t noseH = p.padY, noseW = p.padX;
@@ -537,8 +537,8 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam & p,
-            const ConvolutionNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
+        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float * src, const ConvParam32f & p,
+            const SynetConvolution32fNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
         {
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
@@ -569,7 +569,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float * src0, const ConvParam32f & p,
             size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -668,7 +668,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x3(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x3(const float * src0, const ConvParam32f & p,
             size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, d10, d11, d20, d21, s0, w0, w1;
@@ -728,7 +728,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const float * src0, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const float * src0, const ConvParam32f & p,
             size_t srcC, const float * weight, const __m512 * bias, const __m512 * params, float * dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, s0, w0, w1;
@@ -761,7 +761,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam & p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam32f & p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t n1 = (yEnd - yBeg)*p.dstW;
@@ -797,8 +797,8 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam & p,
-            const ConvolutionNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
+        template<SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam32f & p,
+            const SynetConvolution32fNhwcDirect::AlgParam & a, const float * weight, const float * bias, const float * params, float * dst)
         {
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
@@ -828,7 +828,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <SimdConvolutionActivationType type> void Set(const ConvParam & p, size_t microD, ConvolutionNhwcDirect::ConvolutionPtr & convolution)
+        template <SimdConvolutionActivationType type> void Set(const ConvParam32f & p, size_t microD, SynetConvolution32fNhwcDirect::ConvolutionPtr & convolution)
         {
             if (p.Is1x1())
             {
@@ -850,8 +850,8 @@ namespace Simd
             }
         }
 
-        ConvolutionNhwcDirect::ConvolutionNhwcDirect(const ConvParam & p)
-            : Avx2::ConvolutionNhwcDirect(p)
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f & p)
+            : Avx2::SynetConvolution32fNhwcDirect(p)
         {
             size_t microD = 2 * F;
             switch (p.activation)
