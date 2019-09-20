@@ -34,6 +34,40 @@
 /*! \namespace Simd */
 namespace Simd
 {
+    /*! @ingroup info
+
+    \fn void PrintInfo(std::ostream & os)
+
+    \short Prints information about %Simd Library and CPU properties.
+
+    \param [in, out] os - output stream.
+    */
+    SIMD_INLINE void PrintInfo(std::ostream & os)
+    {
+        os << "Simd Library: " << SimdVersion();
+        os << "; System Sockets: " << SimdCpuInfo(SimdCpuInfoSockets);
+        os << ", Cores: " << SimdCpuInfo(SimdCpuInfoCores);
+        os << ", Threads: " << SimdCpuInfo(SimdCpuInfoThreads);
+        os << "; Cache L1D: " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024 << " KB";
+        os << ", L2: " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024 << " KB";
+        os << ", L3: " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024 << " KB";
+        os << "; Available SIMD:";
+        os << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW" : "");
+        os << (SimdCpuInfo(SimdCpuInfoAvx512f) ? " AVX-512F" : "");
+        os << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA" : "");
+        os << (SimdCpuInfo(SimdCpuInfoAvx) ? " AVX" : "");
+        os << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1" : "");
+        os << (SimdCpuInfo(SimdCpuInfoSsse3) ? " SSSE3" : "");
+        os << (SimdCpuInfo(SimdCpuInfoSse3) ? " SSE3" : "");
+        os << (SimdCpuInfo(SimdCpuInfoSse2) ? " SSE2" : "");
+        os << (SimdCpuInfo(SimdCpuInfoSse) ? " SSE" : "");
+        os << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
+        os << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
+        os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
+        os << (SimdCpuInfo(SimdCpuInfoMsa) ? " MSA" : "");
+        os << std::endl;
+    }
+
 	/*! @ingroup correlation
 
 		\fn void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
