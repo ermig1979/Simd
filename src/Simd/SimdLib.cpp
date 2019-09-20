@@ -57,11 +57,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdConst.h"
+#include "Simd/SimdCpu.h"
 #include "Simd/SimdLog.h"
 #include "Simd/SimdPerformance.h"
 
 #include "Simd/SimdResizer.h"
-#include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
 
@@ -92,52 +92,61 @@ SIMD_API const char * SimdVersion()
 
 using namespace Simd;
 
-SIMD_API int SimdCpuInfo()
+SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
 {
-    int info = 0;
+    switch (type)
+    {
+    case SimdCpuInfoSockets: return Cpu::SOCKET_NUMBER;
+    case SimdCpuInfoCores: return Cpu::CORE_NUMBER;
+    case SimdCpuInfoThreads: return Cpu::THREAD_NUMBER;
+    case SimdCpuInfoCacheL1: return Cpu::L1_CACHE_SIZE;
+    case SimdCpuInfoCacheL2: return Cpu::L2_CACHE_SIZE;
+    case SimdCpuInfoCacheL3: return Cpu::L3_CACHE_SIZE;
 #ifdef SIMD_SSE_ENABLE
-    info |= Sse::Enable ? (1 << SimdCpuInfoSse) : 0;
+    case SimdCpuInfoSse: return Sse::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    info |= Sse2::Enable ? (1 << SimdCpuInfoSse2) : 0;
+    case SimdCpuInfoSse2: return Sse2::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSE3_ENABLE
-    info |= Sse3::Enable ? (1 << SimdCpuInfoSse3) : 0;
+    case SimdCpuInfoSse3: return Sse3::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSSE3_ENABLE
-    info |= Ssse3::Enable ? (1 << SimdCpuInfoSsse3) : 0;
+    case SimdCpuInfoSsse3: return Ssse3::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSE41_ENABLE
-    info |= Sse41::Enable ? (1 << SimdCpuInfoSse41) : 0;
+    case SimdCpuInfoSse41: return Sse41::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSE42_ENABLE
-    info |= Sse42::Enable ? (1 << SimdCpuInfoSse42) : 0;
+    case SimdCpuInfoSse42: return Sse42::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX_ENABLE
-    info |= Avx::Enable ? (1 << SimdCpuInfoAvx) : 0;
+    case SimdCpuInfoAvx: return Avx::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    info |= Avx2::Enable ? (1 << SimdCpuInfoAvx2) : 0;
+    case SimdCpuInfoAvx2: return Avx2::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX512F_ENABLE
-    info |= Avx512f::Enable ? (1 << SimdCpuInfoAvx512f) : 0;
+    case SimdCpuInfoAvx512f: return Avx512f::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX512BW_ENABLE
-    info |= Avx512bw::Enable ? (1 << SimdCpuInfoAvx512bw) : 0;
+    case SimdCpuInfoAvx512bw: return Avx512bw::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_VMX_ENABLE
-    info |= Vmx::Enable ? (1 << SimdCpuInfoVmx) : 0;
+    case SimdCpuInfoVmx: return Vmx::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_VSX_ENABLE
-    info |= Vsx::Enable ? (1 << SimdCpuInfoVsx) : 0;
+    case SimdCpuInfoVsx: return Vsx::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_NEON_ENABLE
-    info |= Neon::Enable ? (1 << SimdCpuInfoNeon) : 0;
+    case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_MSA_ENABLE
-    info |= Msa::Enable ? (1 << SimdCpuInfoMsa) : 0;
+    case SimdCpuInfoMsa: return Msa::Enable ? 1 : 0;
 #endif
-    return info;
+    default:
+        return 0;
+    }
 }
 
 SIMD_API const char * SimdPerformanceStatistic()

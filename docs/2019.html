@@ -32,6 +32,16 @@
 
 <h3 id="R082">October X, 2019 (version X.X.82)</h3> 
 <h4>Algorithms</h4>
+<h5>New features</h5>
+<ul>
+ <li>View::Clone method (it creates clone on the base of external buffer).</li>
+</ul>
+
+<h5>Improving</h5>
+<ul>
+ <li>Now CpuInfo gets L1D, L2, L3 cache sizes, numbers of sockets, cpus and threads.</li>
+</ul>
+
 <h5>Renaming</h5>
 <ul>
  <li>Function from ConvolutionInit to SynetConvolution32fInit.</li>
@@ -58,6 +68,7 @@
 <h5>Bug fixing</h5>
 <ul>
  <li>Some Microsoft Visual Studio project properties can cause program crash at old CPUs.</li>
+ <li>Using of AVX512 property instead of SIMD_AVX512 in CMakeLists.txt.</li>
 </ul>
 
 <a href="#HOME">Home</a> 

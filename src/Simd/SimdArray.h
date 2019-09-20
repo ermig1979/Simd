@@ -25,7 +25,6 @@
 #define __SimdArray_h__
 
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdEnable.h"
 
 namespace Simd
 {

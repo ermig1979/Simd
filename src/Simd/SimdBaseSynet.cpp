@@ -24,11 +24,54 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdEnable.h"
 
 namespace Simd
 {
     namespace Base
     {
+        SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNchwXc)
+            {
+                switch (Simd::ALIGNMENT)
+                {
+                case 16: return SimdTensorFormatNchw4c;
+                case 32: return SimdTensorFormatNchw8c;
+                case 64: return SimdTensorFormatNchw16c;
+                }
+            }
+            if (format == SimdTensorFormatOyxiXo)
+            {
+                switch (Simd::ALIGNMENT)
+                {
+                case 16: return SimdTensorFormatOyxi4o;
+                case 32: return SimdTensorFormatOyxi8o;
+                case 64: return SimdTensorFormatOyxi16o;
+                }
+            }
+            return SimdTensorFormatUnknown;
+        }
+
+        size_t SynetTensorAlignment(SimdTensorFormatType format)
+        {
+            switch (format)
+            {
+            case SimdTensorFormatNchw: return 1;
+            case SimdTensorFormatNhwc: return 1;
+            case SimdTensorFormatNchw4c: return 4;
+            case SimdTensorFormatNchw8c: return 8;
+            case SimdTensorFormatNchw16c: return 16;
+            case SimdTensorFormatOiyx: return 1;
+            case SimdTensorFormatYxio: return 1;
+            case SimdTensorFormatOyxi4o: return 4;
+            case SimdTensorFormatOyxi8o: return 8;
+            case SimdTensorFormatOyxi16o: return 16;
+            }
+            assert(0);
+            return 0;
+        }
+
         void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)
         {
             size_t aligned = Simd::AlignLo(spatial, 4);

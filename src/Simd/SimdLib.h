@@ -147,25 +147,31 @@ typedef enum
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
-    Describes types of SIMD extensions which supported by current CPU and Simd Library (see function ::SimdCpuInfo).
+    Describes type of information which can return function ::SimdCpuInfo.
 */
 typedef enum
 {
-    SimdCpuInfoSse = 0, /*!< SSE (x86). */
-    SimdCpuInfoSse2, /*!< SSE2 (x86). */
-    SimdCpuInfoSse3, /*!< SSE3 (x86). */
-    SimdCpuInfoSsse3, /*!< SSSE3 (x86). */
-    SimdCpuInfoSse41, /*!< SSE4.1 (x86). */
-    SimdCpuInfoSse42, /*!< SSE4.2 (x86). */
-    SimdCpuInfoAvx, /*!< AVX (x86). */
-    SimdCpuInfoAvx2, /*!< AVX2 (x86). */
-    SimdCpuInfoAvx512f, /*!< AVX-512F (x86). */
-    SimdCpuInfoAvx512bw, /*!< AVX-512BW (x86). */
-    SimdCpuInfoVmx, /*!< VMX or Altivec (PowerPC). */
-    SimdCpuInfoVsx, /*!< VSX (PowerPC). */
-    SimdCpuInfoNeon, /*!< NEON (ARM). */
-    SimdCpuInfoMsa, /*!< MSA (MIPS). */
-} SimdCpuInfoFlags;
+    SimdCpuInfoSockets,/*!< A number of sockets. */
+    SimdCpuInfoCores, /*!< A number of psysical CPU cores. */
+    SimdCpuInfoThreads, /*!< A number of logical CPU cores. */
+    SimdCpuInfoCacheL1, /*!< A size of level 1 data cache. */
+    SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
+    SimdCpuInfoCacheL3, /*!< A size of level 3 cache. */
+    SimdCpuInfoSse, /*!< Availability of SSE (x86). */
+    SimdCpuInfoSse2, /*!< Availability of SSE2 (x86). */
+    SimdCpuInfoSse3, /*!< Availability of SSE3 (x86). */
+    SimdCpuInfoSsse3, /*!< Availability of SSSE3 (x86). */
+    SimdCpuInfoSse41, /*!< Availability of SSE4.1 (x86). */
+    SimdCpuInfoSse42, /*!< Availability of SSE4.2 (x86). */
+    SimdCpuInfoAvx, /*!< Availability of AVX (x86). */
+    SimdCpuInfoAvx2, /*!< Availability of AVX2 (x86). */
+    SimdCpuInfoAvx512f, /*!< Availability of AVX-512F (x86). */
+    SimdCpuInfoAvx512bw, /*!< Availability of AVX-512BW (x86). */
+    SimdCpuInfoVmx, /*!< Availability of VMX or Altivec (PowerPC). */
+    SimdCpuInfoVsx, /*!< Availability of VSX (PowerPC). */
+    SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
+    SimdCpuInfoMsa, /*!< Availability of MSA (MIPS). */
+} SimdCpuInfoType;
 
 /*! @ingroup c_types
     Describes types and flags to get information about classifier cascade with using function ::SimdDetectionInfo.
@@ -500,11 +506,11 @@ extern "C"
 
     /*! @ingroup info
 
-        \fn int SimdCpuInfo();
+        \fn size_t SimdCpuInfo(SimdCpuInfoType type);
 
-        \short Gets info about SIMD extensions supported by CPU and %Simd Library.
+        \short Gets info about CPU and %Simd Library.
 
-        \note See enumeration ::SimdCpuInfoFlags.
+        \note See enumeration ::SimdCpuInfoType.
 
         Using example:
         \verbatim
@@ -513,28 +519,34 @@ extern "C"
 
         int main()
         {
-            int info = SimdCpuInfo();
-            std::cout << "SSE: " << (info&(1 << SimdCpuInfoSse) ? "Yes" : "No") << std::endl;
-            std::cout << "SSE2: " << (info&(1 << SimdCpuInfoSse2) ? "Yes" : "No") << std::endl;
-            std::cout << "SSE3: " << (info&(1 << SimdCpuInfoSse3) ? "Yes" : "No") << std::endl;
-            std::cout << "SSSE3: " << (info&(1 << SimdCpuInfoSsse3) ? "Yes" : "No") << std::endl;
-            std::cout << "SSE4.1: " << (info&(1 << SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
-            std::cout << "SSE4.2: " << (info&(1 << SimdCpuInfoSse42) ? "Yes" : "No") << std::endl;
-            std::cout << "AVX: " << (info&(1 << SimdCpuInfoAvx) ? "Yes" : "No") << std::endl;
-            std::cout << "AVX2: " << (info&(1 << SimdCpuInfoAvx2) ? "Yes" : "No") << std::endl;
-            std::cout << "AVX-512F: " << (info&(1 << SimdCpuInfoAvx512f) ? "Yes" : "No") << std::endl;
-            std::cout << "AVX-512BW: " << (info&(1 << SimdCpuInfoAvx512bw) ? "Yes" : "No") << std::endl;
-            std::cout << "PowerPC-Altivec: " << (info&(1 << SimdCpuInfoVmx) ? "Yes" : "No") << std::endl;
-            std::cout << "PowerPC-VSX: " << (info&(1 << SimdCpuInfoVsx) ? "Yes" : "No") << std::endl;
-            std::cout << "ARM-NEON: " << (info&(1 << SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
-            std::cout << "MIPS-MSA: " << (info&(1 << SimdCpuInfoMsa) ? "Yes" : "No") << std::endl;
+            std::cout << "Sockets : " << SimdCpuInfo(SimdCpuInfoSockets) << std::endl;
+            std::cout << "Cores : " << SimdCpuInfo(SimdCpuInfoCores) << std::endl;
+            std::cout << "Threads : " << SimdCpuInfo(SimdCpuInfoThreads) << std::endl;
+            std::cout << "L1D Cache : " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024  << " KB" << std::endl;
+            std::cout << "L2 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  << " KB" << std::endl;
+            std::cout << "L3 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  << " KB" << std::endl;
+            std::cout << "SSE: " << (SimdCpuInfo(SimdCpuInfoSse) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE2: " << (SimdCpuInfo(SimdCpuInfoSse2) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE3: " << (SimdCpuInfo(SimdCpuInfoSse3) ? "Yes" : "No") << std::endl;
+            std::cout << "SSSE3: " << (SimdCpuInfo(SimdCpuInfoSsse3) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE4.1: " << (SimdCpuInfo(SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
+            std::cout << "SSE4.2: " << (SimdCpuInfo(SimdCpuInfoSse42) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX: " << (SimdCpuInfo(SimdCpuInfoAvx) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX2: " << (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX-512F: " << (SimdCpuInfo(SimdCpuInfoAvx512f) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX-512BW: " << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? "Yes" : "No") << std::endl;
+            std::cout << "PowerPC-Altivec: " << (SimdCpuInfo(SimdCpuInfoVmx) ? "Yes" : "No") << std::endl;
+            std::cout << "PowerPC-VSX: " << (SimdCpuInfo(SimdCpuInfoVsx) ? "Yes" : "No") << std::endl;
+            std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
+            std::cout << "MIPS-MSA: " << (SimdCpuInfo(SimdCpuInfoMsa) ? "Yes" : "No") << std::endl;
             return 0;
         }
         \endverbatim
 
-        \return an integer value which bits contains information about SIMD extensions supported by CPU and %Simd Library.
+        \param [in] type - a type of required information.
+        \return a value which contains information about CPU and %Simd Library.
     */
-    SIMD_API int SimdCpuInfo();
+    SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type);
 
     /*! @ingroup info
 

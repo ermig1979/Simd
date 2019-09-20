@@ -570,6 +570,10 @@ namespace Simd
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
 
+        SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format);
+
+        size_t SynetTensorAlignment(SimdTensorFormatType format);
+
         void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
 
