@@ -349,6 +349,8 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetConvolution32fForward);
 
+    TEST_ADD_GROUP_A00(SynetDeconvolution32fForward);
+
     TEST_ADD_GROUP_A00(SynetMergedConvolution32fForward);
 
     TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
@@ -707,7 +709,7 @@ namespace Test
 
 int main(int argc, char* argv[])
 {
-    Test::CheckCpp();
+    //Test::CheckCpp();
 
     Test::Options options(argc, argv);
 

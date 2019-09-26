@@ -93,6 +93,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae4707759c7424c6cb4369bf2a8155f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46f4f23b9bb60566c3146b1be00e1dc2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Clone</a> () const</td></tr>
 <tr class="separator:a46f4f23b9bb60566c3146b1be00e1dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab15976429bab921fb6042bfe98bfd73b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ab15976429bab921fb6042bfe98bfd73b">Clone</a> (<a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;buffer) const</td></tr>
+<tr class="separator:ab15976429bab921fb6042bfe98bfd73b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b98869df8e7e6275ae38ab97365da76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a8b98869df8e7e6275ae38ab97365da76">operator=</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;frame)</td></tr>
 <tr class="separator:a8b98869df8e7e6275ae38ab97365da76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68acc92a0dd91b49cff63f7589d551b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a68acc92a0dd91b49cff63f7589d551b8">Ref</a> ()</td></tr>
@@ -528,7 +530,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a46f4f23b9bb60566c3146b1be00e1dc2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a46f4f23b9bb60566c3146b1be00e1dc2">&#9670;&nbsp;</a></span>Clone()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a46f4f23b9bb60566c3146b1be00e1dc2">&#9670;&nbsp;</a></span>Clone() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -543,6 +545,32 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div><div class="memdoc">
 <p>Gets a copy of current frame.</p>
 <dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images). ">Frame</a> structure. The user must free this pointer after usage. </dd></dl>
+
+</div>
+</div>
+<a id="ab15976429bab921fb6042bfe98bfd73b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab15976429bab921fb6042bfe98bfd73b">&#9670;&nbsp;</a></span>Clone() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>* Clone </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>buffer</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Gets a copy of current frame using buffer as a storage.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">buffer</td><td>- an external frame as a buffer. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to the new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images). ">Frame</a> structure (not owner). The user must free this pointer after usage. </dd></dl>
 
 </div>
 </div>

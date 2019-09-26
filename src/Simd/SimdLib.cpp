@@ -63,6 +63,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
 
 #include "Simd/SimdBase.h"
@@ -5192,9 +5193,7 @@ SIMD_API void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel,
     simdSynetConvertFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
 }
 
-
 typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
-
 SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC6(SynetConvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
@@ -5222,6 +5221,36 @@ SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, 
     SynetConvolution32f * c = (SynetConvolution32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
+}
+
+typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
+SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC0(SynetDeconvolution32fInit);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
+{
+    return simdSynetDeconvolution32fInit(batch, params, gemm);
+}
+
+SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context)
+{
+    return ((SynetDeconvolution32f*)context)->ExternalBufferSize();
+}
+
+SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context)
+{
+    return ((SynetDeconvolution32f*)context)->InternalBufferSize();
+}
+
+SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params)
+{
+    ((SynetDeconvolution32f*)context)->SetParams(weight, internal, bias, params);
+}
+
+SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst)
+{
+    SynetDeconvolution32f * d = (SynetDeconvolution32f*)context;
+    SIMD_PERF_EXT(d);
+    d->Forward(src, buf, dst);
 }
 
 SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv)

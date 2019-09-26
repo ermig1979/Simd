@@ -239,6 +239,7 @@ namespace Simd
         /*!
             Gets a copy of current image view using buffer as a storage.
 
+            \param [in] buffer - an external view as a buffer.
             \return a pointer to the new View structure (not owner). The user must free this pointer after usage.
         */
         View * Clone(View & buffer) const;

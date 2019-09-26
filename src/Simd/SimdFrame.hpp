@@ -2,7 +2,7 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2019 Yermalayeu Ihar,
-*               2011-2019 Antonenka Mikhail,
+*               2014-2019 Antonenka Mikhail,
 *               2019-2019 Artur Voronkov.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -150,6 +150,7 @@ namespace Simd
         /*!
             Gets a copy of current frame using buffer as a storage.
 
+            \param [in, out] buffer - an external frame as a buffer.
             \return a pointer to the new Frame structure (not owner). The user must free this pointer after usage.
         */
         Frame * Clone(Frame & buffer) const;
@@ -448,6 +449,7 @@ namespace Simd
         return clone;
     }
 
+    /*! \cond */
     template <template<class> class A> SIMD_INLINE Frame<A> * Frame<A>::Clone(Frame<A> & buffer) const
     {
         for (size_t i = 0; i < PlaneCount(); ++i)
@@ -463,6 +465,7 @@ namespace Simd
         Copy(*this, *clone);
         return clone;
     }
+    /*! \endcond */
 
     template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::operator = (const Frame<A> & frame)
     {

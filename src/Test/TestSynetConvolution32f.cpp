@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 #include "Test/TestTensor.h"
+#include "Test/TestSynetConvolutionParam.h"
 
 #include "Simd/SimdSynetConvolution32f.h"
 
@@ -32,69 +33,7 @@ namespace Test
 {
     namespace
     {
-        struct Param
-        {
-            SimdBool trans;
-            size_t batch;
-            SimdConvolutionParameters conv;
-
-            Param(SimdBool t, size_t n, size_t sC, size_t sH, size_t sW, size_t dC, size_t kY, size_t kX, size_t dY, size_t dX,
-                size_t sY, size_t sX, size_t pY, size_t pX, size_t pH, size_t pW, size_t g, ::SimdConvolutionActivationType a)
-            {
-                trans = t;
-                batch = n;
-                conv.srcC = sC;
-                conv.srcH = sH;
-                conv.srcW = sW;
-                conv.srcT = SimdTensorData32f;
-                conv.srcF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
-                conv.dstC = dC;
-                conv.dstT = SimdTensorData32f;
-                conv.dstF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
-                conv.kernelY = kY;
-                conv.kernelX = kX;
-                conv.dilationY = dY;
-                conv.dilationX = dX;
-                conv.strideY = sY;
-                conv.strideX = sX;
-                conv.padY = pY;
-                conv.padX = pX;
-                conv.padH = pH;
-                conv.padW = pW;
-                conv.group = g;
-                conv.activation = a;
-                conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
-                conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
-            }
-
-            Param(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size d, Size s, Size b, Size e, size_t g, ::SimdConvolutionActivationType a, ::SimdBool t)
-            {
-                trans = t;
-                batch = n;
-                conv.srcC = sC;
-                conv.srcH = sH;
-                conv.srcW = sW;
-                conv.srcT = SimdTensorData32f;
-                conv.srcF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
-                conv.dstC = dC;
-                conv.dstT = SimdTensorData32f;
-                conv.dstF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
-                conv.kernelY = k.y;
-                conv.kernelX = k.x;
-                conv.dilationY = d.y;
-                conv.dilationX = d.x;
-                conv.strideY = s.y;
-                conv.strideX = s.y;
-                conv.padY = b.y;
-                conv.padX = b.x;
-                conv.padH = e.y;
-                conv.padW = e.x;
-                conv.group = g;
-                conv.activation = a;
-                conv.dstH = (conv.srcH + conv.padY + conv.padH - (conv.dilationY * (conv.kernelY - 1) + 1)) / conv.strideY + 1;
-                conv.dstW = (conv.srcW + conv.padX + conv.padW - (conv.dilationX * (conv.kernelX - 1) + 1)) / conv.strideX + 1;
-            }
-        };
+        typedef Test::SynetConvolutionParam<false> Param;
 
         struct FuncC
         {
@@ -107,14 +46,7 @@ namespace Test
 
             void Update(const Param & p)
             {
-                const SimdConvolutionParameters & c = p.conv;
-                std::stringstream ss;
-                ss << description;
-                ss << "[" << p.batch << "x" << c.srcC << "x" << c.srcH << "x" << c.srcW;
-                ss << "-" << c.dstC << "x" << c.kernelY << "x" << c.kernelX;
-                ss << "-" << c.strideX << "-" << Simd::Max(c.padX, c.padW) << "-" << c.group << "-" << p.trans;
-                ss << "]";
-                description = ss.str();
+                description = description + p.Decription();
             }
 
             void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, const Tensor32f & params, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const

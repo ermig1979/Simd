@@ -97,7 +97,7 @@ typedef enum
 } SimdCompareType;
 
 /*! @ingroup synet
-    Describes type of activation function. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit and ::SimdSynetMergedConvolution32fInit.
+    Describes type of activation function. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit and ::SimdSynetMergedConvolution32fInit.
 */
 typedef enum
 {
@@ -385,7 +385,7 @@ typedef enum
 typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
 /*! @ingroup synet
-    Describes convolution parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit and ::SimdSynetMergedConvolution32fInit.
+    Describes convolution (deconvolution) parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit and ::SimdSynetMergedConvolution32fInit.
 */
 typedef struct SimdConvolutionParameters
 {
@@ -430,27 +430,27 @@ typedef struct SimdConvolutionParameters
     */
     SimdTensorFormatType dstF;
     /*!
-        A convolution kernel window height.
+        A convolution (deconvolution) kernel window height.
     */
     size_t kernelY;
     /*!
-        A convolution kernel window width.
+        A convolution (deconvolution) kernel window width.
     */
     size_t kernelX;
     /*!
-        A convolution dilation along Y-axis.
+        A convolution (deconvolution) dilation along Y-axis.
     */
     size_t dilationY;
     /*!
-        A convolution dilation along X-axis.
+        A convolution (deconvolution) dilation along X-axis.
     */
     size_t dilationX;
     /*!
-        A convolution stride along Y-axis.
+        A convolution (deconvolution) stride along Y-axis.
     */
     size_t strideY;
     /*!
-        A convolution stride along X-axis.
+        A convolution (deconvolution) stride along X-axis.
     */
     size_t strideX;
     /*!
@@ -470,11 +470,11 @@ typedef struct SimdConvolutionParameters
     */
     size_t padW;
     /*!
-        A number of convolution groups.
+        A number of convolution (deconvolution) groups.
     */
     size_t group;
     /*!
-        An activation function type used after convolution.
+        An activation function type used after convolution (deconvolution).
     */
     SimdConvolutionActivationType activation;
 } SimdConvolutionParameters;
@@ -5502,7 +5502,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
@@ -5516,7 +5516,7 @@ extern "C"
     */
     SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
@@ -5527,7 +5527,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
@@ -5538,7 +5538,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -5552,7 +5552,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -5565,7 +5565,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
 
@@ -5578,7 +5578,7 @@ extern "C"
     */
     SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
@@ -5589,7 +5589,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
@@ -5600,7 +5600,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const stats);
 
@@ -5614,7 +5614,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const stats);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_convolution
 
         \fn void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
@@ -5626,6 +5626,69 @@ extern "C"
         \param [out] dst - a pointer to output tensor.
     */
     SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
+
+    /*! @ingroup synet
+
+        \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+
+        \short Initilizes FP32 deconvolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] conv - a pointer to deconvolution parameters.
+        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
+        \return a pointer to FP32 deconvolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+        This pointer is used in functions ::SimdSynetDeconvolution32fExternalBufferSize, ::SimdSynetDeconvolution32fInternalBufferSize, ::SimdSynetDeconvolution32fSetParams and ::SimdSynetDeconvolution32fForward.
+    */
+    SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
+
+        \short Gets size of external temporary buffer required for FP32 deconvolution algorithm.
+
+        \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
+        \return size of external temporary buffer required for FP32 deconvolution algorithm.
+    */
+    SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside FP32 deconvolution algorithm.
+
+        \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside FP32 deconvolution algorithm.
+    */
+    SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
+
+        \short Sets weights, beases and parameters of activation function required for FP32 deconvolution algorithm.
+
+        \param [in, out] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to deconvolution weights.
+        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [in] bias - a pointer to bias. Can be NULL.
+        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+    */
+    SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
+
+        \short Performs forward propagation of FP32 deconvolution algorithm.
+
+        \param [in] context - a pointer to FP32 deconvolution context. It must be created by function ::SimdSynetDeconvolution32fInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] buf - a pointer to external temporary buffer. The size of the external temporary buffer is determined by function ::SimdSynetDeconvolution32fExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
     /*! @ingroup synet
 
