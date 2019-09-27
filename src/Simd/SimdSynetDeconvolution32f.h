@@ -239,6 +239,121 @@ namespace Simd
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
+
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
+    {
+        class SynetDeconvolution32fGemmNN : public Base::SynetDeconvolution32fGemmNN
+        {
+        public:
+            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            virtual String Ext() const { return "Sse2"; }
+        };
+
+        //class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
+        //{
+        //public:
+        //    SynetConvolution32fNhwcDirect(const ConvParam32f & p);
+        //    virtual String Ext() const { return "Sse2"; }
+
+        //    static bool Preferable(const ConvParam32f & p);
+        //};
+
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_SSE2_ENABLE
+
+#ifdef SIMD_AVX_ENABLE    
+    namespace Avx
+    {
+        class SynetDeconvolution32fGemmNN : public Sse2::SynetDeconvolution32fGemmNN
+        {
+        public:
+            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            virtual String Ext() const { return "Avx"; }
+        };
+
+        //class SynetConvolution32fNhwcDirect : public Sse2::SynetConvolution32fNhwcDirect
+        //{
+        //public:
+        //    SynetConvolution32fNhwcDirect(const ConvParam32f & p);
+        //    virtual String Ext() const { return "Avx"; }
+
+        //    static bool Preferable(const ConvParam32f & p);
+        //};
+
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class SynetDeconvolution32fGemmNN : public Avx::SynetDeconvolution32fGemmNN
+        {
+        public:
+            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //class SynetConvolution32fNhwcDirect : public Avx::SynetConvolution32fNhwcDirect
+        //{
+        //public:
+        //    SynetConvolution32fNhwcDirect(const ConvParam32f & p);
+        //    virtual String Ext() const { return "Avx2"; }
+
+        //    static bool Preferable(const ConvParam32f & p);
+        //};
+
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512F_ENABLE    
+    namespace Avx512f
+    {
+        class SynetDeconvolution32fGemmNN : public Avx2::SynetDeconvolution32fGemmNN
+        {
+        public:
+            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            virtual String Ext() const { return "Avx512f"; }
+        };
+
+        //class SynetConvolution32fNhwcDirect : public Avx2::SynetConvolution32fNhwcDirect
+        //{
+        //public:
+        //    SynetConvolution32fNhwcDirect(const ConvParam32f & p);
+        //    virtual String Ext() const { return "Avx512f"; }
+
+        //    static bool Preferable(const ConvParam32f & p);
+        //};
+
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_AVX512F_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class SynetDeconvolution32fGemmNN : public Base::SynetDeconvolution32fGemmNN
+        {
+        public:
+            SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        //class SynetConvolution32fNhwcDirect : public Base::SynetConvolution32fNhwcDirect
+        //{
+        //public:
+        //    SynetConvolution32fNhwcDirect(const ConvParam32f & p);
+        //    virtual String Ext() const { return "Neon"; }
+
+        //    static bool Preferable(const ConvParam32f & p);
+        //};
+
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    }
+#endif//SIMD_NEON_ENABLE
 }
 
 #endif//__SimdSynetDeconvolution32f_h__

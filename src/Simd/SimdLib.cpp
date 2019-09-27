@@ -5224,7 +5224,7 @@ SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, 
 }
 
 typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
-SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC0(SynetDeconvolution32fInit);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
 {

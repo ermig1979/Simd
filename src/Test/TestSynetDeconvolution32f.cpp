@@ -120,7 +120,9 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 22, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 20, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 22, 40, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 44, 80, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 22, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
@@ -144,35 +146,30 @@ namespace Test
 
         result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Base::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 
-//#ifdef SIMD_SSE2_ENABLE
-//        if (Simd::Sse2::Enable)
-//            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Sse2::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-//#endif 
-//
-//#ifdef SIMD_SSE3_ENABLE
-//        if (Simd::Sse3::Enable)
-//            result = result && SynetConvolution32fForwardAutoTest(4 * EPS, FUNC_C(Simd::Sse3::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-//#endif 
-//
-//#ifdef SIMD_AVX_ENABLE
-//        if (Simd::Avx::Enable)
-//            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-//#endif 
-//
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx2::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-//#endif
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512f::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-//#endif
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Neon::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
-//#endif
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Sse2::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx512f::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Neon::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+#endif
 
         return result;
     }

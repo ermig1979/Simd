@@ -109,7 +109,7 @@ namespace Simd
                 {
                     for (size_t i = 0; i < _M; ++i)
                         for (size_t k = 0; k < _K; ++k)
-                            dst[k * _M + i] = src[i * _K + k];
+                            dst[i * _K + k] = src[k * _M + i];
                     src += _grW;
                     dst += _grW;
                 }
@@ -222,32 +222,54 @@ namespace Simd
         {
             const DeconvParam32f & p = _param;
             assert(p.trans && p.group == 1);
-            for (size_t dy = 0; dy < p.dstH; ++dy)
-                for (size_t dx = 0; dx < p.dstW; ++dx)
-                    memset(dst + (dy*p.dstW + dx)*p.dstC, 0, p.dstC * sizeof(float));
-            for (size_t sy = 0; sy < p.srcH; ++sy)
+            if (p.IsPad(0) && p.IsDilation(1) && p.kernelY == p.strideX && p.kernelX == p.strideX)
             {
-                for (size_t sx = 0; sx < p.srcW; ++sx)
+                for (size_t sy = 0; sy < p.srcH; ++sy)
                 {
-                    size_t dy = sy * p.strideY - p.padY;
-                    for (size_t ky = 0; ky < p.kernelY; ky++, dy += p.dilationY)
+                    for (size_t sx = 0; sx < p.srcW; ++sx)
                     {
-                        if (dy < p.dstH)
+                        size_t dy = sy * p.strideY;
+                        for (size_t ky = 0; ky < p.kernelY; ky++, dy += 1)
                         {
-                            size_t dx = sx * p.strideX - p.padX;
-                            for (size_t kx = 0; kx < p.kernelX; kx++, dx += p.dilationX)
+                            size_t dx = sx * p.strideX;
+                            for (size_t kx = 0; kx < p.kernelX; kx++, dx += 1)
                             {
-                                if (dx < p.dstW)
-                                {
-                                    float * d = dst + (dy * p.dstW + dx)*p.dstC;
-                                    for (size_t dc = 0; dc < p.dstC; ++dc)
-                                        d[dc] += src[dc];
-                                }
+                                memcpy(dst + (dy * p.dstW + dx)*p.dstC, src, p.dstC * sizeof(float));
                                 src += p.dstC;
                             }
                         }
-                        else
-                            src += p.kernelX * p.dstC;
+                    }
+                }
+            }
+            else
+            {
+                for (size_t dy = 0; dy < p.dstH; ++dy)
+                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                        memset(dst + (dy*p.dstW + dx)*p.dstC, 0, p.dstC * sizeof(float));
+                for (size_t sy = 0; sy < p.srcH; ++sy)
+                {
+                    for (size_t sx = 0; sx < p.srcW; ++sx)
+                    {
+                        size_t dy = sy * p.strideY - p.padY;
+                        for (size_t ky = 0; ky < p.kernelY; ky++, dy += p.dilationY)
+                        {
+                            if (dy < p.dstH)
+                            {
+                                size_t dx = sx * p.strideX - p.padX;
+                                for (size_t kx = 0; kx < p.kernelX; kx++, dx += p.dilationX)
+                                {
+                                    if (dx < p.dstW)
+                                    {
+                                        float * d = dst + (dy * p.dstW + dx)*p.dstC;
+                                        for (size_t dc = 0; dc < p.dstC; ++dc)
+                                            d[dc] += src[dc];
+                                    }
+                                    src += p.dstC;
+                                }
+                            }
+                            else
+                                src += p.kernelX * p.dstC;
+                        }
                     }
                 }
             }
