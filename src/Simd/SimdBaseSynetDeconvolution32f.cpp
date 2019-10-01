@@ -277,14 +277,116 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        SynetDeconvolution32fNhwcDirect2x2::SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p)
+            : SynetDeconvolution32f(p)
+        {
+            _sizeS = p.srcC*p.srcH*p.srcW;
+            _sizeD = p.dstC*p.dstH*p.dstW;
+            _deconvolution = NULL;
+        }
+
+        void SynetDeconvolution32fNhwcDirect2x2::SetAlgParam(size_t F, size_t L1, size_t L2, size_t L3)
+        {
+            const DeconvParam32f & p = _param;
+            _alg.microD = F;
+            _alg.macroC = Simd::Min(L1 / sizeof(float) / p.kernelX / _alg.microD, p.srcC);
+            _alg.macroH = Simd::Min(L2 / sizeof(float) / _alg.macroC / p.srcW, p.srcH);
+            _alg.macroD = Simd::Min(AlignLoAny(L3 / sizeof(float) / p.kernelY / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
+            _rWeight.Resize(AlignHiAny(p.dstC, _alg.microD) * p.kernelY * p.kernelX * p.srcC);
+            _rBias.Resize(AlignHiAny(p.dstC, _alg.microD), true);
+            if (p.activation == ::SimdConvolutionActivationPrelu)
+                _rParams.Resize(AlignHiAny(p.dstC, _alg.microD));
+        }
+
+        void SynetDeconvolution32fNhwcDirect2x2::ReorderWeight(const float * src, float * dst)
+        {
+            const DeconvParam32f & p = _param;
+            const AlgParam & a = _alg;
+            for (size_t da = 0; da < p.dstC; da += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, da + a.macroD) - da;
+                for (size_t sa = 0; sa < p.srcC; sa += a.macroC)
+                {
+                    size_t macroC = Simd::Min(p.srcC, sa + a.macroC) - sa;
+                    for (size_t di = 0; di < macroD; di += a.microD)
+                    {
+                        size_t microD = Simd::Min(macroD, di + a.microD) - di;
+                        for (size_t ky = 0; ky < p.kernelY; ky++)
+                        {
+                            for (size_t kx = 0; kx < p.kernelX; kx++)
+                            {
+                                for (size_t si = 0; si < macroC; si++)
+                                {
+                                    const float * s = src + (((sa + si)*p.kernelY + ky) * p.kernelX + kx) * p.dstC + da + di;
+                                    size_t i = 0;
+                                    for (; i < microD; i++)
+                                        dst[i] = s[i];
+                                    for (; i < a.microD; i++)
+                                        dst[i] = 0;
+                                    dst += a.microD;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        size_t SynetDeconvolution32fNhwcDirect2x2::InternalBufferSize() const
+        {
+            return _buffer.size + _rWeight.size + _rBias.size + _rParams.size;
+        }
+
+        void SynetDeconvolution32fNhwcDirect2x2::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
+        {
+            SynetDeconvolution32f::SetParams(weight, internal, bias, params);
+            if (_rWeight.data)
+            {
+                const DeconvParam32f & p = _param;
+                ReorderWeight(weight, _rWeight.data);
+                _weight = _rWeight.data;
+                if (internal)
+                    *internal = SimdTrue;
+            }
+            if (_rBias.data)
+            {
+                if (bias)
+                    memcpy(_rBias.data, bias, _param.dstC * sizeof(float));
+                _bias = _rBias.data;
+            }
+            if (_rParams.data && _param.activation == ::SimdConvolutionActivationPrelu)
+            {
+                memcpy(_rParams.data, params, _param.dstC * sizeof(float));
+                _params = _rParams.data;
+            }
+        }
+
+        void SynetDeconvolution32fNhwcDirect2x2::Forward(const float * src, float * buf, float * dst)
+        {
+            const DeconvParam32f & p = _param;
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                _deconvolution(src, _param, _alg, _weight, _bias, _params, dst);
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+        bool SynetDeconvolution32fNhwcDirect2x2::Preferable(const DeconvParam32f & p)
+        {
+            return false;
+        }
+
+        //---------------------------------------------------------------------
+
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             DeconvParam32f param(batch, conv, gemm);
             if (!param.Valid())
                 return NULL;
-            //if (SynetConvolution32fDirectNhwc::Preferable(param))
-            //    return new SynetConvolution32fDirectNhwc(param);
-            //else
+            if (SynetDeconvolution32fNhwcDirect2x2::Preferable(param))
+                return new SynetDeconvolution32fNhwcDirect2x2(param);
+            else
                 return new SynetDeconvolution32fGemmNN(param);
         }
     }

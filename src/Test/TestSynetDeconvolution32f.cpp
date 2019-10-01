@@ -80,8 +80,7 @@ namespace Test
         Tensor32f src({p.batch, p.trans ? c.srcH : c.srcC, p.trans ? c.srcW : c.srcH, p.trans ? c.srcC : c.srcW });
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
 
-        Tensor32f weight({ p.trans ? c.kernelY : c.dstC, p.trans ? c.kernelX : c.srcC / c.group,
-            p.trans ? c.srcC / c.group : c.kernelY, p.trans ? c.dstC : c.kernelX });
+        Tensor32f weight({ c.srcC, p.trans ? c.kernelY : c.dstC / c.group, p.trans ? c.kernelX : c.kernelY, p.trans ? c.dstC / c.group : c.kernelX });
         FillRandom(weight.Data(), weight.Size(), -1.0, 1.0f);
 
         Tensor32f bias({ c.dstC });
@@ -123,9 +122,10 @@ namespace Test
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 20, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 22, 40, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 44, 80, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        //result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 32, 44, 80, 30, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 11, 22, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, Param(1, 24, 44, 80, 24, _2, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }

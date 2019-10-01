@@ -113,6 +113,24 @@ namespace Simd
         const size_t L2_CACHE_SIZE = Base::CpuCacheSize(2);
         const size_t L3_CACHE_SIZE = Base::CpuCacheSize(3);
     }
+
+    namespace Base
+    {
+        SIMD_INLINE size_t AlgCacheL1()
+        {
+            return Cpu::L1_CACHE_SIZE;
+        }
+
+        SIMD_INLINE size_t AlgCacheL2()
+        {
+            return Cpu::L2_CACHE_SIZE;
+        }
+
+        SIMD_INLINE size_t AlgCacheL3()
+        {
+            return Cpu::L3_CACHE_SIZE / Cpu::CORE_NUMBER;
+        }
+    }
 }
 
 #endif//__SimdCpu_h__
