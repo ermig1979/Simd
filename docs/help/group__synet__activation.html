@@ -52,6 +52,12 @@ Functions</h2></td></tr>
 <tr class="memitem:gaee4f654aee53a18b5506e71f6790f39f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gaee4f654aee53a18b5506e71f6790f39f">SimdSynetElu32f</a> (const float *src, size_t size, const float *alpha, float *dst)</td></tr>
 <tr class="memdesc:gaee4f654aee53a18b5506e71f6790f39f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates ELU for 32-bit float array.  <a href="#gaee4f654aee53a18b5506e71f6790f39f">More...</a><br /></td></tr>
 <tr class="separator:gaee4f654aee53a18b5506e71f6790f39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga767efadfb7169fddcd77b3df30368667"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga767efadfb7169fddcd77b3df30368667">SimdSynetPreluLayerForward</a> (const float *src, const float *slope, size_t channels, size_t spatial, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga767efadfb7169fddcd77b3df30368667"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PreluLayer (PReLU).  <a href="#ga767efadfb7169fddcd77b3df30368667">More...</a><br /></td></tr>
+<tr class="separator:ga767efadfb7169fddcd77b3df30368667"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga711c80dca9d175a2ac9221b1062b7840"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga711c80dca9d175a2ac9221b1062b7840">SimdSynetRestrictRange</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
+<tr class="memdesc:ga711c80dca9d175a2ac9221b1062b7840"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given array.  <a href="#ga711c80dca9d175a2ac9221b1062b7840">More...</a><br /></td></tr>
+<tr class="separator:ga711c80dca9d175a2ac9221b1062b7840"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions to acceleratе activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -103,6 +109,137 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to alpha parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga767efadfb7169fddcd77b3df30368667"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga767efadfb7169fddcd77b3df30368667">&#9670;&nbsp;</a></span>SimdSynetPreluLayerForward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetPreluLayerForward </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>slope</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>spatial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of PreluLayer (PReLU). </p>
+<p>Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
+    for(s = 0; s &lt; spatial; ++s)
+        dst[c*spatial + s] = src[c*spatial + s] &gt; 0 ? src[c*spatial + s] : slope[c]*src[c*spatial + s];
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 32-bit float array with slope coefficients. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of (input/output) image tensor. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size. ">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format. ">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga711c80dca9d175a2ac9221b1062b7840"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga711c80dca9d175a2ac9221b1062b7840">&#9670;&nbsp;</a></span>SimdSynetRestrictRange()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetRestrictRange </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>lower</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>upper</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used in order to restrict range for given array. </p>
+<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+    dst[i] = Min(Max(lower, src[i]), upper);
+}
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to lower restrict bound. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to upper restrict bound. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>

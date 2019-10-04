@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -826,7 +827,7 @@ namespace Simd
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
             default: return;
             }
-            SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
+            SetAlgParam(microD, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
         }
     }
 #endif//SIMD_AVX_ENABLE

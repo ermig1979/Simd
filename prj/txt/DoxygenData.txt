@@ -526,6 +526,11 @@
 */
 
 /*! @ingroup synet
+    @defgroup synet_conversion Conversion functions
+    \short Functions to acceleratе conversion in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+*/
+
+/*! @ingroup synet
     @defgroup synet_convolution Convolution framework
     \short A framework to accelerate convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */

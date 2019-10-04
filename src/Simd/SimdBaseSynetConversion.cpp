@@ -23,6 +23,8 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdArray.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
@@ -186,6 +188,8 @@ namespace Simd
             }
         }
 
+        //---------------------------------------------------------------------
+
         void SynetConvertFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             size_t stride = input * kernel;
@@ -347,7 +351,134 @@ namespace Simd
             SynetFilterConverterPtr filterConverter = GetFilterConverter(srcFormat, dstFormat);
             assert(filterConverter);
             filterConverter(output, input, kernel, src, dst);
+        }
 
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE float ToFloat(int value, float scale, float shift)
+        {
+            return value * scale + shift;
+        }
+
+        template<SimdPixelFormatType format> SIMD_INLINE int ToGray(const uint8_t * src);
+
+        template<> SIMD_INLINE int ToGray<SimdPixelFormatGray8>(const uint8_t * src)
+        {
+            return src[0];
+        }
+
+        template<> SIMD_INLINE int ToGray<SimdPixelFormatBgr24>(const uint8_t * src)
+        {
+            return BgrToGray(src[0], src[1], src[2]);
+        }
+
+        template<> SIMD_INLINE int ToGray<SimdPixelFormatRgb24>(const uint8_t * src)
+        {
+            return BgrToGray(src[2], src[1], src[0]);
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInput1(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst)
+        {
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; ++x, src += step)
+                    *dst++ = ToFloat(ToGray<format>(src), scale[0], shift[0]);
+                src += (stride - width * step);
+            }
+        }
+
+        template<SimdPixelFormatType format> SIMD_INLINE int ToBgr(const uint8_t * src, size_t channel);
+
+        template<> SIMD_INLINE int ToBgr<SimdPixelFormatGray8>(const uint8_t * src, size_t channel)
+        {
+            return src[0];
+        }
+
+        template<> SIMD_INLINE int ToBgr<SimdPixelFormatBgr24>(const uint8_t * src, size_t channel)
+        {
+            return src[channel];
+        }
+
+        template<> SIMD_INLINE int ToBgr<SimdPixelFormatRgb24>(const uint8_t * src, size_t channel)
+        {
+            return src[2 - channel];
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInputNchw3(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst0)
+        {
+            float * dst1 = dst0 + width * height;
+            float * dst2 = dst1 + width * height;
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; ++x, src += step)
+                {
+                    *dst0++ = ToFloat(ToBgr<format>(src, 0), scale[0], shift[0]);
+                    *dst1++ = ToFloat(ToBgr<format>(src, 1), scale[1], shift[1]);
+                    *dst2++ = ToFloat(ToBgr<format>(src, 2), scale[2], shift[2]);
+                }
+                src += (stride - width*step);
+            }
+        }
+
+        template<SimdPixelFormatType format, size_t step> void SynetSetInputNhwc3(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst)
+        {
+            for (size_t y = 0; y < height; ++y)
+            {
+                for (size_t x = 0; x < width; ++x, src += step)
+                {
+                    *dst++ = ToFloat(ToBgr<format>(src, 0), scale[0], shift[0]);
+                    *dst++ = ToFloat(ToBgr<format>(src, 1), scale[1], shift[1]);
+                    *dst++ = ToFloat(ToBgr<format>(src, 2), scale[2], shift[2]);
+                }
+                src += (stride - width * step);
+            }
+        }
+
+        void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
+            const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat)
+        {
+            float scale[3];
+            for (size_t i = 0; i < channels; ++i)
+                scale[i] = (upper[i] - lower[i]) / 255.0f;
+            switch (channels)
+            {
+            case 1:
+                switch (srcFormat)
+                {
+                case SimdPixelFormatGray8: SynetSetInput1<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatBgr24: SynetSetInput1<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatBgra32: SynetSetInput1<SimdPixelFormatBgr24, 4>(src, width, height, stride, scale, lower, dst); return;
+                case SimdPixelFormatRgb24: SynetSetInput1<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                default: assert(0);
+                }
+                break;
+            case 3:
+                switch (dstFormat)
+                {
+                case SimdTensorFormatNchw: 
+                    switch (srcFormat)
+                    {
+                    case SimdPixelFormatGray8: SynetSetInputNchw3<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgr24: SynetSetInputNchw3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgra32: SynetSetInputNchw3<SimdPixelFormatBgr24, 4>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgb24: SynetSetInputNchw3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    default: assert(0);
+                    }
+                    break;
+                case SimdTensorFormatNhwc: 
+                    switch (srcFormat)
+                    {
+                    case SimdPixelFormatGray8: SynetSetInputNhwc3<SimdPixelFormatGray8, 1>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgr24: SynetSetInputNhwc3<SimdPixelFormatBgr24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatBgra32: SynetSetInputNhwc3<SimdPixelFormatBgr24, 4>(src, width, height, stride, scale, lower, dst); return;
+                    case SimdPixelFormatRgb24: SynetSetInputNhwc3<SimdPixelFormatRgb24, 3>(src, width, height, stride, scale, lower, dst); return;
+                    default: assert(0);
+                    }
+                    break;
+                default: assert(0);
+                }
+            default: assert(0);
+            }
         }
     }
 }

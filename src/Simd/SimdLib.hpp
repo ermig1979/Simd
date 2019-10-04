@@ -3530,6 +3530,37 @@ namespace Simd
         SimdStretchGray2x2(src.data, src.width, src.height, src.stride, dst.data, dst.width, dst.height, dst.stride);
     }
 
+    /*! @ingroup synet_conversion
+
+        \fn void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format)
+
+        \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        Algorithm's details (example for BGRA pixel format and NCHW tensor format):
+        \verbatim
+        for(c = 0; c < channels; ++c)
+            for(y = 0; y < src.height; ++y)
+                for(x = 0; x < src.width; ++x)
+                    dst[(c*height + y)*width + x] = src.data[src.stride*y + src.width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdSynetSetInput.
+
+        \param [in] src - an input image.
+        \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [out] dst - a pointer to the output 32-bit float image tensor.
+        \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
+        \param [in] format - a format of output image tensor. There are supported following tensor formats: SimdTensorFormatNchw, SimdTensorFormatNhwc.
+    */
+    template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format)
+    {
+        assert(src.format == View<A>::Gray8 || src.format == View<A>::Bgr24 || src.format == View<A>::Bgra32 || src.format == View<A>::Rgb24);
+        assert(format == SimdTensorFormatNchw || format == SimdTensorFormatNhwc);
+
+        SimdSynetSetInput(src.data, src.width, src.height, src.stride, (SimdPixelFormatType)src.format, lower, upper, dst, channels, format);
+    }
+
     /*! @ingroup texture_estimation
 
         \fn void TextureBoostedSaturatedGradient(const View<A>& src, uint8_t saturation, uint8_t boost, View<A>& dx, View<A>& dy)

@@ -115,6 +115,31 @@ namespace Test
         return ss.str();
     }
 
+    template <> SIMD_INLINE String ToString<View::Format>(const View::Format & value)
+    {
+        switch (value)
+        {
+        case View::None:      return "None";
+        case View::Gray8:     return "Gray8";
+        case View::Uv16:      return "Uv16:";
+        case View::Bgr24:     return "Bgr24";
+        case View::Bgra32:    return "Bgra32";
+        case View::Int16:     return "Int16";
+        case View::Int32:     return "Int32";
+        case View::Int64:     return "Int64";
+        case View::Float:     return "Float";
+        case View::Double:    return "Double";
+        case View::BayerGrbg: return "BayerGrbg";
+        case View::BayerGbrg: return "BayerGbrg";
+        case View::BayerRggb: return "BayerRggb";
+        case View::BayerBggr: return "BayerBggr";
+        case View::Hsv24:     return "Hsv24";
+        case View::Hsl24:     return "Hsl24";
+        case View::Rgb24:     return "Rgb24";
+        default: assert(0);  return "";
+        }
+    }
+
     SIMD_INLINE String ToString(int value, int width)
     {
         std::stringstream ss;

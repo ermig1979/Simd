@@ -5466,7 +5466,7 @@ extern "C"
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_conversion
 
         \fn void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
 
@@ -5484,7 +5484,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_conversion
 
         \fn void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
 
@@ -6129,7 +6129,7 @@ extern "C"
     SIMD_API void SimdSynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_activation
 
         \fn void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -6153,7 +6153,7 @@ extern "C"
     */
     SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_activation
 
         \fn void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
@@ -6200,6 +6200,36 @@ extern "C"
         \param [in] format - a format of (input/output) image tensor.
         */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+    /*! @ingroup synet_conversion
+
+        \fn void void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
+
+        \short Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        Algorithm's details (example for BGRA pixel format and NCHW tensor format):
+        \verbatim
+        for(c = 0; c < channels; ++c)
+            for(y = 0; y < height; ++y)
+                for(x = 0; x < width; ++x)
+                    dst[(c*height + y)*width + x] = src[stride*y + width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format).
+
+        \param [in] src - a pointer to pixels data of input image.
+        \param [in] width - a width of input image and output image tensor.
+        \param [in] height - a height of input image and output image tensor.
+        \param [in] stride - a row size of input image.
+        \param [in] srcFormat - a pixel format of input image. There are supported following pixel formats: SimdPixelFormatGray8, SimdPixelFormatBgr24, SimdPixelFormatBgra32, SimdPixelFormatRgb24.
+        \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
+        \param [out] dst - a pointer to the output 32-bit float image tensor.
+        \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
+        \param [in] dstFormat - a format of output image tensor. There are supported following tensor formats: SimdTensorFormatNchw, SimdTensorFormatNhwc.
+    */
+    SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat, 
+        const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
     /*! @ingroup synet
 
