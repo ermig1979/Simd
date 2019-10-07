@@ -69,6 +69,9 @@ namespace Simd
 
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
+
+        void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
+            const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
     }
 #endif// SIMD_SSE41_ENABLE
 }

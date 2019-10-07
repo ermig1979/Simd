@@ -5438,7 +5438,12 @@ SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale,
 SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
     const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat)
 {
-    Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+    else
+#endif
+        Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
 }
 
 typedef void(*SimdSynetSoftmaxLayerForwardPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
