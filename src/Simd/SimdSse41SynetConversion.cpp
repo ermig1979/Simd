@@ -107,10 +107,25 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNchw3<SimdPixelFormatGray8>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst, size_t channel)
         {
-            __m128i _src = Load<false>((__m128i*)src);
-            SynetSetInput1Gray8(_src, scale[0], shift[0], dst + 0 * channel);
-            SynetSetInput1Gray8(_src, scale[1], shift[1], dst + 1 * channel);
-            SynetSetInput1Gray8(_src, scale[2], shift[2], dst + 2 * channel);
+            __m128i src0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i gray0 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 0));
+            __m128i gray1 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 4));
+            __m128i gray2 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 8));
+            __m128i gray3 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 12));
+            StoreScaled<false>(dst + 0 * F, gray0, scale[0], shift[0]);
+            StoreScaled<false>(dst + 1 * F, gray1, scale[0], shift[0]);
+            StoreScaled<false>(dst + 2 * F, gray2, scale[0], shift[0]);
+            StoreScaled<false>(dst + 3 * F, gray3, scale[0], shift[0]);
+            dst += channel;
+            StoreScaled<false>(dst + 0 * F, gray0, scale[1], shift[1]);
+            StoreScaled<false>(dst + 1 * F, gray1, scale[1], shift[1]);
+            StoreScaled<false>(dst + 2 * F, gray2, scale[1], shift[1]);
+            StoreScaled<false>(dst + 3 * F, gray3, scale[1], shift[1]);
+            dst += channel;
+            StoreScaled<false>(dst + 0 * F, gray0, scale[2], shift[2]);
+            StoreScaled<false>(dst + 1 * F, gray1, scale[2], shift[2]);
+            StoreScaled<false>(dst + 2 * F, gray2, scale[2], shift[2]);
+            StoreScaled<false>(dst + 3 * F, gray3, scale[2], shift[2]);
         }
 
         template<> SIMD_INLINE void SynetSetInputNchw3<SimdPixelFormatBgr24>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst, size_t channel)
@@ -171,10 +186,7 @@ namespace Simd
             }
         }
 
-        template<SimdPixelFormatType format> SIMD_INLINE void SynetSetInputNhwc3(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst)
-        {
-
-        }
+        template<SimdPixelFormatType format> SIMD_INLINE void SynetSetInputNhwc3(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst);
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatGray8>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst)
         {
@@ -245,9 +257,9 @@ namespace Simd
             StoreScaled<false>(dst + 0xB * F, _mm_cvtepu8_epi32(_mm_srli_si128(bgr2, 0xC)), scale[2], shift[2]);
         }
 
-        const __m128i K8_RGB_UNPACK_0 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x1, -1, -1, -1, 0x0, 0 - 1, -1, -1, 0x5, -1, -1, -1);
-        const __m128i K8_RGB_UNPACK_1 = SIMD_MM_SETR_EPI8(0x4, -1, -1, -1, 0x3, -1, -1, -1, 0x8, 0 - 1, -1, -1, 0x7, -1, -1, -1);
-        const __m128i K8_RGB_UNPACK_2 = SIMD_MM_SETR_EPI8(0x6, -1, -1, -1, 0xB, -1, -1, -1, 0xA, 0 - 1, -1, -1, 0x9, -1, -1, -1);
+        const __m128i K8_RGB_UNPACK_0 = SIMD_MM_SETR_EPI8(0x2, -1, -1, -1, 0x1, -1, -1, -1, 0x0, -1, -1, -1, 0x5, -1, -1, -1);
+        const __m128i K8_RGB_UNPACK_1 = SIMD_MM_SETR_EPI8(0x4, -1, -1, -1, 0x3, -1, -1, -1, 0x8, -1, -1, -1, 0x7, -1, -1, -1);
+        const __m128i K8_RGB_UNPACK_2 = SIMD_MM_SETR_EPI8(0x6, -1, -1, -1, 0xB, -1, -1, -1, 0xA, -1, -1, -1, 0x9, -1, -1, -1);
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatRgb24>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst)
         {

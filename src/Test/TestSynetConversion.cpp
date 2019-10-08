@@ -226,6 +226,7 @@ namespace Test
 
         View src(w, h, srcFormat);
         FillRandom(src);
+        src.data[0] = 107, src.data[1] = 117, src.data[2] = 127, src.data[3] = 137;
         Tensor32f dst1(ToShape(1, c, h, w, dstFormat), dstFormat);
         Tensor32f dst2(ToShape(1, c, h, w, dstFormat), dstFormat);
         TEST_ALIGN(SIMD_ALIGN);
@@ -275,11 +276,11 @@ namespace Test
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Sse41::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
-//#ifdef SIMD_AVX_ENABLE
-//        if (Simd::Avx::Enable)
-//            result = result && SynetConvertImageAutoTest(TFM_256, FUNC_CT(Simd::Avx::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx2::SynetSetInput), FUNC_SI(SimdSynetSetInput));
+#endif 
+
 //#ifdef SIMD_AVX512F_ENABLE
 //        if (Simd::Avx512f::Enable)
 //            result = result && SynetConvertImageAutoTest(TFM_512, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));

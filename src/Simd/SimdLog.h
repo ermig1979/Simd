@@ -70,13 +70,6 @@ namespace Simd
     }
 #endif //SIMD_SSE_ENABLE
 
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
-        using namespace Sse;
-    }
-#endif //SIMD_SSE_ENABLE
-
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
@@ -88,11 +81,32 @@ namespace Simd
             Simd::Log<T>(buffer, n, name);
         }
     }
-#endif //SIMD_SSE_ENABLE
+#endif //SIMD_SSE2_ENABLE
+
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        using namespace Sse;
+    }
+#endif //SIMD_SSE41_ENABLE
+
+#ifdef SIMD_AVX_ENABLE
+    namespace Avx
+    {
+        SIMD_INLINE void Log(const __m256 & value, const std::string & name)
+        {
+            float buffer[F];
+            _mm256_storeu_ps(buffer, value);
+            Simd::Log<float>(buffer, F, name);
+        }
+    }
+#endif //SIMD_AVX_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        using Avx::Log;
+
         template<class T> SIMD_INLINE void Log(const __m256i & value, const std::string & name)
         {
             const size_t n = sizeof(__m256i) / sizeof(T);
@@ -227,8 +241,9 @@ namespace Simd
 }
 
 #define SIMD_LOG(value) Log(value, #value)
-
 #define SIMD_LOG1(value) Log<uint8_t>(value, #value)
+#define SIMD_LOG2(value) Log<int16_t>(value, #value)
+#define SIMD_LOG4(value) Log<int32_t>(value, #value)
 
 #define SIMD_LOG_SS(message) \
 { \
@@ -241,6 +256,9 @@ namespace Simd
 #else//SIMD_LOG_ENABLE
 
 #define SIMD_LOG(value)
+#define SIMD_LOG1(value)
+#define SIMD_LOG2(value)
+#define SIMD_LOG4(value)
 
 #define SIMD_LOG_SS(message)
 
