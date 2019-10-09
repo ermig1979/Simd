@@ -3546,12 +3546,12 @@ namespace Simd
 
         \note This function is a C++ wrapper for function ::SimdSynetSetInput.
 
-        \param [in] src - an input image.
+        \param [in] src - an input image.There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24.
         \param [in] lower - a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [in] upper - a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor.
         \param [out] dst - a pointer to the output 32-bit float image tensor.
         \param [in] channels - a number of channels in the output image tensor. It can be 1 or 3.
-        \param [in] format - a format of output image tensor. There are supported following tensor formats: SimdTensorFormatNchw, SimdTensorFormatNhwc.
+        \param [in] format - a format of output image tensor. There are supported following tensor formats: ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc.
     */
     template<template<class> class A> SIMD_INLINE void SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format)
     {

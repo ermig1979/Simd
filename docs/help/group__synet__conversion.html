@@ -55,9 +55,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gabf7b6dd9189d190d66199822eebd6d5a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#gabf7b6dd9189d190d66199822eebd6d5a">SimdSynetConvertFilter</a> (size_t output, size_t input, size_t kernel, const float *src, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> srcFormat, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
 <tr class="memdesc:gabf7b6dd9189d190d66199822eebd6d5a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 2d-convolution filter weight between different formats of 4D-tensor.  <a href="#gabf7b6dd9189d190d66199822eebd6d5a">More...</a><br /></td></tr>
 <tr class="separator:gabf7b6dd9189d190d66199822eebd6d5a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga3b0865b4357dab2b3ce39ce2ba50ea7d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga3b0865b4357dab2b3ce39ce2ba50ea7d">SimdSynetSetInput</a> (const uint8_t *src, size_t width, size_t height, size_t stride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> pixelFormat, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
-<tr class="memdesc:ga3b0865b4357dab2b3ce39ce2ba50ea7d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="#ga3b0865b4357dab2b3ce39ce2ba50ea7d">More...</a><br /></td></tr>
-<tr class="separator:ga3b0865b4357dab2b3ce39ce2ba50ea7d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga579496daf24d20e8370e0cccfe45f94c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c">SimdSynetSetInput</a> (const uint8_t *src, size_t width, size_t height, size_t stride, <a class="el" href="group__c__types.html#gaefc67275f1cb286232a1b399e986a393">SimdPixelFormatType</a> srcFormat, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
+<tr class="memdesc:ga579496daf24d20e8370e0cccfe45f94c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="#ga579496daf24d20e8370e0cccfe45f94c">More...</a><br /></td></tr>
+<tr class="separator:ga579496daf24d20e8370e0cccfe45f94c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga5bc210e89b6190c85c9cbcc75d8a1205">SynetSetInput</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const float *lower, const float *upper, float *dst, size_t channels, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga5bc210e89b6190c85c9cbcc75d8a1205"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets image to the input of neural network of <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.  <a href="group__synet__conversion.html#ga5bc210e89b6190c85c9cbcc75d8a1205">More...</a><br /></td></tr>
@@ -123,16 +123,16 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Converts (input/output) image between different formats of 4D-tensor. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between SimdTensorFormatNchw4c, SimdTensorFormatNchw8c, SimdTensorFormatNchw16c is not supported.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a> is not supported.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch (number of images in the batch). </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of image channels. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size (height*width) of image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a format of input image. It can be SimdTensorFormatNchw, SimdTensorFormatNhwc, SimdTensorFormatNchw4c, SimdTensorFormatNchw8c, SimdTensorFormatNchw16c. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a format of input image. It can be <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output image. It can be SimdTensorFormatNchw, SimdTensorFormatNhwc, SimdTensorFormatNchw4c, SimdTensorFormatNchw8c, SimdTensorFormatNchw16c. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output image. It can be <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa858c1ff192c7a873fda80d71c55d33aa">SimdTensorFormatNchw4c</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa4e6b946482db6b2f65489b19339c2ca2">SimdTensorFormatNchw8c</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fabe3d91351bfd75cb31e34f743f312e34">SimdTensorFormatNchw16c</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -196,24 +196,24 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Converts 2d-convolution filter weight between different formats of 4D-tensor. </p>
-<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between SimdTensorFormatOyxi4o, SimdTensorFormatOyxi8o, SimdTensorFormatOyxi16o is not supported.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9">SimdTensorFormatOyxi4o</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e">SimdTensorFormatOyxi8o</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909">SimdTensorFormatOyxi16o</a> is not supported.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">output</td><td>- a number of output channels in filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">input</td><td>- a number of intput channels in filter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">kernel</td><td>- a size (width*height) of filter kernel. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input filter data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a format of input filter. It can be SimdTensorFormatOiyx, SimdTensorFormatYxio, SimdTensorFormatOyxi4o, SimdTensorFormatOyxi8o, SimdTensorFormatOyxi16o. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a format of input filter. It can be <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa8380c38cb33e95d18861dc452ad46766">SimdTensorFormatOiyx</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6faed14951cd9c6aef2009e00d1cb8165d4">SimdTensorFormatYxio</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9">SimdTensorFormatOyxi4o</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e">SimdTensorFormatOyxi8o</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909">SimdTensorFormatOyxi16o</a>. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output filter data. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output filter. It can be SimdTensorFormatOiyx, SimdTensorFormatYxio, SimdTensorFormatOyxi4o, SimdTensorFormatOyxi8o, SimdTensorFormatOyxi16o. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output filter. It can be SimdTensorFormatOiyx, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6faed14951cd9c6aef2009e00d1cb8165d4">SimdTensorFormatYxio</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa8fd57f893baf7db63f8acb7a1a7f87e9">SimdTensorFormatOyxi4o</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa080ee616acededfbb3149139e937fe5e">SimdTensorFormatOyxi8o</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fab5c6d40ff7d57cb7c141c938193ee909">SimdTensorFormatOyxi16o</a>. </td></tr>
   </table>
   </dd>
 </dl>
 
 </div>
 </div>
-<a id="ga3b0865b4357dab2b3ce39ce2ba50ea7d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga3b0865b4357dab2b3ce39ce2ba50ea7d">&#9670;&nbsp;</a></span>SimdSynetSetInput()</h2>
+<a id="ga579496daf24d20e8370e0cccfe45f94c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga579496daf24d20e8370e0cccfe45f94c">&#9670;&nbsp;</a></span>SimdSynetSetInput()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -298,12 +298,12 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input image and output image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input image and output image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of input image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a pixel format of input image. There are supported following pixel formats: SimdPixelFormatGray8, SimdPixelFormatBgr24, SimdPixelFormatBgra32, SimdPixelFormatRgb24. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcFormat</td><td>- a pixel format of input image. There are supported following pixel formats: <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393a47c73032733f1ce1fbd5f27c5cc433b9">SimdPixelFormatGray8</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393afc326697127f235517ffa5887ed4ab71">SimdPixelFormatBgr24</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ae44d7b4e3041b9007d284ea7458b5434">SimdPixelFormatBgra32</a>, <a class="el" href="group__c__types.html#ggaefc67275f1cb286232a1b399e986a393ab8728eeaf379df98637a870290bb2dac">SimdPixelFormatRgb24</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the output image tensor. It can be 1 or 3. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output image tensor. There are supported following tensor formats: SimdTensorFormatNchw, SimdTensorFormatNhwc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstFormat</td><td>- a format of output image tensor. There are supported following tensor formats: <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -365,15 +365,15 @@ Functions</h2></td></tr>
     for(y = 0; y &lt; src.height; ++y)
         for(x = 0; x &lt; src.width; ++x)
             dst[(c*height + y)*width + x] = src.data[src.stride*y + src.width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
-</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__synet__conversion.html#ga3b0865b4357dab2b3ce39ce2ba50ea7d" title="Sets image to the input of neural network of Synet Framework. ">SimdSynetSetInput</a>.</dd></dl>
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c" title="Sets image to the input of neural network of Synet Framework. ">SimdSynetSetInput</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image.There are supported following image formats: <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View&lt;A&gt;::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View&lt;A&gt;::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View&lt;A&gt;::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View&lt;A&gt;::Rgb24</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to the array with lower bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to the array with upper bound of values of the output tensor. The size of the array have to correspond number of channels in the output image tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float image tensor. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the output image tensor. It can be 1 or 3. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of output image tensor. There are supported following tensor formats: SimdTensorFormatNchw, SimdTensorFormatNhwc. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of output image tensor. There are supported following tensor formats: <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6faaeeae755f5e809ea4fd78ef46b40a59c">SimdTensorFormatNchw</a>, <a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fafe947d77906acfc903ad6a513d6055fd">SimdTensorFormatNhwc</a>. </td></tr>
   </table>
   </dd>
 </dl>

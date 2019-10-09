@@ -5438,6 +5438,11 @@ SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale,
 SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
     const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::A)
+        Avx512bw::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);

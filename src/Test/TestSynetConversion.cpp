@@ -281,11 +281,11 @@ namespace Test
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx2::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetConvertImageAutoTest(TFM_512, FUNC_CT(Simd::Avx512f::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
-//#endif 
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx512bw::SynetSetInput), FUNC_SI(SimdSynetSetInput));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && SynetConvertImageAutoTest(TFM_128, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
