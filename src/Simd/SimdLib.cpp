@@ -5453,6 +5453,11 @@ SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height
         Sse41::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+    else
+#endif
         Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
 }
 

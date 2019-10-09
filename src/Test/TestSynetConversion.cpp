@@ -286,10 +286,10 @@ namespace Test
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx512bw::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetConvertImageAutoTest(TFM_128, FUNC_CT(Simd::Neon::SynetConvertImage), FUNC_CT(SimdSynetConvertImage));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Neon::SynetSetInput), FUNC_SI(SimdSynetSetInput));
+#endif
 
         return result;
     }

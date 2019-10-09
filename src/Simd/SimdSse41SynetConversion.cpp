@@ -37,7 +37,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void StoreScaled(float * ptr, __m128i value32, __m128 scale, __m128 shift)
         {
-            return Store<align>(ptr, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(value32), scale), shift));
+            Store<align>(ptr, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(value32), scale), shift));
         }
 
         SIMD_INLINE __m128i BgraToGray32(__m128i bgra)
