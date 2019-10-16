@@ -58,9 +58,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga767efadfb7169fddcd77b3df30368667"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga767efadfb7169fddcd77b3df30368667">SimdSynetPreluLayerForward</a> (const float *src, const float *slope, size_t channels, size_t spatial, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga767efadfb7169fddcd77b3df30368667"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PreluLayer (PReLU).  <a href="#ga767efadfb7169fddcd77b3df30368667">More...</a><br /></td></tr>
 <tr class="separator:ga767efadfb7169fddcd77b3df30368667"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga711c80dca9d175a2ac9221b1062b7840"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga711c80dca9d175a2ac9221b1062b7840">SimdSynetRestrictRange</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
-<tr class="memdesc:ga711c80dca9d175a2ac9221b1062b7840"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given array.  <a href="#ga711c80dca9d175a2ac9221b1062b7840">More...</a><br /></td></tr>
-<tr class="separator:ga711c80dca9d175a2ac9221b1062b7840"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">SimdSynetRestrictRange32f</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
+<tr class="memdesc:ga480e0dbc40eb04ebd599b574e9432d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given array.  <a href="#ga480e0dbc40eb04ebd599b574e9432d32">More...</a><br /></td></tr>
+<tr class="separator:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions to acceleratе activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -251,14 +251,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga711c80dca9d175a2ac9221b1062b7840"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga711c80dca9d175a2ac9221b1062b7840">&#9670;&nbsp;</a></span>SimdSynetRestrictRange()</h2>
+<a id="ga480e0dbc40eb04ebd599b574e9432d32"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga480e0dbc40eb04ebd599b574e9432d32">&#9670;&nbsp;</a></span>SimdSynetRestrictRange32f()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdSynetRestrictRange </td>
+          <td class="memname">void SimdSynetRestrictRange32f </td>
           <td>(</td>
           <td class="paramtype">const float *&#160;</td>
           <td class="paramname"><em>src</em>, </td>

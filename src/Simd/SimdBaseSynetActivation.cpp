@@ -45,6 +45,8 @@ namespace Simd
                 dst[i] = SynetElu32f(src[i], _alpha);
         }
 
+        //---------------------------------------------------------------------
+
         void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
         {
             float _shift = shift[0];
@@ -60,6 +62,25 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = SynetHswish32f(src[i], _shift, _scale);
+        }
+
+        //---------------------------------------------------------------------
+
+        void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            float min = *lower;
+            float max = *upper;
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = Simd::RestrictRange(src[i + 0], min, max);
+                dst[i + 1] = Simd::RestrictRange(src[i + 1], min, max);
+                dst[i + 2] = Simd::RestrictRange(src[i + 2], min, max);
+                dst[i + 3] = Simd::RestrictRange(src[i + 3], min, max);
+            }
+            for (; i < size; ++i)
+                dst[i] = Simd::RestrictRange(src[i], min, max);
         }
     }
 }

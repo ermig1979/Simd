@@ -198,4 +198,88 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncRR
+        {
+            typedef void(*FuncPtr)(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncRR(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Call(const View & src, float lower, float upper, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, src.width, &lower, &upper, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_RR(function) FuncRR(function, #function)
+
+    bool SynetRestrictRange32fAutoTest(size_t size, const FuncRR & f1, const FuncRR & f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        const float lower = -1.0f, upper = 1.0f;
+        FillRandom32f(src, 2.0f*lower, 2.0f*upper);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, lower, upper, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, lower, upper, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetRestrictRange32fAutoTest(const FuncRR & f1, const FuncRR & f2)
+    {
+        bool result = true;
+
+        result = result && SynetRestrictRange32fAutoTest(H*W, f1, f2);
+        result = result && SynetRestrictRange32fAutoTest(H*W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetRestrictRange32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Base::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Sse::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Avx::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Avx512f::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Neon::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+#endif 
+
+        return result;
+    }
 }

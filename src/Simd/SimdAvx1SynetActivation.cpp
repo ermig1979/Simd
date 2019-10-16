@@ -64,6 +64,41 @@ namespace Simd
             else
                 SynetHswish32f<false>(src, size, shift, scale, dst);
         }
+
+        //---------------------------------------------------------------------
+
+        template <bool align> void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            assert(lower[0] <= upper[0]);
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+            float min = *lower;
+            float max = *upper;
+            __m256 _min = _mm256_set1_ps(min);
+            __m256 _max = _mm256_set1_ps(max);
+            size_t sizeF = Simd::AlignLo(size, F);
+            size_t sizeQF = Simd::AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                Store<align>(dst + i + 0 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
+                Store<align>(dst + i + 1 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
+                Store<align>(dst + i + 2 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
+                Store<align>(dst + i + 3 * F, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
+            }
+            for (; i < sizeF; i += F)
+                Store<align>(dst + i, _mm256_min_ps(_mm256_max_ps(_min, Load<align>(src + i)), _max));
+            for (; i < size; ++i)
+                dst[i] = Simd::RestrictRange(src[i], min, max);
+        }
+
+        void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetRestrictRange32f<true>(src, size, lower, upper, dst);
+            else
+                SynetRestrictRange32f<false>(src, size, lower, upper, dst);
+        }
     }
 #endif// SIMD_AVX_ENABLE
 }

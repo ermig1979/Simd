@@ -654,41 +654,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <bool align> void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
-        {
-            assert(lower[0] <= upper[0]);
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-            float min = *lower;
-            float max = *upper;
-            __m128 _min = _mm_set1_ps(min);
-            __m128 _max = _mm_set1_ps(max);
-            size_t sizeF = Simd::AlignLo(size, F);
-            size_t sizeQF = Simd::AlignLo(size, QF);
-            size_t i = 0;
-            for (; i < sizeQF; i += QF)
-            {
-                Store<align>(dst + i + 0 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
-                Store<align>(dst + i + 1 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
-                Store<align>(dst + i + 2 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
-                Store<align>(dst + i + 3 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
-            }
-            for (; i < sizeF; i += F)
-                Store<align>(dst + i, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i)), _max));
-            for (; i < size; ++i)
-                dst[i] = Simd::RestrictRange(src[i], min, max);
-        }
-
-        void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                SynetRestrictRange<true>(src, size, lower, upper, dst);
-            else
-                SynetRestrictRange<false>(src, size, lower, upper, dst);
-        }
-
-        //---------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)
         {
             Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Load<align>(src + offset), Load<align>(scale + offset)), Load<align>(bias + offset)));

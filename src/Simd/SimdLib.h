@@ -6180,7 +6180,7 @@ extern "C"
 
     /*! @ingroup synet_activation
 
-        \fn void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+        \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         \short This function is used in order to restrict range for given array.
 
@@ -6199,7 +6199,7 @@ extern "C"
         \param [in] upper - a pointer to upper restrict bound.
         \param [out] dst - a pointer to the output 32-bit float array.
     */
-    SIMD_API void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+    SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
     /*! @ingroup synet
 

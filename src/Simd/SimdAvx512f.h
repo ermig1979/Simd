@@ -146,7 +146,7 @@ namespace Simd
 
         void SynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-        void SynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst);
+        void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 

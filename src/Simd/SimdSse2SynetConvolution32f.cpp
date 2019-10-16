@@ -169,7 +169,7 @@ namespace Simd
                     }
                 }
                 else
-                    Sse::SynetRestrictRange(dst, size*count, &lower, &upper, dst);
+                    Sse::SynetRestrictRange32f(dst, size*count, &lower, &upper, dst);
             }
             else if (activation == ::SimdConvolutionActivationPrelu)
             {

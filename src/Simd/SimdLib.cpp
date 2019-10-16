@@ -5427,12 +5427,12 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
 }
 
-typedef void(*SimdSynetRestrictRangePtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
-volatile SimdSynetRestrictRangePtr simdSynetRestrictRange = SIMD_FUNC4(SynetRestrictRange, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
+volatile SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetRestrictRange(const float * src, size_t size, const float * lower, const float * upper, float * dst)
+SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
 {
-    simdSynetRestrictRange(src, size, lower, upper, dst);
+    simdSynetRestrictRange32f(src, size, lower, upper, dst);
 }
 
 typedef void(*SimdSynetScaleLayerForwardPtr) (const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);

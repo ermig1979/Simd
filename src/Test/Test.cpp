@@ -339,12 +339,12 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A00(SynetPoolingForwardMax);
     TEST_ADD_GROUP_A00(SynetPreluLayerForward);
-    TEST_ADD_GROUP_A00(SynetRestrictRange);
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
 
     TEST_ADD_GROUP_A00(SynetElu32f);
     TEST_ADD_GROUP_A00(SynetHswish32f);
+    TEST_ADD_GROUP_A00(SynetRestrictRange32f);
 
     TEST_ADD_GROUP_A00(SynetConvertImage);
     TEST_ADD_GROUP_A00(SynetConvertFilter);
