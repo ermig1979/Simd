@@ -100,6 +100,11 @@ namespace Simd
             return Simd::Max(0.0f, src * scale + bias);
         }
 
+        SIMD_INLINE float SynetHswish32f(float value, float shift, float scale)
+        {
+            return Simd::Max(Simd::Min(value, shift) + shift, 0.0f)*scale*value;
+        }
+
         SIMD_INLINE float SynetPreluLayerForward(float value, float slope)
         {
             return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);

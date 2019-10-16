@@ -5747,13 +5747,14 @@ extern "C"
 
         \fn void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
 
-        \short Calculates ELU for 32-bit float array.
+        \short Calculates ELU activation function for 32-bit float array.
 
-        All arrays must have the same size.
+        The input and output arrays must have the same size.
 
-        For every element:
+        Algorithm's details:
         \verbatim
-        dst[i] = src[i] >= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+        for(i = 0; i < size; ++i)
+            dst[i] = src[i] >= 0 ? src[i] : alpha*(exp(src[i]) - 1);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -5979,6 +5980,30 @@ extern "C"
         \param [in] format - a format of (input/output) image tensor.
     */
     SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
+
+    /*! @ingroup synet_activation
+
+        \fn void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
+
+        \short Calculates H-Swish activation function (https://arxiv.org/pdf/1905.02244.pdf) for 32-bit float array.
+
+        Input and output arrays must have the same size.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = max(min(src[i], shift) + shift, 0)*scale*src[i];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] shift - a pointer to shift parameter. It is equal to 3 in original paper.
+        \param [in] scale - a pointer to scale parameter. It is equal to 1/6 in original paper.
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
 
     /*! @ingroup synet
 

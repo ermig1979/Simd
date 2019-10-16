@@ -41,7 +41,7 @@ namespace Simd
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
+                    Sse::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {
@@ -84,7 +84,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    Sse::NeuralRelu(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -126,7 +126,7 @@ namespace Simd
                     }
                 }
                 else
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    Sse::NeuralRelu(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -169,7 +169,7 @@ namespace Simd
                     }
                 }
                 else
-                    SynetRestrictRange(dst, size*count, &lower, &upper, dst);
+                    Sse::SynetRestrictRange(dst, size*count, &lower, &upper, dst);
             }
             else if (activation == ::SimdConvolutionActivationPrelu)
             {

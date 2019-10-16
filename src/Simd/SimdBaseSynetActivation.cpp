@@ -44,5 +44,22 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = SynetElu32f(src[i], _alpha);
         }
+
+        void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
+        {
+            float _shift = shift[0];
+            float _scale = scale[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetHswish32f(src[i + 0], _shift, _scale);
+                dst[i + 1] = SynetHswish32f(src[i + 1], _shift, _scale);
+                dst[i + 2] = SynetHswish32f(src[i + 2], _shift, _scale);
+                dst[i + 3] = SynetHswish32f(src[i + 3], _shift, _scale);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetHswish32f(src[i], _shift, _scale);
+        }
     }
 }
