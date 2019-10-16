@@ -1607,6 +1607,11 @@ SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size
         Base::DeinterleaveBgra(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
 }
 
+SIMD_API void * SimdDetectionLoadStringXml(char * xml)
+{
+    return Base::DetectionLoadStringXml(xml);
+}
+
 SIMD_API void * SimdDetectionLoadA(const char * path)
 {
     return Base::DetectionLoadA(path);
