@@ -356,7 +356,7 @@ namespace Simd
 
             __m256 _params[2], _bias[2];
             _params[0] = _mm256_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm256_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -735,7 +735,7 @@ namespace Simd
 
             __m256 _params[2], _bias[2];
             _params[0] = _mm256_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm256_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -825,6 +825,7 @@ namespace Simd
             case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
+            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, microD, _convolution); break;
             default: return;
             }
             SetAlgParam(microD, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());

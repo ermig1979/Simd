@@ -355,7 +355,7 @@ namespace Simd
 
             float32x4_t _params[2], _bias[2];
             _params[0] = vdupq_n_f32(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = vdupq_n_f32(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -734,7 +734,7 @@ namespace Simd
 
             float32x4_t _params[2], _bias[2];
             _params[0] = vdupq_n_f32(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = vdupq_n_f32(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -825,6 +825,7 @@ namespace Simd
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, microD, _convolution); break;
+            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, microD, _convolution); break;
             default: assert(0);
             }
             SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);

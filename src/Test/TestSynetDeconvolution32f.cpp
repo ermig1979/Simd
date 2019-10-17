@@ -89,8 +89,16 @@ namespace Test
         Tensor32f params({ c.dstC });
         FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
 
-        params.Data()[0] = 0.1f;
-        params.Data()[1] = 1.1f;
+        if (p.conv.activation == ::SimdConvolutionActivationHswish)
+        {
+            params.Data()[0] = 3.0f;
+            params.Data()[1] = 1.0f / 6.0f;
+        }
+        else
+        {
+            params.Data()[0] = 0.1f;
+            params.Data()[1] = 1.1f;
+        }
 
         Tensor32f buf;
 
@@ -135,7 +143,7 @@ namespace Test
         bool result = true;
 
         result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRelu, ::SimdFalse, f1, f2);
-        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRelu, ::SimdTrue, f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
 
         return result;
     }

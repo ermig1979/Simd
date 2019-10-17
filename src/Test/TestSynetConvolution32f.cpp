@@ -70,7 +70,6 @@ namespace Test
     {
         bool result = true;
 
-
         f1.Update(p);
         f2.Update(p);
 
@@ -90,8 +89,16 @@ namespace Test
         Tensor32f params({ c.dstC });
         FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
 
-        params.Data()[0] = 0.1f;
-        params.Data()[1] = 1.1f;
+        if (p.conv.activation == ::SimdConvolutionActivationHswish)
+        {
+            params.Data()[0] = 3.0f;
+            params.Data()[1] = 1.0f / 6.0f;
+        }
+        else
+        {
+            params.Data()[0] = 0.1f;
+            params.Data()[1] = 1.1f;
+        }
 
         Tensor32f buf;
 
@@ -416,6 +423,7 @@ namespace Test
 #endif
 #if 1
         //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 240, 135, 10, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 768, 10, 4, 128, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 240, 135, 27, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
@@ -431,7 +439,8 @@ namespace Test
         bool result = true;
 
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
 
         return result;

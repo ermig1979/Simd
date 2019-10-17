@@ -464,7 +464,7 @@ namespace Simd
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm512_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -771,7 +771,7 @@ namespace Simd
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm512_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -863,6 +863,7 @@ namespace Simd
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, microD, _convolution); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, microD, _convolution); break;
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, microD, _convolution); break;
+            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, microD, _convolution); break;
             default: assert(0);
             }
             SetAlgParam(microD, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());

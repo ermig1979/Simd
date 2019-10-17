@@ -71,8 +71,9 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetHswish32f(const float * src, float32x4_t shift, float32x4_t scale, float * dst, size_t offset)
         {
-            float32x4_t value = Load<align>(src + offset);
-            Store<align>(dst + offset, vmulq_f32(vmulq_f32(vmaxq_f32(vaddq_f32(vminq_f32(value, shift), shift), vdupq_n_f32(0.0f)), scale), value));
+            float32x4_t _src = Load<align>(src + offset);
+            float32x4_t _dst = SynetHswish32f(_src, shift, scale);
+            Store<align>(dst + offset, _dst);
         }
 
         template<bool align> void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)

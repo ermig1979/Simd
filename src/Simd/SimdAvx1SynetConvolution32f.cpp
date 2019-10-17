@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdGemm.h"
@@ -249,6 +250,47 @@ namespace Simd
                 }
                 else
                     Avx::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
+            }
+            else if (activation == ::SimdConvolutionActivationHswish)
+            {
+                float shift = params[0];
+                float scale = params[1];
+                if (bias)
+                {
+                    __m256 _shift = _mm256_set1_ps(shift);
+                    __m256 _scale = _mm256_set1_ps(scale);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, SynetHswish32f(value, _shift, _scale));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetHswish32f(dst[i] + bias[i], shift, scale);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, SynetHswish32f(value, _shift, _scale));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetHswish32f(dst[j] + bias[i], shift, scale);
+                            dst += size;
+                        }
+                    }
+                }
             }
             else
                 assert(0);
@@ -623,6 +665,11 @@ namespace Simd
             return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(params[0], _mm256_min_ps(_mm256_setzero_ps(), value)));
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const __m256 * params)
+        {
+            return Avx::SynetHswish32f(value, params[0], params[1]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -630,7 +677,7 @@ namespace Simd
             __m256 _weight[kernel*kernel];
             __m256 _params[2];
             _params[0] = _mm256_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm256_set1_ps(params[1]);
             size_t dstWF = Simd::AlignLo(dstW, F);
             __m256 tail = RightNotZero(dstW - dstWF);
@@ -755,6 +802,7 @@ namespace Simd
             case ::SimdConvolutionActivationLeakyRelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationLeakyRelu>;
             case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
+            case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
             default:
                 assert(0);
                 return NULL;
@@ -830,6 +878,11 @@ namespace Simd
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const float * params, size_t offset)
         {
             return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(_mm256_loadu_ps(params + offset), _mm256_min_ps(_mm256_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const float * params, size_t offset)
+        {
+            return Avx::SynetHswish32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
         }
 
         SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, __m256 & sum)
@@ -1872,6 +1925,7 @@ namespace Simd
                 case ::SimdConvolutionActivationLeakyRelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationLeakyRelu>(p); break;
                 case ::SimdConvolutionActivationRestrictRange: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRestrictRange>(p); break;
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
+                case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
                 }
             }
             return func ? func : Sse2::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();

@@ -89,7 +89,9 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce">SimdConvolutionActivationPrelu</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0">SimdConvolutionActivationElu</a>
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0">SimdConvolutionActivationElu</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1">SimdConvolutionActivationHswish</a>
 <br />
  }</td></tr>
 <tr class="separator:gac0134d6cef9d64de8b89171e79ef4568"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -325,7 +327,9 @@ Functions</h2></td></tr>
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a3867bdfefdd5a4cf4685cc569b0ca2ce"></a>SimdConvolutionActivationPrelu&#160;</td><td class="fielddoc"><p>Leaky PReLU activation function. It has m parameters: slopes[m] (m = dstC, n = dstH*dstW). </p><pre class="fragment">dst[i*n + j] = src[i*n + j] &gt; 0 ? src[i*n + j] : slopes[i]*src[i*n + j];
 </pre> </td></tr>
-<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0"></a>SimdConvolutionActivationElu&#160;</td><td class="fielddoc"><p>Leaky ELU activation function. It has one parameter: alpha (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0"></a>SimdConvolutionActivationElu&#160;</td><td class="fielddoc"><p>Leaky ELU activation function. It has one parameter: alpha (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1"></a>SimdConvolutionActivationHswish&#160;</td><td class="fielddoc"><p>H-Swish (<a href="https://arxiv.org/pdf/1905.02244.pdf">https://arxiv.org/pdf/1905.02244.pdf</a>) activation function. It has two parameters: shift (params[0]) and scale (params[1]). </p><pre class="fragment">dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
 </pre> </td></tr>
 </table>
 
@@ -762,12 +766,12 @@ for(i = 0; i &lt; count; ++i)
     dst[j] = -FLT_MAX;
 for(i = 0; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
-        dst[j] = max(dst[j], src[i][j]);
+        dst[j] = Max(dst[j], src[i][j]);
 </pre><p>Algorithm's details for <a class="el" href="group__synet.html#gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27">SimdSynetEltwiseOperationMin</a>: </p><pre class="fragment">for(j = 0; j &lt; size; ++j)
     dst[j] = FLT_MAX;
 for(i = 0; i &lt; count; ++i)
     for(j = 0; j &lt; size; ++j)
-        dst[j] = min(dst[j], src[i][j]);
+        dst[j] = Min(dst[j], src[i][j]);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

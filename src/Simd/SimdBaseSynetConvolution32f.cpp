@@ -174,6 +174,34 @@ namespace Simd
                 else
                     SynetElu32f(dst, size*count, &alpha, dst);
             }
+            else if (activation == ::SimdConvolutionActivationHswish)
+            {
+                float shift = params[0];
+                float scale = params[1];
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = SynetHswish32f(dst[i] + bias[i], shift, scale);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = SynetHswish32f(dst[j] + bias[i], shift, scale);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetHswish32f(dst, size*count, &shift, &scale, dst);
+            }
             else
                 assert(0);
         }
@@ -946,6 +974,7 @@ namespace Simd
             case ::SimdConvolutionActivationRestrictRange: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationRestrictRange>;
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
+            case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
             default:
                 assert(0);
                 return NULL;

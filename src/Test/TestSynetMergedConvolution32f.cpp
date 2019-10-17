@@ -180,8 +180,16 @@ namespace Test
 
             params[i].Reshape({ Simd::Max<size_t>(2, p.conv[i].dstC) });
             FillRandom(params[i].Data(), params[i].Size(), -1.0, 1.0f);
-            params[i].Data()[0] = 0.0f + 0.1f * float(i);
-            params[i].Data()[1] = 1.0f + 0.1f * float(i);
+            if (p.conv[i].activation == ::SimdConvolutionActivationHswish)
+            {
+                params[i].Data()[0] = 3.0f;
+                params[i].Data()[1] = 1.0f / 6.0f;
+            }
+            else
+            {
+                params[i].Data()[0] = 0.0f + 0.1f * float(i);
+                params[i].Data()[1] = 1.0f + 0.1f * float(i);
+            }
             p.params[i] = params[i].Data();
         }
 
@@ -206,7 +214,7 @@ namespace Test
         bool result = true;
         const SimdBool t = SimdTrue, f = SimdFalse;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationElu, a2 = ::SimdConvolutionActivationPrelu;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationElu, a2 = ::SimdConvolutionActivationHswish;
 #ifdef NDEBUG
 #if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);

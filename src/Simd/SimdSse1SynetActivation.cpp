@@ -33,8 +33,9 @@ namespace Simd
     {
         template<bool align> SIMD_INLINE void SynetHswish32f(const float * src, __m128 shift, __m128 scale, float * dst, size_t offset)
         {
-            __m128 value = Load<align>(src + offset);
-            Store<align>(dst + offset, _mm_mul_ps(_mm_mul_ps(_mm_max_ps(_mm_add_ps(_mm_min_ps(value, shift), shift), _mm_setzero_ps()), scale), value));
+            __m128 _src = Load<align>(src + offset);
+            __m128 _dst = SynetHswish32f(_src, shift, scale);
+            Store<align>(dst + offset, _dst);
         }
 
         template<bool align> void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)

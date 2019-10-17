@@ -106,7 +106,7 @@ Functions</h2></td></tr>
 <p>Calculates ELU activation function for 32-bit float array. </p>
 <p>The input and output arrays must have the same size.</p>
 <p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+    dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -167,7 +167,7 @@ Functions</h2></td></tr>
 <p>Calculates H-Swish activation function (<a href="https://arxiv.org/pdf/1905.02244.pdf">https://arxiv.org/pdf/1905.02244.pdf</a>) for 32-bit float array. </p>
 <p>Input and output arrays must have the same size.</p>
 <p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
-    dst[i] = max(min(src[i], shift) + shift, 0)*scale*src[i];
+    dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">

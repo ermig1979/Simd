@@ -234,7 +234,7 @@ namespace Simd
             size_t dstCDF = AlignLo(dstC, DF);
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm512_set1_ps(params[1]);
 #ifdef SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
             size_t yInt = Simd::Max(yBeg, yEnd&(~dstM)), nBeg = yBeg * dstW, nInt = yInt * dstW, nEnd = yEnd * dstW;
@@ -482,7 +482,7 @@ namespace Simd
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm512_set1_ps(params[1]);
 
             size_t dc = 0;
@@ -661,7 +661,7 @@ namespace Simd
 
             __m512 _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm512_set1_ps(params[1]);
             for (size_t c = 0; c < srcC; c += F)
             {
@@ -1013,7 +1013,7 @@ namespace Simd
             size_t dstW3 = AlignLoAny(dstW, 3), dstW6 = AlignLoAny(dstW, 6);
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange)
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm512_set1_ps(params[1]);
 
             dst += yBeg * p.dstW * p.dstC;
@@ -1098,6 +1098,7 @@ namespace Simd
                 case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
                 case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationElu: SetConvolutionPtr<SimdConvolutionActivationElu>(_param, i, _convolution); break;
+                case SimdConvolutionActivationHswish: SetConvolutionPtr<SimdConvolutionActivationHswish>(_param, i, _convolution); break;
                 default: assert(0);
                 }
             }

@@ -140,10 +140,18 @@ typedef enum
         Leaky ELU activation function.
         It has one parameter: alpha (params[0]).
         \verbatim
-        dst[i] = src[i] >= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+        dst[i] = src[i] >= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
         \endverbatim
     */
     SimdConvolutionActivationElu,
+    /*!
+        H-Swish (https://arxiv.org/pdf/1905.02244.pdf) activation function.
+        It has two parameters: shift (params[0]) and scale (params[1]).
+        \verbatim
+        dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
+        \endverbatim
+    */
+    SimdConvolutionActivationHswish,
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
@@ -5720,7 +5728,7 @@ extern "C"
             dst[j] = -FLT_MAX;
         for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
-                dst[j] = max(dst[j], src[i][j]);
+                dst[j] = Max(dst[j], src[i][j]);
         \endverbatim
 
         Algorithm's details for ::SimdSynetEltwiseOperationMin:
@@ -5729,7 +5737,7 @@ extern "C"
             dst[j] = FLT_MAX;
         for(i = 0; i < count; ++i)
             for(j = 0; j < size; ++j)
-                dst[j] = min(dst[j], src[i][j]);
+                dst[j] = Min(dst[j], src[i][j]);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -5754,7 +5762,7 @@ extern "C"
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = src[i] >= 0 ? src[i] : alpha*(exp(src[i]) - 1);
+            dst[i] = src[i] >= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -5992,7 +6000,7 @@ extern "C"
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = max(min(src[i], shift) + shift, 0)*scale*src[i];
+            dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
