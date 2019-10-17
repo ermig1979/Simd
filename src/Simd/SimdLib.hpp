@@ -68,26 +68,26 @@ namespace Simd
         os << std::endl;
     }
 
-	/*! @ingroup correlation
+    /*! @ingroup correlation
 
-		\fn void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
+        \fn void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
 
-		\short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
+        \short Gets absolute difference of two gray 8-bit images, pyxel by pixel.
 
-		Both images must have the same width and height.
+        Both images must have the same width and height.
 
-		\note This function is a C++ wrapper for function ::SimdAbsDifference.
+        \note This function is a C++ wrapper for function ::SimdAbsDifference.
 
-		\param [in] a - a first image.
-		\param [in] b - a second image.
-		\param [out] c - a destination image.
-	*/
-	template<template<class> class A> SIMD_INLINE void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
-	{
-		assert(Compatible(a, b) && Compatible(b, c) && a.format == View<A>::Gray8);
+        \param [in] a - a first image.
+        \param [in] b - a second image.
+        \param [out] c - a destination image.
+    */
+    template<template<class> class A> SIMD_INLINE void AbsDifference(const View<A> & a, const View<A> & b, View<A> & c)
+    {
+        assert(Compatible(a, b) && Compatible(b, c) && a.format == View<A>::Gray8);
 
-		SimdAbsDifference(a.data, a.stride, b.data, b.stride, c.data, c.stride, a.width, a.height);
-	}
+        SimdAbsDifference(a.data, a.stride, b.data, b.stride, c.data, c.stride, a.width, a.height);
+    }
 
     /*! @ingroup correlation
 
@@ -3465,8 +3465,8 @@ namespace Simd
 
         SimdSquareSum(src.data, src.stride, src.width, src.height, &sum);
     }
-	
-	    /*! @ingroup other_statistic
+    
+        /*! @ingroup other_statistic
 
         \fn void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
 
@@ -3476,7 +3476,7 @@ namespace Simd
 
         \param [in] src - an input image.
         \param [out] valueSum - a result value sum.
-		\param [out] squareSum - a result square sum.
+        \param [out] squareSum - a result square sum.
     */
     template<template<class> class A> SIMD_INLINE void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
     {

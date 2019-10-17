@@ -1,7 +1,8 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.,
+*               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -32,8 +33,8 @@
 
 #define SIMD_EX(message) \
 { \
-	std::stringstream __ss; \
-	__ss << message; \
+    std::stringstream __ss; \
+    __ss << message; \
     std::cerr << __ss.str().c_str() << std::endl; \
     throw std::runtime_error(__ss.str().c_str()); \
 }
@@ -148,23 +149,25 @@ namespace Simd
             const char * rect = "rect";
         }
 
-        void * DetectionLoadA(const char * path)
+        void * DetectionLoadStringXml(char * xml, const char * path)
         {
             static const float THRESHOLD_EPS = 1e-5f;
 
             Data * data = NULL;
             try
             {
-                Xml::File file;
-                if (!file.Open(path))
-                    SIMD_EX("Can't load XML file '" << path << "'!");
-
                 Xml::Document doc;
-                doc.Parse<0>(file.Data());
+                doc.Parse<0>(xml);
 
                 Xml::Node * root = doc.FirstNode();
-                if (root == NULL)
-                    SIMD_EX("Invalid format of XML file '" << path << "'!");
+                if (root == NULL) {
+                    if (path == NULL) {
+                        SIMD_EX("Invalid format of XML string!");
+                    }
+                    else {
+                        SIMD_EX("Invalid format of XML file '" << path << "'!");
+                    }
+                }
 
                 Xml::Node * cascade = root->FirstNode(Names::cascade);
                 if (cascade == NULL)
@@ -314,6 +317,15 @@ namespace Simd
             }
 
             return data;
+        }
+
+        void * DetectionLoadA(const char * path)
+        {
+            Xml::File file;
+            if (!file.Open(path))
+                SIMD_EX("Can't load XML file '" << path << "'!");
+
+            return DetectionLoadStringXml(file.Data(), path);
         }
 
         void DetectionInfo(const void * _data, size_t * width, size_t * height, SimdDetectionInfoFlags * flags)

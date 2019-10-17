@@ -1,7 +1,8 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2018 Yermalayeu Ihar.,
+*               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -207,6 +208,35 @@ namespace Simd
         {
             for (size_t i = 0; i < _data.size(); ++i)
                 ::SimdRelease(_data[i].handle);
+        }
+
+        /*!
+            Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type.
+            You can call this function more than once if you want to use several object detectors at the same time.
+
+            \note Tree based cascades and old cascade formats are not supported!
+
+            \param [in] xml - a path to cascade.
+            \param [in] tag - an user defined tag. This tag will be inserted in output Object structure.
+            \return a result of this operation.
+        */
+        bool LoadStringXml(const std::string & xml, Tag tag = UNDEFINED_OBJECT_TAG)
+        {
+            // Copy the received string to a non const char pointer.
+            char * xmlTmp = new char[xml.size() + 1];
+            std::copy(xml.begin(), xml.end(), xmlTmp);
+            xmlTmp[xml.size()] = '\0';
+
+            Handle handle = ::SimdDetectionLoadStringXml(xmlTmp);
+            if (handle)
+            {
+                Data data;
+                data.handle = handle;
+                data.tag = tag;
+                ::SimdDetectionInfo(handle, (size_t*)&data.size.x, (size_t*)&data.size.y, &data.flags);
+                _data.push_back(data);
+            }
+            return handle != NULL;
         }
 
         /*!
