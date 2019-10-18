@@ -70,7 +70,7 @@ namespace Simd
                     return false;
                 if (c.dstW != (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1)) / c.strideX + 1 || c.dstW == 0)
                     return false;
-                if (c.kernelY != c.kernelX || !(c.kernelY == 1 || c.kernelY == 3))
+                if (c.kernelY != c.kernelX || !(c.kernelY == 1 || c.kernelY == 3 || c.kernelY == 5 || c.kernelY == 7))
                     return false;
                 if (c.strideY != c.strideX || !(c.strideY == 1 || c.strideY == 2))
                     return false;
@@ -82,9 +82,9 @@ namespace Simd
                 if (c.dstW == (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1) - 1) / c.strideX + 1)
                     c.padW--;
             }
-            if (conv[0].group != 1)
+            if (conv[0].group != 1 || (conv[0].kernelY != 1 && conv[0].kernelY != 3))
                 return false;
-            if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || conv[1].kernelY != 3)
+            if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || (conv[1].kernelY != 3 && conv[1].kernelY != 5 && conv[1].kernelY != 7))
                 return false;
             if (conv[2].group != 1 || conv[2].kernelY != 1 || conv[2].strideY != 1)
                 return false;

@@ -3082,7 +3082,13 @@ namespace Test
         VectorI index(src.src.size());
         for (size_t i = 0; i < index.size(); ++i)
             index[i] = i;
+#ifdef SIMD_CPP_2017_ENABLE
+        std::random_device device;
+        std::minstd_rand generator(device());
+        std::shuffle(index.begin(), index.end(), generator);
+#else
         std::random_shuffle(index.begin(), index.end());
+#endif
         dst.check.Reserve(index.size());
         dst.train.Reserve(index.size());
         for (size_t i = 0; i < index.size(); ++i)

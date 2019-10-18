@@ -597,6 +597,204 @@ namespace Simd
             }
         }
 
+        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
+            size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+        {
+            size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
+            size_t srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F, strideXF = strideX * F;
+            size_t srcM = (bufH[0] - 1), dstM = (bufH[1] - 1), srcS = bufH[0] * srcW, dstS = bufH[1] * dstW;
+            size_t noseY = (p.padY + p.strideY - 1) / p.strideY;
+            size_t bodyY = (p.srcH + p.padY + p.strideY - p.kernelY) / p.strideY;
+            size_t noseX = (p.padX + p.strideX - 1) / p.strideX;
+            size_t bodyX = (p.srcW + p.padX + p.strideX - p.kernelX) / p.strideX;
+            size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
+            size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
+            size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
+
+            float32x4_t _params[2];
+            _params[0] = vdupq_n_f32(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+                _params[1] = vdupq_n_f32(params[1]);
+            for (size_t c = 0; c < srcC; c += F)
+            {
+                float32x4_t _bias = bias ? Load<false>(bias + c) : vdupq_n_f32(0.0f);
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = Load<false>(params + c);
+
+                for (size_t dy = yBeg; dy < yEnd; ++dy)
+                {
+                    float* pd = dst + (dy & dstM) * dstW;
+                    if (dy >= noseY && dy < bodyY)
+                    {
+                        size_t dx = 0;
+                        for (; dx < noseX; ++dx, pd += F)
+                        {
+                            float32x4_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * p.strideY + ky - padY;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                {
+                                    size_t sx = dx * p.strideX + kx - padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
+                                        sum = vmlaq_f32(sum, Load<false>(ps), Load<false>(pw));
+                                    }
+                                }
+                            }
+                            Store<false>(pd, Activate<type>(sum, _params, 0));
+                        }
+                        for (; dx < bodyX8; dx += 8, pd += 8 * F)
+                        {
+                            float32x4_t sum0 = _bias;
+                            float32x4_t sum1 = _bias;
+                            float32x4_t sum2 = _bias;
+                            float32x4_t sum3 = _bias;
+                            float32x4_t sum4 = _bias;
+                            float32x4_t sum5 = _bias;
+                            float32x4_t sum6 = _bias;
+                            float32x4_t sum7 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    float32x4_t w0 = Load<false>(pw);
+                                    sum0 = vmlaq_f32(sum0, Load<false>(ps + 0 * strideXF), w0);
+                                    sum1 = vmlaq_f32(sum1, Load<false>(ps + 1 * strideXF), w0);
+                                    sum2 = vmlaq_f32(sum2, Load<false>(ps + 2 * strideXF), w0);
+                                    sum3 = vmlaq_f32(sum3, Load<false>(ps + 3 * strideXF), w0);
+                                    sum4 = vmlaq_f32(sum4, Load<false>(ps + 4 * strideXF), w0);
+                                    sum5 = vmlaq_f32(sum5, Load<false>(ps + 5 * strideXF), w0);
+                                    sum6 = vmlaq_f32(sum6, Load<false>(ps + 6 * strideXF), w0);
+                                    sum7 = vmlaq_f32(sum7, Load<false>(ps + 7 * strideXF), w0);
+                                }
+                            }
+                            Store<false>(pd + 0 * F, Activate<type>(sum0, _params, 0));
+                            Store<false>(pd + 1 * F, Activate<type>(sum1, _params, 0));
+                            Store<false>(pd + 2 * F, Activate<type>(sum2, _params, 0));
+                            Store<false>(pd + 3 * F, Activate<type>(sum3, _params, 0));
+                            Store<false>(pd + 4 * F, Activate<type>(sum4, _params, 0));
+                            Store<false>(pd + 5 * F, Activate<type>(sum5, _params, 0));
+                            Store<false>(pd + 6 * F, Activate<type>(sum6, _params, 0));
+                            Store<false>(pd + 7 * F, Activate<type>(sum7, _params, 0));
+                        }
+                        for (; dx < bodyX4; dx += 4, pd += 4 * F)
+                        {
+                            float32x4_t sum0 = _bias;
+                            float32x4_t sum1 = _bias;
+                            float32x4_t sum2 = _bias;
+                            float32x4_t sum3 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    float32x4_t w0 = Load<false>(pw);
+                                    sum0 = vmlaq_f32(sum0, Load<false>(ps + 0 * strideXF), w0);
+                                    sum1 = vmlaq_f32(sum1, Load<false>(ps + 1 * strideXF), w0);
+                                    sum2 = vmlaq_f32(sum2, Load<false>(ps + 2 * strideXF), w0);
+                                    sum3 = vmlaq_f32(sum3, Load<false>(ps + 3 * strideXF), w0);
+                                }
+                            }
+                            Store<false>(pd + 0 * F, Activate<type>(sum0, _params, 0));
+                            Store<false>(pd + 1 * F, Activate<type>(sum1, _params, 0));
+                            Store<false>(pd + 2 * F, Activate<type>(sum2, _params, 0));
+                            Store<false>(pd + 3 * F, Activate<type>(sum3, _params, 0));
+                        }
+                        for (; dx < bodyX2; dx += 2, pd += 2 * F)
+                        {
+                            float32x4_t sum0 = _bias;
+                            float32x4_t sum1 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    float32x4_t w0 = Load<false>(pw);
+                                    sum0 = vmlaq_f32(sum0, Load<false>(ps + 0 * strideXF), w0);
+                                    sum1 = vmlaq_f32(sum1, Load<false>(ps + 1 * strideXF), w0);
+                                }
+                            }
+                            Store<false>(pd + 0 * F, Activate<type>(sum0, _params, 0));
+                            Store<false>(pd + 1 * F, Activate<type>(sum1, _params, 0));
+                        }
+                        for (; dx < bodyX; ++dx, pd += F)
+                        {
+                            float32x4_t sum = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    float32x4_t w0 = Load<false>(pw);
+                                    sum = vmlaq_f32(sum, Load<false>(ps), w0);
+                                }
+                            }
+                            Store<false>(pd, Activate<type>(sum, _params, 0));
+                        }
+                        for (; dx < p.dstW; ++dx, pd += F)
+                        {
+                            float32x4_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                {
+                                    size_t sx = dx * strideX + kx - padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
+                                        sum = vmlaq_f32(sum, Load<false>(ps), Load<false>(pw));
+                                    }
+                                }
+                            }
+                            Store<false>(pd, Activate<type>(sum, _params, 0));
+                        }
+                    }
+                    else
+                    {
+                        for (size_t dx = 0; dx < p.dstW; ++dx, pd += F)
+                        {
+                            float32x4_t sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                if (sy < p.srcH)
+                                {
+                                    for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                    {
+                                        size_t sx = dx * strideX + kx - padX;
+                                        if (sx < p.srcW)
+                                        {
+                                            const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                            const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
+                                            sum = vmlaq_f32(sum, Load<false>(ps), Load<false>(pw));
+                                        }
+                                    }
+                                }
+                            }
+                            Store<false>(pd, Activate<type>(sum, _params, 0));
+                        }
+                    }
+                }
+                src += srcS;
+                dst += dstS;
+                weight += weightS;
+            }
+        }
+
         template<SimdConvolutionActivationType type> SIMD_INLINE void ConvolutionDepthwise3x3Edge2x2(
             const float * src0, const float * src1, const float32x4_t * weight, const float32x4_t & bias, const float32x4_t * params, float * dst)
         {
@@ -1169,7 +1367,10 @@ namespace Simd
                     convolution[0] = InputConvolution<type>;
                 break;
             case 1:
-                convolution[1] = DepthwiseConvolution3x3<type>;
+                if (p.conv[1].kernelY == 3)
+                    convolution[1] = DepthwiseConvolution3x3<type>;
+                else
+                    convolution[1] = DepthwiseConvolution<type>;
                 break;
             case 2:
                 if (p.add)

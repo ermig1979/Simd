@@ -56,8 +56,8 @@ namespace Test
                 conv[0].dilationX = 1;
                 conv[0].strideY = s0;
                 conv[0].strideX = s0;
-                conv[0].padY = s0 == 1 || (conv[0].srcH & 1) ? (k0 - 1) / 2 : 0;
-                conv[0].padX = s0 == 1 || (conv[0].srcW & 1) ? (k0 - 1) / 2 : 0;
+                conv[0].padY = s0 == 1 || (conv[0].srcH & 1) ? (k0 - 1) / 2 : (k0 - 1) / 2 - 1;
+                conv[0].padX = s0 == 1 || (conv[0].srcW & 1) ? (k0 - 1) / 2 : (k0 - 1) / 2 - 1;
                 conv[0].padH = (k0 - 1) / 2;
                 conv[0].padW = (k0 - 1) / 2;
                 conv[0].group = 1;
@@ -75,8 +75,8 @@ namespace Test
                 conv[1].dilationX = 1;
                 conv[1].strideY = s1;
                 conv[1].strideX = s1;
-                conv[1].padY = s1 == 1 || (conv[1].srcH & 1) ? (k1 - 1) / 2 : 0;
-                conv[1].padX = s1 == 1 || (conv[1].srcW & 1) ? (k1 - 1) / 2 : 0;
+                conv[1].padY = s1 == 1 || (conv[1].srcH & 1) ? (k1 - 1) / 2 : (k1 - 1) / 2 - 1;
+                conv[1].padX = s1 == 1 || (conv[1].srcW & 1) ? (k1 - 1) / 2 : (k1 - 1) / 2 - 1;
                 conv[1].padH = (k1 - 1) / 2;
                 conv[1].padW = (k1 - 1) / 2;
                 conv[1].group = c1;
@@ -214,7 +214,7 @@ namespace Test
         bool result = true;
         const SimdBool t = SimdTrue, f = SimdFalse;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationElu, a2 = ::SimdConvolutionActivationHswish;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRelu, a2 = ::SimdConvolutionActivationHswish;
 #ifdef NDEBUG
 #if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 3, 384, 384, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
@@ -235,12 +235,13 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 27, 96, 96, 1, 1, a0, 147, 3, 1, a1, 27, a2, f), f1, f2);
 #endif
 #if 1
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 3, 1, a1, 34, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 5, 1, a1, 34, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 7, 1, a1, 34, a2, f), f1, f2);
 #endif
 #else
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 160, 10, 10, 1, 1, a0, 960, 3, 1, a1, 160, a2, f), f1, f2);
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 24, 96, 96, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 32, 22, 22, 1, 1, a0, 175, 3, 2, a1, 64, a2, f), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 3, 1, a1, 34, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 5, 1, a1, 34, a2, f), f1, f2);
 #endif
         return result;
     }

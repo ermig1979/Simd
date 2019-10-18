@@ -50,6 +50,16 @@ namespace Test
             }
         }
 #else
+#if _MSVC_LANG >= 201703L
+        if (!std::filesystem::exists(std::filesystem::path(path)))
+        {
+            if (!std::filesystem::create_directories(std::filesystem::path(path)))
+            {
+                TEST_LOG_SS(Error, "Can't create path '" << path << "'!");
+                return false;
+            }
+        }
+#else
         if (!std::experimental::filesystem::exists(std::experimental::filesystem::path(path)))
         {
             if (!std::experimental::filesystem::create_directories(std::experimental::filesystem::path(path)))
@@ -58,6 +68,7 @@ namespace Test
                 return false;
             }
         }
+#endif
 #endif
         return true;
 #elif defined(__GNUC__)

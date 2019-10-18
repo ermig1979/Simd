@@ -117,6 +117,14 @@
 #define SIMD_CPP_2011_ENABLE
 #endif
 
+#if _MSVC_LANG >= 201402L
+#define SIMD_CPP_2014_ENABLE
+#endif
+
+#if _MSVC_LANG >= 201703L
+#define SIMD_CPP_2017_ENABLE
+#endif
+
 #define SIMD_FUNCTION __FUNCTION__
 
 #elif defined(__GNUC__)
@@ -239,6 +247,14 @@
 
 #if __cplusplus >= 201103L
 #define SIMD_CPP_2011_ENABLE
+#endif
+
+#if __cplusplus >= 201402L
+#define SIMD_CPP_2014_ENABLE
+#endif
+
+#if __cplusplus >= 201703L
+#define SIMD_CPP_2017_ENABLE
 #endif
 
 #if defined(__clang__)

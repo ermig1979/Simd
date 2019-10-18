@@ -1617,7 +1617,15 @@ namespace Simd
                 for (size_t i = 0; i < index.size(); ++i)
                     index[i] = i;
                 if (options.shuffle)
+                {
+#ifdef SIMD_CPP_2017_ENABLE
+                    std::random_device device;
+                    std::minstd_rand generator(device());
+                    std::shuffle(index.begin(), index.end(), generator);
+#else
                     std::random_shuffle(index.begin(), index.end());
+#endif
+                }
 
                 for (size_t epoch = options.epochStart; epoch < options.epochFinish; ++epoch)
                 {
