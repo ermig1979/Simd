@@ -366,6 +366,8 @@ namespace Simd
                 SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
         }
 
+        //---------------------------------------------------------------------
+
         SIMD_INLINE void PoolingMaxHwc1(const float * src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128 & min, float * dst)
         {
             __m128 max0 = min;
@@ -943,6 +945,53 @@ namespace Simd
                 SynetScaleLayerForwardNchw4c(src, scale, bias, channels, spatial, dst);
             else
                 Base::SynetScaleLayerForward(src, scale, bias, channels, spatial, dst, format);
+        }
+
+        //---------------------------------------------------------------------
+
+        void SynetShuffleLayerForward(const float * src0, size_t srcC0, const float * src1, size_t srcC1, size_t spatial, float * dst0, float * dst1, size_t dstC, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNchw)
+                Base::SynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t srcC0DF = AlignLo(srcC0, DF);
+                size_t srcC1DF = AlignLo(srcC1, DF);
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t cd = 0, cs0 = 0, cs1 = 0;
+                    for (; cs0 < srcC0DF; cs0 += DF, cd += F)
+                    {
+                        __m128 s0 = _mm_loadu_ps(src0 + cs0 + 0);
+                        __m128 s1 = _mm_loadu_ps(src0 + cs0 + F);
+                        _mm_storeu_ps(dst0 + cd, _mm_shuffle_ps(s0, s1, 0x88));
+                        _mm_storeu_ps(dst1 + cd, _mm_shuffle_ps(s0, s1, 0xDD));
+                    }
+                    for (; cs0 < srcC0; cs0 += 2, cd += 1)
+                    {
+                        dst0[cd] = src0[cs0 + 0];
+                        dst1[cd] = src0[cs0 + 1];
+                    }
+                    for (; cs1 < srcC1DF; cs1 += DF, cd += F)
+                    {
+                        __m128 s0 = _mm_loadu_ps(src1 + cs1 + 0);
+                        __m128 s1 = _mm_loadu_ps(src1 + cs1 + F);
+                        _mm_storeu_ps(dst0 + cd, _mm_shuffle_ps(s0, s1, 0x88));
+                        _mm_storeu_ps(dst1 + cd, _mm_shuffle_ps(s0, s1, 0xDD));
+                    }
+                    for (; cs1 < srcC1; cs1 += 2, cd += 1)
+                    {
+                        dst0[cd] = src1[cs1 + 0];
+                        dst1[cd] = src1[cs1 + 1];
+                    }
+                    src0 += srcC0;
+                    src1 += srcC1;
+                    dst0 += dstC;
+                    dst1 += dstC;
+                }
+            }
+            else
+                assert(0);
         }
     }
 #endif// SIMD_SSE_ENABLE

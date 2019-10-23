@@ -85,6 +85,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a5a9fe5380e859581fe00c9952f4c540a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a063ba78f485fb64c83ad48d47d553669"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_detection.html#a063ba78f485fb64c83ad48d47d553669">~Detection</a> ()</td></tr>
 <tr class="separator:a063ba78f485fb64c83ad48d47d553669"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d150b1064d2fe666fb227d3871c99bc"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_detection.html#a7d150b1064d2fe666fb227d3871c99bc">LoadStringXml</a> (const std::string &amp;xml, <a class="el" href="struct_simd_1_1_detection.html#a8c435146ddd95c9e268e6ad611875536">Tag</a> tag=<a class="el" href="struct_simd_1_1_detection.html#a396b8bd09ae7cf22fcf825c96b8a0000">UNDEFINED_OBJECT_TAG</a>)</td></tr>
+<tr class="separator:a7d150b1064d2fe666fb227d3871c99bc"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a07d0f60286f2f852eba0d42093437603"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_detection.html#a07d0f60286f2f852eba0d42093437603">Load</a> (const std::string &amp;path, <a class="el" href="struct_simd_1_1_detection.html#a8c435146ddd95c9e268e6ad611875536">Tag</a> tag=<a class="el" href="struct_simd_1_1_detection.html#a396b8bd09ae7cf22fcf825c96b8a0000">UNDEFINED_OBJECT_TAG</a>)</td></tr>
 <tr class="separator:a07d0f60286f2f852eba0d42093437603"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac14257967700e9bd098079663e296b06"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_detection.html#ac14257967700e9bd098079663e296b06">Init</a> (const <a class="el" href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Size</a> &amp;imageSize, double scaleFactor=1.1, const <a class="el" href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Size</a> &amp;sizeMin=<a class="el" href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Size</a>(0, 0), const <a class="el" href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Size</a> &amp;sizeMax=<a class="el" href="struct_simd_1_1_detection.html#a00a95e450f2199bce5c80ed107208dcd">Size</a>(INT_MAX, INT_MAX), const <a class="el" href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">View</a> &amp;roi=<a class="el" href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">View</a>(), ptrdiff_t threadNumber=-1)</td></tr>
@@ -262,6 +264,44 @@ struct Simd::Detection&lt; A &gt;</h3>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
+<a id="a7d150b1064d2fe666fb227d3871c99bc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7d150b1064d2fe666fb227d3871c99bc">&#9670;&nbsp;</a></span>LoadStringXml()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool LoadStringXml </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>xml</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_detection.html#a8c435146ddd95c9e268e6ad611875536">Tag</a>&#160;</td>
+          <td class="paramname"><em>tag</em> = <code><a class="el" href="struct_simd_1_1_detection.html#a396b8bd09ae7cf22fcf825c96b8a0000">UNDEFINED_OBJECT_TAG</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Loads from file classifier cascade. Supports OpenCV HAAR and LBP cascades type. You can call this function more than once if you want to use several object detectors at the same time.</p>
+<dl class="section note"><dt>Note</dt><dd>Tree based cascades and old cascade formats are not supported!</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">xml</td><td>- a path to cascade. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">tag</td><td>- an user defined tag. This tag will be inserted in output <a class="el" href="struct_simd_1_1_detection_1_1_object.html" title="The Object structure describes detected object. ">Object</a> structure. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a result of this operation. </dd></dl>
+
+</div>
+</div>
 <a id="a07d0f60286f2f852eba0d42093437603"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a07d0f60286f2f852eba0d42093437603">&#9670;&nbsp;</a></span>Load()</h2>
 

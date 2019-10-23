@@ -6283,6 +6283,26 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetShuffleLayerForward(const float * src0, size_t srcC0, const float * src1, size_t srcC1, size_t spatial, float * dst0, float * dst1, size_t dstC, SimdTensorFormatType format);
+
+        \short This function is used for forward propagation of ShuffleLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src0 - a pointer to the32-bit float array with the first input image tensor.
+        \param [in] srcC0 - a number of channels in the first input image tensor. It must be even number.
+        \param [in] src1 - a pointer to the32-bit float array with the second input image tensor.
+        \param [in] srcC1 - a number of channels in the second input image tensor. It must be even number.
+        \param [in] spatial - a spatial size of (input/output) image tensors.
+        \param [out] dst0 - a pointer to the 32-bit float array with the first output image tensor.
+        \param [out] dst1 - a pointer to the 32-bit float array with the second output image tensor.
+        \param [in] dstC - a number of channels in the first and the second output image tensors.
+        \param [in] format - a format of (input/output) image tensors.
+    */
+    SIMD_API void SimdSynetShuffleLayerForward(const float * src0, size_t srcC0, const float * src1, size_t srcC1, size_t spatial, float * dst0, float * dst1, size_t dstC, SimdTensorFormatType format);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
 
         \short This function is used for forward propagation of SoftmaxLayer.

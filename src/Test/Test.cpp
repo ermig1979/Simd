@@ -328,18 +328,12 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetAddBias);
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward0);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward1);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward2);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward3);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward4);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward8);
-    TEST_ADD_GROUP_A00(SynetFusedLayerForward9);
     TEST_ADD_GROUP_A00(SynetInnerProductLayerForward);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A00(SynetPoolingForwardMax);
     TEST_ADD_GROUP_A00(SynetPreluLayerForward);
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
+    TEST_ADD_GROUP_A00(SynetShuffleLayerForward);
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
 
     TEST_ADD_GROUP_A00(SynetElu32f);
@@ -353,6 +347,14 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetConvolution32fForward);
 
     TEST_ADD_GROUP_A00(SynetDeconvolution32fForward);
+
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward0);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward1);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward2);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward3);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward4);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward8);
+    TEST_ADD_GROUP_A00(SynetFusedLayerForward9);
 
     TEST_ADD_GROUP_A00(SynetMergedConvolution32fForward);
 

@@ -601,6 +601,55 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNchw)
+            {
+                size_t cd = 0, size = sizeof(float) * spatial;
+                for (size_t cs = 0; cs < srcC0; cs += 2, cd += 1)
+                {
+                    memcpy(dst0, src0 + 0 * spatial, size);
+                    memcpy(dst1, src0 + 1 * spatial, size);
+                    src0 += 2 * spatial;
+                    dst0 += spatial;
+                    dst1 += spatial;
+                }
+                for (size_t cs = 0; cs < srcC1; cs += 2, cd += 1)
+                {
+                    memcpy(dst0, src1 + 0 * spatial, size);
+                    memcpy(dst1, src1 + 1 * spatial, size);
+                    src1 += 2 * spatial;
+                    dst0 += spatial;
+                    dst1 += spatial;
+                }
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t cd = 0;
+                    for (size_t cs = 0; cs < srcC0; cs += 2, cd += 1)
+                    {
+                        dst0[cd] = src0[cs + 0];
+                        dst1[cd] = src0[cs + 1];
+                    }
+                    for (size_t cs = 0; cs < srcC1; cs += 2, cd += 1)
+                    {
+                        dst0[cd] = src1[cs + 0];
+                        dst1[cd] = src1[cs + 1];
+                    }
+                    src0 += srcC0;
+                    src1 += srcC1;
+                    dst0 += dstC;
+                    dst1 += dstC;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
         {
             if (inner == 1 && count == 2)

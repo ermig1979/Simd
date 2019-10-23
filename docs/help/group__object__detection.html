@@ -52,6 +52,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga6eba3c14ffe78667df250d0d91e0d768"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga6eba3c14ffe78667df250d0d91e0d768">SimdDetectionLoadA</a> (const char *path)</td></tr>
 <tr class="memdesc:ga6eba3c14ffe78667df250d0d91e0d768"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a classifier cascade from file.  <a href="#ga6eba3c14ffe78667df250d0d91e0d768">More...</a><br /></td></tr>
 <tr class="separator:ga6eba3c14ffe78667df250d0d91e0d768"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga3505ce44c0562e8d4fe2c82d8a8228bb">SimdDetectionLoadStringXml</a> (char *xml)</td></tr>
+<tr class="memdesc:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Loads a classifier cascade from a string.  <a href="#ga3505ce44c0562e8d4fe2c82d8a8228bb">More...</a><br /></td></tr>
+<tr class="separator:ga3505ce44c0562e8d4fe2c82d8a8228bb"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3">SimdDetectionInfo</a> (const void *data, size_t *width, size_t *height, <a class="el" href="group__c__types.html#gabedf47370ccee15c5ef55dbe5df6479a">SimdDetectionInfoFlags</a> *flags)</td></tr>
 <tr class="memdesc:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets information about the classifier cascade.  <a href="#ga2741acb9a4edf6d227c83ec3cf8ab1e3">More...</a><br /></td></tr>
 <tr class="separator:ga2741acb9a4edf6d227c83ec3cf8ab1e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -105,6 +108,35 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to cascade. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to loaded cascade. On error it returns NULL. This pointer is used in functions <a class="el" href="group__object__detection.html#ga2741acb9a4edf6d227c83ec3cf8ab1e3" title="Gets information about the classifier cascade. ">SimdDetectionInfo</a> and <a class="el" href="group__object__detection.html#ga1c24fa9c803b2fbff5b175b9d582bfc5" title="Initializes hidden classifier cascade structure to work with given size of input 8-bit gray image...">SimdDetectionInit</a>, and must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API. ">SimdRelease</a>. </dd></dl>
+
+</div>
+</div>
+<a id="ga3505ce44c0562e8d4fe2c82d8a8228bb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga3505ce44c0562e8d4fe2c82d8a8228bb">&#9670;&nbsp;</a></span>SimdDetectionLoadStringXml()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void * SimdDetectionLoadStringXml </td>
+          <td>(</td>
+          <td class="paramtype">char *&#160;</td>
+          <td class="paramname"><em>xml</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Loads a classifier cascade from a string. </p>
+<p>This function supports OpenCV HAAR and LBP cascades type. Tree based cascades and old cascade formats are not supported.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is used for implementation of <a class="el" href="struct_simd_1_1_detection.html" title="The Detection structure provides object detection with using of HAAR and LBP cascade classifiers...">Simd::Detection</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">xml</td><td>- A string with the xml of a classifier cascade. </td></tr>
   </table>
   </dd>
 </dl>

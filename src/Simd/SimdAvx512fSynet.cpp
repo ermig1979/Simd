@@ -1328,6 +1328,69 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format)
+        {
+            return Avx2::SynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
+
+            if (format == SimdTensorFormatNchw)
+                Base::SynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t srcC0DF = AlignLo(srcC0, DF);
+                __mmask16 tail00 = TailMask16(srcC0 - srcC0DF);
+                __mmask16 tail0F = TailMask16(srcC0 - srcC0DF - F);
+                size_t srcD0 = (srcC0 - srcC0DF) / 2;
+                __mmask16 tail0 = TailMask16(srcD0);
+                size_t srcC1DF = AlignLo(srcC1, DF);
+                __mmask16 tail10 = TailMask16(srcC1 - srcC1DF);
+                __mmask16 tail1F = TailMask16(srcC1 - srcC1DF - F);
+                size_t srcD1 = (srcC1 - srcC1DF) / 2;
+                __mmask16 tail1 = TailMask16(srcD1);
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    size_t cd = 0, cs0 = 0, cs1 = 0;
+                    for (; cs0 < srcC0DF; cs0 += DF, cd += F)
+                    {
+                        __m512 s0 = _mm512_loadu_ps(src0 + cs0 + 0);
+                        __m512 s1 = _mm512_loadu_ps(src0 + cs0 + F);
+                        _mm512_storeu_ps(dst0 + cd, Deinterleave<0>(s0, s1));
+                        _mm512_storeu_ps(dst1 + cd, Deinterleave<1>(s0, s1));
+                    }
+                    if (srcC0DF < srcC0)
+                    {
+                        __m512 s0 = _mm512_maskz_loadu_ps(tail00, src0 + cs0 + 0);
+                        __m512 s1 = _mm512_maskz_loadu_ps(tail0F, src0 + cs0 + F);
+                        _mm512_mask_storeu_ps(dst0 + cd, tail0, Deinterleave<0>(s0, s1));
+                        _mm512_mask_storeu_ps(dst1 + cd, tail0, Deinterleave<1>(s0, s1));
+                        cd += srcD0;
+                    }
+                    for (; cs1 < srcC1DF; cs1 += DF, cd += F)
+                    {
+                        __m512 s0 = _mm512_loadu_ps(src1 + cs1 + 0);
+                        __m512 s1 = _mm512_loadu_ps(src1 + cs1 + F);
+                        _mm512_storeu_ps(dst0 + cd, Deinterleave<0>(s0, s1));
+                        _mm512_storeu_ps(dst1 + cd, Deinterleave<1>(s0, s1));
+                    }
+                    if (srcC1DF < srcC1)
+                    {
+                        __m512 s0 = _mm512_maskz_loadu_ps(tail10, src1 + cs1 + 0);
+                        __m512 s1 = _mm512_maskz_loadu_ps(tail1F, src1 + cs1 + F);
+                        _mm512_mask_storeu_ps(dst0 + cd, tail1, Deinterleave<0>(s0, s1));
+                        _mm512_mask_storeu_ps(dst1 + cd, tail1, Deinterleave<1>(s0, s1));
+                        cd += srcD1;
+                    }
+                    src0 += srcC0;
+                    src1 += srcC1;
+                    dst0 += dstC;
+                    dst1 += dstC;
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
         {
             Avx512f::Exp exp;
