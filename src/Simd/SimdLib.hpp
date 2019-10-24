@@ -3326,6 +3326,56 @@ namespace Simd
         SimdGetMoments(mask.data, mask.stride, mask.width, mask.height, index, &area, &x, &y, &xx, &xy, &yy);
     }
 
+
+    /*! @ingroup other_statistic
+
+        \fn void GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s, uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy)
+
+        \short Calculate statistical characteristics (moments) of given object.
+
+        The images must has 8-bit gray format and equal size. One of them can be empty.
+
+        For every point:
+        \verbatim
+        if(mask[X, Y] == index || mask == 0)
+        {
+            S = src ? src[X, Y] : 1;
+            n += 1.
+            s += S;
+            sx += S*X.
+            sy += S*Y.
+            sxx += S*X*X.
+            sxy += S*X*Y.
+            syy += S*Y*Y.
+        }
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdGetObjectMoments.
+
+        \param [in] src - an input image.
+        \param [in] mask - a mask image. Can be empty.
+        \param [in] index - an object index.
+        \param [out] n - a reference to unsigned 64-bit integer value with found are of given object.
+        \param [out] s - a reference to unsigned 64-bit integer value with sum of image values of given object.
+        \param [out] sx - a reference to unsigned 64-bit integer value with found first-order moment x of given object.
+        \param [out] sy - a reference to unsigned 64-bit integer value with found first-order moment y of given object.
+        \param [out] sxx - a reference to unsigned 64-bit integer value with found second-order moment xx of given object.
+        \param [out] sxy - a reference to unsigned 64-bit integer value with found second-order moment xy of given object.
+        \param [out] syy - a reference to unsigned 64-bit integer value with found second-order moment yy of given object.
+    */
+    template<template<class> class A> SIMD_INLINE void GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s, uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy)
+    {
+        assert(src.format == View<A>::Empty || src.format == View<A>::Gray8);
+        assert(mask.format == View<A>::Empty || mask.format == View<A>::Gray8);
+        assert(src.format == View<A>::Gray8 || mask.format == View<A>::Gray8);
+        assert(src.format == mask.format ? EqualSize(src, mask) : true);
+
+        if (src.format)
+            SimdGetObjectMoments(src.data, src.stride, src.width, src.height, mask.data, mask.stride, index, &n, &s, &sx, &sy, &sxx, &sxy, &syy);
+        else
+            SimdGetObjectMoments(src.data, src.stride, mask.width, mask.height, mask.data, mask.stride, index, &n, &s, &sx, &sy, &sxx, &sxy, &syy);
+    }
+
     /*! @ingroup row_statistic
 
         \fn void GetRowSums(const View<A>& src, uint32_t * sums)

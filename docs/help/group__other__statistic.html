@@ -58,6 +58,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga826cc6d930c49626110ca8e750c4338f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga826cc6d930c49626110ca8e750c4338f">SimdGetMoments</a> (const uint8_t *mask, size_t stride, size_t width, size_t height, uint8_t index, uint64_t *area, uint64_t *x, uint64_t *y, uint64_t *xx, uint64_t *xy, uint64_t *yy)</td></tr>
 <tr class="memdesc:ga826cc6d930c49626110ca8e750c4338f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate statistical characteristics (moments) of pixels with given index.  <a href="#ga826cc6d930c49626110ca8e750c4338f">More...</a><br /></td></tr>
 <tr class="separator:ga826cc6d930c49626110ca8e750c4338f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga38eb71fc90753224e9309eb4681c1052"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga38eb71fc90753224e9309eb4681c1052">SimdGetObjectMoments</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, const uint8_t *mask, size_t maskStride, uint8_t index, uint64_t *n, uint64_t *s, uint64_t *sx, uint64_t *sy, uint64_t *sxx, uint64_t *sxy, uint64_t *syy)</td></tr>
+<tr class="memdesc:ga38eb71fc90753224e9309eb4681c1052"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate statistical characteristics (moments) of given object.  <a href="#ga38eb71fc90753224e9309eb4681c1052">More...</a><br /></td></tr>
+<tr class="separator:ga38eb71fc90753224e9309eb4681c1052"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafa9683d8daf79d77bfa3ebb3c1d5c9ae"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gafa9683d8daf79d77bfa3ebb3c1d5c9ae">SimdValueSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *sum)</td></tr>
 <tr class="memdesc:gafa9683d8daf79d77bfa3ebb3c1d5c9ae"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of value of pixels for gray 8-bit image.  <a href="#gafa9683d8daf79d77bfa3ebb3c1d5c9ae">More...</a><br /></td></tr>
 <tr class="separator:gafa9683d8daf79d77bfa3ebb3c1d5c9ae"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -82,6 +85,10 @@ Functions</h2></td></tr>
 <tr class="memitem:ga843748fd557be8fb88d1225b16bd5023"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga843748fd557be8fb88d1225b16bd5023">GetMoments</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;mask, uint8_t index, uint64_t &amp;area, uint64_t &amp;x, uint64_t &amp;y, uint64_t &amp;xx, uint64_t &amp;xy, uint64_t &amp;yy)</td></tr>
 <tr class="memdesc:ga843748fd557be8fb88d1225b16bd5023"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate statistical characteristics (moments) of pixels with given index.  <a href="group__other__statistic.html#ga843748fd557be8fb88d1225b16bd5023">More...</a><br /></td></tr>
 <tr class="separator:ga843748fd557be8fb88d1225b16bd5023"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab46435ec733e69220a2d2019634811db"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:gab46435ec733e69220a2d2019634811db"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gab46435ec733e69220a2d2019634811db">GetObjectMoments</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;mask, uint8_t index, uint64_t &amp;n, uint64_t &amp;s, uint64_t &amp;sx, uint64_t &amp;sy, uint64_t &amp;sxx, uint64_t &amp;sxy, uint64_t &amp;syy)</td></tr>
+<tr class="memdesc:gab46435ec733e69220a2d2019634811db"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculate statistical characteristics (moments) of given object.  <a href="group__other__statistic.html#gab46435ec733e69220a2d2019634811db">More...</a><br /></td></tr>
+<tr class="separator:gab46435ec733e69220a2d2019634811db"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7d943d1baa44558da66285ccdcb9cc65"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga7d943d1baa44558da66285ccdcb9cc65"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga7d943d1baa44558da66285ccdcb9cc65">ValueSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t &amp;sum)</td></tr>
 <tr class="memdesc:ga7d943d1baa44558da66285ccdcb9cc65"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of value of pixels for gray 8-bit image.  <a href="group__other__statistic.html#ga7d943d1baa44558da66285ccdcb9cc65">More...</a><br /></td></tr>
@@ -345,6 +352,140 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">xx</td><td>- a pointer to unsigned 64-bit integer value with found second-order moment xx. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">xy</td><td>- a pointer to unsigned 64-bit integer value with found second-order moment xy. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">yy</td><td>- a pointer to unsigned 64-bit integer value with found second-order moment yy. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga38eb71fc90753224e9309eb4681c1052"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga38eb71fc90753224e9309eb4681c1052">&#9670;&nbsp;</a></span>SimdGetObjectMoments()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdGetObjectMoments </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>maskStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>sx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>sy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>sxx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>sxy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>syy</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate statistical characteristics (moments) of given object. </p>
+<p>The images must has 8-bit gray format and equal size. One of them can be empty.</p>
+<p>For every point: </p><pre class="fragment">if(mask[X, Y] == index || mask == 0)
+{
+    S = src ? src[X, Y] : 1;
+    n += 1.
+    s += S;
+    sx += S*X.
+    sy += S*Y.
+    sxx += S*X*X.
+    sxy += S*X*Y.
+    syy += S*Y*Y.
+}
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__other__statistic.html#gab46435ec733e69220a2d2019634811db" title="Calculate statistical characteristics (moments) of given object. ">Simd::GetObjectMoments(const View&lt;A&gt; &amp; src, const View&lt;A&gt; &amp; mask, uint8_t index, uint64_t &amp; n, uint64_t &amp; s,  uint64_t &amp; sx, uint64_t &amp; sy, uint64_t &amp; sxx, uint64_t &amp; sxy, uint64_t &amp; syy)</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the input image. Can be NULL (its behaviour is equal to function SimdGetMoments). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a pointer to pixels data of the mask image. Can be NULL (the moments will be collected over whole image). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">maskStride</td><td>- a row size of the mask image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- a mask index. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">n</td><td>- a pointer to unsigned 64-bit integer value with found area of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">s</td><td>- a pointer to unsigned 64-bit integer value with sum of image values of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sx</td><td>- a pointer to unsigned 64-bit integer value with found first-order moment x of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sy</td><td>- a pointer to unsigned 64-bit integer value with found first-order moment y of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sxx</td><td>- a pointer to unsigned 64-bit integer value with found second-order moment xx of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sxy</td><td>- a pointer to unsigned 64-bit integer value with found second-order moment xy of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">syy</td><td>- a pointer to unsigned 64-bit integer value with found second-order moment yy of given object. </td></tr>
   </table>
   </dd>
 </dl>
@@ -790,6 +931,112 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">xx</td><td>- a reference to unsigned 64-bit integer value with found second-order moment xx. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">xy</td><td>- a reference to unsigned 64-bit integer value with found second-order moment xy. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">yy</td><td>- a reference to unsigned 64-bit integer value with found second-order moment yy. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gab46435ec733e69220a2d2019634811db"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab46435ec733e69220a2d2019634811db">&#9670;&nbsp;</a></span>GetObjectMoments()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void GetObjectMoments </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>mask</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>index</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>n</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>s</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>sx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>sy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>sxx</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>sxy</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t &amp;&#160;</td>
+          <td class="paramname"><em>syy</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculate statistical characteristics (moments) of given object. </p>
+<p>The images must has 8-bit gray format and equal size. One of them can be empty.</p>
+<p>For every point: </p><pre class="fragment">if(mask[X, Y] == index || mask == 0)
+{
+    S = src ? src[X, Y] : 1;
+    n += 1.
+    s += S;
+    sx += S*X.
+    sy += S*Y.
+    sxx += S*X*X.
+    sxy += S*X*Y.
+    syy += S*Y*Y.
+}
+</pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#ga38eb71fc90753224e9309eb4681c1052" title="Calculate statistical characteristics (moments) of given object. ">SimdGetObjectMoments</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask</td><td>- a mask image. Can be empty. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">index</td><td>- an object index. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">n</td><td>- a reference to unsigned 64-bit integer value with found are of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">s</td><td>- a reference to unsigned 64-bit integer value with sum of image values of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sx</td><td>- a reference to unsigned 64-bit integer value with found first-order moment x of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sy</td><td>- a reference to unsigned 64-bit integer value with found first-order moment y of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sxx</td><td>- a reference to unsigned 64-bit integer value with found second-order moment xx of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">sxy</td><td>- a reference to unsigned 64-bit integer value with found second-order moment xy of given object. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">syy</td><td>- a reference to unsigned 64-bit integer value with found second-order moment yy of given object. </td></tr>
   </table>
   </dd>
 </dl>

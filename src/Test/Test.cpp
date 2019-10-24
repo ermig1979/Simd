@@ -310,6 +310,7 @@ namespace Test
 
     TEST_ADD_GROUP_AD0(GetStatistic);
     TEST_ADD_GROUP_AD0(GetMoments);
+    TEST_ADD_GROUP_A00(GetObjectMoments);
     TEST_ADD_GROUP_AD0(GetRowSums);
     TEST_ADD_GROUP_AD0(GetColSums);
     TEST_ADD_GROUP_AD0(GetAbsDyRowSums);

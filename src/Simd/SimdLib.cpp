@@ -4850,32 +4850,59 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
 SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
                 uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy)
 {
+    const bool simd = width < SHRT_MAX && height < SHRT_MAX;
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width < SHRT_MAX && height < SHRT_MAX)
+    if (Avx512bw::Enable && simd)
         Avx512bw::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A && width < SHRT_MAX && height < SHRT_MAX)
+    if(Avx2::Enable && simd)
         Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A && width < SHRT_MAX && height < SHRT_MAX)
+    if(Sse2::Enable && simd)
         Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && width >= Vmx::A && width < SHRT_MAX && height < SHRT_MAX)
+    if(Vmx::Enable && simd)
         Vmx::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && width >= Neon::A && width < SHRT_MAX && height < SHRT_MAX)
+    if (Neon::Enable && simd)
         Neon::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
         Base::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+}
+
+SIMD_API void SimdGetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
+    uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy)
+{
+//#ifdef SIMD_AVX512BW_ENABLE
+//    if (Avx512bw::Enable && width < SHRT_MAX && height < SHRT_MAX)
+//        Avx512bw::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+//    else
+//#endif
+//#ifdef SIMD_AVX2_ENABLE
+    //if (Avx2::Enable && width >= Avx2::A && width < SHRT_MAX && height < SHRT_MAX)
+    //    Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+    //else
+//#endif
+//#ifdef SIMD_SSE2_ENABLE
+//    if (Sse2::Enable && width >= Sse2::A && width < SHRT_MAX && height < SHRT_MAX)
+//        Sse2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
+//    else
+//#endif
+//#ifdef SIMD_NEON_ENABLE
+    //if (Neon::Enable && width >= Neon::A && width < SHRT_MAX && height < SHRT_MAX)
+    //    Neon::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+    //else
+//#endif
+        Base::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
 }
 
 SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)

@@ -5252,6 +5252,49 @@ extern "C"
     SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
         uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
+    /*! @ingroup other_statistic
+
+        \fn void SimdGetObjectMoments(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index, uint64_t * n, uint64_t * s,  uint64_t * sx, uint64_t * sy, uint64_t * sxx, uint64_t * sxy, uint64_t * syy);
+
+        \short Calculate statistical characteristics (moments) of given object.
+
+        The images must has 8-bit gray format and equal size. One of them can be empty.
+
+        For every point:
+        \verbatim
+        if(mask[X, Y] == index || mask == 0)
+        {
+            S = src ? src[X, Y] : 1;
+            n += 1.
+            s += S;
+            sx += S*X.
+            sy += S*Y.
+            sxx += S*X*X.
+            sxy += S*X*Y.
+            syy += S*Y*Y.
+        }
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::GetObjectMoments(const View<A> & src, const View<A> & mask, uint8_t index, uint64_t & n, uint64_t & s,  uint64_t & sx, uint64_t & sy, uint64_t & sxx, uint64_t & sxy, uint64_t & syy).
+
+        \param [in] src - a pointer to pixels data of the input image. Can be NULL (its behaviour is equal to function SimdGetMoments).
+        \param [in] srcStride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] mask - a pointer to pixels data of the mask image. Can be NULL (the moments will be collected over whole image).
+        \param [in] maskStride - a row size of the mask image.
+        \param [in] index - a mask index.
+        \param [out] n - a pointer to unsigned 64-bit integer value with found area of given object.
+        \param [out] s - a pointer to unsigned 64-bit integer value with sum of image values of given object.
+        \param [out] sx - a pointer to unsigned 64-bit integer value with found first-order moment x of given object.
+        \param [out] sy - a pointer to unsigned 64-bit integer value with found first-order moment y of given object.
+        \param [out] sxx - a pointer to unsigned 64-bit integer value with found second-order moment xx of given object.
+        \param [out] sxy - a pointer to unsigned 64-bit integer value with found second-order moment xy of given object.
+        \param [out] syy - a pointer to unsigned 64-bit integer value with found second-order moment yy of given object.
+    */
+    SIMD_API void SimdGetObjectMoments(const uint8_t * src, size_t srcStride, size_t width, size_t height, const uint8_t * mask, size_t maskStride, uint8_t index,
+        uint64_t * n, uint64_t * s,  uint64_t * sx, uint64_t * sy, uint64_t * sxx, uint64_t * sxy, uint64_t * syy);
+
     /*! @ingroup row_statistic
 
         \fn void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
