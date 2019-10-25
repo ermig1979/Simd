@@ -121,6 +121,7 @@ namespace Simd
             return value ? value : otherwise;
         }
 
+#if defined(_SC_LEVEL1_DCACHE_SIZE) && defined(_SC_LEVEL2_CACHE_SIZE) && defined(_SC_LEVEL3_CACHE_SIZE)
         size_t CpuCacheSize(size_t level)
         {
             switch (level)
@@ -132,6 +133,20 @@ namespace Simd
                 return 0;
             }
         }
+#else
+        size_t CpuCacheSize(size_t level)
+        {
+            switch (level)
+            {
+            case 1: return 32 * 1024;
+            case 2: return 256 * 1024;
+            case 3: return 2048 * 1024;
+            default:
+                return 0;
+            }
+        }
+#endif
+
 #else
 #error This platform is unsupported!
 #endif

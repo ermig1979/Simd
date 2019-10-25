@@ -4852,27 +4852,27 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
 {
     const bool simd = width < SHRT_MAX && height < SHRT_MAX;
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && simd)
+    if (Avx512bw::Enable && width >= Avx512bw::A && simd)
         Avx512bw::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && simd)
+    if(Avx2::Enable && width >= Avx2::A && simd)
         Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && simd)
+    if(Sse2::Enable && width >= Sse2::A)
         Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
-    if(Vmx::Enable && simd)
+    if(Vmx::Enable && width >= Vmx::A && simd)
         Vmx::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable && simd)
+    if (Neon::Enable && width >= Neon::A && simd)
         Neon::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
@@ -4892,11 +4892,11 @@ SIMD_API void SimdGetObjectMoments(const uint8_t* src, size_t srcStride, size_t 
     //    Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     //else
 //#endif
-//#ifdef SIMD_SSE2_ENABLE
-//    if (Sse2::Enable && width >= Sse2::A && width < SHRT_MAX && height < SHRT_MAX)
-//        Sse2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
-//    else
-//#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
+    else
+#endif
 //#ifdef SIMD_NEON_ENABLE
     //if (Neon::Enable && width >= Neon::A && width < SHRT_MAX && height < SHRT_MAX)
     //    Neon::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
