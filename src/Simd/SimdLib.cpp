@@ -4857,7 +4857,7 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if(Avx2::Enable && width >= Avx2::A && simd)
+    if(Avx2::Enable && width >= Avx2::A)
         Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
@@ -4887,11 +4887,11 @@ SIMD_API void SimdGetObjectMoments(const uint8_t* src, size_t srcStride, size_t 
 //        Avx512bw::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-    //if (Avx2::Enable && width >= Avx2::A && width < SHRT_MAX && height < SHRT_MAX)
-    //    Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
-    //else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
     if (Sse2::Enable && width >= Sse2::A)
         Sse2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);

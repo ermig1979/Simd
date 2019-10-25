@@ -321,16 +321,16 @@ namespace Test
             result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Sse2::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx2::GetMoments), FUNC_M(SimdGetMoments));
-//#endif 
-//
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && GetMomentsAutoTest(FUNC_M(Simd::Avx512bw::GetMoments), FUNC_M(SimdGetMoments));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Avx2::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Avx512bw::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && GetMomentsAutoTest(FUNC_M(Simd::Neon::GetMoments), FUNC_M(SimdGetMoments));
