@@ -121,25 +121,27 @@ namespace Simd
                     _sxx = HorizontalSum32(_sxx);
 
                     __m128i _y = _mm_set1_epi32((int32_t)row);
-                    __m128i _x = _mm_set1_epi32((int32_t)colB);
+                    __m128i _x0 = _mm_set1_epi32((int32_t)colB);
 
                     n = _mm_add_epi64(n, _n);
 
                     s = _mm_add_epi64(s, _s);
 
                     sx = _mm_add_epi64(sx, _sx);
-                    sx = _mm_add_epi64(sx, _mm_mul_epu32(_s, _x));
+                    __m128i _sx0 = _mm_mul_epu32(_s, _x0);
+                    sx = _mm_add_epi64(sx, _sx0);
 
-                    sy = _mm_add_epi64(sy, _mm_mul_epu32(_s, _y));
+                    __m128i _sy = _mm_mul_epu32(_s, _y);
+                    sy = _mm_add_epi64(sy, _sy);
 
                     sxx = _mm_add_epi64(sxx, _sxx);
-                    sxx = _mm_add_epi64(sxx, _mm_mul_epu32(_sx, _mm_add_epi64(_x, _x)));
-                    sxx = _mm_add_epi64(sxx, _mm_mul_epu32(_s, _mm_mul_epu32(_x, _x)));
+                    sxx = _mm_add_epi64(sxx, _mm_mul_epu32(_sx, _mm_add_epi64(_x0, _x0)));
+                    sxx = _mm_add_epi64(sxx, _mm_mul_epu32(_sx0, _x0));
 
                     sxy = _mm_add_epi64(sxy, _mm_mul_epu32(_sx, _y));
-                    sxy = _mm_add_epi64(sxy, _mm_mul_epu32(_s, _mm_mul_epu32(_x, _y)));
+                    sxy = _mm_add_epi64(sxy, _mm_mul_epu32(_sx0, _y));
 
-                    syy = _mm_add_epi64(syy, _mm_mul_epu32(_s, _mm_mul_epu32(_y, _y)));
+                    syy = _mm_add_epi64(syy, _mm_mul_epu32(_sy, _y));
 
                     colB = colE;
                 }
