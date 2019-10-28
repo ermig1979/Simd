@@ -449,6 +449,9 @@ namespace Simd
         void GetMoments(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             uint64_t * area, uint64_t * x, uint64_t * y, uint64_t * xx, uint64_t * xy, uint64_t * yy);
 
+        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
+            uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy);
+
         void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);
 
         void GetColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums);

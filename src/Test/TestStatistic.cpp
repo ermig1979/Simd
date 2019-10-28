@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -331,10 +331,10 @@ namespace Test
             result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Avx512bw::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && GetMomentsAutoTest(FUNC_M(Simd::Neon::GetMoments), FUNC_M(SimdGetMoments));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Neon::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
+#endif
 
         return result;
     }
