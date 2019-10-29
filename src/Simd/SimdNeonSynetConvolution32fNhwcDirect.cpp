@@ -828,7 +828,7 @@ namespace Simd
             case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, microD, _convolution); break;
             default: assert(0);
             }
-            SetAlgParam(microD, 32 * 1024, 256 * 1024, 2 * 1024 * 1024);
+            SetAlgParam(microD, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
        }
 
         bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f & p)

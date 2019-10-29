@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -1410,7 +1411,7 @@ namespace Simd
                 default: assert(0);
                 }
             }
-            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx::F);
+            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::F);
         }
 
         //---------------------------------------------------------------------

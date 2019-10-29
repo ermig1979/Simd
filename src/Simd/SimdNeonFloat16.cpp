@@ -24,6 +24,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -436,7 +437,7 @@ namespace Simd
 
         void CosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, float * distances)
         {
-            const size_t L2 = 256 * 1024;
+            const size_t L2 = Base::AlgCacheL2();
             size_t mN = AlignLoAny(L2 / 2 / K, 4);
             size_t mM = AlignLoAny(L2 / 2 / K, 3);
             Array32f aa(M), bb(N);

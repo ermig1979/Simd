@@ -797,9 +797,6 @@ namespace Simd
 
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            const size_t CACHE_L1_SIZE = 32 * 1024;
-            const size_t CACHE_L2_SIZE = 256 * 1024;
-            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
             typedef Simd::GemmNN<float, size_t> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
@@ -834,9 +831,9 @@ namespace Simd
             kernelTT = GemmKernelMx8nn;
 #endif
             GemmNN::PackA packA = NULL;
-            L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
-            L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
-            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,
+            L1 = N > 4096 ? Base::AlgCacheL2() : Base::AlgCacheL1();
+            L2 = N > 4096 ? Base::AlgCacheL3() : Base::AlgCacheL2();
+            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, Base::AlgCacheL3(), F,
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx::GemmPackB, Avx::GemmScaleC, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }

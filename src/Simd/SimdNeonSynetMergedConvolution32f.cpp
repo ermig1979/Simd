@@ -1396,7 +1396,7 @@ namespace Simd
         SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f & p)
             : Base::SynetMergedConvolution32f(p)
         {
-            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Neon::F);
+            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Neon::F);
             for (size_t i = 0; i < _param.count; ++i)
             {
                 switch (p.conv[i].activation)

@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -1288,7 +1289,7 @@ namespace Simd
         SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f & p)
             : Avx2::SynetMergedConvolution32f(p)
         {
-            SetSize(32 * 1024, 256 * 1024, 2048 * 1024, Avx512f::F);
+            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx512f::F);
             for (size_t i = 0; i < _param.count; ++i)
             {
                 switch (p.conv[i].activation)

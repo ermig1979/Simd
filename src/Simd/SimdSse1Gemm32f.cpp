@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdGemm.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -763,9 +764,6 @@ namespace Simd
 
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            const size_t CACHE_L1_SIZE = 32 * 1024;
-            const size_t CACHE_L2_SIZE = 256 * 1024;
-            const size_t CACHE_L3_SIZE = 2 * 1024 * 1024;
             typedef Simd::GemmNN<float, size_t> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
@@ -800,9 +798,9 @@ namespace Simd
             kernelTT = GemmKernelMx4nn;
 #endif
             GemmNN::PackA packA = NULL;
-            L1 = N > 4096 ? CACHE_L2_SIZE : CACHE_L1_SIZE;
-            L2 = N > 4096 ? CACHE_L3_SIZE : CACHE_L2_SIZE;
-            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, CACHE_L3_SIZE, F,
+            L1 = N > 4096 ? Base::AlgCacheL2() : Base::AlgCacheL1();
+            L2 = N > 4096 ? Base::AlgCacheL3() : Base::AlgCacheL2();
+            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, Base::AlgCacheL3(), F,
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, GemmPackB, GemmScaleC, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
@@ -813,9 +811,6 @@ namespace Simd
 
         SIMD_INLINE Gemm32fNNcb CreateGemm32fNNcb(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
         {
-            const size_t L1 = 32 * 1024;
-            const size_t L2 = 256 * 1024;
-            const size_t L3 = 2 * 1024 * 1024;
             Gemm32fNNcb::Main kernelMM, kernelMT;
             Gemm32fNNcb::Tail kernelTM, kernelTT;
             size_t microM, microN;
@@ -860,7 +855,8 @@ namespace Simd
             kernelTM = Sse::GetGemmTail(M%microM, microN);
             kernelTT = Sse::GetGemmTail(M%microM, microN);
 #endif
-            return Gemm32fNNcb(M, N, K, microM, microN, L1, L2, L3, F, kernelMM, kernelMT, kernelTM, kernelTT, Sse::GemmPackB, Sse::GemmScaleC, NULL, compatibility);
+            return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, 
+                kernelMM, kernelMT, kernelTM, kernelTT, Sse::GemmPackB, Sse::GemmScaleC, NULL, compatibility);
         }
 
         size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
