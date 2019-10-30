@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
