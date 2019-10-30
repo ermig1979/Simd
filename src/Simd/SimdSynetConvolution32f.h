@@ -254,6 +254,14 @@ namespace Simd
             void SetBlock(size_t block);
             void ForwardMerged(const float * src, float * bufS, float * bufD, float * dst, size_t merge);
 
+#ifdef SIMD_PERFORMANCE_STATISTIC
+            long long RealFlop() const
+            {
+                const ConvParam32f & p = _param;
+                return p.batch * _count * p.srcC * _tileH * _tileW * p.dstC * 2 ;
+            }
+#endif
+
             size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge;
             SimdBool _pad;
             Array32f _winogradWeight;

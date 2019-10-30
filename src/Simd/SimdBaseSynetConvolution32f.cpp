@@ -25,6 +25,7 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -242,7 +243,7 @@ namespace Simd
             if (p.trans && p.group == 1 && _batch > 1)
             {
                 for (size_t merge = 1; merge <= _batch; ++merge)
-                    if (_batch%merge == 0 && _M*merge <= 256)
+                    if (_batch%merge == 0 && _M*merge*_K*sizeof(float) <= Base::AlgCacheL2())
                         _merge = merge;
             }
             _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
@@ -734,7 +735,7 @@ namespace Simd
             if (p.trans && _batch > 1)
             {
                 for (size_t merge = 1; merge <= _batch; ++merge)
-                    if (_batch%merge == 0 && _M*merge <= 256)
+                    if (_batch%merge == 0 && _M*merge <= 128)
                         _merge = merge;
             }
         }
