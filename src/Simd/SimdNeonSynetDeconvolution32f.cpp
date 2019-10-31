@@ -44,7 +44,11 @@ namespace Simd
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
+#if defined(SIMD_ARM64_ENABLE)
+                    _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF4));
+#else
                     _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF3));
+#endif
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
                 }
                 else
@@ -80,22 +84,22 @@ namespace Simd
             {
                 w0 = Load<false>(weight0);
                 w1 = Load<false>(weight1);
-                s0 = vdupq_n_f32(src0[sc]);
+                s0 = vld1q_dup_f32(src0 + sc);
                 d00 = vmlaq_f32(d00, s0, w0);
                 d01 = vmlaq_f32(d01, s0, w1);
-                s0 = vdupq_n_f32(src1[sc]);
+                s0 = vld1q_dup_f32(src1 + sc);
                 d10 = vmlaq_f32(d10, s0, w0);
                 d11 = vmlaq_f32(d11, s0, w1);
-                s0 = vdupq_n_f32(src2[sc]);
+                s0 = vld1q_dup_f32(src2 + sc);
                 d20 = vmlaq_f32(d20, s0, w0);
                 d21 = vmlaq_f32(d21, s0, w1);
-                s0 = vdupq_n_f32(src3[sc]);
+                s0 = vld1q_dup_f32(src3 + sc);
                 d30 = vmlaq_f32(d30, s0, w0);
                 d31 = vmlaq_f32(d31, s0, w1);
-                s0 = vdupq_n_f32(src4[sc]);
+                s0 = vld1q_dup_f32(src4 + sc);
                 d40 = vmlaq_f32(d40, s0, w0);
                 d41 = vmlaq_f32(d41, s0, w1);
-                s0 = vdupq_n_f32(src5[sc]);
+                s0 = vld1q_dup_f32(src5 + sc);
                 d50 = vmlaq_f32(d50, s0, w0);
                 d51 = vmlaq_f32(d51, s0, w1);
                 weight0 += F;
@@ -154,12 +158,12 @@ namespace Simd
             {
                 w0 = Load<false>(weight0);
                 w1 = Load<false>(weight1);
-                if (tail > 0) s0 = vdupq_n_f32(src0[sc]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
-                if (tail > 1) s0 = vdupq_n_f32(src1[sc]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
-                if (tail > 2) s0 = vdupq_n_f32(src2[sc]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
-                if (tail > 3) s0 = vdupq_n_f32(src3[sc]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
-                if (tail > 4) s0 = vdupq_n_f32(src4[sc]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
-                if (tail > 5) s0 = vdupq_n_f32(src5[sc]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
+                if (tail > 0) s0 = vld1q_dup_f32(src0 + sc), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                if (tail > 1) s0 = vld1q_dup_f32(src1 + sc), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                if (tail > 2) s0 = vld1q_dup_f32(src2 + sc), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                if (tail > 3) s0 = vld1q_dup_f32(src3 + sc), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                if (tail > 4) s0 = vld1q_dup_f32(src4 + sc), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
+                if (tail > 5) s0 = vld1q_dup_f32(src5 + sc), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
                 weight0 += F;
                 weight1 += F;
             }

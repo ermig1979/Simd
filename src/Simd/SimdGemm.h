@@ -450,6 +450,7 @@ namespace Simd
         GemmKernelF1,
         GemmKernelF2,
         GemmKernelF3,
+        GemmKernelF4,
     };
 
 #ifdef SIMD_SSE_ENABLE

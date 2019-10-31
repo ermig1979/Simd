@@ -311,7 +311,11 @@ namespace Simd
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
+#if defined(SIMD_ARM64_ENABLE)
+                    _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF4));
+#else
                     _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF3));
+#endif
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
                 }
                 else
@@ -378,7 +382,11 @@ namespace Simd
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
+#if defined(SIMD_ARM64_ENABLE)
+                    _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF4));
+#else
                     _gemmCb.Init(InitGemmCbFuncs(Neon::Gemm32fNNcbBufferSize, Neon::Gemm32fNNcbReorderB, Neon::Gemm32fNNcbRun, "Neon", GemmKernelF2, GemmKernelF3));
+#endif
                     _nhwcStrideW = _gemmCb.At(0).BufferSize(_M*_merge, _N, _K);
                 }
                 else
@@ -760,12 +768,12 @@ namespace Simd
 
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationLeakyRelu>(float32x4_t value, const float * params, size_t offset)
         {
-            return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), vdupq_n_f32(params[0]), vminq_f32(vdupq_n_f32(0.0f), value));
+            return vmlaq_f32(vmaxq_f32(vdupq_n_f32(0.0f), value), vld1q_dup_f32(params + 0), vminq_f32(vdupq_n_f32(0.0f), value));
         }
 
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationRestrictRange>(float32x4_t value, const float * params, size_t offset)
         {
-            return vminq_f32(vmaxq_f32(vdupq_n_f32(params[0]), value), vdupq_n_f32(params[1]));
+            return vminq_f32(vmaxq_f32(vld1q_dup_f32(params + 0), value), vld1q_dup_f32(params + 1));
         }
 
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationPrelu>(float32x4_t value, const float * params, size_t offset)
@@ -775,12 +783,12 @@ namespace Simd
 
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationElu>(float32x4_t value, const float * params, size_t offset)
         {
-            return Neon::Elu(value, vdupq_n_f32(params[0]));
+            return Neon::Elu(value, vld1q_dup_f32(params + 0));
         }
 
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationHswish>(float32x4_t value, const float * params, size_t offset)
         {
-            return Neon::SynetHswish32f(value, vdupq_n_f32(params[0]), vdupq_n_f32(params[1]));
+            return Neon::SynetHswish32f(value, vld1q_dup_f32(params + 0), vld1q_dup_f32(params + 1));
         }
 
         SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, float32x4_t & sum)
@@ -789,7 +797,7 @@ namespace Simd
             for (size_t ky = 0; ky < kH; ++ky)
             {
                 for (size_t i = 0; i < size; ++i, weight += dstC)
-                    sum = vmlaq_f32(sum, vdupq_n_f32(src[i]), Load<false>(weight));
+                    sum = vmlaq_f32(sum, vld1q_dup_f32(src + i), Load<false>(weight));
                 weight += tail;
                 src += stride;
             }
@@ -829,10 +837,10 @@ namespace Simd
                 {
                     w0 = Load<false>(weight + 0 * F);
                     w1 = Load<false>(weight + 1 * F);
-                    s0 = vdupq_n_f32(src0[offset]);
+                    s0 = vld1q_dup_f32(src0 + offset);
                     sums[0][0] = vmlaq_f32(sums[0][0], s0, w0);
                     sums[0][1] = vmlaq_f32(sums[0][1], s0, w1);
-                    s0 = vdupq_n_f32(src1[offset]);
+                    s0 = vld1q_dup_f32(src1 + offset);
                     sums[1][0] = vmlaq_f32(sums[1][0], s0, w0);
                     sums[1][1] = vmlaq_f32(sums[1][1], s0, w1);
                     weight += dstC;
@@ -852,9 +860,9 @@ namespace Simd
                 for (size_t end = offset + size; offset < end; ++offset)
                 {
                     w0 = Load<false>(weight + 0 * F);
-                    s0 = vdupq_n_f32(src0[offset]);
+                    s0 = vld1q_dup_f32(src0 + offset);
                     sums[0][0] = vmlaq_f32(sums[0][0], s0, w0);
-                    s0 = vdupq_n_f32(src1[offset]);
+                    s0 = vld1q_dup_f32(src1 + offset);
                     sums[1][0] = vmlaq_f32(sums[1][0], s0, w0);
                     weight += dstC;
                 }
@@ -923,22 +931,22 @@ namespace Simd
                 {
                     w0 = Load<false>(weight + 0 * F);
                     w1 = Load<false>(weight + 1 * F);
-                    s0 = vdupq_n_f32(src0[offset]);
+                    s0 = vld1q_dup_f32(src0 + offset);
                     sums[0][0] = vmlaq_f32(sums[0][0], s0, w0);
                     sums[0][1] = vmlaq_f32(sums[0][1], s0, w1);
-                    s0 = vdupq_n_f32(src1[offset]);
+                    s0 = vld1q_dup_f32(src1 + offset);
                     sums[1][0] = vmlaq_f32(sums[1][0], s0, w0);
                     sums[1][1] = vmlaq_f32(sums[1][1], s0, w1);
-                    s0 = vdupq_n_f32(src2[offset]);
+                    s0 = vld1q_dup_f32(src2 + offset);
                     sums[2][0] = vmlaq_f32(sums[2][0], s0, w0);
                     sums[2][1] = vmlaq_f32(sums[2][1], s0, w1);
-                    s0 = vdupq_n_f32(src3[offset]);
+                    s0 = vld1q_dup_f32(src3 + offset);
                     sums[3][0] = vmlaq_f32(sums[3][0], s0, w0);
                     sums[3][1] = vmlaq_f32(sums[3][1], s0, w1);
-                    s0 = vdupq_n_f32(src4[offset]);
+                    s0 = vld1q_dup_f32(src4 + offset);
                     sums[4][0] = vmlaq_f32(sums[4][0], s0, w0);
                     sums[4][1] = vmlaq_f32(sums[4][1], s0, w1);
-                    s0 = vdupq_n_f32(src5[offset]);
+                    s0 = vld1q_dup_f32(src5 + offset);
                     sums[5][0] = vmlaq_f32(sums[5][0], s0, w0);
                     sums[5][1] = vmlaq_f32(sums[5][1], s0, w1);
                     weight += dstC;
@@ -962,17 +970,17 @@ namespace Simd
                 for (size_t end = offset + size; offset < end; ++offset)
                 {
                     w0 = Load<false>(weight + 0 * F);
-                    s0 = vdupq_n_f32(src0[offset]);
+                    s0 = vld1q_dup_f32(src0 + offset);
                     sums[0][0] = vmlaq_f32(sums[0][0], s0, w0);
-                    s0 = vdupq_n_f32(src1[offset]);
+                    s0 = vld1q_dup_f32(src1 + offset);
                     sums[1][0] = vmlaq_f32(sums[1][0], s0, w0);
-                    s0 = vdupq_n_f32(src2[offset]);
+                    s0 = vld1q_dup_f32(src2 + offset);
                     sums[2][0] = vmlaq_f32(sums[2][0], s0, w0);
-                    s0 = vdupq_n_f32(src3[offset]);
+                    s0 = vld1q_dup_f32(src3 + offset);
                     sums[3][0] = vmlaq_f32(sums[3][0], s0, w0);
-                    s0 = vdupq_n_f32(src4[offset]);
+                    s0 = vld1q_dup_f32(src4 + offset);
                     sums[4][0] = vmlaq_f32(sums[4][0], s0, w0);
-                    s0 = vdupq_n_f32(src5[offset]);
+                    s0 = vld1q_dup_f32(src5 + offset);
                     sums[5][0] = vmlaq_f32(sums[5][0], s0, w0);
                     weight += dstC;
                 }

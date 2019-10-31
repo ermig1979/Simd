@@ -50,22 +50,22 @@ namespace Simd
             {
                 w0 = Load<false>(weight + 0);
                 w1 = Load<false>(weight + F);
-                s0 = vdupq_n_f32(src0[sc]);
+                s0 = vld1q_dup_f32(src0 + sc);
                 d00 = vmlaq_f32(d00, s0, w0);
                 d01 = vmlaq_f32(d01, s0, w1);
-                s0 = vdupq_n_f32(src1[sc]);
+                s0 = vld1q_dup_f32(src1 + sc);
                 d10 = vmlaq_f32(d10, s0, w0);
                 d11 = vmlaq_f32(d11, s0, w1);
-                s0 = vdupq_n_f32(src2[sc]);
+                s0 = vld1q_dup_f32(src2 + sc);
                 d20 = vmlaq_f32(d20, s0, w0);
                 d21 = vmlaq_f32(d21, s0, w1);
-                s0 = vdupq_n_f32(src3[sc]);
+                s0 = vld1q_dup_f32(src3 + sc);
                 d30 = vmlaq_f32(d30, s0, w0);
                 d31 = vmlaq_f32(d31, s0, w1);
-                s0 = vdupq_n_f32(src4[sc]);
+                s0 = vld1q_dup_f32(src4 + sc);
                 d40 = vmlaq_f32(d40, s0, w0);
                 d41 = vmlaq_f32(d41, s0, w1);
-                s0 = vdupq_n_f32(src5[sc]);
+                s0 = vld1q_dup_f32(src5 + sc);
                 d50 = vmlaq_f32(d50, s0, w0);
                 d51 = vmlaq_f32(d51, s0, w1);
                 weight += DF;
@@ -103,12 +103,12 @@ namespace Simd
             {
                 w0 = Load<false>(weight + 0);
                 w1 = Load<false>(weight + F);
-                if (M > 0) s0 = vdupq_n_f32(src0[sc]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
-                if (M > 1) s0 = vdupq_n_f32(src1[sc]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
-                if (M > 2) s0 = vdupq_n_f32(src2[sc]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
-                if (M > 3) s0 = vdupq_n_f32(src3[sc]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
-                if (M > 4) s0 = vdupq_n_f32(src4[sc]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
-                if (M > 5) s0 = vdupq_n_f32(src5[sc]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
+                if (M > 0) s0 = vld1q_dup_f32(src0 + sc), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                if (M > 1) s0 = vld1q_dup_f32(src1 + sc), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                if (M > 2) s0 = vld1q_dup_f32(src2 + sc), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                if (M > 3) s0 = vld1q_dup_f32(src3 + sc), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                if (M > 4) s0 = vld1q_dup_f32(src4 + sc), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
+                if (M > 5) s0 = vld1q_dup_f32(src5 + sc), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
                 weight += DF;
             }
             if (M > 0) Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0)), Store<false>(dst1 + 0 * F, Activate<type>(d01, params, 1));
@@ -154,17 +154,17 @@ namespace Simd
             for (size_t sc = 0; sc < srcC; ++sc)
             {
                 w0 = Load<false>(weight + 0);
-                s0 = vdupq_n_f32(src0[sc]);
+                s0 = vld1q_dup_f32(src0 + sc);
                 d00 = vmlaq_f32(d00, s0, w0);
-                s0 = vdupq_n_f32(src1[sc]);
+                s0 = vld1q_dup_f32(src1 + sc);
                 d10 = vmlaq_f32(d10, s0, w0);
-                s0 = vdupq_n_f32(src2[sc]);
+                s0 = vld1q_dup_f32(src2 + sc);
                 d20 = vmlaq_f32(d20, s0, w0);
-                s0 = vdupq_n_f32(src3[sc]);
+                s0 = vld1q_dup_f32(src3 + sc);
                 d30 = vmlaq_f32(d30, s0, w0);
-                s0 = vdupq_n_f32(src4[sc]);
+                s0 = vld1q_dup_f32(src4 + sc);
                 d40 = vmlaq_f32(d40, s0, w0);
-                s0 = vdupq_n_f32(src5[sc]);
+                s0 = vld1q_dup_f32(src5 + sc);
                 d50 = vmlaq_f32(d50, s0, w0);
                 weight += DF;
             }
@@ -194,12 +194,12 @@ namespace Simd
             for (size_t sc = 0; sc < srcC; ++sc)
             {
                 w0 = Load<false>(weight + 0);
-                if (M > 0) s0 = vdupq_n_f32(src0[sc]), d00 = vmlaq_f32(d00, s0, w0);
-                if (M > 1) s0 = vdupq_n_f32(src1[sc]), d10 = vmlaq_f32(d10, s0, w0);
-                if (M > 2) s0 = vdupq_n_f32(src2[sc]), d20 = vmlaq_f32(d20, s0, w0);
-                if (M > 3) s0 = vdupq_n_f32(src3[sc]), d30 = vmlaq_f32(d30, s0, w0);
-                if (M > 4) s0 = vdupq_n_f32(src4[sc]), d40 = vmlaq_f32(d40, s0, w0);
-                if (M > 5) s0 = vdupq_n_f32(src5[sc]), d50 = vmlaq_f32(d50, s0, w0);
+                if (M > 0) s0 = vld1q_dup_f32(src0 + sc), d00 = vmlaq_f32(d00, s0, w0);
+                if (M > 1) s0 = vld1q_dup_f32(src1 + sc), d10 = vmlaq_f32(d10, s0, w0);
+                if (M > 2) s0 = vld1q_dup_f32(src2 + sc), d20 = vmlaq_f32(d20, s0, w0);
+                if (M > 3) s0 = vld1q_dup_f32(src3 + sc), d30 = vmlaq_f32(d30, s0, w0);
+                if (M > 4) s0 = vld1q_dup_f32(src4 + sc), d40 = vmlaq_f32(d40, s0, w0);
+                if (M > 5) s0 = vld1q_dup_f32(src5 + sc), d50 = vmlaq_f32(d50, s0, w0);
                 weight += DF;
             }
             if (M > 0) Store<false>(dst0 + 0 * F, Activate<type>(d00, params, 0));
@@ -326,7 +326,7 @@ namespace Simd
                 {
                     w0 = Load<false>(weight + 0);
                     w1 = Load<false>(weight + F);
-                    s0 = vdupq_n_f32(src0[i]);
+                    s0 = vld1q_dup_f32(src0 + i);
                     d00 = vmlaq_f32(d00, s0, w0);
                     d01 = vmlaq_f32(d01, s0, w1);
                     weight += DF;
@@ -349,7 +349,7 @@ namespace Simd
                 for (size_t i = 0; i < size; ++i)
                 {
                     w0 = Load<false>(weight + 0);
-                    s0 = vdupq_n_f32(src0[i]);
+                    s0 = vld1q_dup_f32(src0 + i);
                     d00 = vmlaq_f32(d00, s0, w0);
                     weight += DF;
                 }
@@ -382,22 +382,22 @@ namespace Simd
                 {
                     w0 = Load<false>(weight + 0);
                     w1 = Load<false>(weight + F);
-                    s0 = vdupq_n_f32(src0[offset]);
+                    s0 = vld1q_dup_f32(src0 + offset);
                     d00 = vmlaq_f32(d00, s0, w0);
                     d01 = vmlaq_f32(d01, s0, w1);
-                    s0 = vdupq_n_f32(src1[offset]);
+                    s0 = vld1q_dup_f32(src1 + offset);
                     d10 = vmlaq_f32(d10, s0, w0);
                     d11 = vmlaq_f32(d11, s0, w1);
-                    s0 = vdupq_n_f32(src2[offset]);
+                    s0 = vld1q_dup_f32(src2 + offset);
                     d20 = vmlaq_f32(d20, s0, w0);
                     d21 = vmlaq_f32(d21, s0, w1);
-                    s0 = vdupq_n_f32(src3[offset]);
+                    s0 = vld1q_dup_f32(src3 + offset);
                     d30 = vmlaq_f32(d30, s0, w0);
                     d31 = vmlaq_f32(d31, s0, w1);
-                    s0 = vdupq_n_f32(src4[offset]);
+                    s0 = vld1q_dup_f32(src4 + offset);
                     d40 = vmlaq_f32(d40, s0, w0);
                     d41 = vmlaq_f32(d41, s0, w1);
-                    s0 = vdupq_n_f32(src5[offset]);
+                    s0 = vld1q_dup_f32(src5 + offset);
                     d50 = vmlaq_f32(d50, s0, w0);
                     d51 = vmlaq_f32(d51, s0, w1);
                     weight += DF;
@@ -440,17 +440,17 @@ namespace Simd
                 for (size_t end = offset + size; offset < end; ++offset)
                 {
                     w0 = Load<false>(weight + 0);
-                    s0 = vdupq_n_f32(src0[offset]);
+                    s0 = vld1q_dup_f32(src0 + offset);
                     d00 = vmlaq_f32(d00, s0, w0);
-                    s0 = vdupq_n_f32(src1[offset]);
+                    s0 = vld1q_dup_f32(src1 + offset);
                     d10 = vmlaq_f32(d10, s0, w0);
-                    s0 = vdupq_n_f32(src2[offset]);
+                    s0 = vld1q_dup_f32(src2 + offset);
                     d20 = vmlaq_f32(d20, s0, w0);
-                    s0 = vdupq_n_f32(src3[offset]);
+                    s0 = vld1q_dup_f32(src3 + offset);
                     d30 = vmlaq_f32(d30, s0, w0);
-                    s0 = vdupq_n_f32(src4[offset]);
+                    s0 = vld1q_dup_f32(src4 + offset);
                     d40 = vmlaq_f32(d40, s0, w0);
-                    s0 = vdupq_n_f32(src5[offset]);
+                    s0 = vld1q_dup_f32(src5 + offset);
                     d50 = vmlaq_f32(d50, s0, w0);
                     weight += DF;
                 }
@@ -938,22 +938,22 @@ namespace Simd
                     {
                         w0 = Load<false>(weight + 0);
                         w1 = Load<false>(weight + F);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
                         d01 = vmlaq_f32(d01, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        s0 = vld1q_dup_f32(src + i + 1 * F);
                         d10 = vmlaq_f32(d10, s0, w0);
                         d11 = vmlaq_f32(d11, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        s0 = vld1q_dup_f32(src + i + 2 * F);
                         d20 = vmlaq_f32(d20, s0, w0);
                         d21 = vmlaq_f32(d21, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 3 * F]);
+                        s0 = vld1q_dup_f32(src + i + 3 * F);
                         d30 = vmlaq_f32(d30, s0, w0);
                         d31 = vmlaq_f32(d31, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 4 * F]);
+                        s0 = vld1q_dup_f32(src + i + 4 * F);
                         d40 = vmlaq_f32(d40, s0, w0);
                         d41 = vmlaq_f32(d41, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 5 * F]);
+                        s0 = vld1q_dup_f32(src + i + 5 * F);
                         d50 = vmlaq_f32(d50, s0, w0);
                         d51 = vmlaq_f32(d51, s0, w1);
                     }
@@ -1015,17 +1015,17 @@ namespace Simd
                     for (size_t i = 0; i < n; ++i, weight += DF)
                     {
                         w0 = Load<false>(weight + 0);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        s0 = vld1q_dup_f32(src + i + 1 * F);
                         d10 = vmlaq_f32(d10, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        s0 = vld1q_dup_f32(src + i + 2 * F);
                         d20 = vmlaq_f32(d20, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 3 * F]);
+                        s0 = vld1q_dup_f32(src + i + 3 * F);
                         d30 = vmlaq_f32(d30, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 4 * F]);
+                        s0 = vld1q_dup_f32(src + i + 4 * F);
                         d40 = vmlaq_f32(d40, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 5 * F]);
+                        s0 = vld1q_dup_f32(src + i + 5 * F);
                         d50 = vmlaq_f32(d50, s0, w0);
                     }
                     src += srcS;
@@ -1078,16 +1078,16 @@ namespace Simd
                     {
                         w0 = Load<false>(weight + 0);
                         w1 = Load<false>(weight + F);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
                         d01 = vmlaq_f32(d01, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        s0 = vld1q_dup_f32(src + i + 1 * F);
                         d10 = vmlaq_f32(d10, s0, w0);
                         d11 = vmlaq_f32(d11, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        s0 = vld1q_dup_f32(src + i + 2 * F);
                         d20 = vmlaq_f32(d20, s0, w0);
                         d21 = vmlaq_f32(d21, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 3 * F]);
+                        s0 = vld1q_dup_f32(src + i + 3 * F);
                         d30 = vmlaq_f32(d30, s0, w0);
                         d31 = vmlaq_f32(d31, s0, w1);
                     }
@@ -1135,13 +1135,13 @@ namespace Simd
                     for (size_t i = 0; i < n; ++i, weight += DF)
                     {
                         w0 = Load<false>(weight + 0);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        s0 = vld1q_dup_f32(src + i + 1 * F);
                         d10 = vmlaq_f32(d10, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        s0 = vld1q_dup_f32(src + i + 2 * F);
                         d20 = vmlaq_f32(d20, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 3 * F]);
+                        s0 = vld1q_dup_f32(src + i + 3 * F);
                         d30 = vmlaq_f32(d30, s0, w0);
                     }
                     src += srcS;
@@ -1185,13 +1185,13 @@ namespace Simd
                     {
                         w0 = Load<false>(weight + 0);
                         w1 = Load<false>(weight + F);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
                         d01 = vmlaq_f32(d01, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        s0 = vld1q_dup_f32(src + i + 1 * F);
                         d10 = vmlaq_f32(d10, s0, w0);
                         d11 = vmlaq_f32(d11, s0, w1);
-                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        s0 = vld1q_dup_f32(src + i + 2 * F);
                         d20 = vmlaq_f32(d20, s0, w0);
                         d21 = vmlaq_f32(d21, s0, w1);
                     }
@@ -1232,11 +1232,11 @@ namespace Simd
                     for (size_t i = 0; i < n; ++i, weight += DF)
                     {
                         w0 = Load<false>(weight + 0);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 1 * F]);
+                        s0 = vld1q_dup_f32(src + i + 1 * F);
                         d10 = vmlaq_f32(d10, s0, w0);
-                        s0 = vdupq_n_f32(src[i + 2 * F]);
+                        s0 = vld1q_dup_f32(src + i + 2 * F);
                         d20 = vmlaq_f32(d20, s0, w0);
                     }
                     src += srcS;
@@ -1274,7 +1274,7 @@ namespace Simd
                     {
                         w0 = Load<false>(weight + 0);
                         w1 = Load<false>(weight + F);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
                         d01 = vmlaq_f32(d01, s0, w1);
                     }
@@ -1300,7 +1300,7 @@ namespace Simd
                     for (size_t i = 0; i < n; ++i, weight += DF)
                     {
                         w0 = Load<false>(weight + 0);
-                        s0 = vdupq_n_f32(src[i + 0 * F]);
+                        s0 = vld1q_dup_f32(src + i + 0 * F);
                         d00 = vmlaq_f32(d00, s0, w0);
                     }
                     src += srcS;
