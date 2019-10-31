@@ -279,7 +279,8 @@ namespace Test
         bool result = true;
 
 #if 1
-        result = result && ResizerAutoTest(method, type, channels, 234, 232, 300, 300, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 234, 232, 300, 300, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 64, 48, 11, 17, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
 #else
         result = result && ResizerAutoTest(method, type, channels, W, H, 0.9, f1, f2);
