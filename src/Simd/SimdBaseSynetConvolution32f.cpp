@@ -29,6 +29,15 @@
 
 namespace Simd
 {
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+    Base::PerformanceMeasurer * SynetConvolution32f::Perf(const String& func)
+    {
+        if (_perf == NULL)
+            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+        return _perf;
+    }
+#endif
+
     namespace Base
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, SimdBool trans, float * dst)

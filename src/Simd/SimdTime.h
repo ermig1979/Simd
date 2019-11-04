@@ -47,12 +47,38 @@ namespace Simd
         QueryPerformanceFrequency(&frequency);
         return double(counter.QuadPart) / double(frequency.QuadPart);
     }
+
+    SIMD_INLINE int64_t TimeCounter()
+    {
+        LARGE_INTEGER counter;
+        QueryPerformanceCounter(&counter);
+        return counter.QuadPart;
+    }
+
+    SIMD_INLINE int64_t TimeFrequency()
+    {
+        LARGE_INTEGER frequency;
+        QueryPerformanceFrequency(&frequency);
+        return frequency.QuadPart;
+    }
 #elif defined(__GNUC__)
     SIMD_INLINE double Time()
     {
-        timeval t1;
-        gettimeofday(&t1, NULL);
-        return t1.tv_sec + t1.tv_usec * 0.000001;
+        timeval t;
+        gettimeofday(&t, NULL);
+        return t.tv_sec + t.tv_usec * 0.000001;
+    }
+
+    SIMD_INLINE int64_t TimeCounter()
+    {
+        timeval t;
+        gettimeofday(&t, NULL);
+        return int64_t(t.tv_sec)*1000000 + t.tv_usec;
+    }
+
+    SIMD_INLINE int64_t TimeFrequency()
+    {
+        return int64_t(1000000);
     }
 #else
 #error Platform is not supported!

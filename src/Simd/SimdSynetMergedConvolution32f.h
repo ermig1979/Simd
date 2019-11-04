@@ -143,12 +143,7 @@ namespace Simd
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        Base::PerformanceMeasurer * Perf(const String & func)
-        {
-            if (_perf == NULL)
-                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-            return _perf;
-    }
+        Base::PerformanceMeasurer* Perf(const String& func);
 #endif
 
     private:

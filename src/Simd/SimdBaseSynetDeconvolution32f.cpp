@@ -29,6 +29,15 @@
 
 namespace Simd
 {
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+    Base::PerformanceMeasurer * SynetDeconvolution32f::Perf(const String& func)
+    {
+        if (_perf == NULL)
+            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+        return _perf;
+    }
+#endif
+
     namespace Base
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)

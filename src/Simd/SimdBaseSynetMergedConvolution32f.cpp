@@ -30,6 +30,15 @@
 
 namespace Simd
 {
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+    Base::PerformanceMeasurer * SynetMergedConvolution32f::Perf(const String& func)
+    {
+        if (_perf == NULL)
+            _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
+        return _perf;
+    }
+#endif
+
     namespace Base
     {
         template<SimdConvolutionActivationType type, UpdateType update> void DirectConvolution(const float * src, const SimdConvolutionParameters & p,

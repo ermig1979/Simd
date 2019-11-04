@@ -101,7 +101,7 @@ namespace Simd
 
         long long Flop() const
         {
-            return batch * kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
+            return batch* kernelY* kernelX* srcC* dstH* dstW* dstC / group * 2;
         }
 #endif
     };
@@ -163,12 +163,7 @@ namespace Simd
         }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        Base::PerformanceMeasurer * Perf(const String & func)
-        {
-            if (_perf == NULL)
-                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-            return _perf;
-        }
+        Base::PerformanceMeasurer* Perf(const String & func);
 #endif
 
     protected:
