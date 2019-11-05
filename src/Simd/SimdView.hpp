@@ -527,6 +527,11 @@ namespace Simd
         */
         bool Save(const std::string & path) const;
 
+        /*!
+            Clear View structure (reset all fields) and free memory if it's owner
+         */
+        void Clear();
+
     private:
         bool _owner;
     };
@@ -1286,6 +1291,18 @@ namespace Simd
         }
         else
             return false;
+    }
+
+    template <template<class> class A> SIMD_INLINE void View<A>::Clear()
+    {
+        if (_owner && data)
+            Allocator::Free(data);
+        *(void**)&data = nullptr;
+        _owner = false;
+        *(size_t*)&width = 0;
+        *(size_t*)&height = 0;
+        *(ptrdiff_t *)&stride = 0;
+        *(Format*)&format = Format::None;
     }
 
     // View utilities implementation:
