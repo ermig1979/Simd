@@ -132,17 +132,32 @@ namespace Simd
             Sets a background image. Size of background image must be equal to frameSize (see function ShiftDetector::InitBuffers).
 
             \param [in] background - background image.
+            \param [in] makeCopy - if true, copy of the background will be created.
         */
-        void SetBackground(const View & background)
+        void SetBackground(const View & background, bool makeCopy = true)
         {
-            assert(_background.Size() && _background[0].Size() == background.Size());
+            assert(_background.Size() && _background[0].Size() == background.Size() && background.format == _background[0].format);
 
             if (_textureType == TextureGray)
-                Simd::Copy(background, _background[0]);
+            {
+                if (makeCopy)
+                {
+                    Simd::Copy(background, _background[0]);
+                }
+                else
+                {
+                    _background[0].Clear();
+                    _background[0] = View(background.width, background.height, background.stride, background.format, background.data);
+                }
+            }
             else if (_textureType == TextureGrad)
+            {
                 Simd::AbsGradientSaturatedSum(background, _background[0]);
+            }
             else
+            {
                 assert(0);
+            }
             Build(_background, ::SimdReduce2x2);
         }
 
@@ -254,7 +269,8 @@ namespace Simd
                 _neighborhood = neighborhood;
                 _origin = origin;
                 _size = 2 * _neighborhood + Point(1, 1);
-                _table.resize(_size.x*_size.y, DBL_MAX);
+                _table.resize(_size.x*_size.y);
+                std::fill(_table.begin(), _table.end(), DBL_MAX);
             }
 
             double & At(const Point & shift)
@@ -282,14 +298,11 @@ namespace Simd
                     {
                         size_t offset = y*_size.x + x;
                         double value = _table[offset];
-                        if (value < DBL_MAX)
+                        if (value < minValue)
                         {
-                            if (value < minValue)
-                            {
-                                minX = x;
-                                minY = y;
-                                minValue = value;
-                            }
+                            minX = x;
+                            minY = y;
+                            minValue = value;
                         }
                     }
                 }
@@ -330,14 +343,11 @@ namespace Simd
                     {
                         ptrdiff_t offset = y*_size.x + x;
                         double value = _table[offset];
-                        if (value < DBL_MAX)
+                        if (value < minValue)
                         {
-                            if (value < minValue)
-                            {
-                                minX = x;
-                                minY = y;
-                                minValue = value;
-                            }
+                            minX = x;
+                            minY = y;
+                            minValue = value;
                         }
                     }
                 }
@@ -564,7 +574,9 @@ namespace Simd
                             return false;
                         }
 
-                        if (differences.Empty(currentShift))
+                        double & diffAtCurShift = differences.At(currentShift);
+
+                        if (diffAtCurShift == DBL_MAX)
                         {
                             Rect region = level.searchRegion.Shifted(currentShift);
                             region &= Rect(level.current.Size());
@@ -575,13 +587,13 @@ namespace Simd
                             if (currentArea * 2 < initialArea)
                                 return false;
 
-                            differences.At(currentShift) = GetDifference(level.background, level.current, currentShift, region) *
+                            diffAtCurShift = GetDifference(level.background, level.current, currentShift, region) *
                                 (1.0 + (initialArea - currentArea)*hiddenAreaPenalty / initialArea);
                         }
 
-                        if (minDifference > differences.At(currentShift))
+                        if (minDifference > diffAtCurShift)
                         {
-                            minDifference = differences.At(currentShift);
+                            minDifference = diffAtCurShift;
                             minShift = currentShift;
                         }
                     }
