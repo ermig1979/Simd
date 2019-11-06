@@ -84,8 +84,8 @@ Public Types</h2></td></tr>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a3d7a25cb6a9f5e4e593fd4dd2abacaef"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a3d7a25cb6a9f5e4e593fd4dd2abacaef">InitBuffers</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;frameSize, size_t levelCount, <a class="el" href="struct_simd_1_1_shift_detector.html#a65468556d79304b3a4bfc464cc12e549">TextureType</a> textureType=<a class="el" href="struct_simd_1_1_shift_detector.html#a65468556d79304b3a4bfc464cc12e549a25e6fd08acb6f0a1698b9f1d1242f408">TextureGray</a>, <a class="el" href="struct_simd_1_1_shift_detector.html#a689f1d21ce1eeeb0c9b0257f5dd675cd">DifferenceType</a> differenceType=<a class="el" href="struct_simd_1_1_shift_detector.html#a689f1d21ce1eeeb0c9b0257f5dd675cdaf70d38351e5c9ad54f3dc1dec739eafd">AbsDifference</a>)</td></tr>
 <tr class="separator:a3d7a25cb6a9f5e4e593fd4dd2abacaef"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aed64d51cb0bda22fa0bf1fe75b02a715"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#aed64d51cb0bda22fa0bf1fe75b02a715">SetBackground</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;background)</td></tr>
-<tr class="separator:aed64d51cb0bda22fa0bf1fe75b02a715"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6a032b5530e2f8a9233a7f2824477de4"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a6a032b5530e2f8a9233a7f2824477de4">SetBackground</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;background, bool makeCopy=true)</td></tr>
+<tr class="separator:a6a032b5530e2f8a9233a7f2824477de4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#acd1e8f5d44376cb3a8b8bc4f7e876e1f">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, const <a class="el" href="struct_simd_1_1_shift_detector.html#aab8c4d4da8017092fd371852d39ef6bf">Point</a> &amp;maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</td></tr>
 <tr class="separator:acd1e8f5d44376cb3a8b8bc4f7e876e1f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a06da86af4457f22f2e90c1e703fba677"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_shift_detector.html#a06da86af4457f22f2e90c1e703fba677">Estimate</a> (const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;current, const <a class="el" href="struct_simd_1_1_shift_detector.html#ac90be237fa7778a6c7b44708eaabc763">Rect</a> &amp;region, int maxShift, double hiddenAreaPenalty=0, ptrdiff_t regionAreaMin=REGION_CORRELATION_AREA_MIN)</td></tr>
@@ -301,8 +301,8 @@ int main()
 
 </div>
 </div>
-<a id="aed64d51cb0bda22fa0bf1fe75b02a715"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aed64d51cb0bda22fa0bf1fe75b02a715">&#9670;&nbsp;</a></span>SetBackground()</h2>
+<a id="a6a032b5530e2f8a9233a7f2824477de4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6a032b5530e2f8a9233a7f2824477de4">&#9670;&nbsp;</a></span>SetBackground()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -311,8 +311,18 @@ int main()
           <td class="memname">void SetBackground </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_simd_1_1_shift_detector.html#acea084375a9455df1db79145391a4309">View</a> &amp;&#160;</td>
-          <td class="paramname"><em>background</em></td><td>)</td>
+          <td class="paramname"><em>background</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
           <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>makeCopy</em> = <code>true</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
         </tr>
       </table>
 </div><div class="memdoc">
@@ -320,6 +330,7 @@ int main()
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">background</td><td>- background image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">makeCopy</td><td>- if true, copy of the background will be created. </td></tr>
   </table>
   </dd>
 </dl>

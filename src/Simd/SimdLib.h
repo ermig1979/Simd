@@ -2,7 +2,7 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2019 Yermalayeu Ihar,
-*               2014-2016 Antonenka Mikhail,
+*               2014-2019 Antonenka Mikhail,
 *               2019-2019 Facundo Galan.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy

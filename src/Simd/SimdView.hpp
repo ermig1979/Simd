@@ -528,7 +528,7 @@ namespace Simd
         bool Save(const std::string & path) const;
 
         /*!
-            Clear View structure (reset all fields) and free memory if it's owner
+            Clear View structure (reset all fields) and free memory if it's owner.
          */
         void Clear();
 
