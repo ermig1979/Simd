@@ -331,7 +331,6 @@ namespace Test
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A00(SynetInnerProductLayerForward);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
-    TEST_ADD_GROUP_A00(SynetPoolingForwardMax);
     TEST_ADD_GROUP_A00(SynetPreluLayerForward);
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
     TEST_ADD_GROUP_A00(SynetShuffleLayerForward);
@@ -358,6 +357,9 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetFusedLayerForward9);
 
     TEST_ADD_GROUP_A00(SynetMergedConvolution32fForward);
+
+    TEST_ADD_GROUP_A00(SynetPoolingForwardAverage);
+    TEST_ADD_GROUP_A00(SynetPoolingForwardMax);
 
     TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
     TEST_ADD_GROUP_AD0(TextureBoostedUv);

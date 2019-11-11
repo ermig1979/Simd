@@ -5440,10 +5440,19 @@ SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float *
     c->Forward(src, buf, dst);
 }
 
-typedef void(*SimdSynetPoolingForwardPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-    size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
+typedef void(*SimdSynetPoolingForwardAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
+volatile SimdSynetPoolingForwardAveragePtr simdSynetPoolingForwardAverage = SIMD_FUNC0(SynetPoolingForwardAverage);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-volatile SimdSynetPoolingForwardPtr simdSynetPoolingForwardMax = SIMD_FUNC5(SynetPoolingForwardMax, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+void SimdSynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format)
+{
+    simdSynetPoolingForwardAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
+}
+
+typedef void(*SimdSynetPoolingForwardMaxPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
+volatile SimdSynetPoolingForwardMaxPtr simdSynetPoolingForwardMax = SIMD_FUNC5(SynetPoolingForwardMax, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)

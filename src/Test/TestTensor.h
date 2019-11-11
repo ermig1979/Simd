@@ -427,6 +427,20 @@ namespace Test
         return Shape();
     }
 
+    inline Shape ToShape(size_t channels, size_t height, size_t width, SimdTensorFormatType format)
+    {
+        switch (format)
+        {
+        case SimdTensorFormatNchw: return Shape({ channels, height, width });
+        case SimdTensorFormatNhwc: return Shape({ height, width, channels });
+        case SimdTensorFormatNchw4c: return Shape({ (channels + 3) / 4, height, width, 4 });
+        case SimdTensorFormatNchw8c: return Shape({ (channels + 7) / 8, height, width, 8 });
+        case SimdTensorFormatNchw16c: return Shape({ (channels + 15) / 16, height, width, 16 });
+        }
+        assert(0);
+        return Shape();
+    }
+
     inline Shape ToShape(size_t channels, size_t spatial, SimdTensorFormatType format)
     {
         switch (format)
