@@ -380,29 +380,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)
-        {
-            if (!trans)
-            {
-                if (strideY == 1 && strideX == 1 && kernelY == 3 && kernelX == 3 && srcH == dstH && srcW == dstW && dstW > F)
-                {
-                    for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Avx2::NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
-                    return;
-                }
-                if (strideY == 2 && strideX == 2 && kernelY == 3 && kernelX == 3 && padY == 0 && padX == 0 && dstW > F)
-                {
-                    for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Avx2::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
-                    return;
-                }
-            }
-            Avx::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
-        }
-
-        //---------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)
         {
             Avx::Store<align>(dst + offset, _mm256_fmadd_ps(Avx::Load<align>(src + offset), Avx::Load<align>(scale + offset), Avx::Load<align>(bias + offset)));

@@ -54,6 +54,8 @@ namespace Test
         };
     }
 
+    //---------------------------------------------------------------------
+
     namespace
     {
         struct FuncPA
@@ -150,11 +152,11 @@ namespace Test
             result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Sse::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
 #endif 
 
-//#ifdef SIMD_AVX_ENABLE
-//        if (Simd::Avx::Enable)
-//            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
-//#endif 
-//
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Avx::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx2::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
@@ -172,6 +174,8 @@ namespace Test
 
         return result;
     }
+
+    //---------------------------------------------------------------------
 
     namespace 
     {
