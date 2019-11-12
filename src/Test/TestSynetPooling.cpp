@@ -157,20 +157,15 @@ namespace Test
             result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Avx::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx2::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
-//#endif 
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx512f::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
-//#endif
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Neon::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
-//#endif 
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Avx512f::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Neon::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
+#endif 
 
         return result;
     }
