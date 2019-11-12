@@ -5442,7 +5442,7 @@ SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float *
 
 typedef void(*SimdSynetPoolingForwardAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
-volatile SimdSynetPoolingForwardAveragePtr simdSynetPoolingForwardAverage = SIMD_FUNC0(SynetPoolingForwardAverage);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+volatile SimdSynetPoolingForwardAveragePtr simdSynetPoolingForwardAverage = SIMD_FUNC1(SynetPoolingForwardAverage, SIMD_SSE_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_NEON_FUNC);
 
 void SimdSynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format)

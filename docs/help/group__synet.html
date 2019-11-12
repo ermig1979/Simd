@@ -215,6 +215,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga79036c777c2b67def4c02e4eae4b1c53"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga79036c777c2b67def4c02e4eae4b1c53">SimdSynetMergedConvolution32fForward</a> (void *context, const float *src, float *buf, float *dst)</td></tr>
 <tr class="memdesc:ga79036c777c2b67def4c02e4eae4b1c53"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32 merged convolution algorithm.  <a href="group__synet.html#ga79036c777c2b67def4c02e4eae4b1c53">More...</a><br /></td></tr>
 <tr class="separator:ga79036c777c2b67def4c02e4eae4b1c53"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga120882f066336b3826ceade41b0b4c24"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga120882f066336b3826ceade41b0b4c24">SimdSynetPoolingForwardAverage</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float *dst, size_t dstH, size_t dstW, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> excludePad, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga120882f066336b3826ceade41b0b4c24"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (AveragePooling).  <a href="group__synet.html#ga120882f066336b3826ceade41b0b4c24">More...</a><br /></td></tr>
+<tr class="separator:ga120882f066336b3826ceade41b0b4c24"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9cac56e3742e9b87142286c26824016d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9cac56e3742e9b87142286c26824016d">SimdSynetPoolingForwardMax</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float *dst, size_t dstH, size_t dstW, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:ga9cac56e3742e9b87142286c26824016d"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling).  <a href="group__synet.html#ga9cac56e3742e9b87142286c26824016d">More...</a><br /></td></tr>
 <tr class="separator:ga9cac56e3742e9b87142286c26824016d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1769,6 +1772,135 @@ for(c = 0; c &lt; channels1; ++c)
 
 </div>
 </div>
+<a id="ga120882f066336b3826ceade41b0b4c24"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga120882f066336b3826ceade41b0b4c24">&#9670;&nbsp;</a></span>SimdSynetPoolingForwardAverage()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetPoolingForwardAverage </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
+          <td class="paramname"><em>excludePad</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of PoolingLayer (AveragePooling). </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">excludePad</td><td>- a flag of exclude pad from average value calculation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga9cac56e3742e9b87142286c26824016d"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga9cac56e3742e9b87142286c26824016d">&#9670;&nbsp;</a></span>SimdSynetPoolingForwardMax()</h2>
 
@@ -1884,7 +2016,7 @@ for(c = 0; c &lt; channels1; ++c)
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed input and output data (<a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> - CHW order, <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> - HWC order). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">trans</td><td>- a flag of transposed input and output data (<a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a2b00d0a530b75b6ff7c3a2483e56164c">SimdFalse</a> - NCHW order, <a class="el" href="group__c__types.html#gga128437633efebd89ca4bde565dcf5627a214cc69f5c507c56fd13f7e4e46ad549">SimdTrue</a> - NHWC order). </td></tr>
   </table>
   </dd>
 </dl>
