@@ -52,7 +52,7 @@ namespace Simd
                 int block = 0;
                 _ixg[0].src = 0;
                 _ixg[0].dst = 0;
-                for (int dstIndex = 0; dstIndex < _param.dstW; ++dstIndex)
+                for (int dstIndex = 0; dstIndex < (int)_param.dstW; ++dstIndex)
                 {
                     float alpha = (float)((dstIndex + 0.5)*scale - 0.5);
                     int srcIndex = (int)::floor(alpha);
@@ -64,7 +64,7 @@ namespace Simd
                         alpha = 0;
                     }
 
-                    if (srcIndex > _param.srcW - 2)
+                    if (srcIndex > (int)_param.srcW - 2)
                     {
                         srcIndex = (int)_param.srcW - 2;
                         alpha = 1;
