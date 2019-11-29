@@ -433,7 +433,7 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 34, _5, _1, _1, _2, _2, 34, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 34, _7, _1, _1, _3, _3, 34, a, t), f1, f2);
 #endif
-#if 1        
+#if 0        
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 24, 96, 96, 24, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 24, 48, 48, 24, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 48, 24, 24, 48, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
@@ -442,6 +442,13 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(10, 24, 48, 48, 24, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(10, 48, 24, 24, 48, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(10, 96, 12, 12, 96, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+#endif
+#if 1        
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 384, 13, 13, 1152, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1152, 13, 13, 128, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1152, 13, 13, 192, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 448, 6, 6, 2048, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 2048, 6, 6, 192, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
         //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 120, 12, 12, 120, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
@@ -454,9 +461,10 @@ namespace Test
     {
         bool result = true;
 
+        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationIdentity, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
 
         return result;

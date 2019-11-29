@@ -1771,32 +1771,42 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void ScaleC(float * ptr, __m512 value, __mmask16 mask = -1)
+        SIMD_INLINE void ScaleC(float * ptr, __m512 beta, __mmask16 mask = -1)
         {
-            _mm512_mask_storeu_ps(ptr, mask, _mm512_mul_ps(_mm512_maskz_loadu_ps(mask, ptr), value));
+            _mm512_mask_storeu_ps(ptr, mask, _mm512_mul_ps(_mm512_maskz_loadu_ps(mask, ptr), beta));
         }
 
-        void GemmScaleC(size_t M, size_t N, float value, float * C, size_t ldc)
+        void GemmScaleC(size_t M, size_t N, float beta, float * C, size_t ldc)
         {
-            size_t NQF = AlignLo(N, QF);
-            size_t NF = AlignLo(N, F);
-            __m512 _value = _mm512_set1_ps(value);
-            __mmask16 tail = TailMask16(N - NF);
-            for (size_t i = 0; i < M; ++i)
+            if (beta == 1.0f)
+                return;
+            else if (beta == 0.0f)
             {
-                size_t j = 0;
-                for (; j < NQF; j += QF)
+                for (size_t i = 0; i < M; ++i)
+                    memset(C + i * ldc, 0, N * sizeof(float));
+            }
+            else
+            {
+                size_t NQF = AlignLo(N, QF);
+                size_t NF = AlignLo(N, F);
+                __m512 _beta = _mm512_set1_ps(beta);
+                __mmask16 tail = TailMask16(N - NF);
+                for (size_t i = 0; i < M; ++i)
                 {
-                    ScaleC(C + j + F * 0, _value);
-                    ScaleC(C + j + F * 1, _value);
-                    ScaleC(C + j + F * 2, _value);
-                    ScaleC(C + j + F * 3, _value);
+                    size_t j = 0;
+                    for (; j < NQF; j += QF)
+                    {
+                        ScaleC(C + j + F * 0, _beta);
+                        ScaleC(C + j + F * 1, _beta);
+                        ScaleC(C + j + F * 2, _beta);
+                        ScaleC(C + j + F * 3, _beta);
+                    }
+                    for (; j < NF; j += F)
+                        ScaleC(C + j, _beta);
+                    if (j < N)
+                        ScaleC(C + j, _beta, tail);
+                    C += ldc;
                 }
-                for (; j < NF; j += F)
-                    ScaleC(C + j, _value);
-                if (j < N)
-                    ScaleC(C + j, _value, tail);
-                C += ldc;
             }
         }
 
@@ -2012,8 +2022,9 @@ namespace Simd
             kernelTM = Avx512f::GetGemmTail(M%microM, microN);
             kernelTT = Avx512f::GetGemmTail(M%microM, microN);
 #endif
+            Gemm32fNNcb::PackA packA = (M * 3 < N && N >= 512 && K >= 128) ? Avx512f::GemmPackA : NULL;
             return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, 
-                kernelMM, kernelMT, kernelTM, kernelTT, Avx512f::GemmPackB, Avx512f::GemmScaleC, TailMask16, compatibility);
+                kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx512f::GemmPackB, Avx512f::GemmScaleC, TailMask16, compatibility);
         }
 
         size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)

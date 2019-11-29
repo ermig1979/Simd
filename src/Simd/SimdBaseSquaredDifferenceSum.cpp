@@ -102,7 +102,7 @@ namespace Simd
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
 #endif
-#elif defined(_MSC_VER) && (_MSC_VER >= 1924)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1920)
 #pragma optimize ("", off)
 #endif
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
@@ -128,7 +128,7 @@ namespace Simd
 #else
 #pragma GCC pop_options
 #endif 
-#elif defined(_MSC_VER) && (_MSC_VER >= 1924)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1920)
 #pragma optimize ("", on)
 #endif
     }
