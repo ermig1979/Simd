@@ -27,7 +27,7 @@
     <CharacterSet>MultiByte</CharacterSet>
     <UseDebugLibraries Condition="'$(Configuration)'=='Debug'">true</UseDebugLibraries>
     <UseDebugLibraries Condition="'$(Configuration)'=='Release'">false</UseDebugLibraries>
-    <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">true</WholeProgramOptimization>
+    <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup>
     <OutDir>$(SolutionDir)\..\..\bin\$(PlatformToolset)\$(PlatformName)\$(Configuration)\</OutDir>
