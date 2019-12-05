@@ -109,6 +109,50 @@ namespace Simd
         {
             return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
         }
+
+        //---------------------------------------------------------------------
+
+        template<SimdSynetUnaryOperation32fType type> float SynetUnaryOperation32f(float value);
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs>(float value)
+        {
+            return value > 0 ? value : -value;
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(float value)
+        {
+            return ::exp(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog>(float value)
+        {
+            return ::log(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg>(float value)
+        {
+            return -value;
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt>(float value)
+        {
+            return 1.0f / ::sqrt(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fSqrt>(float value)
+        {
+            return ::sqrt(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh>(float value)
+        {
+            return ::tanh(value);
+        }
+
+        template<> SIMD_INLINE float SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero>(float value)
+        {
+            return 0.0f;
+        }
     }
 
 #ifdef SIMD_SSE_ENABLE

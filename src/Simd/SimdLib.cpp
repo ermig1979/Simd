@@ -5536,6 +5536,14 @@ SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format)
     return Base::SynetTensorAlignment(format);
 }
 
+typedef void(*SimdSynetUnaryOperation32fLayerForwardPtr) (const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
+volatile SimdSynetUnaryOperation32fLayerForwardPtr simdSynetUnaryOperation32fLayerForward = SIMD_FUNC4(SynetUnaryOperation32fLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
+{
+    simdSynetUnaryOperation32fLayerForward(src, size, type, dst);
+}
+
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
                                      uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride)
 {

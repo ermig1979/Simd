@@ -253,6 +253,93 @@ namespace Simd
                 }
             }
         }
+
+        //---------------------------------------------------------------------
+
+        template<SimdSynetUnaryOperation32fType type> __m128 SynetUnaryOperation32f(__m128 value);
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs>(__m128 value)
+        {
+            return _mm_andnot_ps(_mm_set1_ps(-0.0f), value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(__m128 value)
+        {
+            return Exponent(value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fLog>(__m128 value)
+        {
+            return Logarithm(value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fNeg>(__m128 value)
+        {
+            return _mm_sub_ps(_mm_setzero_ps(), value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fRsqrt>(__m128 value)
+        {
+            return _mm_rsqrt_ps(value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fSqrt>(__m128 value)
+        {
+            return _mm_sqrt_ps(value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fTanh>(__m128 value)
+        {
+            return Tanh(value);
+        }
+
+        template<> SIMD_INLINE __m128 SynetUnaryOperation32f<SimdSynetUnaryOperation32fZero>(__m128 value)
+        {
+            return _mm_setzero_ps();
+        }
+
+        template<SimdSynetUnaryOperation32fType type, bool align> void SynetUnaryOperation32fLayerForward(const float* src, size_t size, float* dst)
+        {
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                Sse::Store<align>(dst + i + 0 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 0 * F)));
+                Sse::Store<align>(dst + i + 1 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 1 * F)));
+                Sse::Store<align>(dst + i + 2 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 2 * F)));
+                Sse::Store<align>(dst + i + 3 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 3 * F)));
+            }
+            for (; i < sizeF; i += F)
+                Sse::Store<align>(dst + i, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i)));
+            for (; i < size; ++i)
+                dst[i] = Base::SynetUnaryOperation32f<type>(src[i]);
+        }
+
+        template<bool align> void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
+        {
+            switch (type)
+            {
+            case SimdSynetUnaryOperation32fAbs: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fAbs, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fExp: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fExp, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fLog: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fLog, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fNeg: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fNeg, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fRsqrt: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fRsqrt, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fSqrt: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fSqrt, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fTanh: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fTanh, align>(src, size, dst); break;
+            case SimdSynetUnaryOperation32fZero: SynetUnaryOperation32fLayerForward<SimdSynetUnaryOperation32fZero, align>(src, size, dst); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetUnaryOperation32fLayerForward<true>(src, size, type, dst);
+            else
+                SynetUnaryOperation32fLayerForward<false>(src, size, type, dst);
+        }
     }
 #endif// SIMD_SSE2_ENABLE
 }

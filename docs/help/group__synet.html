@@ -107,6 +107,25 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:ga89b4d9922d69654a2a675ccba0a9452d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga574a91c16cee779be86b5a2100eb1992"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a> { <br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a602870a19dbea3c4c9eabe9951793ae2">SimdSynetUnaryOperation32fAbs</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a7fbdee1497a657679fdec63751f057d5">SimdSynetUnaryOperation32fExp</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a4d67059e1b0aa296b63808500a7869bc">SimdSynetUnaryOperation32fLog</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a62f9199a444f6c96c7b3e397f2245741">SimdSynetUnaryOperation32fNeg</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a4e77c7921bff5a54b2a9feec4178e210">SimdSynetUnaryOperation32fRsqrt</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a14623e620183ee47ee008c4d0ce73aa6">SimdSynetUnaryOperation32fRsqt</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a340d02a3d876c008cc86c485ba4296dc">SimdSynetUnaryOperation32fTanh</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga574a91c16cee779be86b5a2100eb1992a4c68207ed6e0467a8910c35d9c0b1a14">SimdSynetUnaryOperation32fZero</a>
+<br />
+ }</td></tr>
+<tr class="separator:ga574a91c16cee779be86b5a2100eb1992"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga9d571aa9489cf536d4df8eef93aebc6f"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> { <br />
 &#160;&#160;<a class="el" href="group__synet.html#gga9d571aa9489cf536d4df8eef93aebc6fa5d9e615dcba79b138f48aa087d3cd544">SimdTensorFormatUnknown</a> = -1, 
 <br />
@@ -236,6 +255,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2fcc0ee0376a986bd32423815a689ea7"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7">SimdSynetTensorAlignment</a> (<a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga2fcc0ee0376a986bd32423815a689ea7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets alignment requred for current tensor format.  <a href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7">More...</a><br /></td></tr>
 <tr class="separator:ga2fcc0ee0376a986bd32423815a689ea7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga427974bd012f6f3ff00245fd0328a96b"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga427974bd012f6f3ff00245fd0328a96b">SimdSynetUnaryOperation32fLayerForward</a> (const float *src, size_t size, <a class="el" href="group__synet.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a> type, float *dst)</td></tr>
+<tr class="memdesc:ga427974bd012f6f3ff00245fd0328a96b"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of UnaryOperationLayer.  <a href="group__synet.html#ga427974bd012f6f3ff00245fd0328a96b">More...</a><br /></td></tr>
+<tr class="separator:ga427974bd012f6f3ff00245fd0328a96b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga2342ab223da6ae12b76c4954bf995143"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2342ab223da6ae12b76c4954bf995143">SimdWinograd2x3SetFilter</a> (const float *src, size_t size, float *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> trans)</td></tr>
 <tr class="memdesc:ga2342ab223da6ae12b76c4954bf995143"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for filter conversion in Winograd 2x3 convolution algorithm.  <a href="group__synet.html#ga2342ab223da6ae12b76c4954bf995143">More...</a><br /></td></tr>
 <tr class="separator:ga2342ab223da6ae12b76c4954bf995143"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -362,6 +384,39 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452da7cba06259587ac85fe8324a915784f05"></a>SimdSynetEltwiseOperationMax&#160;</td><td class="fielddoc"><p>Maximum. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga89b4d9922d69654a2a675ccba0a9452dab109c4827888eec83c3e8487488ade27"></a>SimdSynetEltwiseOperationMin&#160;</td><td class="fielddoc"><p>Minimum. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
+<a id="ga574a91c16cee779be86b5a2100eb1992"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga574a91c16cee779be86b5a2100eb1992">&#9670;&nbsp;</a></span>SimdSynetUnaryOperation32fType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__synet.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Describes operation type used in function <a class="el" href="group__synet.html#ga427974bd012f6f3ff00245fd0328a96b" title="This function is used for forward propagation of UnaryOperationLayer.">SimdSynetUnaryOperation32fLayerForward</a>. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a602870a19dbea3c4c9eabe9951793ae2"></a>SimdSynetUnaryOperation32fAbs&#160;</td><td class="fielddoc"><p>Gets absolute value for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a7fbdee1497a657679fdec63751f057d5"></a>SimdSynetUnaryOperation32fExp&#160;</td><td class="fielddoc"><p>Gets exponent for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4d67059e1b0aa296b63808500a7869bc"></a>SimdSynetUnaryOperation32fLog&#160;</td><td class="fielddoc"><p>Gets logarithm for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a62f9199a444f6c96c7b3e397f2245741"></a>SimdSynetUnaryOperation32fNeg&#160;</td><td class="fielddoc"><p>Gets negative for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4e77c7921bff5a54b2a9feec4178e210"></a>SimdSynetUnaryOperation32fRsqrt&#160;</td><td class="fielddoc"><p>Gets reverse square root for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a14623e620183ee47ee008c4d0ce73aa6"></a>SimdSynetUnaryOperation32fRsqt&#160;</td><td class="fielddoc"><p>Gets square root for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a340d02a3d876c008cc86c485ba4296dc"></a>SimdSynetUnaryOperation32fTanh&#160;</td><td class="fielddoc"><p>Gets hyperbolic tangent for every point of input tensor. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga574a91c16cee779be86b5a2100eb1992a4c68207ed6e0467a8910c35d9c0b1a14"></a>SimdSynetUnaryOperation32fZero&#160;</td><td class="fielddoc"><p>Gets zero value for every point of input tensor. </p>
 </td></tr>
 </table>
 
@@ -2298,6 +2353,58 @@ for(c = 0; c &lt; channels1; ++c)
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>alignment requred for current tensor format. </dd></dl>
+
+</div>
+</div>
+<a id="ga427974bd012f6f3ff00245fd0328a96b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga427974bd012f6f3ff00245fd0328a96b">&#9670;&nbsp;</a></span>SimdSynetUnaryOperation32fLayerForward()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetUnaryOperation32fLayerForward </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a>&#160;</td>
+          <td class="paramname"><em>type</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of UnaryOperationLayer. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to poitres to the input 32-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of the input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- an unary operation type (see <a class="el" href="group__synet.html#ga574a91c16cee779be86b5a2100eb1992">SimdSynetUnaryOperation32fType</a>). </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

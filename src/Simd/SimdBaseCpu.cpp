@@ -33,7 +33,6 @@
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <sys/sysinfo.h>
 #endif
 
 namespace Simd

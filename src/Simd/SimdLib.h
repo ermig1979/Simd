@@ -323,6 +323,29 @@ typedef enum
 } SimdSynetEltwiseOperationType;
 
 /*! @ingroup synet
+    Describes operation type used in function ::SimdSynetUnaryOperation32fLayerForward.
+*/
+typedef enum
+{
+    /*! Gets absolute value for every point of input tensor. */
+    SimdSynetUnaryOperation32fAbs,
+    /*! Gets exponent for every point of input tensor. */
+    SimdSynetUnaryOperation32fExp,
+    /*! Gets logarithm for every point of input tensor. */
+    SimdSynetUnaryOperation32fLog,
+    /*! Gets negative for every point of input tensor. */
+    SimdSynetUnaryOperation32fNeg,
+    /*! Gets reverse square root for every point of input tensor. */
+    SimdSynetUnaryOperation32fRsqrt,
+    /*! Gets square root for every point of input tensor. */
+    SimdSynetUnaryOperation32fSqrt,
+    /*! Gets hyperbolic tangent for every point of input tensor. */
+    SimdSynetUnaryOperation32fTanh,
+    /*! Gets zero value for every point of input tensor. */
+    SimdSynetUnaryOperation32fZero,
+} SimdSynetUnaryOperation32fType;
+
+/*! @ingroup synet
     Describes <a href="http://github.com/ermig1979/Synet">Synet Framework</a> 4D-tensor format type.
 */
 typedef enum
@@ -6412,6 +6435,21 @@ extern "C"
         \return alignment requred for current tensor format.
     */
     SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetUnaryOperation32fLayerForward(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
+
+        \short This function is used for forward propagation of UnaryOperationLayer.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to poitres to the input 32-bit float arrays.
+        \param [in] size - a size of the input and output arrays.
+        \param [in] type - an unary operation type (see ::SimdSynetUnaryOperation32fType).
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetUnaryOperation32fLayerForward(const float * src, size_t size, SimdSynetUnaryOperation32fType type, float * dst);
 
     /*! @ingroup texture_estimation
 

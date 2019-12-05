@@ -335,6 +335,7 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
     TEST_ADD_GROUP_A00(SynetShuffleLayerForward);
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
+    TEST_ADD_GROUP_A00(SynetUnaryOperation32fLayerForward);
 
     TEST_ADD_GROUP_A00(SynetElu32f);
     TEST_ADD_GROUP_A00(SynetHswish32f);

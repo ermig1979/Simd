@@ -34,6 +34,11 @@ namespace Simd
         {
             return ::expf(value);
         }
+
+        SIMD_INLINE float Log(float value)
+        {
+            return ::logf(value);
+        }
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -113,14 +118,14 @@ namespace Simd
 
         namespace Detail
         {
-            SIMD_INLINE __m128 Poly5(__m128 x)
+            SIMD_INLINE __m128 Poly5(__m128 x, float a, float b, float c, float d, float e, float f)
             {
-                __m128 p = _mm_set1_ps(1.8775767e-3f);
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(8.9893397e-3f));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(5.5826318e-2f));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(2.4015361e-1f));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(6.9315308e-1f));
-                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(9.9999994e-1f));
+                __m128 p = _mm_set1_ps(f);
+                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(e));
+                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(d));
+                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(c));
+                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(b));
+                p = _mm_add_ps(_mm_mul_ps(x, p), _mm_set1_ps(a));
                 return p;
             }
 
@@ -130,8 +135,18 @@ namespace Simd
                 __m128i ipart = _mm_cvtps_epi32(_mm_sub_ps(x, _mm_set1_ps(0.5f)));
                 __m128 fpart = _mm_sub_ps(x, _mm_cvtepi32_ps(ipart));
                 __m128 expipart = _mm_castsi128_ps(_mm_slli_epi32(_mm_add_epi32(ipart, _mm_set1_epi32(127)), 23));
-                __m128 expfpart = Poly5(fpart);
+                __m128 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
                 return _mm_mul_ps(expipart, expfpart);
+            }
+
+            SIMD_INLINE __m128 Log2(__m128 x)
+            {
+                __m128 _1 = _mm_set1_ps(1.0f);
+                __m128i i = _mm_castps_si128(x);
+                __m128 e = _mm_cvtepi32_ps(_mm_sub_epi32(_mm_srli_epi32(_mm_and_si128(i, _mm_set1_epi32(0x7F800000)), 23), _mm_set1_epi32(127)));
+                __m128 m = _mm_or_ps(_mm_castsi128_ps(_mm_and_si128(i, _mm_set1_epi32(0x007FFFFF))), _1);
+                __m128 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
+                return _mm_add_ps(_mm_mul_ps(p, _mm_sub_ps(m, _1)), e);
             }
         }
 
@@ -146,6 +161,18 @@ namespace Simd
             __m128 neg = _mm_mul_ps(alpha, _mm_sub_ps(exp, _mm_set1_ps(1.0f)));
             __m128 mask = _mm_cmpgt_ps(_mm_setzero_ps(), value);
             return Sse::Combine(mask, neg, value);
+        }
+
+        SIMD_INLINE __m128 Logarithm(__m128 value)
+        {
+            return _mm_mul_ps(_mm_set1_ps(0.693147181f), Detail::Log2(value));
+        }
+
+        SIMD_INLINE __m128 Tanh(__m128 value)
+        {
+            __m128 _1 = _mm_set1_ps(1.0f);
+            __m128 exp = Detail::Exp2(_mm_mul_ps(_mm_set1_ps(2.88539008f), value));
+            return _mm_div_ps(_mm_sub_ps(exp, _1), _mm_add_ps(_1, exp));
         }
     }
 #endif //SIMD_SSE2_ENABLE   
@@ -227,14 +254,14 @@ namespace Simd
 
         namespace Detail
         {
-            SIMD_INLINE __m256 Poly5(__m256 x)
+            SIMD_INLINE __m256 Poly5(__m256 x, float a, float b, float c, float d, float e, float f)
             {
-                __m256 p = _mm256_set1_ps(1.8775767e-3f);
-                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(8.9893397e-3f));
-                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(5.5826318e-2f));
-                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(2.4015361e-1f));
-                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(6.9315308e-1f));
-                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(9.9999994e-1f));
+                __m256 p = _mm256_set1_ps(f);
+                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(e));
+                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(d));
+                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(c));
+                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(b));
+                p = _mm256_add_ps(_mm256_mul_ps(x, p), _mm256_set1_ps(a));
                 return p;
             }
 
@@ -244,8 +271,18 @@ namespace Simd
                 __m256i ipart = _mm256_cvtps_epi32(_mm256_sub_ps(x, _mm256_set1_ps(0.5f)));
                 __m256 fpart = _mm256_sub_ps(x, _mm256_cvtepi32_ps(ipart));
                 __m256 expipart = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_add_epi32(ipart, _mm256_set1_epi32(127)), 23));
-                __m256 expfpart = Poly5(fpart);
+                __m256 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
                 return _mm256_mul_ps(expipart, expfpart);
+            }
+
+            SIMD_INLINE __m256 Log2(__m256 x)
+            {
+                __m256 _1 = _mm256_set1_ps(1.0f);
+                __m256i i = _mm256_castps_si256(x);
+                __m256 e = _mm256_cvtepi32_ps(_mm256_sub_epi32(_mm256_srli_epi32(_mm256_and_si256(i, _mm256_set1_epi32(0x7F800000)), 23), _mm256_set1_epi32(127)));
+                __m256 m = _mm256_or_ps(_mm256_castsi256_ps(_mm256_and_si256(i, _mm256_set1_epi32(0x007FFFFF))), _1);
+                __m256 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
+                return _mm256_add_ps(_mm256_mul_ps(p, _mm256_sub_ps(m, _1)), e);
             }
         }
 
@@ -260,6 +297,18 @@ namespace Simd
             __m256 neg = _mm256_mul_ps(alpha, _mm256_sub_ps(exp, _mm256_set1_ps(1.0f)));
             __m256 mask = _mm256_cmp_ps(_mm256_setzero_ps(), value, _CMP_GT_OS);
             return _mm256_blendv_ps(value, neg, mask);
+        }
+
+        SIMD_INLINE __m256 Logarithm(__m256 value)
+        {
+            return _mm256_mul_ps(_mm256_set1_ps(0.693147181f), Detail::Log2(value));
+        }
+
+        SIMD_INLINE __m256 Tanh(__m256 value)
+        {
+            __m256 _1 = _mm256_set1_ps(1.0f);
+            __m256 exp = Detail::Exp2(_mm256_mul_ps(_mm256_set1_ps(2.88539008f), value));
+            return _mm256_div_ps(_mm256_sub_ps(exp, _1), _mm256_add_ps(_1, exp));
         }
     }
 #endif //SIMD_AVX2_ENABLE
@@ -341,14 +390,14 @@ namespace Simd
 
         namespace Detail
         {
-            SIMD_INLINE __m512 Poly5(__m512 x)
+            SIMD_INLINE __m512 Poly5(__m512 x, float a, float b, float c, float d, float e, float f)
             {
-                __m512 p = _mm512_set1_ps(1.8775767e-3f);
-                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(8.9893397e-3f));
-                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(5.5826318e-2f));
-                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(2.4015361e-1f));
-                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(6.9315308e-1f));
-                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(9.9999994e-1f));
+                __m512 p = _mm512_set1_ps(f);
+                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(e));
+                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(d));
+                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(c));
+                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(b));
+                p = _mm512_add_ps(_mm512_mul_ps(x, p), _mm512_set1_ps(a));
                 return p;
             }
 
@@ -358,8 +407,18 @@ namespace Simd
                 __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _mm512_set1_ps(0.5f)));
                 __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
                 __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _mm512_set1_epi32(127)), 23));
-                __m512 expfpart = Poly5(fpart);
+                __m512 expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
                 return _mm512_mul_ps(expipart, expfpart);
+            }
+
+            SIMD_INLINE __m512 Log2(__m512 x)
+            {
+                __m512 _1 = _mm512_set1_ps(1.0f);
+                __m512i i = _mm512_castps_si512(x);
+                __m512 e = _mm512_cvtepi32_ps(_mm512_sub_epi32(_mm512_srli_epi32(_mm512_and_si512(i, _mm512_set1_epi32(0x7F800000)), 23), _mm512_set1_epi32(127)));
+                __m512 m = _mm512_or_ps(_mm512_castsi512_ps(_mm512_and_si512(i, _mm512_set1_epi32(0x007FFFFF))), _1);
+                __m512 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
+                return _mm512_add_ps(_mm512_mul_ps(p, _mm512_sub_ps(m, _1)), e);
             }
         }
 
@@ -374,6 +433,18 @@ namespace Simd
             __m512 neg = _mm512_mul_ps(alpha, _mm512_sub_ps(exp, _mm512_set1_ps(1.0f)));
             __mmask16 mask = _mm512_cmp_ps_mask(_mm512_setzero_ps(), value, _CMP_GT_OS);
             return _mm512_mask_blend_ps(mask, value, neg);
+        }
+
+        SIMD_INLINE __m512 Logarithm(__m512 value)
+        {
+            return _mm512_mul_ps(_mm512_set1_ps(0.693147181f), Detail::Log2(value));
+        }
+
+        SIMD_INLINE __m512 Tanh(__m512 value)
+        {
+            __m512 _1 = _mm512_set1_ps(1.0f);
+            __m512 exp = Detail::Exp2(_mm512_mul_ps(_mm512_set1_ps(2.88539008f), value));
+            return _mm512_div_ps(_mm512_sub_ps(exp, _1), _mm512_add_ps(_1, exp));
         }
     }
 #endif //SIMD_AVX512F_ENABLE
@@ -455,14 +526,14 @@ namespace Simd
 
         namespace Detail
         {
-            SIMD_INLINE float32x4_t Poly5(float32x4_t x)
+            SIMD_INLINE float32x4_t Poly5(float32x4_t x, float a, float b, float c, float d, float e, float f)
             {
-                float32x4_t p = vdupq_n_f32(1.8775767e-3f);
-                p = vmlaq_f32(vdupq_n_f32(8.9893397e-3f), x, p);
-                p = vmlaq_f32(vdupq_n_f32(5.5826318e-2f), x, p);
-                p = vmlaq_f32(vdupq_n_f32(2.4015361e-1f), x, p);
-                p = vmlaq_f32(vdupq_n_f32(6.9315308e-1f), x, p);
-                p = vmlaq_f32(vdupq_n_f32(9.9999994e-1f), x, p);
+                float32x4_t p = vdupq_n_f32(f);
+                p = vmlaq_f32(vdupq_n_f32(e), x, p);
+                p = vmlaq_f32(vdupq_n_f32(d), x, p);
+                p = vmlaq_f32(vdupq_n_f32(c), x, p);
+                p = vmlaq_f32(vdupq_n_f32(b), x, p);
+                p = vmlaq_f32(vdupq_n_f32(a), x, p);
                 return p;
             }
 
@@ -472,8 +543,18 @@ namespace Simd
                 int32x4_t ipart = vcvtq_s32_f32(vsubq_f32(x, vdupq_n_f32(0.5f)));
                 float32x4_t fpart = vsubq_f32(x, vcvtq_f32_s32(ipart));
                 float32x4_t expipart = vreinterpretq_f32_s32(vshlq_n_s32(vaddq_s32(ipart, vdupq_n_s32(127)), 23));
-                float32x4_t expfpart = Poly5(fpart);
+                float32x4_t expfpart = Poly5(fpart, 9.9999994e-1f, 6.9315308e-1f, 2.4015361e-1f, 5.5826318e-2f, 8.9893397e-3f, 1.8775767e-3f);
                 return vmulq_f32(expipart, expfpart);
+            }
+
+            SIMD_INLINE float32x4_t Log2(float32x4_t x)
+            {
+                float32x4_t _1 = vdupq_n_f32(1.0f);
+                int32x4_t i = vreinterpretq_s32_f32(x);
+                float32x4_t e = vcvtq_f32_s32(vsubq_s32(vshrq_n_s32(vandq_s32(i, vdupq_n_s32(0x7F800000)), 23), vdupq_n_s32(127)));
+                float32x4_t m = Or(vreinterpretq_f32_s32(vandq_s32(i, vdupq_n_s32(0x007FFFFF))), _1);
+                float32x4_t p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
+                return vaddq_f32(vmulq_f32(p, vsubq_f32(m, _1)), e);
             }
         }
 
@@ -488,6 +569,18 @@ namespace Simd
             float32x4_t neg = vmulq_f32(alpha, vsubq_f32(exp, vdupq_n_f32(1.0f)));
             uint32x4_t mask = vcgtq_f32(vdupq_n_f32(0.0f), value);
             return vbslq_f32(mask, neg, value);
+        }
+
+        SIMD_INLINE float32x4_t Logarithm(float32x4_t value)
+        {
+            return vmulq_f32(vdupq_n_f32(0.693147181f), Detail::Log2(value));
+        }
+
+        template<int iter> SIMD_INLINE float32x4_t Tanh(float32x4_t value)
+        {
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            float32x4_t exp = Detail::Exp2(vmulq_f32(vdupq_n_f32(2.88539008f), value));
+            return Div<iter>(vsubq_f32(exp, _1), vaddq_f32(_1, exp));
         }
     }
 #endif //SIMD_NEON_ENABLE

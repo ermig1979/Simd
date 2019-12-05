@@ -848,6 +848,128 @@ namespace Test
         return result;
     }
 
+    SIMD_INLINE String ToString(SimdSynetUnaryOperation32fType type)
+    {
+        switch (type)
+        {
+        case SimdSynetUnaryOperation32fAbs:
+            return "Abs";
+        case SimdSynetUnaryOperation32fExp:
+            return "Exp";
+        case SimdSynetUnaryOperation32fLog:
+            return "Log";
+        case SimdSynetUnaryOperation32fNeg:
+            return "Neg";
+        case SimdSynetUnaryOperation32fRsqrt:
+            return "Rsqrt";
+        case SimdSynetUnaryOperation32fSqrt:
+            return "Sqrt";
+        case SimdSynetUnaryOperation32fTanh:
+            return "Tanh";
+        case SimdSynetUnaryOperation32fZero:
+            return "Zero";
+        }
+        assert(0);
+        return "???";
+    }
+
+    namespace
+    {
+        struct FuncUO
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncUO(const FuncPtr & f, const String& d) : func(f), desc(d) {}
+
+            void Update(SimdSynetUnaryOperation32fType type)
+            {
+                desc = desc + "[" + ToString(type) + "]";
+            }
+
+            void Call(const Tensor32f& src, SimdSynetUnaryOperation32fType type, Tensor32f& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), src.Size(), type, dst.Data());
+            }
+        };
+    }
+
+#define FUNC_UO(function) FuncUO(function, #function)
+
+    bool SynetUnaryOperation32fLayerForwardAutoTest(size_t size, SimdSynetUnaryOperation32fType type, FuncUO f1, FuncUO f2)
+    {
+        bool result = true;
+
+        f1.Update(type);
+        f2.Update(type);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << ".");
+
+        Tensor32f src({ size });
+        float lo = -10.0, hi = 10.0f;
+        if (type == SimdSynetUnaryOperation32fLog)
+            lo = 0.000000001f;
+        FillRandom(src.Data(), src.Size(), lo, hi);
+
+        Tensor32f dst1({ size });
+        Tensor32f dst2({ size });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, type, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, type, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetUnaryOperation32fLayerForwardAutoTest(const FuncUO& f1, const FuncUO& f2)
+    {
+        bool result = true;
+
+        for (int type = (int)SimdSynetUnaryOperation32fAbs; type <= (int)SimdSynetUnaryOperation32fZero; type++)
+        {
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(H*W, (SimdSynetUnaryOperation32fType)type, f1, f2);
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(H*W + O, (SimdSynetUnaryOperation32fType)type, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool SynetUnaryOperation32fLayerForwardAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Base::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Sse2::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Avx2::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+#endif
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Avx512f::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Neon::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+#endif 
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool SynetEltwiseLayerForwardDataTest(bool create, size_t size, size_t count, SimdSynetEltwiseOperationType type, const FuncELF & f)
