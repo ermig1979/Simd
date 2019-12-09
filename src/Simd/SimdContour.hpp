@@ -1,7 +1,8 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2019 Yermalayeu Ihar, 
+*               2014-2019 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -174,7 +175,7 @@ namespace Simd
             for (ptrdiff_t row = _roi.Top() + 1; row < _roi.Bottom() - 1; row += anchorScanInterval)
             {
                 const uint8_t * a = &At<A, uint8_t>(_a, 0, row);
-                for (ptrdiff_t col = _roi.Left(); col < _roi.Right() - 1; col += anchorScanInterval)
+                for (ptrdiff_t col = _roi.Left() + 1; col < _roi.Right() - 1; col += anchorScanInterval)
                 {
                     if (a[col])
                         _anchors.push_back(Anchor(Point(col, row), At<A, uint16_t>(_m, col, row) / 2));
