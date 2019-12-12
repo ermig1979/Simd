@@ -5526,6 +5526,14 @@ SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size
     simdSynetSoftmaxLayerForward(src, outer, count, inner, dst);
 }
 
+typedef void(*SimdSynetSoftplus32fPtr) (const float* src, size_t size, const float* beta, const float* threshold, float* dst);
+volatile SimdSynetSoftplus32fPtr simdSynetSoftplus32f = SIMD_FUNC4(SynetSoftplus32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+{
+    simdSynetSoftplus32f(src, size, beta, threshold, dst);
+}
+
 SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format)
 {
     return Base::SynetSpecifyTensorFormat(format);

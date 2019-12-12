@@ -110,6 +110,11 @@ namespace Simd
             return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
         }
 
+        SIMD_INLINE float SynetSoftplus32f(float value, float beta, float threshold)
+        {
+            return value > threshold ? value : ::log(1.0f + ::exp(value * beta)) / beta;
+        }
+
         //---------------------------------------------------------------------
 
         template<SimdSynetUnaryOperation32fType type> float SynetUnaryOperation32f(float value);

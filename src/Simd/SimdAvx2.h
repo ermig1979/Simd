@@ -456,6 +456,8 @@ namespace Simd
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
 
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
+
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
         void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,

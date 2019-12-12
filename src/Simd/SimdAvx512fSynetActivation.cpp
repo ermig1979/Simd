@@ -143,6 +143,46 @@ namespace Simd
             else
                 SynetRestrictRange32f<false>(src, size, lower, upper, dst);
         }
+
+        //---------------------------------------------------------------------
+
+        template<bool align, bool mask> SIMD_INLINE void SynetSoftplus32f(const float* src, __m512 beta, __m512 threshold, float* dst, size_t offset, __mmask16 tail = -1)
+        {
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _dst = Softplus(_src, beta, threshold);
+            Store<align, mask>(dst + offset, _dst, tail);
+        }
+
+        template<bool align> void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            __m512 _beta = _mm512_set1_ps(beta[0]);
+            __m512 _threshold = _mm512_set1_ps(threshold[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSoftplus32f<align, false>(src, _beta, _threshold, dst, i + 0 * F);
+                SynetSoftplus32f<align, false>(src, _beta, _threshold, dst, i + 1 * F);
+                SynetSoftplus32f<align, false>(src, _beta, _threshold, dst, i + 2 * F);
+                SynetSoftplus32f<align, false>(src, _beta, _threshold, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSoftplus32f<align, false>(src, _beta, _threshold, dst, i);
+            if (i < size)
+            {
+                __mmask16 tail = TailMask16(size - i);
+                SynetSoftplus32f<align, true>(src, _beta, _threshold, dst, i, tail);
+            }
+        }
+
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSoftplus32f<true>(src, size, beta, threshold, dst);
+            else
+                SynetSoftplus32f<false>(src, size, beta, threshold, dst);
+        }
     }
 #endif// SIMD_AVX512F_ENABLE
 }

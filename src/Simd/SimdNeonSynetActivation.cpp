@@ -138,6 +138,41 @@ namespace Simd
             else
                 SynetRestrictRange32f<false>(src, size, lower, upper, dst);
         }
+
+        //---------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, float32x4_t beta, float32x4_t threshold, float* dst, size_t offset)
+        {
+            Store<align>(dst + offset, Softplus<1>(Load<align>(src + offset), beta, threshold));
+        }
+
+        template<bool align> void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            float32x4_t _beta = vdupq_n_f32(beta[0]);
+            float32x4_t _threshold = vdupq_n_f32(threshold[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 0 * F);
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 1 * F);
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 2 * F);
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetSoftplus32f(src[i], beta[0], threshold[0]);
+        }
+
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSoftplus32f<true>(src, size, beta, threshold, dst);
+            else
+                SynetSoftplus32f<false>(src, size, beta, threshold, dst);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

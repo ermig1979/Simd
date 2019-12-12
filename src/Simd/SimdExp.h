@@ -168,6 +168,14 @@ namespace Simd
             return _mm_mul_ps(_mm_set1_ps(0.693147181f), Detail::Log2(value));
         }
 
+        SIMD_INLINE __m128 Softplus(__m128 value, __m128 beta, __m128 threshold)
+        {
+            __m128 exp = Exponent(_mm_mul_ps(value, beta));
+            __m128 log = Logarithm(_mm_add_ps(_mm_set1_ps(1.0f), exp));
+            __m128 mask = _mm_cmpgt_ps(threshold, value);
+            return Sse::Combine(mask, _mm_div_ps(log, beta), value);
+        }
+
         SIMD_INLINE __m128 Tanh(__m128 value)
         {
             __m128 _1 = _mm_set1_ps(1.0f);
@@ -302,6 +310,14 @@ namespace Simd
         SIMD_INLINE __m256 Logarithm(__m256 value)
         {
             return _mm256_mul_ps(_mm256_set1_ps(0.693147181f), Detail::Log2(value));
+        }
+
+        SIMD_INLINE __m256 Softplus(__m256 value, __m256 beta, __m256 threshold)
+        {
+            __m256 exp = Exponent(_mm256_mul_ps(value, beta));
+            __m256 log = Logarithm(_mm256_add_ps(_mm256_set1_ps(1.0f), exp));
+            __m256 mask = _mm256_cmp_ps(threshold, value, _CMP_GT_OS);
+            return _mm256_blendv_ps(value, _mm256_div_ps(log, beta), mask);
         }
 
         SIMD_INLINE __m256 Tanh(__m256 value)
@@ -440,6 +456,14 @@ namespace Simd
             return _mm512_mul_ps(_mm512_set1_ps(0.693147181f), Detail::Log2(value));
         }
 
+        SIMD_INLINE __m512 Softplus(__m512 value, __m512 beta, __m512 threshold)
+        {
+            __m512 exp = Exponent(_mm512_mul_ps(value, beta));
+            __m512 log = Logarithm(_mm512_add_ps(_mm512_set1_ps(1.0f), exp));
+            __mmask16 mask = _mm512_cmp_ps_mask(threshold, value, _CMP_GT_OS);
+            return _mm512_mask_blend_ps(mask, value, _mm512_div_ps(log, beta));
+        }
+
         SIMD_INLINE __m512 Tanh(__m512 value)
         {
             __m512 _1 = _mm512_set1_ps(1.0f);
@@ -574,6 +598,14 @@ namespace Simd
         SIMD_INLINE float32x4_t Logarithm(float32x4_t value)
         {
             return vmulq_f32(vdupq_n_f32(0.693147181f), Detail::Log2(value));
+        }
+
+        template<int iter> SIMD_INLINE float32x4_t Softplus(float32x4_t value, float32x4_t beta, float32x4_t threshold)
+        {
+            float32x4_t exp = Exponent(vmulq_f32(value, beta));
+            float32x4_t log = Logarithm(vaddq_f32(vdupq_n_f32(1.0f), exp));
+            uint32x4_t mask = vcgtq_f32(threshold, value);
+            return vbslq_f32(mask, Div<iter>(log, beta), value);
         }
 
         template<int iter> SIMD_INLINE float32x4_t Tanh(float32x4_t value)

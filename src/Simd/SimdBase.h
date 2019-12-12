@@ -585,6 +585,8 @@ namespace Simd
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
 
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
+
         SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format);
 
         size_t SynetTensorAlignment(SimdTensorFormatType format);

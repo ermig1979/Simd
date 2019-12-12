@@ -6306,7 +6306,6 @@ extern "C"
         \verbatim
         for(i = 0; i < size; ++i)
             dst[i] = Min(Max(lower, src[i]), upper);
-        }
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -6409,6 +6408,28 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to outer*count*inner.
     */
     SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
+
+    /*! @ingroup synet_activation
+
+        \fn void SimdSynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float * dst);
+
+        \short This function is used for forward propagation of SoftplusLayer.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = src[i] > threshold ? src[i] : log(1 + exp(src[i]*beta))/beta;
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] beta - a pointer to 'beta' parameter.
+        \param [in] threshold - a pointer to 'threshold' parameter.
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float * dst);
 
     /*! @ingroup synet
 

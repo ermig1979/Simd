@@ -282,4 +282,88 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncSP
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSP(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(const View& src, float beta, float threshold, View & dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func((float*)src.data, src.width, &beta, &threshold, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_SP(function) FuncSP(function, #function)
+
+    bool SynetSoftplus32fAutoTest(size_t size, const FuncSP& f1, const FuncSP& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        const float beta = 3.0f, threshold = 20.0f;
+        FillRandom32f(src, -10.0f, 10.0f);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, beta, threshold, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, beta, threshold, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetSoftplus32fAutoTest(const FuncSP& f1, const FuncSP& f2)
+    {
+        bool result = true;
+
+        result = result && SynetSoftplus32fAutoTest(H * W, f1, f2);
+        result = result && SynetSoftplus32fAutoTest(H * W + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetSoftplus32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetSoftplus32fAutoTest(FUNC_SP(Simd::Base::SynetSoftplus32f), FUNC_SP(SimdSynetSoftplus32f));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetSoftplus32fAutoTest(FUNC_SP(Simd::Sse2::SynetSoftplus32f), FUNC_SP(SimdSynetSoftplus32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetSoftplus32fAutoTest(FUNC_SP(Simd::Avx2::SynetSoftplus32f), FUNC_SP(SimdSynetSoftplus32f));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetSoftplus32fAutoTest(FUNC_SP(Simd::Avx512f::SynetSoftplus32f), FUNC_SP(SimdSynetSoftplus32f));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetSoftplus32fAutoTest(FUNC_SP(Simd::Neon::SynetSoftplus32f), FUNC_SP(SimdSynetSoftplus32f));
+#endif 
+
+        return result;
+    }
 }

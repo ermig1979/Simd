@@ -66,6 +66,41 @@ namespace Simd
             else
                 SynetElu32f<false>(src, size, alpha, dst);
         }
+
+        //---------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, __m256 beta, __m256 threshold, float* dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, Softplus(Avx::Load<align>(src + offset), beta, threshold));
+        }
+
+        template<bool align> void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            __m256 _beta = _mm256_set1_ps(beta[0]);
+            __m256 _threshold = _mm256_set1_ps(threshold[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 0 * F);
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 1 * F);
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 2 * F);
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSoftplus32f<align>(src, _beta, _threshold, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetSoftplus32f(src[i], beta[0], threshold[0]);
+        }
+
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSoftplus32f<true>(src, size, beta, threshold, dst);
+            else
+                SynetSoftplus32f<false>(src, size, beta, threshold, dst);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

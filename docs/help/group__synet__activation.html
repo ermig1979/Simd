@@ -62,6 +62,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">SimdSynetRestrictRange32f</a> (const float *src, size_t size, const float *lower, const float *upper, float *dst)</td></tr>
 <tr class="memdesc:ga480e0dbc40eb04ebd599b574e9432d32"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used in order to restrict range for given array.  <a href="group__synet__activation.html#ga480e0dbc40eb04ebd599b574e9432d32">More...</a><br /></td></tr>
 <tr class="separator:ga480e0dbc40eb04ebd599b574e9432d32"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gab53f12c34df51ecd854e69cc101ac439"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">SimdSynetSoftplus32f</a> (const float *src, size_t size, const float *beta, const float *threshold, float *dst)</td></tr>
+<tr class="memdesc:gab53f12c34df51ecd854e69cc101ac439"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SoftplusLayer.  <a href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">More...</a><br /></td></tr>
+<tr class="separator:gab53f12c34df51ecd854e69cc101ac439"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions to acceleratе activation functions in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
@@ -299,7 +302,6 @@ Functions</h2></td></tr>
 <p>This function is used in order to restrict range for given array. </p>
 <p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
     dst[i] = Min(Max(lower, src[i]), upper);
-}
 </pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
@@ -307,6 +309,67 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">lower</td><td>- a pointer to lower restrict bound. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- a pointer to upper restrict bound. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gab53f12c34df51ecd854e69cc101ac439"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gab53f12c34df51ecd854e69cc101ac439">&#9670;&nbsp;</a></span>SimdSynetSoftplus32f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetSoftplus32f </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>beta</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>threshold</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of SoftplusLayer. </p>
+<p>Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+    dst[i] = src[i] &gt; threshold ? src[i] : log(1 + exp(src[i]*beta))/beta;
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to 'beta' parameter. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a pointer to 'threshold' parameter. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>

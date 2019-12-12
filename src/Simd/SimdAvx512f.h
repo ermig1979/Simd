@@ -139,8 +139,6 @@ namespace Simd
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
-
         void SynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
 
@@ -154,6 +152,10 @@ namespace Simd
         void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format);
+
+        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
+
+        void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
 
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 

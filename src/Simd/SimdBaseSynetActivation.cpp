@@ -82,5 +82,24 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = Simd::RestrictRange(src[i], min, max);
         }
+
+        //---------------------------------------------------------------------
+
+        void SynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float* dst)
+        {
+            float _beta = beta[0];
+            float _threshold = threshold[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetSoftplus32f(src[i + 0], _beta, _threshold);
+                dst[i + 1] = SynetSoftplus32f(src[i + 1], _beta, _threshold);
+                dst[i + 2] = SynetSoftplus32f(src[i + 2], _beta, _threshold);
+                dst[i + 3] = SynetSoftplus32f(src[i + 3], _beta, _threshold);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetSoftplus32f(src[i], _beta, _threshold);
+        }
     }
 }
