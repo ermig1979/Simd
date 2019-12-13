@@ -59,8 +59,6 @@ namespace Simd
 
         void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
-        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst);
-
         void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
 
         void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
@@ -136,6 +134,8 @@ namespace Simd
             size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
 
         void SynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+        void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 

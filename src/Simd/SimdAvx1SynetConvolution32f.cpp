@@ -82,7 +82,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -99,10 +99,10 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
-                                _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _slope));
+                                _mm256_storeu_ps(dst + i, SynetRelu32f(value, _slope));
                             }
                             for (; i < count; ++i)
-                                dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], slope);
+                                dst[i] = Base::SynetRelu32f(dst[i] + bias[i], slope);
                             dst += count;
                         }
                     }
@@ -115,16 +115,16 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
-                                _mm256_storeu_ps(dst + j, SynetPreluLayerForward(value, _slope));
+                                _mm256_storeu_ps(dst + j, SynetRelu32f(value, _slope));
                             }
                             for (; j < size; ++j)
-                                dst[j] = Base::SynetPreluLayerForward(dst[j] + bias[i], slope);
+                                dst[j] = Base::SynetRelu32f(dst[j] + bias[i], slope);
                             dst += size;
                         }
                     }
                 }
                 else
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -204,13 +204,13 @@ namespace Simd
                             for (; i < nF; i += F)
                             {
                                 __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _bias);
-                                _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _slope));
+                                _mm256_storeu_ps(dst + i, SynetRelu32f(value, _slope));
                             }
                             dst += nF;
                             for (size_t j = nF/count; j < size; ++j)
                             {
                                 for (size_t i = 0; i < count; ++i)
-                                    dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                                    dst[i] = Base::SynetRelu32f(dst[i] + bias[i], params[i]);
                                 dst += count;
                             }
                         }
@@ -222,10 +222,10 @@ namespace Simd
                                 for (; i < aligned; i += F)
                                 {
                                     __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
-                                    _mm256_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm256_loadu_ps(params + i)));
+                                    _mm256_storeu_ps(dst + i, SynetRelu32f(value, _mm256_loadu_ps(params + i)));
                                 }
                                 for (; i < count; ++i)
-                                    dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                                    dst[i] = Base::SynetRelu32f(dst[i] + bias[i], params[i]);
                                 dst += count;
                             }
                         }
@@ -240,10 +240,10 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
-                                _mm256_storeu_ps(dst + j, SynetPreluLayerForward(value, _slope));
+                                _mm256_storeu_ps(dst + j, SynetRelu32f(value, _slope));
                             }
                             for (; j < size; ++j)
-                                dst[j] = Base::SynetPreluLayerForward(dst[j] + bias[i], params[i]);
+                                dst[j] = Base::SynetRelu32f(dst[j] + bias[i], params[i]);
                             dst += size;
                         }
                     }

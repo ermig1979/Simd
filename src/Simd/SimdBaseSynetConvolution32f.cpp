@@ -73,7 +73,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -86,7 +86,7 @@ namespace Simd
                         for (size_t j = 0; j < size; ++j)
                         {
                             for (size_t i = 0; i < count; ++i)
-                                dst[i] = SynetPreluLayerForward(dst[i] + bias[i], slope);
+                                dst[i] = SynetRelu32f(dst[i] + bias[i], slope);
                             dst += count;
                         }
                     }
@@ -95,13 +95,13 @@ namespace Simd
                         for (size_t i = 0; i < count; ++i)
                         {
                             for (size_t j = 0; j < size; ++j)
-                                dst[j] = SynetPreluLayerForward(dst[j] + bias[i], slope);
+                                dst[j] = SynetRelu32f(dst[j] + bias[i], slope);
                             dst += size;
                         }
                     }
                 }
                 else
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -140,7 +140,7 @@ namespace Simd
                         for (size_t j = 0; j < size; ++j)
                         {
                             for (size_t i = 0; i < count; ++i)
-                                dst[i] = SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                                dst[i] = SynetRelu32f(dst[i] + bias[i], params[i]);
                             dst += count;
                         }
                     }
@@ -149,7 +149,7 @@ namespace Simd
                         for (size_t i = 0; i < count; ++i)
                         {
                             for (size_t j = 0; j < size; ++j)
-                                dst[j] = SynetPreluLayerForward(dst[j] + bias[i], params[i]);
+                                dst[j] = SynetRelu32f(dst[j] + bias[i], params[i]);
                             dst += size;
                         }
                     }

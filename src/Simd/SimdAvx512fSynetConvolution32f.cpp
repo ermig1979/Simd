@@ -90,7 +90,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -108,13 +108,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, SynetPreluLayerForward(_mm512_add_ps(_dst, _bias), _slope));
+                                _mm512_storeu_ps(dst + i, SynetRelu32f(_mm512_add_ps(_dst, _bias), _slope));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, SynetPreluLayerForward(_mm512_add_ps(_dst, _bias), _slope));
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetRelu32f(_mm512_add_ps(_dst, _bias), _slope));
                             }
                             dst += count;
                         }
@@ -128,19 +128,19 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, SynetPreluLayerForward(value, _slope));
+                                _mm512_storeu_ps(dst + j, SynetRelu32f(value, _slope));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, SynetPreluLayerForward(value, _slope));
+                                _mm512_mask_storeu_ps(dst + j, tail, SynetRelu32f(value, _slope));
                             }
                             dst += size;
                         }
                     }
                 }
                 else
-                    NeuralRelu(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -233,13 +233,13 @@ namespace Simd
                             for (; i < nF; i += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _bias);
-                                _mm512_storeu_ps(dst + i, SynetPreluLayerForward(value, _slope));
+                                _mm512_storeu_ps(dst + i, SynetRelu32f(value, _slope));
                             }
                             if (i < n)
                             {
                                 __mmask16 tail = TailMask16(n - nF);
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _bias);
-                                _mm512_mask_storeu_ps(dst + i, tail, SynetPreluLayerForward(value, _slope));
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetRelu32f(value, _slope));
                             }
                         }
                         else
@@ -250,12 +250,12 @@ namespace Simd
                                 for (; i < aligned; i += F)
                                 {
                                     __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _mm512_loadu_ps(bias + i));
-                                    _mm512_storeu_ps(dst + i, SynetPreluLayerForward(value, _mm512_loadu_ps(params + i)));
+                                    _mm512_storeu_ps(dst + i, SynetRelu32f(value, _mm512_loadu_ps(params + i)));
                                 }
                                 if (i < count)
                                 {
                                     __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _mm512_maskz_loadu_ps(tail, bias + i));
-                                    _mm512_mask_storeu_ps(dst + i, tail, SynetPreluLayerForward(value, _mm512_maskz_loadu_ps(tail, params + i)));
+                                    _mm512_mask_storeu_ps(dst + i, tail, SynetRelu32f(value, _mm512_maskz_loadu_ps(tail, params + i)));
                                 }
                                 dst += count;
                             }
@@ -271,12 +271,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, SynetPreluLayerForward(value, _slope));
+                                _mm512_storeu_ps(dst + j, SynetRelu32f(value, _slope));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, SynetPreluLayerForward(value, _slope));
+                                _mm512_mask_storeu_ps(dst + j, tail, SynetRelu32f(value, _slope));
                             }
                             dst += size;
                         }

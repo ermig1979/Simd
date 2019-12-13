@@ -192,56 +192,6 @@ namespace Simd
                 AddValue<false>(value, dst, aligned, partial, size);
         }
 
-        template<bool align> void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            Exp exp(-slope[0]);
-            size_t aligned = AlignLo(size, F);
-            size_t i = 0;
-            for (; i < aligned; i += F)
-                Avx512f::Store<align>(dst + i, exp.Sigmoid(Avx512f::Load<align>(src + i)));
-            if (i < size)
-            {
-                __mmask16 tail = TailMask16(size - aligned);
-                Avx512f::Store<align, true>(dst + i, exp.Sigmoid(Avx512f::Load<align, true>(src + i, tail)), tail);
-            }
-        }
-
-        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralSigmoid<true>(src, size, slope, dst);
-            else
-                NeuralSigmoid<false>(src, size, slope, dst);
-        }
-
-        template<bool align> void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            Exp exp(-2*slope[0]);
-            size_t aligned = AlignLo(size, F);
-            size_t i = 0;
-            for (; i < aligned; i += F)
-                Avx512f::Store<align>(dst + i, exp.Tanh(Avx512f::Load<align>(src + i)));
-            if (i < size)
-            {
-                __mmask16 tail = TailMask16(size - aligned);
-                Avx512f::Store<align, true>(dst + i, exp.Tanh(Avx512f::Load<align, true>(src + i, tail)), tail);
-            }
-        }
-
-        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralTanh<true>(src, size, slope, dst);
-            else
-                NeuralTanh<false>(src, size, slope, dst);
-        }
-
         template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid(const float * src, const __m512 & _0, const __m512 & _1,
             const __m512 & a, const __m512 & b, const __m512 & slope, float * dst, __mmask16 m = -1)
         {
@@ -458,65 +408,6 @@ namespace Simd
                 NeuralDerivativeTanh<true>(src, size, slope, dst);
             else
                 NeuralDerivativeTanh<false>(src, size, slope, dst);
-        }
-
-        template <bool align, bool mask> SIMD_INLINE void NeuralRelu(const float * src, const __m512 & slope, float * dst, __mmask16 m = -1)
-        {
-            __m512 _src = Load<align, mask>(src, m);
-            __m512 _0 = _mm512_setzero_ps();
-            Store<align, mask>(dst, _mm512_add_ps(_mm512_max_ps(_0, _src), _mm512_mul_ps(slope, _mm512_min_ps(_0, _src))), m);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            size_t partialAlignedSize = Simd::AlignLo(size, F);
-            size_t fullAlignedSize = Simd::AlignLo(size, QF);
-            size_t i = 0;
-            if (slope[0] == 0)
-            {
-                __m512 _0 = _mm512_set1_ps(0.0f);
-                for (; i < fullAlignedSize; i += QF)
-                {
-                    Store<align>(dst + i + 0 * F, _mm512_max_ps(_0, Load<align>(src + i + 0 * F)));
-                    Store<align>(dst + i + 1 * F, _mm512_max_ps(_0, Load<align>(src + i + 1 * F)));
-                    Store<align>(dst + i + 2 * F, _mm512_max_ps(_0, Load<align>(src + i + 2 * F)));
-                    Store<align>(dst + i + 3 * F, _mm512_max_ps(_0, Load<align>(src + i + 3 * F)));
-                }
-                for (; i < partialAlignedSize; i += F)
-                    Store<align>(dst + i, _mm512_max_ps(_0, Load<align>(src + i)));
-                if (i < size)
-                {
-                    __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
-                    __m512 _src = Load<align, true>(src + i, tailMask);
-                    Store<align, true>(dst + i, _mm512_max_ps(_0, _src), tailMask);
-                }
-            }
-            else
-            {
-                __m512 _slope = _mm512_set1_ps(*slope);
-                for (; i < fullAlignedSize; i += QF)
-                {
-                    NeuralRelu<align, true>(src + i + 0 * F, _slope, dst + i + 0 * F);
-                    NeuralRelu<align, true>(src + i + 1 * F, _slope, dst + i + 1 * F);
-                    NeuralRelu<align, true>(src + i + 2 * F, _slope, dst + i + 2 * F);
-                    NeuralRelu<align, true>(src + i + 3 * F, _slope, dst + i + 3 * F);
-                }
-                for (; i < partialAlignedSize; i += F)
-                    NeuralRelu<align, true>(src + i, _slope, dst + i);
-                if (i < size)
-                {
-                    __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
-                    NeuralRelu<align, true>(src + i, _slope, dst + i, tailMask);
-                }
-            }
-        }
-
-        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRelu<true>(src, size, slope, dst);
-            else
-                NeuralRelu<false>(src, size, slope, dst);
         }
 
         template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeRelu(const float * src, const __m512 & _0, const __m512 & _1, const __m512 & slope, float * dst, __mmask16 m = -1)

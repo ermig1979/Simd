@@ -199,11 +199,6 @@ namespace Simd
                 (value & 0x00FF000000000000) >> 40 | (value & 0xFF00000000000000) >> 56;
         }
 
-        SIMD_INLINE float Sigmoid(float value)
-        {
-            return 1.0f / (1.0f + ::exp(-value));
-        }
-
         SIMD_INLINE float RoughSigmoid(float value) // maximal absolute error 0.002294
         {
             float x = ::fabs(value);
@@ -227,11 +222,6 @@ namespace Simd
         SIMD_INLINE float DerivativeSigmoid(float function)
         {
             return (1.0f - function)*function;
-        }
-
-        SIMD_INLINE float Tanh(float value)
-        {
-            return ::tanh(value);
         }
 
         SIMD_INLINE float RoughTanh(float value) // maximal absolute error 0.001514

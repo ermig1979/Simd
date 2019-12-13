@@ -3736,26 +3736,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates sigmoid for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] = 1/(1 + exp(-slope*src[i]));
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
         \short Calculates rough sigmoid for 32-bit float array.
@@ -3768,7 +3748,7 @@ extern "C"
         e = 1 + x + x*x*0.5417 + x*x*x*x*0.1460;
         dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
         \endverbatim
-        It is approximate way (maximal absolute error is 0.002294 (~0.23%) ) of sigmoid function (::SimdNeuralSigmoid) calculation:
+        It is approximate way (maximal absolute error is 0.002294 (~0.23%) ) of sigmoid function (::SimdSynetSigmoid32f) calculation:
         \verbatim
         dst[i] = 1/(1 + exp(-slope*src[i]));
         \endverbatim
@@ -3796,7 +3776,7 @@ extern "C"
         e = max(1 + x/128, 0.5)^128;
         dst[i] = 1 / (1 + e);
         \endverbatim
-        It is approximate way (maximal absolute error is 0.001721 (~0.17%) ) of sigmoid function (::SimdNeuralSigmoid) calculation:
+        It is approximate way (maximal absolute error is 0.001721 (~0.17%) ) of sigmoid function (::SimdSynetSigmoid32f) calculation:
         \verbatim
         dst[i] = 1/(1 + exp(-slope*src[i]));
         \endverbatim
@@ -3834,27 +3814,6 @@ extern "C"
 
     /*! @ingroup neural
 
-        \fn void SimdNeuralTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates hyperbolic tangent for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        x = slope*src[i];
-        dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
-        \endverbatim
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdNeuralTanh(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup neural
-
         \fn void SimdNeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
 
         \short Calculates rough hyperbolic tangent for 32-bit float array.
@@ -3867,7 +3826,7 @@ extern "C"
         e = 1 + x + x*x*0.5658 + x*x*x*x*0.1430;
         dst[i] = (src[i] > 0 ? 1 : -1)*(e - 1/e)/(e + 1/e);
         \endverbatim
-        It is approximate way (maximal absolute error is 0.001514 (~0.15%) ) of hyperbolic tangent (::SimdNeuralTanh)  function calculation:
+        It is approximate way (maximal absolute error is 0.001514 (~0.15%) ) of hyperbolic tangent (::SimdSynetTanh32f)  function calculation:
         \verbatim
         x = slope*src[i];
         dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
@@ -3884,7 +3843,7 @@ extern "C"
 
     /*! @ingroup neural
 
-    \fn void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
+        \fn void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
 
         \short Multiplies output 32-bit float array by derivative of hyperbolic tangent from input 32-bit float array.
 
@@ -3903,28 +3862,6 @@ extern "C"
         \param [in, out] dst - a pointer to output array.
     */
     SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-    /*! @ingroup neural
-
-        \fn void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        \short Calculates Relu (rectified linear unit) function for 32-bit float array.
-
-        All arrays must have the same size.
-
-        For every element:
-        \verbatim
-        dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
-        \endverbatim
-
-        \note This function is used in Simd::Neural::Function.
-
-        \param [in] src - a pointer to the input array.
-        \param [in] size - a size of arrays.
-        \param [in] slope - a pointer to the slope parameter.
-        \param [out] dst - a pointer to output array.
-    */
-    SIMD_API void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst);
 
     /*! @ingroup neural
 
@@ -6298,9 +6235,30 @@ extern "C"
 
     /*! @ingroup synet_activation
 
+        \fn void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
+
+        \short Calculates ReLU (rectified linear unit) function for 32-bit float array.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] =  src[i] > 0 ? src[i] : slope*src[i];
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [out] dst - a pointer to output 32-bit float array.
+    */
+    SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
+
+    /*! @ingroup synet_activation
+
         \fn void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
-        \short This function is used in order to restrict range for given array.
+        \short This function is used in order to restrict range for given 320bit float array.
 
         Algorithm's details:
         \verbatim
@@ -6393,6 +6351,27 @@ extern "C"
     */
     SIMD_API void SimdSynetShuffleLayerForward(const float * src0, size_t srcC0, const float * src1, size_t srcC1, size_t spatial, float * dst0, float * dst1, size_t dstC, SimdTensorFormatType format);
 
+    /*! @ingroup synet_activation
+
+        \fn void SimdSynetSigmoid32f(const float * src, size_t size, const float * slope, float * dst);
+
+        \short This function is used for forward propagation of SigmoidLayer.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = 1/(1 + exp(-slope*src[i]));
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [out] dst - a pointer to output 32-bit float array.
+    */
+    SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
+
     /*! @ingroup synet
 
         \fn void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst);
@@ -6443,6 +6422,30 @@ extern "C"
         \return specified hardware optimized 5D-tensor format. 
     */
     SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format);
+
+    /*! @ingroup synet_activation
+
+        \fn void SimdSynetTanh32f(const float * src, size_t size, const float * slope, float * dst);
+
+        \short Calculates hyperbolic tangent for 32-bit float array.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+        {
+            x = slope*src[i];
+            dst[i] = (exp(x) - exp(-x))/(exp(x) + exp(-x));
+        }
+        \endverbatim
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [out] dst - a pointer to output 32-bit float array.
+    */
+    SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
 
     /*! @ingroup synet
 

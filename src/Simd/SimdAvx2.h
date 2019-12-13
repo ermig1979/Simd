@@ -297,11 +297,7 @@ namespace Simd
 
         void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
 
-        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
         void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst);
 
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
@@ -454,9 +450,13 @@ namespace Simd
         void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
             const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
+        void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
+
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
 
         void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
+
+        void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 

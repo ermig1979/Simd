@@ -3342,14 +3342,6 @@ SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size)
     simdNeuralAddValue(value, dst, size);
 }
 
-typedef void(*SimdNeuralSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdNeuralSigmoidPtr simdNeuralSigmoid = SIMD_FUNC4(NeuralSigmoid, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdNeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdNeuralSigmoid(src, size, slope, dst);
-}
-
 typedef void(*SimdNeuralRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
 SimdNeuralRoughSigmoidPtr simdNeuralRoughSigmoid = SIMD_FUNC5(NeuralRoughSigmoid, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
@@ -3374,14 +3366,6 @@ SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const 
     simdNeuralDerivativeSigmoid(src, size, slope, dst);
 }
 
-typedef void(*SimdNeuralTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdNeuralTanhPtr simdNeuralTanh = SIMD_FUNC4(NeuralTanh, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdNeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdNeuralTanh(src, size, slope, dst);
-}
-
 typedef void(*SimdNeuralRoughTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
 SimdNeuralRoughTanhPtr simdNeuralRoughTanh = SIMD_FUNC4(NeuralRoughTanh, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
@@ -3396,14 +3380,6 @@ SimdNeuralDerivativeTanhPtr simdNeuralDerivativeTanh = SIMD_FUNC4(NeuralDerivati
 SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
 {
     simdNeuralDerivativeTanh(src, size, slope, dst);
-}
-
-typedef void(*SimdNeuralReluPtr) (const float * src, size_t size, const float * slope, float * dst);
-SimdNeuralReluPtr simdNeuralRelu = SIMD_FUNC4(NeuralRelu, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdNeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-{
-    simdNeuralRelu(src, size, slope, dst);
 }
 
 typedef void(*SimdNeuralDerivativeReluPtr) (const float * src, size_t size, const float * slope, float * dst);
@@ -5468,6 +5444,14 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
 }
 
+typedef void(*SimdSynetRelu32fPtr) (const float* src, size_t size, const float* slope, float* dst);
+SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
+{
+    simdSynetRelu32f(src, size, slope, dst);
+}
+
 typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
 volatile SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
@@ -5518,6 +5502,14 @@ SIMD_API void SimdSynetShuffleLayerForward(const float* src0, size_t srcC0, cons
     simdSynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
 }
 
+typedef void(*SimdSynetSigmoid32fPtr) (const float* src, size_t size, const float* slope, float* dst);
+SimdSynetSigmoid32fPtr simdSynetSigmoid32f = SIMD_FUNC4(SynetSigmoid32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
+{
+    simdSynetSigmoid32f(src, size, slope, dst);
+}
+
 typedef void(*SimdSynetSoftmaxLayerForwardPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
 volatile SimdSynetSoftmaxLayerForwardPtr simdSynetSoftmaxLayerForward = SIMD_FUNC4(SynetSoftmaxLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
@@ -5538,6 +5530,15 @@ SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType 
 {
     return Base::SynetSpecifyTensorFormat(format);
 }
+
+typedef void(*SimdSynetTanh32fPtr) (const float* src, size_t size, const float* slope, float* dst);
+SimdSynetTanh32fPtr simdSynetTanh32f = SIMD_FUNC4(SynetTanh32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+{
+    simdSynetTanh32f(src, size, slope, dst);
+}
+
 
 SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format)
 {

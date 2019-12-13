@@ -203,6 +203,189 @@ namespace Test
 
     namespace
     {
+        struct FuncPLF
+        {
+            typedef void(*FuncPtr)(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+            FuncPtr func;
+            String desc;
+
+            FuncPLF(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(SimdTensorFormatType format)
+            {
+                desc = desc + "[" + ToString(format) + "]";
+            }
+
+            void Call(const Tensor32f& src, const Tensor32f& slope, size_t channels, size_t spatial, SimdTensorFormatType format, Tensor32f& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), slope.Data(), channels, spatial, dst.Data(), format);
+            }
+        };
+    }
+
+#define FUNC_PLF(function) FuncPLF(function, #function)
+
+    bool SynetPreluLayerForwardAutoTest(size_t channels, size_t spatial, SimdTensorFormatType format, FuncPLF f1, FuncPLF f2)
+    {
+        bool result = true;
+
+        f1.Update(format);
+        f2.Update(format);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << spatial << "].");
+
+        Tensor32f src(ToShape(channels, spatial, format));
+        Tensor32f slope(ToShape(channels, format));
+        Tensor32f dst1(ToShape(channels, spatial, format));
+        Tensor32f dst2(ToShape(channels, spatial, format));
+
+        FillRandom(src.Data(), slope.Size(), -10.0, 10.0);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, channels, spatial, format, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, channels, spatial, format, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetPreluLayerForwardAutoTest(int mask, const FuncPLF& f1, const FuncPLF& f2)
+    {
+        bool result = true;
+
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNchw16c && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            if (SimdSynetTensorAlignment(format) & mask)
+            {
+                result = result && SynetPreluLayerForwardAutoTest(H, W, format, f1, f2);
+                result = result && SynetPreluLayerForwardAutoTest(H - O, W + O, format, f1, f2);
+            }
+        }
+
+        return result;
+    }
+
+    bool SynetPreluLayerForwardAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetPreluLayerForwardAutoTest(TFM_ANY, FUNC_PLF(Simd::Base::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(TFM_128, FUNC_PLF(Simd::Sse::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(TFM_256, FUNC_PLF(Simd::Avx::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(TFM_512, FUNC_PLF(Simd::Avx512f::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(TFM_128, FUNC_PLF(Simd::Neon::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncRE
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* slope, float* dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncRE(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, float slope, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &slope, (float*)dst.data);
+            }
+        };
+    }
+#define FUNC_RE(function) FuncRE(function, #function)
+
+    bool SynetRelu32fAutoTest(int size, const FuncRE& f1, const FuncRE& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        const float lo = -10.0f, hi = 10.0f, slope = 1.1f;
+        FillRandom32f(src, lo, hi);
+
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
+
+        result = Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetRelu32fAutoTest(const FuncRE& f1, const FuncRE& f2)
+    {
+        bool result = true;
+
+        result = result && SynetRelu32fAutoTest(W * H, f1, f2);
+        result = result && SynetRelu32fAutoTest(W * H + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetRelu32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Base::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Sse::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Avx::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Avx512f::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Neon::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncRR
         {
             typedef void(*FuncPtr)(const float * src, size_t size, const float * lower, const float * upper, float * dst);
@@ -287,6 +470,89 @@ namespace Test
 
     namespace
     {
+        struct FuncSG
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* slope, float* dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncSG(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, float slope, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &slope, (float*)dst.data);
+            }
+        };
+    }
+#define FUNC_SG(function) FuncSG(function, #function)
+
+    bool SynetSigmoid32fAutoTest(int size, const FuncSG& f1, const FuncSG& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        const float lo = -10.0f, hi = 10.0f, slope = 1.1f;
+        FillRandom32f(src, lo, hi);
+
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
+
+        result = Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetSigmoid32fAutoTest(const FuncSG& f1, const FuncSG& f2)
+    {
+        bool result = true;
+
+        result = result && SynetSigmoid32fAutoTest(W * H, f1, f2);
+        result = result && SynetSigmoid32fAutoTest(W * H + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetSigmoid32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Base::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Sse2::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Avx2::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Avx512f::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetSigmoid32fAutoTest(FUNC_SG(Simd::Neon::SynetSigmoid32f), FUNC_SG(SimdSynetSigmoid32f));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncSP
         {
             typedef void(*FuncPtr)(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
@@ -363,6 +629,89 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && SynetSoftplus32fAutoTest(FUNC_SP(Simd::Neon::SynetSoftplus32f), FUNC_SP(SimdSynetSoftplus32f));
 #endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncTH
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* slope, float* dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncTH(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, float slope, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &slope, (float*)dst.data);
+            }
+        };
+    }
+#define FUNC_TH(function) FuncTH(function, #function)
+
+    bool SynetTanh32fAutoTest(int size, const FuncTH& f1, const FuncTH& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        const float lo = -10.0f, hi = 10.0f, slope = 1.1f;
+        FillRandom32f(src, lo, hi);
+
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
+
+        result = Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetTanh32fAutoTest(const FuncTH& f1, const FuncTH& f2)
+    {
+        bool result = true;
+
+        result = result && SynetTanh32fAutoTest(W * H, f1, f2);
+        result = result && SynetTanh32fAutoTest(W * H + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetTanh32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Base::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Sse2::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Avx2::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Avx512f::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetTanh32fAutoTest(FUNC_TH(Simd::Neon::SynetTanh32f), FUNC_TH(SimdSynetTanh32f));
+#endif
 
         return result;
     }

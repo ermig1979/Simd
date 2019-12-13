@@ -345,55 +345,6 @@ namespace Simd
                 NeuralDerivativeTanh<false>(src, size, slope, dst);
         }
 
-        template <bool align> void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-            float s = slope[0];
-            size_t alignedSize = Simd::AlignLo(size, F);
-            size_t i = 0;
-             __m128 _s = _mm_set1_ps(s);
-            if (s == 0)
-            {
-                for (; i < alignedSize; i += F)
-                {
-                    __m128 _src = Load<align>(src + i);
-                    Store<align>(dst + i, _mm_max_ps(_s, _src));
-                }
-                for (; i < size; ++i)
-                    dst[i] = Simd::Max(s, src[i]);
-            }
-            else if (s > 0.0f && s < 1.0f)
-            {
-                for (; i < alignedSize; i += F)
-                {
-                    __m128 _src = Load<align>(src + i);
-                    Store<align>(dst + i, _mm_max_ps(_mm_mul_ps(_s, _src), _src));
-                }
-                for (; i < size; ++i)
-                    dst[i] = Simd::Max(s*src[i], src[i]);
-            }
-            else
-            {
-                __m128 _0 = _mm_set1_ps(0.0f);
-                for (; i < alignedSize; i += F)
-                {
-                    __m128 _src = Load<align>(src + i);
-                    Store<align>(dst + i, _mm_add_ps(_mm_max_ps(_0, _src), _mm_mul_ps(_s, _mm_min_ps(_0, _src))));
-                }
-                for (; i < size; ++i)
-                    dst[i] = Simd::Max(0.0f, src[i]) + s * Simd::Min(src[i], 0.0f);
-            }
-        }
-
-        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRelu<true>(src, size, slope, dst);
-            else
-                NeuralRelu<false>(src, size, slope, dst);
-        }
-
         template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)

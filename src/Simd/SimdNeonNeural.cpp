@@ -253,28 +253,6 @@ namespace Simd
                 AddValue<false>(value, dst, aligned, partial, size);
         }
 
-        template<bool align> void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            Exp exp(-slope[0]);
-            size_t alignedSize = AlignLo(size, F);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-                Store<align>(dst + i, exp.Sigmoid<1>(Load<align>(src + i)));
-            for (; i < size; ++i)
-                dst[i] = Base::Sigmoid(src[i] * slope[0]);
-        }
-
-        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralSigmoid<true>(src, size, slope, dst);
-            else
-                NeuralSigmoid<false>(src, size, slope, dst);
-        }
-
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
@@ -381,28 +359,6 @@ namespace Simd
                 NeuralDerivativeSigmoid<false>(src, size, slope, dst);
         }
 
-        template<bool align> void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            Exp exp(-2.0f*slope[0]);
-            size_t alignedSize = AlignLo(size, F);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-                Store<align>(dst + i, exp.Tanh<1>(Load<align>(src + i)));
-            for (; i < size; ++i)
-                dst[i] = Base::Tanh(src[i] * slope[0]);
-        }
-
-        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralTanh<true>(src, size, slope, dst);
-            else
-                NeuralTanh<false>(src, size, slope, dst);
-        }
-
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
         {
             if (align)
@@ -486,47 +442,6 @@ namespace Simd
                 NeuralPow<true>(src, size, exponent, dst);
             else
                 NeuralPow<false>(src, size, exponent, dst);
-        }
-
-        template <bool align> SIMD_INLINE void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-            float s = slope[0];
-            size_t alignedSize = Simd::AlignLo(size, F);
-            size_t i = 0;
-            float32x4_t _0 = vdupq_n_f32(0.0f);
-            if (s == 0)
-            {
-                for (; i < alignedSize; i += F)
-                {
-                    float32x4_t _src = Load<align>(src + i);
-                    float32x4_t relu = vmaxq_f32(_0, _src);
-                    Store<align>(dst + i, relu);
-                }
-                for (; i < size; ++i)
-                    dst[i] = Simd::Max(0.0f, src[i]);
-            }
-            else
-            {
-                float32x4_t _s = vdupq_n_f32(s);
-                for (; i < alignedSize; i += F)
-                {
-                    float32x4_t _src = Load<align>(src + i);
-                    float32x4_t relu = vaddq_f32(vmaxq_f32(_0, _src), vmulq_f32(_s, vminq_f32(_0, _src)));
-                    Store<align>(dst + i, relu);
-                }
-                for (; i < size; ++i)
-                    dst[i] = Simd::Max(0.0f, src[i]) + s * Simd::Min(src[i], 0.0f);
-            }
-        }
-
-        void NeuralRelu(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralRelu<true>(src, size, slope, dst);
-            else
-                NeuralRelu<false>(src, size, slope, dst);
         }
 
         template <bool align> void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)

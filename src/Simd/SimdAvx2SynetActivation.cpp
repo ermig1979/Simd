@@ -69,6 +69,43 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, exp.Sigmoid(Avx::Load<align>(src + offset)));
+        }
+
+        template<bool align> void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-slope[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSigmoid32f<align>(src, exp, dst, i + 0 * F);
+                SynetSigmoid32f<align>(src, exp, dst, i + 1 * F);
+                SynetSigmoid32f<align>(src, exp, dst, i + 2 * F);
+                SynetSigmoid32f<align>(src, exp, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSigmoid32f<align>(src, exp, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetSigmoid32f(src[i], slope[0]);
+        }
+
+        void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSigmoid32f<true>(src, size, slope, dst);
+            else
+                SynetSigmoid32f<false>(src, size, slope, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, __m256 beta, __m256 threshold, float* dst, size_t offset)
         {
             Avx::Store<align>(dst + offset, Softplus(Avx::Load<align>(src + offset), beta, threshold));
@@ -100,6 +137,43 @@ namespace Simd
                 SynetSoftplus32f<true>(src, size, beta, threshold, dst);
             else
                 SynetSoftplus32f<false>(src, size, beta, threshold, dst);
+        }
+
+        //---------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, exp.Tanh(Avx::Load<align>(src + offset)));
+        }
+
+        template<bool align> void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-2.0f*slope[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetTanh32f<align>(src, exp, dst, i + 0 * F);
+                SynetTanh32f<align>(src, exp, dst, i + 1 * F);
+                SynetTanh32f<align>(src, exp, dst, i + 2 * F);
+                SynetTanh32f<align>(src, exp, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetTanh32f<align>(src, exp, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetTanh32f(src[i], slope[0]);
+        }
+
+        void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetTanh32f<true>(src, size, slope, dst);
+            else
+                SynetTanh32f<false>(src, size, slope, dst);
         }
     }
 #endif// SIMD_AVX2_ENABLE

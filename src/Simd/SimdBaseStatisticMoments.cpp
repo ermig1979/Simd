@@ -62,19 +62,19 @@ namespace Simd
                     if (mask == NULL)
                     {
                         for (uint32_t col = (uint32_t)colB; col < colE; ++col)
-                            GetObjectMoments(src[col], col - colB, _n, _s, _sx, _sxx);
+                            GetObjectMoments(src[col], col - (uint32_t)colB, _n, _s, _sx, _sxx);
                     }
                     else if (src == NULL)
                     {
                         for (uint32_t col = (uint32_t)colB; col < colE; ++col)
                             if(mask[col] == index)
-                                GetObjectMoments(1, col - colB, _n, _s, _sx, _sxx);
+                                GetObjectMoments(1, col - (uint32_t)colB, _n, _s, _sx, _sxx);
                     }
                     else
                     {
                         for (uint32_t col = (uint32_t)colB; col < colE; ++col)
                             if (mask[col] == index)
-                                GetObjectMoments(src[col], col - colB, _n, _s, _sx, _sxx);
+                                GetObjectMoments(src[col], col - (uint32_t)colB, _n, _s, _sx, _sxx);
                     }
                     uint64_t _y = row;
                     uint64_t _x = colB;

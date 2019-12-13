@@ -177,50 +177,6 @@ namespace Simd
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
-        template<bool align> void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            Exp exp(-slope[0]);
-            size_t alignedSize = AlignLo(size, F);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-                Avx::Store<align>(dst + i, exp.Sigmoid(Avx::Load<align>(src + i)));
-            for (; i < size; ++i)
-                dst[i] = Base::Sigmoid(src[i] * slope[0]);
-        }
-
-        void NeuralSigmoid(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralSigmoid<true>(src, size, slope, dst);
-            else
-                NeuralSigmoid<false>(src, size, slope, dst);
-        }
-
-        template<bool align> void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (align)
-                assert(Aligned(src) && Aligned(dst));
-
-            Exp exp(-2.0f*slope[0]);
-            size_t alignedSize = AlignLo(size, F);
-            size_t i = 0;
-            for (; i < alignedSize; i += F)
-                Avx::Store<align>(dst + i, exp.Tanh(Avx::Load<align>(src + i)));
-            for (; i < size; ++i)
-                dst[i] = Base::Tanh(src[i] * slope[0]);
-        }
-
-        void NeuralTanh(const float * src, size_t size, const float * slope, float * dst)
-        {
-            if (Aligned(src) && Aligned(dst))
-                NeuralTanh<true>(src, size, slope, dst);
-            else
-                NeuralTanh<false>(src, size, slope, dst);
-        }
-
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float * src, const __m256 & k, const __m256 & o, const __m256 & m, float * dst)
         {
             __m256 _src = Load<align>(src);

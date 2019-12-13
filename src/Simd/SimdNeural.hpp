@@ -150,7 +150,7 @@ namespace Simd
                     \verbatim
                     df(y) = y > 0 ? 1 : 0;
                     \endverbatim
-                    See implementation details: ::SimdNeuralRelu and ::SimdNeuralDerivativeRelu.
+                    See implementation details: ::SimdSynetRelu32f and ::SimdNeuralDerivativeRelu.
                 */
                 Relu,
                 /*! Leaky ReLU(Rectified Linear Unit):
@@ -160,7 +160,7 @@ namespace Simd
                     \verbatim
                     df(y) = y > 0 ? 1 : 0.01;
                     \endverbatim
-                    See implementation details: ::SimdNeuralRelu and ::SimdNeuralDerivativeRelu.
+                    See implementation details: ::SimdSynetRelu32f and ::SimdNeuralDerivativeRelu.
                 */
                 LeakyRelu,
                 /*! Softmax (normalized exponential function):
@@ -256,7 +256,7 @@ namespace Simd
             static SIMD_INLINE void ReluFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 0.0f;
-                ::SimdNeuralRelu(src, size, &slope, dst);
+                ::SimdSynetRelu32f(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void ReluDerivative(const float * src, size_t size, float * dst)
@@ -268,7 +268,7 @@ namespace Simd
             static SIMD_INLINE void LeakyReluFunction(const float * src, size_t size, float * dst)
             {
                 const float slope = 0.01f;
-                ::SimdNeuralRelu(src, size, &slope, dst);
+                ::SimdSynetRelu32f(src, size, &slope, dst);
             }
 
             static SIMD_INLINE void LeakyReluDerivative(const float * src, size_t size, float * dst)

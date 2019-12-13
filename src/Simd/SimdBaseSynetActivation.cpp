@@ -66,6 +66,99 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            size_t aligned = Simd::AlignLo(spatial, 4);
+            for (size_t c = 0; c < channels; ++c)
+            {
+                float _slope = slope[c];
+                size_t s = 0;
+                for (; s < aligned; s += 4)
+                {
+                    dst[s + 0] = SynetRelu32f(src[s + 0], _slope);
+                    dst[s + 1] = SynetRelu32f(src[s + 1], _slope);
+                    dst[s + 2] = SynetRelu32f(src[s + 2], _slope);
+                    dst[s + 3] = SynetRelu32f(src[s + 3], _slope);
+                }
+                for (; s < spatial; ++s)
+                    dst[s] = SynetRelu32f(src[s], _slope);
+                src += spatial;
+                dst += spatial;
+            }
+        }
+
+        void SynetPreluLayerForwardNhwc(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            size_t aligned = Simd::AlignLo(channels, 4);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < aligned; c += 4)
+                {
+                    dst[c + 0] = SynetRelu32f(src[c + 0], slope[c + 0]);
+                    dst[c + 1] = SynetRelu32f(src[c + 1], slope[c + 1]);
+                    dst[c + 2] = SynetRelu32f(src[c + 2], slope[c + 2]);
+                    dst[c + 3] = SynetRelu32f(src[c + 3], slope[c + 3]);
+                }
+                for (; c < channels; ++c)
+                    dst[c] = SynetRelu32f(src[c], slope[c]);
+                src += channels;
+                dst += channels;
+
+            }
+        }
+
+        template<int N> void SynetPreluLayerForwardNchwXc(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            for (size_t c = 0; c < channels; c += N)
+            {
+                for (size_t s = 0; s < spatial; ++s)
+                {
+                    for (size_t i = 0; i < N; ++i)
+                        dst[i] = SynetRelu32f(src[i], slope[i]);
+                    src += N;
+                    dst += N;
+                }
+                slope += N;
+            }
+        }
+
+        void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNchw(src, slope, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetPreluLayerForwardNchwXc<4>(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw8c)
+                SynetPreluLayerForwardNchwXc<8>(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw16c)
+                SynetPreluLayerForwardNchwXc<16>(src, slope, channels, spatial, dst);
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
+
+        void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            float _slope = slope[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetRelu32f(src[i + 0], _slope);
+                dst[i + 1] = SynetRelu32f(src[i + 1], _slope);
+                dst[i + 2] = SynetRelu32f(src[i + 2], _slope);
+                dst[i + 3] = SynetRelu32f(src[i + 3], _slope);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetRelu32f(src[i], _slope);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             float min = *lower;
@@ -85,6 +178,24 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            float _slope = slope[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetSigmoid32f(src[i + 0], _slope);
+                dst[i + 1] = SynetSigmoid32f(src[i + 1], _slope);
+                dst[i + 2] = SynetSigmoid32f(src[i + 2], _slope);
+                dst[i + 3] = SynetSigmoid32f(src[i + 3], _slope);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetSigmoid32f(src[i], _slope);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float* dst)
         {
             float _beta = beta[0];
@@ -100,6 +211,24 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = SynetSoftplus32f(src[i], _beta, _threshold);
+        }
+
+        //---------------------------------------------------------------------
+
+        void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            float _slope = slope[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetTanh32f(src[i + 0], _slope);
+                dst[i + 1] = SynetTanh32f(src[i + 1], _slope);
+                dst[i + 2] = SynetTanh32f(src[i + 2], _slope);
+                dst[i + 3] = SynetTanh32f(src[i + 3], _slope);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetTanh32f(src[i], _slope);
         }
     }
 }

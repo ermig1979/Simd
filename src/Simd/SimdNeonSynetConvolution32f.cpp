@@ -83,7 +83,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    Neon::NeuralRelu(dst, size*count, &slope, dst);
+                    Neon::SynetRelu32f(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -101,10 +101,10 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
-                                Store<false>(dst + i, SynetPreluLayerForward(value, _slope, _0));
+                                Store<false>(dst + i, SynetRelu32f(value, _slope, _0));
                             }
                             for (; i < count; ++i)
-                                dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], slope);
+                                dst[i] = Base::SynetRelu32f(dst[i] + bias[i], slope);
                             dst += count;
                         }
                     }
@@ -117,16 +117,16 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
-                                Store<false>(dst + j, SynetPreluLayerForward(value, _slope, _0));
+                                Store<false>(dst + j, SynetRelu32f(value, _slope, _0));
                             }
                             for (; j < size; ++j)
-                                dst[j] = Base::SynetPreluLayerForward(dst[j] + bias[i], slope);
+                                dst[j] = Base::SynetRelu32f(dst[j] + bias[i], slope);
                             dst += size;
                         }
                     }
                 }
                 else
-                    Neon::NeuralRelu(dst, size*count, &slope, dst);
+                    Neon::SynetRelu32f(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -184,10 +184,10 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
-                                Store<false>(dst + i, SynetPreluLayerForward(value, Load<false>(params + i), _0));
+                                Store<false>(dst + i, SynetRelu32f(value, Load<false>(params + i), _0));
                             }
                             for (; i < count; ++i)
-                                dst[i] = Base::SynetPreluLayerForward(dst[i] + bias[i], params[i]);
+                                dst[i] = Base::SynetRelu32f(dst[i] + bias[i], params[i]);
                             dst += count;
                         }
                     }
@@ -201,10 +201,10 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
-                                Store<false>(dst + j, SynetPreluLayerForward(value, _slope, _0));
+                                Store<false>(dst + j, SynetRelu32f(value, _slope, _0));
                             }
                             for (; j < size; ++j)
-                                dst[j] = Base::SynetPreluLayerForward(dst[j] + bias[i], params[i]);
+                                dst[j] = Base::SynetRelu32f(dst[j] + bias[i], params[i]);
                             dst += size;
                         }
                     }

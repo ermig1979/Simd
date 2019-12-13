@@ -106,6 +106,178 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, const float* slope, float32x4_t _0, float* dst, size_t offset)
+        {
+            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), Load<align>(slope + offset), _0));
+        }
+
+        template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, float32x4_t slope, float32x4_t _0, float* dst, size_t offset)
+        {
+            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), slope, _0));
+        }
+
+        template <bool align> void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(spatial, F) && Aligned(dst));
+
+            size_t aligned = AlignLo(spatial, QF);
+            size_t partial = AlignLo(spatial, F);
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            for (size_t c = 0; c < channels; ++c)
+            {
+                size_t s = 0;
+                if (partial)
+                {
+                    float32x4_t _slope = vdupq_n_f32(slope[c]);
+                    for (; s < aligned; s += QF)
+                    {
+                        SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 0);
+                        SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 1);
+                        SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 2);
+                        SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 3);
+                    }
+                    for (; s < partial; s += F)
+                        SynetPreluLayerForward<align>(src, _slope, _0, dst, s);
+                }
+                for (; s < spatial; ++s)
+                    dst[s] = Base::SynetRelu32f(src[s], slope[c]);
+                src += spatial;
+                dst += spatial;
+            }
+        }
+
+        SIMD_INLINE void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            if (Aligned(src) && Aligned(spatial, F) && Aligned(dst))
+                SynetPreluLayerForwardNchw<true>(src, slope, channels, spatial, dst);
+            else
+                SynetPreluLayerForwardNchw<false>(src, slope, channels, spatial, dst);
+        }
+
+        template <bool align> void SynetPreluLayerForwardNhwc(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(slope) && Aligned(channels, F) && Aligned(dst));
+
+            size_t aligned = AlignLo(channels, QF);
+            size_t partial = AlignLo(channels, F);
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                if (partial)
+                {
+                    for (; c < aligned; c += QF)
+                    {
+                        SynetPreluLayerForward<align>(src, slope, _0, dst, c + F * 0);
+                        SynetPreluLayerForward<align>(src, slope, _0, dst, c + F * 1);
+                        SynetPreluLayerForward<align>(src, slope, _0, dst, c + F * 2);
+                        SynetPreluLayerForward<align>(src, slope, _0, dst, c + F * 3);
+                    }
+                    for (; c < partial; c += F)
+                        SynetPreluLayerForward<align>(src, slope, _0, dst, c);
+                }
+                for (; c < channels; ++c)
+                    dst[c] = Base::SynetRelu32f(src[c], slope[c]);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        SIMD_INLINE void SynetPreluLayerForwardNhwc(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            if (Aligned(src) && Aligned(slope) && Aligned(channels, F) && Aligned(dst))
+                SynetPreluLayerForwardNhwc<true>(src, slope, channels, spatial, dst);
+            else
+                SynetPreluLayerForwardNhwc<false>(src, slope, channels, spatial, dst);
+        }
+
+        template <bool align> void SynetPreluLayerForwardNchw4c(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            size_t spatialF = spatial * F;
+            size_t spatial4F = AlignLo(spatial, 4) * F;
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            for (size_t c = 0; c < channels; c += F)
+            {
+                float32x4_t _slope = Load<false>(slope + c);
+                size_t s = 0;
+                for (; s < spatial4F; s += 4 * F)
+                {
+                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 0);
+                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 1);
+                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 2);
+                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s + F * 3);
+                }
+                for (; s < spatialF; s += F)
+                    SynetPreluLayerForward<align>(src, _slope, _0, dst, s);
+                src += spatialF;
+                dst += spatialF;
+            }
+        }
+
+        SIMD_INLINE void SynetPreluLayerForwardNchw4c(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetPreluLayerForwardNchw4c<true>(src, slope, channels, spatial, dst);
+            else
+                SynetPreluLayerForwardNchw4c<false>(src, slope, channels, spatial, dst);
+        }
+
+        void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format)
+        {
+            if (Base::NchwCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNchw(src, slope, channels, spatial, dst);
+            else if (Base::NhwcCompatible(channels, spatial, format))
+                SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
+            else if (format == SimdTensorFormatNchw4c)
+                SynetPreluLayerForwardNchw4c(src, slope, channels, spatial, dst);
+            else
+                Base::SynetPreluLayerForward(src, slope, channels, spatial, dst, format);
+        }
+
+        //-------------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetRelu32f(const float* src, float32x4_t slope, float32x4_t zero, float* dst, size_t offset)
+        {
+            float32x4_t _src = Load<align>(src + offset);
+            float32x4_t _dst = SynetRelu32f(_src, slope, zero);
+            Store<align>(dst + offset, _dst);
+        }
+
+        template<bool align> void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            float32x4_t _slope = vdupq_n_f32(slope[0]);
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetRelu32f<align>(src, _slope, _0, dst, i + 0 * F);
+                SynetRelu32f<align>(src, _slope, _0, dst, i + 1 * F);
+                SynetRelu32f<align>(src, _slope, _0, dst, i + 2 * F);
+                SynetRelu32f<align>(src, _slope, _0, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetRelu32f<align>(src, _slope, _0, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetRelu32f(src[i], slope[0]);
+        }
+
+        void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetRelu32f<true>(src, size, slope, dst);
+            else
+                SynetRelu32f<false>(src, size, slope, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         template <bool align> void SynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
         {
             assert(lower[0] <= upper[0]);
@@ -141,6 +313,43 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Neon::Exp& exp, float* dst, size_t offset)
+        {
+            Store<align>(dst + offset, exp.Sigmoid<1>(Load<align>(src + offset)));
+        }
+
+        template<bool align> void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-slope[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSigmoid32f<align>(src, exp, dst, i + 0 * F);
+                SynetSigmoid32f<align>(src, exp, dst, i + 1 * F);
+                SynetSigmoid32f<align>(src, exp, dst, i + 2 * F);
+                SynetSigmoid32f<align>(src, exp, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSigmoid32f<align>(src, exp, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetSigmoid32f(src[i], slope[0]);
+        }
+
+        void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSigmoid32f<true>(src, size, slope, dst);
+            else
+                SynetSigmoid32f<false>(src, size, slope, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, float32x4_t beta, float32x4_t threshold, float* dst, size_t offset)
         {
             Store<align>(dst + offset, Softplus<1>(Load<align>(src + offset), beta, threshold));
@@ -172,6 +381,43 @@ namespace Simd
                 SynetSoftplus32f<true>(src, size, beta, threshold, dst);
             else
                 SynetSoftplus32f<false>(src, size, beta, threshold, dst);
+        }
+
+        //---------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Neon::Exp& exp, float* dst, size_t offset)
+        {
+            Store<align>(dst + offset, exp.Tanh<1>(Load<align>(src + offset)));
+        }
+
+        template<bool align> void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-2.0f*slope[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetTanh32f<align>(src, exp, dst, i + 0 * F);
+                SynetTanh32f<align>(src, exp, dst, i + 1 * F);
+                SynetTanh32f<align>(src, exp, dst, i + 2 * F);
+                SynetTanh32f<align>(src, exp, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetTanh32f<align>(src, exp, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetTanh32f(src[i], slope[0]);
+        }
+
+        void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetTanh32f<true>(src, size, slope, dst);
+            else
+                SynetTanh32f<false>(src, size, slope, dst);
         }
     }
 #endif// SIMD_NEON_ENABLE

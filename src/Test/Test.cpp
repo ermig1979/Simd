@@ -251,14 +251,11 @@ namespace Test
     TEST_ADD_GROUP_AD0(NeuralAddVectorMultipliedByValue);
     TEST_ADD_GROUP_AD0(NeuralAddVector);
     TEST_ADD_GROUP_AD0(NeuralAddValue);
-    TEST_ADD_GROUP_AD0(NeuralSigmoid);
     TEST_ADD_GROUP_AD0(NeuralRoughSigmoid);
     TEST_ADD_GROUP_AD0(NeuralRoughSigmoid2);
     TEST_ADD_GROUP_AD0(NeuralDerivativeSigmoid);
-    TEST_ADD_GROUP_AD0(NeuralTanh);
     TEST_ADD_GROUP_AD0(NeuralRoughTanh);
     TEST_ADD_GROUP_AD0(NeuralDerivativeTanh);
-    TEST_ADD_GROUP_AD0(NeuralRelu);
     TEST_ADD_GROUP_AD0(NeuralDerivativeRelu);
     TEST_ADD_GROUP_AD0(NeuralPow);
     TEST_ADD_GROUP_AD0(NeuralUpdateWeights);
@@ -331,7 +328,6 @@ namespace Test
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A00(SynetInnerProductLayerForward);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
-    TEST_ADD_GROUP_A00(SynetPreluLayerForward);
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
     TEST_ADD_GROUP_A00(SynetShuffleLayerForward);
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);
@@ -339,8 +335,12 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetElu32f);
     TEST_ADD_GROUP_A00(SynetHswish32f);
+    TEST_ADD_GROUP_A00(SynetPreluLayerForward);
+    TEST_ADD_GROUP_A00(SynetRelu32f);
     TEST_ADD_GROUP_A00(SynetRestrictRange32f);
+    TEST_ADD_GROUP_A00(SynetSigmoid32f);
     TEST_ADD_GROUP_A00(SynetSoftplus32f);
+    TEST_ADD_GROUP_A00(SynetTanh32f);
 
     TEST_ADD_GROUP_A00(SynetConvertImage);
     TEST_ADD_GROUP_A00(SynetConvertFilter);

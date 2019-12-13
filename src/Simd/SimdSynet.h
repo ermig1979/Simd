@@ -105,14 +105,24 @@ namespace Simd
             return Simd::Max(Simd::Min(value, shift) + shift, 0.0f)*scale*value;
         }
 
-        SIMD_INLINE float SynetPreluLayerForward(float value, float slope)
+        SIMD_INLINE float SynetRelu32f(float value, float slope)
         {
-            return Simd::Max(0.0f, value) + slope*Simd::Min(value, 0.0f);
+            return Simd::Max(0.0f, value) + slope * Simd::Min(value, 0.0f);
+        }
+
+        SIMD_INLINE float SynetSigmoid32f(float value, float slope)
+        {
+            return 1.0f / (1.0f + ::exp(-value*slope));
         }
 
         SIMD_INLINE float SynetSoftplus32f(float value, float beta, float threshold)
         {
             return value > threshold ? value : ::log(1.0f + ::exp(value * beta)) / beta;
+        }
+
+        SIMD_INLINE float SynetTanh32f(float value, float slope)
+        {
+            return ::tanh(value*slope);
         }
 
         //---------------------------------------------------------------------
@@ -168,7 +178,7 @@ namespace Simd
             return _mm_mul_ps(_mm_mul_ps(_mm_max_ps(_mm_add_ps(_mm_min_ps(value, shift), shift), _mm_setzero_ps()), scale), value);
         }
 
-        SIMD_INLINE __m128 SynetPreluLayerForward(const __m128 & value, const __m128 & slope)
+        SIMD_INLINE __m128 SynetRelu32f(__m128 value, __m128 slope)
         {
             __m128 positive = _mm_max_ps(_mm_setzero_ps(), value);
             __m128 negative = _mm_min_ps(_mm_setzero_ps(), value);
@@ -185,7 +195,7 @@ namespace Simd
             return _mm256_mul_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_add_ps(_mm256_min_ps(value, shift), shift), _mm256_setzero_ps()), scale), value);
         }
 
-        SIMD_INLINE __m256 SynetPreluLayerForward(const __m256 & value, const __m256 & slope)
+        SIMD_INLINE __m256 SynetRelu32f(const __m256 & value, const __m256 & slope)
         {
             __m256 positive = _mm256_max_ps(_mm256_setzero_ps(), value);
             __m256 negative = _mm256_min_ps(_mm256_setzero_ps(), value);
@@ -202,7 +212,7 @@ namespace Simd
             return _mm512_mul_ps(_mm512_mul_ps(_mm512_max_ps(_mm512_add_ps(_mm512_min_ps(value, shift), shift), _mm512_setzero_ps()), scale), value);
         }
 
-        SIMD_INLINE __m512 SynetPreluLayerForward(const __m512 & value, const __m512 & slope)
+        SIMD_INLINE __m512 SynetRelu32f(const __m512 & value, const __m512 & slope)
         {
             __m512 positive = _mm512_max_ps(_mm512_setzero_ps(), value);
             __m512 negative = _mm512_min_ps(_mm512_setzero_ps(), value);
@@ -219,7 +229,7 @@ namespace Simd
             return vmulq_f32(vmulq_f32(vmaxq_f32(vaddq_f32(vminq_f32(value, shift), shift), vdupq_n_f32(0.0f)), scale), value);
         }
 
-        SIMD_INLINE float32x4_t SynetPreluLayerForward(const float32x4_t & value, const float32x4_t & slope, const float32x4_t & zero)
+        SIMD_INLINE float32x4_t SynetRelu32f(const float32x4_t & value, const float32x4_t & slope, const float32x4_t & zero)
         {
             float32x4_t positive = vmaxq_f32(zero, value);
             float32x4_t negative = vminq_f32(zero, value);
