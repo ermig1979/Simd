@@ -360,19 +360,19 @@ namespace Simd
             switch (_block)
             {
             case 2:
-                _setFilter = Neon::Winograd2x3SetFilter;
-                _setInput = Neon::Winograd2x3SetInput;
-                _setOutput = Neon::Winograd2x3SetOutput;
+                _setFilter = Neon::WinogradBlock2x2Kernel3x3SetFilter;
+                _setInput = Neon::WinogradBlock2x2Kernel3x3SetInput;
+                _setOutput = Neon::WinogradBlock2x2Kernel3x3SetOutput;
                 break;
             case 3:
-                _setFilter = Neon::Winograd3x3SetFilter;
-                _setInput = Neon::Winograd3x3SetInput;
-                _setOutput = Neon::Winograd3x3SetOutput;
+                _setFilter = Neon::WinogradBlock3x3Kernel3x3SetFilter;
+                _setInput = Neon::WinogradBlock3x3Kernel3x3SetInput;
+                _setOutput = Neon::WinogradBlock3x3Kernel3x3SetOutput;
                 break;
             case 4:
-                _setFilter = Neon::Winograd4x3SetFilter;
-                _setInput = Neon::Winograd4x3SetInput;
-                _setOutput = Neon::Winograd4x3SetOutput;
+                _setFilter = Neon::WinogradBlock4x4Kernel3x3SetFilter;
+                _setInput = Neon::WinogradBlock4x4Kernel3x3SetInput;
+                _setOutput = Neon::WinogradBlock4x4Kernel3x3SetOutput;
                 break;
             default:
                 assert(0);

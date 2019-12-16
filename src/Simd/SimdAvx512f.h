@@ -159,23 +159,23 @@ namespace Simd
 
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
-        void Winograd2x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+        void WinogradBlock2x2Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        void Winograd2x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+        void WinogradBlock2x2Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
 
-        void Winograd2x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+        void WinogradBlock2x2Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        void Winograd3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+        void WinogradBlock3x3Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        void Winograd3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+        void WinogradBlock3x3Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
 
-        void Winograd3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+        void WinogradBlock3x3Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        void Winograd4x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+        void WinogradBlock4x4Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
-        void Winograd4x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+        void WinogradBlock4x4Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
 
-        void Winograd4x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+        void WinogradBlock4x4Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
     }
 #endif// SIMD_AVX512F_ENABLE
 }

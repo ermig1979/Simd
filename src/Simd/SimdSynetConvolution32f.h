@@ -233,7 +233,7 @@ namespace Simd
         public:
             SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::Winograd" + ToStr(_block) + "x3" + (_merge > 1 ? "-" + ToStr(_merge) : ""); }
+            virtual String Desc() const { return Ext() + "::Winograd(" + ToStr(_block) + "x" + "3" + ")" +  (_merge > 1 ? "-" + ToStr(_merge) : ""); }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);

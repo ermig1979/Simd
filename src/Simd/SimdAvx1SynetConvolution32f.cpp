@@ -547,19 +547,19 @@ namespace Simd
             switch (_block)
             {
             case 2:
-                _setFilter = Avx::Winograd2x3SetFilter;
-                _setInput = Avx::Winograd2x3SetInput;
-                _setOutput = Avx::Winograd2x3SetOutput;
+                _setFilter = Avx::WinogradBlock2x2Kernel3x3SetFilter;
+                _setInput = Avx::WinogradBlock2x2Kernel3x3SetInput;
+                _setOutput = Avx::WinogradBlock2x2Kernel3x3SetOutput;
                 break;
             case 3:
-                _setFilter = Avx::Winograd3x3SetFilter;
-                _setInput = Avx::Winograd3x3SetInput;
-                _setOutput = Avx::Winograd3x3SetOutput;
+                _setFilter = Avx::WinogradBlock3x3Kernel3x3SetFilter;
+                _setInput = Avx::WinogradBlock3x3Kernel3x3SetInput;
+                _setOutput = Avx::WinogradBlock3x3Kernel3x3SetOutput;
                 break;
             case 4:
-                _setFilter = Avx::Winograd4x3SetFilter;
-                _setInput = Avx::Winograd4x3SetInput;
-                _setOutput = Avx::Winograd4x3SetOutput;
+                _setFilter = Avx::WinogradBlock4x4Kernel3x3SetFilter;
+                _setInput = Avx::WinogradBlock4x4Kernel3x3SetInput;
+                _setOutput = Avx::WinogradBlock4x4Kernel3x3SetOutput;
                 break;
             default:
                 assert(0);

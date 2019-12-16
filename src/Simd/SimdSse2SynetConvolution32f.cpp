@@ -326,19 +326,19 @@ namespace Simd
             switch (_block)
             {
             case 2:
-                _setFilter = Sse::Winograd2x3SetFilter;
-                _setInput = Sse::Winograd2x3SetInput;
-                _setOutput = Sse::Winograd2x3SetOutput;
+                _setFilter = Sse::WinogradBlock2x2Kernel3x3SetFilter;
+                _setInput = Sse::WinogradBlock2x2Kernel3x3SetInput;
+                _setOutput = Sse::WinogradBlock2x2Kernel3x3SetOutput;
                 break;
             case 3:
-                _setFilter = Sse::Winograd3x3SetFilter;
-                _setInput = Sse::Winograd3x3SetInput;
-                _setOutput = Sse::Winograd3x3SetOutput;
+                _setFilter = Sse::WinogradBlock3x3Kernel3x3SetFilter;
+                _setInput = Sse::WinogradBlock3x3Kernel3x3SetInput;
+                _setOutput = Sse::WinogradBlock3x3Kernel3x3SetOutput;
                 break;
             case 4:
-                _setFilter = Sse::Winograd4x3SetFilter;
-                _setInput = Sse::Winograd4x3SetInput;
-                _setOutput = Sse::Winograd4x3SetOutput;
+                _setFilter = Sse::WinogradBlock4x4Kernel3x3SetFilter;
+                _setInput = Sse::WinogradBlock4x4Kernel3x3SetInput;
+                _setOutput = Sse::WinogradBlock4x4Kernel3x3SetOutput;
                 break;
             default:
                 assert(0);

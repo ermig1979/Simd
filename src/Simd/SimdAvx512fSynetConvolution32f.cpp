@@ -529,19 +529,19 @@ namespace Simd
             switch (_block)
             {
             case 2:
-                _setFilter = Avx512f::Winograd2x3SetFilter;
-                _setInput = Avx512f::Winograd2x3SetInput;
-                _setOutput = Avx512f::Winograd2x3SetOutput;
+                _setFilter = Avx512f::WinogradBlock2x2Kernel3x3SetFilter;
+                _setInput = Avx512f::WinogradBlock2x2Kernel3x3SetInput;
+                _setOutput = Avx512f::WinogradBlock2x2Kernel3x3SetOutput;
                 break;
             case 3:
-                _setFilter = Avx512f::Winograd3x3SetFilter;
-                _setInput = Avx512f::Winograd3x3SetInput;
-                _setOutput = Avx512f::Winograd3x3SetOutput;
+                _setFilter = Avx512f::WinogradBlock3x3Kernel3x3SetFilter;
+                _setInput = Avx512f::WinogradBlock3x3Kernel3x3SetInput;
+                _setOutput = Avx512f::WinogradBlock3x3Kernel3x3SetOutput;
                 break;
             case 4:
-                _setFilter = Avx512f::Winograd4x3SetFilter;
-                _setInput = Avx512f::Winograd4x3SetInput;
-                _setOutput = Avx512f::Winograd4x3SetOutput;
+                _setFilter = Avx512f::WinogradBlock4x4Kernel3x3SetFilter;
+                _setInput = Avx512f::WinogradBlock4x4Kernel3x3SetInput;
+                _setOutput = Avx512f::WinogradBlock4x4Kernel3x3SetOutput;
                 break;
             default:
                 assert(0);
