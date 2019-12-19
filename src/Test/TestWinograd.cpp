@@ -54,7 +54,7 @@ namespace Test
 
 #define FUNC_WF(function) FuncWF(function, #function)
 
-    bool WinogradSetFilterAutoTest(size_t srcC, size_t dstC, size_t block, size_t core, SimdBool trans, FuncWF f1, FuncWF f2)
+    bool WinogradSetFilterAutoTest(size_t srcC, size_t dstC, const Size& block, const Size& core, SimdBool trans, FuncWF f1, FuncWF f2)
     {
         bool result = true;
 
@@ -63,11 +63,11 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcC << ", " << dstC << "].");
 
-        size_t count = Simd::Square(block + core - 1);
-        Tensor32f src({ trans ? core : dstC, trans ? core : srcC, trans ? srcC : core, trans ? dstC : core });
+        size_t count = (block.x + core.x - 1) * (block.y + core.y - 1);
+        Tensor32f src({ trans ? core.y : dstC, trans ? core.x : srcC, trans ? srcC : core.y, trans ? dstC : core.x });
         FillRandom(src.Data(), src.Size(), -10.0, 10.0f);
-        Tensor32f dst1({count,  trans ? srcC : dstC, trans ? dstC : srcC});
-        Tensor32f dst2({ count,  trans ? srcC : dstC, trans ? dstC : srcC });
+        Tensor32f dst1({ count, trans ? srcC : dstC, trans ? dstC : srcC });
+        Tensor32f dst2({ count, trans ? srcC : dstC, trans ? dstC : srcC });
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -80,7 +80,7 @@ namespace Test
         return result;
     }
 
-    bool WinogradSetFilterAutoTest(size_t block, size_t core, const FuncWF & f1, const FuncWF & f2)
+    bool WinogradSetFilterAutoTest(const Size& block, const Size& core, const FuncWF & f1, const FuncWF & f2)
     {
         bool result = true;
 
@@ -90,30 +90,63 @@ namespace Test
         return result;
     }
 
-    bool WinogradKernel3x3Block2x2SetFilterAutoTest()
+    bool WinogradKernel2x2Block2x2SetFilterAutoTest()
     {
         bool result = true;
 
-        result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Base::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+        Size _2x2(2, 2);
 
-#ifdef SIMD_SSE_ENABLE
+        result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Base::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
+
+/*#ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && WinogradSetFilterAutoTest(2, 3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+           result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+#endif  */
+
+        return result;
+    }
+
+    bool WinogradKernel3x3Block2x2SetFilterAutoTest()
+    {
+        bool result = true;
+
+        Size _2x2(2, 2), _3x3(3, 3);
+
+        result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Base::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
 #endif 
 
         return result;
@@ -123,26 +156,28 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Base::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
+        Size _3x3(3, 3);
+
+        result = result && WinogradSetFilterAutoTest(_3x3, _3x3, FUNC_WF(Simd::Base::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
+            result = result && WinogradSetFilterAutoTest(_3x3, _3x3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
+            result = result && WinogradSetFilterAutoTest(_3x3, _3x3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
+            result = result && WinogradSetFilterAutoTest(_3x3, _3x3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && WinogradSetFilterAutoTest(3, 3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
+            result = result && WinogradSetFilterAutoTest(_3x3, _3x3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block3x3SetFilter), FUNC_WF(SimdWinogradKernel3x3Block3x3SetFilter));
 #endif 
 
         return result;
@@ -152,26 +187,28 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Base::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
+        Size _3x3(3, 3), _4x4(4, 4);
+
+        result = result && WinogradSetFilterAutoTest(_4x4, _3x3, FUNC_WF(Simd::Base::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
+            result = result && WinogradSetFilterAutoTest(_4x4, _3x3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
+            result = result && WinogradSetFilterAutoTest(_4x4, _3x3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
+            result = result && WinogradSetFilterAutoTest(_4x4, _3x3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && WinogradSetFilterAutoTest(4, 3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
+            result = result && WinogradSetFilterAutoTest(_4x4, _3x3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block4x4SetFilter), FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter));
 #endif 
 
         return result;
@@ -233,6 +270,60 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, srcC, srcH, srcW, padB, padE, dst2, trans));
 
         result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2SetInputAutoTest(size_t block, int padB, int padE, int trans, const FuncWI& f1, const FuncWI& f2)
+    {
+        bool result = true;
+
+        Size _core(2, 2), _block(block, block), _padB(padB, padB), _padE(padE, padE);
+
+        result = result && WinogradSetInputAutoTest(128, 8, 60, _block, _core, _padB, _padE, trans, f1, f2);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2SetInputAutoTest(size_t block, const FuncWI& f1, const FuncWI& f2)
+    {
+        bool result = true;
+
+        result = result && WinogradKernel2x2SetInputAutoTest(block, 0, 0, 0, f1, f2);
+        result = result && WinogradKernel2x2SetInputAutoTest(block, 0, 0, 1, f1, f2);
+        result = result && WinogradKernel2x2SetInputAutoTest(block, 1, 0, 0, f1, f2);
+        result = result && WinogradKernel2x2SetInputAutoTest(block, 1, 0, 1, f1, f2);
+        result = result && WinogradKernel2x2SetInputAutoTest(block, 0, 1, 0, f1, f2);
+        result = result && WinogradKernel2x2SetInputAutoTest(block, 0, 1, 1, f1, f2);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2Block2x2SetInputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradKernel2x2SetInputAutoTest(2, FUNC_WI(Simd::Base::WinogradKernel2x2Block2x2SetInput), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradKernel3x3SetInputAutoTest(2, FUNC_WI(Simd::Sse::WinogradKernel3x3Block2x2SetInput), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradKernel3x3SetInputAutoTest(2, FUNC_WI(Simd::Avx::WinogradKernel3x3Block2x2SetInput), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradKernel3x3SetInputAutoTest(2, FUNC_WI(Simd::Avx512f::WinogradKernel3x3Block2x2SetInput), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradKernel3x3SetInputAutoTest(2, FUNC_WI(Simd::Neon::WinogradKernel3x3Block2x2SetInput), FUNC_WI(SimdWinogradKernel3x3Block2x2SetInput));
+//#endif
 
         return result;
     }
@@ -376,7 +467,7 @@ namespace Test
 
 #define FUNC_WO(function) FuncWO(function, #function)
 
-    bool WinogradSetOutputAutoTest(size_t dstC, size_t dstH, size_t dstW, size_t block, size_t core, int trans, FuncWO f1, FuncWO f2)
+    bool WinogradSetOutputAutoTest(size_t dstC, size_t dstH, size_t dstW, const Size& block, const Size& core, int trans, FuncWO f1, FuncWO f2)
     {
         bool result = true;
 
@@ -385,9 +476,9 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " .");
 
-        size_t count = Simd::Square(block + core - 1);
-        size_t tileH = (dstH + block - 1) / block;
-        size_t tileW = (dstW + block - 1) / block;
+        size_t count = (block.x + core.x - 1) * (block.y + core.y - 1);
+        size_t tileH = (dstH + block.y - 1) / block.y;
+        size_t tileW = (dstW + block.x - 1) / block.x;
 
         Tensor32f src({count, trans ? tileH : dstC, trans ? tileW : tileH, trans ? dstC : tileW });
         FillRandom(src.Data(), src.Size(), -10.0, 10.0f);
@@ -405,7 +496,57 @@ namespace Test
         return result;
     }
 
-    bool WinogradSetOutputAutoTest(size_t block, size_t core, int trans, const FuncWO & f1, const FuncWO & f2)
+    bool WinogradKernel2x2SetOutputAutoTest(const Size& block, const Size& core, int trans, const FuncWO& f1, const FuncWO& f2)
+    {
+        bool result = true;
+
+        result = result && WinogradSetOutputAutoTest(256, 8, 60, block, core, trans, f1, f2);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2SetOutputAutoTest(size_t block, const FuncWO& f1, const FuncWO& f2)
+    {
+        bool result = true;
+
+        Size _core(2, 2), _block(block, block);
+
+        result = result && WinogradKernel2x2SetOutputAutoTest(_block, _core, 0, f1, f2);
+        result = result && WinogradKernel2x2SetOutputAutoTest(_block, _core, 1, f1, f2);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2Block2x2SetOutputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Base::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Sse::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Avx::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Neon::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+//#endif
+
+        return result;
+    }
+
+    bool WinogradKernel3x3SetOutputAutoTest(const Size& block, const Size& core, int trans, const FuncWO & f1, const FuncWO & f2)
     {
         bool result = true;
 
@@ -417,12 +558,14 @@ namespace Test
         return result;
     }
 
-    bool WinogradSetOutputAutoTest(size_t block, size_t core, const FuncWO & f1, const FuncWO & f2)
+    bool WinogradKernel3x3SetOutputAutoTest(size_t block, const FuncWO & f1, const FuncWO & f2)
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(block, core, 0, f1, f2);
-        result = result && WinogradSetOutputAutoTest(block, core, 1, f1, f2);
+        Size _core(3, 3), _block(block, block);
+
+        result = result && WinogradKernel3x3SetOutputAutoTest(_block, _core, 0, f1, f2);
+        result = result && WinogradKernel3x3SetOutputAutoTest(_block, _core, 1, f1, f2);
 
         return result;
     }
@@ -431,26 +574,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Base::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+        result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Base::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Sse::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Sse::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Avx::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && WinogradSetOutputAutoTest(2, 3, FUNC_WO(Simd::Neon::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(2, FUNC_WO(Simd::Neon::WinogradKernel3x3Block2x2SetOutput), FUNC_WO(SimdWinogradKernel3x3Block2x2SetOutput));
 #endif
 
         return result;
@@ -460,26 +603,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Base::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
+        result = result && WinogradKernel3x3SetOutputAutoTest(3, FUNC_WO(Simd::Base::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Sse::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(3, FUNC_WO(Simd::Sse::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Avx::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(3, FUNC_WO(Simd::Avx::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(3, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && WinogradSetOutputAutoTest(3, 3, FUNC_WO(Simd::Neon::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(3, FUNC_WO(Simd::Neon::WinogradKernel3x3Block3x3SetOutput), FUNC_WO(SimdWinogradKernel3x3Block3x3SetOutput));
 #endif
 
         return result;
@@ -489,26 +632,26 @@ namespace Test
     {
         bool result = true;
 
-        result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Base::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
+        result = result && WinogradKernel3x3SetOutputAutoTest(4, FUNC_WO(Simd::Base::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Sse::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(4, FUNC_WO(Simd::Sse::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Avx::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(4, FUNC_WO(Simd::Avx::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(4, FUNC_WO(Simd::Avx512f::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && WinogradSetOutputAutoTest(4, 3, FUNC_WO(Simd::Neon::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
+            result = result && WinogradKernel3x3SetOutputAutoTest(4, FUNC_WO(Simd::Neon::WinogradKernel3x3Block4x4SetOutput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
 #endif 
 
         return result;
@@ -670,6 +813,38 @@ namespace Test
         result = result && Compare(gemmDst, winogradDst, eps, true, 64, DifferenceAbsolute);
 
         return result;
+    }
+
+    bool WinogradKernel2x2SpecialTest(size_t block, size_t padB, size_t padE, SimdBool trans, const FuncWF& ff, const FuncWI& fi, const FuncWO& fo)
+    {
+        bool result = true;
+
+        Size _core(2, 2), _block(block, block), _padB(padB, padB), _padE(padE, padE);
+
+        result = result && WinogradSpecialTest(EPS * 1, 128, 8, 60, 256, _block, _core, _padB, _padE, trans, ff, fi, fo);
+        result = result && WinogradSpecialTest(EPS * 1, 128, 9, 61, 256, _block, _core, _padB, _padE, trans, ff, fi, fo);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2SpecialTest(size_t block, const FuncWF& ff, const FuncWI& fi, const FuncWO& fo)
+    {
+        bool result = true;
+
+
+        result = result && WinogradKernel2x2SpecialTest(block, 0, 0, ::SimdFalse, ff, fi, fo);
+        result = result && WinogradKernel2x2SpecialTest(block, 0, 0, ::SimdTrue, ff, fi, fo);
+        result = result && WinogradKernel2x2SpecialTest(block, 1, 0, ::SimdFalse, ff, fi, fo);
+        result = result && WinogradKernel2x2SpecialTest(block, 1, 0, ::SimdTrue, ff, fi, fo);
+        result = result && WinogradKernel2x2SpecialTest(block, 0, 1, ::SimdFalse, ff, fi, fo);
+        result = result && WinogradKernel2x2SpecialTest(block, 0, 1, ::SimdTrue, ff, fi, fo);
+
+        return result;
+    }
+
+    bool WinogradKernel2x2Block2x2SpecialTest()
+    {
+        return WinogradKernel2x2SpecialTest(2, FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
     }
 
     bool WinogradKernel3x3SpecialTest(size_t block, size_t pad, SimdBool trans, const FuncWF & ff, const FuncWI & fi, const FuncWO & fo)
