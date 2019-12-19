@@ -370,19 +370,19 @@ namespace Test
 
     TEST_ADD_GROUP_A00(TransformImage);
 
-    TEST_ADD_GROUP_A00(WinogradBlock2x2Kernel3x3SetFilter);
-    TEST_ADD_GROUP_A00(WinogradBlock2x2Kernel3x3SetInput);
-    TEST_ADD_GROUP_A00(WinogradBlock2x2Kernel3x3SetOutput);
-    TEST_ADD_GROUP_A00(WinogradBlock3x3Kernel3x3SetFilter);
-    TEST_ADD_GROUP_A00(WinogradBlock3x3Kernel3x3SetInput);
-    TEST_ADD_GROUP_A00(WinogradBlock3x3Kernel3x3SetOutput);
-    TEST_ADD_GROUP_A00(WinogradBlock4x4Kernel3x3SetFilter);
-    TEST_ADD_GROUP_A00(WinogradBlock4x4Kernel3x3SetInput);
-    TEST_ADD_GROUP_A00(WinogradBlock4x4Kernel3x3SetOutput);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block2x2SetFilter);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block2x2SetInput);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block2x2SetOutput);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block3x3SetFilter);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block3x3SetInput);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block3x3SetOutput);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block4x4SetFilter);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block4x4SetInput);
+    TEST_ADD_GROUP_A00(WinogradKernel3x3Block4x4SetOutput);
 
-    TEST_ADD_GROUP_00S(WinogradBlock2x2Kernel3x3);
-    TEST_ADD_GROUP_00S(WinogradBlock3x3Kernel3x3);
-    TEST_ADD_GROUP_00S(WinogradBlock4x4Kernel3x3);
+    TEST_ADD_GROUP_00S(WinogradKernel3x3Block2x2);
+    TEST_ADD_GROUP_00S(WinogradKernel3x3Block3x3);
+    TEST_ADD_GROUP_00S(WinogradKernel3x3Block4x4);
 
     TEST_ADD_GROUP_AD0(Yuv444pToBgr);
     TEST_ADD_GROUP_AD0(Yuv422pToBgr);

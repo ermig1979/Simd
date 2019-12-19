@@ -243,7 +243,7 @@ namespace Simd
 
         protected:
             typedef void(*SetFilter)(const float * src, size_t size, float * dst, SimdBool trans);
-            typedef void(*SetInput)(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+            typedef void(*SetInput)(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
             typedef void(*SetOutput)(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
             void SetBlock(size_t block);

@@ -642,19 +642,19 @@ namespace Simd
             switch (_block)
             {
             case 2:
-                _setFilter = Base::WinogradBlock2x2Kernel3x3SetFilter;
-                _setInput = Base::WinogradBlock2x2Kernel3x3SetInput;
-                _setOutput = Base::WinogradBlock2x2Kernel3x3SetOutput;
+                _setFilter = Base::WinogradKernel3x3Block2x2SetFilter;
+                _setInput = Base::WinogradKernel3x3Block2x2SetInput;
+                _setOutput = Base::WinogradKernel3x3Block2x2SetOutput;
                 break;
             case 3:
-                _setFilter = Base::WinogradBlock3x3Kernel3x3SetFilter;
-                _setInput = Base::WinogradBlock3x3Kernel3x3SetInput;
-                _setOutput = Base::WinogradBlock3x3Kernel3x3SetOutput;
+                _setFilter = Base::WinogradKernel3x3Block3x3SetFilter;
+                _setInput = Base::WinogradKernel3x3Block3x3SetInput;
+                _setOutput = Base::WinogradKernel3x3Block3x3SetOutput;
                 break;
             case 4:
-                _setFilter = Base::WinogradBlock4x4Kernel3x3SetFilter;
-                _setInput = Base::WinogradBlock4x4Kernel3x3SetInput;
-                _setOutput = Base::WinogradBlock4x4Kernel3x3SetOutput;
+                _setFilter = Base::WinogradKernel3x3Block4x4SetFilter;
+                _setInput = Base::WinogradKernel3x3Block4x4SetInput;
+                _setOutput = Base::WinogradKernel3x3Block4x4SetOutput;
                 break;
             default:
                 assert(0);
@@ -706,7 +706,7 @@ namespace Simd
             {
                 for (size_t b = 0; b < _batch; ++b)
                 {
-                    _setInput(src, p.srcC, p.srcH, p.srcW, bufS, _strideS, _pad, p.trans);
+                    _setInput(src, p.srcC, p.srcH, p.srcW, _pad, _pad, _pad, _pad, bufS, _strideS, p.trans);
                     for (size_t i = 0; i < _count; ++i)
                         _gemm.Run(GemmArgs(_M, _N, _K, &_1, _winogradWeight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N));
                     _setOutput(bufD, _strideD, dst, p.dstC, p.dstH, p.dstW, p.trans);
@@ -755,7 +755,7 @@ namespace Simd
             for (size_t b = 0; b < _batch; b += merge)
             {
                 for (size_t m = 0; m < merge; ++m)
-                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, bufS + m * _strideS, _strideS * merge, _pad, p.trans);
+                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, _pad, _pad, _pad, _pad, bufS + m * _strideS, _strideS * merge, p.trans);
                 for (size_t i = 0; i < _count; ++i)
                 {
                     if (_nhwcWeight.data)

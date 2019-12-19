@@ -6613,7 +6613,7 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock2x2Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
         \short This function is used for filter conversion in Winograd F(2x2,3x3) convolution algorithm.
 
@@ -6624,11 +6624,11 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float array with filter weights.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock2x2Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock2x2Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block2x2SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
         \short This function is used for input image conversion in Winograd F(2x2,3x3) convolution algorithm.
 
@@ -6638,16 +6638,20 @@ extern "C"
         \param [in] srcChannels - a number of input channels.
         \param [in] srcHeight - a height of input image.
         \param [in] srcWidth - a width of input image.
+        \param [in] padY - an additional zero padding of input image at the beginning of Y-axis.
+        \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
+        \param [in] padH - an additional zero padding of input image at the end of Y-axis.
+        \param [in] padW - an additional zero padding of input image at the end of X-axis.
         \param [out] dst - a pointer to the output array with converted image.
         \param [in] dstStride - a stride of output image.
-        \param [in] pad - a flag to signalize padding.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock2x2Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block2x2SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
+        size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock2x2Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block2x2SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
         \short This function is used for output image conversion in Winograd F(2x2,3x3) convolution algorithm.
 
@@ -6661,11 +6665,11 @@ extern "C"
         \param [in] dstWidth - a width of output image.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock2x2Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block2x2SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock3x3Kernel3x3SetFilter(const float * src, size_t size, float * dst);
+        \fn void SimdWinogradKernel3x3Block3x3SetFilter(const float * src, size_t size, float * dst);
 
         \short This function is used for filter conversion in Winograd F(3x3,3x3) convolution algorithm.
 
@@ -6676,11 +6680,11 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float array with filter weights.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock3x3Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock3x3Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
         \short This function is used for input image conversion in Winograd F(3x3,3x3) convolution algorithm.
 
@@ -6690,16 +6694,20 @@ extern "C"
         \param [in] srcChannels - a number of input channels.
         \param [in] srcHeight - a height of input image.
         \param [in] srcWidth - a width of input image.
+        \param [in] padY - an additional zero padding of input image at the beginning of Y-axis.
+        \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
+        \param [in] padH - an additional zero padding of input image at the end of Y-axis.
+        \param [in] padW - an additional zero padding of input image at the end of X-axis.
         \param [out] dst - a pointer to the output array with converted image.
         \param [in] dstStride - a stride of output image.
-        \param [in] pad - a flag to signalize padding.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock3x3Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block3x3SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
+        size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock3x3Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
         \short This function is used for output image conversion in Winograd F(3x3,3x3) convolution algorithm.
 
@@ -6713,11 +6721,11 @@ extern "C"
         \param [in] dstWidth - a width of output image.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock3x3Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock4x4Kernel3x3SetFilter(const float * src, size_t size, float * dst);
+        \fn void SimdWinogradKernel3x3Block4x4SetFilter(const float * src, size_t size, float * dst);
 
         \short This function is used for filter conversion in Winograd F(4x4,3x3) convolution algorithm.
 
@@ -6728,11 +6736,11 @@ extern "C"
         \param [out] dst - a pointer to the output 32-bit float array with filter weights.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock4x4Kernel3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block4x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock4x4Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block4x4SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float * dst, size_t dstStride, SimdBool trans);
 
         \short This function is used for input image conversion in Winograd F(4x4,3x3) convolution algorithm.
 
@@ -6742,16 +6750,20 @@ extern "C"
         \param [in] srcChannels - a number of input channels.
         \param [in] srcHeight - a height of input image.
         \param [in] srcWidth - a width of input image.
+        \param [in] padY - an additional zero padding of input image at the beginning of Y-axis.
+        \param [in] padX - an additional zero padding of input image at the beginning of X-axis.
+        \param [in] padH - an additional zero padding of input image at the end of Y-axis.
+        \param [in] padW - an additional zero padding of input image at the end of X-axis.
         \param [out] dst - a pointer to the output array with converted image.
         \param [in] dstStride - a stride of output image.
-        \param [in] pad - a flag to signalize padding.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock4x4Kernel3x3SetInput(const float * src, size_t srcChannels, size_t srcHeight, size_t srcWidth, float * dst, size_t dstStride, SimdBool pad, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
+        size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
 
     /*! @ingroup synet
 
-        \fn void SimdWinogradBlock4x4Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+        \fn void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
         \short This function is used for output image conversion in Winograd F(4x4,3x3) convolution algorithm.
 
@@ -6765,7 +6777,7 @@ extern "C"
         \param [in] dstWidth - a width of output image.
         \param [in] trans - a flag of transposed data.
     */
-    SIMD_API void SimdWinogradBlock4x4Kernel3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
+    SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
     /*! @ingroup yuv_conversion
 
