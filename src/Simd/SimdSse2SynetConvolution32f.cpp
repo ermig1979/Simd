@@ -323,26 +323,31 @@ namespace Simd
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
             : Base::SynetConvolution32fWinograd(p)
         {
-            switch (_block)
+            if (p.kernelY == 3 && p.kernelX == 3)
             {
-            case 2:
-                _setFilter = Sse::WinogradKernel3x3Block2x2SetFilter;
-                _setInput = Sse::WinogradKernel3x3Block2x2SetInput;
-                _setOutput = Sse::WinogradKernel3x3Block2x2SetOutput;
-                break;
-            case 3:
-                _setFilter = Sse::WinogradKernel3x3Block3x3SetFilter;
-                _setInput = Sse::WinogradKernel3x3Block3x3SetInput;
-                _setOutput = Sse::WinogradKernel3x3Block3x3SetOutput;
-                break;
-            case 4:
-                _setFilter = Sse::WinogradKernel3x3Block4x4SetFilter;
-                _setInput = Sse::WinogradKernel3x3Block4x4SetInput;
-                _setOutput = Sse::WinogradKernel3x3Block4x4SetOutput;
-                break;
-            default:
-                assert(0);
+                if (_blockY == 4 && _blockX == 4)
+                {
+                    _setFilter = Sse::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Sse::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Sse::WinogradKernel3x3Block4x4SetOutput;
+                }
+                else if (_blockY == 3 && _blockX == 3)
+                {
+                    _setFilter = Sse::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Sse::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Sse::WinogradKernel3x3Block3x3SetOutput;
+                }
+                else if (_blockY == 2 && _blockX == 2)
+                {
+                    _setFilter = Sse::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Sse::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Sse::WinogradKernel3x3Block2x2SetOutput;
+                }
+                else
+                    assert(0);
             }
+            else
+                assert(0);
             _gemm.Init(InitGemmFuncs(Sse::Gemm32fNN, "Sse", p.gemm, "Ext"));
             if (_param.trans)
             {

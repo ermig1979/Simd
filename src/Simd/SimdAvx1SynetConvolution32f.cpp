@@ -544,26 +544,31 @@ namespace Simd
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
             : Sse2::SynetConvolution32fWinograd(p)
         {
-            switch (_block)
+            if (p.kernelY == 3 && p.kernelX == 3)
             {
-            case 2:
-                _setFilter = Avx::WinogradKernel3x3Block2x2SetFilter;
-                _setInput = Avx::WinogradKernel3x3Block2x2SetInput;
-                _setOutput = Avx::WinogradKernel3x3Block2x2SetOutput;
-                break;
-            case 3:
-                _setFilter = Avx::WinogradKernel3x3Block3x3SetFilter;
-                _setInput = Avx::WinogradKernel3x3Block3x3SetInput;
-                _setOutput = Avx::WinogradKernel3x3Block3x3SetOutput;
-                break;
-            case 4:
-                _setFilter = Avx::WinogradKernel3x3Block4x4SetFilter;
-                _setInput = Avx::WinogradKernel3x3Block4x4SetInput;
-                _setOutput = Avx::WinogradKernel3x3Block4x4SetOutput;
-                break;
-            default:
-                assert(0);
+                if (_blockY == 4 && _blockX == 4)
+                {
+                    _setFilter = Avx::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Avx::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Avx::WinogradKernel3x3Block4x4SetOutput;
+                }
+                else if (_blockY == 3 && _blockX == 3)
+                {
+                    _setFilter = Avx::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Avx::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Avx::WinogradKernel3x3Block3x3SetOutput;
+                }
+                else if (_blockY == 2 && _blockX == 2)
+                {
+                    _setFilter = Avx::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Avx::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Avx::WinogradKernel3x3Block2x2SetOutput;
+                }
+                else
+                    assert(0);
             }
+            else
+                assert(0);
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans)
             {
@@ -843,6 +848,8 @@ namespace Simd
             if (p.group == 1)
             {
                 if (p.kernelY > p.srcH || p.kernelX > p.srcW)
+                    return false;
+                if (p.trans && p.IsKernel(1) && p.dstC < Sse::F)
                     return false;
                 return p.srcC <= 16 || (p.IsKernel(1) && p.srcC*p.dstC <= 8 * 1024 && p.dstC >= F && p.dstC > p.srcC);
             }

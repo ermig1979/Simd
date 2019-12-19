@@ -233,7 +233,7 @@ namespace Simd
         public:
             SynetConvolution32fWinograd(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::Winograd(" + ToStr(_block) + "x" + "3" + ")" +  (_merge > 1 ? "-" + ToStr(_merge) : ""); }
+            virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
@@ -246,7 +246,7 @@ namespace Simd
             typedef void(*SetInput)(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth, size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans);
             typedef void(*SetOutput)(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-            void SetBlock(size_t block);
+            void SetBlock(size_t blockY, size_t blockX);
             void ForwardMerged(const float * src, float * bufS, float * bufD, float * dst, size_t merge);
 
 #ifdef SIMD_PERFORMANCE_STATISTIC
@@ -257,8 +257,8 @@ namespace Simd
             }
 #endif
 
-            size_t _count, _block, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge;
-            SimdBool _pad;
+            size_t _count, _blockY, _blockX, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge;
+
             Array32f _winogradWeight;
             SetFilter _setFilter;
             SetInput _setInput;

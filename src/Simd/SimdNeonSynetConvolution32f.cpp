@@ -351,32 +351,32 @@ namespace Simd
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
             : Base::SynetConvolution32fWinograd(p)
         {
-            if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH*p.srcW*p.batch >= 144)
-                SetBlock(4);
-            else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH*p.srcW*p.batch >= 81 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
-                SetBlock(3);
-            else
-                SetBlock(2);
-            switch (_block)
+            if (p.kernelY == 3 && p.kernelX == 3)
             {
-            case 2:
-                _setFilter = Neon::WinogradKernel3x3Block2x2SetFilter;
-                _setInput = Neon::WinogradKernel3x3Block2x2SetInput;
-                _setOutput = Neon::WinogradKernel3x3Block2x2SetOutput;
-                break;
-            case 3:
-                _setFilter = Neon::WinogradKernel3x3Block3x3SetFilter;
-                _setInput = Neon::WinogradKernel3x3Block3x3SetInput;
-                _setOutput = Neon::WinogradKernel3x3Block3x3SetOutput;
-                break;
-            case 4:
-                _setFilter = Neon::WinogradKernel3x3Block4x4SetFilter;
-                _setInput = Neon::WinogradKernel3x3Block4x4SetInput;
-                _setOutput = Neon::WinogradKernel3x3Block4x4SetOutput;
-                break;
-            default:
-                assert(0);
+                if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
+                {
+                    SetBlock(4, 4);
+                    _setFilter = Neon::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Neon::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Neon::WinogradKernel3x3Block4x4SetOutput;
+                }
+                else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH * p.srcW * p.batch >= 81 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
+                {
+                    SetBlock(3, 3);
+                    _setFilter = Neon::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Neon::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Neon::WinogradKernel3x3Block3x3SetOutput;
+                }
+                else
+                {
+                    SetBlock(2, 2);
+                    _setFilter = Neon::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Neon::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Neon::WinogradKernel3x3Block2x2SetOutput;
+                }
             }
+            else
+                assert(0);
             _gemm.Init(InitGemmFuncs(Neon::Gemm32fNN, "Neon", p.gemm, "Ext"));
             if (_param.trans)
             {
@@ -400,8 +400,18 @@ namespace Simd
 
         bool SynetConvolution32fWinograd::Preferable(const ConvParam32f & p)
         {
-            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC >= 10 &&
-                (p.trans ? (p.srcH >= 4 && p.srcW >= 4 && p.srcH*p.srcW*p.batch >= 36) : (p.srcH >= 6 && p.srcW >= 6));
+            if (!p.IsDilation(1) || !p.IsStride(1) || p.group != 1 || p.srcC < 10)
+                return false;
+            if (p.IsKernel(3))
+            {
+                if (!(p.IsPad(0) || p.IsPad(1)))
+                    return false;
+                if (p.trans)
+                    return p.srcH >= 4 && p.srcW >= 4 && p.srcH * p.srcW * p.batch >= 36;
+                else
+                    return p.srcH >= 6 && p.srcW >= 6;
+            }
+            return false;
         }
 
         //---------------------------------------------------------------------

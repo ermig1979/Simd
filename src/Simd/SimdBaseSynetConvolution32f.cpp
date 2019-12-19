@@ -630,37 +630,44 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
+        SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f& p)
             : SynetConvolution32f(p)
         {
-            if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH*p.srcW*p.batch >= 144)
-                SetBlock(4);
-            else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH*p.srcW*p.batch >= 81 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
-                SetBlock(3);
-            else
-                SetBlock(2);
-            switch (_block)
+            if (p.kernelY == 3 && p.kernelX == 3)
             {
-            case 2:
-                _setFilter = Base::WinogradKernel3x3Block2x2SetFilter;
-                _setInput = Base::WinogradKernel3x3Block2x2SetInput;
-                _setOutput = Base::WinogradKernel3x3Block2x2SetOutput;
-                break;
-            case 3:
-                _setFilter = Base::WinogradKernel3x3Block3x3SetFilter;
-                _setInput = Base::WinogradKernel3x3Block3x3SetInput;
-                _setOutput = Base::WinogradKernel3x3Block3x3SetOutput;
-                break;
-            case 4:
-                _setFilter = Base::WinogradKernel3x3Block4x4SetFilter;
-                _setInput = Base::WinogradKernel3x3Block4x4SetInput;
-                _setOutput = Base::WinogradKernel3x3Block4x4SetOutput;
-                break;
-            default:
-                assert(0);
+                if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
+                {
+                    SetBlock(4, 4);
+                    _setFilter = Base::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Base::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Base::WinogradKernel3x3Block4x4SetOutput;
+                }
+                else if (p.trans && p.srcH >= 6 && p.srcW >= 6 && p.srcH * p.srcW * p.batch >= 81 && p.dstH % 3 == 0 && p.dstW % 3 == 0)
+                {
+                    SetBlock(3, 3);
+                    _setFilter = Base::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Base::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Base::WinogradKernel3x3Block3x3SetOutput;
+                }
+                else
+                {
+                    SetBlock(2, 2);
+                    _setFilter = Base::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Base::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Base::WinogradKernel3x3Block2x2SetOutput;
+                }
             }
+            else
+                assert(0);
             _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
+        }
+
+        String SynetConvolution32fWinograd::Desc() const 
+        { 
+            const ConvParam32f& p = this->Param();
+            return Ext() + "::Winograd F(" + ToStr(_blockY) + "x" + ToStr(_blockX) + "," + 
+                ToStr(p.kernelY) + "x" + ToStr(p.kernelX) + ")" + (_merge > 1 ? "-" + ToStr(_merge) : ""); 
         }
         
         size_t SynetConvolution32fWinograd::ExternalBufferSize() const
@@ -706,7 +713,7 @@ namespace Simd
             {
                 for (size_t b = 0; b < _batch; ++b)
                 {
-                    _setInput(src, p.srcC, p.srcH, p.srcW, _pad, _pad, _pad, _pad, bufS, _strideS, p.trans);
+                    _setInput(src, p.srcC, p.srcH, p.srcW, p.padY, p.padX, p.padH, p.padW, bufS, _strideS, p.trans);
                     for (size_t i = 0; i < _count; ++i)
                         _gemm.Run(GemmArgs(_M, _N, _K, &_1, _winogradWeight.data + i * _strideW, _K, bufS + i * _strideS, _N, &_0, bufD + i * _strideD, _N));
                     _setOutput(bufD, _strideD, dst, p.dstC, p.dstH, p.dstW, p.trans);
@@ -719,24 +726,34 @@ namespace Simd
 
         bool SynetConvolution32fWinograd::Preferable(const ConvParam32f & p)
         {
-            return p.IsKernel(3) && p.IsDilation(1) && p.IsStride(1) && (p.IsPad(0) || p.IsPad(1)) && p.group == 1 && p.srcC > 16 && 
-                (p.trans ? (p.srcH >= 4 && p.srcW >= 4 && p.srcH*p.srcW*p.batch >= 36) : (p.srcH >= 6 && p.srcW >= 6));
+            if (!p.IsDilation(1) || !p.IsStride(1) || p.group != 1 || p.srcC <= 16)
+                return false;
+            if (p.IsKernel(3))
+            {
+                if (!(p.IsPad(0) || p.IsPad(1)))
+                    return false;
+                if (p.trans)
+                    return p.srcH >= 4 && p.srcW >= 4 && p.srcH * p.srcW * p.batch >= 36;
+                else
+                    return p.srcH >= 6 && p.srcW >= 6;
+            }
+            return false;
         }
 
-        void SynetConvolution32fWinograd::SetBlock(size_t block)
+        void SynetConvolution32fWinograd::SetBlock(size_t blockY, size_t blockX)
         {
             const ConvParam32f & p = _param;
-            _block = block;
-            _count = Simd::Square(_block + p.kernelX - 1);
-            _tileH = (p.dstH + _block - 1) / _block;
-            _tileW = (p.dstW + _block - 1) / _block;
+            _blockY = blockY;
+            _blockX = blockX;
+            _count = (_blockY + p.kernelX - 1) * (_blockX + p.kernelX - 1);
+            _tileH = (p.dstH + _blockY - 1) / _blockY;
+            _tileW = (p.dstW + _blockX - 1) / _blockX;
             _strideW = p.srcC * p.dstC;
             _strideS = p.srcC * _tileH * _tileW;
             _strideD = p.dstC * _tileH * _tileW;
             _M = p.trans ? _tileW * _tileH : p.dstC;
             _N = p.trans ? p.dstC : _tileW * _tileH;
             _K = p.srcC;
-            _pad = (SimdBool)p.padX;
             _batch = p.batch;
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
@@ -755,7 +772,7 @@ namespace Simd
             for (size_t b = 0; b < _batch; b += merge)
             {
                 for (size_t m = 0; m < merge; ++m)
-                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, _pad, _pad, _pad, _pad, bufS + m * _strideS, _strideS * merge, p.trans);
+                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, p.padY, p.padX, p.padH, p.padW, bufS + m * _strideS, _strideS * merge, p.trans);
                 for (size_t i = 0; i < _count; ++i)
                 {
                     if (_nhwcWeight.data)

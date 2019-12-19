@@ -451,10 +451,11 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 2048, 6, 6, 192, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #if 1        
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 5, 51, 32, Size(17, 7), _1, _1, _1, _1, 1, a, t), f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 5, 51, 32, Size(17, 7), _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 64, 128, 1, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 5, 51, 32, Size(17, 7), _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 64, 128, 1, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }
