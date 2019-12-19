@@ -220,12 +220,9 @@ namespace Simd
             static bool Preferable(const ConvParam32f & p);
 
         protected:
-            virtual void GemmAndBias(const float * src, float * dst);
-
             static void ImgToRow(const float * src, const ConvParam32f & p, float * dst);
 
-            bool _is1x1;
-            size_t _weightStep, _srcStep, _dstStep, _M, _N, _K, _batch, _sizeS, _sizeB, _sizeD;
+            size_t _M, _N, _K, _batch, _sizeS, _sizeB, _sizeD;
         };
 
         class SynetConvolution32fWinograd : public SynetConvolution32f
@@ -449,9 +446,6 @@ namespace Simd
             SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Sse3"; }
 
-            static bool Preferable(const ConvParam32f & p);
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
@@ -477,8 +471,6 @@ namespace Simd
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx"; }
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         class SynetConvolution32fWinograd : public Sse2::SynetConvolution32fWinograd
@@ -550,8 +542,6 @@ namespace Simd
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx2"; }
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         class SynetConvolution32fWinograd : public Avx::SynetConvolution32fWinograd
@@ -612,8 +602,6 @@ namespace Simd
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Avx512f"; }
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         class SynetConvolution32fWinograd : public Avx2::SynetConvolution32fWinograd
@@ -674,8 +662,6 @@ namespace Simd
             virtual String Ext() const { return "Neon"; }
 
             static bool Preferable(const ConvParam32f & p);
-        protected:
-            virtual void GemmAndBias(const float * src, float * dst);
         };
 
         class SynetConvolution32fWinograd : public Base::SynetConvolution32fWinograd

@@ -501,29 +501,43 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : SynetConvolution32f(p)
         {
-            _is1x1 = p.IsKernel(1) && p.IsDilation(1) && p.IsStride(1) && p.IsPad(0);
-            _M = p.dstC / p.group;
-            _N = p.dstH  * p.dstW;
-            _K = p.srcC * p.kernelY * p.kernelX / p.group;
-            _weightStep = p.dstC * _K / p.group;
+            assert(p.group == 1);
+            if (p.trans)
+                assert(p.dstC == 1 && p.Is1x1());
+            _M = p.dstC;
+            _N = p.dstH * p.dstW;
+            _K = p.srcC * p.kernelY * p.kernelX; 
             _batch = p.batch;
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeB = p.srcC*p.kernelY*p.kernelX*p.dstH*p.dstW;
             _sizeD = p.dstC*p.dstH*p.dstW;
+            _gemm.Init(InitGemmFuncs(Base::Gemm32fNT, "Base"));
+            _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
         size_t SynetConvolution32fGemmNT::ExternalBufferSize() const
         {
-            return _sizeB;
+            return _param.trans ? 1 : _sizeB;
         };
 
         void SynetConvolution32fGemmNT::Forward(const float * src, float * buf, float * dst)
         {
-            buf = Buffer(buf);
+            const ConvParam32f& p = _param;
+            if (p.trans == 0)
+                buf = Buffer(buf);
             for (size_t b = 0; b < _batch; ++b)
             {
-                ImgToRow(src, _param, buf);
-                GemmAndBias(buf, dst);
+                if (p.trans)
+                {
+                    _gemm.Run(GemmArgs(_M, _N, _K, &_1, _weight, _K, src, _K, &_0, dst, _N));
+                    _biasAndActivation(_bias, 1, p.dstH * p.dstW, p.activation, _params, SimdFalse, dst);
+                }
+                else
+                {
+                    ImgToRow(src, _param, buf);
+                    _gemm.Run(GemmArgs(_M, _N, _K, &_1, _weight, _K, buf, _K, &_0, dst, _N));
+                    _biasAndActivation(_bias, p.dstC, p.dstH * p.dstW, p.activation, _params, SimdFalse, dst);
+                }
                 src += _sizeS;
                 dst += _sizeD;
             }
@@ -531,15 +545,12 @@ namespace Simd
 
         bool SynetConvolution32fGemmNT::Preferable(const ConvParam32f & p)
         {
-            return p.trans == 0 && p.srcH < 6 && p.srcW < 6 && p.group == 1;
-        }
-
-        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam32f & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
-                Base::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
+            if (p.group != 1)
+                return false;
+            if (p.trans)
+                return p.Is1x1() && p.dstC == 1;
+            else
+                return p.srcH < 6 && p.srcW < 6;
         }
 
         void SynetConvolution32fGemmNT::ImgToRow(const float * src, const ConvParam32f & p, float * dst)

@@ -293,7 +293,9 @@ namespace Simd
                 }
             }
             else
-                assert(0);
+            {
+                Sse2::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+            }
         }
 
         //---------------------------------------------------------------------
@@ -529,14 +531,8 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : Sse3::SynetConvolution32fGemmNT(p)
         {
-        }
-
-        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam32f & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
-                Avx::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Avx::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
+            _gemm.Init(InitGemmFuncs(Avx::Gemm32fNT, "Avx"));
+            _biasAndActivation = Avx::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------

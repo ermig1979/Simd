@@ -331,19 +331,18 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : Base::SynetConvolution32fGemmNT(p)
         {
+            _gemm.Init(InitGemmFuncs(Neon::Gemm32fNT, "Neon"));
+            _biasAndActivation = Neon::ConvolutionBiasAndActivation;
         }
 
         bool SynetConvolution32fGemmNT::Preferable(const ConvParam32f & p)
         {
-            return p.srcH < 4 && p.srcW < 4 && p.group == 1 && p.trans == 0;
-        }
-
-        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam32f & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
-                Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
+            if (p.group != 1)
+                return false;
+            if (p.trans)
+                return p.Is1x1() && p.dstC == 1;
+            else
+                return p.srcH < 4 && p.srcW < 4;
         }
 
         //---------------------------------------------------------------------

@@ -2527,7 +2527,11 @@ namespace Simd
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
             SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M*N*K * 2);
-
+            if (K <= Avx2::F)
+            {
+                Avx2::Gemm32fNT(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+                return;
+            }
             typedef Simd::GemmNT<float> GemmNT;
 #if SIMD_ZMM_COUNT == 32
             GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, Avx::GemmScaleC,

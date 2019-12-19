@@ -33,19 +33,8 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : Base::SynetConvolution32fGemmNT(p)
         {
-        }
-
-        bool SynetConvolution32fGemmNT::Preferable(const ConvParam32f & p)
-        {
-            return p.srcH < 6 && p.srcW < 6 && p.group == 1 && p.trans == 0;
-        }
-
-        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam32f & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
-                Sse3::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Sse2::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, ::SimdFalse, dst);
+            _gemm.Init(InitGemmFuncs(Sse3::Gemm32fNT, "Sse3"));
+            _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------

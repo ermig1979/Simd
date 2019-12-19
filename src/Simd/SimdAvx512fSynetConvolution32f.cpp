@@ -509,14 +509,8 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : Avx2::SynetConvolution32fGemmNT(p)
         {
-        }
-
-        void SynetConvolution32fGemmNT::GemmAndBias(const float * src, float * dst)
-        {
-            const ConvParam32f & p = _param;
-            for (size_t g = 0; g < p.group; ++g)
-                Avx512f::Gemm32fNT(_M, _N, _K, &_1, _weight + _weightStep * g, _K, src + _srcStep * g, _K, &_0, dst + _dstStep * g, _N);
-            Avx512f::ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH*p.dstW, _param.activation, _params, ::SimdFalse, dst);
+            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNT, "Avx512f"));
+            _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
