@@ -42,6 +42,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetInput1(const float src[16], float* dst, size_t stride)
         {
             dst[0 * stride] = src[0] - src[1] - src[3] + src[4];
@@ -203,6 +205,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetOutput1(const float* src, size_t stride, float dst[4])
         {
             float s[9];
@@ -314,6 +318,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         void WinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
         {
             if (trans)
@@ -327,6 +333,8 @@ namespace Simd
                     Base::WinogradKernel3x3Block2x2SetFilter1n(src, dst, size);
             }
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInput1(const float src[16], float * dst, size_t stride)
         {
@@ -508,6 +516,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel3x3Block2x2SetOutput1(const float * src, size_t stride, float dst[4])
         {
             float s[16];
@@ -636,6 +646,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         void WinogradKernel3x3Block3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
         {
             if (trans)
@@ -649,6 +661,8 @@ namespace Simd
                     Base::WinogradKernel3x3Block3x3SetFilter1n(src, dst, size);
             }
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel3x3Block3x3SetInput1(const float src[25], float * dst, size_t stride)
         {
@@ -884,6 +898,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel3x3Block3x3SetOutput1(const float * src, size_t stride, float dst[9])
         {
             float s[25];
@@ -1043,6 +1059,8 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------
+
         void WinogradKernel3x3Block4x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
         {
             if (trans)
@@ -1056,6 +1074,8 @@ namespace Simd
                     Base::WinogradKernel3x3Block4x4SetFilter1n(src, dst, size);
             }
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel3x3Block4x4SetInput1(const float src[36], float * dst, size_t stride)
         {
@@ -1334,6 +1354,8 @@ namespace Simd
                 }
             }
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel3x3Block4x4SetOutput1(const float * src, size_t stride, float dst[16])
         {
