@@ -33,6 +33,47 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const __m256 src[4], float* dst, size_t stride)
+        {
+            _mm256_storeu_ps(dst + 0 * stride, src[0]);
+            _mm256_storeu_ps(dst + 1 * stride, _mm256_add_ps(src[0], src[1]));
+            _mm256_storeu_ps(dst + 2 * stride, src[1]);
+
+            _mm256_storeu_ps(dst + 3 * stride, _mm256_add_ps(src[0], src[2]));
+            _mm256_storeu_ps(dst + 4 * stride, _mm256_add_ps(_mm256_add_ps(src[0], src[1]), _mm256_add_ps(src[2], src[3])));
+            _mm256_storeu_ps(dst + 5 * stride, _mm256_add_ps(src[1], src[3]));
+
+            _mm256_storeu_ps(dst + 6 * stride, src[2]);
+            _mm256_storeu_ps(dst + 7 * stride, _mm256_add_ps(src[2], src[3]));
+            _mm256_storeu_ps(dst + 8 * stride, src[3]);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter8t(const float* src, float* dst, size_t stride)
+        {
+            __m256 _src[4];
+            _src[0] = _mm256_loadu_ps(src + 0 * stride);
+            _src[1] = _mm256_loadu_ps(src + 1 * stride);
+            _src[2] = _mm256_loadu_ps(src + 2 * stride);
+            _src[3] = _mm256_loadu_ps(src + 3 * stride);
+            WinogradKernel2x2Block2x2SetFilter(_src, dst, stride);
+        }
+
+        void WinogradKernel2x2Block2x2SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t size8 = AlignLo(size, 8), i = 0;
+            if (trans)
+            {
+                for (; i < size8; i += 8)
+                    WinogradKernel2x2Block2x2SetFilter8t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel2x2Block2x2SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                Sse::WinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
+            }
+        }
+
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter8t(const float * src, float * dst, size_t stride)
         {
             const __m256 r2 = _mm256_set1_ps(1.0f / 2.0f);

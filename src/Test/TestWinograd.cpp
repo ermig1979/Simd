@@ -98,25 +98,25 @@ namespace Test
 
         result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Base::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
 
-/*#ifdef SIMD_SSE_ENABLE
+#ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Sse::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Sse::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Avx::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Avx::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Avx512f::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
+            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Avx512f::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-           result = result && WinogradSetFilterAutoTest(_2x2, _3x3, FUNC_WF(Simd::Neon::WinogradKernel3x3Block2x2SetFilter), FUNC_WF(SimdWinogradKernel3x3Block2x2SetFilter));
-#endif  */
+            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Neon::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
+#endif
 
         return result;
     }

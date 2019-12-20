@@ -44,89 +44,114 @@ namespace Simd
             *(float32x4x2_t*)(dst + 2) = vzipq_f32(b0.val[1], b1.val[1]);
         }
 
-        SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter4n(const float * src, float * dst, size_t stride)
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const float32x4_t src[4], float* dst, size_t stride)
+        {
+            Store<false>(dst + 0 * stride, src[0]);
+            Store<false>(dst + 1 * stride, vaddq_f32(src[0], src[1]));
+            Store<false>(dst + 2 * stride, src[1]);
+
+            Store<false>(dst + 3 * stride, vaddq_f32(src[0], src[2]));
+            Store<false>(dst + 4 * stride, vaddq_f32(vaddq_f32(src[0], src[1]), vaddq_f32(src[2], src[3])));
+            Store<false>(dst + 5 * stride, vaddq_f32(src[1], src[3]));
+
+            Store<false>(dst + 6 * stride, src[2]);
+            Store<false>(dst + 7 * stride, vaddq_f32(src[2], src[3]));
+            Store<false>(dst + 8 * stride, src[3]);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter4n(const float* src, float* dst, size_t stride)
+        {
+            float32x4_t _src[4];
+            Load4(src + 0, 4, _src + 0);
+            WinogradKernel2x2Block2x2SetFilter(_src, dst, stride);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter4t(const float* src, float* dst, size_t stride)
+        {
+            float32x4_t _src[4];
+            _src[0] = Load<false>(src + 0 * stride);
+            _src[1] = Load<false>(src + 1 * stride);
+            _src[2] = Load<false>(src + 2 * stride);
+            _src[3] = Load<false>(src + 3 * stride);
+            WinogradKernel2x2Block2x2SetFilter(_src, dst, stride);
+        }
+
+        void WinogradKernel2x2Block2x2SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t size4 = AlignLo(size, 4), i = 0;
+            if (trans)
+            {
+                for (; i < size4; i += 4)
+                    WinogradKernel2x2Block2x2SetFilter4t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel2x2Block2x2SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                for (; i < size4; i += 4, src += 16, dst += 4)
+                    WinogradKernel2x2Block2x2SetFilter4n(src, dst, size);
+                for (; i < size; i += 1, src += 4, dst += 1)
+                    Base::WinogradKernel2x2Block2x2SetFilter1n(src, dst, size);
+            }
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter(const float32x4_t src[9], float* dst, size_t stride)
         {
             const float32x4_t r2 = vdupq_n_f32(1.0f / 2.0f);
             const float32x4_t r4 = vdupq_n_f32(1.0f / 4.0f);
 
-            float32x4_t s[9];
-            Load4(src + 0, 9, s + 0);
-            Load4(src + 4, 9, s + 4);
-            s[8] = SetF32(src[8], src[17], src[26], src[35]);
+            Store<false>(dst + 0 * stride, src[0]);
+            float32x4_t _0a2 = vaddq_f32(src[0], src[2]);
+            Store<false>(dst + 1 * stride, vmulq_f32(vaddq_f32(_0a2, src[1]), r2));
+            Store<false>(dst + 2 * stride, vmulq_f32(vsubq_f32(_0a2, src[1]), r2));
+            Store<false>(dst + 3 * stride, src[2]);
 
-            Store<false>(dst + 0 * stride, s[0]);
-            float32x4_t _0a2 = vaddq_f32(s[0], s[2]);
-            Store<false>(dst + 1 * stride, vmulq_f32(vaddq_f32(_0a2, s[1]), r2));
-            Store<false>(dst + 2 * stride, vmulq_f32(vsubq_f32(_0a2, s[1]), r2));
-            Store<false>(dst + 3 * stride, s[2]);
-
-            float32x4_t _0a6a3 = vaddq_f32(vaddq_f32(s[0], s[6]), s[3]);
+            float32x4_t _0a6a3 = vaddq_f32(vaddq_f32(src[0], src[6]), src[3]);
             Store<false>(dst + 4 * stride, vmulq_f32(_0a6a3, r2));
-            float32x4_t _2a8a5 = vaddq_f32(vaddq_f32(s[2], s[8]), s[5]);
-            float32x4_t _1a7a4 = vaddq_f32(vaddq_f32(s[1], s[7]), s[4]);
+            float32x4_t _2a8a5 = vaddq_f32(vaddq_f32(src[2], src[8]), src[5]);
+            float32x4_t _1a7a4 = vaddq_f32(vaddq_f32(src[1], src[7]), src[4]);
             Store<false>(dst + 5 * stride, vmulq_f32(vaddq_f32(vaddq_f32(_0a6a3, _2a8a5), _1a7a4), r4));
             Store<false>(dst + 6 * stride, vmulq_f32(vsubq_f32(vaddq_f32(_0a6a3, _2a8a5), _1a7a4), r4));
             Store<false>(dst + 7 * stride, vmulq_f32(_2a8a5, r2));
 
-            float32x4_t _0a6s3 = vsubq_f32(vaddq_f32(s[0], s[6]), s[3]);
+            float32x4_t _0a6s3 = vsubq_f32(vaddq_f32(src[0], src[6]), src[3]);
             Store<false>(dst + 8 * stride, vmulq_f32(_0a6s3, r2));
-            float32x4_t _2a8s5 = vsubq_f32(vaddq_f32(s[2], s[8]), s[5]);
-            float32x4_t _1a7s4 = vsubq_f32(vaddq_f32(s[1], s[7]), s[4]);
+            float32x4_t _2a8s5 = vsubq_f32(vaddq_f32(src[2], src[8]), src[5]);
+            float32x4_t _1a7s4 = vsubq_f32(vaddq_f32(src[1], src[7]), src[4]);
             Store<false>(dst + 9 * stride, vmulq_f32(vaddq_f32(vaddq_f32(_0a6s3, _2a8s5), _1a7s4), r4));
             Store<false>(dst + 10 * stride, vmulq_f32(vsubq_f32(vaddq_f32(_0a6s3, _2a8s5), _1a7s4), r4));
             Store<false>(dst + 11 * stride, vmulq_f32(_2a8s5, r2));
 
-            Store<false>(dst + 12 * stride, s[6]);
-            float32x4_t _6a8 = vaddq_f32(s[6], s[8]);
-            Store<false>(dst + 13 * stride, vmulq_f32(vaddq_f32(_6a8, s[7]), r2));
-            Store<false>(dst + 14 * stride, vmulq_f32(vsubq_f32(_6a8, s[7]), r2));
-            Store<false>(dst + 15 * stride, s[8]);
+            Store<false>(dst + 12 * stride, src[6]);
+            float32x4_t _6a8 = vaddq_f32(src[6], src[8]);
+            Store<false>(dst + 13 * stride, vmulq_f32(vaddq_f32(_6a8, src[7]), r2));
+            Store<false>(dst + 14 * stride, vmulq_f32(vsubq_f32(_6a8, src[7]), r2));
+            Store<false>(dst + 15 * stride, src[8]);
+        }
+
+        SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter4n(const float * src, float * dst, size_t stride)
+        {
+            float32x4_t _src[9];
+            Load4(src + 0, 9, _src + 0);
+            Load4(src + 4, 9, _src + 4);
+            _src[8] = SetF32(src[8], src[17], src[26], src[35]);
+            WinogradKernel3x3Block2x2SetFilter(_src, dst, stride);
         }
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter4t(const float * src, float * dst, size_t stride)
         {
-            const float32x4_t r2 = vdupq_n_f32(1.0f / 2.0f);
-            const float32x4_t r4 = vdupq_n_f32(1.0f / 4.0f);
-
-            float32x4_t s[9];
-            s[0] = Load<false>(src + 0 * stride);
-            s[1] = Load<false>(src + 1 * stride);
-            s[2] = Load<false>(src + 2 * stride);
-            s[3] = Load<false>(src + 3 * stride);
-            s[4] = Load<false>(src + 4 * stride);
-            s[5] = Load<false>(src + 5 * stride);
-            s[6] = Load<false>(src + 6 * stride);
-            s[7] = Load<false>(src + 7 * stride);
-            s[8] = Load<false>(src + 8 * stride);
-
-            Store<false>(dst + 0 * stride, s[0]);
-            float32x4_t _0a2 = vaddq_f32(s[0], s[2]);
-            Store<false>(dst + 1 * stride, vmulq_f32(vaddq_f32(_0a2, s[1]), r2));
-            Store<false>(dst + 2 * stride, vmulq_f32(vsubq_f32(_0a2, s[1]), r2));
-            Store<false>(dst + 3 * stride, s[2]);
-
-            float32x4_t _0a6a3 = vaddq_f32(vaddq_f32(s[0], s[6]), s[3]);
-            Store<false>(dst + 4 * stride, vmulq_f32(_0a6a3, r2));
-            float32x4_t _2a8a5 = vaddq_f32(vaddq_f32(s[2], s[8]), s[5]);
-            float32x4_t _1a7a4 = vaddq_f32(vaddq_f32(s[1], s[7]), s[4]);
-            Store<false>(dst + 5 * stride, vmulq_f32(vaddq_f32(vaddq_f32(_0a6a3, _2a8a5), _1a7a4), r4));
-            Store<false>(dst + 6 * stride, vmulq_f32(vsubq_f32(vaddq_f32(_0a6a3, _2a8a5), _1a7a4), r4));
-            Store<false>(dst + 7 * stride, vmulq_f32(_2a8a5, r2));
-
-            float32x4_t _0a6s3 = vsubq_f32(vaddq_f32(s[0], s[6]), s[3]);
-            Store<false>(dst + 8 * stride, vmulq_f32(_0a6s3, r2));
-            float32x4_t _2a8s5 = vsubq_f32(vaddq_f32(s[2], s[8]), s[5]);
-            float32x4_t _1a7s4 = vsubq_f32(vaddq_f32(s[1], s[7]), s[4]);
-            Store<false>(dst + 9 * stride, vmulq_f32(vaddq_f32(vaddq_f32(_0a6s3, _2a8s5), _1a7s4), r4));
-            Store<false>(dst + 10 * stride, vmulq_f32(vsubq_f32(vaddq_f32(_0a6s3, _2a8s5), _1a7s4), r4));
-            Store<false>(dst + 11 * stride, vmulq_f32(_2a8s5, r2));
-
-            Store<false>(dst + 12 * stride, s[6]);
-            float32x4_t _6a8 = vaddq_f32(s[6], s[8]);
-            Store<false>(dst + 13 * stride, vmulq_f32(vaddq_f32(_6a8, s[7]), r2));
-            Store<false>(dst + 14 * stride, vmulq_f32(vsubq_f32(_6a8, s[7]), r2));
-            Store<false>(dst + 15 * stride, s[8]);
-}
+            float32x4_t _src[9];
+            _src[0] = Load<false>(src + 0 * stride);
+            _src[1] = Load<false>(src + 1 * stride);
+            _src[2] = Load<false>(src + 2 * stride);
+            _src[3] = Load<false>(src + 3 * stride);
+            _src[4] = Load<false>(src + 4 * stride);
+            _src[5] = Load<false>(src + 5 * stride);
+            _src[6] = Load<false>(src + 6 * stride);
+            _src[7] = Load<false>(src + 7 * stride);
+            _src[8] = Load<false>(src + 8 * stride);
+            WinogradKernel3x3Block2x2SetFilter(_src, dst, stride);
+        }
 
         void WinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
         {
