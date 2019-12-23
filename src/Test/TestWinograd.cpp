@@ -121,6 +121,37 @@ namespace Test
         return result;
     }
 
+    bool WinogradKernel2x2Block4x4SetFilterAutoTest()
+    {
+        bool result = true;
+
+        Size _2x2(2, 2), _4x4(4, 4);
+
+        result = result && WinogradSetFilterAutoTest(_4x4, _2x2, FUNC_WF(Simd::Base::WinogradKernel2x2Block4x4SetFilter), FUNC_WF(SimdWinogradKernel2x2Block4x4SetFilter));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Sse::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Avx::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Avx512f::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
+//#endif
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradSetFilterAutoTest(_2x2, _2x2, FUNC_WF(Simd::Neon::WinogradKernel2x2Block2x2SetFilter), FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter));
+//#endif
+
+        return result;
+    }
+
     bool WinogradKernel3x3Block2x2SetFilterAutoTest()
     {
         bool result = true;
@@ -326,6 +357,35 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && WinogradKernel2x2SetInputAutoTest(2, FUNC_WI(Simd::Neon::WinogradKernel2x2Block2x2SetInput), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput));
 #endif
+
+        return result;
+    }
+
+    bool WinogradKernel2x2Block4x4SetInputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradKernel2x2SetInputAutoTest(4, FUNC_WI(Simd::Base::WinogradKernel2x2Block4x4SetInput), FUNC_WI(SimdWinogradKernel2x2Block4x4SetInput));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradKernel2x2SetInputAutoTest(2, FUNC_WI(Simd::Sse::WinogradKernel2x2Block2x2SetInput), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradKernel2x2SetInputAutoTest(2, FUNC_WI(Simd::Avx::WinogradKernel2x2Block2x2SetInput), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradKernel2x2SetInputAutoTest(2, FUNC_WI(Simd::Avx512f::WinogradKernel2x2Block2x2SetInput), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradKernel2x2SetInputAutoTest(2, FUNC_WI(Simd::Neon::WinogradKernel2x2Block2x2SetInput), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput));
+//#endif
 
         return result;
     }
@@ -546,6 +606,35 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Neon::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
 #endif
+
+        return result;
+    }
+
+    bool WinogradKernel2x2Block4x4SetOutputAutoTest()
+    {
+        bool result = true;
+
+        result = result && WinogradKernel2x2SetOutputAutoTest(4, FUNC_WO(Simd::Base::WinogradKernel2x2Block4x4SetOutput), FUNC_WO(SimdWinogradKernel2x2Block4x4SetOutput));
+
+//#ifdef SIMD_SSE_ENABLE
+//        if (Simd::Sse::Enable)
+//            result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Sse::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Avx::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Avx512f::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && WinogradKernel2x2SetOutputAutoTest(2, FUNC_WO(Simd::Neon::WinogradKernel2x2Block2x2SetOutput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+//#endif
 
         return result;
     }
@@ -849,6 +938,11 @@ namespace Test
     bool WinogradKernel2x2Block2x2SpecialTest()
     {
         return WinogradKernel2x2SpecialTest(2, FUNC_WF(SimdWinogradKernel2x2Block2x2SetFilter), FUNC_WI(SimdWinogradKernel2x2Block2x2SetInput), FUNC_WO(SimdWinogradKernel2x2Block2x2SetOutput));
+    }
+
+    bool WinogradKernel2x2Block4x4SpecialTest()
+    {
+        return WinogradKernel2x2SpecialTest(4, FUNC_WF(SimdWinogradKernel2x2Block4x4SetFilter), FUNC_WI(SimdWinogradKernel2x2Block4x4SetInput), FUNC_WO(SimdWinogradKernel2x2Block4x4SetOutput));
     }
 
     bool WinogradKernel3x3SpecialTest(size_t block, size_t pad, SimdBool trans, const FuncWF & ff, const FuncWI & fi, const FuncWO & fo)

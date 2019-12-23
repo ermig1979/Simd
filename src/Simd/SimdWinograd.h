@@ -61,6 +61,112 @@ namespace Simd
             dst[8 * stride] = src3;
         }
 
+        //-----------------------------------------------------------------------
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetFilter1n(const float* src, float* dst, size_t stride)
+        {
+            const float r2 = 1.0f / 2.0f;
+            const float r3 = 1.0f / 3.0f;
+            const float r6 = 1.0f / 6.0f;
+
+            float t[10];
+            t[0] = r2 * src[0];
+            t[1] = r2 * src[1];
+            t[2] = r2 * (- src[0] - src[2]);
+            t[3] = r2 * (- src[1] - src[3]);
+            t[4] = r6 * (src[2] - src[0]);
+            t[5] = r6 * (src[3] - src[1]);
+            t[6] = r6 * src[0] + r3 * src[2];
+            t[7] = r6 * src[1] + r3 * src[3];
+            t[8] = src[2];
+            t[9] = src[3];
+
+            dst[0 * stride] = r2 * t[0];
+            dst[1 * stride] = r2 * (-t[0] - t[1]);
+            dst[2 * stride] = r6 * (t[1] - t[0]);
+            dst[3 * stride] = r6 * t[0] + r3* t[1];
+            dst[4 * stride] = t[1];
+
+            dst[5 * stride] = r2 * t[2];
+            dst[6 * stride] = r2 * (-t[2] - t[3]);
+            dst[7 * stride] = r6 * (t[3] - t[2]);
+            dst[8 * stride] = r6 * t[2] + r3 * t[3];
+            dst[9 * stride] = t[3];
+
+            dst[10 * stride] = r2 * t[4];
+            dst[11 * stride] = r2 * (-t[4] - t[5]);
+            dst[12 * stride] = r6 * (t[5] - t[4]);
+            dst[13 * stride] = r6 * t[4] + r3 * t[5];
+            dst[14 * stride] = t[5];
+
+            dst[15 * stride] = r2 * t[6];
+            dst[16 * stride] = r2 * (-t[6] - t[7]);
+            dst[17 * stride] = r6 * (t[7] - t[6]);
+            dst[18 * stride] = r6 * t[6] + r3 * t[7];
+            dst[19 * stride] = t[7];
+
+            dst[20 * stride] = r2 * t[8];
+            dst[21 * stride] = r2 * (-t[8] - t[9]);
+            dst[22 * stride] = r6 * (t[9] - t[8]);
+            dst[23 * stride] = r6 * t[8] + r3 * t[9];
+            dst[24 * stride] = t[9];
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetFilter1t(const float* src, float* dst, size_t stride)
+        {
+            const float r2 = 1.0f / 2.0f;
+            const float r3 = 1.0f / 3.0f;
+            const float r6 = 1.0f / 6.0f;
+            float src0 = src[0 * stride];
+            float src1 = src[1 * stride];
+            float src2 = src[2 * stride];
+            float src3 = src[3 * stride];
+
+            float t[10];
+            t[0] = r2 * src0;
+            t[1] = r2 * src1;
+            t[2] = r2 * (-src0 - src2);
+            t[3] = r2 * (-src1 - src3);
+            t[4] = r6 * (src2 - src0);
+            t[5] = r6 * (src3 - src1);
+            t[6] = r6 * src0 + r3 * src2;
+            t[7] = r6 * src1 + r3 * src3;
+            t[8] = src2;
+            t[9] = src3;
+
+            dst[0 * stride] = r2 * t[0];
+            dst[1 * stride] = r2 * (-t[0] - t[1]);
+            dst[2 * stride] = r6 * (t[1] - t[0]);
+            dst[3 * stride] = r6 * t[0] + r3 * t[1];
+            dst[4 * stride] = t[1];
+
+            dst[5 * stride] = r2 * t[2];
+            dst[6 * stride] = r2 * (-t[2] - t[3]);
+            dst[7 * stride] = r6 * (t[3] - t[2]);
+            dst[8 * stride] = r6 * t[2] + r3 * t[3];
+            dst[9 * stride] = t[3];
+
+            dst[10 * stride] = r2 * t[4];
+            dst[11 * stride] = r2 * (-t[4] - t[5]);
+            dst[12 * stride] = r6 * (t[5] - t[4]);
+            dst[13 * stride] = r6 * t[4] + r3 * t[5];
+            dst[14 * stride] = t[5];
+
+            dst[15 * stride] = r2 * t[6];
+            dst[16 * stride] = r2 * (-t[6] - t[7]);
+            dst[17 * stride] = r6 * (t[7] - t[6]);
+            dst[18 * stride] = r6 * t[6] + r3 * t[7];
+            dst[19 * stride] = t[7];
+
+            dst[20 * stride] = r2 * t[8];
+            dst[21 * stride] = r2 * (-t[8] - t[9]);
+            dst[22 * stride] = r6 * (t[9] - t[8]);
+            dst[23 * stride] = r6 * t[8] + r3 * t[9];
+            dst[24 * stride] = t[9];
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter1n(const float * src, float * dst, size_t stride)
         {
             const float r2 = 1.0f / 2.0f;
@@ -113,6 +219,8 @@ namespace Simd
             dst[14 * stride] = (src6 + src8 - src7)*r2;
             dst[15 * stride] = src8;
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel3x3Block3x3SetFilter1n(const float * src, float * dst, size_t stride)
         {
@@ -231,6 +339,8 @@ namespace Simd
             dst[stride * 23] = r6 * t[12] + r3 * t[13] + f2_3 * t[14];
             dst[stride * 24] = t[14];
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE void WinogradKernel3x3Block4x4SetFilter1n(const float * src, float * dst, size_t stride)
         {
