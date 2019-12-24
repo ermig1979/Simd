@@ -520,7 +520,7 @@ namespace Simd
             size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
         {
             assert(padY == padX && padW == padH && (padY + padH == 0 || padY + padH == 1));
-            if (trans ? (srcChannels < F) : true)
+            if (trans ? false : true)
             {
                 Base::WinogradKernel2x2Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
@@ -571,6 +571,172 @@ namespace Simd
                     WinogradKernel2x2Block4x4SetInput16t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, 5, dst, dstStride), dst += srcChannels;
                 if (col < dstW)
                     WinogradKernel2x2Block4x4SetInput16t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, tailW, dst, dstStride), dst += srcChannels;
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputGetRow(const __m512* s, __m512* d)
+        {
+            const __m512 _2 = _mm512_set1_ps(2.0f);
+            const __m512 _4 = _mm512_set1_ps(4.0f);
+            const __m512 _8 = _mm512_set1_ps(8.0f);
+            d[0] = _mm512_add_ps(_mm512_add_ps(s[0], s[1]), _mm512_add_ps(s[2], s[3]));
+            d[1] = _mm512_add_ps(_mm512_sub_ps(s[1], s[2]), _mm512_mul_ps(_2, s[3]));
+            d[2] = _mm512_add_ps(_mm512_add_ps(s[1], s[2]), _mm512_mul_ps(_4, s[3]));
+            d[3] = _mm512_add_ps(_mm512_sub_ps(s[1], s[2]), _mm512_add_ps(_mm512_mul_ps(_8, s[3]), s[4]));
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputLoad25(const float* src, size_t stride, __m512* dst, __mmask16 tail = -1)
+        {
+            __m512 s[25];
+            s[0] = _mm512_maskz_loadu_ps(tail, src + 0 * stride);
+            s[1] = _mm512_maskz_loadu_ps(tail, src + 1 * stride);
+            s[2] = _mm512_maskz_loadu_ps(tail, src + 2 * stride);
+            s[3] = _mm512_maskz_loadu_ps(tail, src + 3 * stride);
+            s[4] = _mm512_maskz_loadu_ps(tail, src + 4 * stride);
+            s[5] = _mm512_maskz_loadu_ps(tail, src + 5 * stride);
+            s[6] = _mm512_maskz_loadu_ps(tail, src + 6 * stride);
+            s[7] = _mm512_maskz_loadu_ps(tail, src + 7 * stride);
+            s[8] = _mm512_maskz_loadu_ps(tail, src + 8 * stride);
+            s[9] = _mm512_maskz_loadu_ps(tail, src + 9 * stride);
+            s[10] = _mm512_maskz_loadu_ps(tail, src + 10 * stride);
+            s[11] = _mm512_maskz_loadu_ps(tail, src + 11 * stride);
+            s[12] = _mm512_maskz_loadu_ps(tail, src + 12 * stride);
+            s[13] = _mm512_maskz_loadu_ps(tail, src + 13 * stride);
+            s[14] = _mm512_maskz_loadu_ps(tail, src + 14 * stride);
+            s[15] = _mm512_maskz_loadu_ps(tail, src + 15 * stride);
+            s[16] = _mm512_maskz_loadu_ps(tail, src + 16 * stride);
+            s[17] = _mm512_maskz_loadu_ps(tail, src + 17 * stride);
+            s[18] = _mm512_maskz_loadu_ps(tail, src + 18 * stride);
+            s[19] = _mm512_maskz_loadu_ps(tail, src + 19 * stride);
+            s[20] = _mm512_maskz_loadu_ps(tail, src + 20 * stride);
+            s[21] = _mm512_maskz_loadu_ps(tail, src + 21 * stride);
+            s[22] = _mm512_maskz_loadu_ps(tail, src + 22 * stride);
+            s[23] = _mm512_maskz_loadu_ps(tail, src + 23 * stride);
+            s[24] = _mm512_maskz_loadu_ps(tail, src + 24 * stride);
+
+            const __m512 _2 = _mm512_set1_ps(2.0f);
+            const __m512 _4 = _mm512_set1_ps(4.0f);
+            const __m512 _8 = _mm512_set1_ps(8.0f);
+            __m512 t[5];
+            t[0] = _mm512_add_ps(_mm512_add_ps(s[0], s[5]), _mm512_add_ps(s[10], s[15]));
+            t[1] = _mm512_add_ps(_mm512_add_ps(s[1], s[6]), _mm512_add_ps(s[11], s[16]));
+            t[2] = _mm512_add_ps(_mm512_add_ps(s[2], s[7]), _mm512_add_ps(s[12], s[17]));
+            t[3] = _mm512_add_ps(_mm512_add_ps(s[3], s[8]), _mm512_add_ps(s[13], s[18]));
+            t[4] = _mm512_add_ps(_mm512_add_ps(s[4], s[9]), _mm512_add_ps(s[14], s[19]));
+            WinogradKernel2x2Block4x4SetOutputGetRow(t, dst + 0);
+
+            t[0] = _mm512_add_ps(_mm512_sub_ps(s[5], s[10]), _mm512_mul_ps(_2, s[15]));
+            t[1] = _mm512_add_ps(_mm512_sub_ps(s[6], s[11]), _mm512_mul_ps(_2, s[16]));
+            t[2] = _mm512_add_ps(_mm512_sub_ps(s[7], s[12]), _mm512_mul_ps(_2, s[17]));
+            t[3] = _mm512_add_ps(_mm512_sub_ps(s[8], s[13]), _mm512_mul_ps(_2, s[18]));
+            t[4] = _mm512_add_ps(_mm512_sub_ps(s[9], s[14]), _mm512_mul_ps(_2, s[19]));
+            WinogradKernel2x2Block4x4SetOutputGetRow(t, dst + 4);
+
+            t[0] = _mm512_add_ps(_mm512_add_ps(s[5], s[10]), _mm512_mul_ps(_4, s[15]));
+            t[1] = _mm512_add_ps(_mm512_add_ps(s[6], s[11]), _mm512_mul_ps(_4, s[16]));
+            t[2] = _mm512_add_ps(_mm512_add_ps(s[7], s[12]), _mm512_mul_ps(_4, s[17]));
+            t[3] = _mm512_add_ps(_mm512_add_ps(s[8], s[13]), _mm512_mul_ps(_4, s[18]));
+            t[4] = _mm512_add_ps(_mm512_add_ps(s[9], s[14]), _mm512_mul_ps(_4, s[19]));
+            WinogradKernel2x2Block4x4SetOutputGetRow(t, dst + 8);
+
+            t[0] = _mm512_add_ps(_mm512_sub_ps(s[5], s[10]), _mm512_add_ps(_mm512_mul_ps(_8, s[15]), s[20]));
+            t[1] = _mm512_add_ps(_mm512_sub_ps(s[6], s[11]), _mm512_add_ps(_mm512_mul_ps(_8, s[16]), s[21]));
+            t[2] = _mm512_add_ps(_mm512_sub_ps(s[7], s[12]), _mm512_add_ps(_mm512_mul_ps(_8, s[17]), s[22]));
+            t[3] = _mm512_add_ps(_mm512_sub_ps(s[8], s[13]), _mm512_add_ps(_mm512_mul_ps(_8, s[18]), s[23]));
+            t[4] = _mm512_add_ps(_mm512_sub_ps(s[9], s[14]), _mm512_add_ps(_mm512_mul_ps(_8, s[19]), s[24]));
+            WinogradKernel2x2Block4x4SetOutputGetRow(t, dst + 12);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputStore16(const __m512 src[16], float* dst, size_t dstS, size_t dstC, __mmask16 tail = -1)
+        {
+            _mm512_mask_storeu_ps(dst + 0 * dstS + 0 * dstC, tail, src[0]);
+            _mm512_mask_storeu_ps(dst + 0 * dstS + 1 * dstC, tail, src[1]);
+            _mm512_mask_storeu_ps(dst + 0 * dstS + 2 * dstC, tail, src[2]);
+            _mm512_mask_storeu_ps(dst + 0 * dstS + 3 * dstC, tail, src[3]);
+            _mm512_mask_storeu_ps(dst + 1 * dstS + 0 * dstC, tail, src[4]);
+            _mm512_mask_storeu_ps(dst + 1 * dstS + 1 * dstC, tail, src[5]);
+            _mm512_mask_storeu_ps(dst + 1 * dstS + 2 * dstC, tail, src[6]);
+            _mm512_mask_storeu_ps(dst + 1 * dstS + 3 * dstC, tail, src[7]);
+            _mm512_mask_storeu_ps(dst + 2 * dstS + 0 * dstC, tail, src[8]);
+            _mm512_mask_storeu_ps(dst + 2 * dstS + 1 * dstC, tail, src[9]);
+            _mm512_mask_storeu_ps(dst + 2 * dstS + 2 * dstC, tail, src[10]);
+            _mm512_mask_storeu_ps(dst + 2 * dstS + 3 * dstC, tail, src[11]);
+            _mm512_mask_storeu_ps(dst + 3 * dstS + 0 * dstC, tail, src[12]);
+            _mm512_mask_storeu_ps(dst + 3 * dstS + 1 * dstC, tail, src[13]);
+            _mm512_mask_storeu_ps(dst + 3 * dstS + 2 * dstC, tail, src[14]);
+            _mm512_mask_storeu_ps(dst + 3 * dstS + 3 * dstC, tail, src[15]);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutput16t(const float* src, size_t srcStride, float* dst, size_t dstW, size_t dstC)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                __m512 tmp[16];
+                WinogradKernel2x2Block4x4SetOutputLoad25(src + d, srcStride, tmp);
+                WinogradKernel2x2Block4x4SetOutputStore16(tmp, dst + d, dstS, dstC);
+            }
+            if (dstCF < dstC)
+            {
+                __mmask16 tail = TailMask16(dstC - dstCF);
+                __m512 tmp[16];
+                WinogradKernel2x2Block4x4SetOutputLoad25(src + dstC - F, srcStride, tmp, tail);
+                WinogradKernel2x2Block4x4SetOutputStore16(tmp, dst + dstC - F, dstS, dstC, tail);
+            }
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutputStore16(const __m512 src[16], float* dst, size_t dstS, size_t dstC, size_t rowE, size_t colE, __mmask16 tail = -1)
+        {
+            for (size_t row = 0; row < rowE; ++row)
+                for (size_t col = 0; col < colE; ++col)
+                    _mm512_mask_storeu_ps(dst + row * dstS + col * dstC, tail, src[row * 4 + col]);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetOutput16t(const float* src, size_t srcStride, float* dst, size_t dstW, size_t dstC, size_t rowE, size_t colE)
+        {
+            size_t dstS = dstW * dstC, dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                __m512 tmp[16];
+                WinogradKernel2x2Block4x4SetOutputLoad25(src + d, srcStride, tmp);
+                WinogradKernel2x2Block4x4SetOutputStore16(tmp, dst + d, dstS, dstC, rowE, colE);
+            }
+            if (dstCF < dstC)
+            {
+                __mmask16 tail = TailMask16(dstC - dstCF);
+                __m512 tmp[16];
+                WinogradKernel2x2Block4x4SetOutputLoad25(src + dstC - F, srcStride, tmp, tail);
+                WinogradKernel2x2Block4x4SetOutputStore16(tmp, dst + dstC - F, dstS, dstC, rowE, colE, tail);
+            }
+        }
+
+        void WinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        {
+            if (trans ? false : true)
+            {
+                Base::WinogradKernel2x2Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                return;
+            }
+            size_t tileH = (dstHeight + 3) / 4;
+            size_t tileW = (dstWidth + 3) / 4;
+            size_t dstH4 = AlignLo(dstHeight, 4);
+            size_t dstW4 = AlignLo(dstWidth, 4);
+            size_t row, col;
+            for (row = 0; row < dstH4; row += 4)
+            {
+                for (col = 0; col < dstW4; col += 4)
+                    WinogradKernel2x2Block4x4SetOutput16t(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels), src += dstChannels;
+                if (col < dstWidth)
+                    WinogradKernel2x2Block4x4SetOutput16t(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, 4, dstWidth - col), src += dstChannels;
+            }
+            if (row < dstHeight)
+            {
+                for (col = 0; col < dstW4; col += 4)
+                    WinogradKernel2x2Block4x4SetOutput16t(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, dstHeight - row, 4), src += dstChannels;
+                if (col < dstWidth)
+                    WinogradKernel2x2Block4x4SetOutput16t(src, srcStride, dst + (row * dstWidth + col) * dstChannels, dstWidth, dstChannels, dstHeight - row, dstWidth - col), src += dstChannels;
             }
         }
 
