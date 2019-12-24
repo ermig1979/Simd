@@ -352,6 +352,14 @@ namespace Simd
         {
             if (p.kernelY == 2 && p.kernelX == 2)
             {
+                if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
+                {
+                    SetBlock(4, 4);
+                    _setFilter = Neon::WinogradKernel2x2Block4x4SetFilter;
+                    _setInput = Neon::WinogradKernel2x2Block4x4SetInput;
+                    _setOutput = Neon::WinogradKernel2x2Block4x4SetOutput;
+                }
+                else
                 {
                     SetBlock(2, 2);
                     _setFilter = Neon::WinogradKernel2x2Block2x2SetFilter;

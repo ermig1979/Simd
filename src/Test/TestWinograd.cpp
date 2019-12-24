@@ -565,6 +565,7 @@ namespace Test
         bool result = true;
 
         result = result && WinogradSetOutputAutoTest(256, 8, 60, block, core, trans, f1, f2);
+        result = result && WinogradSetOutputAutoTest(256, 7, 59, block, core, trans, f1, f2);
 
         return result;
     }
