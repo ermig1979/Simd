@@ -325,6 +325,87 @@ namespace Simd
         
         //-----------------------------------------------------------------------
 
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetFilterRow(const float32x4_t* t, float* dst, size_t stride)
+        {
+            const float32x4_t r2 = vdupq_n_f32(1.0f / 2.0f);
+            const float32x4_t r3 = vdupq_n_f32(1.0f / 3.0f);
+            const float32x4_t r6 = vdupq_n_f32(1.0f / 6.0f);
+            const float32x4_t mr2 = vdupq_n_f32(-1.0f / 2.0f);
+
+            Store<false>(dst + 0 * stride, vmulq_f32(r2, t[0]));
+            Store<false>(dst + 1 * stride, vmulq_f32(mr2, vaddq_f32(t[0], t[1])));
+            Store<false>(dst + 2 * stride, vmulq_f32(r6, vsubq_f32(t[1], t[0])));
+            Store<false>(dst + 3 * stride, vaddq_f32(vmulq_f32(r6, t[0]), vmulq_f32(r3, t[1])));
+            Store<false>(dst + 4 * stride, t[1]);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetFilter(const float32x4_t src[4], float* dst, size_t stride)
+        {
+            const float32x4_t r2 = vdupq_n_f32(1.0f / 2.0f);
+            const float32x4_t r3 = vdupq_n_f32(1.0f / 3.0f);
+            const float32x4_t r6 = vdupq_n_f32(1.0f / 6.0f);
+            const float32x4_t mr2 = vdupq_n_f32(-1.0f / 2.0f);
+
+            float32x4_t t[2];
+            t[0] = vmulq_f32(r2, src[0]);
+            t[1] = vmulq_f32(r2, src[1]);
+            WinogradKernel2x2Block4x4SetFilterRow(t, dst + 0 * stride, stride);
+
+            t[0] = vmulq_f32(mr2, vaddq_f32(src[0], src[2]));
+            t[1] = vmulq_f32(mr2, vaddq_f32(src[1], src[3]));
+            WinogradKernel2x2Block4x4SetFilterRow(t, dst + 5 * stride, stride);
+
+            t[0] = vmulq_f32(r6, vsubq_f32(src[2], src[0]));
+            t[1] = vmulq_f32(r6, vsubq_f32(src[3], src[1]));
+            WinogradKernel2x2Block4x4SetFilterRow(t, dst + 10 * stride, stride);
+
+            t[0] = vaddq_f32(vmulq_f32(r6, src[0]), vmulq_f32(r3, src[2]));
+            t[1] = vaddq_f32(vmulq_f32(r6, src[1]), vmulq_f32(r3, src[3]));
+            WinogradKernel2x2Block4x4SetFilterRow(t, dst + 15 * stride, stride);
+
+            t[0] = src[2];
+            t[1] = src[3];
+            WinogradKernel2x2Block4x4SetFilterRow(t, dst + 20 * stride, stride);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetFilter4n(const float* src, float* dst, size_t stride)
+        {
+            float32x4_t _src[4];
+            Load4(src + 0, 4, _src + 0);
+            WinogradKernel2x2Block4x4SetFilter(_src, dst, stride);
+        }
+
+        SIMD_INLINE void WinogradKernel2x2Block4x4SetFilter4t(const float* src, float* dst, size_t stride)
+        {
+            float32x4_t _src[4];
+            _src[0] = Load<false>(src + 0 * stride);
+            _src[1] = Load<false>(src + 1 * stride);
+            _src[2] = Load<false>(src + 2 * stride);
+            _src[3] = Load<false>(src + 3 * stride);
+            WinogradKernel2x2Block4x4SetFilter(_src, dst, stride);
+        }
+
+        void WinogradKernel2x2Block4x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t size4 = AlignLo(size, 4), i = 0;
+            if (trans)
+            {
+                for (; i < size4; i += 4)
+                    WinogradKernel2x2Block4x4SetFilter4t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel2x2Block4x4SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                for (; i < size4; i += 4, src += 16, dst += 4)
+                    WinogradKernel2x2Block4x4SetFilter4n(src, dst, size);
+                for (; i < size; i += 1, src += 4, dst += 1)
+                    Base::WinogradKernel2x2Block4x4SetFilter1n(src, dst, size);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter(const float32x4_t src[9], float* dst, size_t stride)
         {
             const float32x4_t r2 = vdupq_n_f32(1.0f / 2.0f);
