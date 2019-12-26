@@ -33,6 +33,51 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter(const __m256* t, float* dst, size_t stride)
+        {
+            const __m256 r4 = _mm256_set1_ps(1.0f / 4.0f);
+            const __m256 r6 = _mm256_set1_ps(1.0f / 6.0f);
+            const __m256 mr6 = _mm256_set1_ps(-1.0f / 6.0f);
+            const __m256 r12 = _mm256_set1_ps(1.0f / 12.0f);
+            const __m256 r24 = _mm256_set1_ps(1.0f / 24.0f);
+            _mm256_storeu_ps(dst + 0 * stride, _mm256_mul_ps(r4, t[0]));
+            __m256 t0 = _mm256_add_ps(t[0], t[2]);
+            _mm256_storeu_ps(dst + 1 * stride, _mm256_mul_ps(mr6, _mm256_add_ps(t0, t[1])));
+            _mm256_storeu_ps(dst + 2 * stride, _mm256_mul_ps(mr6, _mm256_sub_ps(t0, t[1])));
+            __m256 t1 = _mm256_add_ps(_mm256_mul_ps(r24, t[0]), _mm256_mul_ps(r6, t[2]));
+            __m256 t2 = _mm256_mul_ps(r12, t[1]);
+            _mm256_storeu_ps(dst + 3 * stride, _mm256_add_ps(t1, t2));
+            _mm256_storeu_ps(dst + 4 * stride, _mm256_sub_ps(t1, t2));
+            _mm256_storeu_ps(dst + 5 * stride, t[2]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter8t(const float* src, float* dst, size_t stride)
+        {
+            __m256 s[3];
+            s[0] = _mm256_loadu_ps(src + 0 * stride);
+            s[1] = _mm256_loadu_ps(src + 1 * stride);
+            s[2] = _mm256_loadu_ps(src + 2 * stride);
+            WinogradKernel1x3Block1x4SetFilter(s, dst + 0 * stride, stride);
+        }
+
+        void WinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t sizeF = AlignLo(size, F), i = 0;
+            if (trans)
+            {
+                for (; i < sizeF; i += F)
+                    WinogradKernel1x3Block1x4SetFilter8t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel1x3Block1x4SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                Sse::WinogradKernel1x3Block1x4SetFilter(src, size, dst, trans);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const __m256 src[4], float* dst, size_t stride)
         {
             _mm256_storeu_ps(dst + 0 * stride, src[0]);

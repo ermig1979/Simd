@@ -34,6 +34,54 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter(const __m512* t, float* dst, size_t stride, __mmask16 tail)
+        {
+            const __m512 r4 = _mm512_set1_ps(1.0f / 4.0f);
+            const __m512 r6 = _mm512_set1_ps(1.0f / 6.0f);
+            const __m512 mr6 = _mm512_set1_ps(-1.0f / 6.0f);
+            const __m512 r12 = _mm512_set1_ps(1.0f / 12.0f);
+            const __m512 r24 = _mm512_set1_ps(1.0f / 24.0f);
+            _mm512_mask_storeu_ps(dst + 0 * stride, tail, _mm512_mul_ps(r4, t[0]));
+            __m512 t0 = _mm512_add_ps(t[0], t[2]);
+            _mm512_mask_storeu_ps(dst + 1 * stride, tail, _mm512_mul_ps(mr6, _mm512_add_ps(t0, t[1])));
+            _mm512_mask_storeu_ps(dst + 2 * stride, tail, _mm512_mul_ps(mr6, _mm512_sub_ps(t0, t[1])));
+            __m512 t1 = _mm512_add_ps(_mm512_mul_ps(r24, t[0]), _mm512_mul_ps(r6, t[2]));
+            __m512 t2 = _mm512_mul_ps(r12, t[1]);
+            _mm512_mask_storeu_ps(dst + 3 * stride, tail, _mm512_add_ps(t1, t2));
+            _mm512_mask_storeu_ps(dst + 4 * stride, tail, _mm512_sub_ps(t1, t2));
+            _mm512_mask_storeu_ps(dst + 5 * stride, tail, t[2]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter16t(const float* src, float* dst, size_t stride, __mmask16 tail = -1)
+        {
+            __m512 s[3];
+            s[0] = _mm512_maskz_loadu_ps(tail, src + 0 * stride);
+            s[1] = _mm512_maskz_loadu_ps(tail, src + 1 * stride);
+            s[2] = _mm512_maskz_loadu_ps(tail, src + 2 * stride);
+            WinogradKernel1x3Block1x4SetFilter(s, dst + 0 * stride, stride, tail);
+        }
+
+        void WinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t sizeF = AlignLo(size, F), i = 0;
+            if (trans)
+            {
+                for (; i < sizeF; i += F)
+                    WinogradKernel1x3Block1x4SetFilter16t(src + i, dst + i, size);
+                if (i < size)
+                {
+                    __mmask16 tail = TailMask16(size - sizeF);
+                    WinogradKernel1x3Block1x4SetFilter16t(src + i, dst + i, size, tail);
+                }
+            }
+            else
+            {
+                Sse::WinogradKernel1x3Block1x4SetFilter(src, size, dst, trans);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const __m512 src[4], float* dst, size_t stride, __mmask16 tail)
         {
             _mm512_mask_storeu_ps(dst + 0 * stride, tail, src[0]);
