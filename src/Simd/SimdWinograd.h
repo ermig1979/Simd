@@ -31,6 +31,32 @@ namespace Simd
 {
     namespace Base
     {
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter1n(const float* src, float* dst, size_t stride)
+        {
+            const float r4 = float(1.0f / 4.0f);
+            const float r6 = float(1.0f / 6.0f);
+            const float r12 = float(1.0f / 12.0f);
+            const float r24 = float(1.0f / 24.0f);
+
+            dst[stride * 0] = r4 * src[0];
+            dst[stride * 1] = -r6 * (src[0] + src[1] + src[2]);
+            dst[stride * 2] = -r6 * (src[0] - src[1] + src[2]);
+            dst[stride * 3] = r24 * src[0] + r12 * src[1] + r6 * src[2];
+            dst[stride * 4] = r24 * src[0] - r12 * src[1] + r6 * src[2];
+            dst[stride * 5] = src[2];
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter1t(const float* src, float* dst, size_t stride)
+        {
+            float _src[3];
+            _src[0] = src[0 * stride];
+            _src[1] = src[1 * stride];
+            _src[2] = src[2 * stride];
+            WinogradKernel1x3Block1x4SetFilter1n(_src, dst, stride);
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter1n(const float* src, float* dst, size_t stride)
         {
             dst[0 * stride] = src[0];
