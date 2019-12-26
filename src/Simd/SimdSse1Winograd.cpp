@@ -217,6 +217,101 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetOutputLoad6(const float* src, size_t stride, __m128 dst[4])
+        {
+            __m128 s[6];
+            s[0] = _mm_loadu_ps(src + 0 * stride);
+            s[1] = _mm_loadu_ps(src + 1 * stride);
+            s[2] = _mm_loadu_ps(src + 2 * stride);
+            s[3] = _mm_loadu_ps(src + 3 * stride);
+            s[4] = _mm_loadu_ps(src + 4 * stride);
+            s[5] = _mm_loadu_ps(src + 5 * stride);
+            __m128 _2 = _mm_set1_ps(2.0f);
+            __m128 _4 = _mm_set1_ps(4.0f);
+            __m128 _8 = _mm_set1_ps(8.0f);
+            dst[0] = _mm_add_ps(_mm_add_ps(_mm_add_ps(s[0], s[1]), _mm_add_ps(s[2], s[3])), s[4]);
+            dst[1] = _mm_add_ps(_mm_sub_ps(s[1], s[2]), _mm_mul_ps(_2, _mm_sub_ps(s[3], s[4])));
+            dst[2] = _mm_add_ps(_mm_add_ps(s[1], s[2]), _mm_mul_ps(_4, _mm_add_ps(s[3], s[4])));
+            dst[3] = _mm_add_ps(_mm_add_ps(_mm_sub_ps(s[1], s[2]), _mm_mul_ps(_8, _mm_sub_ps(s[3], s[4]))), s[5]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetOutputStore4(const __m128 src[4], float* dst, size_t dstC)
+        {
+            _mm_storeu_ps(dst + 0 * dstC, src[0]);
+            _mm_storeu_ps(dst + 1 * dstC, src[1]);
+            _mm_storeu_ps(dst + 2 * dstC, src[2]);
+            _mm_storeu_ps(dst + 3 * dstC, src[3]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetOutput4t(const float* src, size_t srcStride, float* dst, size_t dstC)
+        {
+            size_t dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                __m128 tmp[4];
+                WinogradKernel1x3Block1x4SetOutputLoad6(src + d, srcStride, tmp);
+                WinogradKernel1x3Block1x4SetOutputStore4(tmp, dst + d, dstC);
+            }
+            if (dstCF < dstC)
+            {
+                __m128 tmp[4];
+                WinogradKernel1x3Block1x4SetOutputLoad6(src + dstC - F, srcStride, tmp);
+                WinogradKernel1x3Block1x4SetOutputStore4(tmp, dst + dstC - F, dstC);
+            }
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetOutputStore4(const __m128 src[4], float* dst, size_t dstC, size_t colE)
+        {
+            for (size_t col = 0; col < colE; ++col)
+                _mm_storeu_ps(dst + col * dstC, src[col]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x3Block1x4SetOutput4t(const float* src, size_t srcStride, float* dst, size_t dstC, size_t colE)
+        {
+            size_t dstCF = AlignLo(dstC, F);
+            for (size_t d = 0; d < dstCF; d += F)
+            {
+                __m128 tmp[4];
+                WinogradKernel1x3Block1x4SetOutputLoad6(src + d, srcStride, tmp);
+                WinogradKernel1x3Block1x4SetOutputStore4(tmp, dst + d, dstC, colE);
+            }
+            if (dstCF < dstC)
+            {
+                __m128 tmp[4];
+                WinogradKernel1x3Block1x4SetOutputLoad6(src + dstC - F, srcStride, tmp);
+                WinogradKernel1x3Block1x4SetOutputStore4(tmp, dst + dstC - F, dstC, colE);
+            }
+        }
+
+        void WinogradKernel1x3Block1x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
+        {
+            if (trans ? (dstChannels < 4) : (dstWidth < 16))
+            {
+                Base::WinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                return;
+            }
+            size_t tileW = (dstWidth + 3) / 4;
+            size_t dstW4 = AlignLo(dstWidth, 4);
+            if (trans)
+            {
+                for (size_t row = 0; row < dstHeight; row += 1)
+                {
+                    size_t col;
+                    for (col = 0; col < dstW4; col += 4)
+                        WinogradKernel1x3Block1x4SetOutput4t(src, srcStride, dst + col * dstChannels, dstChannels), src += dstChannels;
+                    if (col < dstWidth)
+                        WinogradKernel1x3Block1x4SetOutput4t(src, srcStride, dst + col * dstChannels, dstChannels, dstWidth - col), src += dstChannels;
+                    dst += dstWidth * dstChannels;
+                }
+            }
+            else
+            {
+                Base::WinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const __m128 src[4], float * dst, size_t stride)
         {
             _mm_storeu_ps(dst + 0 * stride, src[0]);
