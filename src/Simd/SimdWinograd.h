@@ -57,6 +57,36 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter1n(const float* src, float* dst, size_t stride)
+        {
+            const float r36 = float(1.0f / 36.0f);
+            const float r48 = float(1.0f / 48.0f);
+            const float r120 = float(1.0f / 120.0f);
+            const float r720 = float(1.0f / 720.0f);
+
+            dst[stride * 0] = r36 * src[0];
+            dst[stride * 1] = r48 * (src[0] + src[1] + src[2] + src[3] + src[4]);
+            dst[stride * 2] = r48 * (src[0] - src[1] + src[2] - src[3] + src[4]);
+            dst[stride * 3] = -r120 * (src[0] + 2 * src[1] + 4 * src[2] + 8 * src[3] + 16 * src[4]);
+            dst[stride * 4] = -r120 * (src[0] - 2 * src[1] + 4 * src[2] - 8 * src[3] + 16 * src[4]);
+            dst[stride * 5] = r720 * (src[0] + 3 * src[1] + 9 * src[2] + 27 * src[3] + 81 * src[4]);
+            dst[stride * 6] = r720 * (src[0] - 3 * src[1] + 9 * src[2] - 27 * src[3] + 81 * src[4]);
+            dst[stride * 7] = src[4];
+        }
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter1t(const float* src, float* dst, size_t stride)
+        {
+            float _src[5];
+            _src[0] = src[0 * stride];
+            _src[1] = src[1 * stride];
+            _src[2] = src[2 * stride];
+            _src[3] = src[3 * stride];
+            _src[4] = src[4 * stride];
+            WinogradKernel1x5Block1x4SetFilter1n(_src, dst, stride);
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter1n(const float* src, float* dst, size_t stride)
         {
             dst[0 * stride] = src[0];
