@@ -359,6 +359,15 @@ namespace Simd
                     _setOutput = Neon::WinogradKernel1x3Block1x4SetOutput;
                 }
             }
+            else if (p.kernelY == 1 && p.kernelX == 5)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Neon::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Neon::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Neon::WinogradKernel1x5Block1x4SetOutput;
+                }
+            }
             else if (p.kernelY == 2 && p.kernelX == 2)
             {
                 if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
@@ -432,6 +441,12 @@ namespace Simd
                 if (!(p.IsPad(0) || (p.padX == 1 && p.padW == 1)))
                     return false;
                 if (p.srcC <= 32)
+                    return false;
+                return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
+            }
+            else if (p.IsKernel(1, 5))
+            {
+                if (!(p.IsPad(0) || (p.padX == 2 && p.padW == 2)))
                     return false;
                 return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
             }

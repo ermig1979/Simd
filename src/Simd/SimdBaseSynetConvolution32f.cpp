@@ -653,6 +653,15 @@ namespace Simd
                     _setOutput = Base::WinogradKernel1x3Block1x4SetOutput;
                 }
             }
+            else if (p.kernelY == 1 && p.kernelX == 5)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Base::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Base::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Base::WinogradKernel1x5Block1x4SetOutput;
+                }
+            }
             else if (p.kernelY == 2 && p.kernelX == 2)
             {
                 if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
@@ -765,6 +774,7 @@ namespace Simd
         {
             if (!p.IsDilation(1) || !p.IsStride(1) || p.group != 1 || p.srcC <= 16)
                 return false;
+
             if (p.IsKernel(1, 3))
             {
                 if (!(p.IsPad(0) || (p.padX == 1 && p.padW == 1)) )
@@ -773,6 +783,12 @@ namespace Simd
                     return false;
                 return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
             }
+            else if (p.IsKernel(1, 5))
+            {
+                if (!(p.IsPad(0) || (p.padX == 2 && p.padW == 2)))
+                    return false;
+                return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
+            }           
             else if (p.IsKernel(2))
             {
                 if (!(p.IsPad(0) || (p.padY + p.padH == 1 && p.padX + p.padW == 1)))

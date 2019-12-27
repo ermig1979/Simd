@@ -549,6 +549,15 @@ namespace Simd
                     _setOutput = Avx::WinogradKernel1x3Block1x4SetOutput;
                 }
             }
+            else if (p.kernelY == 1 && p.kernelX == 5)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Avx::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Avx::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Avx::WinogradKernel1x5Block1x4SetOutput;
+                }
+            }
             else if (p.kernelY == 2 && p.kernelX == 2)
             {
                 if (_blockY == 4 && _blockX == 4)
