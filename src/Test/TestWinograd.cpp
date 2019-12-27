@@ -450,25 +450,25 @@ namespace Test
 
         result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Base::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Sse::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
-//#endif 
-//
-//#ifdef SIMD_AVX_ENABLE
-//        if (Simd::Avx::Enable)
-//            result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Avx::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
-//#endif 
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Avx512f::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Neon::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
-//#endif
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Sse::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Avx::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Avx512f::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Neon::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
+#endif
 
         return result;
     }
@@ -803,25 +803,25 @@ namespace Test
 
         result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Base::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Sse::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
-//#endif 
-//
-//#ifdef SIMD_AVX_ENABLE
-//        if (Simd::Avx::Enable)
-//            result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Avx::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
-//#endif 
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Avx512f::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Neon::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
-//#endif
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Sse::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Avx::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Avx512f::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Neon::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
+#endif
 
         return result;
     }
