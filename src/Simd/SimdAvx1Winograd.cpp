@@ -284,6 +284,62 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter(const __m256* t, float* dst, size_t stride)
+        {
+            const __m256 r36 = _mm256_set1_ps(1.0f / 36.0f);
+            const __m256 r48 = _mm256_set1_ps(1.0f / 48.0f);
+            const __m256 mr120 = _mm256_set1_ps(-1.0f / 120.0f);
+            const __m256 r720 = _mm256_set1_ps(1.0f / 720.0f);
+            const __m256 _2 = _mm256_set1_ps(2.0f);
+            const __m256 _3 = _mm256_set1_ps(3.0f);
+            const __m256 _4 = _mm256_set1_ps(4.0f);
+            const __m256 _9 = _mm256_set1_ps(9.0f);
+            _mm256_storeu_ps(dst + 0 * stride, _mm256_mul_ps(r36, t[0]));
+            __m256 a[2];
+            a[0] = _mm256_add_ps(_mm256_add_ps(t[0], t[2]), t[4]);
+            a[1] = _mm256_add_ps(t[1], t[3]);
+            _mm256_storeu_ps(dst + 1 * stride, _mm256_mul_ps(r48, _mm256_add_ps(a[0], a[1])));
+            _mm256_storeu_ps(dst + 2 * stride, _mm256_mul_ps(r48, _mm256_sub_ps(a[0], a[1])));
+            a[0] = _mm256_add_ps(t[0], _mm256_mul_ps(_4, _mm256_add_ps(t[2], _mm256_mul_ps(_4, t[4]))));
+            a[1] = _mm256_mul_ps(_2, _mm256_add_ps(t[1], _mm256_mul_ps(_4, t[3])));
+            _mm256_storeu_ps(dst + 3 * stride, _mm256_mul_ps(mr120, _mm256_add_ps(a[0], a[1])));
+            _mm256_storeu_ps(dst + 4 * stride, _mm256_mul_ps(mr120, _mm256_sub_ps(a[0], a[1])));
+            a[0] = _mm256_add_ps(t[0], _mm256_mul_ps(_9, _mm256_add_ps(t[2], _mm256_mul_ps(_9, t[4]))));
+            a[1] = _mm256_mul_ps(_3, _mm256_add_ps(t[1], _mm256_mul_ps(_9, t[3])));
+            _mm256_storeu_ps(dst + 5 * stride, _mm256_mul_ps(r720, _mm256_add_ps(a[0], a[1])));
+            _mm256_storeu_ps(dst + 6 * stride, _mm256_mul_ps(r720, _mm256_sub_ps(a[0], a[1])));
+            _mm256_storeu_ps(dst + 7 * stride, t[4]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter8t(const float* src, float* dst, size_t stride)
+        {
+            __m256 s[5];
+            s[0] = _mm256_loadu_ps(src + 0 * stride);
+            s[1] = _mm256_loadu_ps(src + 1 * stride);
+            s[2] = _mm256_loadu_ps(src + 2 * stride);
+            s[3] = _mm256_loadu_ps(src + 3 * stride);
+            s[4] = _mm256_loadu_ps(src + 4 * stride);
+            WinogradKernel1x5Block1x4SetFilter(s, dst, stride);
+        }
+
+        void WinogradKernel1x5Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t sizeF = AlignLo(size, F), i = 0;
+            if (trans)
+            {
+                for (; i < sizeF; i += F)
+                    WinogradKernel1x5Block1x4SetFilter8t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel1x5Block1x4SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                Sse::WinogradKernel1x5Block1x4SetFilter(src, size, dst, trans);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const __m256 src[4], float* dst, size_t stride)
         {
             _mm256_storeu_ps(dst + 0 * stride, src[0]);

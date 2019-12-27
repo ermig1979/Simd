@@ -73,7 +73,7 @@ namespace Simd
             s[0] = _mm_setr_ps(src[0], src[3], src[6], src[9]);
             s[1] = _mm_setr_ps(src[1], src[4], src[7], src[10]);
             s[2] = _mm_setr_ps(src[2], src[5], src[8], src[11]);
-            WinogradKernel1x3Block1x4SetFilter(s, dst + 0 * stride, stride);
+            WinogradKernel1x3Block1x4SetFilter(s, dst, stride);
         }
 
         SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter4t(const float* src, float* dst, size_t stride)
@@ -82,7 +82,7 @@ namespace Simd
             s[0] = _mm_loadu_ps(src + 0 * stride);
             s[1] = _mm_loadu_ps(src + 1 * stride);
             s[2] = _mm_loadu_ps(src + 2 * stride);
-            WinogradKernel1x3Block1x4SetFilter(s, dst + 0 * stride, stride);
+            WinogradKernel1x3Block1x4SetFilter(s, dst, stride);
         }
 
         void WinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
@@ -307,6 +307,73 @@ namespace Simd
             else
             {
                 Base::WinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter(const __m128 * t, float* dst, size_t stride)
+        {
+            const __m128 r36 = _mm_set1_ps(1.0f / 36.0f);
+            const __m128 r48 = _mm_set1_ps(1.0f / 48.0f);
+            const __m128 mr120 = _mm_set1_ps(-1.0f / 120.0f);
+            const __m128 r720 = _mm_set1_ps(1.0f / 720.0f);
+            const __m128 _2 = _mm_set1_ps(2.0f);
+            const __m128 _3 = _mm_set1_ps(3.0f);
+            const __m128 _4 = _mm_set1_ps(4.0f);
+            const __m128 _9 = _mm_set1_ps(9.0f);
+            _mm_storeu_ps(dst + 0 * stride, _mm_mul_ps(r36, t[0]));
+            __m128 a[2];
+            a[0] = _mm_add_ps(_mm_add_ps(t[0], t[2]), t[4]);
+            a[1] = _mm_add_ps(t[1], t[3]);
+            _mm_storeu_ps(dst + 1 * stride, _mm_mul_ps(r48, _mm_add_ps(a[0], a[1])));
+            _mm_storeu_ps(dst + 2 * stride, _mm_mul_ps(r48, _mm_sub_ps(a[0], a[1])));
+            a[0] = _mm_add_ps(t[0], _mm_mul_ps(_4, _mm_add_ps(t[2], _mm_mul_ps(_4, t[4]))));
+            a[1] = _mm_mul_ps(_2, _mm_add_ps(t[1], _mm_mul_ps(_4, t[3])));
+            _mm_storeu_ps(dst + 3 * stride, _mm_mul_ps(mr120, _mm_add_ps(a[0], a[1])));
+            _mm_storeu_ps(dst + 4 * stride, _mm_mul_ps(mr120, _mm_sub_ps(a[0], a[1])));
+            a[0] = _mm_add_ps(t[0], _mm_mul_ps(_9, _mm_add_ps(t[2], _mm_mul_ps(_9, t[4]))));
+            a[1] = _mm_mul_ps(_3, _mm_add_ps(t[1], _mm_mul_ps(_9, t[3])));
+            _mm_storeu_ps(dst + 5 * stride, _mm_mul_ps(r720, _mm_add_ps(a[0], a[1])));
+            _mm_storeu_ps(dst + 6 * stride, _mm_mul_ps(r720, _mm_sub_ps(a[0], a[1])));
+            _mm_storeu_ps(dst + 7 * stride, t[4]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter4n(const float* src, float* dst, size_t stride)
+        {
+            __m128 s[5];
+            Load4(src + 0, 5, s + 0);
+            s[4] = _mm_setr_ps(src[4], src[9], src[14], src[19]);
+            WinogradKernel1x5Block1x4SetFilter(s, dst, stride);
+        }
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter4t(const float* src, float* dst, size_t stride)
+        {
+            __m128 s[5];
+            s[0] = _mm_loadu_ps(src + 0 * stride);
+            s[1] = _mm_loadu_ps(src + 1 * stride);
+            s[2] = _mm_loadu_ps(src + 2 * stride);
+            s[3] = _mm_loadu_ps(src + 3 * stride);
+            s[4] = _mm_loadu_ps(src + 4 * stride);
+            WinogradKernel1x5Block1x4SetFilter(s, dst, stride);
+        }
+
+        void WinogradKernel1x5Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t size4 = AlignLo(size, 4), i = 0;
+            if (trans)
+            {
+                for (; i < size4; i += 4)
+                    WinogradKernel1x5Block1x4SetFilter4t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel1x5Block1x4SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                for (; i < size4; i += 4, src += 20, dst += 4)
+                    WinogradKernel1x5Block1x4SetFilter4n(src, dst, size);
+                for (; i < size; i += 1, src += 5, dst += 1)
+                    Base::WinogradKernel1x5Block1x4SetFilter1n(src, dst, size);
             }
         }
 

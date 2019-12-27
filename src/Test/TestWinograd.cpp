@@ -129,25 +129,25 @@ namespace Test
 
         result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Base::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
 
-//#ifdef SIMD_SSE_ENABLE
-//        if (Simd::Sse::Enable)
-//            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Sse::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
-//#endif 
-//
-//#ifdef SIMD_AVX_ENABLE
-//        if (Simd::Avx::Enable)
-//            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Avx::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
-//#endif 
-//
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Avx512f::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
-//#endif
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Neon::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
-//#endif
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Sse::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
+#endif 
+
+#ifdef SIMD_AVX_ENABLE
+        if (Simd::Avx::Enable)
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Avx::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Avx512f::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Neon::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
+#endif
 
         return result;
     }

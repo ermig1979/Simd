@@ -308,6 +308,73 @@ namespace Simd
 
         //-----------------------------------------------------------------------
 
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter(const float32x4_t* t, float* dst, size_t stride)
+        {
+            const float32x4_t r36 = vdupq_n_f32(1.0f / 36.0f);
+            const float32x4_t r48 = vdupq_n_f32(1.0f / 48.0f);
+            const float32x4_t mr120 = vdupq_n_f32(-1.0f / 120.0f);
+            const float32x4_t r720 = vdupq_n_f32(1.0f / 720.0f);
+            const float32x4_t _2 = vdupq_n_f32(2.0f);
+            const float32x4_t _3 = vdupq_n_f32(3.0f);
+            const float32x4_t _4 = vdupq_n_f32(4.0f);
+            const float32x4_t _9 = vdupq_n_f32(9.0f);
+            Store<false>(dst + 0 * stride, vmulq_f32(r36, t[0]));
+            float32x4_t a[2];
+            a[0] = vaddq_f32(vaddq_f32(t[0], t[2]), t[4]);
+            a[1] = vaddq_f32(t[1], t[3]);
+            Store<false>(dst + 1 * stride, vmulq_f32(r48, vaddq_f32(a[0], a[1])));
+            Store<false>(dst + 2 * stride, vmulq_f32(r48, vsubq_f32(a[0], a[1])));
+            a[0] = vaddq_f32(t[0], vmulq_f32(_4, vaddq_f32(t[2], vmulq_f32(_4, t[4]))));
+            a[1] = vmulq_f32(_2, vaddq_f32(t[1], vmulq_f32(_4, t[3])));
+            Store<false>(dst + 3 * stride, vmulq_f32(mr120, vaddq_f32(a[0], a[1])));
+            Store<false>(dst + 4 * stride, vmulq_f32(mr120, vsubq_f32(a[0], a[1])));
+            a[0] = vaddq_f32(t[0], vmulq_f32(_9, vaddq_f32(t[2], vmulq_f32(_9, t[4]))));
+            a[1] = vmulq_f32(_3, vaddq_f32(t[1], vmulq_f32(_9, t[3])));
+            Store<false>(dst + 5 * stride, vmulq_f32(r720, vaddq_f32(a[0], a[1])));
+            Store<false>(dst + 6 * stride, vmulq_f32(r720, vsubq_f32(a[0], a[1])));
+            Store<false>(dst + 7 * stride, t[4]);
+        }
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter4n(const float* src, float* dst, size_t stride)
+        {
+            float32x4_t s[5];
+            Load4(src + 0, 5, s + 0);
+            s[4] = SetF32(src[4], src[9], src[14], src[19]);
+            WinogradKernel1x5Block1x4SetFilter(s, dst, stride);
+        }
+
+        SIMD_INLINE void WinogradKernel1x5Block1x4SetFilter4t(const float* src, float* dst, size_t stride)
+        {
+            float32x4_t s[5];
+            s[0] = Load<false>(src + 0 * stride);
+            s[1] = Load<false>(src + 1 * stride);
+            s[2] = Load<false>(src + 2 * stride);
+            s[3] = Load<false>(src + 3 * stride);
+            s[4] = Load<false>(src + 4 * stride);
+            WinogradKernel1x5Block1x4SetFilter(s, dst, stride);
+        }
+
+        void WinogradKernel1x5Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
+        {
+            size_t size4 = AlignLo(size, 4), i = 0;
+            if (trans)
+            {
+                for (; i < size4; i += 4)
+                    WinogradKernel1x5Block1x4SetFilter4t(src + i, dst + i, size);
+                for (; i < size; i += 1)
+                    Base::WinogradKernel1x5Block1x4SetFilter1t(src + i, dst + i, size);
+            }
+            else
+            {
+                for (; i < size4; i += 4, src += 20, dst += 4)
+                    WinogradKernel1x5Block1x4SetFilter4n(src, dst, size);
+                for (; i < size; i += 1, src += 5, dst += 1)
+                    Base::WinogradKernel1x5Block1x4SetFilter1n(src, dst, size);
+            }
+        }
+
+        //-----------------------------------------------------------------------
+
         SIMD_INLINE void WinogradKernel2x2Block2x2SetFilter(const float32x4_t src[4], float* dst, size_t stride)
         {
             Store<false>(dst + 0 * stride, src[0]);
