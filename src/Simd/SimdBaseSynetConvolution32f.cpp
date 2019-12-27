@@ -644,7 +644,16 @@ namespace Simd
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f& p)
             : SynetConvolution32f(p)
         {
-            if (p.kernelY == 2 && p.kernelX == 2)
+            if (p.kernelY == 1 && p.kernelX == 3)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Base::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Base::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Base::WinogradKernel1x3Block1x4SetOutput;
+                }
+            }
+            else if (p.kernelY == 2 && p.kernelX == 2)
             {
                 if (p.trans && p.srcH >= 8 && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 144)
                 {
@@ -756,7 +765,15 @@ namespace Simd
         {
             if (!p.IsDilation(1) || !p.IsStride(1) || p.group != 1 || p.srcC <= 16)
                 return false;
-            if (p.IsKernel(2))
+            if (p.IsKernel(1, 3))
+            {
+                if (!(p.IsPad(0) || (p.padX == 1 && p.padW == 1)) )
+                    return false;
+                if (p.srcC <= 32)
+                    return false;
+                return p.trans && p.srcW >= 8 && p.srcH * p.srcW * p.batch >= 36;
+            }
+            else if (p.IsKernel(2))
             {
                 if (!(p.IsPad(0) || (p.padY + p.padH == 1 && p.padX + p.padW == 1)))
                     return false;
@@ -779,7 +796,7 @@ namespace Simd
             const ConvParam32f & p = _param;
             _blockY = blockY;
             _blockX = blockX;
-            _count = (_blockY + p.kernelX - 1) * (_blockX + p.kernelX - 1);
+            _count = (_blockY + p.kernelY - 1) * (_blockX + p.kernelX - 1);
             _tileH = (p.dstH + _blockY - 1) / _blockY;
             _tileW = (p.dstW + _blockX - 1) / _blockX;
             _strideW = p.srcC * p.dstC;

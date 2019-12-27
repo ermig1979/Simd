@@ -520,7 +520,16 @@ namespace Simd
         {
             if (p.dstC == 8)
                 return;
-            if (p.kernelY == 2 && p.kernelX == 2)
+            if (p.kernelY == 1 && p.kernelX == 3)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Avx512f::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Avx512f::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Avx512f::WinogradKernel1x3Block1x4SetOutput;
+                }
+            }
+            else if (p.kernelY == 2 && p.kernelX == 2)
             {
                 if (_blockY == 4 && _blockX == 4)
                 {

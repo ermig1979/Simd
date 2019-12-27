@@ -65,6 +65,11 @@ namespace Simd
             return kernelY == value && kernelX == value;
         }
 
+        SIMD_INLINE bool IsKernel(size_t valueY, size_t valueX) const
+        {
+            return kernelY == valueY && kernelX == valueX;
+        }
+
         SIMD_INLINE bool IsDilation(size_t value) const
         {
             return dilationY == value && dilationX == value;

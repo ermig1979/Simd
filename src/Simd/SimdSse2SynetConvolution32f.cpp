@@ -323,7 +323,16 @@ namespace Simd
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
             : Base::SynetConvolution32fWinograd(p)
         {
-            if (p.kernelY == 2 && p.kernelX == 2)
+            if (p.kernelY == 1 && p.kernelX == 3)
+            {
+                {
+                    SetBlock(1, 4);
+                    _setFilter = Sse::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Sse::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Sse::WinogradKernel1x3Block1x4SetOutput;
+                }
+            }
+            else if (p.kernelY == 2 && p.kernelX == 2)
             {
                 if (_blockY == 4 && _blockX == 4)
                 {
