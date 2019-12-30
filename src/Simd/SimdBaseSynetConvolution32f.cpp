@@ -219,17 +219,20 @@ namespace Simd
         SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
             : SynetConvolution32f(p)
         {
-            _is1x1 = p.Is1x1();
+            if (p.IsDilation(1) && p.IsStride(1) && p.IsPad(0))
+            {
+                _skipConv = p.IsKernel(1) || (p.srcH == p.kernelY && p.srcW == p.kernelX);
+            }
             if (p.trans)
             {
                 _M = p.dstH * p.dstW;
                 _N = p.dstC / p.group;
                 _K = p.srcC * p.kernelY * p.kernelX / p.group;
-                _ldS = _K * (_is1x1 ? p.group : 1);
+                _ldS = _K * (p.Is1x1() ? p.group : 1);
                 _ldW = p.dstC;
                 _ldD = p.dstC;
                 _grW = _N;
-                _grS = _K * (_is1x1 ? 1 : _M);
+                _grS = _K * (p.Is1x1() ? 1 : _M);
                 _grD = _N;
             }
             else
@@ -261,7 +264,7 @@ namespace Simd
 
         size_t SynetConvolution32fGemmNN::ExternalBufferSize() const
         {
-            if (_is1x1)
+            if (_skipConv)
                 return 1;
             else
                 return _sizeB*_merge;
@@ -284,14 +287,14 @@ namespace Simd
         void SynetConvolution32fGemmNN::Forward(const float * src, float * buf, float * dst)
         {
             const ConvParam32f & p = _param;
-            if (!_is1x1)
+            if (!_skipConv)
                 buf = Buffer(buf);
             if (_merge > 1)
             {
                 for (size_t b = 0; b < _batch; b += _merge)
                 {
                     const float * tmp = src;
-                    if (!_is1x1)
+                    if (!_skipConv)
                     {
                         for (size_t m = 0; m < _merge; ++m)
                             ImgToRow(src + m * _sizeS, buf + m * _sizeB);
@@ -317,7 +320,7 @@ namespace Simd
                 for (size_t b = 0; b < _batch; ++b)
                 {
                     const float * tmp = src;
-                    if (!_is1x1)
+                    if (!_skipConv)
                     {
                         if (_param.trans)
                             ImgToRow(src, buf);

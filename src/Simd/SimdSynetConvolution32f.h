@@ -89,6 +89,7 @@ namespace Simd
         {
             return srcC == group && dstC == group;
         }
+
         SIMD_INLINE bool Is1x1() const
         {
             return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
@@ -209,7 +210,7 @@ namespace Simd
             virtual void ImgToCol(const float * src, float * dst);
             virtual void ImgToRow(const float * src, float * dst);
 
-            bool _is1x1;
+            bool _skipConv;
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD, _merge;
         };
 
