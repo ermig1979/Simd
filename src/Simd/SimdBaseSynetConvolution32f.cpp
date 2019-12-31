@@ -223,6 +223,8 @@ namespace Simd
             {
                 _skipConv = p.IsKernel(1) || (p.srcH == p.kernelY && p.srcW == p.kernelX);
             }
+            else
+                _skipConv = false;
             if (p.trans)
             {
                 _M = p.dstH * p.dstW;

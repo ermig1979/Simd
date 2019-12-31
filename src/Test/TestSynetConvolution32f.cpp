@@ -455,7 +455,7 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 8, 60, 256, _2, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 7, 59, 128, Size(3, 1), _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 56, 56, 64, _1, _1, _2, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }
@@ -465,7 +465,7 @@ namespace Test
         bool result = true;
 
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationIdentity, ::SimdTrue, f1, f2);
-        //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
