@@ -1867,7 +1867,7 @@ namespace Simd
             {
                 size_t dstW32 = AlignLo(dstWidth, 32);
                 __mmask16 tails[3];
-                tails[0] = TailMask16(tileW - AlignLo(tileW, F));
+                tails[0] = TailMask16(tileW - dstW32 / 2); 
                 for (size_t c = 0; c < 2; ++c)
                     tails[1 + c] = TailMask16(dstWidth - dstW32 - F * c);
                 for (size_t c = 0; c < dstChannels; ++c)
