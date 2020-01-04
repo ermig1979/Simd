@@ -2051,6 +2051,7 @@ namespace Simd
 
         void Gemm32fNNcbRun(size_t M, size_t N, size_t K, const float * A, const float * pB, float * C, GemmKernelType type, bool compatibility)
         {
+            SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M * N * K * 2);
             if (N > Avx::F)
             {
                 Gemm32fNNcb gemm = CreateGemm32fNNcb(M, N, K, type, compatibility);

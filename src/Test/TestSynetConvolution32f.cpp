@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -450,9 +450,15 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 448, 6, 6, 2048, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 2048, 6, 6, 192, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 64, 128, 1, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 8, 60, 256, _2, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #if 1        
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 8, 60, 256, _2, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 96, 160, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 80, 160, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 64, 160, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 48, 160, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 32, 160, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 16, 160, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #else
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 89, 159, 64, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
@@ -465,7 +471,7 @@ namespace Test
         bool result = true;
 
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationIdentity, ::SimdTrue, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdFalse, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);

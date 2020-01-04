@@ -153,7 +153,7 @@ namespace Simd
                     size_t srcCF8 = AlignLo(srcC, 8 * F);
                     if (padX == 0 && padY == 0 && (dstW - 1) * strideX + kernelX == srcW && (dstH - 1) * strideY + kernelY == srcH)
                     {
-                        size_t stepY = srcW * srcC * kernelY, stepX = kernelX * srcC;
+                        size_t stepY = srcW * srcC * strideY, stepX = strideX * srcC;
                         __m256 norm = _mm256_set1_ps(1.0f / (kernelY * kernelX));
                         for (size_t ph = 0; ph < dstH; ++ph)
                         {
