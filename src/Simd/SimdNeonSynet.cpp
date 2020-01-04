@@ -411,13 +411,13 @@ namespace Simd
                 SynetInnerProductLayerForward<false>(src, weight, bias, count, size, dst);
         }
 
+        //---------------------------------------------------------------------
+
         template<int shift> SIMD_INLINE float32x4_t LoadAtEdge(const float * src)
         {
             static const int32_t mask[3 * F] = { 0, 0, 0, 0, -1, -1, -1, -1, 0, 0, 0, 0 };
             return And(Load<false>(src + shift), Load<false>((float*)mask + F + shift));
         }
-
-        //---------------------------------------------------------------------
 
         SIMD_INLINE float32x4_t NoseSquareSum(const float * src)
         {

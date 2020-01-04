@@ -378,7 +378,7 @@ namespace Simd
                 d11 = _mm512_setzero_ps();
                 d21 = _mm512_setzero_ps();
                 d31 = _mm512_setzero_ps();
-                for (; k < K16; k += 32)
+                for (; k < K32; k += 32)
                 {
                     s0 = _mm512_loadu_ps(S0 + k + 0 * F);
                     s1 = _mm512_loadu_ps(S0 + k + 1 * F);
