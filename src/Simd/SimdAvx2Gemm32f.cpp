@@ -804,7 +804,7 @@ namespace Simd
 
         static void Kernel2x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
-            size_t K8 = K & (~8);
+            size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;
             const float * A1 = A + 1 * lda;
             const float * B0 = B + 0 * ldb;
