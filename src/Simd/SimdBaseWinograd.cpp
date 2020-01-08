@@ -2100,53 +2100,53 @@ namespace Simd
         void WinogradKernel3x3Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
             size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
         {
-            assert(padY == padX && padY == padH && padY == padW && (padY == 0 || padY == 1));
-            SimdBool pad = padY > 0 ? SimdTrue : SimdFalse;
-            size_t dstHeight = pad ? srcHeight : srcHeight - 2;
-            size_t dstWidth = pad ? srcWidth : srcWidth - 2;
-            size_t dstHeightFull = dstHeight / 4 * 4;
-            size_t dstWidthFull = dstWidth / 4 * 4;
-            size_t noseW = Simd::Min<size_t>(6, dstWidth + 1);
-            size_t noseH = Simd::Min<size_t>(6, dstHeight + 1);
-            size_t start = pad ? 4 : 0;
-            if (pad)
-            {
-                if (dstHeight == dstHeightFull)
-                    dstHeightFull -= 4;
-                if (dstWidth == dstWidthFull)
-                    dstWidthFull -= 4;
-                src -= (srcWidth + 1)*(trans ? srcChannels : 1);
-            }
-            size_t tailW = dstWidth - dstWidthFull + (pad ? 1 : 2);
-            size_t tailH = dstHeight - dstHeightFull + (pad ? 1 : 2);
+            assert(padY + padH <= 2 && padX + padW <= 2);
+            size_t dstH = srcHeight - 2 + padY + padH;
+            size_t dstW = srcWidth - 2 + padX + padW;
+            size_t dstH4 = dstH / 4 * 4;
+            size_t dstW4 = dstW / 4 * 4;
+            size_t noseW = Simd::Min<size_t>(6, dstW + 1);
+            size_t noseH = Simd::Min<size_t>(6, dstH + 1);
+            size_t startY = padY ? 4 : 0;
+            size_t startX = padX ? 4 : 0;
+            if (padH && dstH == dstH4)
+                dstH4 -= 4;
+            if(padY)
+                src -= srcWidth * (trans ? srcChannels : 1);
+            if (padW && dstW == dstW4)
+                dstW4 -= 4;
+            if(padX)
+                src -= 1 * (trans ? srcChannels : 1);
+            size_t tailW = dstW - dstW4 + (padX ? 0 : 1) + (padW ? 0 : 1);
+            size_t tailH = dstH - dstH4 + (padY ? 0 : 1) + (padH ? 0 : 1);
             if (trans)
             {
                 size_t row = 0, col = 0;
-                if (pad)
+                if (padY)
                 {
-                    if (pad)
+                    if (padX)
                         WinogradKernel3x3Block4x4SetInput1t(src, srcWidth, srcChannels, 1, noseH, 1, noseW, dst, dstStride), dst += srcChannels;
-                    for (col = start; col < dstWidthFull; col += 4)
+                    for (col = startX; col < dstW4; col += 4)
                         WinogradKernel3x3Block4x4SetInput1t(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, 6, dst, dstStride), dst += srcChannels;
-                    if (col < dstWidth)
+                    if (col < dstW)
                         WinogradKernel3x3Block4x4SetInput1t(src + col * srcChannels, srcWidth, srcChannels, 1, noseH, 0, tailW, dst, dstStride), dst += srcChannels;
                 }
-                for (row = start; row < dstHeightFull; row += 4)
+                for (row = startY; row < dstH4; row += 4)
                 {
-                    if (pad)
+                    if (padX)
                         WinogradKernel3x3Block4x4SetInput1t(src + row * srcWidth * srcChannels, srcWidth, srcChannels, 0, 6, 1, noseW, dst, dstStride), dst += srcChannels;
-                    for (col = start; col < dstWidthFull; col += 4)
+                    for (col = startX; col < dstW4; col += 4)
                         WinogradKernel3x3Block4x4SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, dst, dstStride), dst += srcChannels;
-                    if (col < dstWidth)
+                    if (col < dstW)
                         WinogradKernel3x3Block4x4SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, 6, 0, tailW, dst, dstStride), dst += srcChannels;
                 }
-                if (row < dstHeight)
+                if (row < dstH)
                 {
-                    if (pad)
+                    if (padX)
                         WinogradKernel3x3Block4x4SetInput1t(src + row * srcWidth* srcChannels, srcWidth, srcChannels, 0, tailH, 1, noseW, dst, dstStride), dst += srcChannels;
-                    for (col = start; col < dstWidthFull; col += 4)
+                    for (col = startX; col < dstW4; col += 4)
                         WinogradKernel3x3Block4x4SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, 6, dst, dstStride), dst += srcChannels;
-                    if (col < dstWidth)
+                    if (col < dstW)
                         WinogradKernel3x3Block4x4SetInput1t(src + (row * srcWidth + col) * srcChannels, srcWidth, srcChannels, 0, tailH, 0, tailW, dst, dstStride), dst += srcChannels;
                 }
             }
@@ -2155,31 +2155,31 @@ namespace Simd
                 for (size_t c = 0; c < srcChannels; ++c)
                 {
                     size_t row = 0, col = 0;
-                    if (pad)
+                    if (padY)
                     {
-                        if (pad)
+                        if (padX)
                             WinogradKernel3x3Block4x4SetInput1n(src, srcWidth, 1, noseH, 1, noseW, dst++, dstStride);
-                        for (col = start; col < dstWidthFull; col += 4)
+                        for (col = startX; col < dstW4; col += 4)
                             WinogradKernel3x3Block4x4SetInput1n(src + col, srcWidth, 1, noseH, 0, 6, dst++, dstStride);
-                        if (col < dstWidth)
+                        if (col < dstW)
                             WinogradKernel3x3Block4x4SetInput1n(src + col, srcWidth, 1, noseH, 0, tailW, dst++, dstStride);
                     }
-                    for (row = start; row < dstHeightFull; row += 4)
+                    for (row = startY; row < dstH4; row += 4)
                     {
-                        if (pad)
+                        if (padX)
                             WinogradKernel3x3Block4x4SetInput1n(src + row * srcWidth, srcWidth, 0, 6, 1, noseW, dst++, dstStride);
-                        for (col = start; col < dstWidthFull; col += 4)
+                        for (col = startX; col < dstW4; col += 4)
                             WinogradKernel3x3Block4x4SetInput1n(src + row * srcWidth + col, srcWidth, dst++, dstStride);
-                        if (col < dstWidth)
+                        if (col < dstW)
                             WinogradKernel3x3Block4x4SetInput1n(src + row * srcWidth + col, srcWidth, 0, 6, 0, tailW, dst++, dstStride);
                     }
-                    if (row < dstHeight)
+                    if (row < dstH)
                     {
-                        if (pad)
+                        if (padX)
                             WinogradKernel3x3Block4x4SetInput1n(src + row * srcWidth, srcWidth, 0, tailH, 1, noseW, dst++, dstStride);
-                        for (col = start; col < dstWidthFull; col += 4)
+                        for (col = startX; col < dstW4; col += 4)
                             WinogradKernel3x3Block4x4SetInput1n(src + row * srcWidth + col, srcWidth, 0, tailH, 0, 6, dst++, dstStride);
-                        if (col < dstWidth)
+                        if (col < dstW)
                             WinogradKernel3x3Block4x4SetInput1n(src + row * srcWidth + col, srcWidth, 0, tailH, 0, tailW, dst++, dstStride);
                     }
                     src += srcWidth * srcHeight;

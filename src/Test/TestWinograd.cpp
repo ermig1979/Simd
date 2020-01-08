@@ -566,6 +566,11 @@ namespace Test
         result = result && WinogradSetInputAutoTest(128, 28, 24, _block, _core, _pad, _pad, trans, f1, f2);
         result = result && WinogradSetInputAutoTest(256, 14, 12, _block, _core, _pad, _pad, trans, f1, f2);
         result = result && WinogradSetInputAutoTest(512, 7, 6, _block, _core, _pad, _pad, trans, f1, f2);
+        if(block == 4 && pad)
+        {
+            result = result && WinogradSetInputAutoTest(64, 40, 159, _block, _core, _pad, Size(1, 0), trans, f1, f2);
+            result = result && WinogradSetInputAutoTest(64, 41, 159, _block, _core, Size(1, 0), _pad, trans, f1, f2);
+        }
 
         return result;
     }
