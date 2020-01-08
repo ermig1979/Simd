@@ -47,7 +47,7 @@ namespace Simd
         /*!
             Creates a new Font class with given height.
 
-            \note The font is generated on the base of the generic monospace font from Gdiplus.
+            \note The font supports ASCII characters only. It was generated on the base of the generic monospace font from Gdiplus.
 
             \param [in] height - initial height value. By default it is equal to 16.
         */
