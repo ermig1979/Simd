@@ -250,7 +250,8 @@ namespace Simd
             typedef void(*SetOutput)(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
             void SetBlock(size_t blockY, size_t blockX);
-            void ForwardMerged(const float * src, float * bufS, float * bufD, float * dst, size_t merge);
+            void ForwardMerged(const float * src, float * bufS, float * bufD, float * dst);
+            void ForwardSplitted(const float * src, float * bufS, float * bufD, float * dst);
 
 #ifdef SIMD_PERFORMANCE_STATISTIC
             long long RealFlop() const
@@ -260,7 +261,7 @@ namespace Simd
             }
 #endif
 
-            size_t _count, _blockY, _blockX, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge;
+            size_t _count, _blockY, _blockX, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge, _split, _tileHs;
 
             Array32f _winogradWeight;
             SetFilter _setFilter;

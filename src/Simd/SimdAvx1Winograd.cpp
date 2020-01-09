@@ -2564,8 +2564,8 @@ namespace Simd
                 size_t dstW = srcWidth - 2 + padX + padW;
                 size_t dstH4 = dstH / 4 * 4;
                 size_t dstW4 = dstW / 4 * 4;
-                size_t noseW = Simd::Min<size_t>(6, dstW + 1);
-                size_t noseH = Simd::Min<size_t>(6, dstH + 1);
+                size_t noseW = Simd::Min<size_t>(6, srcWidth + padX);
+                size_t noseH = Simd::Min<size_t>(6, srcHeight + padY);
                 size_t startY = padY ? 4 : 0;
                 size_t startX = padX ? 4 : 0;
                 if (padH && dstH == dstH4)
@@ -2576,8 +2576,8 @@ namespace Simd
                     dstW4 -= 4;
                 if (padX)
                     src -= srcChannels;
-                size_t tailW = dstW - dstW4 + (padX ? 0 : 1) + (padW ? 0 : 1);
-                size_t tailH = dstH - dstH4 + (padY ? 0 : 1) + (padH ? 0 : 1);
+                size_t tailW = dstW - dstW4 + (padW ? 1 : 2);
+                size_t tailH = dstH - dstH4 + (padH ? 1 : 2);
                 size_t row = 0, col = 0;
                 if (padY)
                 {

@@ -717,8 +717,8 @@ namespace Simd
         String SynetConvolution32fWinograd::Desc() const 
         { 
             const ConvParam32f& p = this->Param();
-            return Ext() + "::Winograd F(" + ToStr(_blockY) + "x" + ToStr(_blockX) + "," + 
-                ToStr(p.kernelY) + "x" + ToStr(p.kernelX) + ")" + (_merge > 1 ? "-" + ToStr(_merge) : ""); 
+            return Ext() + "::Winograd F(" + ToStr(_blockY) + "x" + ToStr(_blockX) + "," + ToStr(p.kernelY) + "x" + ToStr(p.kernelX) + ")" 
+                + (_merge > 1 ? "*" + ToStr(_merge) : "") + (_split > 1 ? "/" + ToStr(_split) : "");
         }
         
         size_t SynetConvolution32fWinograd::ExternalBufferSize() const
@@ -758,7 +758,10 @@ namespace Simd
             float * bufD = bufS + _strideS * _count * _merge;
             if (p.trans)
             {
-                ForwardMerged(src, bufS, bufD, dst, _merge);
+                if (_split > 1)
+                    ForwardSplitted(src, bufS, bufD, dst);
+                else
+                    ForwardMerged(src, bufS, bufD, dst);
             }
             else
             {
@@ -821,8 +824,6 @@ namespace Simd
             _tileH = (p.dstH + _blockY - 1) / _blockY;
             _tileW = (p.dstW + _blockX - 1) / _blockX;
             _strideW = p.srcC * p.dstC;
-            _strideS = p.srcC * _tileH * _tileW;
-            _strideD = p.dstC * _tileH * _tileW;
             _M = p.trans ? _tileW * _tileH : p.dstC;
             _N = p.trans ? p.dstC : _tileW * _tileH;
             _K = p.srcC;
@@ -830,40 +831,90 @@ namespace Simd
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
             _merge = 1;
-            if (p.trans && _batch > 1)
+            _split = 1;
+            _tileHs = _tileH;
+            if (p.trans)
             {
-                for (size_t merge = 1; merge <= _batch; ++merge)
-                    if (_batch%merge == 0 && _M*merge <= 128)
-                        _merge = merge;
+                if (_batch > 1)
+                {
+                    for (size_t merge = 1; merge <= _batch; ++merge)
+                        if (_batch % merge == 0 && _M * merge <= 128)
+                            _merge = merge;
+                }
+                if (_merge == 1 && _blockY == 4 && _tileW * _tileH * (p.srcC + p.dstC) > p.srcC * p.dstC)
+                {
+                    size_t cache = Base::AlgCacheL2();
+                    _tileHs = Simd::RestrictRange(cache / _count / _tileW / (p.srcC + p.dstC), size_t(1), _tileH);
+                    _split = (_tileH + _tileHs - 1) / _tileHs;
+                    while (_split * _tileHs >= _tileH + _split)
+                        _tileHs--;
+                }
             }
+            _strideS = p.srcC * _tileHs * _tileW;
+            _strideD = p.dstC * _tileHs * _tileW;
         }
 
-        void SynetConvolution32fWinograd::ForwardMerged(const float * src, float * bufS, float * bufD, float * dst, size_t merge)
+        void SynetConvolution32fWinograd::ForwardMerged(const float * src, float * bufS, float * bufD, float * dst)
         {
             const ConvParam32f & p = _param;
-            for (size_t b = 0; b < _batch; b += merge)
+            for (size_t b = 0; b < _batch; b += _merge)
             {
-                for (size_t m = 0; m < merge; ++m)
-                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, p.padY, p.padX, p.padH, p.padW, bufS + m * _strideS, _strideS * merge, p.trans);
+                for (size_t m = 0; m < _merge; ++m)
+                    _setInput(src + m * _sizeS, p.srcC, p.srcH, p.srcW, p.padY, p.padX, p.padH, p.padW, bufS + m * _strideS, _strideS * _merge, p.trans);
                 for (size_t i = 0; i < _count; ++i)
                 {
                     if (_nhwcWeight.data)
                     {
                         if (_gemmCb.Size())
-                            _gemmCb.Run(GemmCbArgs(_M * merge, _N, _K, bufS + i * _strideS * merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * merge));
+                            _gemmCb.Run(GemmCbArgs(_M * _merge, _N, _K, bufS + i * _strideS * _merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * _merge));
                         else
-                            _nhwcRun(_M * merge, _N, _K, bufS + i * _strideS * merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * merge, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                            _nhwcRun(_M * _merge, _N, _K, bufS + i * _strideS * _merge, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD * _merge, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                     }
                     else
-                        _gemm.Run(GemmArgs(_M * merge, _N, _K, &_1, bufS + i * _strideS * merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * merge, _N));
+                        _gemm.Run(GemmArgs(_M * _merge, _N, _K, &_1, bufS + i * _strideS * _merge, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD * _merge, _N));
                 }
-                for (size_t m = 0; m < merge; ++m)
+                for (size_t m = 0; m < _merge; ++m)
                 {
-                    _setOutput(bufD + m * _strideD, _strideD * merge, dst + m * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
+                    _setOutput(bufD + m * _strideD, _strideD * _merge, dst + m * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
                     _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
                 }
-                src += _sizeS * merge;
-                dst += _sizeD * merge;
+                src += _sizeS * _merge;
+                dst += _sizeD * _merge;
+            }
+        }
+
+        void SynetConvolution32fWinograd::ForwardSplitted(const float* src, float* bufS, float* bufD, float* dst)
+        {
+            const ConvParam32f& p = _param;
+            for (size_t b = 0; b < _batch; ++b)
+            {
+                for (size_t s = 0; s < _split; ++s)
+                {
+                    size_t padY = s ? 0 : p.padY;
+                    size_t padH = s == _split - 1 ? p.padH : 0;
+                    size_t srcY = s * _tileHs * _blockY + padY - p.padY;
+                    size_t srcH = Simd::Min(_tileHs * _blockY + p.kernelY - 1 - padY - padH, p.srcH - srcY);
+                    size_t M = _tileW * Simd::Min(_tileHs, _tileH - s * _tileHs);
+                    size_t dstY = s * _tileHs * _blockY;
+                    size_t dstH = Simd::Min(_tileHs * _blockY, p.dstH - dstY);
+                    _setInput(src + srcY * p.srcC * p.srcW, p.srcC, srcH, p.srcW, padY, p.padX, padH, p.padW, bufS, _strideS, p.trans);
+                    for (size_t i = 0; i < _count; ++i)
+                    {
+                        if (_nhwcWeight.data)
+                        {
+                            if (_gemmCb.Size())
+                                _gemmCb.Run(GemmCbArgs(M, _N, _K, bufS + i * _strideS, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD));
+                            else
+                                _nhwcRun(M, _N, _K, bufS + i * _strideS, _nhwcWeight.data + i * _nhwcStrideW, bufD + i * _strideD, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                        }
+                        else
+                            _gemm.Run(GemmArgs(M, _N, _K, &_1, bufS + i * _strideS, _K, _winogradWeight.data + i * _strideW, _N, &_0, bufD + i * _strideD, _N));
+                    }
+                    _setOutput(bufD, _strideD, dst + dstY * p.dstC * p.dstW, p.dstC, dstH, p.dstW, p.trans);
+                    _biasAndActivation(_bias, p.dstC, dstH * p.dstW, p.activation, _params, p.trans, dst + dstY * p.dstC * p.dstW);
+                }
+                src += _sizeS;
+                dst += _sizeD;
             }
         }
 
@@ -1366,9 +1417,12 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+#define SIMD_BASE_ONLY_GEMM_NN
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             ConvParam32f param(batch, conv, gemm);
+#if !defined(SIMD_BASE_ONLY_GEMM_NN)
             if (!param.Valid())
                 return NULL;
             else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
@@ -1384,6 +1438,7 @@ namespace Simd
             else if (SynetConvolution32fDirectNhwc::Preferable(param))
                 return new SynetConvolution32fDirectNhwc(param);
             else
+#endif
                 return new SynetConvolution32fGemmNN(param);
         }
     }
