@@ -99,7 +99,7 @@ namespace Simd
 
         long long Flop() const
         {
-            return batch * kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
+            return batch * kernelY * kernelX * srcC * srcH * srcW * dstC / group * 2;
         }
 #endif
     };
