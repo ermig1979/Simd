@@ -34,6 +34,11 @@
 
 namespace Simd
 {
+    SIMD_INLINE size_t DivHi(size_t value, size_t divider)
+    {
+        return (value + divider - 1) / divider;
+    }
+
     SIMD_INLINE size_t AlignHiAny(size_t size, size_t align)
     {
         return (size + align - 1) / align * align;

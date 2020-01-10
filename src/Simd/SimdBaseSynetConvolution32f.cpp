@@ -841,13 +841,26 @@ namespace Simd
                         if (_batch % merge == 0 && _M * merge <= 128)
                             _merge = merge;
                 }
-                if (_merge == 1 && _blockY == 4 && _tileW * _tileH * (p.srcC + p.dstC) > p.srcC * p.dstC)
+                if (_merge == 1 && _blockY == 4)
                 {
-                    size_t cache = Base::AlgCacheL2();
-                    _tileHs = Simd::RestrictRange(cache / _count / _tileW / (p.srcC + p.dstC), size_t(1), _tileH);
-                    _split = (_tileH + _tileHs - 1) / _tileHs;
-                    while (_split * _tileHs >= _tileH + _split)
-                        _tileHs--;
+                    size_t cacheL2 = Base::AlgCacheL2() / sizeof(float);
+                    size_t cacheL3 = Base::AlgCacheL3() / sizeof(float);
+                    size_t bufferSize = _count * (p.srcC + p.dstC) * _tileW * _tileH;
+                    size_t weightSize = _count * p.srcC * p.dstC;
+                    if (bufferSize > cacheL2)
+                    {
+                        _tileHs = Simd::RestrictRange<size_t>(size_t(cacheL2*0.5) * _tileH / bufferSize, 1, _tileH);
+                        _split = DivHi(_tileH, _tileHs);
+                        while (_split * _tileHs >= _tileH + _split)
+                            _tileHs--;
+                        if (_split > 1 && weightSize > cacheL3)
+                        {
+                            _split = DivHi(bufferSize, weightSize);
+                            _tileHs = DivHi(_tileH, _split);
+                            while (_split * _tileHs >= _tileH + _tileHs)
+                                _split--;
+                        }
+                    }
                 }
             }
             _strideS = p.srcC * _tileHs * _tileW;
@@ -1417,7 +1430,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-#define SIMD_BASE_ONLY_GEMM_NN
+//#define SIMD_BASE_ONLY_GEMM_NN
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
