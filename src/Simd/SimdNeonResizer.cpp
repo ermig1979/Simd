@@ -578,11 +578,11 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(float32x4_t));
-            if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear && dstX >= A)
+            if (tparam.IsByteBilinear() && dstX >= A)
                 return new ResizerByteBilinear(param);
-            else if (type == SimdResizeChannelByte && method == SimdResizeMethodArea)
+            else if (param.IsByteArea())
                 return new ResizerByteArea(param);
-            else if (type == SimdResizeChannelFloat && (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp))
+            else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
             else
                 return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

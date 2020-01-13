@@ -336,7 +336,7 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m128i));
-            if (type == SimdResizeChannelByte && method == SimdResizeMethodBilinear && dstX >= A)
+            if (param.IsByteBilinear() && dstX >= A)
                 return new ResizerByteBilinear(param);
             else
                 return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

@@ -46,6 +46,22 @@ namespace Simd
             this->channels = channels;
             this->align = align;
         }
+
+        bool IsByteBilinear() const
+        {
+            return type == SimdResizeChannelByte && method == SimdResizeMethodBilinear;
+        }
+
+        bool IsByteArea() const
+        {
+            return type == SimdResizeChannelByte && method == SimdResizeMethodArea;
+        }
+
+        bool IsFloatBilinear() const
+        {
+            return type == SimdResizeChannelFloat && 
+                (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp || method == SimdResizeMethodInferenceEngineInterp);
+        }
     };
 
     class Resizer : Deletable
@@ -100,7 +116,7 @@ namespace Simd
             Array32i _ix, _iy;
             Array32f _ax, _ay, _bx[2];
 
-            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, bool caffeInterp, int32_t * indices, float * alphas);
+            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t * indices, float * alphas);
 
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
 

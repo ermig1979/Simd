@@ -170,7 +170,7 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m512));
-            if (type == SimdResizeChannelFloat && (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp))
+            if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
             else
                 return Avx2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);

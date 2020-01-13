@@ -309,6 +309,8 @@ typedef enum
     SimdResizeMethodCaffeInterp,
     /*! Area method. */
     SimdResizeMethodArea,
+    /*! InferenceEngine::Extension::Cpu::Interp compatible method. */
+    SimdResizeMethodInferenceEngineInterp,
 } SimdResizeMethodType;
 
 /*! @ingroup synet
