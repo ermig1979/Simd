@@ -317,8 +317,11 @@ namespace Simd
             _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
             _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));
             _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _compatible ? _F : _microN));
-            if(_packA)
+            if (_packA)
+            {
+
                 _pA.Resize(_macroM * _macroK);
+            }
             size_t NF = AlignLo(_N, _F);
             if (tailMask)
             {
@@ -425,10 +428,11 @@ namespace Simd
         void MacroKernelCompatible(size_t M, size_t N, size_t K, const T * A, size_t lda, const T * pB, T * C, size_t ldc)
         {
             size_t klda = lda;
+            T * pA = (T*)A;
             if (_packA)
             {
                 _packA(A, lda, M, K, _microM, _pA.data);
-                A = _pA.data;
+                pA = _pA.data;
                 lda = K;
                 klda = 1;
             }
@@ -439,18 +443,18 @@ namespace Simd
             {
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMM(K, _1, A + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _main);
+                    _kernelMM(K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _main);
                 if (i < M)
-                    _kernelTM(M - i, K, _1, A + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _main);
+                    _kernelTM(M - i, K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _main);
                 pB += _microN * _K;
             }
             if (j < N)
             {
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMT(K, _1, A + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _tail);
+                    _kernelMT(K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _tail);
                 if (i < M)
-                    _kernelTT(M - i, K, _1, A + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _tail);
             }
         }
 

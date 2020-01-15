@@ -333,7 +333,7 @@
 
 #if (defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512F_ENABLE))
 #ifdef SIMD_X64_ENABLE
-#ifndef _MSC_VER
+#if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1915)
 #define SIMD_ZMM_COUNT 32
 #else
 #define SIMD_ZMM_COUNT 16

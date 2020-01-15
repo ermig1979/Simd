@@ -838,7 +838,7 @@ namespace Simd
                 return false;
             if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
                 return false;
-            if (p.Is1x1() && (p.srcC > p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 128)))
+            if (p.Is1x1() && (p.srcC >= 2*p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 128) || p.srcC > 256))
                 return false;
             if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                 return false;
