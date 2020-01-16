@@ -300,6 +300,7 @@ namespace Simd
             : _0(0)
             , _1(1)
         {
+            L2 = Simd::RestrictRange<size_t>(::sqrt(L1 * L3), L2/4, L2);
             _compatible = compatible;
             _M = M;
             _N = N;
@@ -427,13 +428,13 @@ namespace Simd
 
         void MacroKernelCompatible(size_t M, size_t N, size_t K, const T * A, size_t lda, const T * pB, T * C, size_t ldc)
         {
-            size_t klda = lda;
+            size_t klda = lda, plda = lda;
             T * pA = (T*)A;
             if (_packA)
             {
-                _packA(A, lda, M, K, _microM, _pA.data);
+                //_packA(A, lda, M, K, _microM, _pA.data);
                 pA = _pA.data;
-                lda = K;
+                plda = K;
                 klda = 1;
             }
             size_t MA = AlignLoAny(M, _microM);
@@ -443,18 +444,34 @@ namespace Simd
             {
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMM(K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _main);
+                {
+                    if (_packA && j == 0)
+                        _packA(A + i * lda, lda, _microM, K, _microM, pA + i * plda);
+                    _kernelMM(K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _main);
+                }
                 if (i < M)
-                    _kernelTM(M - i, K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _main);
+                {
+                    if (_packA && j == 0)
+                        _packA(A + i * lda, lda, M - i, K, _microM, pA + i * plda);
+                    _kernelTM(M - i, K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _main);
+                }
                 pB += _microN * _K;
             }
             if (j < N)
             {
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMT(K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _tail);
+                {
+                    if (_packA && j == 0)
+                        _packA(A + i * lda, lda, _microM, K, _microM, pA + i * plda);
+                    _kernelMT(K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _tail);
+                }
                 if (i < M)
-                    _kernelTT(M - i, K, _1, pA + i * lda, klda, pB, _F*_K, _F, C + i * ldc + j, ldc, _tail);
+                {
+                    if (_packA && j == 0)
+                        _packA(A + i * lda, lda, M - i, K, _microM, pA + i * plda);
+                    _kernelTT(M - i, K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _tail);
+                }
             }
         }
 

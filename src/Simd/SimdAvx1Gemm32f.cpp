@@ -578,81 +578,83 @@ namespace Simd
             return NULL;
         }
 
+        SIMD_INLINE void GemmPackA_4x8(const float* src, size_t stride, float* dst)
+        {
+            __m256 s0 = _mm256_loadu_ps(src + 0 * stride);
+            __m256 s1 = _mm256_loadu_ps(src + 1 * stride);
+            __m256 s2 = _mm256_loadu_ps(src + 2 * stride);
+            __m256 s3 = _mm256_loadu_ps(src + 3 * stride);
+            __m256 s00 = _mm256_unpacklo_ps(s0, s2);
+            __m256 s01 = _mm256_unpacklo_ps(s1, s3);
+            __m256 s10 = _mm256_unpackhi_ps(s0, s2);
+            __m256 s11 = _mm256_unpackhi_ps(s1, s3);
+            __m256 d0 = _mm256_unpacklo_ps(s00, s01);
+            __m256 d1 = _mm256_unpackhi_ps(s00, s01);
+            __m256 d2 = _mm256_unpacklo_ps(s10, s11);
+            __m256 d3 = _mm256_unpackhi_ps(s10, s11);
+            _mm256_storeu_ps(dst + 0x00, _mm256_permute2f128_ps(d0, d1, 0x20));
+            _mm256_storeu_ps(dst + 0x08, _mm256_permute2f128_ps(d2, d3, 0x20));
+            _mm256_storeu_ps(dst + 0x10, _mm256_permute2f128_ps(d0, d1, 0x31));
+            _mm256_storeu_ps(dst + 0x18, _mm256_permute2f128_ps(d2, d3, 0x31));
+        }
+
+        SIMD_INLINE void GemmPackA_4x4(const float* src, size_t stride, float* dst)
+        {
+            __m128 s0 = _mm_loadu_ps(src + 0 * stride);
+            __m128 s1 = _mm_loadu_ps(src + 1 * stride);
+            __m128 s2 = _mm_loadu_ps(src + 2 * stride);
+            __m128 s3 = _mm_loadu_ps(src + 3 * stride);
+            __m128 s00 = _mm_unpacklo_ps(s0, s2);
+            __m128 s01 = _mm_unpacklo_ps(s1, s3);
+            __m128 s10 = _mm_unpackhi_ps(s0, s2);
+            __m128 s11 = _mm_unpackhi_ps(s1, s3);
+            _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
+            _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(s00, s01));
+            _mm_storeu_ps(dst + 8, _mm_unpacklo_ps(s10, s11));
+            _mm_storeu_ps(dst + 12, _mm_unpackhi_ps(s10, s11));
+        }
+
+        SIMD_INLINE void GemmPackA_6x4(const float* src, size_t stride, float* dst)
+        {
+            __m128 s0 = _mm_loadu_ps(src + 0 * stride);
+            __m128 s1 = _mm_loadu_ps(src + 1 * stride);
+            __m128 s2 = _mm_loadu_ps(src + 2 * stride);
+            __m128 s3 = _mm_loadu_ps(src + 3 * stride);
+            __m128 s4 = _mm_loadu_ps(src + 4 * stride);
+            __m128 s5 = _mm_loadu_ps(src + 5 * stride);
+            __m128 s00 = _mm_unpacklo_ps(s0, s2);
+            __m128 s01 = _mm_unpacklo_ps(s1, s3);
+            __m128 s10 = _mm_unpackhi_ps(s0, s2);
+            __m128 s11 = _mm_unpackhi_ps(s1, s3);
+            __m128 s20 = _mm_unpacklo_ps(s4, s5);
+            __m128 s21 = _mm_unpackhi_ps(s4, s5);
+            _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
+            _mm_storel_pi((__m64*)(dst + 4), s20);
+            _mm_storeu_ps(dst + 6, _mm_unpackhi_ps(s00, s01));
+            _mm_storeh_pi((__m64*)(dst + 10), s20);
+            _mm_storeu_ps(dst + 12, _mm_unpacklo_ps(s10, s11));
+            _mm_storel_pi((__m64*)(dst + 16), s21);
+            _mm_storeu_ps(dst + 18, _mm_unpackhi_ps(s10, s11));
+            _mm_storeh_pi((__m64*)(dst + 22), s21);
+        }
+
         void GemmPackA(const float * src, size_t stride, size_t M, size_t K, size_t cell, float * dst)
         {
             size_t K4 = AlignLo(K, 4), K8 = AlignLo(K, 8);
             for (size_t i = 0; i < M; i += cell)
             {
                 size_t m = Simd::Min(cell, M - i), k = 0;
-                if (cell == 6 && m == 6)
-                {
-                    size_t K4 = AlignLo(K, 4);
-                    for (; k < K4; k += 4)
-                    {
-                        const float * ps = src + k;
-                        __m128 s0 = _mm_loadu_ps(ps + 0 * stride);
-                        __m128 s1 = _mm_loadu_ps(ps + 1 * stride);
-                        __m128 s2 = _mm_loadu_ps(ps + 2 * stride);
-                        __m128 s3 = _mm_loadu_ps(ps + 3 * stride);
-                        __m128 s4 = _mm_loadu_ps(ps + 4 * stride);
-                        __m128 s5 = _mm_loadu_ps(ps + 5 * stride);
-                        __m128 s00 = _mm_unpacklo_ps(s0, s2);
-                        __m128 s01 = _mm_unpacklo_ps(s1, s3);
-                        __m128 s10 = _mm_unpackhi_ps(s0, s2);
-                        __m128 s11 = _mm_unpackhi_ps(s1, s3);
-                        __m128 s20 = _mm_unpacklo_ps(s4, s5);
-                        __m128 s21 = _mm_unpackhi_ps(s4, s5);
-                        _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
-                        _mm_storel_pi((__m64*)(dst + 4), s20);
-                        _mm_storeu_ps(dst + 6, _mm_unpackhi_ps(s00, s01));
-                        _mm_storeh_pi((__m64*)(dst + 10), s20);
-                        _mm_storeu_ps(dst + 12, _mm_unpacklo_ps(s10, s11));
-                        _mm_storel_pi((__m64*)(dst + 16), s21);
-                        _mm_storeu_ps(dst + 18, _mm_unpackhi_ps(s10, s11));
-                        _mm_storeh_pi((__m64*)(dst + 22), s21);
-                        dst += 24;
-                    }
-                }
                 if (cell == 4 && m == 4)
                 {
-                    for (; k < K8; k += 8)
-                    {
-                        const float * ps = src + k;
-                        __m256 s0 = _mm256_loadu_ps(ps + 0 * stride);
-                        __m256 s1 = _mm256_loadu_ps(ps + 1 * stride);
-                        __m256 s2 = _mm256_loadu_ps(ps + 2 * stride);
-                        __m256 s3 = _mm256_loadu_ps(ps + 3 * stride);
-                        __m256 s00 = _mm256_unpacklo_ps(s0, s2);
-                        __m256 s01 = _mm256_unpacklo_ps(s1, s3);
-                        __m256 s10 = _mm256_unpackhi_ps(s0, s2);
-                        __m256 s11 = _mm256_unpackhi_ps(s1, s3);
-                        __m256 d0 = _mm256_unpacklo_ps(s00, s01);
-                        __m256 d1 = _mm256_unpackhi_ps(s00, s01);
-                        __m256 d2 = _mm256_unpacklo_ps(s10, s11);
-                        __m256 d3 = _mm256_unpackhi_ps(s10, s11);
-                        _mm256_storeu_ps(dst + 0, _mm256_permute2f128_ps(d0, d1, 0x20));
-                        _mm256_storeu_ps(dst + 8, _mm256_permute2f128_ps(d2, d3, 0x20));
-                        _mm256_storeu_ps(dst + 16, _mm256_permute2f128_ps(d0, d1, 0x31));
-                        _mm256_storeu_ps(dst + 24, _mm256_permute2f128_ps(d2, d3, 0x31));
-                        dst += 32;
-                    };
-                    for (; k < K4; k += 4)
-                    {
-                        const float * ps = src + k;
-                        __m128 s0 = _mm_loadu_ps(ps + 0 * stride);
-                        __m128 s1 = _mm_loadu_ps(ps + 1 * stride);
-                        __m128 s2 = _mm_loadu_ps(ps + 2 * stride);
-                        __m128 s3 = _mm_loadu_ps(ps + 3 * stride);
-                        __m128 s00 = _mm_unpacklo_ps(s0, s2);
-                        __m128 s01 = _mm_unpacklo_ps(s1, s3);
-                        __m128 s10 = _mm_unpackhi_ps(s0, s2);
-                        __m128 s11 = _mm_unpackhi_ps(s1, s3);
-                        _mm_storeu_ps(dst + 0, _mm_unpacklo_ps(s00, s01));
-                        _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(s00, s01));
-                        _mm_storeu_ps(dst + 8, _mm_unpacklo_ps(s10, s11));
-                        _mm_storeu_ps(dst + 12, _mm_unpackhi_ps(s10, s11));
-                        dst += 16;
-                    }
+                    for (; k < K8; k += 8, dst += 32)
+                        GemmPackA_4x8(src + k, stride, dst);
+                    for (; k < K4; k += 4, dst += 16)
+                        GemmPackA_4x4(src + k, stride, dst);
+                }
+                else if (cell == 6 && m == 6)
+                {
+                    for (; k < K4; k += 4, dst += 24)
+                        GemmPackA_6x4(src + k, stride, dst);
                 }
                 for (; k < K; ++k)
                 {
