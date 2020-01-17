@@ -31,6 +31,95 @@ namespace Simd
 #if defined(SIMD_AVX512F_ENABLE) 
     namespace Avx512f
     {
+        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x12(const float* src0, size_t srcC,
+            const float* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1)
+        {
+            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, s0, w0, w1;
+            d00 = bias[0], d01 = bias[1];
+            d10 = bias[0], d11 = bias[1];
+            d20 = bias[0], d21 = bias[1];
+            d30 = bias[0], d31 = bias[1];
+            d40 = bias[0], d41 = bias[1];
+            d50 = bias[0], d51 = bias[1];
+            d60 = bias[0], d61 = bias[1];
+            d70 = bias[0], d71 = bias[1];
+            d80 = bias[0], d81 = bias[1];
+            d90 = bias[0], d91 = bias[1];
+            da0 = bias[0], da1 = bias[1];
+            db0 = bias[0], db1 = bias[1];
+            const float* src1 = src0 + 1 * srcC;
+            const float* src2 = src0 + 2 * srcC;
+            const float* src3 = src0 + 3 * srcC;
+            const float* src4 = src0 + 4 * srcC;
+            const float* src5 = src0 + 5 * srcC;
+            for (size_t sc0 = 0, sc6 = 6 * srcC; sc0 < srcC; ++sc0, ++sc6)
+            {
+                w0 = _mm512_loadu_ps(weight + 0);
+                w1 = _mm512_loadu_ps(weight + F);
+                s0 = _mm512_set1_ps(src0[sc0]);
+                d00 = _mm512_fmadd_ps(s0, w0, d00);
+                d01 = _mm512_fmadd_ps(s0, w1, d01);
+                s0 = _mm512_set1_ps(src1[sc0]);
+                d10 = _mm512_fmadd_ps(s0, w0, d10);
+                d11 = _mm512_fmadd_ps(s0, w1, d11);
+                s0 = _mm512_set1_ps(src2[sc0]);
+                d20 = _mm512_fmadd_ps(s0, w0, d20);
+                d21 = _mm512_fmadd_ps(s0, w1, d21);
+                s0 = _mm512_set1_ps(src3[sc0]);
+                d30 = _mm512_fmadd_ps(s0, w0, d30);
+                d31 = _mm512_fmadd_ps(s0, w1, d31);
+                s0 = _mm512_set1_ps(src4[sc0]);
+                d40 = _mm512_fmadd_ps(s0, w0, d40);
+                d41 = _mm512_fmadd_ps(s0, w1, d41);
+                s0 = _mm512_set1_ps(src5[sc0]);
+                d50 = _mm512_fmadd_ps(s0, w0, d50);
+                d51 = _mm512_fmadd_ps(s0, w1, d51);
+                s0 = _mm512_set1_ps(src0[sc6]);
+                d60 = _mm512_fmadd_ps(s0, w0, d60);
+                d61 = _mm512_fmadd_ps(s0, w1, d61);
+                s0 = _mm512_set1_ps(src1[sc6]);
+                d70 = _mm512_fmadd_ps(s0, w0, d70);
+                d71 = _mm512_fmadd_ps(s0, w1, d71);
+                s0 = _mm512_set1_ps(src2[sc6]);
+                d80 = _mm512_fmadd_ps(s0, w0, d80);
+                d81 = _mm512_fmadd_ps(s0, w1, d81);
+                s0 = _mm512_set1_ps(src3[sc6]);
+                d90 = _mm512_fmadd_ps(s0, w0, d90);
+                d91 = _mm512_fmadd_ps(s0, w1, d91);
+                s0 = _mm512_set1_ps(src4[sc6]);
+                da0 = _mm512_fmadd_ps(s0, w0, da0);
+                da1 = _mm512_fmadd_ps(s0, w1, da1);
+                s0 = _mm512_set1_ps(src5[sc6]);
+                db0 = _mm512_fmadd_ps(s0, w0, db0);
+                db1 = _mm512_fmadd_ps(s0, w1, db1);
+                weight += DF;
+            }
+            _mm512_storeu_ps(dst0 + 0 * F, Activate<type>(d00, params, 0));
+            _mm512_storeu_ps(dst1 + 0 * F, Activate<type>(d01, params, 1));
+            _mm512_storeu_ps(dst0 + 1 * F, Activate<type>(d10, params, 0));
+            _mm512_storeu_ps(dst1 + 1 * F, Activate<type>(d11, params, 1));
+            _mm512_storeu_ps(dst0 + 2 * F, Activate<type>(d20, params, 0));
+            _mm512_storeu_ps(dst1 + 2 * F, Activate<type>(d21, params, 1));
+            _mm512_storeu_ps(dst0 + 3 * F, Activate<type>(d30, params, 0));
+            _mm512_storeu_ps(dst1 + 3 * F, Activate<type>(d31, params, 1));
+            _mm512_storeu_ps(dst0 + 4 * F, Activate<type>(d40, params, 0));
+            _mm512_storeu_ps(dst1 + 4 * F, Activate<type>(d41, params, 1));
+            _mm512_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
+            _mm512_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
+            _mm512_storeu_ps(dst0 + 6 * F, Activate<type>(d60, params, 0));
+            _mm512_storeu_ps(dst1 + 6 * F, Activate<type>(d61, params, 1));
+            _mm512_storeu_ps(dst0 + 7 * F, Activate<type>(d70, params, 0));
+            _mm512_storeu_ps(dst1 + 7 * F, Activate<type>(d71, params, 1));
+            _mm512_storeu_ps(dst0 + 8 * F, Activate<type>(d80, params, 0));
+            _mm512_storeu_ps(dst1 + 8 * F, Activate<type>(d81, params, 1));
+            _mm512_storeu_ps(dst0 + 9 * F, Activate<type>(d90, params, 0));
+            _mm512_storeu_ps(dst1 + 9 * F, Activate<type>(d91, params, 1));
+            _mm512_storeu_ps(dst0 + 10 * F, Activate<type>(da0, params, 0));
+            _mm512_storeu_ps(dst1 + 10 * F, Activate<type>(da1, params, 1));
+            _mm512_storeu_ps(dst0 + 11 * F, Activate<type>(db0, params, 0));
+            _mm512_storeu_ps(dst1 + 11 * F, Activate<type>(db1, params, 1));
+        }
+
         template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x6(const float * src0, size_t srcC,
             const float * weight, const __m512 * bias, const __m512 * params, float * dst0, float * dst1)
         {
@@ -240,6 +329,7 @@ namespace Simd
 #ifdef SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
             size_t yInt = Simd::Max(yBeg, yEnd&(~dstM)), nBeg = yBeg * dstW, nInt = yInt * dstW, nEnd = yEnd * dstW;
             size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
+            size_t nInt12 = AlignLoAny(nInt - nBeg, 12) + nBeg, nEnd12 = AlignLoAny(nEnd - nInt, 12) + nInt;
             InputConvolution1x1_2xM_Ptr tailInt_2 = GetInputConvolution1x1_2xM<type>(nIntTail);
             InputConvolution1x1_2xM_Ptr tailEnd_2 = GetInputConvolution1x1_2xM<type>(nEndTail);
 #else
@@ -267,10 +357,14 @@ namespace Simd
                 size_t dn = nBeg;
                 if (dstC - dc > F)
                 {
+                    for (; dn < nInt12; dn += 12, pS += 12 * srcC, dst0 += 12 * F)
+                        InputConvolution1x1_2x12<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
                     for (; dn < nInt6; dn += 6, pS += 6 * srcC, dst0 += 6 * F)
                         InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
                     if (nIntTail)
                         tailInt_2(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += nIntTail * srcC, dn += nIntTail;
+                    for (; dn < nEnd12; dn += 12, pS += 12 * srcC, dst1 += 12 * F)
+                        InputConvolution1x1_2x12<type>(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS);
                     for (; dn < nEnd6; dn += 6, pS += 6 * srcC, dst1 += 6 * F)
                         InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst1, dst1 + dstS);
                     if (nEndTail)
@@ -919,6 +1013,179 @@ namespace Simd
             }
         }
 
+        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x12(const float* src, size_t srcC, size_t srcS,
+            const float* weight, const __m512* bias, const __m512* params, float* dst, size_t dstC, const __mmask16 tails[2])
+        {
+            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, s0, w0, w1;
+            if (tails[1])
+            {
+                d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
+                d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
+                d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
+                d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
+                d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
+                d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
+                d60 = _mm512_setzero_ps(), d61 = _mm512_setzero_ps();
+                d70 = _mm512_setzero_ps(), d71 = _mm512_setzero_ps();
+                d80 = _mm512_setzero_ps(), d81 = _mm512_setzero_ps();
+                d90 = _mm512_setzero_ps(), d91 = _mm512_setzero_ps();
+                da0 = _mm512_setzero_ps(), da1 = _mm512_setzero_ps();
+                db0 = _mm512_setzero_ps(), db1 = _mm512_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm512_loadu_ps(weight + 0);
+                        w1 = _mm512_loadu_ps(weight + F);
+                        s0 = _mm512_set1_ps(src[i + 0 * F]);
+                        d00 = _mm512_fmadd_ps(s0, w0, d00);
+                        d01 = _mm512_fmadd_ps(s0, w1, d01);
+                        s0 = _mm512_set1_ps(src[i + 1 * F]);
+                        d10 = _mm512_fmadd_ps(s0, w0, d10);
+                        d11 = _mm512_fmadd_ps(s0, w1, d11);
+                        s0 = _mm512_set1_ps(src[i + 2 * F]);
+                        d20 = _mm512_fmadd_ps(s0, w0, d20);
+                        d21 = _mm512_fmadd_ps(s0, w1, d21);
+                        s0 = _mm512_set1_ps(src[i + 3 * F]);
+                        d30 = _mm512_fmadd_ps(s0, w0, d30);
+                        d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        s0 = _mm512_set1_ps(src[i + 4 * F]);
+                        d40 = _mm512_fmadd_ps(s0, w0, d40);
+                        d41 = _mm512_fmadd_ps(s0, w1, d41);
+                        s0 = _mm512_set1_ps(src[i + 5 * F]);
+                        d50 = _mm512_fmadd_ps(s0, w0, d50);
+                        d51 = _mm512_fmadd_ps(s0, w1, d51);
+                        s0 = _mm512_set1_ps(src[i + 6 * F]);
+                        d60 = _mm512_fmadd_ps(s0, w0, d60);
+                        d61 = _mm512_fmadd_ps(s0, w1, d61);
+                        s0 = _mm512_set1_ps(src[i + 7 * F]);
+                        d70 = _mm512_fmadd_ps(s0, w0, d70);
+                        d71 = _mm512_fmadd_ps(s0, w1, d71);
+                        s0 = _mm512_set1_ps(src[i + 8 * F]);
+                        d80 = _mm512_fmadd_ps(s0, w0, d80);
+                        d81 = _mm512_fmadd_ps(s0, w1, d81);
+                        s0 = _mm512_set1_ps(src[i + 9 * F]);
+                        d90 = _mm512_fmadd_ps(s0, w0, d90);
+                        d91 = _mm512_fmadd_ps(s0, w1, d91);
+                        s0 = _mm512_set1_ps(src[i + 10 * F]);
+                        da0 = _mm512_fmadd_ps(s0, w0, da0);
+                        da1 = _mm512_fmadd_ps(s0, w1, da1);
+                        s0 = _mm512_set1_ps(src[i + 11 * F]);
+                        db0 = _mm512_fmadd_ps(s0, w0, db0);
+                        db1 = _mm512_fmadd_ps(s0, w1, db1);
+                    }
+                    src += srcS;
+                }
+                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d60, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d61, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d70, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d71, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d80, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d81, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d90, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, d91, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, da0, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, da1, bias, params, tails[1]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, db0, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, db1, bias, params, tails[1]);
+            }
+            else
+            {
+                d00 = _mm512_setzero_ps();
+                d10 = _mm512_setzero_ps();
+                d20 = _mm512_setzero_ps();
+                d30 = _mm512_setzero_ps();
+                d40 = _mm512_setzero_ps();
+                d50 = _mm512_setzero_ps();
+                d60 = _mm512_setzero_ps();
+                d70 = _mm512_setzero_ps();
+                d80 = _mm512_setzero_ps();
+                d90 = _mm512_setzero_ps();
+                da0 = _mm512_setzero_ps();
+                db0 = _mm512_setzero_ps();
+                for (size_t c = 0; c < srcC; c += F)
+                {
+                    size_t n = Simd::Min(F, srcC - c);
+                    for (size_t i = 0; i < n; ++i, weight += DF)
+                    {
+                        w0 = _mm512_loadu_ps(weight + 0);
+                        s0 = _mm512_set1_ps(src[i + 0 * F]);
+                        d00 = _mm512_fmadd_ps(s0, w0, d00);
+                        s0 = _mm512_set1_ps(src[i + 1 * F]);
+                        d10 = _mm512_fmadd_ps(s0, w0, d10);
+                        s0 = _mm512_set1_ps(src[i + 2 * F]);
+                        d20 = _mm512_fmadd_ps(s0, w0, d20);
+                        s0 = _mm512_set1_ps(src[i + 3 * F]);
+                        d30 = _mm512_fmadd_ps(s0, w0, d30);
+                        s0 = _mm512_set1_ps(src[i + 4 * F]);
+                        d40 = _mm512_fmadd_ps(s0, w0, d40);
+                        s0 = _mm512_set1_ps(src[i + 5 * F]);
+                        d50 = _mm512_fmadd_ps(s0, w0, d50);
+                        s0 = _mm512_set1_ps(src[i + 6 * F]);
+                        d60 = _mm512_fmadd_ps(s0, w0, d60);
+                        s0 = _mm512_set1_ps(src[i + 7 * F]);
+                        d70 = _mm512_fmadd_ps(s0, w0, d70);
+                        s0 = _mm512_set1_ps(src[i + 8 * F]);
+                        d80 = _mm512_fmadd_ps(s0, w0, d80);
+                        s0 = _mm512_set1_ps(src[i + 9 * F]);
+                        d90 = _mm512_fmadd_ps(s0, w0, d90);
+                        s0 = _mm512_set1_ps(src[i + 10 * F]);
+                        da0 = _mm512_fmadd_ps(s0, w0, da0);
+                        s0 = _mm512_set1_ps(src[i + 11 * F]);
+                        db0 = _mm512_fmadd_ps(s0, w0, db0);
+                    }
+                    src += srcS;
+                }
+                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d60, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d70, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d80, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, d90, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, da0, bias, params, tails[0]);
+                dst += dstC;
+                Term<term>::template Save<type, 0>(dst + 0, db0, bias, params, tails[0]);
+            }
+        }
+
         template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x6(const float * src, size_t srcC, size_t srcS,
             const float * weight, const __m512 * bias, const __m512 * params, float * dst, size_t dstC, const __mmask16 tails[2])
         {
@@ -1020,16 +1287,18 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x4(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m512 * bias, const __m512 * params, float * dst, size_t dstC, const __mmask16 tails[2])
+        template<TermType term, SimdConvolutionActivationType type, int M> void OutputConvolution_2xM(const float* src, size_t srcC, size_t srcS,
+            const float* weight, const __m512* bias, const __m512* params, float* dst, size_t dstC, const __mmask16 tails[2])
         {
-            __m512 d00, d01, d10, d11, d20, d21, d30, d31, s0, w0, w1;
+            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
             if (tails[1])
             {
-                d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
-                d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
-                d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
-                d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
+                if (M > 0) d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
+                if (M > 1) d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
+                if (M > 2) d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
+                if (M > 3) d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
+                if (M > 4) d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
+                if (M > 5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
                 for (size_t c = 0; c < srcC; c += F)
                 {
                     size_t n = Simd::Min(F, srcC - c);
@@ -1037,170 +1306,69 @@ namespace Simd
                     {
                         w0 = _mm512_loadu_ps(weight + 0);
                         w1 = _mm512_loadu_ps(weight + F);
-                        s0 = _mm512_set1_ps(src[i + 0 * F]);
-                        d00 = _mm512_fmadd_ps(s0, w0, d00);
-                        d01 = _mm512_fmadd_ps(s0, w1, d01);
-                        s0 = _mm512_set1_ps(src[i + 1 * F]);
-                        d10 = _mm512_fmadd_ps(s0, w0, d10);
-                        d11 = _mm512_fmadd_ps(s0, w1, d11);
-                        s0 = _mm512_set1_ps(src[i + 2 * F]);
-                        d20 = _mm512_fmadd_ps(s0, w0, d20);
-                        d21 = _mm512_fmadd_ps(s0, w1, d21);
-                        s0 = _mm512_set1_ps(src[i + 3 * F]);
-                        d30 = _mm512_fmadd_ps(s0, w0, d30);
-                        d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        if (M > 0) s0 = _mm512_set1_ps(src[i + 0 * F]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+                        if (M > 1) s0 = _mm512_set1_ps(src[i + 1 * F]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
+                        if (M > 2) s0 = _mm512_set1_ps(src[i + 2 * F]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
+                        if (M > 3) s0 = _mm512_set1_ps(src[i + 3 * F]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        if (M > 4) s0 = _mm512_set1_ps(src[i + 4 * F]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
+                        if (M > 5) s0 = _mm512_set1_ps(src[i + 5 * F]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
                     }
                     src += srcS;
                 }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tails[1]);
+                if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]), dst += dstC;
+                if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]), dst += dstC;
+                if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]), dst += dstC;
+                if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tails[1]), dst += dstC;
+                if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tails[1]), dst += dstC;
+                if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tails[1]), dst += dstC;
             }
             else
             {
-                d00 = _mm512_setzero_ps();
-                d10 = _mm512_setzero_ps();
-                d20 = _mm512_setzero_ps();
-                d30 = _mm512_setzero_ps();
+                if (M > 0) d00 = _mm512_setzero_ps();
+                if (M > 1) d10 = _mm512_setzero_ps();
+                if (M > 2) d20 = _mm512_setzero_ps();
+                if (M > 3) d30 = _mm512_setzero_ps();
+                if (M > 4) d40 = _mm512_setzero_ps();
+                if (M > 5) d50 = _mm512_setzero_ps();
                 for (size_t c = 0; c < srcC; c += F)
                 {
                     size_t n = Simd::Min(F, srcC - c);
                     for (size_t i = 0; i < n; ++i, weight += DF)
                     {
                         w0 = _mm512_loadu_ps(weight + 0);
-                        s0 = _mm512_set1_ps(src[i + 0 * F]);
-                        d00 = _mm512_fmadd_ps(s0, w0, d00);
-                        s0 = _mm512_set1_ps(src[i + 1 * F]);
-                        d10 = _mm512_fmadd_ps(s0, w0, d10);
-                        s0 = _mm512_set1_ps(src[i + 2 * F]);
-                        d20 = _mm512_fmadd_ps(s0, w0, d20);
-                        s0 = _mm512_set1_ps(src[i + 3 * F]);
-                        d30 = _mm512_fmadd_ps(s0, w0, d30);
+                        if (M > 0) s0 = _mm512_set1_ps(src[i + 0 * F]), d00 = _mm512_fmadd_ps(s0, w0, d00);
+                        if (M > 1) s0 = _mm512_set1_ps(src[i + 1 * F]), d10 = _mm512_fmadd_ps(s0, w0, d10);
+                        if (M > 2) s0 = _mm512_set1_ps(src[i + 2 * F]), d20 = _mm512_fmadd_ps(s0, w0, d20);
+                        if (M > 3) s0 = _mm512_set1_ps(src[i + 3 * F]), d30 = _mm512_fmadd_ps(s0, w0, d30);
+                        if (M > 4) s0 = _mm512_set1_ps(src[i + 4 * F]), d40 = _mm512_fmadd_ps(s0, w0, d40);
+                        if (M > 5) s0 = _mm512_set1_ps(src[i + 5 * F]), d50 = _mm512_fmadd_ps(s0, w0, d50);
                     }
                     src += srcS;
                 }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tails[0]);
+                if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]), dst += dstC;
+                if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]), dst += dstC;
+                if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]), dst += dstC;
+                if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tails[0]), dst += dstC;
+                if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tails[0]), dst += dstC;
+                if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tails[0]), dst += dstC;
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x3(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m512 * bias, const __m512 * params, float * dst, size_t dstC, const __mmask16 tails[2])
-        {
-            __m512 d00, d01, d10, d11, d20, d21, s0, w0, w1;
-            if (tails[1])
-            {
-                d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
-                d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
-                d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm512_loadu_ps(weight + 0);
-                        w1 = _mm512_loadu_ps(weight + F);
-                        s0 = _mm512_set1_ps(src[i + 0 * F]);
-                        d00 = _mm512_fmadd_ps(s0, w0, d00);
-                        d01 = _mm512_fmadd_ps(s0, w1, d01);
-                        s0 = _mm512_set1_ps(src[i + 1 * F]);
-                        d10 = _mm512_fmadd_ps(s0, w0, d10);
-                        d11 = _mm512_fmadd_ps(s0, w1, d11);
-                        s0 = _mm512_set1_ps(src[i + 2 * F]);
-                        d20 = _mm512_fmadd_ps(s0, w0, d20);
-                        d21 = _mm512_fmadd_ps(s0, w1, d21);
-                    }
-                    src += srcS;
-                }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]);
-            }
-            else
-            {
-                d00 = _mm512_setzero_ps();
-                d10 = _mm512_setzero_ps();
-                d20 = _mm512_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm512_loadu_ps(weight + 0);
-                        s0 = _mm512_set1_ps(src[i + 0 * F]);
-                        d00 = _mm512_fmadd_ps(s0, w0, d00);
-                        s0 = _mm512_set1_ps(src[i + 1 * F]);
-                        d10 = _mm512_fmadd_ps(s0, w0, d10);
-                        s0 = _mm512_set1_ps(src[i + 2 * F]);
-                        d20 = _mm512_fmadd_ps(s0, w0, d20);
-                    }
-                    src += srcS;
-                }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]);
-                dst += dstC;
-                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]);
-            }
-        }
+        typedef void(*OutputConvolution_2xM_Ptr)(const float* src, size_t srcC, size_t srcS, const float* weight, const __m512* bias, const __m512* params, float* dst, size_t dstC, const __mmask16 tails[2]);
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x1(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m512 * bias, const __m512 * params, float * dst, size_t dstC, const __mmask16 tails[2])
+        template<TermType term, SimdConvolutionActivationType type> OutputConvolution_2xM_Ptr GetOutputConvolution_2xM(size_t M)
         {
-            __m512 d00, d01, s0, w0, w1;
-            if (tails[1])
+            switch (M)
             {
-                d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm512_loadu_ps(weight + 0);
-                        w1 = _mm512_loadu_ps(weight + F);
-                        s0 = _mm512_set1_ps(src[i + 0 * F]);
-                        d00 = _mm512_fmadd_ps(s0, w0, d00);
-                        d01 = _mm512_fmadd_ps(s0, w1, d01);
-                    }
-                    src += srcS;
-                }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
+            case 0: return OutputConvolution_2xM<term, type, 0>;
+            case 1: return OutputConvolution_2xM<term, type, 1>;
+            case 2: return OutputConvolution_2xM<term, type, 2>;
+            case 3: return OutputConvolution_2xM<term, type, 3>;
+            case 4: return OutputConvolution_2xM<term, type, 4>;
+            case 5: return OutputConvolution_2xM<term, type, 5>;
             }
-            else
-            {
-                d00 = _mm512_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm512_loadu_ps(weight + 0);
-                        s0 = _mm512_set1_ps(src[i + 0 * F]);
-                        d00 = _mm512_fmadd_ps(s0, w0, d00);
-                    }
-                    src += srcS;
-                }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]);
-            }
+            assert(0);
+            return NULL;
         }
 
         template<TermType term, SimdConvolutionActivationType type> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
@@ -1209,7 +1377,17 @@ namespace Simd
             assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
             size_t srcH = p.srcH, srcW = p.srcW, dstW = p.dstW, dstC = p.dstC;
             size_t srcM = (bufH[1] - 1), srcS = bufH[1] * srcW*F;
-            size_t dstW3 = AlignLoAny(dstW, 3), dstW6 = AlignLoAny(dstW, 6);
+#ifdef SIMD_MERGECONV_MERGE_OUTPUT_ROWS
+            size_t yInt = Simd::Max(yBeg, yEnd & (~srcM)), nBeg = yBeg * srcW, nInt = yInt * srcW, nEnd = yEnd * srcW;
+            size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
+            size_t nInt12 = AlignLoAny(nInt - nBeg, 12) + nBeg, nEnd12 = AlignLoAny(nEnd - nInt, 12) + nInt;
+            OutputConvolution_2xM_Ptr tailInt = GetOutputConvolution_2xM<term, type>(nIntTail);
+            OutputConvolution_2xM_Ptr tailEnd = GetOutputConvolution_2xM<term, type>(nEndTail);
+#else
+            size_t dstW6 = AlignLoAny(dstW, 6), wTail = dstW - dstW6;
+            OutputConvolution_2xM_Ptr tailW = GetOutputConvolution_2xM<term, type>(wTail);
+#endif
+
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
             if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
@@ -1229,22 +1407,33 @@ namespace Simd
                     _params[1] = _mm512_loadu_ps(params + dc + F);
                 }
                 float * pDst = dst + dc;
+#ifdef SIMD_MERGECONV_MERGE_OUTPUT_ROWS
+                const float* src0 = src + (yBeg & srcM) * srcW * F;
+                const float* src1 = src + (yInt & srcM) * srcW * F;
+                size_t dn = nBeg;
+                for (; dn < nInt12; dn += 12, pDst += 12 * dstC, src0 += 12 * F)
+                    OutputConvolution_2x12<term, type>(src0, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
+                for (; dn < nInt6; dn += 6, pDst += 6 * dstC, src0 += 6 * F)
+                    OutputConvolution_2x6<term, type>(src0, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
+                if (nIntTail)
+                    tailInt(src0, srcC, srcS, weight, _bias, _params, pDst, dstC, tails), dn += nIntTail, pDst += nIntTail * dstC, src0 += nIntTail * F;
+                for (; dn < nEnd12; dn += 12, pDst += 12 * dstC, src1 += 12 * F)
+                    OutputConvolution_2x12<term, type>(src1, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
+                for (; dn < nEnd6; dn += 6, pDst += 6 * dstC, src1 += 6 * F)
+                    OutputConvolution_2x6<term, type>(src1, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
+                if (nEndTail)
+                    tailEnd(src1, srcC, srcS, weight, _bias, _params, pDst, dstC, tails), dn += nEndTail, pDst += nEndTail * dstC, src1 += nEndTail * F;
+#else
                 for (size_t y = yBeg; y < yEnd; ++y)
                 {
                     const float * pSrc = src + (y&srcM)*srcW*F;
                     size_t x = 0;
                     for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
                         OutputConvolution_2x6<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
-                    if (dstW - dstW6 == 4)
-                        OutputConvolution_2x4<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tails), pDst += 4 * dstC;
-                    else
-                    {
-                        for (; x < dstW3; x += 3, pDst += 3 * dstC, pSrc += 3 * F)
-                            OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
-                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-                            OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tails);
-                    }
+                    if (wTail)
+                        tailW(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tails), pDst += wTail * dstC, pSrc += wTail * F;
                 }
+#endif
                 weight += srcC * DF;
             }
         }
