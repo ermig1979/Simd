@@ -1061,16 +1061,18 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x4(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
+        template<TermType term, SimdConvolutionActivationType type, int M> void OutputConvolution_2xM(const float* src, size_t srcC, size_t srcS,
+            const float* weight, const __m256* bias, const __m256* params, float* dst, size_t dstC, size_t tail)
         {
-            __m256 d00, d01, d10, d11, d20, d21, d30, d31, s0, w0, w1;
+            __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
             if (tail > F)
             {
-                d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
-                d10 = _mm256_setzero_ps(), d11 = _mm256_setzero_ps();
-                d20 = _mm256_setzero_ps(), d21 = _mm256_setzero_ps();
-                d30 = _mm256_setzero_ps(), d31 = _mm256_setzero_ps();
+                if (M > 0) d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
+                if (M > 1) d10 = _mm256_setzero_ps(), d11 = _mm256_setzero_ps();
+                if (M > 2) d20 = _mm256_setzero_ps(), d21 = _mm256_setzero_ps();
+                if (M > 3) d30 = _mm256_setzero_ps(), d31 = _mm256_setzero_ps();
+                if (M > 4) d40 = _mm256_setzero_ps(), d41 = _mm256_setzero_ps();
+                if (M > 5) d50 = _mm256_setzero_ps(), d51 = _mm256_setzero_ps();
                 for (size_t c = 0; c < srcC; c += F)
                 {
                     size_t n = Simd::Min(F, srcC - c);
@@ -1078,238 +1080,94 @@ namespace Simd
                     {
                         w0 = _mm256_loadu_ps(weight + 0);
                         w1 = _mm256_loadu_ps(weight + F);
-                        s0 = _mm256_set1_ps(src[i + 0 * F]);
-                        d00 = _mm256_fmadd_ps(s0, w0, d00);
-                        d01 = _mm256_fmadd_ps(s0, w1, d01);
-                        s0 = _mm256_set1_ps(src[i + 1 * F]);
-                        d10 = _mm256_fmadd_ps(s0, w0, d10);
-                        d11 = _mm256_fmadd_ps(s0, w1, d11);
-                        s0 = _mm256_set1_ps(src[i + 2 * F]);
-                        d20 = _mm256_fmadd_ps(s0, w0, d20);
-                        d21 = _mm256_fmadd_ps(s0, w1, d21);
-                        s0 = _mm256_set1_ps(src[i + 3 * F]);
-                        d30 = _mm256_fmadd_ps(s0, w0, d30);
-                        d31 = _mm256_fmadd_ps(s0, w1, d31);
+                        if (M > 0) s0 = _mm256_set1_ps(src[i + 0 * F]), d00 = _mm256_fmadd_ps(s0, w0, d00), d01 = _mm256_fmadd_ps(s0, w1, d01);
+                        if (M > 1) s0 = _mm256_set1_ps(src[i + 1 * F]), d10 = _mm256_fmadd_ps(s0, w0, d10), d11 = _mm256_fmadd_ps(s0, w1, d11);
+                        if (M > 2) s0 = _mm256_set1_ps(src[i + 2 * F]), d20 = _mm256_fmadd_ps(s0, w0, d20), d21 = _mm256_fmadd_ps(s0, w1, d21);
+                        if (M > 3) s0 = _mm256_set1_ps(src[i + 3 * F]), d30 = _mm256_fmadd_ps(s0, w0, d30), d31 = _mm256_fmadd_ps(s0, w1, d31);
+                        if (M > 4) s0 = _mm256_set1_ps(src[i + 4 * F]), d40 = _mm256_fmadd_ps(s0, w0, d40), d41 = _mm256_fmadd_ps(s0, w1, d41);
+                        if (M > 5) s0 = _mm256_set1_ps(src[i + 5 * F]), d50 = _mm256_fmadd_ps(s0, w0, d50), d51 = _mm256_fmadd_ps(s0, w1, d51);
                     }
                     src += srcS;
                 }
                 if (tail == DF)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params), dst += dstC;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params), dst += dstC;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params), dst += dstC;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params), dst += dstC;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params), dst += dstC;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params), dst += dstC;
                 }
                 else
                 {
                     tail -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tail);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail), dst += dstC;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tail), dst += dstC;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tail), dst += dstC;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tail), dst += dstC;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tail), dst += dstC;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tail), dst += dstC;
                 }
             }
             else
             {
-                d00 = _mm256_setzero_ps();
-                d10 = _mm256_setzero_ps();
-                d20 = _mm256_setzero_ps();
-                d30 = _mm256_setzero_ps();
+                if (M > 0) d00 = _mm256_setzero_ps();
+                if (M > 1) d10 = _mm256_setzero_ps();
+                if (M > 2) d20 = _mm256_setzero_ps();
+                if (M > 3) d30 = _mm256_setzero_ps();
+                if (M > 4) d40 = _mm256_setzero_ps();
+                if (M > 5) d50 = _mm256_setzero_ps();
                 for (size_t c = 0; c < srcC; c += F)
                 {
                     size_t n = Simd::Min(F, srcC - c);
                     for (size_t i = 0; i < n; ++i, weight += DF)
                     {
                         w0 = _mm256_loadu_ps(weight + 0);
-                        s0 = _mm256_set1_ps(src[i + 0 * F]);
-                        d00 = _mm256_fmadd_ps(s0, w0, d00);
-                        s0 = _mm256_set1_ps(src[i + 1 * F]);
-                        d10 = _mm256_fmadd_ps(s0, w0, d10);
-                        s0 = _mm256_set1_ps(src[i + 2 * F]);
-                        d20 = _mm256_fmadd_ps(s0, w0, d20);
-                        s0 = _mm256_set1_ps(src[i + 3 * F]);
-                        d30 = _mm256_fmadd_ps(s0, w0, d30);
+                        if (M > 0) s0 = _mm256_set1_ps(src[i + 0 * F]), d00 = _mm256_fmadd_ps(s0, w0, d00);
+                        if (M > 1) s0 = _mm256_set1_ps(src[i + 1 * F]), d10 = _mm256_fmadd_ps(s0, w0, d10);
+                        if (M > 2) s0 = _mm256_set1_ps(src[i + 2 * F]), d20 = _mm256_fmadd_ps(s0, w0, d20);
+                        if (M > 3) s0 = _mm256_set1_ps(src[i + 3 * F]), d30 = _mm256_fmadd_ps(s0, w0, d30);
+                        if (M > 4) s0 = _mm256_set1_ps(src[i + 4 * F]), d40 = _mm256_fmadd_ps(s0, w0, d40);
+                        if (M > 5) s0 = _mm256_set1_ps(src[i + 5 * F]), d50 = _mm256_fmadd_ps(s0, w0, d50);
                     }
                     src += srcS;
                 }
                 if (tail == F)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), dst += dstC;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), dst += dstC;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), dst += dstC;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), dst += dstC;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), dst += dstC;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), dst += dstC;
                 }
                 else
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tail);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail), dst += dstC;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tail), dst += dstC;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tail), dst += dstC;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tail), dst += dstC;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tail), dst += dstC;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tail), dst += dstC;
                 }
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x3(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
-        {
-            __m256 d00, d01, d10, d11, d20, d21, s0, w0, w1;
-            if (tail > F)
-            {
-                d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
-                d10 = _mm256_setzero_ps(), d11 = _mm256_setzero_ps();
-                d20 = _mm256_setzero_ps(), d21 = _mm256_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm256_loadu_ps(weight + 0);
-                        w1 = _mm256_loadu_ps(weight + F);
-                        s0 = _mm256_set1_ps(src[i + 0 * F]);
-                        d00 = _mm256_fmadd_ps(s0, w0, d00);
-                        d01 = _mm256_fmadd_ps(s0, w1, d01);
-                        s0 = _mm256_set1_ps(src[i + 1 * F]);
-                        d10 = _mm256_fmadd_ps(s0, w0, d10);
-                        d11 = _mm256_fmadd_ps(s0, w1, d11);
-                        s0 = _mm256_set1_ps(src[i + 2 * F]);
-                        d20 = _mm256_fmadd_ps(s0, w0, d20);
-                        d21 = _mm256_fmadd_ps(s0, w1, d21);
-                    }
-                    src += srcS;
-                }
-                if (tail == DF)
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
-                }
-                else
-                {
-                    tail -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tail);
-                }
-            }
-            else
-            {
-                d00 = _mm256_setzero_ps();
-                d10 = _mm256_setzero_ps();
-                d20 = _mm256_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm256_loadu_ps(weight + 0);
-                        s0 = _mm256_set1_ps(src[i + 0 * F]);
-                        d00 = _mm256_fmadd_ps(s0, w0, d00);
-                        s0 = _mm256_set1_ps(src[i + 1 * F]);
-                        d10 = _mm256_fmadd_ps(s0, w0, d10);
-                        s0 = _mm256_set1_ps(src[i + 2 * F]);
-                        d20 = _mm256_fmadd_ps(s0, w0, d20);
-                    }
-                    src += srcS;
-                }
-                if (tail == F)
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                }
-                else
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tail);
-                    dst += dstC;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tail);
-                }
-            }
-        }
+        typedef void(*OutputConvolution_2xM_Ptr)(const float* src, size_t srcC, size_t srcS, const float* weight, const __m256* bias, const __m256* params, float* dst, size_t dstC, size_t tail);
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x1(const float * src, size_t srcC, size_t srcS,
-            const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
+        template<TermType term, SimdConvolutionActivationType type> OutputConvolution_2xM_Ptr GetOutputConvolution_2xM(size_t M)
         {
-            __m256 d00, d01, s0, w0, w1;
-            if (tail > F)
+            switch (M)
             {
-                d00 = _mm256_setzero_ps(), d01 = _mm256_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm256_loadu_ps(weight + 0);
-                        w1 = _mm256_loadu_ps(weight + F);
-                        s0 = _mm256_set1_ps(src[i + 0 * F]);
-                        d00 = _mm256_fmadd_ps(s0, w0, d00);
-                        d01 = _mm256_fmadd_ps(s0, w1, d01);
-                    }
-                    src += srcS;
-                }
-                if (tail == DF)
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
-                }
-                else
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tail - F);
-                }
+            case 0: return OutputConvolution_2xM<term, type, 0>;
+            case 1: return OutputConvolution_2xM<term, type, 1>;
+            case 2: return OutputConvolution_2xM<term, type, 2>;
+            case 3: return OutputConvolution_2xM<term, type, 3>;
+            case 4: return OutputConvolution_2xM<term, type, 4>;
+            case 5: return OutputConvolution_2xM<term, type, 5>;
             }
-            else
-            {
-                d00 = _mm256_setzero_ps();
-                for (size_t c = 0; c < srcC; c += F)
-                {
-                    size_t n = Simd::Min(F, srcC - c);
-                    for (size_t i = 0; i < n; ++i, weight += DF)
-                    {
-                        w0 = _mm256_loadu_ps(weight + 0);
-                        s0 = _mm256_set1_ps(src[i + 0 * F]);
-                        d00 = _mm256_fmadd_ps(s0, w0, d00);
-                    }
-                    src += srcS;
-                }
-                if (tail == F)
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                else
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tail);
-            }
+            assert(0);
+            return NULL;
         }
 
         template<TermType term, SimdConvolutionActivationType type> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
@@ -1318,7 +1176,15 @@ namespace Simd
             assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
             size_t srcH = p.srcH, srcW = p.srcW, dstW = p.dstW, dstC = p.dstC;
             size_t srcM = (bufH[1] - 1), srcS = bufH[1] * srcW*F;
-            size_t dstW3 = AlignLoAny(dstW, 3), dstW6 = AlignLoAny(dstW, 6);
+#ifdef SIMD_MERGECONV_MERGE_OUTPUT_ROWS
+            size_t yInt = Simd::Max(yBeg, yEnd & (~srcM)), nBeg = yBeg * srcW, nInt = yInt * srcW, nEnd = yEnd * srcW;
+            size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
+            OutputConvolution_2xM_Ptr tailInt = GetOutputConvolution_2xM<term, type>(nIntTail);
+            OutputConvolution_2xM_Ptr tailEnd = GetOutputConvolution_2xM<term, type>(nEndTail);
+#else
+            size_t dstW6 = AlignLoAny(dstW, 6), wTail = dstW - dstW6;
+            OutputConvolution_2xM_Ptr tailW = GetOutputConvolution_2xM<term, type>(wTail);
+#endif
             __m256 _params[2], _bias[2];
             _params[0] = _mm256_set1_ps(params[0]);
             if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
@@ -1337,22 +1203,29 @@ namespace Simd
                     _params[1] = _mm256_loadu_ps(params + dc + F);
                 }
                 float * pDst = dst + dc;
+#ifdef SIMD_MERGECONV_MERGE_OUTPUT_ROWS
+                const float* src0 = src + (yBeg & srcM) * srcW * F;
+                const float* src1 = src + (yInt & srcM) * srcW * F;
+                size_t dn = nBeg;
+                for (; dn < nInt6; dn += 6, pDst += 6 * dstC, src0 += 6 * F)
+                    OutputConvolution_2x6<term, type>(src0, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                if (nIntTail)
+                    tailInt(src0, srcC, srcS, weight, _bias, _params, pDst, dstC, tail), dn += nIntTail, pDst += nIntTail * dstC, src0 += nIntTail * F;
+                for (; dn < nEnd6; dn += 6, pDst += 6 * dstC, src1 += 6 * F)
+                    OutputConvolution_2x6<term, type>(src1, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+                if (nEndTail)
+                    tailEnd(src1, srcC, srcS, weight, _bias, _params, pDst, dstC, tail), dn += nEndTail, pDst += nEndTail * dstC, src1 += nEndTail * F;
+#else
                 for (size_t y = yBeg; y < yEnd; ++y)
                 {
-                    const float * pSrc = src + (y&srcM)*srcW*F;
+                    const float* pSrc = src + (y & srcM) * srcW * F;
                     size_t x = 0;
                     for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
                         OutputConvolution_2x6<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                    if (dstW - dstW6 == 4)
-                        OutputConvolution_2x4<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail), pDst += 4 * dstC;
-                    else
-                    {
-                        for (; x < dstW3; x += 3, pDst += 3 * dstC, pSrc += 3 * F)
-                            OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                        for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-                            OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
-                    }
+                    if (wTail)
+                        tailW(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail), pDst += wTail * dstC, pSrc += wTail * F;
                 }
+#endif
                 weight += srcC * DF;
             }
         }
@@ -1411,7 +1284,7 @@ namespace Simd
                 default: assert(0);
                 }
             }
-            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::F);
+            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2()/2, Base::AlgCacheL3(), Avx::F);
         }
 
         //---------------------------------------------------------------------

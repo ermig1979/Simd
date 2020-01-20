@@ -216,7 +216,7 @@ namespace Test
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
         const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRelu, a2 = ::SimdConvolutionActivationHswish;
 #ifdef NDEBUG
-#if 1
+#if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 3, 384, 389, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 16, 192, 199, 1, 1, a0, 96, 3, 2, a1, 24, a2, f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 24, 96, 99, 1, 1, a0, 144, 3, 1, a1, 24, a2, f), f1, f2);
@@ -239,9 +239,13 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 5, 1, a1, 34, a2, f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 7, 1, a1, 34, a2, f), f1, f2);
 #endif
+#if 1
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 3, 320, 320, 3, 2, a0, 16, 3, 1, a1, 8, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 160, 160, 1, 1, a0, 48, 3, 2, a1, 8, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 80, 80, 1, 1, a0, 48, 3, 1, a1, 8, a2, f), f1, f2);
+#endif
 #else
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 3, 1, a1, 34, a2, f), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 34, 32, 32, 1, 1, a0, 34, 5, 1, a1, 34, a2, f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 80, 80, 1, 1, a0, 48, 3, 1, a1, 8, a2, f), f1, f2);
 #endif
         return result;
     }

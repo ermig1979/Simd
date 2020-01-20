@@ -1502,7 +1502,7 @@ namespace Simd
             MergConvParam32f param(batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
-            if (param.conv[2].dstC <= HF)
+            if (param.conv[1].dstC <= HF && param.conv[2].dstC <= HF)
                 return new Avx2::SynetMergedConvolution32f(param);
             else
                 return new Avx512f::SynetMergedConvolution32f(param);
