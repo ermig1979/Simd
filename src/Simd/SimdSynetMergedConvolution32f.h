@@ -73,7 +73,7 @@ namespace Simd
                     return false;
                 if (c.kernelY != c.kernelX || !(c.kernelY == 1 || c.kernelY == 3 || c.kernelY == 5 || c.kernelY == 7))
                     return false;
-                if (c.strideY != c.strideX || !(c.strideY == 1 || c.strideY == 2))
+                if (c.strideY != c.strideX || !(c.strideY == 1 || c.strideY == 2 || c.strideY == 3))
                     return false;
                 if (c.dilationY != 1 || c.dilationX != 1)
                     return false;
