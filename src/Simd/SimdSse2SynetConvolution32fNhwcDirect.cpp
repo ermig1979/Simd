@@ -842,6 +842,8 @@ namespace Simd
                 return false;
             if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                 return false;
+            if ((p.strideY > 1 && p.strideX > 1) && p.srcC > 32)
+                return false;
             return true;
         }
     }
