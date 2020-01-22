@@ -2461,7 +2461,7 @@ namespace Simd
             kernelTM = Avx512f::GetGemmTail(M%microM, microN);
             kernelTT = Avx512f::GetGemmTail(M%microM, microN);
 #endif
-            Gemm32fNNcb::PackA packA = ((M * 3 < N && N >= 512 && K >= 128) || (K >= 256 && M > 256)) ? Avx512f::GemmPackA : NULL;
+            Gemm32fNNcb::PackA packA = ((M * 3 < N && N >= 512 && K >= 128 && M > 16) || (K >= 256 && M > 256)) ? Avx512f::GemmPackA : NULL;
             return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F,
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx512f::GemmPackB, Avx512f::GemmScaleC, TailMask16, compatibility);
         }

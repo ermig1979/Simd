@@ -595,143 +595,121 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x3(const float * src0, const ConvParam32f & p,
-            size_t srcC, size_t dstC, const float * weight, const __m128 * bias, const __m128 * params, float * dst)
+
+        template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(const float* src0, const ConvParam32f& p,
+            size_t srcC, size_t dstC, const float* weight, const __m128* bias, const __m128* params, float* dst)
         {
-            __m128 d00, d01, d10, d11, d20, d21, s0, w0, w1;
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
             size_t dS = p.srcC, dD = p.dstC;
-            const float * src1 = src0 + 1 * dS;
-            const float * src2 = src0 + 2 * dS;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            const float* src4 = src0 + 4 * dS;
+            const float* src5 = src0 + 5 * dS;
             if (dstC > F)
             {
-                d00 = _mm_setzero_ps(); d01 = _mm_setzero_ps();
-                d10 = _mm_setzero_ps(); d11 = _mm_setzero_ps();
-                d20 = _mm_setzero_ps(); d21 = _mm_setzero_ps();
+                if (M > 0) d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                if (M > 1) d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+                if (M > 2) d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+                if (M > 3) d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+                if (M > 4) d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
+                if (M > 5) d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
                     w0 = _mm_loadu_ps(weight + 0);
                     w1 = _mm_loadu_ps(weight + F);
-                    s0 = _mm_set1_ps(src0[offset]);
-                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
-                    d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
-                    s0 = _mm_set1_ps(src1[offset]);
-                    d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
-                    d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
-                    s0 = _mm_set1_ps(src2[offset]);
-                    d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
-                    d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                    if (M > 0) s0 = _mm_set1_ps(src0[offset]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                    if (M > 1) s0 = _mm_set1_ps(src1[offset]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10), d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
+                    if (M > 2) s0 = _mm_set1_ps(src2[offset]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20), d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                    if (M > 3) s0 = _mm_set1_ps(src3[offset]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30), d31 = _mm_add_ps(_mm_mul_ps(s0, w1), d31);
+                    if (M > 4) s0 = _mm_set1_ps(src4[offset]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40), d41 = _mm_add_ps(_mm_mul_ps(s0, w1), d41);
+                    if (M > 5) s0 = _mm_set1_ps(src5[offset]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50), d51 = _mm_add_ps(_mm_mul_ps(s0, w1), d51);
                     weight += DF;
                 }
                 if (dstC == DF)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params), dst += dD;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params), dst += dD;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params), dst += dD;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params), dst += dD;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params), dst += dD;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params), dst += dD;
                 }
                 else
                 {
                     dstC -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC), dst += dD;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC), dst += dD;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC), dst += dD;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params, dstC), dst += dD;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params, dstC), dst += dD;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params, dstC), dst += dD;
                 }
             }
             else
             {
-                d00 = _mm_setzero_ps();
-                d10 = _mm_setzero_ps();
-                d20 = _mm_setzero_ps();
+                if (M > 0) d00 = _mm_setzero_ps();
+                if (M > 1) d10 = _mm_setzero_ps();
+                if (M > 2) d20 = _mm_setzero_ps();
+                if (M > 3) d30 = _mm_setzero_ps();
+                if (M > 4) d40 = _mm_setzero_ps();
+                if (M > 5) d50 = _mm_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
                     w0 = _mm_loadu_ps(weight + 0);
-                    s0 = _mm_set1_ps(src0[offset]);
-                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
-                    s0 = _mm_set1_ps(src1[offset]);
-                    d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
-                    s0 = _mm_set1_ps(src2[offset]);
-                    d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                    if (M > 0) s0 = _mm_set1_ps(src0[offset]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                    if (M > 1) s0 = _mm_set1_ps(src1[offset]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                    if (M > 2) s0 = _mm_set1_ps(src2[offset]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                    if (M > 3) s0 = _mm_set1_ps(src3[offset]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                    if (M > 4) s0 = _mm_set1_ps(src4[offset]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                    if (M > 5) s0 = _mm_set1_ps(src5[offset]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
                     weight += DF;
                 }
                 if (dstC == F)
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), dst += dD;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), dst += dD;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), dst += dD;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), dst += dD;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), dst += dD;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), dst += dD;
                 }
                 else
                 {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC);
+                    if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC), dst += dD;
+                    if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC), dst += dD;
+                    if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC), dst += dD;
+                    if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, dstC), dst += dD;
+                    if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, dstC), dst += dD;
+                    if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, dstC), dst += dD;
                 }
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x1(const float * src0, const ConvParam32f & p,
-            size_t srcC, size_t dstC, const float * weight, const __m128 * bias, const __m128 * params, float * dst)
+        typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const float* src0, const ConvParam32f& p, size_t srcC, size_t dstC, const float* weight, const __m128* bias, const __m128* params, float* dst);
+
+        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
         {
-            __m128 d00, d01, s0, w0, w1;
-            if (dstC > F)
+            switch (M)
             {
-                d00 = _mm_setzero_ps(); d01 = _mm_setzero_ps();
-                for (size_t offset = 0; offset < srcC; ++offset)
-                {
-                    w0 = _mm_loadu_ps(weight + 0);
-                    w1 = _mm_loadu_ps(weight + F);
-                    s0 = _mm_set1_ps(src0[offset]);
-                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
-                    d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
-                    weight += DF;
-                }
-                if (dstC == DF)
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
-                }
-                else
-                {
-                    dstC -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
-                }
+            case 0: return ConvolutionNhwcDirect1x1_2xM<term, type, 0>;
+            case 1: return ConvolutionNhwcDirect1x1_2xM<term, type, 1>;
+            case 2: return ConvolutionNhwcDirect1x1_2xM<term, type, 2>;
+            case 3: return ConvolutionNhwcDirect1x1_2xM<term, type, 3>;
+            case 4: return ConvolutionNhwcDirect1x1_2xM<term, type, 4>;
+            case 5: return ConvolutionNhwcDirect1x1_2xM<term, type, 5>;
             }
-            else
-            {
-                d00 = _mm_setzero_ps();
-                for (size_t offset = 0; offset < srcC; ++offset)
-                {
-                    w0 = _mm_loadu_ps(weight + 0);
-                    s0 = _mm_set1_ps(src0[offset]);
-                    d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
-                    weight += DF;
-                }
-                if (dstC == F)
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                else
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
-            }
+            assert(0);
+            return NULL;
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float * src, const ConvParam32f & p,
-            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float* src, const ConvParam32f& p,
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
         {
-            size_t n1 = (yEnd - yBeg)*p.dstW;
-            size_t n3 = AlignLoAny(n1, 3);
+            size_t n1 = (yEnd - yBeg) * p.dstW;
             size_t n6 = AlignLoAny(n1, 6);
+            size_t nTail = n1 - n6;
+            ConvolutionNhwcDirect1x1_2xM_Ptr tailN = GetConvolutionNhwcDirect1x1_2xM<term, type>(nTail);
 
             __m128 _params[2], _bias[2];
             _params[0] = _mm_set1_ps(params[0]);
@@ -748,16 +726,14 @@ namespace Simd
                     _params[0] = _mm_loadu_ps(params + dc + 0);
                     _params[1] = _mm_loadu_ps(params + dc + F);
                 }
-                const float * ps = src + yBeg * p.srcW * p.srcC;
-                float * pd = dst + dc + yBeg * p.dstW * p.dstC;
+                const float* ps = src + yBeg * p.srcW * p.srcC;
+                float* pd = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
                 for (; i < n6; i += 6, ps += 6 * p.srcC, pd += 6 * p.dstC)
                     ConvolutionNhwcDirect1x1_2x6<term, type>(ps, p, srcC, dC, weight, _bias, _params, pd);
-                for (; i < n3; i += 3, ps += 3 * p.srcC, pd += 3 * p.dstC)
-                    ConvolutionNhwcDirect1x1_2x3<term, type>(ps, p, srcC, dC, weight, _bias, _params, pd);
-                for (; i < n1; i += 1, ps += 1 * p.srcC, pd += 1 * p.dstC)
-                    ConvolutionNhwcDirect1x1_2x1<term, type>(ps, p, srcC, dC, weight, _bias, _params, pd);
-                weight += srcC*DF;
+                if (nTail)
+                    tailN(ps, p, srcC, dC, weight, _bias, _params, pd), ps += nTail * p.srcC, pd += nTail * p.dstC;
+                weight += srcC * DF;
             }
         }
 
@@ -838,7 +814,7 @@ namespace Simd
                 return false;
             if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
                 return false;
-            if (p.Is1x1() && (p.srcC >= 2*p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 128) || p.srcC > 256))
+            if (p.Is1x1() && (p.srcC >= 2 * p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 128) || p.srcC > 256))
                 return false;
             if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                 return false;
