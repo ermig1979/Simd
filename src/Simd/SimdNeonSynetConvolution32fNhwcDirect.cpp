@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -813,7 +813,7 @@ namespace Simd
                 return false;
             if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
                 return false;
-            if (p.Is1x1() && p.srcC > p.dstC)
+            if (p.Is1x1() && (p.srcC >= 2 * p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 128) || p.srcC > 256))
                 return false;
             if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                 return false;

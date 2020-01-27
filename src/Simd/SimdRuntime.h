@@ -111,7 +111,7 @@ namespace Simd
                 , count(0)
                 , sum(0)
                 , min(std::numeric_limits<double>::max())
-                , max(std::numeric_limits<double>::min())
+                , max(0)
             {
             }
 
@@ -125,7 +125,12 @@ namespace Simd
 
             SIMD_INLINE double Mean() const
             {
-                return (sum - min - max) / (count - 2);
+                if( count > 2)
+                    return (sum - min - max) / (count - 2);
+                else if (count > 0)
+                    return sum / count;
+                else
+                    return sum;
             }
         };
         typedef std::vector<Candidate> Candidates;

@@ -95,7 +95,7 @@ namespace Test
     const int E = 10;
     const int O = 9;
 
-    const double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+    extern double MINIMAL_TEST_EXECUTION_TIME;
 
     const int DW = 48;
     const int DH = 64;

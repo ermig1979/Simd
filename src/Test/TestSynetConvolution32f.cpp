@@ -40,25 +40,19 @@ namespace Test
             typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
             FuncPtr func;
-            String description;
+            String desc;
 
-            FuncC(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            FuncC(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
             void Update(const Param & p)
             {
-                description = description + p.Decription();
+                desc = desc + p.Decription();
             }
 
-            void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, const Tensor32f & params, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
+            void Call(void * context, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
-                void * context = func(p.batch, &p.conv, NULL);
-                buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context) });
-                ::SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
-                {
-                    TEST_PERFORMANCE_TEST(description);
-                    ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
-                }
-                ::SimdRelease(context);
+                TEST_PERFORMANCE_TEST(desc);
+                ::SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
             }
         };
     }
@@ -73,7 +67,7 @@ namespace Test
         f1.Update(p);
         f2.Update(p);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
 
         const SimdConvolutionParameters & c = p.conv;
         Tensor32f src({p.batch, p.trans ? c.srcH : c.srcC, p.trans ? c.srcW : c.srcH, p.trans ? c.srcC : c.srcW });
@@ -108,11 +102,23 @@ namespace Test
         ::SimdFill32f(dst1.Data(), dst1.Size(), params.Data() + 0);
         ::SimdFill32f(dst2.Data(), dst2.Size(), params.Data() + 1);
 
+        void * context1 = f1.func(p.batch, &p.conv, NULL);
+        void * context2 = f2.func(p.batch, &p.conv, NULL);
+
+        buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context1) });
+        buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context2) });
+
+        ::SimdSynetConvolution32fSetParams(context1, weight.Data(), NULL, bias.Data(), params.Data());
+        ::SimdSynetConvolution32fSetParams(context2, weight.Data(), NULL, bias.Data(), params.Data());
+
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, weight, bias, params, src, buf, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, weight, bias, params, src, buf, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf, dst2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
 
         result = result && Compare(dst1, dst2, eps, true, 64, DifferenceBoth);
 
@@ -478,10 +484,10 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 17, 17, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #if 1
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 112, 2, 2, 1280, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 320, 30, 30, 320, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 112, 2, 2, 1280, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 320, 30, 30, 320, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }
