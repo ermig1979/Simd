@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -581,33 +581,30 @@ namespace Simd
         template <bool align> void SynetScaleLayerForwardNhwc3(const float * src, const float * scale, const float * bias, size_t height, size_t width, float * dst)
         {
             if (align)
-                assert(Aligned(src) && Aligned(dst));
+                assert(Aligned(src) && Aligned(dst) && Aligned(width));
 
             size_t width3 = width * 3;
             size_t widthF3 = AlignLo(width, F) * 3;
             if (bias)
             {
+                float _scale[F * 3], _bias[F * 3];
+                for (size_t i = 0; i < F; ++i)
+                    for (size_t c = 0; c < 3; ++c)
+                        _scale[i * 3 + c] = scale[c], _bias[i * 3 + c] = bias[c];
+                __m256 _scale0 = Load<false>(_scale + 0 * F);
+                __m256 _scale1 = Load<false>(_scale + 1 * F);
+                __m256 _scale2 = Load<false>(_scale + 2 * F);
+                __m256 _bias0 = Load<false>(_bias + 0 * F);
+                __m256 _bias1 = Load<false>(_bias + 1 * F);
+                __m256 _bias2 = Load<false>(_bias + 2 * F);                
                 for (size_t h = 0; h < height; ++h)
                 {
                     size_t w = 0;
-                    if (widthF3)
+                    for (; w < widthF3; w += F * 3)
                     {
-                        float _scale[F * 3], _bias[F * 3];
-                        for (size_t i = 0; i < F; ++i)
-                            for (size_t c = 0; c < 3; ++c)
-                                _scale[i * 3 + c] = scale[c], _bias[i * 3 + c] = bias[c];
-                        __m256 _scale0 = Load<false>(_scale + 0 * F);
-                        __m256 _scale1 = Load<false>(_scale + 1 * F);
-                        __m256 _scale2 = Load<false>(_scale + 2 * F);
-                        __m256 _bias0 = Load<false>(_bias + 0 * F);
-                        __m256 _bias1 = Load<false>(_bias + 1 * F);
-                        __m256 _bias2 = Load<false>(_bias + 2 * F);
-                        for (; w < widthF3; w += F * 3)
-                        {
-                            SynetScaleLayerForward<align, false>(src, _scale0, _bias0, dst, w + F * 0);
-                            SynetScaleLayerForward<align, false>(src, _scale1, _bias1, dst, w + F * 1);
-                            SynetScaleLayerForward<align, false>(src, _scale2, _bias2, dst, w + F * 2);
-                        }
+                        SynetScaleLayerForward<align, false>(src, _scale0, _bias0, dst, w + F * 0);
+                        SynetScaleLayerForward<align, false>(src, _scale1, _bias1, dst, w + F * 1);
+                        SynetScaleLayerForward<align, false>(src, _scale2, _bias2, dst, w + F * 2);
                     }
                     for (; w < width3; w += 3)
                     {
@@ -615,28 +612,27 @@ namespace Simd
                         dst[w + 1] = src[w + 1] * scale[1] + bias[1];
                         dst[w + 2] = src[w + 2] * scale[2] + bias[2];
                     }
+                    src += width3;
+                    dst += width3;
                 }
             }
             else
             {
+                float _scale[F * 3];
+                for (size_t i = 0; i < F; ++i)
+                    for (size_t c = 0; c < 3; ++c)
+                        _scale[i * 3 + c] = scale[c];
+                __m256 _scale0 = Load<false>(_scale + 0 * F);
+                __m256 _scale1 = Load<false>(_scale + 1 * F);
+                __m256 _scale2 = Load<false>(_scale + 2 * F);                
                 for (size_t h = 0; h < height; ++h)
                 {
                     size_t w = 0;
-                    if (widthF3)
+                    for (; w < widthF3; w += F * 3)
                     {
-                        float _scale[F * 3];
-                        for (size_t i = 0; i < F; ++i)
-                            for (size_t c = 0; c < 3; ++c)
-                                _scale[i * 3 + c] = scale[c];
-                        __m256 _scale0 = Load<false>(_scale + 0 * F);
-                        __m256 _scale1 = Load<false>(_scale + 1 * F);
-                        __m256 _scale2 = Load<false>(_scale + 2 * F);
-                        for (; w < widthF3; w += F * 3)
-                        {
-                            SynetScaleLayerForward<align>(src, _scale0, dst, w + F * 0);
-                            SynetScaleLayerForward<align>(src, _scale1, dst, w + F * 1);
-                            SynetScaleLayerForward<align>(src, _scale2, dst, w + F * 2);
-                        }
+                        SynetScaleLayerForward<align>(src, _scale0, dst, w + F * 0);
+                        SynetScaleLayerForward<align>(src, _scale1, dst, w + F * 1);
+                        SynetScaleLayerForward<align>(src, _scale2, dst, w + F * 2);
                     }
                     for (; w < width3; w += 3)
                     {
@@ -644,6 +640,8 @@ namespace Simd
                         dst[w + 1] = src[w + 1] * scale[1];
                         dst[w + 2] = src[w + 2] * scale[2];
                     }
+                    src += width3;
+                    dst += width3;
                 }
             }
         }
@@ -657,7 +655,7 @@ namespace Simd
             }
             if (channels == 3)
             {
-                if (Aligned(src) && Aligned(dst))
+                if (Aligned(src) && Aligned(dst) && Aligned(width))
                     SynetScaleLayerForwardNhwc3<true>(src, scale, bias, height, width, dst);
                 else
                     SynetScaleLayerForwardNhwc3<false>(src, scale, bias, height, width, dst);

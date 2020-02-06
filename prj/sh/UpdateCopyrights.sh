@@ -2,6 +2,7 @@
 
 function UpdateCopyrights () {
 directory=$1
+spaces="                                                    "
 cd ${directory}
 git ls-tree -r --name-status HEAD | while read file_name; do
   last_update_year=$(git log -1 --date=short --format="%ad" -- $file_name)
@@ -10,10 +11,10 @@ git ls-tree -r --name-status HEAD | while read file_name; do
   copyright_year=${copyright_year#*-}
   copyright_year=${copyright_year:0:4}
   if [ "${last_update_year}" != "${copyright_year}" ] && [ "${copyright_year:0:2}" == "20" ]; then 
-    echo "update ${copyright_year} to ${last_update_year} in ${file_name}"
+    echo "update ${copyright_year} to ${last_update_year} in ${file_name}${spaces}"
     sed -i '4s/'"-${copyright_year}"'/'"-${last_update_year}"'/g' ${file_name}
   else
-    printf "scan ${directory}/${file_name}                            \r"
+    printf "scan ${directory}/${file_name}${spaces}\r"
   fi
 done
 cd ~-
