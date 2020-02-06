@@ -795,7 +795,7 @@ namespace Simd
                     _filter[i] = vdupq_n_f32(filter[i]);
 
                 size_t alignedWidth = AlignLo(width, F);
-                float32x4_t tailMask = RightNotZero(width - alignedWidth);
+                float32x4_t tailMask = RightNotZero32f(width - alignedWidth);
 
                 for (size_t row = 0; row < height; ++row)
                 {

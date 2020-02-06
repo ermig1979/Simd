@@ -6280,15 +6280,16 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdBool compatible);
 
         \short This function is used for forward propagation of ScaleLayer.
 
         Algorithm's details (example for NCHW tensor format):
         \verbatim
         for(c = 0; c < channels; ++c)
-            for(s = 0; s < spatial; ++s)
-                dst[c*spatial + s] = src[c*spatial + s]*scale[c] + (bias ? bias[c] : 0);
+            for(h = 0; h < height; ++h)
+                for(w = 0; w < width; ++w)
+                    dst[(c*height + h)*width + w] = src[(c*height + h)*width + w]*scale[c] + (bias ? bias[c] : 0);
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
@@ -6297,11 +6298,13 @@ extern "C"
         \param [in] scale - a pointer to the 32-bit float array with scale coefficients. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)).
         \param [in] bias - a pointer to the 32-bit float array with bias coefficients. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)). Can be NULL.
         \param [in] channels - a number of channels in the (input/output) image tensor.
-        \param [in] spatial - a spatial size of (input/output) image tensor.
+        \param [in] height - a height of (input/output) image tensor.
+        \param [in] width - a width of (input/output) image tensor.
         \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
         \param [in] format - a format of (input/output) image tensor.
-        */
-    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+        \param [in] compatible - a flag of bitwise compatibility with Inference Engine.
+    */
+    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdBool compatible);
 
     /*! @ingroup synet_conversion
 

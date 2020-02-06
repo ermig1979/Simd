@@ -153,7 +153,7 @@ namespace Simd
                     _filter[i] = _mm_set1_ps(filter[i]);
 
                 size_t alignedWidth = AlignLo(width, F);
-                __m128 tailMask = RightNotZero(width - alignedWidth);
+                __m128 tailMask = RightNotZero32f(width - alignedWidth);
 
                 for (size_t row = 0; row < height; ++row)
                 {

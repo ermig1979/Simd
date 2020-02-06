@@ -278,13 +278,13 @@ namespace Simd
             return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
         }
 
-        SIMD_INLINE __m128 RightNotZero(ptrdiff_t count)
+        SIMD_INLINE __m128 RightNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
             return _mm_loadu_ps((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
-        SIMD_INLINE __m128 LeftNotZero(ptrdiff_t count)
+        SIMD_INLINE __m128 LeftNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
             return _mm_loadu_ps((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
@@ -507,7 +507,7 @@ namespace Simd
     namespace Sse3
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse::RightNotZero;
+        using Sse::RightNotZero32f;
 #endif
     }
 #endif//SIMD_SSE3_ENABLE
@@ -540,7 +540,7 @@ namespace Simd
     namespace Sse41
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
-        using Sse::RightNotZero;
+        using Sse::RightNotZero32f;
 #endif
 
         template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
@@ -592,16 +592,28 @@ namespace Simd
             return _mm256_mul_ps(_mm256_rsqrt_ps(_mm256_max_ps(value, _mm256_set1_ps(0.00000001f))), value);
         }
 
-        SIMD_INLINE __m256 RightNotZero(ptrdiff_t count)
+        SIMD_INLINE __m256 RightNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
             return _mm256_loadu_ps((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
-        SIMD_INLINE __m256 LeftNotZero(ptrdiff_t count)
+        SIMD_INLINE __m256 LeftNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
             return _mm256_loadu_ps((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
+        SIMD_INLINE __m256i RightNotZero32i(ptrdiff_t count)
+        {
+            const int32_t mask[DF] = { 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1 };
+            return _mm256_loadu_si256((__m256i*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
+        SIMD_INLINE __m256i LeftNotZero32i(ptrdiff_t count)
+        {
+            const int32_t mask[DF] = { -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return _mm256_loadu_si256((__m256i*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
         SIMD_INLINE __m256 PermutedHorizontalAdd(__m256 a, __m256 b)
@@ -634,7 +646,7 @@ namespace Simd
     namespace Avx2
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
-        using Avx::RightNotZero;
+        using Avx::RightNotZero32f;
 #endif
 
         SIMD_INLINE __m256i SaturateI16ToU8(__m256i value)
@@ -783,6 +795,18 @@ namespace Simd
         {
             return _mm256_or_si256(_mm256_shuffle_epi8(value, _mm256_add_epi8(shuffle, K8_SHUFFLE_0)),
                 _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
+        }
+
+        template<bool compatible> __m256 Fmadd(__m256 a, __m256 b, __m256 c);
+
+        template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c)
+        {
+            return _mm256_fmadd_ps(a, b, c);
+        }
+
+        template <> SIMD_INLINE __m256 Fmadd<true>(__m256 a, __m256 b, __m256 c)
+        {
+            return _mm256_add_ps(_mm256_or_ps(_mm256_mul_ps(a, b), _mm256_setzero_ps()), c);
         }
     }
 #endif// SIMD_AVX2_ENABLE
@@ -939,6 +963,18 @@ namespace Simd
         template <> SIMD_INLINE __m512 Deinterleave<1>(const __m512 & a, const __m512 & b)
         {
             return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_1, b);
+        }
+
+        template<bool compatible> __m512 Fmadd(__m512 a, __m512 b, __m512 c);
+
+        template <> SIMD_INLINE __m512 Fmadd<false>(__m512 a, __m512 b, __m512 c)
+        {
+            return _mm512_fmadd_ps(a, b, c);
+        }
+
+        template <> SIMD_INLINE __m512 Fmadd<true>(__m512 a, __m512 b, __m512 c)
+        {
+            return _mm512_add_ps(_mm512_or_ps(_mm512_mul_ps(a, b), _mm512_setzero_ps()), c);
         }
     }
 #endif //SIMD_AVX512F_ENABLE
@@ -1526,13 +1562,13 @@ namespace Simd
             return vcvtq_f32_u32(UnpackU16<part>(a));
         }
 
-        SIMD_INLINE float32x4_t RightNotZero(size_t count)
+        SIMD_INLINE float32x4_t RightNotZero32f(size_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
             return vld1q_f32((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
         }
 
-        SIMD_INLINE float32x4_t LeftNotZero(ptrdiff_t count)
+        SIMD_INLINE float32x4_t LeftNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
             return vld1q_f32((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));

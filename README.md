@@ -167,9 +167,11 @@ Also you can use parameters:
 * `-help` or `-?` in order to print help message.
 * `-r=../..` to set project root directory.
 * `-pa=1` to print alignment statistics.
-* `-w=1920` width of test image for performance testing.
-* `-h=1080` height of test image for performance testing.
+* `-c=512` a number of channels in test image for performance testing.
+* `-h=1080` a height of test image for performance testing.
+* `-w=1920` a width of test image for performance testing.
 * `-oh=log.html` - a file name with test report (in HTML file format).	
 * `-s=sample.avi` a video source (See `Simd::Motion` test).
 * `-wt=1` a thread number used to parallelize algorithms.
 * `-fe=Abs` an exclude filter to exclude some tests.
+* `-mt=100` a minimal test execution time (in milliseconds).

@@ -874,7 +874,7 @@ namespace Simd
 
                 size_t fullAlignedWidth = AlignLo(width, QF);
                 size_t partialAlignedWidth = AlignLo(width, F);
-                __m256 tailMask = RightNotZero(width - partialAlignedWidth);
+                __m256 tailMask = RightNotZero32f(width - partialAlignedWidth);
 
                 for (size_t row = 0; row < height; ++row)
                 {

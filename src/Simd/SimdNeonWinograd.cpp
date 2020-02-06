@@ -1782,7 +1782,7 @@ namespace Simd
             else
             {
                 size_t dstW8 = AlignLo(dstWidth, 8);
-                uint32x4_t tailMask = vreinterpretq_u32_f32(LeftNotZero(4 + dstW2 - dstWidth));
+                uint32x4_t tailMask = vreinterpretq_u32_f32(LeftNotZero32f(4 + dstW2 - dstWidth));
                 size_t tailCol = dstW2 < dstWidth ? dstWidth - 7 : dstWidth - 8;
                 for (size_t c = 0; c < dstChannels; ++c)
                 {

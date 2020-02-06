@@ -442,7 +442,7 @@ namespace Simd
             if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm256_set1_ps(params[1]);
             size_t dstWF = Simd::AlignLo(dstW, F);
-            __m256 tail = RightNotZero(dstW - dstWF);
+            __m256 tail = RightNotZero32f(dstW - dstWF);
             for (size_t dc = 0; dc < dstC; ++dc)
             {
                 if (type == ::SimdConvolutionActivationPrelu)

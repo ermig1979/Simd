@@ -446,42 +446,42 @@ namespace Test
     {
         struct FuncScLF
         {
-            typedef void(*FuncPtr)(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+            typedef void(*FuncPtr)(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible);
 
             FuncPtr func;
             String desc;
 
             FuncScLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdTensorFormatType format, bool HasBias)
+            void Update(SimdTensorFormatType format, int bias, int compatible)
             {
-                desc = desc + "[" + ToString(format) + "-" + ToString<int>(HasBias) + "]";
+                desc = desc + "[" + ToString(format) + "-" + ToString(bias) + "-" + ToString(compatible) + "]";
             }
 
-            void Call(const Tensor32f & src, const Tensor32f & scale, const Tensor32f & bias, size_t channels, size_t spatial, SimdTensorFormatType format, Tensor32f & dst) const
+            void Call(const Tensor32f & src, const Tensor32f & scale, const Tensor32f & bias, size_t channels, size_t height, size_t width, SimdTensorFormatType format, int compatible, Tensor32f & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(src.Data(), scale.Data(), bias.Data(), channels, spatial, dst.Data(), format);
+                func(src.Data(), scale.Data(), bias.Data(), channels, height, width, dst.Data(), format, (SimdBool)compatible);
             }
         };
     }
 
 #define FUNC_SCLF(function) FuncScLF(function, #function)
 
-    bool SynetScaleLayerForwardAutoTest(size_t channels, size_t spatial, SimdTensorFormatType format, bool hasBias, FuncScLF f1, FuncScLF f2)
+    bool SynetScaleLayerForwardAutoTest(size_t channels, size_t height, size_t width, SimdTensorFormatType format, int hasBias, int compatible, FuncScLF f1, FuncScLF f2)
     {
         bool result = true;
 
-        f1.Update(format, hasBias);
-        f2.Update(format, hasBias);
+        f1.Update(format, hasBias, compatible);
+        f2.Update(format, hasBias, compatible);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << spatial << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << height << ", " << width << "].");
 
-        Tensor32f src(ToShape(channels, spatial, format));
+        Tensor32f src(ToShape(channels, height, width, format));
         Tensor32f scale(ToShape(channels, format));
         Tensor32f bias;
-        Tensor32f dst1(ToShape(channels, spatial, format));
-        Tensor32f dst2(ToShape(channels, spatial, format));
+        Tensor32f dst1(ToShape(channels, height, width, format));
+        Tensor32f dst2(ToShape(channels, height, width, format));
 
         FillRandom(src.Data(), src.Size(), -10.0, 10.0);
         FillRandom(scale.Data(), scale.Size(), -10.0, 10.0);
@@ -492,9 +492,9 @@ namespace Test
         }
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, channels, spatial, format, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, channels, height, width, format, compatible, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, channels, spatial, format, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, channels, height, width, format, compatible, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
 
@@ -509,10 +509,14 @@ namespace Test
         {
             if (SimdSynetTensorAlignment(format)&mask)
             {
-                result = result && SynetScaleLayerForwardAutoTest(H, W, format, true, f1, f2);
-                result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, format, true, f1, f2);
-                result = result && SynetScaleLayerForwardAutoTest(H, W, format, false, f1, f2);
-                result = result && SynetScaleLayerForwardAutoTest(H - O, W + O, format, false, f1, f2);
+                for (int hasBias = 0; hasBias <= 1; ++hasBias)
+                {
+                    for (int compatible = 0; compatible <= 1; ++compatible)
+                    {
+                        result = result && SynetScaleLayerForwardAutoTest(C, (int)sqrt(H), (int)sqrt(W), format, hasBias, compatible, f1, f2);
+                        result = result && SynetScaleLayerForwardAutoTest(C - O, (int)sqrt(H) + O/2, (int)sqrt(W) + O/2, format, hasBias, compatible, f1, f2);
+                    }
+                }
             }
         }
         //result = result && SynetScaleLayerForwardAutoTest(3, W*W, SimdTensorFormatNhwc, true, f1, f2);

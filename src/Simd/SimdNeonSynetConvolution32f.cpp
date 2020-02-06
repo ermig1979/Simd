@@ -620,7 +620,7 @@ namespace Simd
             if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = vdupq_n_f32(params[1]);
             size_t dstWF = Simd::AlignLo(dstW, F);
-            float32x4_t tail = RightNotZero(dstW - dstWF);
+            float32x4_t tail = RightNotZero32f(dstW - dstWF);
             for (size_t dc = 0; dc < dstC; ++dc)
             {
                 if (type == ::SimdConvolutionActivationPrelu)

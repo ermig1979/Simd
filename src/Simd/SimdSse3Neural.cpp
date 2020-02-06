@@ -171,7 +171,7 @@ namespace Simd
         template <bool align, size_t kernelX, size_t kernelY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
-            __m128 tailMask = RightNotZero(width - alignedWidth);
+            __m128 tailMask = RightNotZero32f(width - alignedWidth);
             __m128 _sums[kernelX*kernelY];
             memset(_sums, 0, sizeof(_sums));
             for (size_t row = 0; row < height; ++row)
@@ -364,7 +364,7 @@ namespace Simd
                     size_t M3 = M / 3 * 3;
                     size_t N4 = Simd::AlignLo(N, 4);
                     size_t K4 = Simd::AlignLo(K, 4);
-                    __m128 tailMask = RightNotZero(K - K4);
+                    __m128 tailMask = RightNotZero32f(K - K4);
                     size_t i = 0;
                     for (; i < M3; i += 3)
                     {
@@ -861,7 +861,7 @@ namespace Simd
                     const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
                     size_t alignedWidth = AlignLo(dstWidth, F);
-                    __m128 tailMask = RightNotZero(dstWidth - alignedWidth);
+                    __m128 tailMask = RightNotZero32f(dstWidth - alignedWidth);
                     __m128 _weight[kernelX*kernelY];
                     for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                     {

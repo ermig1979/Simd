@@ -684,7 +684,7 @@ namespace Simd
         template <bool align, size_t coreX, size_t coreY> void NeuralAddConvolutionForward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 tailMask = RightNotZero32f(width - alignedWidth);
             __m256 _weights[coreX*coreY];
             LoadWeightsForward<coreX*coreY>(weights, _weights);
             for (size_t row = 0; row < height; ++row)
@@ -782,7 +782,7 @@ namespace Simd
             height += coreY - 1;
             width += coreX - 1;
             size_t alignedWidth = AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 tailMask = RightNotZero32f(width - alignedWidth);
             __m256 _weights[coreX*coreY];
             LoadWeightsBackward<coreX*coreY>(weights, _weights);
 
@@ -850,7 +850,7 @@ namespace Simd
         template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
-            __m256 tailMask = RightNotZero(width - alignedWidth);
+            __m256 tailMask = RightNotZero32f(width - alignedWidth);
             __m256 _sums[coreX*coreY];
             memset(_sums, 0, sizeof(_sums));
             for (size_t row = 0; row < height; ++row)
@@ -1109,7 +1109,7 @@ namespace Simd
                     size_t M3 = M / 3 * 3;
                     size_t N4 = Simd::AlignLo(N, 4);
                     size_t K8 = Simd::AlignLo(K, 8);
-                    __m256 tailMask = RightNotZero(K - K8);
+                    __m256 tailMask = RightNotZero32f(K - K8);
                     size_t i = 0;
                     for (; i < M3; i += 3)
                     {
@@ -1675,7 +1675,7 @@ namespace Simd
                         return;
                     }
                     size_t alignedWidth = AlignLo(dstWidth, F);
-                    __m256 tailMask = RightNotZero(dstWidth - alignedWidth);
+                    __m256 tailMask = RightNotZero32f(dstWidth - alignedWidth);
                     __m256 _weight[kernelX*kernelY];
                     for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                     {

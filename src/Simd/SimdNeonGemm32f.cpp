@@ -2094,7 +2094,7 @@ namespace Simd
                     }
                     else
                     {
-                        float32x4_t mask0 = LeftNotZero(n - 0 * F);
+                        float32x4_t mask0 = LeftNotZero32f(n - 0 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -2117,8 +2117,8 @@ namespace Simd
                     }
                     else
                     {
-                        float32x4_t mask0 = LeftNotZero(n - 0 * F);
-                        float32x4_t mask1 = LeftNotZero(n - 1 * F);
+                        float32x4_t mask0 = LeftNotZero32f(n - 0 * F);
+                        float32x4_t mask1 = LeftNotZero32f(n - 1 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -2143,9 +2143,9 @@ namespace Simd
                     }
                     else
                     {
-                        float32x4_t mask0 = LeftNotZero(n - 0 * F);
-                        float32x4_t mask1 = LeftNotZero(n - 1 * F);
-                        float32x4_t mask2 = LeftNotZero(n - 2 * F);
+                        float32x4_t mask0 = LeftNotZero32f(n - 0 * F);
+                        float32x4_t mask1 = LeftNotZero32f(n - 1 * F);
+                        float32x4_t mask2 = LeftNotZero32f(n - 2 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -2172,10 +2172,10 @@ namespace Simd
                     }
                     else
                     {
-                        float32x4_t mask0 = LeftNotZero(n - 0 * F);
-                        float32x4_t mask1 = LeftNotZero(n - 1 * F);
-                        float32x4_t mask2 = LeftNotZero(n - 2 * F);
-                        float32x4_t mask3 = LeftNotZero(n - 3 * F);
+                        float32x4_t mask0 = LeftNotZero32f(n - 0 * F);
+                        float32x4_t mask1 = LeftNotZero32f(n - 1 * F);
+                        float32x4_t mask2 = LeftNotZero32f(n - 2 * F);
+                        float32x4_t mask3 = LeftNotZero32f(n - 3 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float* b = B + k * ldb;

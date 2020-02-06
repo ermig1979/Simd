@@ -649,7 +649,7 @@ namespace Simd
                     }
                     else
                     {
-                        __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
+                        __m128 mask0 = Sse::LeftNotZero32f(n - 0 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -672,8 +672,8 @@ namespace Simd
                     }
                     else
                     {
-                        __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
-                        __m128 mask1 = Sse::LeftNotZero(n - 1 * F);
+                        __m128 mask0 = Sse::LeftNotZero32f(n - 0 * F);
+                        __m128 mask1 = Sse::LeftNotZero32f(n - 1 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -698,9 +698,9 @@ namespace Simd
                     }
                     else
                     {
-                        __m128 mask0 = Sse::LeftNotZero(n - 0 * F);
-                        __m128 mask1 = Sse::LeftNotZero(n - 1 * F);
-                        __m128 mask2 = Sse::LeftNotZero(n - 2 * F);
+                        __m128 mask0 = Sse::LeftNotZero32f(n - 0 * F);
+                        __m128 mask1 = Sse::LeftNotZero32f(n - 1 * F);
+                        __m128 mask2 = Sse::LeftNotZero32f(n - 2 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;

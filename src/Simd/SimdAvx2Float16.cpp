@@ -137,7 +137,7 @@ namespace Simd
                 SquaredDifferenceSum16f<align>(a, b, i, sums[0]);
             if (partialAlignedSize != size)
             {
-                __m256 mask = RightNotZero(size - partialAlignedSize);
+                __m256 mask = RightNotZero32f(size - partialAlignedSize);
                 __m256 _a = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(a + size - F)));
                 __m256 _b = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(b + size - F)));
                 __m256 _d = _mm256_and_ps(_mm256_sub_ps(_a, _b), mask);
@@ -194,7 +194,7 @@ namespace Simd
             }
             if (partialAlignedSize != size)
             {
-                __m256 mask = RightNotZero(size - partialAlignedSize);
+                __m256 mask = RightNotZero32f(size - partialAlignedSize);
                 __m256 a0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + size - F))));
                 __m256 b0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + size - F))));
                 _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
@@ -217,7 +217,7 @@ namespace Simd
         {
             size_t M4 = AlignLo(M, 4);
             size_t KF = AlignLo(K, F);
-            __m256 mask = RightNotZero(K - KF);
+            __m256 mask = RightNotZero32f(K - KF);
             size_t i = 0;
             for (; i < M4; i += 4)
             {

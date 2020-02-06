@@ -548,13 +548,17 @@ namespace Test
                 {
                     SOURCE = arg.substr(3, arg.size() - 3);
                 }
-                else if (arg.find("-w=") == 0)
+                else if (arg.find("-c=") == 0)
                 {
-                    W = FromString<int>(arg.substr(3, arg.size() - 3));
+                    C = FromString<int>(arg.substr(3, arg.size() - 3));
                 }
                 else if (arg.find("-h=") == 0)
                 {
                     H = FromString<int>(arg.substr(3, arg.size() - 3));
+                }                
+                else if (arg.find("-w=") == 0)
+                {
+                    W = FromString<int>(arg.substr(3, arg.size() - 3));
                 }
                 else if (arg.find("-pa=") == 0)
                 {
@@ -714,8 +718,9 @@ namespace Test
         std::cout << "    -help or -?   to print this help message." << std::endl << std::endl;
         std::cout << "    -r=../..      to set project root directory." << std::endl << std::endl;
         std::cout << "    -pa=1         to print alignment statistics." << std::endl << std::endl;
-        std::cout << "    -w=1920       width of test image for performance testing." << std::endl << std::endl;
-        std::cout << "    -h=1080       height of test image for performance testing." << std::endl << std::endl;
+        std::cout << "    -c=512        a number of channels in test image for performance testing." << std::endl << std::endl;
+        std::cout << "    -h=1080       a height of test image for performance testing." << std::endl << std::endl;
+        std::cout << "    -w=1920       a width of test image for performance testing." << std::endl << std::endl;
         std::cout << "    -oh=log.html  a file name with test report (in HTML format)." << std::endl << std::endl;
         std::cout << "    -s=sample.avi a video source (Simd::Motion test)." << std::endl << std::endl;
         std::cout << "    -wt=1         a thread number used to parallelize algorithms." << std::endl << std::endl;
@@ -728,11 +733,13 @@ namespace Test
     String SOURCE = "";
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-    int W = 1920;
+    int C = 512;
     int H = 1080;
+    int W = 1920;
 #else
-    int W = 128;
+    int C = 32;
     int H = 96;
+    int W = 128;
 #endif
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
 

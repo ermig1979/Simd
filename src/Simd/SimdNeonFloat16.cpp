@@ -134,7 +134,7 @@ namespace Simd
                 SquaredDifferenceSum16f<align>(a, b, i, sums[0]);
             if (partialAlignedSize != size)
             {
-                float32x4_t tailMask = RightNotZero(size - partialAlignedSize);
+                float32x4_t tailMask = RightNotZero32f(size - partialAlignedSize);
                 float32x4_t _a = vcvt_f32_f16((float16x4_t)LoadHalf<false>(a + size - F));
                 float32x4_t _b = vcvt_f32_f16((float16x4_t)LoadHalf<false>(a + size - F));
                 float32x4_t _d = And(vsubq_f32(_a, _b), tailMask);
@@ -191,7 +191,7 @@ namespace Simd
             }
             if (partialAlignedSize != size)
             {
-                float32x4_t tailMask = RightNotZero(size - partialAlignedSize);
+                float32x4_t tailMask = RightNotZero32f(size - partialAlignedSize);
                 float32x4_t a0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(a + i + 0)), tailMask);
                 float32x4_t b0 = And(vcvt_f32_f16((float16x4_t)LoadHalf<align>(b + i + 0)), tailMask);
                 _aa[0] = vmlaq_f32(_aa[0], a0, a0);

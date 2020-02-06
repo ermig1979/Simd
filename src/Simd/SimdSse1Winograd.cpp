@@ -1794,7 +1794,7 @@ namespace Simd
             else
             {
                 size_t dstW8 = AlignLo(dstWidth, 8);
-                __m128 tailMask = LeftNotZero(4 + dstW2 - dstWidth);
+                __m128 tailMask = LeftNotZero32f(4 + dstW2 - dstWidth);
                 size_t tailCol = dstW2 < dstWidth ? dstWidth - 7 : dstWidth - 8;
                 size_t tailRow = dstH2 < dstHeight ? dstHeight - 1 : dstHeight - 2;
                 for (size_t c = 0; c < dstChannels; ++c)

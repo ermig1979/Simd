@@ -826,7 +826,7 @@ namespace Simd
         template <bool align, size_t coreX, size_t coreY> void NeuralAddConvolutionForward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
         {
             size_t alignedWidth = AlignLo(width, F);
-            float32x4_t tailMask = RightNotZero(width - alignedWidth);
+            float32x4_t tailMask = RightNotZero32f(width - alignedWidth);
             float32x4_t _weights[coreX*coreY];
             LoadWeightsForward<coreX*coreY>(weights, _weights);
             for (size_t row = 0; row < height; ++row)
@@ -985,7 +985,7 @@ namespace Simd
                     size_t M3 = M / 3 * 3;
                     size_t N4 = Simd::AlignLo(N, 4);
                     size_t K4 = Simd::AlignLo(K, 4);
-                    float32x4_t tailMask = RightNotZero(K - K4);
+                    float32x4_t tailMask = RightNotZero32f(K - K4);
                     size_t i = 0;
                     for (; i < M3; i += 3)
                     {
@@ -1481,7 +1481,7 @@ namespace Simd
                     const float * weight, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth)
                 {
                     size_t alignedWidth = AlignLo(dstWidth, F);
-                    float32x4_t tailMask = RightNotZero(dstWidth - alignedWidth);
+                    float32x4_t tailMask = RightNotZero32f(dstWidth - alignedWidth);
                     float32x4_t _weight[kernelX*kernelY];
                     for (size_t srcChannel = 0; srcChannel < srcDepth; ++srcChannel)
                     {
@@ -1739,7 +1739,7 @@ namespace Simd
             height += coreY - 1;
             width += coreX - 1;
             size_t alignedWidth = AlignLo(width, F);
-            float32x4_t tailMask = RightNotZero(width - alignedWidth);
+            float32x4_t tailMask = RightNotZero32f(width - alignedWidth);
             float32x4_t _weights[coreX*coreY];
             LoadWeightsBackward<coreX*coreY>(weights, _weights);
 
@@ -1807,7 +1807,7 @@ namespace Simd
         template <bool align, size_t coreX, size_t coreY> SIMD_INLINE void NeuralAddConvolutionSum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
         {
             size_t alignedWidth = Simd::AlignLo(width, F);
-            float32x4_t tailMask = RightNotZero(width - alignedWidth);
+            float32x4_t tailMask = RightNotZero32f(width - alignedWidth);
             float32x4_t _sums[coreX*coreY];
             memset(_sums, 0, sizeof(_sums));
             for (size_t row = 0; row < height; ++row)

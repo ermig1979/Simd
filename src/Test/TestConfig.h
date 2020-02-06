@@ -102,8 +102,9 @@ namespace Test
 
     const float EPS = 0.001f;
 
+    extern int C;
+    extern int H;    
     extern int W;
-    extern int H;
 
     extern String ROOT_PATH;
     extern String SOURCE;
