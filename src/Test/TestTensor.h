@@ -301,6 +301,7 @@ namespace Test
     };
 
     typedef Tensor<float> Tensor32f;
+    typedef Tensor<uint8_t> Tensor8u;
 
     //-------------------------------------------------------------------------
 
@@ -308,6 +309,12 @@ namespace Test
     {
         assert(src.Size() == dst.Size());
         memcpy(dst.Data(), src.Data(), src.Size() * sizeof(T));
+    }
+
+    template<class T> inline void Fill(Tensor<T>& tensor, T value)
+    {
+        for (size_t i = 0; i < tensor.Size(); ++i)
+            tensor.Data()[i] = value;
     }
 
     inline void Compare(const Tensor32f & a, const Tensor32f & b, float differenceMax, bool printError, int errorCountMax, DifferenceType differenceType, const String & description,
@@ -361,6 +368,54 @@ namespace Test
         int errorCount = 0;
         Index index(a.Count(), 0);
         Compare(a, b, differenceMax, printError, errorCountMax, differenceType, description, index, 0, errorCount, message);
+        if (printError && errorCount > 0)
+            TEST_LOG_SS(Error, message.str());
+        return errorCount == 0;
+    }
+
+    inline void Compare(const Tensor8u& a, const Tensor8u& b, int differenceMax, bool printError, int errorCountMax, const String& description,
+        Shape index, size_t order, int& errorCount, std::stringstream& message)
+    {
+        if (order == a.Count())
+        {
+            int _a = *a.Data(index);
+            int _b = *b.Data(index);
+            int difference = ::abs(_a - _b);
+            bool error = difference > differenceMax;
+            if (error)
+            {
+                errorCount++;
+                if (printError)
+                {
+                    if (errorCount == 1)
+                        message << std::endl << "Fail comparison: " << description << std::endl;
+                    message << "Error at [";
+                    for (size_t i = 0; i < index.size() - 1; ++i)
+                        message << index[i] << ", ";
+                    message << index[index.size() - 1] << "] : " << _a << " != " << _b << ";"
+                        << " (difference = " << difference << ")!" << std::endl;
+                }
+                if (errorCount > errorCountMax)
+                {
+                    if (printError)
+                        message << "Stop comparison." << std::endl;
+                }
+            }
+        }
+        else
+        {
+            for (index[order] = 0; index[order] < a.Axis(order) && errorCount < errorCountMax; ++index[order])
+                Compare(a, b, differenceMax, printError, errorCountMax, description, index, order + 1, errorCount, message);
+        }
+    }
+
+    inline bool Compare(const Tensor8u& a, const Tensor8u& b, int differenceMax, bool printError, int errorCountMax, const String& description = "")
+    {
+        std::stringstream message;
+        message << std::fixed << std::setprecision(6);
+        int errorCount = 0;
+        Index index(a.Count(), 0);
+        Compare(a, b, differenceMax, printError, errorCountMax, description, index, 0, errorCount, message);
         if (printError && errorCount > 0)
             TEST_LOG_SS(Error, message.str());
         return errorCount == 0;

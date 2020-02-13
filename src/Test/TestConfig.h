@@ -91,6 +91,7 @@ namespace Test
     typedef std::vector<float, Simd::Allocator<float> > Buffer32f;
     typedef std::vector<float*> FloatPtrs;
     typedef Tensor<float> Tensor32f;
+    typedef Tensor<uint8_t> Tensor8u;
 
     const int E = 10;
     const int O = 9;

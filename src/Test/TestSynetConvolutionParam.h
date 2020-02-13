@@ -35,17 +35,18 @@ namespace Test
         SimdConvolutionParameters conv;
 
         SynetConvolutionParam(SimdBool t, size_t n, size_t sC, size_t sH, size_t sW, size_t dC, size_t kY, size_t kX, size_t dY, size_t dX,
-            size_t sY, size_t sX, size_t pY, size_t pX, size_t pH, size_t pW, size_t g, ::SimdConvolutionActivationType a)
+            size_t sY, size_t sX, size_t pY, size_t pX, size_t pH, size_t pW, size_t g, SimdConvolutionActivationType a, 
+            SimdTensorDataType sT = SimdTensorData32f, SimdTensorDataType dT = SimdTensorData32f)
         {
             trans = t;
             batch = n;
             conv.srcC = sC;
             conv.srcH = sH;
             conv.srcW = sW;
-            conv.srcT = SimdTensorData32f;
+            conv.srcT = sT;
             conv.srcF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
             conv.dstC = dC;
-            conv.dstT = SimdTensorData32f;
+            conv.dstT = dT;
             conv.dstF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
             conv.kernelY = kY;
             conv.kernelX = kX;
@@ -71,17 +72,18 @@ namespace Test
             }
         }
 
-        SynetConvolutionParam(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size d, Size s, Size b, Size e, size_t g, ::SimdConvolutionActivationType a, ::SimdBool t)
+        SynetConvolutionParam(size_t n, size_t sC, size_t sH, size_t sW, size_t dC, Size k, Size d, Size s, Size b, Size e, size_t g, 
+            SimdConvolutionActivationType a, ::SimdBool t, SimdTensorDataType sT = SimdTensorData32f, SimdTensorDataType dT = SimdTensorData32f)
         {
             trans = t;
             batch = n;
             conv.srcC = sC;
             conv.srcH = sH;
             conv.srcW = sW;
-            conv.srcT = SimdTensorData32f;
+            conv.srcT = sT;
             conv.srcF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
             conv.dstC = dC;
-            conv.dstT = SimdTensorData32f;
+            conv.dstT = dT;
             conv.dstF = trans ? SimdTensorFormatNhwc : SimdTensorFormatNchw;
             conv.kernelY = k.y;
             conv.kernelX = k.x;
@@ -115,6 +117,40 @@ namespace Test
             ss << "-" << conv.strideX << "-" << Simd::Max(conv.padX, conv.padW) << "-" << conv.group << "-" << this->trans;
             ss << "]";
             return ss.str();
+        }
+
+        Shape SrcShape() const
+        {
+            if (trans)
+                return Shape({ batch, conv.srcH, conv.srcW, conv.srcC });
+            else
+                return Shape({ batch, conv.srcC, conv.srcH, conv.srcW });
+        }
+
+        Shape DstShape() const
+        {
+            if (trans)
+                return Shape({ batch, conv.dstH, conv.dstW, conv.dstC });
+            else
+                return Shape({ batch, conv.dstC, conv.dstH, conv.dstW });
+        }
+
+        Shape WeightShape() const
+        {
+            if (back)
+            {
+                if (trans)
+                    return Shape({ conv.srcC, conv.kernelY, conv.kernelX, conv.dstC / conv.group });
+                else
+                    return Shape({ conv.srcC, conv.dstC / conv.group, conv.kernelY, conv.kernelX });
+            }
+            else
+            {
+                if (trans)
+                    return Shape({ conv.kernelY, conv.kernelX, conv.srcC / conv.group, conv.dstC });
+                else
+                    return Shape({ conv.dstC, conv.srcC / conv.group, conv.kernelY, conv.kernelX });
+            }
         }
     };
 }

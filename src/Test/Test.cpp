@@ -346,6 +346,8 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetConvertFilter);
     TEST_ADD_GROUP_A00(SynetSetInput);
 
+    TEST_ADD_GROUP_A00(SynetConvolution8iForward);
+
     TEST_ADD_GROUP_A00(SynetConvolution32fForward);
 
     TEST_ADD_GROUP_A00(SynetDeconvolution32fForward);

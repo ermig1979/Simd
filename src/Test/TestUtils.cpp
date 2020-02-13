@@ -85,17 +85,30 @@ namespace Test
         }
     }
 
-    uint8_t g_rand[UINT16_MAX];
-    bool InitRand()
+    uint8_t g_rand8u[UINT16_MAX];
+    bool InitRand8u()
     {
         for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
-            g_rand[i] = ::rand();
+            g_rand8u[i] = ::rand();
         return true;
     }
-    bool g_inited = InitRand();
-    SIMD_INLINE const uint8_t * Rand()
+    bool g_rand8u_inited = InitRand8u();
+    SIMD_INLINE const uint8_t * Rand8u()
     {
-        return g_rand + (::rand()&INT16_MAX);
+        return g_rand8u + (::rand()&INT16_MAX);
+    }
+
+    int16_t g_rand16i[UINT16_MAX];
+    bool InitRand16i()
+    {
+        for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
+            g_rand16i[i] = (::rand() & INT16_MAX);
+        return true;
+    }
+    bool g_rand16i_inited = InitRand16i();
+    SIMD_INLINE const int16_t* Rand16i()
+    {
+        return g_rand16i + (::rand() & INT16_MAX);
     }
 
     void FillRandom(View & view, uint8_t lo, uint8_t hi)
@@ -110,7 +123,7 @@ namespace Test
             if (fast)
             {
                 for (size_t col = 0; col < width; col += INT16_MAX)
-                    memcpy(view.data + offset + col, Rand(), std::min<size_t>(INT16_MAX, width - col));
+                    memcpy(view.data + offset + col, Rand8u(), std::min<size_t>(INT16_MAX, width - col));
             }
             else
             {
@@ -185,7 +198,7 @@ namespace Test
         for (size_t row = 0; row < view.height; ++row)
         {
             ptrdiff_t offset = row*view.stride;
-            const uint8_t * rand = Rand();
+            const uint8_t * rand = Rand8u();
             for (size_t col = 0; col < width; ++col, ++offset)
                 view.data[offset] = (rand[col] & 1) ? index : 0;
         }
@@ -204,7 +217,7 @@ namespace Test
             ptrdiff_t left = rect.left + indent;
             ptrdiff_t right = rect.right - indent;
             ptrdiff_t offset = row*mask.stride + left;
-            const uint8_t * rand = Rand();
+            const uint8_t * rand = Rand8u();
             for (ptrdiff_t col = left; col < right; ++col, ++offset)
                 mask.data[offset] = (rand[col] & 1) ? index : 0;
         }
@@ -215,7 +228,7 @@ namespace Test
         assert(view.format == View::Float);
 
         bool fast = view.Area() > 100000;
-        float boost = (hi - lo) / 255;
+        float boost = (hi - lo) / UCHAR_MAX;
         for (size_t row = 0; row < view.height; ++row)
         {
             if (fast)
@@ -224,7 +237,7 @@ namespace Test
                 {
                     size_t size = std::min<size_t>(INT16_MAX, view.width - col);
                     float * dst = & view.At<float>(col, row);
-                    const uint8_t * src = Rand();
+                    const uint8_t * src = Rand8u();
                     for (size_t i = 0; i < size; ++i)
                         dst[i] = lo + boost*src[i];
                 }
@@ -240,13 +253,13 @@ namespace Test
     void FillRandom(float * data, size_t size, float lo, float hi)
     {
         bool fast = size > 100000;
-        float boost = (hi - lo) / 255;
+        float boost = (hi - lo) / SHRT_MAX;
         if (fast)
         {
             for (size_t i = 0; i < size; i += INT16_MAX)
             {
                 size_t n = std::min<size_t>(INT16_MAX, size - i);
-                const uint8_t * src = Rand();
+                const int16_t * src = Rand16i();
                 for (size_t j = 0; j < n; ++j)
                     data[i + j] = lo + boost * src[j];
             }

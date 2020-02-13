@@ -41,6 +41,12 @@ namespace Test
         return ((::rand()&INT16_MAX)*1.0) / INT16_MAX;
     }
 
+    template<class T> inline void Fill(T * data, size_t size, T value)
+    {
+        for (size_t i = 0; i < size; ++i)
+            data[i] = value;
+    }
+
     void FillRandom(View & view, uint8_t lo = 0, uint8_t hi = 255);
 
     void FillRandom2(View & view, uint8_t lo = 0, uint8_t hi = 255, uint8_t step = 1);

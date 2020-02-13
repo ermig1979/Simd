@@ -62,6 +62,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdPerformance.h"
 
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
@@ -5227,8 +5228,7 @@ SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * wei
 SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst)
 {
     SynetConvolution32f * c = (SynetConvolution32f*)context;
-    SIMD_PERF_EXT(c);
-    c->Forward(src, buf, dst);
+    SIMD_PERF_EXT(c);c->Forward(src, buf, dst);
 }
 
 typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
@@ -5261,9 +5261,12 @@ SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src
     d->Forward(src, buf, dst);
 }
 
+typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv);
+SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC0(SynetConvolution8iInit);//, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
 SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv)
 {
-    return NULL;
+    return simdSynetConvolution8iInit(batch, conv);
 }
 
 SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context)
@@ -5278,7 +5281,7 @@ SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context)
     return 0;
 }
 
-SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const stats)
+SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats)
 {
     assert(0);
 }
