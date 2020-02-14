@@ -106,6 +106,49 @@ namespace Simd
 #endif
     };
 
+    struct CvtParam
+    {
+        Array8u zero;
+        Array32f scale, shift, iScale, iShift;
+        bool neg;
+
+        CvtParam()
+            : neg(false)
+        {
+        }
+
+        void Init(const float * min, const float * max, size_t size)
+        {
+            zero.Resize(size);
+            scale.Resize(size);
+            shift.Resize(size);
+            iScale.Resize(size);
+            for (size_t i = 0; i < size; ++i)
+            {
+                assert(min[i] <= max[i]);
+                if (min[i] < 0.0f)
+                    neg = true;
+            }
+            for (size_t i = 0; i < size; ++i)
+            {
+                float abs = ::fmax(::fabs(min[i]), ::fabs(max[i]));
+                float inv = abs / (neg ? 127.0f : 255.0f);
+                if (fabs(inv) < 1e-7)
+                    inv = 1.0f;
+                zero[i] = (neg ? 128 : 0);
+                scale[i] = float(1.0 / inv);
+                shift[i] = float(zero[i]);
+                iScale[i] = inv;
+                iShift[i] = -float(zero[i]) * inv;
+            }        
+        }
+
+        size_t Size() const
+        {
+            return (zero.size)*sizeof(uint8_t) + (scale.size + shift.size + iScale.size + iShift.size) * sizeof(float);
+        }
+    };
+
     class SynetConvolution8i : public Deletable
     {
     public:
@@ -135,16 +178,7 @@ namespace Simd
             return _buffer.size;
         }
 
-        virtual void SetParams(const float * weight, const float * bias, const float * params, const float* const* stats)
-        {
-            _weight = weight;
-            _bias = bias;
-            _params = params;
-            _stats[0] = stats[0];
-            _stats[1] = stats[1];
-            _stats[2] = stats[2];
-            _stats[3] = stats[3];
-        }
+        virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats) = 0;
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
 
@@ -173,7 +207,6 @@ namespace Simd
     protected:
         ConvParam8i _param;
         Array8u _buffer;
-        const float * _weight, * _bias, * _params, * _stats[4];
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         Base::PerformanceMeasurer * _perf;
 #endif
@@ -199,11 +232,11 @@ namespace Simd
             virtual void GemmNN(size_t S, size_t D, size_t K, size_t C, const uint8_t* src, size_t lda, const int8_t* weight, size_t ldb, int32_t* dst, size_t ldc);
             virtual void GemmNN(size_t D, size_t S, size_t C, size_t K, const int8_t* weight, size_t lda, const uint8_t* src, size_t ldb, int32_t* dst, size_t ldc);
 
+            CvtParam _srcCvt, _dstCvt;
             Array8i _weight8i;
-            Array8u _zero8u;
             Array32i _norm32i;
-            Array32f _norm32f, _srcScale, _srcShift, _dstScale, _dstShift;
-            bool _skipConv, _src8u, _dst8u, _negSrc;
+            Array32f _norm32f; 
+            bool _skipConv, _src8u, _dst8u, _overflow16i;
             size_t _batch, _merge, _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeS, _sizeB, _sizeD;
         };
 
