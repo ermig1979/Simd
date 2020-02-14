@@ -79,6 +79,7 @@ namespace Simd
         }
     };
 
+    typedef Array<int8_t> Array8i;
     typedef Array<uint8_t> Array8u;
     typedef Array<int16_t> Array16i;
     typedef Array<uint16_t> Array16u;

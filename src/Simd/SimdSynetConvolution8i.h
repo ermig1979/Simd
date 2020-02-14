@@ -159,6 +159,13 @@ namespace Simd
             }
         }
 
+        template<class T> T * Allocate(uint8_t* & buffer, size_t size)
+        {
+            T* ptr = (T*)buffer;
+            buffer = buffer + size*sizeof(T);
+            return ptr;
+        }
+
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         Base::PerformanceMeasurer* Perf(const String & func);
 #endif
@@ -180,6 +187,7 @@ namespace Simd
             SynetConvolution8iGemmNN(const ConvParam8i & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmNN"; }
+            virtual size_t InternalBufferSize() const;
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
@@ -187,6 +195,16 @@ namespace Simd
         protected:
             virtual void ImgToCol(const uint8_t* src, uint8_t* dst);
             virtual void ImgToRow(const uint8_t* src, uint8_t* dst);
+
+            virtual void GemmNN(size_t S, size_t D, size_t K, size_t C, const uint8_t* src, size_t lda, const int8_t* weight, size_t ldb, int32_t* dst, size_t ldc);
+            virtual void GemmNN(size_t D, size_t S, size_t C, size_t K, const int8_t* weight, size_t lda, const uint8_t* src, size_t ldb, int32_t* dst, size_t ldc);
+
+            Array8i _weight8i;
+            Array8u _zero8u;
+            Array32i _norm32i;
+            Array32f _norm32f, _srcScale, _srcShift, _dstScale, _dstShift;
+            bool _skipConv, _src8u, _dst8u, _negSrc;
+            size_t _batch, _merge, _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeS, _sizeB, _sizeD;
         };
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);

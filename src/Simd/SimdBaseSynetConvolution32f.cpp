@@ -359,7 +359,7 @@ namespace Simd
             const ConvParam32f & p = _param;
             assert(!p.trans);
             size_t srcSize = p.srcW * p.srcH;
-            if (p.dilationX == 1 && p.dilationY == 1 && p.strideX == 2 && p.strideY == 2 && p.padX == 0 && p.padY == 0 && p.padW == 0 && p.padH == 0 && p.kernelX == 1 && p.kernelY == 1)
+            if (p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1))
             {
                 for (size_t c = 0; c < p.srcC; ++c)
                 {
@@ -372,7 +372,56 @@ namespace Simd
                     src += srcSize;
                 }
             }
-            else if (p.dilationX*p.dilationY*p.strideX*p.strideY != 1)
+            else if (p.IsDilation(1) && p.IsStride(1))
+            {
+                const ptrdiff_t bodySize = p.dstW - p.padX - p.padW;
+                for (size_t c = 0; c < p.srcC; ++c)
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ++ky)
+                    {
+                        for (size_t kx = 0; kx < p.kernelX; ++kx)
+                        {
+                            size_t sy = ky - p.padY;
+                            for (size_t dy = 0; dy < p.dstH; ++dy, ++sy)
+                            {
+                                if (sy < p.srcH)
+                                {
+                                    size_t sx = kx - p.padX, dx = 0;
+                                    const float* psrc = src + sy * p.srcW;
+                                    for (; dx < p.padX; ++dx, ++sx)
+                                    {
+                                        if (sx < p.srcW)
+                                            *(dst++) = psrc[sx];
+                                        else
+                                            *(dst++) = 0;
+                                    }
+                                    if (bodySize > 0)
+                                    {
+                                        memcpy(dst, psrc + sx, bodySize * sizeof(float));
+                                        dst += bodySize;
+                                        dx += bodySize;
+                                        sx += bodySize;
+                                    }
+                                    for (; dx < p.dstW; ++dx, ++sx)
+                                    {
+                                        if (sx < p.srcW)
+                                            *(dst++) = psrc[sx];
+                                        else
+                                            *(dst++) = 0;
+                                    }
+                                }
+                                else
+                                {
+                                    memset(dst, 0, p.dstW * sizeof(float));
+                                    dst += p.dstW;
+                                }
+                            }
+                        }
+                    }
+                    src += srcSize;
+                }
+            }
+            else
             {
                 for (size_t c = 0; c < p.srcC; ++c)
                 {
@@ -401,55 +450,6 @@ namespace Simd
                                         *(dst++) = 0;
                                 }
                                 sy += p.strideY;
-                            }
-                        }
-                    }
-                    src += srcSize;
-                }
-            }
-            else
-            {
-                const ptrdiff_t bodySize = p.dstW - p.padX - p.padW;
-                for (size_t c = 0; c < p.srcC; ++c)
-                {
-                    for (size_t ky = 0; ky < p.kernelY; ++ky)
-                    {
-                        for (size_t kx = 0; kx < p.kernelX; ++kx)
-                        {
-                            size_t sy = ky - p.padY;
-                            for (size_t dy = 0; dy < p.dstH; ++dy, ++sy)
-                            {
-                                if (sy < p.srcH)
-                                {
-                                    size_t sx = kx - p.padX, dx = 0;
-                                    const float * psrc = src + sy * p.srcW;
-                                    for (; dx < p.padX; ++dx, ++sx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = psrc[sx];
-                                        else
-                                            *(dst++) = 0;
-                                    }
-                                    if (bodySize > 0)
-                                    {
-                                        memcpy(dst, psrc + sx, bodySize * sizeof(float));
-                                        dst += bodySize;
-                                        dx += bodySize;
-                                        sx += bodySize;
-                                    }
-                                    for (; dx < p.dstW; ++dx, ++sx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = psrc[sx];
-                                        else
-                                            *(dst++) = 0;
-                                    }
-                                }
-                                else
-                                {
-                                    memset(dst, 0, p.dstW * sizeof(float));
-                                    dst += p.dstW;
-                                }
                             }
                         }
                     }
@@ -1435,9 +1435,9 @@ namespace Simd
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             ConvParam32f param(batch, conv, gemm);
-#if !defined(SIMD_BASE_ONLY_GEMM_NN)
             if (!param.Valid())
                 return NULL;
+#if !defined(SIMD_BASE_ONLY_GEMM_NN)
             else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new SynetConvolution32fDepthwiseDotProduct(param);
             else if(SynetConvolution32fWinograd::Preferable(param))
@@ -1450,8 +1450,8 @@ namespace Simd
                 return new SynetConvolution32fNhwcDirect(param);
             else if (SynetConvolution32fDirectNhwc::Preferable(param))
                 return new SynetConvolution32fDirectNhwc(param);
-            else
 #endif
+            else
                 return new SynetConvolution32fGemmNN(param);
         }
     }
