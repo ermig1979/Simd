@@ -123,6 +123,7 @@ namespace Simd
             scale.Resize(size);
             shift.Resize(size);
             iScale.Resize(size);
+            iShift.Resize(size);
             for (size_t i = 0; i < size; ++i)
             {
                 assert(min[i] <= max[i]);

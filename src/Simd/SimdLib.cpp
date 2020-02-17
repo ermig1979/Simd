@@ -5271,24 +5271,25 @@ SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionPa
 
 SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context)
 {
-    assert(0);
-    return 0;
+    return ((SynetConvolution8i*)context)->ExternalBufferSize();
 }
 
 SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context)
 {
-    assert(0);
-    return 0;
+    return ((SynetConvolution8i*)context)->InternalBufferSize();
+
 }
 
 SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats)
 {
-    assert(0);
+    ((SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
 }
 
 SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst)
 {
-    assert(0);
+    SynetConvolution8i * c = (SynetConvolution8i*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
 }
 
 typedef void(*SimdSynetEltwiseLayerForwardPtr) (float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
