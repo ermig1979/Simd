@@ -50,6 +50,11 @@ namespace Simd
             return (D)(F(value) * scale + shift);
         }
 
+        template<> SIMD_INLINE uint8_t Convert<int32_t, uint8_t, float>(int32_t value, float scale, float shift)
+        {
+            return (uint8_t)Simd::RestrictRange(Quantize(float(value) * scale + shift), 0, 255);
+        }
+
         template<> SIMD_INLINE uint8_t Convert<float, uint8_t, float>(float value, float scale, float shift)
         {
             return (uint8_t)Simd::RestrictRange(Quantize(value * scale + shift), 0, 255);
@@ -288,7 +293,7 @@ namespace Simd
             for (size_t b = 0; b < _batch; b += _merge)
             {
                 if (!_src8u)
-                    Convert<float, uint8_t, float>((float*)src + b * _sizeS, _merge, p.srcC, p.srcH, p.srcW, p.srcF, _srcCvt.scale.data, _srcCvt.scale.data, src8u);
+                    Convert<float, uint8_t, float>((float*)src + b * _sizeS, _merge, p.srcC, p.srcH, p.srcW, p.srcF, _srcCvt.scale.data, _srcCvt.shift.data, src8u);
                 const uint8_t * pSrc = _src8u ? src + b * _sizeS : src8u;
                 int32_t* pSum = sum32i;
                 if (!_skipConv)
@@ -315,7 +320,7 @@ namespace Simd
                             GemmNN(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, pSrc + _grS * g, _ldS, pSum + _grD * g, _ldD);
                     }
                 }
-                Convert<int32_t, uint8_t, int32_t>(pSum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, dst);
+                Convert<int32_t, int32_t, int32_t>(pSum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, pSum);
                 switch (p.activation)
                 {
                 case SimdConvolutionActivationIdentity:
@@ -550,9 +555,9 @@ namespace Simd
                             dst[j] += s0[j] * w0;
                     }
                 }
+                weight += lda;
+                dst += ldc;
             }
-            weight += lda;
-            dst += ldc;
         }
 
         //---------------------------------------------------------------------
