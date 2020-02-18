@@ -562,58 +562,58 @@ namespace Test
     {
         struct FuncShLF
         {
-            typedef void(*FuncPtr)(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format);
+            typedef void(*FuncPtr)(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
 
             FuncPtr func;
             String desc;
 
             FuncShLF(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Update(SimdTensorFormatType format)
+            void Update(SimdTensorFormatType format, int type)
             {
-                desc = desc + "[" + ToString(format) + "]";
+                desc = desc + "[" + ToString(format) + "-" + ToString(type) + "]";
             }
 
-            void Call(const Tensor32f & src0, const Tensor32f & src1, size_t srcC0, size_t srcC1, size_t spatial, SimdTensorFormatType format, Tensor32f & dst0, Tensor32f & dst1) const
+            void Call(const Tensor32f & src0, const Tensor32f & src1, size_t channels0, size_t channels1, size_t spatial, SimdTensorFormatType format, int type, Tensor32f & dst0, Tensor32f & dst1) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(src0.Data(), srcC0, src1.Data(), srcC1, spatial, dst0.Data(), dst1.Data(), (srcC0 + srcC1)/2, format);
+                func(src0.Data(), src1.Data(), channels0, channels1, spatial, dst0.Data(), dst1.Data(), format, type);
             }
         };
     }
 
 #define FUNC_SHLF(function) FuncShLF(function, #function)
 
-    bool SynetShuffleLayerForwardAutoTest(size_t srcC0, size_t srcC1, size_t spatial, SimdTensorFormatType format, FuncShLF f1, FuncShLF f2)
+    bool SynetShuffleLayerForwardAutoTest(size_t channels0, size_t channels1, size_t spatial, SimdTensorFormatType format, int type, FuncShLF f1, FuncShLF f2)
     {
         bool result = true;
 
-        if (srcC0 & 1)
-            srcC0++;
-        if (srcC1 & 1)
-            srcC1++;
+        if (channels0 & 1)
+            channels0++;
+        if (channels1 & 1)
+            channels1++;
 
-        f1.Update(format);
-        f2.Update(format);
+        f1.Update(format, type);
+        f2.Update(format, type);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << srcC0 << " + " << srcC1 << ", " << spatial << "].");
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels0 << " + " << channels1 << ", " << spatial << "].");
 
-        Tensor32f src0(ToShape(srcC0, spatial, format));
-        Tensor32f src1(ToShape(srcC1, spatial, format));
-        size_t dstC = (srcC0 + srcC1) / 2;
-        Tensor32f dst10(ToShape(dstC, spatial, format));
-        Tensor32f dst11(ToShape(dstC, spatial, format));
-        Tensor32f dst20(ToShape(dstC, spatial, format));
-        Tensor32f dst21(ToShape(dstC, spatial, format));
+        size_t channels = (channels0 + channels1) / 2;
+        Tensor32f src0(ToShape(type ? channels : channels0, spatial, format));
+        Tensor32f src1(ToShape(type ? channels : channels1, spatial, format));
+        Tensor32f dst10(ToShape(type ? channels0 : channels, spatial, format));
+        Tensor32f dst11(ToShape(type ? channels1 : channels, spatial, format));
+        Tensor32f dst20(ToShape(type ? channels0 : channels, spatial, format));
+        Tensor32f dst21(ToShape(type ? channels1 : channels, spatial, format));
 
         FillRandom(src0.Data(), src0.Size(), -10.0, 10.0);
         FillRandom(src1.Data(), src1.Size(), -10.0, 10.0);
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src0, src1, srcC0, srcC1, spatial, format, dst10, dst11));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src0, src1, channels0, channels1, spatial, format, type, dst10, dst11));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src0, src1, srcC0, srcC1, spatial, format, dst20, dst21));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src0, src1, channels0, channels1, spatial, format, type, dst20, dst21));
 
         result = result && Compare(dst10, dst20, EPS, true, 32, DifferenceBoth, "dst0");
         result = result && Compare(dst11, dst21, EPS, true, 32, DifferenceBoth, "dst1");
@@ -625,10 +625,14 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetShuffleLayerForwardAutoTest(H * 7 / 16, H * 9 / 16, W, SimdTensorFormatNchw, f1, f2);
-        result = result && SynetShuffleLayerForwardAutoTest(H * 7 / 16 + O, H * 9 / 16 - O, W + O, SimdTensorFormatNchw, f1, f2);
-        result = result && SynetShuffleLayerForwardAutoTest(H * 7 / 16, H * 9 / 16, W, SimdTensorFormatNhwc, f1, f2);
-        result = result && SynetShuffleLayerForwardAutoTest(H * 7 / 16 + O, H * 9 / 16 - O, W + O, SimdTensorFormatNhwc, f1, f2);
+        for (SimdTensorFormatType format = SimdTensorFormatNchw; format <= SimdTensorFormatNhwc && result; format = (SimdTensorFormatType)((int)format + 1))
+        {
+            for (int type = 0; type <= 1; type++)
+            {
+                result = result && SynetShuffleLayerForwardAutoTest(H * 7 / 16, H * 9 / 16, W, format, type, f1, f2);
+                result = result && SynetShuffleLayerForwardAutoTest(H * 7 / 16 + O, H * 9 / 16 - O, W + O, format, type, f1, f2);
+            }
+        }
 
         return result;
     }

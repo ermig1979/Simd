@@ -74,9 +74,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga3841bca2ac310225763ae483429967cc"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#ga3841bca2ac310225763ae483429967cc">SimdSynetConvolution8iInternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:ga3841bca2ac310225763ae483429967cc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer used inside INT8 convolution algorithm.  <a href="group__synet__convolution.html#ga3841bca2ac310225763ae483429967cc">More...</a><br /></td></tr>
 <tr class="separator:ga3841bca2ac310225763ae483429967cc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga26f512ea3dc584a36a7998c429ab6f70"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#ga26f512ea3dc584a36a7998c429ab6f70">SimdSynetConvolution8iSetParams</a> (void *context, const float *weight, const float *bias, const float *params, const float *const stats)</td></tr>
-<tr class="memdesc:ga26f512ea3dc584a36a7998c429ab6f70"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, beases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.  <a href="group__synet__convolution.html#ga26f512ea3dc584a36a7998c429ab6f70">More...</a><br /></td></tr>
-<tr class="separator:ga26f512ea3dc584a36a7998c429ab6f70"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga808feb178234a756f2b5bec560cd8e9a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#ga808feb178234a756f2b5bec560cd8e9a">SimdSynetConvolution8iSetParams</a> (void *context, const float *weight, const float *bias, const float *params, const float *const *stats)</td></tr>
+<tr class="memdesc:ga808feb178234a756f2b5bec560cd8e9a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, beases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.  <a href="group__synet__convolution.html#ga808feb178234a756f2b5bec560cd8e9a">More...</a><br /></td></tr>
+<tr class="separator:ga808feb178234a756f2b5bec560cd8e9a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab3af52ee0b31eba79308941cd0eeb5b4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#gab3af52ee0b31eba79308941cd0eeb5b4">SimdSynetConvolution8iForward</a> (void *context, const uint8_t *src, uint8_t *buf, uint8_t *dst)</td></tr>
 <tr class="memdesc:gab3af52ee0b31eba79308941cd0eeb5b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of INT8 convolution algorithm.  <a href="group__synet__convolution.html#gab3af52ee0b31eba79308941cd0eeb5b4">More...</a><br /></td></tr>
 <tr class="separator:gab3af52ee0b31eba79308941cd0eeb5b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -326,7 +326,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__convolution.html#gaa6fcba4caa5d1bf4844d7f5d5bd0fb61" title="Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.">SimdSynetConvolution8iExternalBufferSize</a>, <a class="el" href="group__synet__convolution.html#ga3841bca2ac310225763ae483429967cc" title="Gets size of internal buffer used inside INT8 convolution algorithm.">SimdSynetConvolution8iInternalBufferSize</a>, <a class="el" href="group__synet__convolution.html#ga26f512ea3dc584a36a7998c429ab6f70" title="Sets weights, beases, parameters of activation function, input/output tensor statistics required for ...">SimdSynetConvolution8iSetParams</a> and <a class="el" href="group__synet__convolution.html#gab3af52ee0b31eba79308941cd0eeb5b4" title="Performs forward propagation of INT8 convolution algorithm.">SimdSynetConvolution8iForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__convolution.html#gaa6fcba4caa5d1bf4844d7f5d5bd0fb61" title="Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.">SimdSynetConvolution8iExternalBufferSize</a>, <a class="el" href="group__synet__convolution.html#ga3841bca2ac310225763ae483429967cc" title="Gets size of internal buffer used inside INT8 convolution algorithm.">SimdSynetConvolution8iInternalBufferSize</a>, <a class="el" href="group__synet__convolution.html#ga808feb178234a756f2b5bec560cd8e9a" title="Sets weights, beases, parameters of activation function, input/output tensor statistics required for ...">SimdSynetConvolution8iSetParams</a> and <a class="el" href="group__synet__convolution.html#gab3af52ee0b31eba79308941cd0eeb5b4" title="Performs forward propagation of INT8 convolution algorithm.">SimdSynetConvolution8iForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -384,8 +384,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga26f512ea3dc584a36a7998c429ab6f70"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga26f512ea3dc584a36a7998c429ab6f70">&#9670;&nbsp;</a></span>SimdSynetConvolution8iSetParams()</h2>
+<a id="ga808feb178234a756f2b5bec560cd8e9a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga808feb178234a756f2b5bec560cd8e9a">&#9670;&nbsp;</a></span>SimdSynetConvolution8iSetParams()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -417,7 +417,7 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">const float *const&#160;</td>
+          <td class="paramtype">const float *const *&#160;</td>
           <td class="paramname"><em>stats</em>&#160;</td>
         </tr>
         <tr>

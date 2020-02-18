@@ -514,7 +514,7 @@ namespace Simd
         void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
             const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat);
 
-        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format);
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
         

@@ -147,7 +147,7 @@ namespace Simd
 
         void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible);
 
-        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format);
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
 

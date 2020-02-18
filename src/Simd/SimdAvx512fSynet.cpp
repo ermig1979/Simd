@@ -933,62 +933,107 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format)
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
         {
-            return Avx2::SynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
-
             if (format == SimdTensorFormatNchw)
-                Base::SynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
+                Base::SynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
             else if (format == SimdTensorFormatNhwc)
             {
-                size_t srcC0DF = AlignLo(srcC0, DF);
-                __mmask16 tail00 = TailMask16(srcC0 - srcC0DF);
-                __mmask16 tail0F = TailMask16(srcC0 - srcC0DF - F);
-                size_t srcD0 = (srcC0 - srcC0DF) / 2;
-                __mmask16 tail0 = TailMask16(srcD0);
-                size_t srcC1DF = AlignLo(srcC1, DF);
-                __mmask16 tail10 = TailMask16(srcC1 - srcC1DF);
-                __mmask16 tail1F = TailMask16(srcC1 - srcC1DF - F);
-                size_t srcD1 = (srcC1 - srcC1DF) / 2;
-                __mmask16 tail1 = TailMask16(srcD1);
-                for (size_t s = 0; s < spatial; ++s)
+                size_t channels = (channels0 + channels1) / 2;
+                size_t channels0DF = AlignLo(channels0, DF);
+                __mmask16 tail00 = TailMask16(channels0 - channels0DF);
+                __mmask16 tail0F = TailMask16(channels0 - channels0DF - F);
+                size_t channels0t = (channels0 - channels0DF) / 2;
+                __mmask16 tail0 = TailMask16(channels0t);
+                size_t channels1DF = AlignLo(channels1, DF);
+                __mmask16 tail10 = TailMask16(channels1 - channels1DF);
+                __mmask16 tail1F = TailMask16(channels1 - channels1DF - F);
+                size_t channels1t = (channels1 - channels1DF) / 2;
+                __mmask16 tail1 = TailMask16(channels1t);
+                if (type == 0)
                 {
-                    size_t cd = 0, cs0 = 0, cs1 = 0;
-                    for (; cs0 < srcC0DF; cs0 += DF, cd += F)
+                    for (size_t s = 0; s < spatial; ++s)
                     {
-                        __m512 s0 = _mm512_loadu_ps(src0 + cs0 + 0);
-                        __m512 s1 = _mm512_loadu_ps(src0 + cs0 + F);
-                        _mm512_storeu_ps(dst0 + cd, Deinterleave<0>(s0, s1));
-                        _mm512_storeu_ps(dst1 + cd, Deinterleave<1>(s0, s1));
+                        size_t cd = 0, cs0 = 0, cs1 = 0;
+                        for (; cs0 < channels0DF; cs0 += DF, cd += F)
+                        {
+                            __m512 s0 = _mm512_loadu_ps(src0 + cs0 + 0);
+                            __m512 s1 = _mm512_loadu_ps(src0 + cs0 + F);
+                            _mm512_storeu_ps(dst0 + cd, Deinterleave<0>(s0, s1));
+                            _mm512_storeu_ps(dst1 + cd, Deinterleave<1>(s0, s1));
+                        }
+                        if (channels0DF < channels0)
+                        {
+                            __m512 s0 = _mm512_maskz_loadu_ps(tail00, src0 + cs0 + 0);
+                            __m512 s1 = _mm512_maskz_loadu_ps(tail0F, src0 + cs0 + F);
+                            _mm512_mask_storeu_ps(dst0 + cd, tail0, Deinterleave<0>(s0, s1));
+                            _mm512_mask_storeu_ps(dst1 + cd, tail0, Deinterleave<1>(s0, s1));
+                            cd += channels0t;
+                        }
+                        for (; cs1 < channels1DF; cs1 += DF, cd += F)
+                        {
+                            __m512 s0 = _mm512_loadu_ps(src1 + cs1 + 0);
+                            __m512 s1 = _mm512_loadu_ps(src1 + cs1 + F);
+                            _mm512_storeu_ps(dst0 + cd, Deinterleave<0>(s0, s1));
+                            _mm512_storeu_ps(dst1 + cd, Deinterleave<1>(s0, s1));
+                        }
+                        if (channels1DF < channels1)
+                        {
+                            __m512 s0 = _mm512_maskz_loadu_ps(tail10, src1 + cs1 + 0);
+                            __m512 s1 = _mm512_maskz_loadu_ps(tail1F, src1 + cs1 + F);
+                            _mm512_mask_storeu_ps(dst0 + cd, tail1, Deinterleave<0>(s0, s1));
+                            _mm512_mask_storeu_ps(dst1 + cd, tail1, Deinterleave<1>(s0, s1));
+                            cd += channels1t;
+                        }
+                        src0 += channels0;
+                        src1 += channels1;
+                        dst0 += channels;
+                        dst1 += channels;
                     }
-                    if (srcC0DF < srcC0)
-                    {
-                        __m512 s0 = _mm512_maskz_loadu_ps(tail00, src0 + cs0 + 0);
-                        __m512 s1 = _mm512_maskz_loadu_ps(tail0F, src0 + cs0 + F);
-                        _mm512_mask_storeu_ps(dst0 + cd, tail0, Deinterleave<0>(s0, s1));
-                        _mm512_mask_storeu_ps(dst1 + cd, tail0, Deinterleave<1>(s0, s1));
-                        cd += srcD0;
-                    }
-                    for (; cs1 < srcC1DF; cs1 += DF, cd += F)
-                    {
-                        __m512 s0 = _mm512_loadu_ps(src1 + cs1 + 0);
-                        __m512 s1 = _mm512_loadu_ps(src1 + cs1 + F);
-                        _mm512_storeu_ps(dst0 + cd, Deinterleave<0>(s0, s1));
-                        _mm512_storeu_ps(dst1 + cd, Deinterleave<1>(s0, s1));
-                    }
-                    if (srcC1DF < srcC1)
-                    {
-                        __m512 s0 = _mm512_maskz_loadu_ps(tail10, src1 + cs1 + 0);
-                        __m512 s1 = _mm512_maskz_loadu_ps(tail1F, src1 + cs1 + F);
-                        _mm512_mask_storeu_ps(dst0 + cd, tail1, Deinterleave<0>(s0, s1));
-                        _mm512_mask_storeu_ps(dst1 + cd, tail1, Deinterleave<1>(s0, s1));
-                        cd += srcD1;
-                    }
-                    src0 += srcC0;
-                    src1 += srcC1;
-                    dst0 += dstC;
-                    dst1 += dstC;
                 }
+                else if (type == 1)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cs = 0, cd0 = 0, cd1 = 0;
+                        for (; cd0 < channels0DF; cd0 += DF, cs += F)
+                        {
+                            __m512 s0 = _mm512_loadu_ps(src0 + cs);
+                            __m512 s1 = _mm512_loadu_ps(src1 + cs);
+                            _mm512_storeu_ps(dst0 + cd0 + 0, Interleave<0>(s0, s1));
+                            _mm512_storeu_ps(dst0 + cd0 + F, Interleave<1>(s0, s1));
+                        }
+                        if (channels0DF < channels0)
+                        {
+                            __m512 s0 = _mm512_maskz_loadu_ps(tail0, src0 + cs);
+                            __m512 s1 = _mm512_maskz_loadu_ps(tail0, src1 + cs);
+                            _mm512_mask_storeu_ps(dst0 + cd0 + 0, tail00, Interleave<0>(s0, s1));
+                            _mm512_mask_storeu_ps(dst0 + cd0 + F, tail0F, Interleave<1>(s0, s1));
+                            cs += channels0t;
+                        }
+                        for (; cd1 < channels1DF; cd1 += DF, cs += F)
+                        {
+                            __m512 s0 = _mm512_loadu_ps(src0 + cs);
+                            __m512 s1 = _mm512_loadu_ps(src1 + cs);
+                            _mm512_storeu_ps(dst1 + cd1 + 0, Interleave<0>(s0, s1));
+                            _mm512_storeu_ps(dst1 + cd1 + F, Interleave<1>(s0, s1));
+                        }
+                        if (channels1DF < channels1)
+                        {
+                            __m512 s0 = _mm512_maskz_loadu_ps(tail1, src0 + cs);
+                            __m512 s1 = _mm512_maskz_loadu_ps(tail1, src1 + cs);
+                            _mm512_mask_storeu_ps(dst1 + cd1 + 0, tail10, Interleave<0>(s0, s1));
+                            _mm512_mask_storeu_ps(dst1 + cd1 + F, tail1F, Interleave<1>(s0, s1));
+                            cs += channels1t;
+                        }
+                        src0 += channels;
+                        src1 += channels;
+                        dst0 += channels0;
+                        dst1 += channels1;
+                    }
+                }
+                else
+                    assert(0);
             }
             else
                 assert(0);

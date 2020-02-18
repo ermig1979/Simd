@@ -469,51 +469,105 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format)
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
         {
-            if (format == SimdTensorFormatNchw)
+            size_t channels = (channels0 + channels1) / 2, size = sizeof(float) * spatial;
+            switch (type)
             {
-                size_t cd = 0, size = sizeof(float) * spatial;
-                for (size_t cs = 0; cs < srcC0; cs += 2, cd += 1)
-                {
-                    memcpy(dst0, src0 + 0 * spatial, size);
-                    memcpy(dst1, src0 + 1 * spatial, size);
-                    src0 += 2 * spatial;
-                    dst0 += spatial;
-                    dst1 += spatial;
-                }
-                for (size_t cs = 0; cs < srcC1; cs += 2, cd += 1)
-                {
-                    memcpy(dst0, src1 + 0 * spatial, size);
-                    memcpy(dst1, src1 + 1 * spatial, size);
-                    src1 += 2 * spatial;
-                    dst0 += spatial;
-                    dst1 += spatial;
-                }
-            }
-            else if (format == SimdTensorFormatNhwc)
-            {
-                for (size_t s = 0; s < spatial; ++s)
+            case 0:
+                if (format == SimdTensorFormatNchw)
                 {
                     size_t cd = 0;
-                    for (size_t cs = 0; cs < srcC0; cs += 2, cd += 1)
+                    for (size_t cs = 0; cs < channels0; cs += 2, cd += 1)
                     {
-                        dst0[cd] = src0[cs + 0];
-                        dst1[cd] = src0[cs + 1];
+                        memcpy(dst0, src0 + 0 * spatial, size);
+                        memcpy(dst1, src0 + 1 * spatial, size);
+                        src0 += 2 * spatial;
+                        dst0 += spatial;
+                        dst1 += spatial;
                     }
-                    for (size_t cs = 0; cs < srcC1; cs += 2, cd += 1)
+                    for (size_t cs = 0; cs < channels1; cs += 2, cd += 1)
                     {
-                        dst0[cd] = src1[cs + 0];
-                        dst1[cd] = src1[cs + 1];
+                        memcpy(dst0, src1 + 0 * spatial, size);
+                        memcpy(dst1, src1 + 1 * spatial, size);
+                        src1 += 2 * spatial;
+                        dst0 += spatial;
+                        dst1 += spatial;
                     }
-                    src0 += srcC0;
-                    src1 += srcC1;
-                    dst0 += dstC;
-                    dst1 += dstC;
                 }
-            }
-            else
+                else if (format == SimdTensorFormatNhwc)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cd = 0;
+                        for (size_t cs = 0; cs < channels0; cs += 2, cd += 1)
+                        {
+                            dst0[cd] = src0[cs + 0];
+                            dst1[cd] = src0[cs + 1];
+                        }
+                        for (size_t cs = 0; cs < channels1; cs += 2, cd += 1)
+                        {
+                            dst0[cd] = src1[cs + 0];
+                            dst1[cd] = src1[cs + 1];
+                        }
+                        src0 += channels0;
+                        src1 += channels1;
+                        dst0 += channels;
+                        dst1 += channels;
+                    }
+                }
+                else
+                    assert(0);                
+                break;
+            case 1:
+                if (format == SimdTensorFormatNchw)
+                {
+                    size_t cs = 0;
+                    for (size_t cd = 0; cd < channels0; cs += 1, cd += 2)
+                    {
+                        memcpy(dst0 + 0 * spatial, src0, size);
+                        memcpy(dst0 + 1 * spatial, src1, size);
+                        src0 += spatial;
+                        src1 += spatial;
+                        dst0 += 2 * spatial;
+                    }
+                    for (size_t cd = 0; cd < channels1; cs += 1, cd += 2)
+                    {
+                        memcpy(dst1 + 0 * spatial, src0, size);
+                        memcpy(dst1 + 1 * spatial, src1, size);
+                        src0 += spatial;
+                        src1 += spatial;
+                        dst1 += 2 * spatial;
+                    }
+                }                
+                else if (format == SimdTensorFormatNhwc)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cs = 0;
+                        for (size_t cd = 0; cd < channels0; cd += 2, cs += 1)
+                        {
+                            dst0[cd + 0] = src0[cs];
+                            dst0[cd + 1] = src1[cs];
+                        }
+                        for (size_t cd = 0; cd < channels1; cd += 2, cs += 1)
+                        {
+                            dst1[cd + 0] = src0[cs];
+                            dst1[cd + 1] = src1[cs];
+                        }
+                        src0 += channels;
+                        src1 += channels;
+                        dst0 += channels0;
+                        dst1 += channels1;
+                    }
+                }
+                else
+                    assert(0);
+                break;
+            default:
                 assert(0);
+            }
+
         }
 
         //---------------------------------------------------------------------

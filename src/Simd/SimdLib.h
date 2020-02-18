@@ -5632,7 +5632,7 @@ extern "C"
 
     /*! @ingroup synet_convolution
 
-        \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const stats);
+        \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
 
         \short Sets weights, beases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.
 
@@ -6338,23 +6338,23 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetShuffleLayerForward(const float * src0, size_t srcC0, const float * src1, size_t srcC1, size_t spatial, float * dst0, float * dst1, size_t dstC, SimdTensorFormatType format);
+        \fn void SimdSynetShuffleLayerForward(const float * src0, const float * src1, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format, int type);
 
         \short This function is used for forward propagation of ShuffleLayer.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
-        \param [in] src0 - a pointer to the32-bit float array with the first input image tensor.
-        \param [in] srcC0 - a number of channels in the first input image tensor. It must be even number.
-        \param [in] src1 - a pointer to the32-bit float array with the second input image tensor.
-        \param [in] srcC1 - a number of channels in the second input image tensor. It must be even number.
+        \param [in] src0 - a pointer to the 32-bit float array with the first input image tensor.
+        \param [in] src1 - a pointer to the 32-bit float array with the second input image tensor.
+        \param [in] channels0 - a number of channels in the first input (type == 0) or output (type == 1) image tensor. It must be even number.
+        \param [in] channels1 - a number of channels in the second input (type == 0) or output (type == 1) image tensor. It must be even number.
         \param [in] spatial - a spatial size of (input/output) image tensors.
         \param [out] dst0 - a pointer to the 32-bit float array with the first output image tensor.
         \param [out] dst1 - a pointer to the 32-bit float array with the second output image tensor.
-        \param [in] dstC - a number of channels in the first and the second output image tensors.
         \param [in] format - a format of (input/output) image tensors.
+        \param [in] type - a shuffle type (it can be 0 or 1).
     */
-    SIMD_API void SimdSynetShuffleLayerForward(const float * src0, size_t srcC0, const float * src1, size_t srcC1, size_t spatial, float * dst0, float * dst1, size_t dstC, SimdTensorFormatType format);
+    SIMD_API void SimdSynetShuffleLayerForward(const float * src0, const float * src1, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format, int type);
 
     /*! @ingroup synet_activation
 

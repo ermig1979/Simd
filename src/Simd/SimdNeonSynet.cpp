@@ -846,44 +846,85 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format)
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
         {
             if (format == SimdTensorFormatNchw)
-                Base::SynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
+                Base::SynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
             else if (format == SimdTensorFormatNhwc)
             {
-                size_t srcC0DF = AlignLo(srcC0, DF);
-                size_t srcC1DF = AlignLo(srcC1, DF);
-                for (size_t s = 0; s < spatial; ++s)
+                size_t channels = (channels0 + channels1) / 2;
+                size_t channels0DF = AlignLo(channels0, DF);
+                size_t channels1DF = AlignLo(channels1, DF);
+                if (type == 0)
                 {
-                    size_t cd = 0, cs0 = 0, cs1 = 0;
-                    for (; cs0 < srcC0DF; cs0 += DF, cd += F)
+                    for (size_t s = 0; s < spatial; ++s)
                     {
-                        float32x4x2_t _src0 = Load2<false>(src0 + cs0);
-                        Store<false>(dst0 + cd, _src0.val[0]);
-                        Store<false>(dst1 + cd, _src0.val[1]);
+                        size_t cd = 0, cs0 = 0, cs1 = 0;
+                        for (; cs0 < channels0DF; cs0 += DF, cd += F)
+                        {
+                            float32x4x2_t _src0 = Load2<false>(src0 + cs0);
+                            Store<false>(dst0 + cd, _src0.val[0]);
+                            Store<false>(dst1 + cd, _src0.val[1]);
+                        }
+                        for (; cs0 < channels0; cs0 += 2, cd += 1)
+                        {
+                            dst0[cd] = src0[cs0 + 0];
+                            dst1[cd] = src0[cs0 + 1];
+                        }
+                        for (; cs1 < channels1DF; cs1 += DF, cd += F)
+                        {
+                            float32x4x2_t _src1 = Load2<false>(src1 + cs1);
+                            Store<false>(dst0 + cd, _src1.val[0]);
+                            Store<false>(dst1 + cd, _src1.val[1]);
+                        }
+                        for (; cs1 < channels1; cs1 += 2, cd += 1)
+                        {
+                            dst0[cd] = src1[cs1 + 0];
+                            dst1[cd] = src1[cs1 + 1];
+                        }
+                        src0 += channels0;
+                        src1 += channels1;
+                        dst0 += channels;
+                        dst1 += channels;
                     }
-                    for (; cs0 < srcC0; cs0 += 2, cd += 1)
-                    {
-                        dst0[cd] = src0[cs0 + 0];
-                        dst1[cd] = src0[cs0 + 1];
-                    }
-                    for (; cs1 < srcC1DF; cs1 += DF, cd += F)
-                    {
-                        float32x4x2_t _src1 = Load2<false>(src1 + cs1);
-                        Store<false>(dst0 + cd, _src1.val[0]);
-                        Store<false>(dst1 + cd, _src1.val[1]);
-                    }
-                    for (; cs1 < srcC1; cs1 += 2, cd += 1)
-                    {
-                        dst0[cd] = src1[cs1 + 0];
-                        dst1[cd] = src1[cs1 + 1];
-                    }
-                    src0 += srcC0;
-                    src1 += srcC1;
-                    dst0 += dstC;
-                    dst1 += dstC;
                 }
+                else if (type == 1)
+                {
+                    for (size_t s = 0; s < spatial; ++s)
+                    {
+                        size_t cs = 0, cd0 = 0, cd1 = 0;
+                        for (; cd0 < channels0DF; cd0 += DF, cs += F)
+                        {
+                            float32x4x2_t s;
+                            s.val[0] = Load<false>(src0 + cs);
+                            s.val[1] = Load<false>(src1 + cs);
+                            Store2<false>(dst0 + cd0, s);
+                        }
+                        for (; cd0 < channels0; cd0 += 2, cs += 1)
+                        {
+                            dst0[cd0 + 0] = src0[cs];
+                            dst0[cd0 + 1] = src1[cs];
+                        }
+                        for (; cd1 < channels1DF; cd1 += DF, cs += F)
+                        {
+                            float32x4x2_t s;
+                            s.val[0] = Load<false>(src0 + cs);
+                            s.val[1] = Load<false>(src1 + cs);
+                            Store2<false>(dst1 + cd1, s);
+                        }
+                        for (; cd1 < channels1; cd1 += 2, cs += 1)
+                        {
+                            dst1[cd1 + 0] = src0[cs];
+                            dst1[cd1 + 1] = src1[cs];
+                        }
+                        src0 += channels;
+                        src1 += channels;
+                        dst0 += channels0;
+                        dst1 += channels1;
+                    }
+                }
+                else
+                    assert(0);
             }
             else
                 assert(0);

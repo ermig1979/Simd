@@ -5498,12 +5498,12 @@ SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height
         Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
 }
 
-typedef void(*SimdSynetShuffleLayerForwardPtr) (const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format);
+typedef void(*SimdSynetShuffleLayerForwardPtr) (const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
 volatile SimdSynetShuffleLayerForwardPtr simdSynetShuffleLayerForward = SIMD_FUNC4(SynetShuffleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetShuffleLayerForward(const float* src0, size_t srcC0, const float* src1, size_t srcC1, size_t spatial, float* dst0, float* dst1, size_t dstC, SimdTensorFormatType format)
+SIMD_API void SimdSynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
 {
-    simdSynetShuffleLayerForward(src0, srcC0, src1, srcC1, spatial, dst0, dst1, dstC, format);
+    simdSynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
 }
 
 typedef void(*SimdSynetSigmoid32fPtr) (const float* src, size_t size, const float* slope, float* dst);
