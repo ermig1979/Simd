@@ -31,7 +31,7 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        template<bool align> void SynetConvertImage_Chw_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetReorderImage_Chw_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t channels8 = AlignLo(channels, 8);
             size_t spatial8 = AlignLo(spatial, 8);
@@ -93,7 +93,7 @@ namespace Simd
                     dst[c] = src[c*spatial];
         }
 
-        template<bool align> void SynetConvertImage_Chw_Chw16c(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetReorderImage_Chw_Chw16c(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t spatial8 = AlignLo(spatial, 8);
             size_t channels16 = AlignLo(channels, 16);
@@ -142,12 +142,12 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertImage_Hwc_Chw(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetReorderImage_Hwc_Chw(size_t channels, size_t spatial, const float * src, float * dst)
         {
-            SynetConvertImage_Chw_Hwc<align>(spatial, channels, src, dst);
+            SynetReorderImage_Chw_Hwc<align>(spatial, channels, src, dst);
         }
 
-        template<bool align> void SynetConvertImage_Hwc_Chw16c(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetReorderImage_Hwc_Chw16c(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t channelsF = AlignLo(channels, F);
             size_t channelsF4 = AlignLo(channels, 4 * F);
@@ -186,7 +186,7 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertImage_Chw16c_Chw(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetReorderImage_Chw16c_Chw(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t spatial8 = AlignLo(spatial, 8);
             size_t channels16 = AlignLo(channels, 16);
@@ -232,7 +232,7 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertImage_Chw16c_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
+        template<bool align> void SynetReorderImage_Chw16c_Hwc(size_t channels, size_t spatial, const float * src, float * dst)
         {
             size_t stride = F * spatial;
             size_t channelsF = AlignLo(channels, F);
@@ -279,28 +279,28 @@ namespace Simd
             if (src == SimdTensorFormatNchw)
             {
                 if (dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_Chw_Hwc<false>;
+                    return SynetReorderImage_Chw_Hwc<false>;
                 if (dst == SimdTensorFormatNchw16c)
-                    return SynetConvertImage_Chw_Chw16c<false>;
+                    return SynetReorderImage_Chw_Chw16c<false>;
             }
             if (src == SimdTensorFormatNhwc)
             {
                 if (dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_Hwc_Chw<false>;
+                    return SynetReorderImage_Hwc_Chw<false>;
                 if (dst == SimdTensorFormatNchw16c)
-                    return SynetConvertImage_Hwc_Chw16c<false>;
+                    return SynetReorderImage_Hwc_Chw16c<false>;
             }
             if (src == SimdTensorFormatNchw16c)
             {
                 if (dst == SimdTensorFormatNchw)
-                    return SynetConvertImage_Chw16c_Chw<false>;
+                    return SynetReorderImage_Chw16c_Chw<false>;
                 if (dst == SimdTensorFormatNhwc)
-                    return SynetConvertImage_Chw16c_Hwc<false>;
+                    return SynetReorderImage_Chw16c_Hwc<false>;
             }
             return NULL;
         }
 
-        void SynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
+        void SynetReorderImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
         {
             SynetImageConverterPtr imageConverter = GetImageConverter(srcFormat, dstFormat);
             if (imageConverter)
@@ -315,14 +315,14 @@ namespace Simd
                 }
             }
             else
-                return Avx::SynetConvertImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
+                return Avx::SynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
         }
 
-        template<bool align> void SynetConvertFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetReorderFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             if (kernel == 1)
             {
-                SynetConvertImage_Chw_Hwc<align>(output, input, src, dst);
+                SynetReorderImage_Chw_Hwc<align>(output, input, src, dst);
                 return;
             }
             size_t output8 = AlignLo(output, 8);
@@ -387,11 +387,11 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Oiyx_Oyxi16o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetReorderFilter_Oiyx_Oyxi16o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             if (kernel == 1)
             {
-                SynetConvertImage_Chw_Chw16c<align>(output, input, src, dst);
+                SynetReorderImage_Chw_Chw16c<align>(output, input, src, dst);
                 return;
             }
             size_t output16 = AlignLo(output, 16);
@@ -433,17 +433,17 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Yxio_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetReorderFilter_Yxio_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             if (kernel == 1)
             {
-                SynetConvertImage_Chw_Hwc<align>(input, output, src, dst);
+                SynetReorderImage_Chw_Hwc<align>(input, output, src, dst);
                 return;
             }
-            SynetConvertFilter_Oiyx_Yxio<align>(kernel, input, output, src, dst);
+            SynetReorderFilter_Oiyx_Yxio<align>(kernel, input, output, src, dst);
         }
 
-        template<bool align> void SynetConvertFilter_Yxio_Oyxi16o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetReorderFilter_Yxio_Oyxi16o(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             size_t outputF = AlignLo(output, F);
             size_t outputF4 = AlignLo(output, F * 4);
@@ -486,11 +486,11 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Oyxi16o_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetReorderFilter_Oyxi16o_Oiyx(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             if (kernel == 1)
             {
-                SynetConvertImage_Chw16c_Chw<align>(output, input, src, dst);
+                SynetReorderImage_Chw16c_Chw<align>(output, input, src, dst);
                 return;
             }
             size_t output16 = AlignLo(output, 16);
@@ -542,7 +542,7 @@ namespace Simd
             }
         }
 
-        template<bool align> void SynetConvertFilter_Oyxi16o_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
+        template<bool align> void SynetReorderFilter_Oyxi16o_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
         {
             size_t outputF = AlignLo(output, F);
             size_t outputF4 = AlignLo(output, 4 * F);
@@ -591,34 +591,34 @@ namespace Simd
             if (src == SimdTensorFormatOiyx)
             {
                 if (dst == SimdTensorFormatYxio)
-                    return SynetConvertFilter_Oiyx_Yxio<false>;
+                    return SynetReorderFilter_Oiyx_Yxio<false>;
                 if (dst == SimdTensorFormatOyxi16o)
-                    return SynetConvertFilter_Oiyx_Oyxi16o<false>;
+                    return SynetReorderFilter_Oiyx_Oyxi16o<false>;
             }
             if (src == SimdTensorFormatYxio)
             {
                 if (dst == SimdTensorFormatOiyx)
-                    return SynetConvertFilter_Yxio_Oiyx<false>;
+                    return SynetReorderFilter_Yxio_Oiyx<false>;
                 if (dst == SimdTensorFormatOyxi16o)
-                    return SynetConvertFilter_Yxio_Oyxi16o<false>;
+                    return SynetReorderFilter_Yxio_Oyxi16o<false>;
             }
             if (src == SimdTensorFormatOyxi16o)
             {
                 if (dst == SimdTensorFormatOiyx)
-                    return SynetConvertFilter_Oyxi16o_Oiyx<false>;
+                    return SynetReorderFilter_Oyxi16o_Oiyx<false>;
                 if (dst == SimdTensorFormatYxio)
-                    return SynetConvertFilter_Oyxi16o_Yxio<false>;
+                    return SynetReorderFilter_Oyxi16o_Yxio<false>;
             }
             return NULL;
         }
 
-        void SynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
+        void SynetReorderFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
         {
             SynetFilterConverterPtr filterConverter = GetFilterConverter(srcFormat, dstFormat);
             if (filterConverter)
                 filterConverter(output, input, kernel, src, dst);
             else
-                Avx::SynetConvertFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
+                Avx::SynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
         }
     }
 #endif// SIMD_AVX512F_ENABLE

@@ -25,6 +25,7 @@
 #define __SimdArray_h__
 
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
@@ -66,6 +67,12 @@ namespace Simd
         SIMD_INLINE void Clear()
         {
             ::memset(data, 0, size * sizeof(T));
+        }
+
+        SIMD_INLINE void Swap(const Array & array)
+        {
+            Simd::Swap(data, array.data);
+            Simd::Swap(size, array.size);
         }
 
         SIMD_INLINE T & operator[] (size_t i)

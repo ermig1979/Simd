@@ -38,8 +38,13 @@
 <ul>
  <li>Add parameter of bitwise compatibility of function SynetScaleLayerForward and Inference Engine.</li>
  <li>Add parameter 'type' to function SynetShuffleLayerForward.</li>
+ <li>Base implementation, SSE2 optimizations of function SynetConvert32fTo8u.</li>
 </ul>
-
+<h5>Renaming</h5>
+<ul>
+ <li>SimdSynetConvertImage to SimdSynetReorderImage.</li>
+ <li>SimdSynetConvertFilter to SimdSynetReorderFilter.</li>
+</ul>
 
 <h4>Test framework</h4>
 <h5>New features</h5>
@@ -47,7 +52,9 @@
  <li>A new commandline test parameter -c - a number of channels in test image for performance testing.</li>
  <li>A new commandline test parameter -mt - a minimal test execution time (in milliseconds).</li>
  <li>Tests for verifying functionality of SynetConvolution8i framework.</li>
+ <li>Tests for verifying functionality of function SynetConvert32fTo8u.</li>
 </ul>
+
 <a href="#HOME">Home</a> 
 <hr/> 
 <h3 id="R086">February 3, 2020 (version 4.5.86)</h3> 

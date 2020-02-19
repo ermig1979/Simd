@@ -230,8 +230,8 @@ namespace Simd
             virtual void ImgToCol(const uint8_t* src, uint8_t* dst);
             virtual void ImgToRow(const uint8_t* src, uint8_t* dst);
 
-            virtual void GemmNN(size_t S, size_t D, size_t K, size_t C, const uint8_t* src, size_t lda, const int8_t* weight, size_t ldb, int32_t* dst, size_t ldc);
-            virtual void GemmNN(size_t D, size_t S, size_t C, size_t K, const int8_t* weight, size_t lda, const uint8_t* src, size_t ldb, int32_t* dst, size_t ldc);
+            virtual void GemmNchw(size_t D, size_t S, size_t C, size_t K, const int8_t * wgt, size_t ldw, const uint8_t * src, size_t lds, int32_t * dst, size_t ldd);
+            virtual void GemmNhwc(size_t S, size_t D, size_t K, size_t C, const uint8_t * src, size_t lds, const int8_t * wgt, size_t ldw, int32_t * dst, size_t ldd);
 
             CvtParam _srcCvt, _dstCvt;
             Array8i _weight8i;
@@ -239,6 +239,26 @@ namespace Simd
             Array32f _norm32f; 
             bool _skipConv, _src8u, _dst8u, _overflow16i;
             size_t _batch, _merge, _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeS, _sizeB, _sizeD;
+        };
+
+        class SynetConvolution8iNhwcDirect : public SynetConvolution8i
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::NhwcDirect"; }
+            virtual size_t InternalBufferSize() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+        protected:
+            CvtParam _srcCvt, _dstCvt;
+            Array8i _weight8i;
+            Array32i _norm32i;
+            Array32f _norm32f;
+            bool _src8u, _dst8u, _overflow16i;
+            size_t _batch, _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeS, _sizeB, _sizeD;
         };
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);

@@ -5498,39 +5498,24 @@ extern "C"
 
     /*! @ingroup synet_conversion
 
-        \fn void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+        \fn void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t * dst, SimdBool compatible);
 
-        \short Converts (input/output) image between different formats of 4D-tensor.
+        \short Converts 32-bit float point image to 8-bit unsigned integer image.
 
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c is not supported.
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. 
 
-        \param [in] batch - a batch (number of images in the batch).
-        \param [in] channels - a number of image channels.
-        \param [in] spatial - a spatial size (height*width) of image.
-        \param [in] src - a pointer to input image data.
-        \param [in] srcFormat - a format of input image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
-        \param [out] dst - a pointer to output image data.
-        \param [in] dstFormat - a format of output image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
+        \param [in] src - a pointer to the 32-bit float array with input image tensor. 
+        \param [in] batch - a number of images in the batch of (input/output) image tensor.
+        \param [in] channels - a number of channels in the (input/output) image tensor.
+        \param [in] height - a height of (input/output) image tensor.
+        \param [in] width - a width of (input/output) image tensor.
+        \param [in] format - a format of (input/output) image tensor.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients. 
+        \param [in] shift - a pointer to the 32-bit float array with shift coefficients. 
+        \param [out] dst - a pointer to the 8-bit unsigned integer array with output image tensor. 
+        \param [in] compatible - a flag of bitwise compatibility with Inference Engine.
     */
-    SIMD_API void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-
-    /*! @ingroup synet_conversion
-
-        \fn void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-
-        \short Converts 2d-convolution filter weight between different formats of 4D-tensor.
-
-        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o is not supported.
-
-        \param [in] output - a number of output channels in filter.
-        \param [in] input - a number of intput channels in filter.
-        \param [in] kernel - a size (width*height) of filter kernel.
-        \param [in] src - a pointer to input filter data.  
-        \param [in] srcFormat - a format of input filter. It can be ::SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o.
-        \param [out] dst - a pointer to output filter data.
-        \param [in] dstFormat - a format of output filter. It can be SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o. 
-    */
-    SIMD_API void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+    SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdBool compatible);
 
     /*! @ingroup synet_convolution
 
@@ -6255,6 +6240,42 @@ extern "C"
         \param [out] dst - a pointer to output 32-bit float array.
     */
     SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
+
+    /*! @ingroup synet_conversion
+
+        \fn void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+
+        \short Converts (input/output) image between different formats of 4D-tensor.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c is not supported.
+
+        \param [in] batch - a batch (number of images in the batch).
+        \param [in] channels - a number of image channels.
+        \param [in] spatial - a spatial size (height*width) of image.
+        \param [in] src - a pointer to input image data.
+        \param [in] srcFormat - a format of input image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
+        \param [out] dst - a pointer to output image data.
+        \param [in] dstFormat - a format of output image. It can be ::SimdTensorFormatNchw, ::SimdTensorFormatNhwc, ::SimdTensorFormatNchw4c, ::SimdTensorFormatNchw8c, ::SimdTensorFormatNchw16c.
+    */
+    SIMD_API void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
+
+    /*! @ingroup synet_conversion
+
+        \fn void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
+
+        \short Converts 2d-convolution filter weight between different formats of 4D-tensor.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. Conversion between ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o is not supported.
+
+        \param [in] output - a number of output channels in filter.
+        \param [in] input - a number of intput channels in filter.
+        \param [in] kernel - a size (width*height) of filter kernel.
+        \param [in] src - a pointer to input filter data.
+        \param [in] srcFormat - a format of input filter. It can be ::SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o.
+        \param [out] dst - a pointer to output filter data.
+        \param [in] dstFormat - a format of output filter. It can be SimdTensorFormatOiyx, ::SimdTensorFormatYxio, ::SimdTensorFormatOyxi4o, ::SimdTensorFormatOyxi8o, ::SimdTensorFormatOyxi16o.
+    */
+    SIMD_API void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
 
     /*! @ingroup synet_activation
 

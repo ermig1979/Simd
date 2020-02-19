@@ -5186,20 +5186,12 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
     simdSynetAddBias(bias, channels, spatial, dst, format);
 }
 
-typedef void(*SimdSynetConvertImagePtr) (size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-volatile SimdSynetConvertImagePtr simdSynetConvertImage = SIMD_FUNC4(SynetConvertImage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+typedef void(*SimdSynetConvert32fTo8uPtr) (const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdBool compatible);
+volatile  SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC1(SynetConvert32fTo8u, SIMD_SSE2_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetConvertImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
+SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdBool compatible)
 {
-    simdSynetConvertImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
-}
-
-typedef void(*SimdSynetConvertFilterPtr) (size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
-volatile SimdSynetConvertFilterPtr simdSynetConvertFilter = SIMD_FUNC4(SynetConvertFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void SimdSynetConvertFilter(size_t output, size_t input, size_t kernel, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat)
-{
-    simdSynetConvertFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
+    simdSynetConvert32fTo8u(src, batch, channels, height, width, format, scale, shift, dst, compatible);
 }
 
 typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
@@ -5454,6 +5446,22 @@ SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512F_FUN
 SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
 {
     simdSynetRelu32f(src, size, slope, dst);
+}
+
+typedef void(*SimdSynetReorderImagePtr) (size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
+volatile SimdSynetReorderImagePtr simdSynetReorderImage = SIMD_FUNC4(SynetReorderImage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat)
+{
+    simdSynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
+}
+
+typedef void(*SimdSynetReorderFilterPtr) (size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
+volatile SimdSynetReorderFilterPtr simdSynetReorderFilter = SIMD_FUNC4(SynetReorderFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat)
+{
+    simdSynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
 }
 
 typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);

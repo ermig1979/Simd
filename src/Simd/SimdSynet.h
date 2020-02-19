@@ -40,6 +40,11 @@ namespace Simd
             return (format == SimdTensorFormatNhwc && channels != 1) || (format == SimdTensorFormatNchw && spatial == 1);
         }
 
+        SIMD_INLINE uint8_t SynetConvert32fTo8u(float value, float scale, float shift)
+        {
+            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), 0, 255);
+        }
+
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
 
         template <> SIMD_INLINE float SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(float a, float b)

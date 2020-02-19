@@ -315,9 +315,9 @@ namespace Simd
                     for (size_t g = 0; g < p.group; ++g)
                     {
                         if (p.trans)
-                            GemmNN(_siS, _siD, _siK, _siC, pSrc + _grS * g, _ldS, weight + _grW * g, _ldW, pSum + _grD * g, _ldD);
+                            GemmNhwc(_siS, _siD, _siK, _siC, pSrc + _grS * g, _ldS, weight + _grW * g, _ldW, pSum + _grD * g, _ldD);
                         else
-                            GemmNN(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, pSrc + _grS * g, _ldS, pSum + _grD * g, _ldD);
+                            GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, pSrc + _grS * g, _ldS, pSum + _grD * g, _ldD);
                     }
                 }
                 Convert<int32_t, int32_t, int32_t>(pSum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, pSum);
@@ -491,8 +491,42 @@ namespace Simd
             }
         }
 
-        void SynetConvolution8iGemmNN::GemmNN(size_t S, size_t D, size_t K, size_t C,
-            const uint8_t* src, size_t lda, const int8_t* weight, size_t ldb, int32_t* dst, size_t ldc)
+        void SynetConvolution8iGemmNN::GemmNchw(size_t D, size_t S, size_t C, size_t K, const int8_t* wgt, size_t ldw, const uint8_t* src, size_t lds, int32_t* dst, size_t ldd)
+        {
+            const size_t C2 = _overflow16i ? AlignLo(C, 2) : 0;
+            for (size_t i = 0; i < D; ++i)
+            {
+                for (size_t j = 0; j < S; ++j)
+                    dst[j] = 0;
+                size_t c = 0;
+                for (; c < C2; c += 2)
+                {
+                    for (size_t k = 0; k < K; k++)
+                    {
+                        int32_t w0 = wgt[(c + 0) * K + k];
+                        int32_t w1 = wgt[(c + 1) * K + k];
+                        const uint8_t* s0 = src + ((c + 0) * K + k) * lds;
+                        const uint8_t* s1 = src + ((c + 1) * K + k) * lds;
+                        for (size_t j = 0; j < S; ++j)
+                            dst[j] += Simd::RestrictRange(s0[j] * w0 + s1[j] * w1, SHRT_MIN, SHRT_MAX);
+                    }
+                }
+                for (; c < C; ++c)
+                {
+                    for (size_t k = 0; k < K; k++)
+                    {
+                        int32_t w0 = wgt[(c + 0) * K + k];
+                        const uint8_t* s0 = src + ((c + 0) * K + k) * lds;
+                        for (size_t j = 0; j < S; ++j)
+                            dst[j] += s0[j] * w0;
+                    }
+                }
+                wgt += ldw;
+                dst += ldd;
+            }
+        }
+
+        void SynetConvolution8iGemmNN::GemmNhwc(size_t S, size_t D, size_t K, size_t C, const uint8_t* src, size_t lds, const int8_t* wgt, size_t ldw, int32_t* dst, size_t ldd)
         {
             const size_t C2 = _overflow16i ? AlignLo(C, 2) : 0;
             for (size_t i = 0; i < S; ++i)
@@ -506,57 +540,21 @@ namespace Simd
                     {
                         int32_t s0 = src[o + 0];
                         int32_t s1 = src[o + 1];
-                        const int8_t* w0 = weight + (o + 0) * ldb;
-                        const int8_t* w1 = weight + (o + 1) * ldb;
+                        const int8_t* w0 = wgt + (o + 0) * ldw;
+                        const int8_t* w1 = wgt + (o + 1) * ldw;
                         for (size_t j = 0; j < D; ++j)
                             dst[j] += Simd::RestrictRange(s0 * w0[j] + s1 * w1[j], SHRT_MIN, SHRT_MAX);
                     }
                     for (; c < C; ++c, ++o)
                     {
                         int32_t s0 = src[o];
-                        const int8_t* w0 = weight + o * ldb;
+                        const int8_t* w0 = wgt + o * ldw;
                         for (size_t j = 0; j < D; ++j)
                             dst[j] += s0 * w0[j];
                     }
                 }
-                src += lda;
-                dst += ldc;
-            }
-        }
-
-        void SynetConvolution8iGemmNN::GemmNN(size_t D, size_t S, size_t C, size_t K,
-            const int8_t* weight, size_t lda, const uint8_t* src, size_t ldb, int32_t* dst, size_t ldc)
-        {
-            const size_t C2 = _overflow16i ? AlignLo(C, 2) : 0;
-            for (size_t i = 0; i < D; ++i)
-            {
-                for (size_t j = 0; j < S; ++j)
-                    dst[j] = 0;
-                size_t c = 0;
-                for (; c < C2; c += 2)
-                {
-                    for (size_t k = 0; k < K; k++)
-                    {
-                        int32_t w0 = weight[(c + 0) * K + k];
-                        int32_t w1 = weight[(c + 1) * K + k];
-                        const uint8_t* s0 = src + ((c + 0) * K + k) * ldb;
-                        const uint8_t* s1 = src + ((c + 1) * K + k) * ldb;
-                        for (size_t j = 0; j < S; ++j)
-                            dst[j] += Simd::RestrictRange(s0[j] * w0 + s1[j] * w1, SHRT_MIN, SHRT_MAX);
-                    }
-                }
-                for (; c < C; ++c)
-                {
-                    for (size_t k = 0; k < K; k++)
-                    {
-                        int32_t w0 = weight[(c + 0) * K + k];
-                        const uint8_t* s0 = src + ((c + 0) * K + k) * ldb;
-                        for (size_t j = 0; j < S; ++j)
-                            dst[j] += s0[j] * w0;
-                    }
-                }
-                weight += lda;
-                dst += ldc;
+                src += lds;
+                dst += ldd;
             }
         }
 

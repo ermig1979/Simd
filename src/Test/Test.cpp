@@ -342,9 +342,10 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetSoftplus32f);
     TEST_ADD_GROUP_A00(SynetTanh32f);
 
-    TEST_ADD_GROUP_A00(SynetConvertImage);
-    TEST_ADD_GROUP_A00(SynetConvertFilter);
+    TEST_ADD_GROUP_A00(SynetConvert32fTo8u);
     TEST_ADD_GROUP_A00(SynetSetInput);
+    TEST_ADD_GROUP_A00(SynetReorderImage);
+    TEST_ADD_GROUP_A00(SynetReorderFilter);
 
     TEST_ADD_GROUP_A00(SynetConvolution8iForward);
 

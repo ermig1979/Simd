@@ -196,6 +196,30 @@ namespace Test
             return Data() + Offset(index);
         }
 
+        SIMD_INLINE size_t Batch() const
+        {
+            assert(_shape.size() == 4 && (_format == SimdTensorFormatNchw || _format == SimdTensorFormatNhwc));
+            return _shape[0];
+        }
+
+        SIMD_INLINE size_t Channels() const
+        {
+            assert(_shape.size() == 4 && (_format == SimdTensorFormatNchw || _format == SimdTensorFormatNhwc));
+            return _format == SimdTensorFormatNchw ? _shape[1] : _shape[3];
+        }
+
+        SIMD_INLINE size_t Height() const
+        {
+            assert(_shape.size() == 4 && (_format == SimdTensorFormatNchw || _format == SimdTensorFormatNhwc));
+            return _format == SimdTensorFormatNchw ? _shape[2] : _shape[1];
+        }
+
+        SIMD_INLINE size_t Width() const
+        {
+            assert(_shape.size() == 4 && (_format == SimdTensorFormatNchw || _format == SimdTensorFormatNhwc));
+            return _format == SimdTensorFormatNchw ? _shape[3] : _shape[2];
+        }
+
         void DebugPrint(std::ostream & os, const String & name, size_t first = 5, size_t last = 2) const
         {
             os << name << " { ";
