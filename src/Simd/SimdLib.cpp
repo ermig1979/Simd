@@ -5186,12 +5186,12 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
     simdSynetAddBias(bias, channels, spatial, dst, format);
 }
 
-typedef void(*SimdSynetConvert32fTo8uPtr) (const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdBool compatible);
-volatile  SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC1(SynetConvert32fTo8u, SIMD_SSE2_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_NEON_FUNC);
+typedef void(*SimdSynetConvert32fTo8uPtr) (const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+volatile  SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC2(SynetConvert32fTo8u, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC);// , SIMD_AVX512F_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdBool compatible)
+SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
 {
-    simdSynetConvert32fTo8u(src, batch, channels, height, width, format, scale, shift, dst, compatible);
+    simdSynetConvert32fTo8u(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
 }
 
 typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
@@ -5472,12 +5472,12 @@ SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const fl
     simdSynetRestrictRange32f(src, size, lower, upper, dst);
 }
 
-typedef void(*SimdSynetScaleLayerForwardPtr) (const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible);
+typedef void(*SimdSynetScaleLayerForwardPtr) (const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 volatile SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible)
+SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
 {
-    simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatible);
+    simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
 }
 
 SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,

@@ -647,7 +647,7 @@ namespace Simd
                 SynetScaleLayerForwardNchw4c<false>(src, scale, bias, channels, spatial, dst);
         }
 
-        void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible)
+        void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {
             size_t spatial = height * width;
             if (Base::NchwCompatible(channels, spatial, format))
@@ -657,7 +657,7 @@ namespace Simd
             else if (format == SimdTensorFormatNchw4c)
                 SynetScaleLayerForwardNchw4c(src, scale, bias, channels, spatial, dst);
             else
-                Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatible);
+                Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
         }
 
         //---------------------------------------------------------------------

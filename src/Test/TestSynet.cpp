@@ -446,34 +446,34 @@ namespace Test
     {
         struct FuncScLF
         {
-            typedef void(*FuncPtr)(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible);
+            typedef void(*FuncPtr)(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
             FuncPtr func;
             String desc;
 
             FuncScLF(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(SimdTensorFormatType format, int bias, int compatible)
+            void Update(SimdTensorFormatType format, int bias, int comp)
             {
-                desc = desc + "[" + ToString(format) + "-" + ToString(bias) + "-" + ToString(compatible) + "]";
+                desc = desc + "[" + ToString(format) + "-" + ToString(bias) + "-" + ToString(comp) + "]";
             }
 
-            void Call(const Tensor32f & src, const Tensor32f & scale, const Tensor32f & bias, size_t channels, size_t height, size_t width, SimdTensorFormatType format, int compatible, Tensor32f & dst) const
+            void Call(const Tensor32f & src, const Tensor32f & scale, const Tensor32f & bias, size_t channels, size_t height, size_t width, SimdTensorFormatType format, int comp, Tensor32f & dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                func(src.Data(), scale.Data(), bias.Data(), channels, height, width, dst.Data(), format, (SimdBool)compatible);
+                func(src.Data(), scale.Data(), bias.Data(), channels, height, width, dst.Data(), format, (SimdSynetCompatibilityType)comp);
             }
         };
     }
 
 #define FUNC_SCLF(function) FuncScLF(function, #function)
 
-    bool SynetScaleLayerForwardAutoTest(size_t channels, size_t height, size_t width, SimdTensorFormatType format, int hasBias, int compatible, FuncScLF f1, FuncScLF f2)
+    bool SynetScaleLayerForwardAutoTest(size_t channels, size_t height, size_t width, SimdTensorFormatType format, int hasBias, int comp, FuncScLF f1, FuncScLF f2)
     {
         bool result = true;
 
-        f1.Update(format, hasBias, compatible);
-        f2.Update(format, hasBias, compatible);
+        f1.Update(format, hasBias, comp);
+        f2.Update(format, hasBias, comp);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << channels << ", " << height << ", " << width << "].");
 
@@ -492,9 +492,9 @@ namespace Test
         }
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, channels, height, width, format, compatible, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, bias, channels, height, width, format, comp, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, channels, height, width, format, compatible, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, bias, channels, height, width, format, comp, dst2));
 
         result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
 
@@ -511,10 +511,10 @@ namespace Test
             {
                 for (int hasBias = 0; hasBias <= 1; ++hasBias)
                 {
-                    for (int compatible = 0; compatible <= 1; ++compatible)
+                    for (int comp = 0; comp <= 2; ++comp)
                     {
-                        result = result && SynetScaleLayerForwardAutoTest(C, (int)sqrt(H), (int)sqrt(W), format, hasBias, compatible, f1, f2);
-                        result = result && SynetScaleLayerForwardAutoTest(C - O, (int)sqrt(H) + O/2, (int)sqrt(W) + O/2, format, hasBias, compatible, f1, f2);
+                        result = result && SynetScaleLayerForwardAutoTest(C, (int)sqrt(H), (int)sqrt(W), format, hasBias, comp, f1, f2);
+                        result = result && SynetScaleLayerForwardAutoTest(C - O, (int)sqrt(H) + O/2, (int)sqrt(W) + O/2, format, hasBias, comp, f1, f2);
                     }
                 }
             }

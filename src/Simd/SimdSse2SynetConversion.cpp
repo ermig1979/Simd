@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -34,7 +34,7 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetConvert32fTo8u(const float * src, __m128 scale, __m128 shift, uint8_t* dst)
         {
             __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse::Load<align>(src), scale), shift));
-            *((int*)dst) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
+            *((int32_t*)dst) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO));
         }
 
         template <bool align> SIMD_INLINE void SynetConvert32fTo8uNchw(const float* src, __m128 scale, __m128 shift, uint8_t* dst)
@@ -136,7 +136,7 @@ namespace Simd
             }
         }
 
-        void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdBool compatible)
+        void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
         {
             size_t spatial = height * width;
             if (Base::NchwCompatible(channels, spatial, format))

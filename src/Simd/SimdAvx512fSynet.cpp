@@ -587,12 +587,12 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <bool align, bool mask, bool compatible> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset, __mmask16 tail = -1)
+        template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset, __mmask16 tail = -1)
         {
             __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 _scale = Load<align, mask>(scale + offset, tail);
             __m512 _bias = Load<align, mask>(bias + offset, tail);
-            Store<align, mask>(dst + offset, Fmadd<compatible>(_src, _scale, _bias), tail);
+            Store<align, mask>(dst + offset, Fmadd<nofma>(_src, _scale, _bias), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, float * dst, size_t offset, __mmask16 tail = -1)
@@ -602,10 +602,10 @@ namespace Simd
             Store<align, mask>(dst + offset, _mm512_mul_ps(_src, _scale), tail);
         }
 
-        template <bool align, bool mask, bool compatible> SIMD_INLINE void SynetScaleLayerForward(const float* src, const __m512& scale, const __m512& bias, float* dst, size_t offset, __mmask16 tail = -1)
+        template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float* src, const __m512& scale, const __m512& bias, float* dst, size_t offset, __mmask16 tail = -1)
         {
             __m512 _src = Load<align, mask>(src + offset, tail);
-            Store<align, mask>(dst + offset, Fmadd<compatible>(_src, scale, bias), tail);
+            Store<align, mask>(dst + offset, Fmadd<nofma>(_src, scale, bias), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetScaleLayerForward(const float * src, const __m512 & scale, float * dst, size_t offset, __mmask16 tail = -1)
@@ -614,7 +614,7 @@ namespace Simd
             Store<align, mask>(dst + offset, _mm512_mul_ps(_src, scale), tail);
         }
 
-        template <bool align, bool compatible> void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
+        template <bool align, bool nofma, bool notail> void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(width, F) && Aligned(dst));
@@ -633,15 +633,15 @@ namespace Simd
                         size_t w = 0;
                         for (; w < widthQF; w += QF)
                         {
-                            SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, w + F * 0);
-                            SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, w + F * 1);
-                            SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, w + F * 2);
-                            SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, w + F * 3);
+                            SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, w + F * 0);
+                            SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, w + F * 1);
+                            SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, w + F * 2);
+                            SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, w + F * 3);
                         }
                         for (; w < widthF; w += F)
-                            SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, w);
+                            SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, w);
                         if (w < width)
-                            SynetScaleLayerForward<align, true, compatible>(src, _scale, _bias, dst, w, tail);
+                            SynetScaleLayerForward<align, true, notail>(src, _scale, _bias, dst, w, tail);
                         src += width;
                         dst += width;
                     }
@@ -673,23 +673,25 @@ namespace Simd
             }
         }
 
-        template <bool compatible> SIMD_INLINE void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
+        template <bool nofma, bool notail> SIMD_INLINE void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
         {
             if (Aligned(src) && Aligned(width, F) && Aligned(dst))
-                SynetScaleLayerForwardNchw<true, compatible>(src, scale, bias, channels, height, width, dst);
+                SynetScaleLayerForwardNchw<true, nofma, notail>(src, scale, bias, channels, height, width, dst);
             else
-                SynetScaleLayerForwardNchw<false, compatible>(src, scale, bias, channels, height, width, dst);
+                SynetScaleLayerForwardNchw<false, nofma, notail>(src, scale, bias, channels, height, width, dst);
         }
 
-        SIMD_INLINE void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdBool compatible)
+        SIMD_INLINE void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if(compatible && bias)
-                SynetScaleLayerForwardNchw<true>(src, scale, bias, channels, height, width, dst);
+            if((compatibility & SimdSynetCompatibilityNoFma) && bias)
+                SynetScaleLayerForwardNchw<true, true>(src, scale, bias, channels, height, width, dst);
+            else if ((compatibility & SimdSynetCompatibilityNoFmaTail) && bias)
+                SynetScaleLayerForwardNchw<false, true>(src, scale, bias, channels, height, width, dst);
             else
-                SynetScaleLayerForwardNchw<false>(src, scale, bias, channels, 1, height*width, dst);
+                SynetScaleLayerForwardNchw<false, false>(src, scale, bias, channels, 1, height*width, dst);
         }
 
-        template <bool align, bool compatible> void SynetScaleLayerForwardNhwc(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst)
+        template <bool align, bool nofma, bool notail> void SynetScaleLayerForwardNhwc(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(scale) && Aligned(bias) && Aligned(channels, F) && Aligned(dst));
@@ -708,15 +710,15 @@ namespace Simd
                         size_t c = 0;
                         for (; c < channelsQF; c += QF)
                         {
-                            SynetScaleLayerForward<align, false, false>(src, scale, bias, dst, c + F * 0);
-                            SynetScaleLayerForward<align, false, false>(src, scale, bias, dst, c + F * 1);
-                            SynetScaleLayerForward<align, false, false>(src, scale, bias, dst, c + F * 2);
-                            SynetScaleLayerForward<align, false, false>(src, scale, bias, dst, c + F * 3);
+                            SynetScaleLayerForward<align, false, nofma>(src, scale, bias, dst, c + F * 0);
+                            SynetScaleLayerForward<align, false, nofma>(src, scale, bias, dst, c + F * 1);
+                            SynetScaleLayerForward<align, false, nofma>(src, scale, bias, dst, c + F * 2);
+                            SynetScaleLayerForward<align, false, nofma>(src, scale, bias, dst, c + F * 3);
                         }
                         for (; c < channelsF; c += F)
-                            SynetScaleLayerForward<align, false, false>(src, scale, bias, dst, c);
+                            SynetScaleLayerForward<align, false, nofma>(src, scale, bias, dst, c);
                         if (c < channels)
-                            SynetScaleLayerForward<align, true, false>(src, scale, bias, dst, c, tail);
+                            SynetScaleLayerForward<align, true, nofma>(src, scale, bias, dst, c, tail);
                         src += channels;
                         dst += channels;
                     }
@@ -725,15 +727,15 @@ namespace Simd
                         size_t c = 0;
                         for (; c < channelsQF; c += QF)
                         {
-                            SynetScaleLayerForward<align, false, compatible>(src, scale, bias, dst, c + F * 0);
-                            SynetScaleLayerForward<align, false, compatible>(src, scale, bias, dst, c + F * 1);
-                            SynetScaleLayerForward<align, false, compatible>(src, scale, bias, dst, c + F * 2);
-                            SynetScaleLayerForward<align, false, compatible>(src, scale, bias, dst, c + F * 3);
+                            SynetScaleLayerForward<align, false, notail>(src, scale, bias, dst, c + F * 0);
+                            SynetScaleLayerForward<align, false, notail>(src, scale, bias, dst, c + F * 1);
+                            SynetScaleLayerForward<align, false, notail>(src, scale, bias, dst, c + F * 2);
+                            SynetScaleLayerForward<align, false, notail>(src, scale, bias, dst, c + F * 3);
                         }
                         for (; c < channelsF; c += F)
-                            SynetScaleLayerForward<align, false, compatible>(src, scale, bias, dst, c);
+                            SynetScaleLayerForward<align, false, notail>(src, scale, bias, dst, c);
                         if (c < channels)
-                            SynetScaleLayerForward<align, true, compatible>(src, scale, bias, dst, c, tail);
+                            SynetScaleLayerForward<align, true, notail>(src, scale, bias, dst, c, tail);
                         src += channels;
                         dst += channels;
                     }
@@ -764,7 +766,7 @@ namespace Simd
             }
         }
 
-        template <bool align> void SynetScaleLayerForwardNhwc3(const float* src, const float* scale, const float* bias, size_t height, size_t width, float* dst)
+        template <bool align, bool nofma> void SynetScaleLayerForwardNhwc3(const float* src, const float* scale, const float* bias, size_t height, size_t width, float* dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(dst) && Aligned(width));
@@ -788,9 +790,9 @@ namespace Simd
                     size_t w = 0;
                     for (; w < widthF3; w += F * 3)
                     {
-                        SynetScaleLayerForward<align, false, false>(src, _scale0, _bias0, dst, w + F * 0);
-                        SynetScaleLayerForward<align, false, false>(src, _scale1, _bias1, dst, w + F * 1);
-                        SynetScaleLayerForward<align, false, false>(src, _scale2, _bias2, dst, w + F * 2);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale0, _bias0, dst, w + F * 0);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale1, _bias1, dst, w + F * 1);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale2, _bias2, dst, w + F * 2);
                     }
                     for (; w < width3; w += 3)
                     {
@@ -832,33 +834,35 @@ namespace Simd
             }
         }
 
-        template<bool compatible> SIMD_INLINE void SynetScaleLayerForwardNhwc(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
+        template<bool nofma, bool notail> SIMD_INLINE void SynetScaleLayerForwardNhwc(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
         {
             if (channels == 3)
             {
                 if (Aligned(src) && Aligned(dst) && Aligned(width))
-                    SynetScaleLayerForwardNhwc3<true>(src, scale, bias, height, width, dst);
+                    SynetScaleLayerForwardNhwc3<true, nofma>(src, scale, bias, height, width, dst);
                 else
-                    SynetScaleLayerForwardNhwc3<false>(src, scale, bias, height, width, dst);
+                    SynetScaleLayerForwardNhwc3<false, nofma>(src, scale, bias, height, width, dst);
             }
             else
             {
                 if (Aligned(src) && Aligned(scale) && Aligned(bias) && Aligned(channels, F) && Aligned(dst))
-                    SynetScaleLayerForwardNhwc<true, compatible>(src, scale, bias, channels, height, width, dst);
+                    SynetScaleLayerForwardNhwc<true, nofma, notail>(src, scale, bias, channels, height, width, dst);
                 else
-                    SynetScaleLayerForwardNhwc<false, compatible>(src, scale, bias, channels, height, width, dst);
+                    SynetScaleLayerForwardNhwc<false, nofma, notail>(src, scale, bias, channels, height, width, dst);
             }
         }
 
-        SIMD_INLINE void SynetScaleLayerForwardNhwc(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdBool compatible)
+        SIMD_INLINE void SynetScaleLayerForwardNhwc(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if (compatible && bias)
-                SynetScaleLayerForwardNhwc<true>(src, scale, bias, channels, height, width, dst);
+            if ((compatibility & SimdSynetCompatibilityNoFma) && bias)
+                SynetScaleLayerForwardNhwc<true, true>(src, scale, bias, channels, 1, height * width, dst);
+            else if ((compatibility & SimdSynetCompatibilityNoFmaTail) && bias)
+                SynetScaleLayerForwardNhwc<false, true>(src, scale, bias, channels, height, width, dst);
             else
-                SynetScaleLayerForwardNhwc<false>(src, scale, bias, channels, 1, height * width, dst);
+                SynetScaleLayerForwardNhwc<false, false>(src, scale, bias, channels, 1, height * width, dst);
         }
 
-        template <bool align> void SynetScaleLayerForwardNchw16c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
+        template <bool align, bool nofma> void SynetScaleLayerForwardNchw16c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(dst));
@@ -874,13 +878,13 @@ namespace Simd
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
-                        SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, s + F * 0);
-                        SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, s + F * 1);
-                        SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, s + F * 2);
-                        SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, s + F * 3);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, s + F * 0);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, s + F * 1);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, s + F * 2);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, s + F * 3);
                     }
                     for (; s < spatialF; s += F)
-                        SynetScaleLayerForward<align, false, false>(src, _scale, _bias, dst, s);
+                        SynetScaleLayerForward<align, false, nofma>(src, _scale, _bias, dst, s);
                     src += spatialF;
                     dst += spatialF;
                 }
@@ -906,29 +910,39 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void SynetScaleLayerForwardNchw16c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
+        SIMD_INLINE void SynetScaleLayerForwardNchw16c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdSynetCompatibilityType compatibility)
         {
-            if (Aligned(src) && Aligned(dst))
-                SynetScaleLayerForwardNchw16c<true>(src, scale, bias, channels, spatial, dst);
+            if ((compatibility & SimdSynetCompatibilityNoFma) && bias)
+            {
+                if (Aligned(src) && Aligned(dst))
+                    SynetScaleLayerForwardNchw16c<true, true>(src, scale, bias, channels, spatial, dst);
+                else
+                    SynetScaleLayerForwardNchw16c<false, true>(src, scale, bias, channels, spatial, dst);
+            }
             else
-                SynetScaleLayerForwardNchw16c<false>(src, scale, bias, channels, spatial, dst);
+            {
+                if (Aligned(src) && Aligned(dst))
+                    SynetScaleLayerForwardNchw16c<true, false>(src, scale, bias, channels, spatial, dst);
+                else
+                    SynetScaleLayerForwardNchw16c<false, false>(src, scale, bias, channels, spatial, dst);
+            }
         }
 
-        void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdBool compatible)
+        void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {
             size_t spatial = height * width;
             if (Base::NchwCompatible(channels, spatial, format))
-                SynetScaleLayerForwardNchw(src, scale, bias, channels, height, width, dst, compatible);
+                SynetScaleLayerForwardNchw(src, scale, bias, channels, height, width, dst, compatibility);
             else if (Base::NhwcCompatible(channels, spatial, format))
-                SynetScaleLayerForwardNhwc(src, scale, bias, channels, height, width, dst, compatible);
+                SynetScaleLayerForwardNhwc(src, scale, bias, channels, height, width, dst, compatibility);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatible);
+                Sse::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
             else if (format == SimdTensorFormatNchw8c)
-                Avx2::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatible);
+                Avx2::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
             else if (format == SimdTensorFormatNchw16c)
-                SynetScaleLayerForwardNchw16c(src, scale, bias, channels, spatial, dst);
+                SynetScaleLayerForwardNchw16c(src, scale, bias, channels, spatial, dst, compatibility);
             else
-                Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatible);
+                Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
         }
 
         //---------------------------------------------------------------------

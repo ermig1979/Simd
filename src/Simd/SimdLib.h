@@ -314,6 +314,17 @@ typedef enum
 } SimdResizeMethodType;
 
 /*! @ingroup synet
+    Describes Synet compatibility flags. This type used in functions ::SimdSynetScaleLayerForward, ::SimdSynetConvert32fTo8u.
+*/
+typedef enum
+{
+    SimdSynetCompatibilityFast = 0, /*!< Fast (No compatibility for fast code). */
+    SimdSynetCompatibilityNoFmaTail = 1, /*!< Not use FMA instructions at row tail. */
+    SimdSynetCompatibilityNoFma = 2, /*!< Not use FMA instructions. */
+    SimdSynetCompatibilityFmaMask = 3, /*!< Bit mask of options of FMA instructions using. */
+} SimdSynetCompatibilityType;
+
+/*! @ingroup synet
     Describes operation type used in function ::SimdSynetEltwiseLayerForward.
 */
 typedef enum
@@ -5498,7 +5509,7 @@ extern "C"
 
     /*! @ingroup synet_conversion
 
-        \fn void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t * dst, SimdBool compatible);
+        \fn void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t * dst, SimdSynetCompatibilityType compatibility);
 
         \short Converts 32-bit float point image to 8-bit unsigned integer image.
 
@@ -5513,9 +5524,9 @@ extern "C"
         \param [in] scale - a pointer to the 32-bit float array with scale coefficients. 
         \param [in] shift - a pointer to the 32-bit float array with shift coefficients. 
         \param [out] dst - a pointer to the 8-bit unsigned integer array with output image tensor. 
-        \param [in] compatible - a flag of bitwise compatibility with Inference Engine.
+        \param [in] compatibility - a flags of bitwise compatibility.
     */
-    SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdBool compatible);
+    SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_convolution
 
@@ -6301,7 +6312,7 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdBool compatible);
+        \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
         \short This function is used for forward propagation of ScaleLayer.
 
@@ -6323,9 +6334,9 @@ extern "C"
         \param [in] width - a width of (input/output) image tensor.
         \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
         \param [in] format - a format of (input/output) image tensor.
-        \param [in] compatible - a flag of bitwise compatibility with Inference Engine.
+        \param [in] compatibility - a flags of bitwise compatibility.
     */
-    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdBool compatible);
+    SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_conversion
 

@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -30,19 +30,19 @@ namespace Test
 {
     template<class S, class D> struct FuncCvt
     {
-        typedef void(*FuncPtr)(const S * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, D * dst, SimdBool compatible);
+        typedef void(*FuncPtr)(const S * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, D * dst, SimdSynetCompatibilityType compatibility);
 
         FuncPtr func;
         String desc;
 
         FuncCvt(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-        void Update(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType f, SimdBool comp)
+        void Update(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType f, SimdSynetCompatibilityType comp)
         {
-            desc = desc + "[" + ToString(n) + "x" + ToString(c) + "x" + ToString(h) + "x" + ToString(w) + ":" + ToString(f) + "-" + ToString(comp) + "]";
+            desc = desc + "[" + ToString(n) + "x" + ToString(c) + "x" + ToString(h) + "x" + ToString(w) + ":" + ToString(f) + "-" + ToString((int)comp) + "]";
         }
 
-        void Call(const Tensor<S> & src, const Buffer32f & scale, const Buffer32f& shift, Tensor<D> & dst, SimdBool comp) const
+        void Call(const Tensor<S> & src, const Buffer32f & scale, const Buffer32f& shift, Tensor<D> & dst, SimdSynetCompatibilityType comp) const
         {
             TEST_PERFORMANCE_TEST(desc);
             func(src.Data(), src.Batch(), src.Channels(), src.Height(), src.Width(), src.Format(), scale.data(), shift.data(), dst.Data(), comp);
@@ -53,7 +53,7 @@ namespace Test
 
 #define FUNC_C_32F_8U(function) FuncCvt32fTo8u(function, #function)
 
-    bool SynetConvert32fTo8uAutoTest(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType f, SimdBool comp, FuncCvt32fTo8u f1, FuncCvt32fTo8u f2)
+    bool SynetConvert32fTo8uAutoTest(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType f, SimdSynetCompatibilityType comp, FuncCvt32fTo8u f1, FuncCvt32fTo8u f2)
     {
         bool result = true;
 
@@ -78,7 +78,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2, comp));
 
-        result = result && Compare(dst1, dst2, 0, true, 64);
+        result = result && Compare(dst1, dst2, comp == SimdSynetCompatibilityNoFma ? 0 : 1, true, 64);
 
         return result;
     }
@@ -88,14 +88,14 @@ namespace Test
         bool result = true;
 
         SimdTensorFormatType format[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
-        SimdBool compatible[2] = { SimdFalse, SimdTrue };
+        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFast, SimdSynetCompatibilityNoFma, SimdSynetCompatibilityNoFmaTail };
 
-        for (int f = 0; f < 2; ++f)
+        for (int f = 0; f <= 1; ++f)
         {
-            for (int c = 0; c < 2; ++c)
+            for (int c = 0; c <= 2; ++c)
             {
-                result = result && SynetConvert32fTo8uAutoTest(2, C/2, (int)sqrt(H), (int)sqrt(W), format[f], compatible[c], f1, f2);
-                result = result && SynetConvert32fTo8uAutoTest(1, 3, H / 3 + O, W / 5 - O, format[f], compatible[c], f1, f2);
+                result = result && SynetConvert32fTo8uAutoTest(2, C/2, (int)sqrt(H), (int)sqrt(W), format[f], compatibility[c], f1, f2);
+                result = result && SynetConvert32fTo8uAutoTest(1, 3, H / 3 + O, W / 5 - O, format[f], compatibility[c], f1, f2);
             }
         }
 
@@ -111,6 +111,11 @@ namespace Test
 #ifdef SIMD_SSE2_ENABLE
         if (Simd::Sse2::Enable)
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Sse2::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Avx2::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
         return result;

@@ -807,7 +807,7 @@ namespace Simd
                 _mm256_shuffle_epi8(_mm256_permute4x64_epi64(value, 0x4E), _mm256_add_epi8(shuffle, K8_SHUFFLE_1)));
         }
 
-        template<bool compatible> __m256 Fmadd(__m256 a, __m256 b, __m256 c);
+        template<bool nofma> __m256 Fmadd(__m256 a, __m256 b, __m256 c);
 
         template <> SIMD_INLINE __m256 Fmadd<false>(__m256 a, __m256 b, __m256 c)
         {
@@ -975,7 +975,7 @@ namespace Simd
             return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_1, b);
         }
 
-        template<bool compatible> __m512 Fmadd(__m512 a, __m512 b, __m512 c);
+        template<bool nofma> __m512 Fmadd(__m512 a, __m512 b, __m512 c);
 
         template <> SIMD_INLINE __m512 Fmadd<false>(__m512 a, __m512 b, __m512 c)
         {
