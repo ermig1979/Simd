@@ -984,7 +984,7 @@ namespace Simd
 
         template <> SIMD_INLINE __m512 Fmadd<true>(__m512 a, __m512 b, __m512 c)
         {
-            return _mm512_add_ps(_mm512_or_ps(_mm512_mul_ps(a, b), _mm512_setzero_ps()), c);
+            return _mm512_maskz_add_ps(-1, _mm512_mul_ps(a, b), c);
         }
     }
 #endif //SIMD_AVX512F_ENABLE
@@ -1624,6 +1624,25 @@ namespace Simd
         SIMD_INLINE bool TestZ(uint32x4_t a)
         {
             return !(vgetq_lane_u32(a, 0) | vgetq_lane_u32(a, 1) | vgetq_lane_u32(a, 2) | vgetq_lane_u32(a, 3));
+        }
+
+        SIMD_INLINE int32x4_t Round(float32x4_t value)
+        {
+            uint32x4_t sign = vcgtq_f32(value, vdupq_n_f32(0));
+            float32x4_t round = vbslq_f32(sign, vdupq_n_f32(0.5f), vdupq_n_f32(-0.5f));
+            return vcvtq_s32_f32(vaddq_f32(value, round));
+        }
+
+        template<bool nofma> float32x4_t Fmadd(float32x4_t a, float32x4_t b, float32x4_t c);
+
+        template <> SIMD_INLINE float32x4_t Fmadd<false>(float32x4_t a, float32x4_t b, float32x4_t c)
+        {
+            return vmlaq_f32(c, a, b);
+        }
+
+        template <> SIMD_INLINE float32x4_t Fmadd<true>(float32x4_t a, float32x4_t b, float32x4_t c)
+        {
+            return vaddq_f32(vmlaq_f32(vdupq_n_f32(0), a, b), c);
         }
     }
 #endif//SIMD_NEON_ENABLE

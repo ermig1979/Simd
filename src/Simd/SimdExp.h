@@ -432,7 +432,7 @@ namespace Simd
                 __m512 _1 = _mm512_set1_ps(1.0f);
                 __m512i i = _mm512_castps_si512(x);
                 __m512 e = _mm512_cvtepi32_ps(_mm512_sub_epi32(_mm512_srli_epi32(_mm512_and_si512(i, _mm512_set1_epi32(0x7F800000)), 23), _mm512_set1_epi32(127)));
-                __m512 m = _mm512_or_ps(_mm512_castsi512_ps(_mm512_and_si512(i, _mm512_set1_epi32(0x007FFFFF))), _1);
+                __m512 m = Or(_mm512_castsi512_ps(_mm512_and_si512(i, _mm512_set1_epi32(0x007FFFFF))), _1);
                 __m512 p = Poly5(m, 3.1157899f, -3.3241990f, 2.5988452f, -1.2315303f, 3.1821337e-1f, -3.4436006e-2f);
                 return _mm512_add_ps(_mm512_mul_ps(p, _mm512_sub_ps(m, _1)), e);
             }

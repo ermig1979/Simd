@@ -26,12 +26,200 @@
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdLog.h"
+#include "Simd/SimdSynet.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m512 scale, __m512 shift, uint8_t* dst, __mmask16 tail = -1)
+        {
+            __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(Avx512f::Load<align, mask>(src, tail), scale, shift));
+            __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(i32, K_ZERO), K_ZERO));
+            Store<align, mask>(dst, _mm512_extracti32x4_epi32(u8, 0), tail);
+        }
+
+        template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, const float* scale, const float* shift, uint8_t* dst, __mmask16 tail = -1)
+        {
+            SynetConvert32fTo8u<align, mask, nofma>(src, Avx512f::Load<align, mask>(scale, tail), Avx512f::Load<align, mask>(shift, tail), dst, tail);
+        }
+
+        template <bool align, bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst) && Aligned(width, A));
+
+            size_t widthF = AlignLo(width, F);
+            __mmask16 tailF = TailMask16(width - widthF);
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    __m512 _scale = _mm512_set1_ps(scale[c]);
+                    __m512 _shift = _mm512_set1_ps(shift[c]);
+                    for (size_t h = 0; h < height; ++h)
+                    {
+                        size_t w = 0;
+                        for (; w < widthF; w += F)
+                            SynetConvert32fTo8u<align, false, nofma>(src + w, _scale, _shift, dst + w);
+                        if( w < width)
+                            SynetConvert32fTo8u<align, true, nofma>(src + w, _scale, _shift, dst + w, tailF);
+                        src += width;
+                        dst += width;
+                    }
+                }
+            }
+        }
+
+        template <bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)
+        {
+            if (Aligned(src) && Aligned(dst) && Aligned(width, A))
+                SynetConvert32fTo8uNchw<true, nofma>(src, batch, channels, height, width, scale, shift, dst);
+            else
+                SynetConvert32fTo8uNchw<false, nofma>(src, batch, channels, height, width, scale, shift, dst);
+        }
+
+        template <bool align, bool nofma, bool notail> void SynetConvert32fTo8uNhwc(const float* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst) && Aligned(channels, A) && Aligned(scale) && Aligned(shift));
+
+            size_t channelsF = AlignLo(channels, F);
+            size_t widthF = AlignLo(width, F);
+            __mmask16 tailF = TailMask16(channels - channelsF);
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t h = 0; h < height; ++h)
+                {
+                    size_t w = 0;
+                    for (; w < widthF; ++w)
+                    {
+                        size_t c = 0;
+                        for (; c < channelsF; c += F)
+                            SynetConvert32fTo8u<align, false, nofma>(src + c, scale + c, shift + c, dst + c);
+                        if (c < channels)
+                            SynetConvert32fTo8u<align, true, nofma>(src + c, scale + c, shift + c, dst + c, tailF);
+                        src += channels;
+                        dst += channels;
+                    }
+                    for (; w < width; ++w)
+                    {
+                        size_t c = 0;
+                        for (; c < channelsF; c += F)
+                            SynetConvert32fTo8u<align, false, notail>(src + c, scale + c, shift + c, dst + c);
+                        if (c < channels)
+                            SynetConvert32fTo8u<align, true, notail>(src + c, scale + c, shift + c, dst + c, tailF);
+                        src += channels;
+                        dst += channels;
+                    }
+                }
+            }
+        }
+
+        template <bool nofma, bool notail> void SynetConvert32fTo8uNhwc(const float* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)
+        {
+            if (Aligned(src) && Aligned(dst) && Aligned(channels, A) && Aligned(scale) && Aligned(shift))
+                SynetConvert32fTo8uNhwc<true, nofma, notail>(src, batch, channels, height, width, scale, shift, dst);
+            else
+                SynetConvert32fTo8uNhwc<false, nofma, notail>(src, batch, channels, height, width, scale, shift, dst);
+        }
+
+        template <bool align, bool nofma> void SynetConvert32fTo8uNhwc3(const float* src, size_t batch, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst) && Aligned(width, A));
+
+            size_t width3 = width * 3;
+            size_t width3F = AlignLo(width, F) * 3;
+
+            float _scale[F * 3], _shift[F * 3];
+            for (size_t i = 0; i < F; ++i)
+                for (size_t c = 0; c < 3; ++c)
+                    _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
+
+            __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
+            __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
+            __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
+            __m512 _shift0 = Avx512f::Load<false>(_shift + 0 * F);
+            __m512 _shift1 = Avx512f::Load<false>(_shift + 1 * F);
+            __m512 _shift2 = Avx512f::Load<false>(_shift + 2 * F);
+
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t h = 0; h < height; ++h)
+                {
+                    size_t w = 0;
+                    for (; w < width3F; w += 3 * F)
+                    {
+                        SynetConvert32fTo8u<align, false, nofma>(src + 0 * F, _scale0, _shift0, dst + 0 * F);
+                        SynetConvert32fTo8u<align, false, nofma>(src + 1 * F, _scale1, _shift1, dst + 1 * F);
+                        SynetConvert32fTo8u<align, false, nofma>(src + 2 * F, _scale2, _shift2, dst + 2 * F);
+                        src += 3 * F;
+                        dst += 3 * F;
+                    }
+                    for (; w < width3; w += 3)
+                    {
+                        dst[0] = Base::SynetConvert32fTo8u(src[0], scale[0], shift[0]);
+                        dst[1] = Base::SynetConvert32fTo8u(src[1], scale[1], shift[1]);
+                        dst[2] = Base::SynetConvert32fTo8u(src[2], scale[2], shift[2]);
+                        src += 3;
+                        dst += 3;
+                    }
+                }
+            }
+        }
+
+        template <bool nofma> void SynetConvert32fTo8uNhwc3(const float* src, size_t batch, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)
+        {
+            if (Aligned(src) && Aligned(dst) && Aligned(width, A))
+                SynetConvert32fTo8uNhwc3<true, nofma>(src, batch, height, width, scale, shift, dst);
+            else
+                SynetConvert32fTo8uNhwc3<false, nofma>(src, batch, height, width, scale, shift, dst);
+        }
+
+        void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
+        {
+            __m128 a = _mm_maskz_loadu_ps(-1, src);
+            if (!(compatibility & SimdSynetCompatibilityNoFmaTail))
+            {
+                width = height * width;
+                height = 1;
+            }
+            size_t spatial = height * width;
+            if (Base::NchwCompatible(channels, spatial, format))
+            {
+                if (compatibility & SimdSynetCompatibilityNoFma)
+                    SynetConvert32fTo8uNchw<true>(src, batch, channels, height, width, scale, shift, dst);
+                else
+                    SynetConvert32fTo8uNchw<false>(src, batch, channels, height, width, scale, shift, dst);
+            }
+            else if (Base::NhwcCompatible(channels, spatial, format))
+            {
+                if (channels == 3)
+                {
+                    if (compatibility & SimdSynetCompatibilityNoFma)
+                        SynetConvert32fTo8uNhwc3<true>(src, batch, height, width, scale, shift, dst);
+                    else
+                        SynetConvert32fTo8uNhwc3<false>(src, batch, height, width, scale, shift, dst);
+                }
+                else
+                {
+                    if (compatibility & SimdSynetCompatibilityNoFma)
+                        SynetConvert32fTo8uNhwc<true, true>(src, batch, channels, height, width, scale, shift, dst);
+                    else if (compatibility & SimdSynetCompatibilityNoFmaTail)
+                        SynetConvert32fTo8uNhwc<false, true>(src, batch, channels, height, width, scale, shift, dst);
+                    else
+                        SynetConvert32fTo8uNhwc<false, false>(src, batch, channels, height, width, scale, shift, dst);
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
+ 
+
         template <bool align> SIMD_INLINE void StoreScaled(float * ptr, __m512i value32, __m512 scale, __m512 shift)
         {
             Avx512f::Store<align>(ptr, _mm512_fmadd_ps(_mm512_cvtepi32_ps(value32), scale, shift));

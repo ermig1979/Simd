@@ -88,7 +88,7 @@ namespace Test
         bool result = true;
 
         SimdTensorFormatType format[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
-        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFast, SimdSynetCompatibilityNoFma, SimdSynetCompatibilityNoFmaTail };
+        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFast, SimdSynetCompatibilityNoFmaTail, SimdSynetCompatibilityNoFma };
 
         for (int f = 0; f <= 1; ++f)
         {
@@ -116,6 +116,16 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Avx2::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Avx512bw::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Neon::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
         return result;

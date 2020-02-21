@@ -5187,7 +5187,7 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
 }
 
 typedef void(*SimdSynetConvert32fTo8uPtr) (const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
-volatile  SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC2(SynetConvert32fTo8u, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC);// , SIMD_AVX512F_FUNC, SIMD_NEON_FUNC);
+volatile  SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC4(SynetConvert32fTo8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
 {

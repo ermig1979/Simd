@@ -1156,7 +1156,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m512 SynetUnaryOperation32f<SimdSynetUnaryOperation32fAbs>(__m512 value)
         {
-            return _mm512_andnot_ps(_mm512_set1_ps(-0.0f), value);
+            return AndNot(_mm512_set1_ps(-0.0f), value);
         }
 
         template<> SIMD_INLINE __m512 SynetUnaryOperation32f<SimdSynetUnaryOperation32fExp>(__m512 value)

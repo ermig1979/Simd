@@ -95,6 +95,7 @@ namespace Simd
             AVX2 = 1 << 5,
             AVX512F = 1 << 16,
             AVX512BW = 1 << 30,
+            AVX512VL = 1 << 31,
 
             // Ecx:
             AVX512VBMI = 1 << 1,
@@ -423,7 +424,8 @@ namespace Simd
         {
             return
                 Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW);
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW) &&
+                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512VL);
         }
 
         SIMD_INLINE bool SupportedByOS()
