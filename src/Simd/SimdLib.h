@@ -5593,16 +5593,17 @@ extern "C"
 
     /*! @ingroup synet_convolution
 
-        \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
+        \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
         \short Initilizes INT8 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
+        \param [in] compatibility - a flags of bitwise compatibility.
         \return a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution8iExternalBufferSize, ::SimdSynetConvolution8iInternalBufferSize, ::SimdSynetConvolution8iSetParams and ::SimdSynetConvolution8iForward.
     */
-    SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
+    SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_convolution
 

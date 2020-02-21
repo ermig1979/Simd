@@ -29,6 +29,169 @@
 
 namespace Simd
 {
+    SynetConvolution8i::SynetConvolution8i(const ConvParam8i& p)
+        : _param(p)
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+        , _perf(NULL)
+#endif
+    {
+        _sizeS = p.srcC * p.srcH * p.srcW;
+        _sizeD = p.dstC * p.dstH * p.dstW;
+        _merge = 1;
+        _src8u = p.srcT == SimdTensorData8u;
+        _dst8u = p.dstT == SimdTensorData8u;
+        _overflow16i = true;
+        _weight8i.Resize(p.srcC * p.kernelY * p.kernelX / p.group * p.dstC);
+        _norm32i.Resize(2 * p.dstC);
+        _norm32f.Resize(2 * p.dstC);
+    }
+
+    size_t SynetConvolution8i::ExternalBufferSize() const
+    {
+        size_t size = 1;
+        if (!_src8u)
+            size += _sizeS * _merge * sizeof(uint8_t);
+        return size;
+    }
+
+    size_t SynetConvolution8i::InternalBufferSize() const
+    {
+        return _buffer.size * sizeof(uint8_t) + _srcCvt.Size() + _dstCvt.Size() +
+            _weight8i.size * sizeof(int8_t) + _norm32i.size * sizeof(int32_t) + _norm32f.size * sizeof(float);
+    }
+
+    void SynetConvolution8i::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
+    {
+        const ConvParam8i& p = _param;
+        _srcCvt.Init(stats[0], stats[1], p.srcC);
+        _dstCvt.Init(stats[2], stats[3], p.dstC);
+        size_t G = p.group, D = p.dstC / G, C = p.srcC / G, K = p.kernelY * p.kernelX, CK = C * K, GD = G * D;
+        Array32f normW(CK);
+        const float* pSrcW = weight;
+        const float* pSrcB = bias;
+        const float* pSrcScaleInv = _srcCvt.iScale.data;
+        const float* pSrcScale = _srcCvt.scale.data;
+        const float* pSrcShift = _srcCvt.shift.data;
+        const float* pDstScale = _dstCvt.iScale.data;
+        const float* pDstScaleInv = _dstCvt.scale.data;
+        const float* pDstShift = _dstCvt.iShift.data;
+        float* pNormW = normW.data;
+        int8_t* pDstW = _weight8i.data;
+        int32_t* pDstS = _norm32i.data;
+        int32_t* pDstB = pDstS + p.dstC;
+        float* pNormScale = _norm32f.data;
+        float* pNormShift = pNormScale + p.dstC;
+        for (size_t g = 0; g < G; ++g)
+        {
+            for (size_t d = 0; d < D; ++d)
+            {
+                float normB = 0, minW = FLT_MAX, maxW = -FLT_MAX, scale = 1.0f;
+                if (p.trans)
+                {
+                    for (size_t k = 0, kc = 0; k < K; ++k)
+                        for (size_t c = 0; c < C; ++c, ++kc)
+                        {
+                            pNormW[kc] = pSrcW[kc * GD + d] * pSrcScaleInv[c];
+                            minW = Simd::Min(minW, pNormW[kc]);
+                            maxW = Simd::Max(maxW, pNormW[kc]);
+                        }
+                    scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
+                    for (size_t k = 0, kc = 0; k < K; ++k)
+                        for (size_t c = 0; c < C; ++c, ++kc)
+                            if (_srcCvt.neg)
+                            {
+                                int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f);
+                                if (w & 1)
+                                    w = Round(w * 0.25f) * 4;
+                                pDstW[kc * GD + d] = w / 2;
+                                normB -= w * pSrcShift[c];
+                            }
+                            else
+                            {
+                                pDstW[kc * GD + d] = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f);
+                                normB -= pDstW[kc * GD + d] * pSrcShift[c];
+                            }
+                }
+                else
+                {
+                    for (size_t c = 0, ck = 0; c < C; ++c)
+                        for (size_t k = 0; k < K; ++k, ++ck)
+                        {
+                            pNormW[ck] = pSrcW[d * CK + ck] * pSrcScaleInv[c];
+                            minW = Simd::Min(minW, pNormW[ck]);
+                            maxW = Simd::Max(maxW, pNormW[ck]);
+                        }
+                    scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
+                    for (size_t c = 0, ck = 0; c < C; ++c)
+                        for (size_t k = 0; k < K; ++k, ++ck)
+                            if (_srcCvt.neg)
+                            {
+                                int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f);
+                                if (w & 1)
+                                    w = Round(w * 0.25f) * 4;
+                                pDstW[d * CK + ck] = w / 2;
+                                normB -= w * pSrcShift[c];
+                            }
+                            else
+                            {
+                                pDstW[d * CK + ck] = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f);
+                                normB -= pDstW[d * CK + ck] * pSrcShift[c];
+                            }
+                }
+                pDstS[d] = _srcCvt.neg ? 2 : 1;
+                if (pSrcB)
+                    normB += pSrcB[d] * scale;
+                pDstB[d] = Round(normB);
+                if (_dst8u)
+                {
+                    pNormScale[d] = (1.0f / scale) * pDstScaleInv[d];
+                    pNormShift[d] = -pDstShift[d] / pDstScale[d];
+                }
+                else
+                {
+                    pNormScale[d] = 1.0f / scale;
+                    pNormShift[d] = 0;
+                }
+            }
+            if (p.trans)
+            {
+                pSrcW += D;
+                pDstW += D;
+            }
+            else
+            {
+                pSrcW += CK * D;
+                pDstW += CK * D;
+            }
+            pSrcB += D;
+            pDstB += D;
+            pDstS += D;
+            pSrcScale += C;
+            pSrcShift += C;
+            pDstScale += D;
+            pDstShift += D;
+            pNormScale += D;
+            pNormShift += D;
+        }
+    }
+
+    void SynetConvolution8i::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+    {
+        if (buf == NULL)
+        {
+            _buffer.Resize(ExternalBufferSize());
+            buf = _buffer.data;
+        }
+        const ConvParam8i& p = _param;
+        uint8_t* src8u = _src8u ? NULL : Allocate<uint8_t>(buf, _sizeS * _merge);
+        for (size_t b = 0; b < p.batch; b += _merge)
+        {
+            if (!_src8u)
+                _convertSrc((float*)src + b * _sizeS, _merge, p.srcC, p.srcH, p.srcW, p.srcF, _srcCvt.scale.data, _srcCvt.shift.data, src8u, p.compatibility);
+            Forward8u(_src8u ? src + b * _sizeS : src8u, buf, dst + b * (_dst8u ? sizeof(uint8_t) : sizeof(float)));
+        }
+    }
+
 #if defined(SIMD_PERFORMANCE_STATISTIC)
     Base::PerformanceMeasurer * SynetConvolution8i::Perf(const String& func)
     {
@@ -37,6 +200,8 @@ namespace Simd
         return _perf;
     }
 #endif
+
+    //-------------------------------------------------------------------------
 
     namespace Base
     {
@@ -111,9 +276,7 @@ namespace Simd
             }
             else
                 _skipConv = false;
-            _sizeS = p.srcC * p.srcH * p.srcW;
             _sizeB = p.srcC * p.kernelY * p.kernelX * p.dstH * p.dstW;
-            _sizeD = p.dstC * p.dstH * p.dstW;
             if (p.trans)
             {
                 _ldS = p.srcC * p.kernelY * p.kernelX / p.group * (_skipConv ? p.group : 1);
@@ -136,145 +299,15 @@ namespace Simd
             _siC = p.srcC / p.group;
             _siD = p.dstC;
             _siS = p.dstH * p.dstW;
-            _merge = 1;
-            _batch = p.batch;
-            _src8u = p.srcT == SimdTensorData8u;
-            _dst8u = p.dstT == SimdTensorData8u;
-            _overflow16i = true;
-            _weight8i.Resize(p.srcC * p.kernelY * p.kernelX / p.group * p.dstC);
-            _norm32i.Resize(2 * p.dstC);
-            _norm32f.Resize(2 * p.dstC);
-        }
-
-        size_t SynetConvolution8iGemmNN::InternalBufferSize() const
-        {
-            return SynetConvolution8i::InternalBufferSize() + _srcCvt.Size() + _dstCvt.Size() +
-                _weight8i.size * sizeof(int8_t) + _norm32i.size * sizeof(int32_t) + _norm32f.size * sizeof(float);
+            _convertSrc = Base::SynetConvert32fTo8u;
         }
 
         size_t SynetConvolution8iGemmNN::ExternalBufferSize() const
         {
-            size_t size = _sizeD * _merge * sizeof(int32_t);
-            if (!_src8u)
-                size += _sizeS * _merge * sizeof(uint8_t);
+            size_t size = SynetConvolution8i::ExternalBufferSize() + _sizeD * _merge * sizeof(int32_t);
             if(!_skipConv)
                 size += _sizeB * _merge * sizeof(uint8_t);
             return size;
-        }
-
-        void SynetConvolution8iGemmNN::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
-        {
-            const ConvParam8i& p = _param;
-            _srcCvt.Init(stats[0], stats[1], p.srcC);
-            _dstCvt.Init(stats[2], stats[3], p.dstC);
-            size_t G = p.group, D = p.dstC / G, C = p.srcC / G, K = p.kernelY * p.kernelX, CK = C * K, GD = G * D;
-            Array32f normW(CK);
-            const float* pSrcW = weight;
-            const float* pSrcB = bias;
-            const float* pSrcScaleInv = _srcCvt.iScale.data;
-            const float* pSrcScale = _srcCvt.scale.data;
-            const float* pSrcShift = _srcCvt.shift.data;
-            const float* pDstScale = _dstCvt.iScale.data;
-            const float* pDstScaleInv = _dstCvt.scale.data;
-            const float* pDstShift = _dstCvt.iShift.data;
-            float* pNormW = normW.data;
-            int8_t* pDstW = _weight8i.data;
-            int32_t* pDstS = _norm32i.data;
-            int32_t* pDstB = pDstS + p.dstC;
-            float* pNormScale = _norm32f.data;
-            float* pNormShift = pNormScale + p.dstC;
-            for (size_t g = 0; g < G; ++g)
-            {
-                for (size_t d = 0; d < D; ++d)
-                {
-                    float normB = 0, minW = FLT_MAX, maxW = -FLT_MAX, scale = 1.0f;
-                    if (p.trans)
-                    {
-                        for (size_t k = 0, kc = 0; k < K; ++k)
-                            for (size_t c = 0; c < C; ++c, ++kc)
-                            {
-                                pNormW[kc] = pSrcW[kc * GD + d] * pSrcScaleInv[c];
-                                minW = Simd::Min(minW, pNormW[kc]);
-                                maxW = Simd::Max(maxW, pNormW[kc]);
-                            }
-                        scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
-                        for (size_t k = 0, kc = 0; k < K; ++k)
-                            for (size_t c = 0; c < C; ++c, ++kc)
-                                if (_srcCvt.neg)
-                                {
-                                    int w = Convert<float, int8_t, float>(pNormW[kc], scale, 0.0f);
-                                    if (w & 1)
-                                        w = Round(w * 0.25f) * 4;
-                                    pDstW[kc * GD + d] = w / 2;
-                                    normB -= w * pSrcShift[c];
-                                }
-                                else
-                                {
-                                    pDstW[kc * GD + d] = Convert<float, int8_t, float>(pNormW[kc], scale, 0.0f);
-                                    normB -= pDstW[kc * GD + d] * pSrcShift[c];
-                                }
-                    }
-                    else
-                    {
-                        for (size_t c = 0, ck = 0; c < C; ++c)
-                            for (size_t k = 0; k < K; ++k, ++ck)
-                            {
-                                pNormW[ck] = pSrcW[d * CK + ck] * pSrcScaleInv[c];
-                                minW = Simd::Min(minW, pNormW[ck]);
-                                maxW = Simd::Max(maxW, pNormW[ck]);
-                            }
-                        scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
-                        for (size_t c = 0, ck = 0; c < C; ++c)
-                            for (size_t k = 0; k < K; ++k, ++ck)
-                                if (_srcCvt.neg)
-                                {
-                                    int w = Convert<float, int8_t, float>(pNormW[ck], scale, 0.0f);
-                                    if (w & 1)
-                                        w = Round(w * 0.25f) * 4;
-                                    pDstW[d * CK + ck] = w / 2;
-                                    normB -= w * pSrcShift[c];
-                                }
-                                else
-                                {
-                                    pDstW[d * CK + ck] = Convert<float, int8_t, float>(pNormW[ck], scale, 0.0f);
-                                    normB -= pDstW[d * CK + ck] * pSrcShift[c];
-                                }
-                    }
-                    pDstS[d] = _srcCvt.neg ? 2 : 1;
-                    if (pSrcB)
-                        normB += pSrcB[d] * scale;
-                    pDstB[d] = Quantize(normB);
-                    if (_dst8u)
-                    {
-                        pNormScale[d] = (1.0f / scale) * pDstScaleInv[d];
-                        pNormShift[d] = -pDstShift[d] / pDstScale[d];
-                    }
-                    else
-                    {
-                        pNormScale[d] = 1.0f / scale;
-                        pNormShift[d] = 0;
-                    }
-                }
-                if (p.trans)
-                {
-                    pSrcW += D;
-                    pDstW += D;
-                }
-                else
-                {
-                    pSrcW += CK * D;
-                    pDstW += CK * D;
-                }
-                pSrcB += D;
-                pDstB += D;
-                pDstS += D;
-                pSrcScale += C;
-                pSrcShift += C;
-                pDstScale += D;
-                pDstShift += D;
-                pNormScale += D;
-                pNormShift += D;
-            }
         }
 
         template <typename T> void Relu(T* data, size_t size)
@@ -283,59 +316,50 @@ namespace Simd
                 data[i] = Simd::Max(data[i], T(0));
         }
 
-        void SynetConvolution8iGemmNN::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        void SynetConvolution8iGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const ConvParam8i& p = _param;
             const int8_t * weight = _weight8i.data;
-            buf = Buffer(buf);
-            uint8_t * src8u = _src8u ? NULL : Allocate<uint8_t>(buf, _sizeS*_merge);
-            int32_t * sum32i = Allocate<int32_t>(buf, _sizeD * _merge);
-            for (size_t b = 0; b < _batch; b += _merge)
+            int32_t * sum = Allocate<int32_t>(buf, _sizeD * _merge);
+            if (!_skipConv)
             {
-                if (!_src8u)
-                    Convert<float, uint8_t, float>((float*)src + b * _sizeS, _merge, p.srcC, p.srcH, p.srcW, p.srcF, _srcCvt.scale.data, _srcCvt.shift.data, src8u);
-                const uint8_t * pSrc = _src8u ? src + b * _sizeS : src8u;
-                int32_t* pSum = sum32i;
-                if (!_skipConv)
-                {
-                    if(p.trans)
-                        for (size_t m = 0; m < _merge; ++m)
-                            ImgToRow(pSrc + m * _sizeS, buf + m * _sizeB);
-                    else
-                        for (size_t m = 0; m < _merge; ++m)
-                            ImgToCol(pSrc + m * _sizeS, buf + m * _sizeB);
-                    pSrc = buf;
-                }
-                if (_merge > 1)
-                {
-                    assert(0);
-                }
+                if(p.trans)
+                    for (size_t m = 0; m < _merge; ++m)
+                        ImgToRow(src + m * _sizeS, buf + m * _sizeB);
                 else
-                {
-                    for (size_t g = 0; g < p.group; ++g)
-                    {
-                        if (p.trans)
-                            GemmNhwc(_siS, _siD, _siK, _siC, pSrc + _grS * g, _ldS, weight + _grW * g, _ldW, pSum + _grD * g, _ldD);
-                        else
-                            GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, pSrc + _grS * g, _ldS, pSum + _grD * g, _ldD);
-                    }
-                }
-                Convert<int32_t, int32_t, int32_t>(pSum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, pSum);
-                switch (p.activation)
-                {
-                case SimdConvolutionActivationIdentity:
-                    break;
-                case SimdConvolutionActivationRelu:
-                    Relu(pSum, _sizeD * _merge);
-                    break;
-                default:
-                    assert(0);
-                }
-                if (_dst8u)
-                    Convert<int32_t, uint8_t, float>(sum32i, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, dst + b * _sizeD);
-                else
-                    Convert<int32_t, float, float>(sum32i, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, (float*)dst + b * _sizeD);
+                    for (size_t m = 0; m < _merge; ++m)
+                        ImgToCol(src + m * _sizeS, buf + m * _sizeB);
+                src = buf;
             }
+            if (_merge > 1)
+            {
+                assert(0);
+            }
+            else
+            {
+                for (size_t g = 0; g < p.group; ++g)
+                {
+                    if (p.trans)
+                        GemmNhwc(_siS, _siD, _siK, _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD);
+                    else
+                        GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD);
+                }
+            }
+            Convert<int32_t, int32_t, int32_t>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, sum);
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity:
+                break;
+            case SimdConvolutionActivationRelu:
+                Relu(sum, _sizeD * _merge);
+                break;
+            default:
+                assert(0);
+            }
+            if (_dst8u)
+                Convert<int32_t, uint8_t, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, dst);
+            else
+                Convert<int32_t, float, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, (float*)dst);
         }
 
         void SynetConvolution8iGemmNN::ImgToCol(const uint8_t* src, uint8_t* dst)
@@ -562,9 +586,9 @@ namespace Simd
 
 //#define SIMD_BASE_ONLY_GEMM_NN
 
-        void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv)
+        void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam8i param(batch, conv);
+            ConvParam8i param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
 #if !defined(SIMD_BASE_ONLY_GEMM_NN)

@@ -50,9 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ga3a024fbe7eaad3bc2dea8e24d096d02f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga3a024fbe7eaad3bc2dea8e24d096d02f">SimdSynetConvert32fTo8u</a> (const float *src, size_t batch, size_t channels, size_t height, size_t width, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *scale, const float *shift, uint8_t *dst, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> compatible)</td></tr>
-<tr class="memdesc:ga3a024fbe7eaad3bc2dea8e24d096d02f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit float point image to 8-bit unsigned integer image.  <a href="group__synet__conversion.html#ga3a024fbe7eaad3bc2dea8e24d096d02f">More...</a><br /></td></tr>
-<tr class="separator:ga3a024fbe7eaad3bc2dea8e24d096d02f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76">SimdSynetConvert32fTo8u</a> (const float *src, size_t batch, size_t channels, size_t height, size_t width, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, const float *scale, const float *shift, uint8_t *dst, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memdesc:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 32-bit float point image to 8-bit unsigned integer image.  <a href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76">More...</a><br /></td></tr>
+<tr class="separator:gadf0f8eea2dfcad07e1cac06c4a0a1b76"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga7d3c13d93a7aedd0ba96b881cdf0506c"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__conversion.html#ga7d3c13d93a7aedd0ba96b881cdf0506c">SimdSynetReorderImage</a> (size_t batch, size_t channels, size_t spatial, const float *src, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> srcFormat, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> dstFormat)</td></tr>
 <tr class="memdesc:ga7d3c13d93a7aedd0ba96b881cdf0506c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts (input/output) image between different formats of 4D-tensor.  <a href="group__synet__conversion.html#ga7d3c13d93a7aedd0ba96b881cdf0506c">More...</a><br /></td></tr>
 <tr class="separator:ga7d3c13d93a7aedd0ba96b881cdf0506c"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -70,8 +70,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions to acceleratе conversion in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="ga3a024fbe7eaad3bc2dea8e24d096d02f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga3a024fbe7eaad3bc2dea8e24d096d02f">&#9670;&nbsp;</a></span>SimdSynetConvert32fTo8u()</h2>
+<a id="gadf0f8eea2dfcad07e1cac06c4a0a1b76"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gadf0f8eea2dfcad07e1cac06c4a0a1b76">&#9670;&nbsp;</a></span>SimdSynetConvert32fTo8u()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -133,8 +133,8 @@ Functions</h2></td></tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
-          <td class="paramname"><em>compatible</em>&#160;</td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -157,7 +157,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to the 32-bit float array with shift coefficients. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 8-bit unsigned integer array with output image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatible</td><td>- a flag of bitwise compatibility with Inference Engine. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of bitwise compatibility. </td></tr>
   </table>
   </dd>
 </dl>

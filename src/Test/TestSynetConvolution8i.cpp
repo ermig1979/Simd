@@ -37,7 +37,7 @@ namespace Test
 
         struct FuncC
         {
-            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv);
+            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
             FuncPtr func;
             String desc;
@@ -167,7 +167,7 @@ namespace Test
         }
     }
 
-    bool SynetConvolution8iForwardAutoTest(float eps, Param p, int neg, FuncC f1, FuncC f2)
+    bool SynetConvolution8iForwardAutoTest(float eps, Param p, int neg, SimdSynetCompatibilityType comp, FuncC f1, FuncC f2)
     {
         bool result = true;
 
@@ -216,8 +216,8 @@ namespace Test
         Fill(dst8u1, uint8_t(1));
         Fill(dst8u2, uint8_t(2));
 
-        void * context1 = f1.func(p.batch, &p.conv);
-        void * context2 = f2.func(p.batch, &p.conv);
+        void * context1 = f1.func(p.batch, &p.conv, comp);
+        void * context2 = f2.func(p.batch, &p.conv, comp);
 
         buf8u.Extend({ ::SimdSynetConvolution8iExternalBufferSize(context1) });
         buf8u.Extend({ ::SimdSynetConvolution8iExternalBufferSize(context2) });
@@ -242,7 +242,7 @@ namespace Test
         return result;
     }
 
-    bool SynetConvolution8iForwardAutoTest(const FuncC & f1, const FuncC & f2)
+    bool SynetConvolution8iForwardAutoTest(const FuncC & f1, const FuncC & f2, SimdSynetCompatibilityType c = SimdSynetCompatibilityFast)
     {
         bool result = true;
 
@@ -254,10 +254,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, c, f1, f2);
 #endif
 
         return result;

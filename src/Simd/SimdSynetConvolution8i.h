@@ -37,12 +37,14 @@ namespace Simd
     {
         SimdBool trans;
         size_t batch;
+        SimdSynetCompatibilityType compatibility;
 
-        ConvParam8i(size_t batch, const SimdConvolutionParameters * conv)
+        ConvParam8i(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
             *((SimdConvolutionParameters*)this) = *conv;
             this->trans = (srcF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
             this->batch = batch;
+            this->compatibility = compatibility;
         }
 
         bool Valid()
@@ -153,13 +155,7 @@ namespace Simd
     class SynetConvolution8i : public Deletable
     {
     public:
-        SynetConvolution8i(const ConvParam8i & p) 
-            : _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC)
-            , _perf(NULL)
-#endif
-        {
-        }
+        SynetConvolution8i(const ConvParam8i& p);
 
         const ConvParam8i & Param() const 
         {
@@ -169,30 +165,12 @@ namespace Simd
         virtual String Ext() const = 0;
         virtual String Desc() const = 0;
 
-        virtual size_t ExternalBufferSize() const
-        {
-            return 1;
-        }
+        virtual size_t ExternalBufferSize() const;
+        virtual size_t InternalBufferSize() const;
 
-        virtual size_t InternalBufferSize() const
-        {
-            return _buffer.size;
-        }
+        virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
 
-        virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats) = 0;
-
-        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst) = 0;
-
-        uint8_t* Buffer(uint8_t * buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
-            }
-        }
+        virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
         template<class T> T * Allocate(uint8_t* & buffer, size_t size)
         {
@@ -206,11 +184,23 @@ namespace Simd
 #endif
 
     protected:
+        virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
+
+        typedef void(*Convert32fTo8u)(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+
         ConvParam8i _param;
+        SimdSynetCompatibilityType _compatibility;
         Array8u _buffer;
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         Base::PerformanceMeasurer * _perf;
 #endif
+        Convert32fTo8u _convertSrc;
+        CvtParam _srcCvt, _dstCvt;
+        Array8i _weight8i;
+        Array32i _norm32i;
+        Array32f _norm32f; 
+        bool _src8u, _dst8u, _overflow16i;
+        size_t _merge, _sizeS, _sizeD;
     };
 
     namespace Base
@@ -221,47 +211,36 @@ namespace Simd
             SynetConvolution8iGemmNN(const ConvParam8i & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmNN"; }
-            virtual size_t InternalBufferSize() const;
             virtual size_t ExternalBufferSize() const;
-            virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
-            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
         protected:
+            virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
             virtual void ImgToCol(const uint8_t* src, uint8_t* dst);
             virtual void ImgToRow(const uint8_t* src, uint8_t* dst);
 
             virtual void GemmNchw(size_t D, size_t S, size_t C, size_t K, const int8_t * wgt, size_t ldw, const uint8_t * src, size_t lds, int32_t * dst, size_t ldd);
             virtual void GemmNhwc(size_t S, size_t D, size_t K, size_t C, const uint8_t * src, size_t lds, const int8_t * wgt, size_t ldw, int32_t * dst, size_t ldd);
 
-            CvtParam _srcCvt, _dstCvt;
-            Array8i _weight8i;
-            Array32i _norm32i;
-            Array32f _norm32f; 
-            bool _skipConv, _src8u, _dst8u, _overflow16i;
-            size_t _batch, _merge, _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeS, _sizeB, _sizeD;
+            bool _skipConv;
+            size_t _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeB;
         };
 
-        class SynetConvolution8iNhwcDirect : public SynetConvolution8i
-        {
-        public:
-            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
-            virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::NhwcDirect"; }
-            virtual size_t InternalBufferSize() const;
-            virtual size_t ExternalBufferSize() const;
-            virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
-            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+        //class SynetConvolution8iNhwcDirect : public SynetConvolution8i
+        //{
+        //public:
+        //    SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+        //    virtual String Ext() const { return "Base"; }
+        //    virtual String Desc() const { return Ext() + "::NhwcDirect"; }
+        //    virtual size_t InternalBufferSize() const;
+        //    virtual size_t ExternalBufferSize() const;
+        //    virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
+        //    virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-        protected:
-            CvtParam _srcCvt, _dstCvt;
-            Array8i _weight8i;
-            Array32i _norm32i;
-            Array32f _norm32f;
-            bool _src8u, _dst8u, _overflow16i;
-            size_t _batch, _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeS, _sizeB, _sizeD;
-        };
+        //protected:
+        //};
 
-        void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv);
+        void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 }
 

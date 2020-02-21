@@ -5253,12 +5253,12 @@ SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src
     d->Forward(src, buf, dst);
 }
 
-typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv);
+typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
 SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC0(SynetConvolution8iInit);//, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
-SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv)
+SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
 {
-    return simdSynetConvolution8iInit(batch, conv);
+    return simdSynetConvolution8iInit(batch, conv, compatibility);
 }
 
 SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context)

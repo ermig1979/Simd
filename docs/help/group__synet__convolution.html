@@ -65,9 +65,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gac34c3e3672c20e307137705511814dbc"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#gac34c3e3672c20e307137705511814dbc">SimdSynetConvolution32fForward</a> (void *context, const float *src, float *buf, float *dst)</td></tr>
 <tr class="memdesc:gac34c3e3672c20e307137705511814dbc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs forward propagation of FP32 convolution algorithm.  <a href="group__synet__convolution.html#gac34c3e3672c20e307137705511814dbc">More...</a><br /></td></tr>
 <tr class="separator:gac34c3e3672c20e307137705511814dbc"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga85e12e44e42408609ea43f83d4b61747"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#ga85e12e44e42408609ea43f83d4b61747">SimdSynetConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv)</td></tr>
-<tr class="memdesc:ga85e12e44e42408609ea43f83d4b61747"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes INT8 convolution algorithm.  <a href="group__synet__convolution.html#ga85e12e44e42408609ea43f83d4b61747">More...</a><br /></td></tr>
-<tr class="separator:ga85e12e44e42408609ea43f83d4b61747"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga53d7304604ffae8507174504bc1c4151"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#ga53d7304604ffae8507174504bc1c4151">SimdSynetConvolution8iInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memdesc:ga53d7304604ffae8507174504bc1c4151"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes INT8 convolution algorithm.  <a href="group__synet__convolution.html#ga53d7304604ffae8507174504bc1c4151">More...</a><br /></td></tr>
+<tr class="separator:ga53d7304604ffae8507174504bc1c4151"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaa6fcba4caa5d1bf4844d7f5d5bd0fb61"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html#gaa6fcba4caa5d1bf4844d7f5d5bd0fb61">SimdSynetConvolution8iExternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:gaa6fcba4caa5d1bf4844d7f5d5bd0fb61"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.  <a href="group__synet__convolution.html#gaa6fcba4caa5d1bf4844d7f5d5bd0fb61">More...</a><br /></td></tr>
 <tr class="separator:gaa6fcba4caa5d1bf4844d7f5d5bd0fb61"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -292,8 +292,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga85e12e44e42408609ea43f83d4b61747"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga85e12e44e42408609ea43f83d4b61747">&#9670;&nbsp;</a></span>SimdSynetConvolution8iInit()</h2>
+<a id="ga53d7304604ffae8507174504bc1c4151"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga53d7304604ffae8507174504bc1c4151">&#9670;&nbsp;</a></span>SimdSynetConvolution8iInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -308,7 +308,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *&#160;</td>
-          <td class="paramname"><em>conv</em>&#160;</td>
+          <td class="paramname"><em>conv</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -323,6 +329,7 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">conv</td><td>- a pointer to convolution parameters. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of bitwise compatibility. </td></tr>
   </table>
   </dd>
 </dl>
@@ -349,7 +356,7 @@ Functions</h2></td></tr>
 <p>Gets size in bytes of external temporary buffer required for INT8 convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga85e12e44e42408609ea43f83d4b61747" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga53d7304604ffae8507174504bc1c4151" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -376,7 +383,7 @@ Functions</h2></td></tr>
 <p>Gets size of internal buffer used inside INT8 convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga85e12e44e42408609ea43f83d4b61747" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga53d7304604ffae8507174504bc1c4151" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -431,7 +438,7 @@ Functions</h2></td></tr>
 <p>Sets weights, beases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga85e12e44e42408609ea43f83d4b61747" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga53d7304604ffae8507174504bc1c4151" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to original (32-bit float point) convolution weights. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to original (32-bit float point) bias. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">params</td><td>- a pointer to original (32-bit float point) parameters of activation functions (see <a class="el" href="group__synet.html#gac0134d6cef9d64de8b89171e79ef4568">SimdConvolutionActivationType</a>). Can be NULL. </td></tr>
@@ -483,7 +490,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of INT8 convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga85e12e44e42408609ea43f83d4b61747" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to INT8 convolution context. It must be created by function <a class="el" href="group__synet__convolution.html#ga53d7304604ffae8507174504bc1c4151" title="Initilizes INT8 convolution algorithm.">SimdSynetConvolution8iInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input tensor. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__convolution.html#gaa6fcba4caa5d1bf4844d7f5d5bd0fb61" title="Gets size in bytes of external temporary buffer required for INT8 convolution algorithm.">SimdSynetConvolution8iExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output tensor. </td></tr>

@@ -45,6 +45,11 @@ namespace Simd
             return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), 0, 255);
         }
 
+        SIMD_INLINE int8_t SynetConvert32fTo8i(float value, float scale, float shift)
+        {
+            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), -128, 127);
+        }
+
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
 
         template <> SIMD_INLINE float SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(float a, float b)
