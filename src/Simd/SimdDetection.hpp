@@ -216,7 +216,7 @@ namespace Simd
 
             \note Tree based cascades and old cascade formats are not supported!
 
-            \param [in] xml - a path to cascade.
+            \param [in] xml - a string containing XML with cascade.
             \param [in] tag - an user defined tag. This tag will be inserted in output Object structure.
             \return a result of this operation.
         */
