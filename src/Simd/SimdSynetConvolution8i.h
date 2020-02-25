@@ -172,13 +172,6 @@ namespace Simd
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-        template<class T> T * Allocate(uint8_t* & buffer, size_t size)
-        {
-            T* ptr = (T*)buffer;
-            buffer = buffer + size*sizeof(T);
-            return ptr;
-        }
-
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         Base::PerformanceMeasurer* Perf(const String & func);
 #endif
@@ -226,22 +219,53 @@ namespace Simd
             size_t _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeB;
         };
 
-        //class SynetConvolution8iNhwcDirect : public SynetConvolution8i
-        //{
-        //public:
-        //    SynetConvolution8iNhwcDirect(const ConvParam8i& p);
-        //    virtual String Ext() const { return "Base"; }
-        //    virtual String Desc() const { return Ext() + "::NhwcDirect"; }
-        //    virtual size_t InternalBufferSize() const;
-        //    virtual size_t ExternalBufferSize() const;
-        //    virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
-        //    virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+        class SynetConvolution8iNhwcDirect : public SynetConvolution8i
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::NhwcDirect"; }
+            virtual size_t InternalBufferSize() const;
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
 
-        //protected:
-        //};
+            static bool Preferable(const ConvParam8i& p);
+        
+            struct AlgParam
+            {
+                size_t F, microD, macroH, macroC, macroD;
+                int32_t zero, norm, high;
+            };
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight,
+                const int32_t * bias, const float * scale, const float *shift, int32_t * sum, uint8_t* dst);
+
+        protected:
+            void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3);
+            void ReorderWeight();
+
+            virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvolutionPtr _convolution;
+        };
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
+
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        class SynetConvolution8iNhwcDirect : public Base::SynetConvolution8iNhwcDirect
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 
 #endif//__SimdSynetConvolution8i_h__

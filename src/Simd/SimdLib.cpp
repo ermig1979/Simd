@@ -5220,7 +5220,39 @@ SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * wei
 SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst)
 {
     SynetConvolution32f * c = (SynetConvolution32f*)context;
-    SIMD_PERF_EXT(c);c->Forward(src, buf, dst);
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
+}
+
+typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC1(SynetConvolution8iInit, SIMD_SSE41_FUNC);//, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_NEON_FUNC);
+
+SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
+{
+    return simdSynetConvolution8iInit(batch, conv, compatibility);
+}
+
+SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void* context)
+{
+    return ((SynetConvolution8i*)context)->ExternalBufferSize();
+}
+
+SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
+{
+    return ((SynetConvolution8i*)context)->InternalBufferSize();
+
+}
+
+SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight, const float* bias, const float* params, const float* const* stats)
+{
+    ((SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
+}
+
+SIMD_API void SimdSynetConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
+{
+    SynetConvolution8i* c = (SynetConvolution8i*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
 }
 
 typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
@@ -5251,37 +5283,6 @@ SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src
     SynetDeconvolution32f * d = (SynetDeconvolution32f*)context;
     SIMD_PERF_EXT(d);
     d->Forward(src, buf, dst);
-}
-
-typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC0(SynetConvolution8iInit);//, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
-
-SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
-{
-    return simdSynetConvolution8iInit(batch, conv, compatibility);
-}
-
-SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context)
-{
-    return ((SynetConvolution8i*)context)->ExternalBufferSize();
-}
-
-SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context)
-{
-    return ((SynetConvolution8i*)context)->InternalBufferSize();
-
-}
-
-SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats)
-{
-    ((SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
-}
-
-SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst)
-{
-    SynetConvolution8i * c = (SynetConvolution8i*)context;
-    SIMD_PERF_EXT(c);
-    c->Forward(src, buf, dst);
 }
 
 typedef void(*SimdSynetEltwiseLayerForwardPtr) (float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);

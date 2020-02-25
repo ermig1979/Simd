@@ -71,8 +71,8 @@ namespace Simd
 
         SIMD_INLINE void Swap(const Array & array)
         {
-            Simd::Swap(data, array.data);
-            Simd::Swap(size, array.size);
+            Simd::Swap((T*&)data, (T*&)(array.data));
+            Simd::Swap((size_t&)size, (size_t&)(array.size));
         }
 
         SIMD_INLINE T & operator[] (size_t i)

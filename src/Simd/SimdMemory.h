@@ -111,6 +111,13 @@ namespace Simd
         return ptr;
     }
 
+    template<class T> T* Allocate(uint8_t*& buffer, size_t size)
+    {
+        T* ptr = (T*)buffer;
+        buffer = buffer + size * sizeof(T);
+        return ptr;
+    }
+
     SIMD_INLINE void Free(void * ptr)
     {
 #ifdef SIMD_NO_MANS_LAND
