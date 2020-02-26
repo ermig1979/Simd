@@ -322,6 +322,7 @@ typedef enum
     SimdSynetCompatibilityNoFmaTail = 1, /*!< Not use FMA instructions at row tail. */
     SimdSynetCompatibilityNoFma = 2, /*!< Not use FMA instructions. */
     SimdSynetCompatibilityFmaMask = 3, /*!< Bit mask of options of FMA instructions using. */
+    SimdSynetCompatibilityOverflow16i = 4, /*!< 16-bit integer overflow. */
 } SimdSynetCompatibilityType;
 
 /*! @ingroup synet

@@ -242,7 +242,7 @@ namespace Test
         return result;
     }
 
-    bool SynetConvolution8iForwardAutoTest(const FuncC & f1, const FuncC & f2, SimdSynetCompatibilityType c = SimdSynetCompatibilityFast)
+    bool SynetConvolution8iForwardAutoTest(const FuncC & f1, const FuncC & f2, SimdSynetCompatibilityType c = SimdSynetCompatibilityOverflow16i)
     {
         bool result = true;
 
@@ -253,11 +253,14 @@ namespace Test
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu;
 
 #ifdef NDEBUG
-#if 1
+#if 0
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 30, 30, 32, _3, _1, _1, _1, _1, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+#else
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 32, 150, 150, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 30, 30, 32, _1, _1, _1, _0, _0, 1, aId, t1, f32, u8), 0, c, f1, f2);
 #endif
 
         return result;

@@ -553,6 +553,18 @@ namespace Simd
         using Sse::RightNotZero32f;
 #endif
 
+        template <int part> SIMD_INLINE __m128i UnpackI8(__m128i a);
+
+        template <> SIMD_INLINE __m128i UnpackI8<0>(__m128i a)
+        {
+            return _mm_cvtepi8_epi16(a);
+        }
+
+        template <> SIMD_INLINE __m128i UnpackI8<1>(__m128i a)
+        {
+            return _mm_cvtepi8_epi16(_mm_srli_si128(a, 8));
+        }
+
         template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
 
         template <> SIMD_INLINE __m128i UnpackI16<0>(__m128i a)

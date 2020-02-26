@@ -40,10 +40,11 @@ namespace Simd
         _merge = 1;
         _src8u = p.srcT == SimdTensorData8u;
         _dst8u = p.dstT == SimdTensorData8u;
-        _overflow16i = true;
+        _overflow16i = p.compatibility & SimdSynetCompatibilityOverflow16i;
         _weight8i.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
         _norm32i.Resize(2 * p.dstC);
         _norm32f.Resize(2 * p.dstC);
+        _convertSrc = Base::SynetConvert32fTo8u;
     }
 
     size_t SynetConvolution8i::ExternalBufferSize() const
@@ -299,7 +300,6 @@ namespace Simd
             _siC = p.srcC / p.group;
             _siD = p.dstC;
             _siS = p.dstH * p.dstW;
-            _convertSrc = Base::SynetConvert32fTo8u;
         }
 
         size_t SynetConvolution8iGemmNN::ExternalBufferSize() const
@@ -609,14 +609,13 @@ namespace Simd
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);
             ReorderWeight();
+            _alg.norm = _srcCvt.neg ? 2 : 1;
+            _alg.zero = _srcCvt.neg ? 0x80808080 : 0;
         }
 
         bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
         {
             return false;
-            if (p.trans != SimdTrue || p.group != 1)
-                return false;
-            return true;
         }
 
         void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3)
@@ -632,6 +631,7 @@ namespace Simd
                     break;
             }
             _alg.macroD = Simd::Min(AlignLoAny(L3 / sizeof(float) / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
+            _alg.size = (p.dstT == SimdTensorData32f ? 4 : 1);
         }
 
         void SynetConvolution8iNhwcDirect::ReorderWeight()
@@ -673,7 +673,7 @@ namespace Simd
             int32_t* sum = _alg.macroC < p.srcC ? Allocate<int32_t>(buf, _sizeD) : NULL;
             for (size_t m = 0; m < _merge; ++m)
             {
-                _convolution(src, _param, _alg, _weight8i.data, _norm32i.data, _norm32f.data, _norm32f.data + p.dstC, sum, dst);
+                _convolution(src, _param, _alg, _weight8i.data, _norm32i.data + p.dstC, NULL, _norm32f.data, _norm32f.data + p.dstC, sum, dst);
                 src += _sizeS;
                 dst += _sizeD*(_dst8u ? sizeof(uint8_t) : sizeof(float));
             }

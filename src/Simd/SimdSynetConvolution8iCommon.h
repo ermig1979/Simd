@@ -83,125 +83,125 @@ namespace Simd
 
         template <Term8iType term> struct Term
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift);
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail);
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift);
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail);
         };
 
         template <> struct Term<Term8iSingle8u>
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
-                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_slli_epi32(sum, norm), bias[index]), params, index);
+                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_mullo_epi32(sum, norm), bias[index]), params, index);
                 __m128 f32 = _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]);
-                *((int32_t*)dst) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(_mm_cvtps_epi32(f32), K_ZERO), K_ZERO));
+                ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(_mm_cvtps_epi32(f32), K_ZERO), K_ZERO));
             }
 
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 uint8_t tmp[F];
-                Term::Save<type, norm, index>(tmp, buf, sum, bias, params, scale, shift);
+                Term::Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
-                    dst[i] = tmp[i];
+                    dst[index * F + i] = tmp[i];
             }
         };
 
         template <> struct Term<Term8iSingle32f>
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
-                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_slli_epi32(sum, norm), bias[index]), params, index);
-                _mm_storeu_ps((float*)dst, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]));
+                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_mullo_epi32(sum, norm), bias[index]), params, index);
+                _mm_storeu_ps((float*)dst + index*F, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]));
             }
 
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, norm, index>(tmp, buf, sum, bias, params, scale, shift);
+                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
-                    ((float*)dst)[i] = ((float*)tmp)[i];
+                    ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
         };
 
         template <> struct Term<Term8iFirst>
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
-                _mm_storeu_si128((__m128i*)buf, sum);
+                _mm_storeu_si128((__m128i*)buf + index, sum);
             }
 
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 int32_t tmp[F];
                 _mm_storeu_si128((__m128i*)tmp, sum);
                 for (size_t i = 0; i < tail; ++i)
-                    buf[i] = tmp[i];
+                    buf[index * F + i] = tmp[i];
             }
         };
 
         template <> struct Term<Term8iIterim>
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
-                _mm_storeu_si128((__m128i*)buf, _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum));
+                _mm_storeu_si128((__m128i*)buf + index, _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum));
             }
 
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 int32_t tmp[F];
                 _mm_storeu_si128((__m128i*)tmp, _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum));
                 for (size_t i = 0; i < tail; ++i)
-                    buf[i] = tmp[i];
+                    buf[index * F + i] = tmp[i];
             }
         };
 
         template <> struct Term<Term8iLast8u>
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
                 sum = _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum);
-                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_slli_epi32(sum, norm), bias[index]), params, index);
+                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_mullo_epi32(sum, norm), bias[index]), params, index);
                 __m128 f32 = _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]);
-                *((int32_t*)dst) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(_mm_cvtps_epi32(f32), K_ZERO), K_ZERO));
+                ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(_mm_cvtps_epi32(f32), K_ZERO), K_ZERO));
             }
 
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 uint8_t tmp[F];
-                Save<type, norm, index>(tmp, buf, sum, bias, params, scale, shift);
+                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
-                    dst[i] = tmp[i];
+                    dst[index * F + i] = tmp[i];
             }
         };
 
         template <> struct Term<Term8iLast32f>
         {
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
                 sum = _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum);
-                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_slli_epi32(sum, norm), bias[index]), params, index);
-                _mm_storeu_ps((float*)dst, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]));
+                __m128i i32 = Activate<type>(_mm_add_epi32(_mm_mullo_epi32(sum, norm), bias[index]), params, index);
+                _mm_storeu_ps((float*)dst + index * F, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]));
             }
 
-            template<SimdConvolutionActivationType type, int norm, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
-                __m128i sum, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
+                __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, norm, index>(tmp, buf, sum, bias, params, scale, shift);
+                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
-                    ((float*)dst)[i] = ((float*)tmp)[i];
+                    ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
         };
     }

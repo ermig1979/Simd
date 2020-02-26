@@ -91,6 +91,26 @@ namespace Simd
             return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
         }
 
+        SIMD_INLINE size_t NoseH() const
+        {
+            return DivHi(padY, strideY);
+        }
+
+        SIMD_INLINE size_t NoseW() const
+        {
+            return DivHi(padX, strideX);
+        }
+
+        SIMD_INLINE size_t BodyH() const
+        {
+            return (padY + srcH - (kernelY - 1) * dilationY - 1)/ strideY + 1;
+        }
+
+        SIMD_INLINE size_t BodyW() const
+        {
+            return (padX + srcW - (kernelX - 1) * dilationX - 1) / strideX + 1;
+        }
+
 #ifdef SIMD_PERFORMANCE_STATISTIC
         String Info() const
         {
@@ -234,10 +254,10 @@ namespace Simd
             struct AlgParam
             {
                 size_t F, microD, macroH, macroC, macroD;
-                int32_t zero, norm, high;
+                int32_t zero, norm, high, size;
             };
             typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight,
-                const int32_t * bias, const float * scale, const float *shift, int32_t * sum, uint8_t* dst);
+                const int32_t * bias, const int32_t* params, const float * scale, const float *shift, int32_t * buf, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3);
@@ -261,6 +281,8 @@ namespace Simd
             SynetConvolution8iNhwcDirect(const ConvParam8i& p);
 
             virtual String Ext() const { return "Sse41"; }
+
+            static bool Preferable(const ConvParam8i& p);
         };
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
