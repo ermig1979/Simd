@@ -1339,7 +1339,7 @@ namespace Simd
             for (size_t macroH = p.dstH; macroH >= 1; macroH--)
             {
                 _alg.macroH = macroH;
-                if (_alg.macroC * p.srcW * (_alg.macroH * p.strideY + p.kernelY * p.dilationY - 1) <= L2)
+                if (_alg.macroC * p.srcW * (_alg.macroH * p.strideY + p.kernelY * p.dilationY - 1) * sizeof(float) <= L2)
                     break;
             }
             _alg.macroD = Simd::Min(AlignLoAny(L3 / sizeof(float) / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));

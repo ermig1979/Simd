@@ -200,6 +200,7 @@ namespace Test
         Tensor32f srcMin({ c.srcC }), srcMax({ c.srcC }), dstMin({ c.dstC }), dstMax({ c.dstC });
         Tensor32f src32f(p.SrcShape()), dst32f1(p.DstShape()), dst32f2(p.DstShape()), buf32f;
         Tensor8u src8u(p.SrcShape()), dst8u1(p.DstShape()), dst8u2(p.DstShape()), buf8u;
+        //dst8u2.Reshape({ 1000000 }); dst8u2.Extend(p.DstShape());
 
         FillSrc32f(p, neg, src32f, srcMin.Data(), srcMax.Data());
         FillSrc8u(p, neg, src32f, srcMin.Data(), srcMax.Data(), src8u);
@@ -235,7 +236,7 @@ namespace Test
         ::SimdRelease(context2);
 
         if(p.conv.dstT == SimdTensorData32f)
-            result = result && Compare(dst32f1, dst32f2, eps, true, 64, DifferenceBoth);
+            result = result && Compare(dst32f1, dst32f2, eps*eps, true, 64, DifferenceBoth);
         else
             result = result && Compare(dst8u1, dst8u2, 0, true, 64);
 
@@ -255,12 +256,17 @@ namespace Test
 #ifdef NDEBUG
 #if 0
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t0, f32, u8), 0, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 30, 30, 32, _3, _1, _1, _1, _1, 1, aRe, t1, f32, u8), 0, c, f1, f2);
-#else
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _5, _2, _3, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 32, 150, 150, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, f32), 0, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 32, 150, 150, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _3, _1, _1, _1, _1, 1, aId, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _7, _1, _2, _3, _3, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 2000, 30, 30, 64, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+#else
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 5000, 30, 30, 400, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 30, 30, 32, _1, _1, _1, _0, _0, 1, aId, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 5000, 10, 10, 400, _1, _1, _1, _0, _0, 1, aId, t1, f32, u8), 0, c, f1, f2);
 #endif
 
         return result;

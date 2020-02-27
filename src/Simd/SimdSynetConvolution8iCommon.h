@@ -39,6 +39,7 @@ namespace Simd
         Term8iIterim,
         Term8iLast8u,
         Term8iLast32f,
+        Term8iSize
     };
 
     namespace Base
@@ -169,7 +170,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
-                sum = _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum);
+                sum = _mm_add_epi32(_mm_loadu_si128((__m128i*)buf + index), sum);
                 __m128i i32 = Activate<type>(_mm_add_epi32(_mm_mullo_epi32(sum, norm), bias[index]), params, index);
                 __m128 f32 = _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]);
                 ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(_mm_cvtps_epi32(f32), K_ZERO), K_ZERO));
@@ -190,7 +191,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
             {
-                sum = _mm_add_epi32(_mm_loadu_si128((__m128i*)buf), sum);
+                sum = _mm_add_epi32(_mm_loadu_si128((__m128i*)buf + index), sum);
                 __m128i i32 = Activate<type>(_mm_add_epi32(_mm_mullo_epi32(sum, norm), bias[index]), params, index);
                 _mm_storeu_ps((float*)dst + index * F, _mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(i32), scale[index]), shift[index]));
             }

@@ -26,6 +26,7 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -206,11 +207,6 @@ namespace Simd
 
     namespace Base
     {
-        SIMD_INLINE int Quantize(float value)
-        {
-            return (int)(value + (value >= 0 ? 0.5f : -0.5f));
-        }
-
         template<class S, class D, class F> SIMD_INLINE D Convert(S value, F scale, F shift)
         {
             return (D)(F(value) * scale + shift);
@@ -218,17 +214,17 @@ namespace Simd
 
         template<> SIMD_INLINE uint8_t Convert<int32_t, uint8_t, float>(int32_t value, float scale, float shift)
         {
-            return (uint8_t)Simd::RestrictRange(Quantize(float(value) * scale + shift), 0, 255);
+            return (uint8_t)Simd::RestrictRange(Round(float(value) * scale + shift), 0, 255);
         }
 
         template<> SIMD_INLINE uint8_t Convert<float, uint8_t, float>(float value, float scale, float shift)
         {
-            return (uint8_t)Simd::RestrictRange(Quantize(value * scale + shift), 0, 255);
+            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), 0, 255);
         }
 
         template<> SIMD_INLINE int8_t Convert<float, int8_t, float>(float value, float scale, float shift)
         {
-            return (int8_t)Simd::RestrictRange(Quantize(value * scale + shift), -128, 127);
+            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), -128, 127);
         }
 
         template<class S, class D, class F> void Convert(const S * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const F* scale, const F* shift, D * dst)
@@ -623,14 +619,14 @@ namespace Simd
             const ConvParam8i& p = _param;
             _alg.F = F;
             _alg.microD = microD;
-            _alg.macroC = Simd::Min(L1 / sizeof(float) / p.kernelY / p.kernelX / microD, p.srcC);
+            _alg.macroC = Simd::Min(L1 / p.kernelY / p.kernelX / microD, p.srcC);
             for (size_t macroH = p.dstH; macroH >= 1; macroH--)
             {
                 _alg.macroH = macroH;
                 if (_alg.macroC * p.srcW * (_alg.macroH * p.strideY + p.kernelY * p.dilationY - 1) <= L2)
                     break;
             }
-            _alg.macroD = Simd::Min(AlignLoAny(L3 / sizeof(float) / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
+            _alg.macroD = Simd::Min(AlignLoAny(L3 / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
             _alg.size = (p.dstT == SimdTensorData32f ? 4 : 1);
         }
 
