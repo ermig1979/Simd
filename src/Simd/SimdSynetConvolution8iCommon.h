@@ -195,6 +195,36 @@ namespace Simd
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
         };
+
+        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum, __m128i norm,
+            const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+        {
+            Term<term>::template Save<type, 0>(dst, buf, sum, norm, bias, params, scale, shift);
+        }
+
+        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum, __m128i norm,
+            const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst, buf, sum, norm, bias, params, scale, shift, tail);
+        }
+
+        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type> 
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1, __m128i norm, 
+            const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
+        {
+            Term<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift);
+            Term<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift);
+        }
+
+        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1, __m128i norm,
+            const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift);
+            Term<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift, tail);
+        }
     }
 #endif//SIMD_SSE41_ENABLE
 
