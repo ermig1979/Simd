@@ -28,20 +28,10 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdSynetConvolution8i.h"
 
 namespace Simd
 {
-    enum Term8iType
-    {
-        Term8iSingle8u,
-        Term8iSingle32f,
-        Term8iFirst,
-        Term8iIterim,
-        Term8iLast8u,
-        Term8iLast32f,
-        Term8iSize
-    };
-
     namespace Base
     {
         template<::SimdConvolutionActivationType type> SIMD_INLINE int32_t Activate(int32_t value, const int32_t* params, size_t offset);
@@ -82,7 +72,7 @@ namespace Simd
             return _mm_min_epi32(_mm_max_epi32(params[0], value), params[1]);
         }
 
-        template <Term8iType term> struct Term
+        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift);
@@ -90,7 +80,7 @@ namespace Simd
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail);
         };
 
-        template <> struct Term<Term8iSingle8u>
+        template <> struct Term<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
@@ -110,7 +100,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<Term8iSingle32f>
+        template <> struct Term<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
@@ -129,7 +119,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<Term8iFirst>
+        template <> struct Term<Base::SynetConvolution8iNhwcDirect::Term8iFirst>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
@@ -147,7 +137,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<Term8iIterim>
+        template <> struct Term<Base::SynetConvolution8iNhwcDirect::Term8iIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
@@ -165,7 +155,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<Term8iLast8u>
+        template <> struct Term<Base::SynetConvolution8iNhwcDirect::Term8iLast8u>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)
@@ -186,7 +176,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<Term8iLast32f>
+        template <> struct Term<Base::SynetConvolution8iNhwcDirect::Term8iLast32f>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift)

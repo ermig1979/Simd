@@ -36,6 +36,7 @@ namespace Simd
     {
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;
         using ConvolutionPtr = SynetConvolution8iNhwcDirect::ConvolutionPtr;
+        using Term8iType = Base::SynetConvolution8iNhwcDirect::Term8iType;
 
         SIMD_INLINE __m128i Set4(const uint8_t* src)
         {
@@ -155,7 +156,7 @@ namespace Simd
                 }
                 else
                 {
-                    Term<term>::template Save<type, 0>(dst, buf, d00, norm, bias, params, scale, shift, dstC - F);
+                    Term<term>::template Save<type, 0>(dst, buf, d00, norm, bias, params, scale, shift, dstC);
                 }
             }
         }
@@ -168,7 +169,6 @@ namespace Simd
             //size_t bodyW6 = AlignLoAny(bodyW - noseW, 6 * p.strideX) + noseW;
             size_t tailH = p.dstH, tailW = p.dstW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
-
             __m128i _params[2], _bias[2];
             _params[0] = _mm_setzero_si128();
             if (type == ::SimdConvolutionActivationRestrictRange)
@@ -222,56 +222,8 @@ namespace Simd
             }
         }
 
-        template<bool overflow, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const uint8_t * src, 
-            const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const int32_t* bias, const int32_t* params, 
-            const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
+        template <bool overflow, Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam & a, ConvolutionPtr * d)
         {
-            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
-            {
-                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                for (size_t sc = 0; sc < p.srcC; sc += a.macroC)
-                {
-                    size_t macroC = Simd::Min(p.srcC, sc + a.macroC) - sc;
-                    for (size_t yBeg = 0; yBeg < p.dstH;)
-                    {
-                        size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
-                        if (a.macroC == p.srcC)
-                        {
-                            if(a.size == 1)
-                                ConvolutionNhwcDirect_2<overflow, Term8iSingle8u, type>(src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
-                            else
-                                ConvolutionNhwcDirect_2<overflow, Term8iSingle32f, type>(src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
-                        }
-                        else if (sc == 0)
-                            ConvolutionNhwcDirect_2<overflow, Term8iFirst, type>(src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
-                        else if (sc + macroC == p.srcC)
-                        {
-                            if (a.size == 1)
-                                ConvolutionNhwcDirect_2<overflow, Term8iLast8u, type>(src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
-                            else
-                                ConvolutionNhwcDirect_2<overflow, Term8iLast32f, type>(src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
-                        }
-                        else
-                            ConvolutionNhwcDirect_2<overflow, Term8iIterim, type>(src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
-                        yBeg = yEnd;
-                    }
-                    weight += p.kernelY * p.kernelX * DivHi(macroC, 4) * a.F * 4;
-                }
-                weight += p.kernelY * p.kernelX* DivHi(p.srcC, 4) * (macroD - a.F) * 4;
-                bias += a.macroD;
-                //if (type == ::SimdConvolutionActivationPrelu)
-                //    params += macroD;
-                shift += a.macroD;
-                scale += a.macroD;
-                if(buf)
-                    buf += a.macroD;
-                dst += a.macroD * a.size;
-            }
-        }
-
-        template <SimdConvolutionActivationType type> void Set(const ConvParam8i& p, const AlgParam & a, ConvolutionPtr& convolution)
-        {
-            bool overflow = p.compatibility & SimdSynetCompatibilityOverflow16i;
             //if (p.Is1x1())
             //{
             //    switch (microD)
@@ -285,10 +237,39 @@ namespace Simd
             {
                 switch (a.microD)
                 {
-                case 2 * F: convolution = overflow ? (ConvolutionPtr)ConvolutionNhwcDirect_2<true, type> : (ConvolutionPtr)ConvolutionNhwcDirect_2<false, type>; break;
+                case 2 * F: d[term] = ConvolutionNhwcDirect_2<overflow, term, activation>; break;
                 default:
                     assert(0);
                 }
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        {
+            if (p.compatibility & SimdSynetCompatibilityOverflow16i)
+                Set<true, term, activation>(p, a, d);
+            else
+                Set<false, term, activation>(p, a, d);
+        }        
+        
+        template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
+        {
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u, activation>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f, activation>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iFirst, activation>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iIterim, activation>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iLast8u, activation>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iLast32f, activation>(p, a, d);
+        }
+
+        static void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr * d)
+        {
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, a, d); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, a, d); break;
+            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a, d); break;
+            default: assert(0);
             }
         }
 
@@ -296,13 +277,7 @@ namespace Simd
             : Base::SynetConvolution8iNhwcDirect(p)
         {
             SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            switch (p.activation)
-            {
-            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, _alg, _convolution); break;
-            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, _alg, _convolution); break;
-            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolution); break;
-            default: assert(0);
-            }
+            Set(p, _alg, _convolutions);
             _convertSrc = Sse2::SynetConvert32fTo8u;
         }
 

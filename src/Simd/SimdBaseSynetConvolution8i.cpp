@@ -50,9 +50,9 @@ namespace Simd
 
     size_t SynetConvolution8i::ExternalBufferSize() const
     {
-        size_t size = 1;
+        size_t size = SIMD_ALIGN;
         if (!_src8u)
-            size += _sizeS * _merge * sizeof(uint8_t);
+            size += AlignHi(_sizeS * _merge * sizeof(uint8_t), SIMD_ALIGN);
         return size;
     }
 
@@ -300,9 +300,10 @@ namespace Simd
 
         size_t SynetConvolution8iGemmNN::ExternalBufferSize() const
         {
-            size_t size = SynetConvolution8i::ExternalBufferSize() + _sizeD * _merge * sizeof(int32_t);
+            size_t size = SynetConvolution8i::ExternalBufferSize();
+            size += AlignHi(_sizeD * _merge * sizeof(int32_t), SIMD_ALIGN);
             if(!_skipConv)
-                size += _sizeB * _merge * sizeof(uint8_t);
+                size += AlignHi(_sizeB * _merge * sizeof(uint8_t), SIMD_ALIGN);
             return size;
         }
 
@@ -582,8 +583,9 @@ namespace Simd
 
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
             : SynetConvolution8i(p)
-            , _convolution(NULL)
         {
+            for (size_t i = 0; i < Term8iSize; ++i)
+                _convolutions[i] = NULL;
         }
 
         size_t SynetConvolution8iNhwcDirect::InternalBufferSize() const
@@ -597,7 +599,7 @@ namespace Simd
             const ConvParam8i& p = _param;
             size_t size = SynetConvolution8i::ExternalBufferSize();
             if (_alg.macroC < p.srcC)
-                size += _sizeD*sizeof(int32_t);
+                size += AlignHi(_sizeD*sizeof(int32_t), SIMD_ALIGN);
             return size;
         }
 
@@ -669,9 +671,60 @@ namespace Simd
             int32_t* sum = _alg.macroC < p.srcC ? Allocate<int32_t>(buf, _sizeD) : NULL;
             for (size_t m = 0; m < _merge; ++m)
             {
-                _convolution(src, _param, _alg, _weight8i.data, _norm32i.data + p.dstC, NULL, _norm32f.data, _norm32f.data + p.dstC, sum, dst);
+                Forward8u(src, sum, dst);
                 src += _sizeS;
                 dst += _sizeD*(_dst8u ? sizeof(uint8_t) : sizeof(float));
+            }
+        }
+
+        void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, int32_t* buf, uint8_t* dst)
+        {
+            const ConvParam8i& p = _param;
+            const int8_t* weight = _weight8i.data;
+            const int32_t* bias = _norm32i.data + p.dstC;
+            const int32_t* params = NULL;
+            const float* scale = _norm32f.data;
+            const float* shift = _norm32f.data + p.dstC;
+            for (size_t dc = 0; dc < p.dstC; dc += _alg.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, dc + _alg.macroD) - dc;
+                for (size_t sc = 0; sc < p.srcC; sc += _alg.macroC)
+                {
+                    size_t macroC = Simd::Min(p.srcC, sc + _alg.macroC) - sc;
+                    for (size_t yBeg = 0; yBeg < p.dstH;)
+                    {
+                        size_t yEnd = Simd::Min(yBeg + _alg.macroH, p.dstH);
+                        if (_alg.macroC == p.srcC)
+                        {
+                            if (_alg.size == 1)
+                                _convolutions[Term8iSingle8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                            else
+                                _convolutions[Term8iSingle32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                        }
+                        else if (sc == 0)
+                            _convolutions[Term8iFirst](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                        else if (sc + macroC == p.srcC)
+                        {
+                            if (_alg.size == 1)
+                                _convolutions[Term8iLast8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                            else
+                                _convolutions[Term8iLast32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                        }
+                        else
+                            _convolutions[Term8iIterim](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                        yBeg = yEnd;
+                    }
+                    weight += p.kernelY * p.kernelX * DivHi(macroC, 4) * _alg.F * 4;
+                }
+                weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * (macroD - _alg.F) * 4;
+                bias += _alg.macroD;
+                //if (type == ::SimdConvolutionActivationPrelu)
+                //    params += macroD;
+                shift += _alg.macroD;
+                scale += _alg.macroD;
+                if (buf)
+                    buf += _alg.macroD;
+                dst += _alg.macroD * _alg.size;
             }
         }
 

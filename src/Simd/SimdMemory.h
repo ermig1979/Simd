@@ -111,10 +111,10 @@ namespace Simd
         return ptr;
     }
 
-    template<class T> T* Allocate(uint8_t*& buffer, size_t size)
+    template<class T> T* Allocate(uint8_t*& buffer, size_t size, size_t align = SIMD_ALIGN)
     {
         T* ptr = (T*)buffer;
-        buffer = buffer + size * sizeof(T);
+        buffer = buffer + AlignHi(size * sizeof(T), align);
         return ptr;
     }
 

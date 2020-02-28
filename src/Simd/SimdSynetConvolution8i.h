@@ -250,23 +250,36 @@ namespace Simd
             virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
 
             static bool Preferable(const ConvParam8i& p);
+
+            enum Term8iType
+            {
+                Term8iSingle8u,
+                Term8iSingle32f,
+                Term8iFirst,
+                Term8iIterim,
+                Term8iLast8u,
+                Term8iLast32f,
+                Term8iSize
+            };
         
             struct AlgParam
             {
                 size_t F, microD, macroH, macroC, macroD;
                 int32_t zero, norm, high, size;
             };
-            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight,
-                const int32_t * bias, const int32_t* params, const float * scale, const float *shift, int32_t * buf, uint8_t* dst);
+
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
+                const int8_t* weight, const int32_t* bias, const int32_t* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3);
             void ReorderWeight();
 
             virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+            void Forward8u(const uint8_t* src, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
-            ConvolutionPtr _convolution;
+            ConvolutionPtr _convolutions[Term8iSize];
         };
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
