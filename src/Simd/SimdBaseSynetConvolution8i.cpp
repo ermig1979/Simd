@@ -621,7 +621,7 @@ namespace Simd
             const ConvParam8i& p = _param;
             _alg.F = F;
             _alg.microD = microD;
-            _alg.macroC = Simd::Min(L1 / p.kernelY / p.kernelX / microD, p.srcC);
+            _alg.macroC = Simd::Min(AlignLoAny(L1 / p.kernelY / p.kernelX / microD, 4), p.srcC);
             for (size_t macroH = p.dstH; macroH >= 1; macroH--)
             {
                 _alg.macroH = macroH;
@@ -714,9 +714,9 @@ namespace Simd
                             _convolutions[Term8iIterim](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
                         yBeg = yEnd;
                     }
-                    weight += p.kernelY * p.kernelX * DivHi(macroC, 4) * _alg.F * 4;
+                    weight += DivHi(macroC, 4) * _alg.F * 4;
                 }
-                weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * (macroD - _alg.F) * 4;
+                weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * macroD * 4 - DivHi(p.srcC, 4) * _alg.F * 4;
                 bias += _alg.macroD;
                 //if (type == ::SimdConvolutionActivationPrelu)
                 //    params += macroD;
