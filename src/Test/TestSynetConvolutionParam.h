@@ -109,13 +109,13 @@ namespace Test
             }
         }
 
-        String Decription() const
+        String Decription(String extra = String()) const
         {
             std::stringstream ss;
             ss << "[" << this->batch << "x" << conv.srcC << "x" << conv.srcH << "x" << conv.srcW;
             ss << "-" << conv.dstC << "x" << conv.kernelY << "x" << conv.kernelX;
             ss << "-" << conv.strideX << "-" << Simd::Max(conv.padX, conv.padW) << "-" << conv.group << "-" << this->trans;
-            ss << "]";
+            ss << extra << "]";
             return ss.str();
         }
 

@@ -273,7 +273,7 @@ namespace Simd
         {
             __m256i lo = InterpolateY<align>((__m256i*)bx0 + 0, (__m256i*)bx1 + 0, alpha);
             __m256i hi = InterpolateY<align>((__m256i*)bx0 + 1, (__m256i*)bx1 + 1, alpha);
-            Store<false>((__m256i*)dst, PackU16ToU8(lo, hi));
+            Store<false>((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
         template <size_t channelCount> void ResizeBilinear(

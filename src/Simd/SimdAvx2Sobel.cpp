@@ -461,7 +461,7 @@ namespace Simd
         {
             __m256i lo = Anchor<align>(src, stride, threshold);
             __m256i hi = Anchor<align>(src + HA, stride, threshold);
-            Store<align>((__m256i*)dst, PackU16ToU8(lo, hi));
+            Store<align>((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
         template <bool align> void ContourAnchors(const int16_t * src, size_t srcStride, size_t width, size_t height,

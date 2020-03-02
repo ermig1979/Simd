@@ -33,7 +33,7 @@ namespace Simd
         {
             __m256i lo = Load<align>((__m256i*)src + 0);
             __m256i hi = Load<align>((__m256i*)src + 1);
-            Store<align>((__m256i*)dst, PackU16ToU8(lo, hi));
+            Store<align>((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
         template <bool align> void Int16ToGray(const int16_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)

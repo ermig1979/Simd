@@ -119,7 +119,7 @@ namespace Simd
         {
             __m256i lo = ReduceRow16<align>(buffer, offset);
             __m256i hi = ReduceRow16<align>(buffer, offset + HA);
-            return PackU16ToU8(lo, hi);
+            return PackI16ToU8(lo, hi);
         }
 
         template <bool even> void ReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,

@@ -44,9 +44,9 @@ namespace Test
 
             FuncC(const FuncPtr & f, const String & d) : func(f), desc(d) {}
 
-            void Update(const Param & p)
+            void Update(const Param & p, SimdSynetCompatibilityType c)
             {
-                desc = desc + p.Decription();
+                desc = desc + p.Decription((c ? "-o" : "-e"));
             }
 
             void Call(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst) const
@@ -171,8 +171,8 @@ namespace Test
     {
         bool result = true;
 
-        f1.Update(p);
-        f2.Update(p);
+        f1.Update(p, comp);
+        f2.Update(p, comp);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
 
@@ -243,7 +243,7 @@ namespace Test
         return result;
     }
 
-    bool SynetConvolution8iForwardAutoTest(const FuncC & f1, const FuncC & f2, SimdSynetCompatibilityType c = SimdSynetCompatibilityOverflow16i)
+    bool SynetConvolution8iForwardAutoTest(const FuncC& f1, const FuncC& f2)
     {
         bool result = true;
 
@@ -252,6 +252,7 @@ namespace Test
         const SimdBool t0 = SimdFalse, t1 = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu;
+        SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)(SimdSynetCompatibilityOverflow16i | SimdSynetCompatibilityNoFma);
 
 #ifdef NDEBUG
 #if 1
@@ -268,8 +269,9 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 48, 48, 96, _3, _1, _1, _1, _1, 1, aRe, t1, u8, u8), 1, c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 16, 24, 24, 16, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 1, c, f1, f2);
+        //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 16, 24, 24, 16, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 1, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _5, _2, _3, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 5000, 30, 30, 400, _1, _1, _1, _0, _0, 1, aRe, t1, f32, u8), 0, c, f1, f2);
 #endif
 
         return result;
@@ -285,6 +287,11 @@ namespace Test
         if (Simd::Sse41::Enable)
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sse41::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx2::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif
 
         return result;
     }

@@ -223,7 +223,7 @@ namespace Simd
         {
             __m256i lo = ResizerByteBilinearInterpolateY<align>((__m256i*)bx0 + 0, (__m256i*)bx1 + 0, alpha);
             __m256i hi = ResizerByteBilinearInterpolateY<align>((__m256i*)bx0 + 1, (__m256i*)bx1 + 1, alpha);
-            Store<false>((__m256i*)dst, PackU16ToU8(lo, hi));
+            Store<false>((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
         template<size_t N> void ResizerByteBilinear::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)

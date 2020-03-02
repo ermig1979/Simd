@@ -120,14 +120,14 @@ namespace Simd
         {
             const __m256i lo = MainRowX5x5<align, compensation>(buffer.dst + offset);
             const __m256i hi = MainRowX5x5<align, compensation>(buffer.dst + offset + HA);
-            return _mm256_and_si256(PackU16ToU8(lo, hi), K16_00FF);
+            return _mm256_and_si256(PackI16ToU8(lo, hi), K16_00FF);
         }
 
         template <bool align, bool compensation> SIMD_INLINE void MainRowX5x5(Buffer & buffer, size_t offset, uint8_t * dst)
         {
             __m256i lo = MainRowX5x5<align, compensation>(buffer, offset);
             __m256i hi = MainRowX5x5<align, compensation>(buffer, offset + A);
-            Store<false>((__m256i*)dst, PackU16ToU8(lo, hi));
+            Store<false>((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
         template <bool align, bool compensation> void ReduceGray5x5(

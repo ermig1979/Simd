@@ -78,7 +78,7 @@ namespace Simd
 
         template <bool compensation> SIMD_INLINE __m256i ReduceRow(const __m256i lo[3], const __m256i hi[3])
         {
-            return PackU16ToU8(
+            return PackI16ToU8(
                 DivideBy16<compensation>(BinomialSum16(lo[0], lo[1], lo[2])),
                 DivideBy16<compensation>(BinomialSum16(hi[0], hi[1], hi[2])));
         }

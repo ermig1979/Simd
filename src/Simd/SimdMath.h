@@ -830,6 +830,16 @@ namespace Simd
         {
             return _mm256_add_ps(_mm256_or_ps(_mm256_mul_ps(a, b), _mm256_setzero_ps()), c);
         }
+
+        template <int part> SIMD_INLINE __m256i Cvt8uTo16i(__m256i a)
+        {
+            return _mm256_cvtepu8_epi16(_mm256_extractf128_si256(a, part));
+        }
+
+        template <int part> SIMD_INLINE __m256i Cvt8iTo16i(__m256i a)
+        {
+            return _mm256_cvtepi8_epi16(_mm256_extractf128_si256(a, part));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 

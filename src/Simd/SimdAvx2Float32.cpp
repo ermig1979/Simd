@@ -41,7 +41,7 @@ namespace Simd
             __m256i d1 = Float32ToUint8<align>(src + F * 1, lower, upper, boost);
             __m256i d2 = Float32ToUint8<align>(src + F * 2, lower, upper, boost);
             __m256i d3 = Float32ToUint8<align>(src + F * 3, lower, upper, boost);
-            Store<align>((__m256i*)dst, PackU16ToU8(PackU32ToI16(d0, d1), PackU32ToI16(d2, d3)));
+            Store<align>((__m256i*)dst, PackI16ToU8(PackU32ToI16(d0, d1), PackU32ToI16(d2, d3)));
         }
 
         template <bool align> void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)

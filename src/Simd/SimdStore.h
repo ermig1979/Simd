@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -175,7 +175,7 @@ namespace Simd
             return _mm256_permute4x64_epi64(_mm256_packs_epi16(lo, hi), 0xD8);
         }
 
-        SIMD_INLINE __m256i PackU16ToU8(__m256i lo, __m256i hi)
+        SIMD_INLINE __m256i PackI16ToU8(__m256i lo, __m256i hi)
         {
             return _mm256_permute4x64_epi64(_mm256_packus_epi16(lo, hi), 0xD8);
         }

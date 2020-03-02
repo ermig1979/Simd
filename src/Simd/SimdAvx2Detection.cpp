@@ -75,7 +75,7 @@ namespace Simd
         {
             __m256i lo = _mm256_loadu_si256((__m256i*)src + 0);
             __m256i hi = _mm256_loadu_si256((__m256i*)src + 1);
-            _mm256_storeu_si256((__m256i*)dst, PackU16ToU8(lo, hi));
+            _mm256_storeu_si256((__m256i*)dst, PackI16ToU8(lo, hi));
         }
 
         SIMD_INLINE void PackResult16i(const uint16_t * src, size_t size, uint8_t * dst)
@@ -91,7 +91,7 @@ namespace Simd
         {
             const __m256i lo = Simd::Avx2::PackI32ToI16(_mm256_loadu_si256((__m256i*)src + 0), _mm256_loadu_si256((__m256i*)src + 1));
             const __m256i hi = Simd::Avx2::PackI32ToI16(_mm256_loadu_si256((__m256i*)src + 2), _mm256_loadu_si256((__m256i*)src + 3));
-            _mm256_storeu_si256((__m256i*)dst, Simd::Avx2::PackU16ToU8(lo, hi));
+            _mm256_storeu_si256((__m256i*)dst, Simd::Avx2::PackI16ToU8(lo, hi));
         }
 
         SIMD_INLINE void PackResult32i(const uint32_t * src, size_t size, uint8_t * dst)

@@ -52,7 +52,7 @@ namespace Simd
 
         SIMD_INLINE __m256i Average8(const __m256i & s00, const __m256i & s01, const __m256i & s10, const __m256i & s11)
         {
-            return PackU16ToU8(Average16(s00, s10), Average16(s01, s11));
+            return PackI16ToU8(Average16(s00, s10), Average16(s01, s11));
         }
 #endif
 
