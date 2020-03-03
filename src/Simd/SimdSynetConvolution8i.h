@@ -311,8 +311,21 @@ namespace Simd
             SynetConvolution8iNhwcDirect(const ConvParam8i& p);
 
             virtual String Ext() const { return "Avx2"; }
+        };
 
-            static bool Preferable(const ConvParam8i& p);
+        void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class SynetConvolution8iNhwcDirect : public Avx2::SynetConvolution8iNhwcDirect
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
         };
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);

@@ -26,52 +26,52 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdAvx2.h"
+#include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
-    namespace Avx2
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;
         using ConvolutionPtr = SynetConvolution8iNhwcDirect::ConvolutionPtr;
         using Term8iType = Base::SynetConvolution8iNhwcDirect::Term8iType;
 
-        SIMD_INLINE __m256i Set4(const uint8_t* src)
+        SIMD_INLINE __m512i Set4(const uint8_t* src)
         {
-            return _mm256_set1_epi32(*(int32_t*)src);
+            return _mm512_set1_epi32(*(int32_t*)src);
         }
 
-        template<bool overflow> void Madd4(__m256i& i32, __m256i u8, __m256i i8);
+        template<bool overflow> void Madd4(__m512i& i32, __m512i u8, __m512i i8);
 
-        template<> SIMD_INLINE void Madd4<true>(__m256i& i32, __m256i u8, __m256i i8)
+        template<> SIMD_INLINE void Madd4<true>(__m512i& i32, __m512i u8, __m512i i8)
         {
-            i32 = _mm256_add_epi32(i32, _mm256_madd_epi16(_mm256_maddubs_epi16(u8, i8), Avx2::K16_0001));
+            i32 = _mm512_add_epi32(i32, _mm512_madd_epi16(_mm512_maddubs_epi16(u8, i8), Avx512bw::K16_0001));
         }
 
-        template<> SIMD_INLINE void Madd4<false>(__m256i& i32, __m256i u8, __m256i i8)
+        template<> SIMD_INLINE void Madd4<false>(__m512i& i32, __m512i u8, __m512i i8)
         {
-            __m256i lo = _mm256_madd_epi16(Cvt8uTo16i<0>(u8), Cvt8iTo16i<0>(i8));
-            __m256i hi = _mm256_madd_epi16(Cvt8uTo16i<1>(u8), Cvt8iTo16i<1>(i8));
-            i32 = _mm256_add_epi32(i32, PermutedHadd32i(lo, hi));
+            __m512i lo = _mm512_madd_epi16(Cvt8uTo16i<0>(u8), Cvt8iTo16i<0>(i8));
+            __m512i hi = _mm512_madd_epi16(Cvt8uTo16i<1>(u8), Cvt8iTo16i<1>(i8));
+            //i32 = _mm512_add_epi32(i32, _mm512_hadd_epi32(lo, hi));
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x1(const uint8_t * src0,
             const ConvParam8i& p, const AlgParam & a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t * weight0, 
-            const __m256i * bias, const __m256i * params, const __m256 * scale, const __m256* shift, int32_t * buf, uint8_t* dst)
+            const __m512i * bias, const __m512i * params, const __m512 * scale, const __m512* shift, int32_t * buf, uint8_t* dst)
         {
-            __m256i d00, d01, s0, w0, w1;
+            __m512i d00, d01, s0, w0, w1;
             size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
-            __m256i norm = _mm256_set1_epi32(a.norm);
+            __m512i norm = _mm512_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
             size_t kX = p.kernelX * p.dilationX;
             if (dstC > F)
             {
-                d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
+                d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -81,8 +81,8 @@ namespace Simd
                             size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                w1 = _mm512_loadu_si512((__m512i*)weight1);
                                 s0 = Set4(src0 + offs);
                                 Madd4<overflow>(d00, s0, w0);
                                 Madd4<overflow>(d01, s0, w1);
@@ -91,11 +91,11 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
+                            s0 = _mm512_set1_epi32(a.zero);
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                w1 = _mm512_loadu_si512((__m512i*)weight1);
                                 Madd4<overflow>(d00, s0, w0);
                                 Madd4<overflow>(d01, s0, w1);
                                 weight0 += A, weight1 += A;
@@ -104,14 +104,12 @@ namespace Simd
                         weight0 += dW, weight1 += dW;
                     }
                 }
-                if (dstC == DF)
-                    Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift);
-                else
-                    Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F);
+                __mmask16 tail = TailMask16(dstC - F);
+                Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail);
             }
             else
             {
-                d00 = _mm256_setzero_si256();
+                d00 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -121,7 +119,7 @@ namespace Simd
                             size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 s0 = Set4(src0 + offs);
                                 Madd4<overflow>(d00, s0, w0);
                                 weight0 += A;
@@ -129,10 +127,10 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
+                            s0 = _mm512_set1_epi32(a.zero);
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 Madd4<overflow>(d00, s0, w0);
                                 weight0 += A;
                             }
@@ -140,36 +138,34 @@ namespace Simd
                         weight0 += dW;
                     }
                 }
-                if (dstC == F)
-                    Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift);
-                else
-                    Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, dstC);
+                __mmask16 tail = TailMask16(dstC);
+                Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail);
             }
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x5(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
-            const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
+            const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t * weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
-            __m256i norm = _mm256_set1_epi32(a.norm);
+            __m512i norm = _mm512_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
             size_t kX = p.kernelX * p.dilationX;
             if (dstC > F)
             {
-                d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
-                d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
-                d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
-                d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
-                d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
+                d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -180,8 +176,8 @@ namespace Simd
                             size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                w1 = _mm512_loadu_si512((__m512i*)weight1);
                                 s0 = Set4(src0 + offs);
                                 Madd4<overflow>(d00, s0, w0);
                                 Madd4<overflow>(d01, s0, w1);
@@ -202,11 +198,11 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
+                            s0 = _mm512_set1_epi32(a.zero);
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                w1 = _mm512_loadu_si512((__m512i*)weight1);
                                 Madd4<overflow>(d00, s0, w0);
                                 Madd4<overflow>(d01, s0, w1);
                                 Madd4<overflow>(d10, s0, w0);
@@ -223,40 +219,20 @@ namespace Simd
                         weight0 += dW, weight1 += dW;
                     }
                 }
-                if (dstC == DF)
-                {
-                    Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                }
-                else
-                {
-                    Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F);
-                    dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F);
-                    dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC - F);
+                Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
-                d00 = _mm256_setzero_si256();
-                d10 = _mm256_setzero_si256();
-                d20 = _mm256_setzero_si256();
-                d30 = _mm256_setzero_si256();
-                d40 = _mm256_setzero_si256();
+                d00 = _mm512_setzero_si512();
+                d10 = _mm512_setzero_si512();
+                d20 = _mm512_setzero_si512();
+                d30 = _mm512_setzero_si512();
+                d40 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -267,7 +243,7 @@ namespace Simd
                             size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 s0 = Set4(src0 + offs);
                                 Madd4<overflow>(d00, s0, w0);
                                 s0 = Set4(src1 + offs);
@@ -283,10 +259,10 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
+                            s0 = _mm512_set1_epi32(a.zero);
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 Madd4<overflow>(d00, s0, w0);
                                 Madd4<overflow>(d10, s0, w0);
                                 Madd4<overflow>(d20, s0, w0);
@@ -298,58 +274,38 @@ namespace Simd
                         weight0 += dW;
                     }
                 }
-                if (dstC == F)
-                {
-                    Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift);
-                    dst += dD, buf += dB;
-                }
-                else
-                {
-                    Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, dstC);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, dstC);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, dstC);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, dstC);
-                    dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, dstC);
-                    dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC);
+                Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma, int M> void ConvolutionNhwcDirect_2xM(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
-            const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
+            const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
-            __m256i norm = _mm256_set1_epi32(a.norm);
+            __m512i norm = _mm512_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
             size_t kX = p.kernelX * p.dilationX;
             if (dstC > F)
             {
-                if (M > 0) d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
-                if (M > 1) d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
-                if (M > 2) d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
-                if (M > 3) d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
-                if (M > 4) d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
+                if (M > 0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                if (M > 1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                if (M > 2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                if (M > 3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                if (M > 4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -360,8 +316,8 @@ namespace Simd
                             size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                w1 = _mm512_loadu_si512((__m512i*)weight1);
                                 if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
                                 if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
                                 if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
@@ -372,11 +328,11 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
+                            s0 = _mm512_set1_epi32(a.zero);
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                w1 = _mm512_loadu_si512((__m512i*)weight1);
                                 if (M > 0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
                                 if (M > 1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
                                 if (M > 2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
@@ -388,30 +344,20 @@ namespace Simd
                         weight0 += dW, weight1 += dW;
                     }
                 }
-                if (dstC == DF)
-                {
-                    if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                }
-                else
-                {
-                    if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC - F);
+                if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
-                if (M > 0) d00 = _mm256_setzero_si256();
-                if (M > 1) d10 = _mm256_setzero_si256();
-                if (M > 2) d20 = _mm256_setzero_si256();
-                if (M > 3) d30 = _mm256_setzero_si256();
-                if (M > 4) d40 = _mm256_setzero_si256();
+                if (M > 0) d00 = _mm512_setzero_si512();
+                if (M > 1) d10 = _mm512_setzero_si512();
+                if (M > 2) d20 = _mm512_setzero_si512();
+                if (M > 3) d30 = _mm512_setzero_si512();
+                if (M > 4) d40 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -422,7 +368,7 @@ namespace Simd
                             size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0);
                                 if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0);
                                 if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0);
@@ -433,10 +379,10 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
+                            s0 = _mm512_set1_epi32(a.zero);
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 if (M > 0) Madd4<overflow>(d00, s0, w0);
                                 if (M > 1) Madd4<overflow>(d10, s0, w0);
                                 if (M > 2) Madd4<overflow>(d20, s0, w0);
@@ -448,27 +394,17 @@ namespace Simd
                         weight0 += dW;
                     }
                 }
-                if (dstC == F)
-                {
-                    if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                }
-                else
-                {
-                    if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC);
+                if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
         typedef void(*ConvolutionNhwcDirect_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, 
-            const int8_t* weight0, const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst);
+            const int8_t* weight0, const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst);
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> ConvolutionNhwcDirect_2xM_Ptr GetConvolutionNhwcDirect_2xM(size_t M)
         {
@@ -493,21 +429,21 @@ namespace Simd
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<overflow, term, type, nofma>(m);
             size_t tailH = p.dstH, tailW = p.dstW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
-            __m256i _params[2], _bias[2];
-            _params[0] = _mm256_setzero_si256();
+            __m512i _params[2], _bias[2];
+            _params[0] = _mm512_setzero_si512();
             if (type == ::SimdConvolutionActivationRestrictRange)
-                _params[1] = _mm256_set1_epi32(a.high);
-            __m256 _scale[2], _shift[2];
+                _params[1] = _mm512_set1_epi32(a.high);
+            __m512 _scale[2], _shift[2];
 
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
-                _bias[0] = _mm256_loadu_si256((__m256i*)(bias + dc + 0));
-                _bias[1] = _mm256_loadu_si256((__m256i*)(bias + dc + F));
-                _scale[0] = _mm256_loadu_ps(scale + dc + 0);
-                _scale[1] = _mm256_loadu_ps(scale + dc + F);
-                _shift[0] = _mm256_loadu_ps(shift + dc + 0);
-                _shift[1] = _mm256_loadu_ps(shift + dc + F);
+                _bias[0] = _mm512_loadu_si512((__m512i*)(bias + dc + 0));
+                _bias[1] = _mm512_loadu_si512((__m512i*)(bias + dc + F));
+                _scale[0] = _mm512_loadu_ps(scale + dc + 0);
+                _scale[1] = _mm512_loadu_ps(scale + dc + F);
+                _shift[0] = _mm512_loadu_ps(shift + dc + 0);
+                _shift[1] = _mm512_loadu_ps(shift + dc + F);
 
                 uint8_t * d = dst + (dc + yBeg * p.dstW * p.dstC) * a.size;
                 int32_t * b = buf + dc + yBeg * p.dstW * p.dstC;
@@ -556,27 +492,27 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect1x1_2x5(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
+            const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
-            __m256i norm = _mm256_set1_epi32(a.norm);
+            __m512i norm = _mm512_set1_epi32(a.norm);
             if (dstC > F)
             {
-                d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
-                d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
-                d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
-                d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
-                d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
+                d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
-                    w0 = _mm256_loadu_si256((__m256i*)weight0);
-                    w1 = _mm256_loadu_si256((__m256i*)weight1);
+                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                    w1 = _mm512_loadu_si512((__m512i*)weight1);
                     s0 = Set4(src0 + offs);
                     Madd4<overflow>(d00, s0, w0);
                     Madd4<overflow>(d01, s0, w1);
@@ -594,33 +530,23 @@ namespace Simd
                     Madd4<overflow>(d41, s0, w1);
                     weight0 += A, weight1 += A;
                 }
-                if (dstC == DF)
-                {
-                    Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                }
-                else
-                {
-                    Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC - F);
+                Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
-                d00 = _mm256_setzero_si256();
-                d10 = _mm256_setzero_si256();
-                d20 = _mm256_setzero_si256();
-                d30 = _mm256_setzero_si256();
-                d40 = _mm256_setzero_si256();
+                d00 = _mm512_setzero_si512();
+                d10 = _mm512_setzero_si512();
+                d20 = _mm512_setzero_si512();
+                d30 = _mm512_setzero_si512();
+                d40 = _mm512_setzero_si512();
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
-                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                    w0 = _mm512_loadu_si512((__m512i*)weight0);
                     s0 = Set4(src0 + offs);
                     Madd4<overflow>(d00, s0, w0);
                     s0 = Set4(src1 + offs);
@@ -633,48 +559,38 @@ namespace Simd
                     Madd4<overflow>(d40, s0, w0);
                     weight0 += A;
                 }
-                if (dstC == F)
-                {
-                    Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                }
-                else
-                {
-                    Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC);
+                Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma, int M> void ConvolutionNhwcDirect1x1_2xM(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
+            const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
-            __m256i norm = _mm256_set1_epi32(a.norm);
+            __m512i norm = _mm512_set1_epi32(a.norm);
             if (dstC > F)
             {
-                if (M > 0) d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
-                if (M > 1) d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
-                if (M > 2) d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
-                if (M > 3) d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
-                if (M > 4) d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
+                if (M > 0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                if (M > 1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                if (M > 2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                if (M > 3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                if (M > 4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
-                    w0 = _mm256_loadu_si256((__m256i*)weight0);
-                    w1 = _mm256_loadu_si256((__m256i*)weight1);
+                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                    w1 = _mm512_loadu_si512((__m512i*)weight1);
                     if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
                     if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
                     if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
@@ -682,33 +598,23 @@ namespace Simd
                     if (M > 4) s0 = Set4(src4 + offs), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
                     weight0 += A, weight1 += A;
                 }
-                if (dstC == DF)
-                {
-                    if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                }
-                else
-                {
-                    if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC - F);
+                if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
-                if (M > 0) d00 = _mm256_setzero_si256();
-                if (M > 1) d10 = _mm256_setzero_si256();
-                if (M > 2) d20 = _mm256_setzero_si256();
-                if (M > 3) d30 = _mm256_setzero_si256();
-                if (M > 4) d40 = _mm256_setzero_si256();
+                if (M > 0) d00 = _mm512_setzero_si512();
+                if (M > 1) d10 = _mm512_setzero_si512();
+                if (M > 2) d20 = _mm512_setzero_si512();
+                if (M > 3) d30 = _mm512_setzero_si512();
+                if (M > 4) d40 = _mm512_setzero_si512();
                 for (size_t offs = 0; offs < srcC; offs += 4)
                 {
-                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                    w0 = _mm512_loadu_si512((__m512i*)weight0);
                     if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0);
                     if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0);
                     if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0);
@@ -716,27 +622,17 @@ namespace Simd
                     if (M > 4) s0 = Set4(src4 + offs), Madd4<overflow>(d40, s0, w0);
                     weight0 += A;
                 }
-                if (dstC == F)
-                {
-                    if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                }
-                else
-                {
-                    if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                }
+                __mmask16 tail = TailMask16(dstC);
+                if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
         typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC,
-            const int8_t* weight0, const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst);
+            const int8_t* weight0, const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst);
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
         {
@@ -758,21 +654,21 @@ namespace Simd
         {
             size_t n1 = (yEnd - yBeg) * p.dstW, n5 = AlignLoAny(n1, 5), m = n1 - n5;
             ConvolutionNhwcDirect1x1_2xM_Ptr convolutionNhwcDirect1x1_2xM = GetConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma>(m);
-            __m256i _params[2], _bias[2];
-            _params[0] = _mm256_setzero_si256();
+            __m512i _params[2], _bias[2];
+            _params[0] = _mm512_setzero_si512();
             if (type == ::SimdConvolutionActivationRestrictRange)
-                _params[1] = _mm256_set1_epi32(a.high);
-            __m256 _scale[2], _shift[2];
+                _params[1] = _mm512_set1_epi32(a.high);
+            __m512 _scale[2], _shift[2];
 
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
-                _bias[0] = _mm256_loadu_si256((__m256i*)(bias + dc + 0));
-                _bias[1] = _mm256_loadu_si256((__m256i*)(bias + dc + F));
-                _scale[0] = _mm256_loadu_ps(scale + dc + 0);
-                _scale[1] = _mm256_loadu_ps(scale + dc + F);
-                _shift[0] = _mm256_loadu_ps(shift + dc + 0);
-                _shift[1] = _mm256_loadu_ps(shift + dc + F);
+                _bias[0] = _mm512_loadu_si512((__m512i*)(bias + dc + 0));
+                _bias[1] = _mm512_loadu_si512((__m512i*)(bias + dc + F));
+                _scale[0] = _mm512_loadu_ps(scale + dc + 0);
+                _scale[1] = _mm512_loadu_ps(scale + dc + F);
+                _shift[0] = _mm512_loadu_ps(shift + dc + 0);
+                _shift[1] = _mm512_loadu_ps(shift + dc + F);
                 const uint8_t* s = src + yBeg * p.srcW * p.srcC;
                 uint8_t* d = dst + (dc + yBeg * p.dstW * p.dstC) * a.size;
                 int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
@@ -847,11 +743,11 @@ namespace Simd
         }
 
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
-            : Sse41::SynetConvolution8iNhwcDirect(p)
+            : Avx2::SynetConvolution8iNhwcDirect(p)
         {
             SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             Set(p, _alg, _convolutions);
-            _convertSrc = Avx2::SynetConvert32fTo8u;
+            _convertSrc = Avx512bw::SynetConvert32fTo8u;
         }
 
         //---------------------------------------------------------------------

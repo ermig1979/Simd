@@ -840,6 +840,11 @@ namespace Simd
         {
             return _mm256_cvtepi8_epi16(_mm256_extractf128_si256(a, part));
         }
+
+        SIMD_INLINE __m256i PermutedHadd32i(__m256i a, __m256i b)
+        {
+            return _mm256_hadd_epi32(_mm256_permute2f128_si256(a, b, 0x20), _mm256_permute2f128_si256(a, b, 0x31));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 
@@ -1223,6 +1228,16 @@ namespace Simd
         SIMD_INLINE __m512i Merge16(const __m512i & even, __m512i odd)
         {
             return _mm512_or_si512(_mm512_slli_epi16(odd, 8), even);
+        }
+
+        template <int part> SIMD_INLINE __m512i Cvt8uTo16i(__m512i a)
+        {
+            return _mm512_cvtepu8_epi16(_mm512_extracti64x4_epi64(a, part));
+        }
+
+        template <int part> SIMD_INLINE __m512i Cvt8iTo16i(__m512i a)
+        {
+            return _mm512_cvtepi8_epi16(_mm512_extracti64x4_epi64(a, part));
         }
     }
 #endif //SIMD_AVX512BW_ENABLE
