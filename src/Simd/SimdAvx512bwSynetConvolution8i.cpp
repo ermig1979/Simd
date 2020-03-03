@@ -54,7 +54,7 @@ namespace Simd
         {
             __m512i lo = _mm512_madd_epi16(Cvt8uTo16i<0>(u8), Cvt8iTo16i<0>(i8));
             __m512i hi = _mm512_madd_epi16(Cvt8uTo16i<1>(u8), Cvt8iTo16i<1>(i8));
-            //i32 = _mm512_add_epi32(i32, _mm512_hadd_epi32(lo, hi));
+            i32 = _mm512_add_epi32(i32, Hadd32(lo, hi));
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x1(const uint8_t * src0,
@@ -143,17 +143,18 @@ namespace Simd
             }
         }
 
-        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x5(const uint8_t* src0,
+        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x12(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
             const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t * weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
+            const uint8_t* src5 = src0 + 5 * dS;
             __m512i norm = _mm512_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
@@ -166,6 +167,13 @@ namespace Simd
                 d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
                 d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
                 d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
+                d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
+                d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
+                d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
+                d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
+                d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
+                dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
+                dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -173,26 +181,23 @@ namespace Simd
                         assert(sx + kx < p.srcW && sx + kx + 5 <= p.srcW);
                         if (sy + ky < p.srcH)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
-                            for (; offs < end; offs += 4)
+                            size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                            for (; offs0 < end; offs0 += 4, offs6 += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                s0 = Set4(src0 + offs);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d01, s0, w1);
-                                s0 = Set4(src1 + offs);
-                                Madd4<overflow>(d10, s0, w0);
-                                Madd4<overflow>(d11, s0, w1);
-                                s0 = Set4(src2 + offs);
-                                Madd4<overflow>(d20, s0, w0);
-                                Madd4<overflow>(d21, s0, w1);
-                                s0 = Set4(src3 + offs);
-                                Madd4<overflow>(d30, s0, w0);
-                                Madd4<overflow>(d31, s0, w1);
-                                s0 = Set4(src4 + offs);
-                                Madd4<overflow>(d40, s0, w0);
-                                Madd4<overflow>(d41, s0, w1);
+                                s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                                 weight0 += A, weight1 += A;
                             }
                         }
@@ -203,16 +208,18 @@ namespace Simd
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d01, s0, w1);
-                                Madd4<overflow>(d10, s0, w0);
-                                Madd4<overflow>(d11, s0, w1);
-                                Madd4<overflow>(d20, s0, w0);
-                                Madd4<overflow>(d21, s0, w1);
-                                Madd4<overflow>(d30, s0, w0);
-                                Madd4<overflow>(d31, s0, w1);
-                                Madd4<overflow>(d40, s0, w0);
-                                Madd4<overflow>(d41, s0, w1);
+                                Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                                 weight0 += A, weight1 += A;
                             }
                         }
@@ -225,6 +232,13 @@ namespace Simd
                 Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d50, d51, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d60, d61, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d70, d71, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d80, d81, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d90, d91, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, dA0, dA1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, dB0, dB1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
@@ -233,6 +247,13 @@ namespace Simd
                 d20 = _mm512_setzero_si512();
                 d30 = _mm512_setzero_si512();
                 d40 = _mm512_setzero_si512();
+                d50 = _mm512_setzero_si512();
+                d60 = _mm512_setzero_si512();
+                d70 = _mm512_setzero_si512();
+                d80 = _mm512_setzero_si512();
+                d90 = _mm512_setzero_si512();
+                dA0 = _mm512_setzero_si512();
+                dB0 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -240,20 +261,22 @@ namespace Simd
                         assert(sx + kx < p.srcW && sx + kx + 5 <= p.srcW);
                         if (sy + ky < p.srcH)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
-                            for (; offs < end; offs += 4)
+                            size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                            for (; offs0 < end; offs0 += 4, offs6 += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                s0 = Set4(src0 + offs);
-                                Madd4<overflow>(d00, s0, w0);
-                                s0 = Set4(src1 + offs);
-                                Madd4<overflow>(d10, s0, w0);
-                                s0 = Set4(src2 + offs);
-                                Madd4<overflow>(d20, s0, w0);
-                                s0 = Set4(src3 + offs);
-                                Madd4<overflow>(d30, s0, w0);
-                                s0 = Set4(src4 + offs);
-                                Madd4<overflow>(d40, s0, w0);
+                                s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0);
+                                s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0);
+                                s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0);
+                                s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0);
+                                s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0);
+                                s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0);
+                                s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0);
+                                s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0);
+                                s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0);
+                                s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0);
+                                s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0);
+                                s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0);
                                 weight0 += A;
                             }
                         }
@@ -268,6 +291,13 @@ namespace Simd
                                 Madd4<overflow>(d20, s0, w0);
                                 Madd4<overflow>(d30, s0, w0);
                                 Madd4<overflow>(d40, s0, w0);
+                                Madd4<overflow>(d50, s0, w0);
+                                Madd4<overflow>(d60, s0, w0);
+                                Madd4<overflow>(d70, s0, w0);
+                                Madd4<overflow>(d80, s0, w0);
+                                Madd4<overflow>(d90, s0, w0);
+                                Madd4<overflow>(dA0, s0, w0);
+                                Madd4<overflow>(dB0, s0, w0);
                                 weight0 += A;
                             }
                         }
@@ -280,6 +310,13 @@ namespace Simd
                 Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d50, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d60, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d70, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d80, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d90, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, dA0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, dB0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
@@ -287,13 +324,14 @@ namespace Simd
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
             const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
+            const uint8_t* src5 = src0 + 5 * dS;
             __m512i norm = _mm512_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
@@ -301,11 +339,18 @@ namespace Simd
             size_t kX = p.kernelX * p.dilationX;
             if (dstC > F)
             {
-                if (M > 0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
-                if (M > 1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
-                if (M > 2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
-                if (M > 3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
-                if (M > 4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
+                if (M > 0x0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                if (M > 0x1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                if (M > 0x2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                if (M > 0x3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                if (M > 0x4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
+                if (M > 0x5) d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
+                if (M > 0x6) d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
+                if (M > 0x7) d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
+                if (M > 0x8) d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
+                if (M > 0x9) d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
+                if (M > 0xA) dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
+                if (M > 0xB) dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -313,16 +358,23 @@ namespace Simd
                         assert(sx + kx < p.srcW && sx + kx + M <= p.srcW);
                         if (sy + ky < p.srcH)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
-                            for (; offs < end; offs += 4)
+                            size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                            for (; offs0 < end; offs0 += 4, offs6 += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
-                                if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
-                                if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
-                                if (M > 3) s0 = Set4(src3 + offs), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
-                                if (M > 4) s0 = Set4(src4 + offs), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                                 weight0 += A, weight1 += A;
                             }
                         }
@@ -333,11 +385,18 @@ namespace Simd
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
                                 w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                if (M > 0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
-                                if (M > 1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
-                                if (M > 2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
-                                if (M > 3) Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
-                                if (M > 4) Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                if (M > 0x0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                if (M > 0x1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                if (M > 0x2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                if (M > 0x3) Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                if (M > 0x4) Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                if (M > 0x5) Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                if (M > 0x6) Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                if (M > 0x7) Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                if (M > 0x8) Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                if (M > 0x9) Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                if (M > 0xA) Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                if (M > 0xB) Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                                 weight0 += A, weight1 += A;
                             }
                         }
@@ -345,19 +404,33 @@ namespace Simd
                     }
                 }
                 __mmask16 tail = TailMask16(dstC - F);
-                if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save2<term, type, nofma>(dst, buf, d50, d51, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save2<term, type, nofma>(dst, buf, d60, d61, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save2<term, type, nofma>(dst, buf, d70, d71, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save2<term, type, nofma>(dst, buf, d80, d81, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save2<term, type, nofma>(dst, buf, d90, d91, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save2<term, type, nofma>(dst, buf, dA0, dA1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save2<term, type, nofma>(dst, buf, dB0, dB1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
-                if (M > 0) d00 = _mm512_setzero_si512();
-                if (M > 1) d10 = _mm512_setzero_si512();
-                if (M > 2) d20 = _mm512_setzero_si512();
-                if (M > 3) d30 = _mm512_setzero_si512();
-                if (M > 4) d40 = _mm512_setzero_si512();
+                if (M > 0x0) d00 = _mm512_setzero_si512();
+                if (M > 0x1) d10 = _mm512_setzero_si512();
+                if (M > 0x2) d20 = _mm512_setzero_si512();
+                if (M > 0x3) d30 = _mm512_setzero_si512();
+                if (M > 0x4) d40 = _mm512_setzero_si512();
+                if (M > 0x5) d50 = _mm512_setzero_si512();
+                if (M > 0x6) d60 = _mm512_setzero_si512();
+                if (M > 0x7) d70 = _mm512_setzero_si512();
+                if (M > 0x8) d80 = _mm512_setzero_si512();
+                if (M > 0x9) d90 = _mm512_setzero_si512();
+                if (M > 0xA) dA0 = _mm512_setzero_si512();
+                if (M > 0xB) dB0 = _mm512_setzero_si512();
                 for (size_t ky = 0; ky < kY; ky += p.dilationY)
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
@@ -365,15 +438,22 @@ namespace Simd
                         assert(sx + kx < p.srcW && sx + kx + M <= p.srcW);
                         if (sy + ky < p.srcH)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
-                            for (; offs < end; offs += 4)
+                            size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                            for (; offs0 < end; offs0 += 4, offs6 += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0);
-                                if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0);
-                                if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0);
-                                if (M > 3) s0 = Set4(src3 + offs), Madd4<overflow>(d30, s0, w0);
-                                if (M > 4) s0 = Set4(src4 + offs), Madd4<overflow>(d40, s0, w0);
+                                if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0);
+                                if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0);
+                                if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0);
+                                if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0);
+                                if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0);
+                                if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0);
+                                if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0);
+                                if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0);
+                                if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0);
+                                if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0);
+                                if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0);
+                                if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0);
                                 weight0 += A;
                             }
                         }
@@ -383,11 +463,18 @@ namespace Simd
                             for (size_t offs = 0, end = srcC; offs < end; offs += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                if (M > 0) Madd4<overflow>(d00, s0, w0);
-                                if (M > 1) Madd4<overflow>(d10, s0, w0);
-                                if (M > 2) Madd4<overflow>(d20, s0, w0);
-                                if (M > 3) Madd4<overflow>(d30, s0, w0);
-                                if (M > 4) Madd4<overflow>(d40, s0, w0);
+                                if (M > 0x0) Madd4<overflow>(d00, s0, w0);
+                                if (M > 0x1) Madd4<overflow>(d10, s0, w0);
+                                if (M > 0x2) Madd4<overflow>(d20, s0, w0);
+                                if (M > 0x3) Madd4<overflow>(d30, s0, w0);
+                                if (M > 0x4) Madd4<overflow>(d40, s0, w0);
+                                if (M > 0x5) Madd4<overflow>(d50, s0, w0);
+                                if (M > 0x6) Madd4<overflow>(d60, s0, w0);
+                                if (M > 0x7) Madd4<overflow>(d70, s0, w0);
+                                if (M > 0x8) Madd4<overflow>(d80, s0, w0);
+                                if (M > 0x9) Madd4<overflow>(d90, s0, w0);
+                                if (M > 0xA) Madd4<overflow>(dA0, s0, w0);
+                                if (M > 0xB) Madd4<overflow>(dB0, s0, w0);
                                 weight0 += A;
                             }
                         }
@@ -395,11 +482,18 @@ namespace Simd
                     }
                 }
                 __mmask16 tail = TailMask16(dstC);
-                if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save1<term, type, nofma>(dst, buf, d50, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save1<term, type, nofma>(dst, buf, d60, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save1<term, type, nofma>(dst, buf, d70, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save1<term, type, nofma>(dst, buf, d80, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save1<term, type, nofma>(dst, buf, d90, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save1<term, type, nofma>(dst, buf, dA0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save1<term, type, nofma>(dst, buf, dB0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
@@ -410,11 +504,18 @@ namespace Simd
         {
             switch (M)
             {
-            case 0: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0>;
-            case 1: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 1>;
-            case 2: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 2>;
-            case 3: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 3>;
-            case 4: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 4>;
+            case 0x0: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x0>;
+            case 0x1: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x1>;
+            case 0x2: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x2>;
+            case 0x3: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x3>;
+            case 0x4: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x4>;
+            case 0x5: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x5>;
+            case 0x6: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x6>;
+            case 0x7: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x7>;
+            case 0x8: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x8>;
+            case 0x9: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0x9>;
+            case 0xA: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0xA>;
+            case 0xB: return ConvolutionNhwcDirect_2xM<overflow, term, type, nofma, 0xB>;
             }
             assert(0);
             return NULL;
@@ -425,7 +526,7 @@ namespace Simd
             const int32_t* bias, const int32_t * params, const float * scale, const float* shift, int32_t* buf, uint8_t* dst)
         {
             size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
-            size_t bodyW5 = AlignLoAny(bodyW - noseW, 5) + noseW, m = bodyW - bodyW5;
+            size_t bodyW12 = AlignLoAny(bodyW - noseW, 12) + noseW, m = bodyW - bodyW12;
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<overflow, term, type, nofma>(m);
             size_t tailH = p.dstH, tailW = p.dstW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
@@ -453,8 +554,8 @@ namespace Simd
                     size_t dx = 0;
                     for (; dx < noseW; dx++, b += p.dstC, d += p.dstC * a.size)
                         ConvolutionNhwcDirect_2x1<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
-                    for (; dx < bodyW5; dx += 5, b += p.dstC * 5, d += p.dstC * a.size * 5)
-                        ConvolutionNhwcDirect_2x5<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < bodyW12; dx += 12, b += p.dstC * 12, d += p.dstC * a.size * 12)
+                        ConvolutionNhwcDirect_2x12<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
                         convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < tailW; dx++, b += p.dstC, d += p.dstC * a.size)
@@ -465,8 +566,8 @@ namespace Simd
                     size_t dx = 0;
                     for (; dx < noseW; dx++, b += p.dstC, d += p.dstC * a.size)
                         ConvolutionNhwcDirect_2x1<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
-                    for (; dx < bodyW5; dx += 5, b += p.dstC * 5, d += p.dstC * a.size * 5)
-                        ConvolutionNhwcDirect_2x5<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < bodyW12; dx += 12, b += p.dstC * 12, d += p.dstC * a.size * 12)
+                        ConvolutionNhwcDirect_2x12<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
                         convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < tailW; dx++, b += p.dstC, d += p.dstC * a.size)
@@ -477,8 +578,8 @@ namespace Simd
                     size_t dx = 0;
                     for (; dx < noseW; dx++, b += p.dstC, d += p.dstC * a.size)
                         ConvolutionNhwcDirect_2x1<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
-                    for (; dx < bodyW5; dx += 5, b += p.dstC * 5, d += p.dstC * a.size * 5)
-                        ConvolutionNhwcDirect_2x5<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < bodyW12; dx += 12, b += p.dstC * 12, d += p.dstC * a.size * 12)
+                        ConvolutionNhwcDirect_2x12<overflow, term, type, nofma>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
                         convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < tailW; dx++, b += p.dstC, d += p.dstC * a.size)
@@ -490,17 +591,18 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect1x1_2x5(
+        template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect1x1_2x12(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
             const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
+            const uint8_t* src5 = src0 + 5 * dS;
             __m512i norm = _mm512_set1_epi32(a.norm);
             if (dstC > F)
             {
@@ -509,25 +611,29 @@ namespace Simd
                 d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
                 d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
                 d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
-                for (size_t offs = 0; offs < srcC; offs += 4)
+                d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
+                d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
+                d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
+                d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
+                d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
+                dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
+                dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
                 {
                     w0 = _mm512_loadu_si512((__m512i*)weight0);
                     w1 = _mm512_loadu_si512((__m512i*)weight1);
-                    s0 = Set4(src0 + offs);
-                    Madd4<overflow>(d00, s0, w0);
-                    Madd4<overflow>(d01, s0, w1);
-                    s0 = Set4(src1 + offs);
-                    Madd4<overflow>(d10, s0, w0);
-                    Madd4<overflow>(d11, s0, w1);
-                    s0 = Set4(src2 + offs);
-                    Madd4<overflow>(d20, s0, w0);
-                    Madd4<overflow>(d21, s0, w1);
-                    s0 = Set4(src3 + offs);
-                    Madd4<overflow>(d30, s0, w0);
-                    Madd4<overflow>(d31, s0, w1);
-                    s0 = Set4(src4 + offs);
-                    Madd4<overflow>(d40, s0, w0);
-                    Madd4<overflow>(d41, s0, w1);
+                    s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                    s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                    s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                    s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                    s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                    s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                    s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                    s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                    s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                    s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                    s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                    s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                     weight0 += A, weight1 += A;
                 }
                 __mmask16 tail = TailMask16(dstC - F);
@@ -536,6 +642,13 @@ namespace Simd
                 Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d50, d51, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d60, d61, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d70, d71, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d80, d81, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, d90, d91, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, dA0, dA1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save2<term, type, nofma>(dst, buf, dB0, dB1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
@@ -544,19 +657,28 @@ namespace Simd
                 d20 = _mm512_setzero_si512();
                 d30 = _mm512_setzero_si512();
                 d40 = _mm512_setzero_si512();
-                for (size_t offs = 0; offs < srcC; offs += 4)
+                d50 = _mm512_setzero_si512();
+                d60 = _mm512_setzero_si512();
+                d70 = _mm512_setzero_si512();
+                d80 = _mm512_setzero_si512();
+                d90 = _mm512_setzero_si512();
+                dA0 = _mm512_setzero_si512();
+                dB0 = _mm512_setzero_si512();
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
                 {
                     w0 = _mm512_loadu_si512((__m512i*)weight0);
-                    s0 = Set4(src0 + offs);
-                    Madd4<overflow>(d00, s0, w0);
-                    s0 = Set4(src1 + offs);
-                    Madd4<overflow>(d10, s0, w0);
-                    s0 = Set4(src2 + offs);
-                    Madd4<overflow>(d20, s0, w0);
-                    s0 = Set4(src3 + offs);
-                    Madd4<overflow>(d30, s0, w0);
-                    s0 = Set4(src4 + offs);
-                    Madd4<overflow>(d40, s0, w0);
+                    s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0);
+                    s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0);
+                    s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0);
+                    s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0);
+                    s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0);
+                    s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0);
+                    s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0);
+                    s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0);
+                    s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0);
+                    s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0);
+                    s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0);
+                    s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0);
                     weight0 += A;
                 }
                 __mmask16 tail = TailMask16(dstC);
@@ -565,6 +687,13 @@ namespace Simd
                 Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
                 Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d50, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d60, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d70, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d80, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, d90, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, dA0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                Save1<term, type, nofma>(dst, buf, dB0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
@@ -572,62 +701,105 @@ namespace Simd
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
             const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
-            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
+            __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
             const int8_t* weight1 = weight0 + DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
+            const uint8_t* src5 = src0 + 5 * dS;
             __m512i norm = _mm512_set1_epi32(a.norm);
             if (dstC > F)
             {
-                if (M > 0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
-                if (M > 1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
-                if (M > 2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
-                if (M > 3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
-                if (M > 4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
-                for (size_t offs = 0; offs < srcC; offs += 4)
+                if (M > 0x0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                if (M > 0x1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                if (M > 0x2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                if (M > 0x3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                if (M > 0x4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
+                if (M > 0x5) d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
+                if (M > 0x6) d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
+                if (M > 0x7) d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
+                if (M > 0x8) d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
+                if (M > 0x9) d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
+                if (M > 0xA) dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
+                if (M > 0xB) dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
                 {
                     w0 = _mm512_loadu_si512((__m512i*)weight0);
                     w1 = _mm512_loadu_si512((__m512i*)weight1);
-                    if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
-                    if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
-                    if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
-                    if (M > 3) s0 = Set4(src3 + offs), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
-                    if (M > 4) s0 = Set4(src4 + offs), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                    if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                    if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                    if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                    if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                    if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                    if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                    if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                    if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                    if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                    if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                    if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                    if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
                     weight0 += A, weight1 += A;
                 }
                 __mmask16 tail = TailMask16(dstC - F);
-                if (M > 0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save2<term, type, nofma>(dst, buf, d00, d01, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save2<term, type, nofma>(dst, buf, d10, d11, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save2<term, type, nofma>(dst, buf, d20, d21, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save2<term, type, nofma>(dst, buf, d30, d31, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save2<term, type, nofma>(dst, buf, d40, d41, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save2<term, type, nofma>(dst, buf, d50, d51, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save2<term, type, nofma>(dst, buf, d60, d61, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save2<term, type, nofma>(dst, buf, d70, d71, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save2<term, type, nofma>(dst, buf, d80, d81, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save2<term, type, nofma>(dst, buf, d90, d91, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save2<term, type, nofma>(dst, buf, dA0, dA1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save2<term, type, nofma>(dst, buf, dB0, dB1, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
             else
             {
-                if (M > 0) d00 = _mm512_setzero_si512();
-                if (M > 1) d10 = _mm512_setzero_si512();
-                if (M > 2) d20 = _mm512_setzero_si512();
-                if (M > 3) d30 = _mm512_setzero_si512();
-                if (M > 4) d40 = _mm512_setzero_si512();
-                for (size_t offs = 0; offs < srcC; offs += 4)
+                if (M > 0x0) d00 = _mm512_setzero_si512();
+                if (M > 0x1) d10 = _mm512_setzero_si512();
+                if (M > 0x2) d20 = _mm512_setzero_si512();
+                if (M > 0x3) d30 = _mm512_setzero_si512();
+                if (M > 0x4) d40 = _mm512_setzero_si512();
+                if (M > 0x5) d50 = _mm512_setzero_si512();
+                if (M > 0x6) d60 = _mm512_setzero_si512();
+                if (M > 0x7) d70 = _mm512_setzero_si512();
+                if (M > 0x8) d80 = _mm512_setzero_si512();
+                if (M > 0x9) d90 = _mm512_setzero_si512();
+                if (M > 0xA) dA0 = _mm512_setzero_si512();
+                if (M > 0xB) dB0 = _mm512_setzero_si512();
+                for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
                 {
                     w0 = _mm512_loadu_si512((__m512i*)weight0);
-                    if (M > 0) s0 = Set4(src0 + offs), Madd4<overflow>(d00, s0, w0);
-                    if (M > 1) s0 = Set4(src1 + offs), Madd4<overflow>(d10, s0, w0);
-                    if (M > 2) s0 = Set4(src2 + offs), Madd4<overflow>(d20, s0, w0);
-                    if (M > 3) s0 = Set4(src3 + offs), Madd4<overflow>(d30, s0, w0);
-                    if (M > 4) s0 = Set4(src4 + offs), Madd4<overflow>(d40, s0, w0);
+                    if (M > 0x0) s0 = Set4(src0 + offs0), Madd4<overflow>(d00, s0, w0);
+                    if (M > 0x1) s0 = Set4(src1 + offs0), Madd4<overflow>(d10, s0, w0);
+                    if (M > 0x2) s0 = Set4(src2 + offs0), Madd4<overflow>(d20, s0, w0);
+                    if (M > 0x3) s0 = Set4(src3 + offs0), Madd4<overflow>(d30, s0, w0);
+                    if (M > 0x4) s0 = Set4(src4 + offs0), Madd4<overflow>(d40, s0, w0);
+                    if (M > 0x5) s0 = Set4(src5 + offs0), Madd4<overflow>(d50, s0, w0);
+                    if (M > 0x6) s0 = Set4(src0 + offs6), Madd4<overflow>(d60, s0, w0);
+                    if (M > 0x7) s0 = Set4(src1 + offs6), Madd4<overflow>(d70, s0, w0);
+                    if (M > 0x8) s0 = Set4(src2 + offs6), Madd4<overflow>(d80, s0, w0);
+                    if (M > 0x9) s0 = Set4(src3 + offs6), Madd4<overflow>(d90, s0, w0);
+                    if (M > 0xA) s0 = Set4(src4 + offs6), Madd4<overflow>(dA0, s0, w0);
+                    if (M > 0xB) s0 = Set4(src5 + offs6), Madd4<overflow>(dB0, s0, w0);
                     weight0 += A;
                 }
                 __mmask16 tail = TailMask16(dstC);
-                if (M > 0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
-                if (M > 4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x0) Save1<term, type, nofma>(dst, buf, d00, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x1) Save1<term, type, nofma>(dst, buf, d10, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x2) Save1<term, type, nofma>(dst, buf, d20, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x3) Save1<term, type, nofma>(dst, buf, d30, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x4) Save1<term, type, nofma>(dst, buf, d40, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x5) Save1<term, type, nofma>(dst, buf, d50, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x6) Save1<term, type, nofma>(dst, buf, d60, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x7) Save1<term, type, nofma>(dst, buf, d70, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x8) Save1<term, type, nofma>(dst, buf, d80, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0x9) Save1<term, type, nofma>(dst, buf, d90, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xA) Save1<term, type, nofma>(dst, buf, dA0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
+                if (M > 0xB) Save1<term, type, nofma>(dst, buf, dB0, norm, bias, params, scale, shift, tail), dst += dD, buf += dB;
             }
         }
 
@@ -638,11 +810,18 @@ namespace Simd
         {
             switch (M)
             {
-            case 0: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0>;
-            case 1: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 1>;
-            case 2: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 2>;
-            case 3: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 3>;
-            case 4: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 4>;
+            case 0x0: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x0>;
+            case 0x1: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x1>;
+            case 0x2: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x2>;
+            case 0x3: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x3>;
+            case 0x4: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x4>;
+            case 0x5: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x5>;
+            case 0x6: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x6>;
+            case 0x7: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x7>;
+            case 0x8: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x8>;
+            case 0x9: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0x9>;
+            case 0xA: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0xA>;
+            case 0xB: return ConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma, 0xB>;
             }
             assert(0);
             return NULL;
@@ -652,7 +831,7 @@ namespace Simd
             const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
             const int32_t* bias, const int32_t* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
         {
-            size_t n1 = (yEnd - yBeg) * p.dstW, n5 = AlignLoAny(n1, 5), m = n1 - n5;
+            size_t n1 = (yEnd - yBeg) * p.dstW, n12 = AlignLoAny(n1, 12), m = n1 - n12;
             ConvolutionNhwcDirect1x1_2xM_Ptr convolutionNhwcDirect1x1_2xM = GetConvolutionNhwcDirect1x1_2xM<overflow, term, type, nofma>(m);
             __m512i _params[2], _bias[2];
             _params[0] = _mm512_setzero_si512();
@@ -673,8 +852,8 @@ namespace Simd
                 uint8_t* d = dst + (dc + yBeg * p.dstW * p.dstC) * a.size;
                 int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
-                for (; i < n5; i += 5, s += p.srcC * 5, b += p.dstC * 5, d += p.dstC * a.size * 5)
-                    ConvolutionNhwcDirect1x1_2x5<overflow, term, type, nofma>(s, p, a, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                for (; i < n12; i += 12, s += p.srcC * 12, b += p.dstC * 12, d += p.dstC * a.size * 12)
+                    ConvolutionNhwcDirect1x1_2x12<overflow, term, type, nofma>(s, p, a, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                 for (; i < n1; i += m, s += p.srcC * m, b += p.dstC * m, d += p.dstC * a.size * m)
                     convolutionNhwcDirect1x1_2xM(s, p, a, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                 weight += DivHi(p.srcC, 4) * DA;
