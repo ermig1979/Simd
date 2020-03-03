@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 
-option(SIMD_AVX512 "AVX512 enable" ON)
+option(SIMD_AVX512 "AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) enable" ON)
+option(SIMD_AVX512VNNI "AVX-512-VNNI enable" ON)
 option(SIMD_TEST "Test framework enable" ON)
 option(SIMD_INFO "Print build information" ON)
 option(SIMD_PERF "Internal performance statistic" OFF)
@@ -110,15 +111,26 @@ endif()
 
     if((((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "gnu")) AND (NOT(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.5.0"))) OR (CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))    
         file(GLOB_RECURSE SIMD_AVX512F_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512f*.cpp)
-        set_source_files_properties(${SIMD_AVX512F_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mfma")
+        set_source_files_properties(${SIMD_AVX512F_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512cd -mfma")
 
         file(GLOB_RECURSE SIMD_AVX512BW_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512bw*.cpp)
-        set_source_files_properties(${SIMD_AVX512BW_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512bw -mavx512vl -mavx512dq -mbmi -mlzcnt -mfma")
+        set_source_files_properties(${SIMD_AVX512BW_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512cd -mavx512bw -mavx512vl -mavx512dq -mbmi -mlzcnt -mfma")
 
         if(UNIX AND SIMD_AVX512)
             set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mavx512bw")
             set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AVX512F_SRC} ${SIMD_AVX512BW_SRC})
             message("Use AVX-512F and AVX-512BW")
+        endif()
+    endif()
+	
+	if(((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "gnu")) AND (NOT(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0.0")))    
+        file(GLOB_RECURSE SIMD_AVX512VNNI_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512vnni*.cpp)
+        set_source_files_properties(${SIMD_AVX512VNNI_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx512f -mavx512cd -mavx512bw -mavx512vl -mavx512dq -mavx512vnni")
+
+        if(UNIX AND SIMD_AVX512VNNI)
+            set(SIMD_LIB_FLAGS "${SIMD_LIB_FLAGS} -mavx512vnni")
+            set(SIMD_ALG_SRC ${SIMD_ALG_SRC} ${SIMD_AVX512VNNI_SRC})
+            message("Use AVX-512VNNI")
         endif()
     endif()
 

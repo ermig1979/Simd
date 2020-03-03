@@ -244,7 +244,7 @@ namespace Simd
         public:
             SynetConvolution8iNhwcDirect(const ConvParam8i& p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::NhwcDirect"; }
+            virtual String Desc() const;
             virtual size_t InternalBufferSize() const;
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
@@ -326,6 +326,21 @@ namespace Simd
             SynetConvolution8iNhwcDirect(const ConvParam8i& p);
 
             virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
+#ifdef SIMD_AVX512VNNI_ENABLE    
+    namespace Avx512vnni
+    {
+        class SynetConvolution8iNhwcDirect : public Avx512bw::SynetConvolution8iNhwcDirect
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512vnni"; }
         };
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);

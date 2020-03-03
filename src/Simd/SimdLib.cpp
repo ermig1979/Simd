@@ -78,6 +78,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"
 #include "Simd/SimdAvx512bw.h"
+#include "Simd/SimdAvx512vnni.h"
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
@@ -133,6 +134,9 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_AVX512BW_ENABLE
     case SimdCpuInfoAvx512bw: return Avx512bw::Enable ? 1 : 0;
+#endif
+#ifdef SIMD_AVX512VNNI_ENABLE
+    case SimdCpuInfoAvx512vnni: return Avx512vnni::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_VMX_ENABLE
     case SimdCpuInfoVmx: return Vmx::Enable ? 1 : 0;
@@ -5225,7 +5229,7 @@ SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, 
 }
 
 typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC3(SynetConvolution8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
+SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC4(SynetConvolution8iInit, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
 
 SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
 {

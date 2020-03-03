@@ -99,6 +99,10 @@
 #define SIMD_AVX512BW_ENABLE
 #endif
 
+#if !defined(SIMD_AVX512VNNI_DISABLE) && _MSC_VER >= 1924
+#define SIMD_AVX512VNNI_ENABLE
+#endif
+
 #if defined(NDEBUG) && _MSC_VER == 1914
 #define SIMD_MASKZ_LOAD_ERROR
 #endif
@@ -205,6 +209,10 @@
 #if !defined(SIMD_AVX512BW_DISABLE) && defined(__AVX512BW__)
 #define SIMD_AVX512BW_ENABLE
 #endif
+
+#if !defined(SIMD_AVX512VNNI_DISABLE) && defined(__AVX512VNNI__)
+#define SIMD_AVX512VNNI_ENABLE
+#endif
 #endif
 
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
@@ -294,7 +302,7 @@
 #endif
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE) \
-    || defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) 
+    || defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE)
 #include <immintrin.h>
 #endif
 
@@ -316,7 +324,7 @@
 #include <msa.h>
 #endif
 
-#if defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE)
+#if defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE)
 #define SIMD_ALIGN 64
 #elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
@@ -331,7 +339,7 @@
 #define SIMD_ALIGN 4
 #endif
 
-#if (defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512F_ENABLE))
+#if (defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE))
 #ifdef SIMD_X64_ENABLE
 #if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1915)
 #define SIMD_ZMM_COUNT 32

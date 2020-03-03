@@ -588,6 +588,11 @@ namespace Simd
                 _convolutions[i] = NULL;
         }
 
+        String SynetConvolution8iNhwcDirect::Desc() const 
+        { 
+            return Ext() + "::NhwcDirect" + ((_param.compatibility& SimdSynetCompatibilityOverflow16i) ? "-o" : "-e");
+        }
+
         size_t SynetConvolution8iNhwcDirect::InternalBufferSize() const
         {
             size_t size = SynetConvolution8i::InternalBufferSize();

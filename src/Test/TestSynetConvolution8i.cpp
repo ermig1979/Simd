@@ -46,7 +46,7 @@ namespace Test
 
             void Update(const Param & p, SimdSynetCompatibilityType c)
             {
-                desc = desc + p.Decription((c ? "-o" : "-e"));
+                desc = desc + p.Decription(((c&SimdSynetCompatibilityOverflow16i) ? "-o" : "-e"));
             }
 
             void Call(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst) const
@@ -243,7 +243,7 @@ namespace Test
         return result;
     }
 
-    bool SynetConvolution8iForwardAutoTest(const FuncC& f1, const FuncC& f2)
+    bool SynetConvolution8iForwardAutoTest(const FuncC& f1, const FuncC& f2, SimdSynetCompatibilityType c)
     {
         bool result = true;
 
@@ -252,7 +252,7 @@ namespace Test
         const SimdBool t0 = SimdFalse, t1 = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu;
-        SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)(SimdSynetCompatibilityOverflow16i | SimdSynetCompatibilityNoFma);
+        //SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)((SimdCpuInfo(SimdCpuInfoAvx512vnni) ? SimdSynetCompatibilityFast : SimdSynetCompatibilityOverflow16i)  | SimdSynetCompatibilityNoFma);
 
 #ifdef NDEBUG
 #if 1
@@ -278,6 +278,19 @@ namespace Test
         return result;
     }
 
+    bool SynetConvolution8iForwardAutoTest(const FuncC& f1, const FuncC& f2)
+    {
+        bool result = true;
+
+        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibilityOverflow16i | SimdSynetCompatibilityNoFma);
+        SimdSynetCompatibilityType e = (SimdSynetCompatibilityType)(SimdSynetCompatibilityFast | SimdSynetCompatibilityNoFma);
+
+        result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
+        result = result && SynetConvolution8iForwardAutoTest(f1, f2, e);
+
+        return result;
+    }
+
     bool SynetConvolution8iForwardAutoTest()
     {
         bool result = true;
@@ -297,6 +310,11 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512bw::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif
+
+#ifdef SIMD_AVX512VNNI_ENABLE
+        if (Simd::Avx512vnni::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512vnni::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
 
         return result;
