@@ -61,7 +61,7 @@ namespace Simd
             const __m512i * bias, const __m512i * params, const __m512 * scale, const __m512* shift, int32_t * buf, uint8_t* dst)
         {
             __m512i d00, d01, s0, w0, w1;
-            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX;
+            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(srcC, 4) * A;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             __m512i norm = _mm512_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
@@ -90,15 +90,20 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm512_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d01, s0, w1);
-                                weight0 += A, weight1 += A;
+                                s0 = _mm512_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                    w1 = _mm512_loadu_si512((__m512i*)weight1);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    Madd4<overflow>(d01, s0, w1);
+                                    weight0 += A, weight1 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz, weight1 += dWz;
                         }
                         weight0 += dW, weight1 += dW;
                     }
@@ -126,13 +131,18 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm512_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                Madd4<overflow>(d00, s0, w0);
-                                weight0 += A;
+                                s0 = _mm512_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    weight0 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz;
                         }
                         weight0 += dW;
                     }
@@ -147,7 +157,7 @@ namespace Simd
             const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
-            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dWz = DivHi(srcC, 4) * A;
             const int8_t * weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
@@ -177,7 +187,7 @@ namespace Simd
                 {
                     for (size_t kx = 0; kx < kX; kx += p.dilationX)
                     {
-                        assert(sx + kx < p.srcW && sx + kx + 5 <= p.srcW);
+                        assert(sx + kx < p.srcW && sx + kx + 11 <= p.srcW);
                         if (sy + ky < p.srcH)
                         {
                             size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
@@ -202,25 +212,30 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm512_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
-                                Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
-                                Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
-                                Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
-                                Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
-                                Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
-                                Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
-                                Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
-                                Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
-                                Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
-                                Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
-                                Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
-                                weight0 += A, weight1 += A;
+                                s0 = _mm512_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                    w1 = _mm512_loadu_si512((__m512i*)weight1);
+                                    Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                    Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                    Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                    Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                    Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                    Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                    Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                    Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                    Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                    Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                    Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                    Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
+                                    weight0 += A, weight1 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz, weight1 += dWz;
                         }
                         weight0 += dW, weight1 += dW;
                     }
@@ -281,24 +296,29 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm512_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d10, s0, w0);
-                                Madd4<overflow>(d20, s0, w0);
-                                Madd4<overflow>(d30, s0, w0);
-                                Madd4<overflow>(d40, s0, w0);
-                                Madd4<overflow>(d50, s0, w0);
-                                Madd4<overflow>(d60, s0, w0);
-                                Madd4<overflow>(d70, s0, w0);
-                                Madd4<overflow>(d80, s0, w0);
-                                Madd4<overflow>(d90, s0, w0);
-                                Madd4<overflow>(dA0, s0, w0);
-                                Madd4<overflow>(dB0, s0, w0);
-                                weight0 += A;
+                                s0 = _mm512_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    Madd4<overflow>(d10, s0, w0);
+                                    Madd4<overflow>(d20, s0, w0);
+                                    Madd4<overflow>(d30, s0, w0);
+                                    Madd4<overflow>(d40, s0, w0);
+                                    Madd4<overflow>(d50, s0, w0);
+                                    Madd4<overflow>(d60, s0, w0);
+                                    Madd4<overflow>(d70, s0, w0);
+                                    Madd4<overflow>(d80, s0, w0);
+                                    Madd4<overflow>(d90, s0, w0);
+                                    Madd4<overflow>(dA0, s0, w0);
+                                    Madd4<overflow>(dB0, s0, w0);
+                                    weight0 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz;
                         }
                         weight0 += dW;
                     }
@@ -324,7 +344,7 @@ namespace Simd
             const __m512i* bias, const __m512i* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
-            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dWz = DivHi(srcC, 4) * A;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
@@ -379,25 +399,30 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm512_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                w1 = _mm512_loadu_si512((__m512i*)weight1);
-                                if (M > 0x0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
-                                if (M > 0x1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
-                                if (M > 0x2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
-                                if (M > 0x3) Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
-                                if (M > 0x4) Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
-                                if (M > 0x5) Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
-                                if (M > 0x6) Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
-                                if (M > 0x7) Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
-                                if (M > 0x8) Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
-                                if (M > 0x9) Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
-                                if (M > 0xA) Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
-                                if (M > 0xB) Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
-                                weight0 += A, weight1 += A;
+                                s0 = _mm512_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                    w1 = _mm512_loadu_si512((__m512i*)weight1);
+                                    if (M > 0x0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                    if (M > 0x1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                    if (M > 0x2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                    if (M > 0x3) Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                    if (M > 0x4) Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                    if (M > 0x5) Madd4<overflow>(d50, s0, w0), Madd4<overflow>(d51, s0, w1);
+                                    if (M > 0x6) Madd4<overflow>(d60, s0, w0), Madd4<overflow>(d61, s0, w1);
+                                    if (M > 0x7) Madd4<overflow>(d70, s0, w0), Madd4<overflow>(d71, s0, w1);
+                                    if (M > 0x8) Madd4<overflow>(d80, s0, w0), Madd4<overflow>(d81, s0, w1);
+                                    if (M > 0x9) Madd4<overflow>(d90, s0, w0), Madd4<overflow>(d91, s0, w1);
+                                    if (M > 0xA) Madd4<overflow>(dA0, s0, w0), Madd4<overflow>(dA1, s0, w1);
+                                    if (M > 0xB) Madd4<overflow>(dB0, s0, w0), Madd4<overflow>(dB1, s0, w1);
+                                    weight0 += A, weight1 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz, weight1 += dWz;
                         }
                         weight0 += dW, weight1 += dW;
                     }
@@ -458,24 +483,29 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm512_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm512_loadu_si512((__m512i*)weight0);
-                                if (M > 0x0) Madd4<overflow>(d00, s0, w0);
-                                if (M > 0x1) Madd4<overflow>(d10, s0, w0);
-                                if (M > 0x2) Madd4<overflow>(d20, s0, w0);
-                                if (M > 0x3) Madd4<overflow>(d30, s0, w0);
-                                if (M > 0x4) Madd4<overflow>(d40, s0, w0);
-                                if (M > 0x5) Madd4<overflow>(d50, s0, w0);
-                                if (M > 0x6) Madd4<overflow>(d60, s0, w0);
-                                if (M > 0x7) Madd4<overflow>(d70, s0, w0);
-                                if (M > 0x8) Madd4<overflow>(d80, s0, w0);
-                                if (M > 0x9) Madd4<overflow>(d90, s0, w0);
-                                if (M > 0xA) Madd4<overflow>(dA0, s0, w0);
-                                if (M > 0xB) Madd4<overflow>(dB0, s0, w0);
-                                weight0 += A;
+                                s0 = _mm512_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm512_loadu_si512((__m512i*)weight0);
+                                    if (M > 0x0) Madd4<overflow>(d00, s0, w0);
+                                    if (M > 0x1) Madd4<overflow>(d10, s0, w0);
+                                    if (M > 0x2) Madd4<overflow>(d20, s0, w0);
+                                    if (M > 0x3) Madd4<overflow>(d30, s0, w0);
+                                    if (M > 0x4) Madd4<overflow>(d40, s0, w0);
+                                    if (M > 0x5) Madd4<overflow>(d50, s0, w0);
+                                    if (M > 0x6) Madd4<overflow>(d60, s0, w0);
+                                    if (M > 0x7) Madd4<overflow>(d70, s0, w0);
+                                    if (M > 0x8) Madd4<overflow>(d80, s0, w0);
+                                    if (M > 0x9) Madd4<overflow>(d90, s0, w0);
+                                    if (M > 0xA) Madd4<overflow>(dA0, s0, w0);
+                                    if (M > 0xB) Madd4<overflow>(dB0, s0, w0);
+                                    weight0 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz;
                         }
                         weight0 += dW;
                     }

@@ -62,7 +62,7 @@ namespace Simd
             const __m256i * bias, const __m256i * params, const __m256 * scale, const __m256* shift, int32_t * buf, uint8_t* dst)
         {
             __m256i d00, d01, s0, w0, w1;
-            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX;
+            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(srcC, 4) * A;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             __m256i norm = _mm256_set1_epi32(a.norm);
             size_t sy = dy * p.strideY - p.padY;
@@ -91,15 +91,20 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d01, s0, w1);
-                                weight0 += A, weight1 += A;
+                                s0 = _mm256_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                    w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    Madd4<overflow>(d01, s0, w1);
+                                    weight0 += A, weight1 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz, weight1 += dWz;
                         }
                         weight0 += dW, weight1 += dW;
                     }
@@ -129,13 +134,18 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                Madd4<overflow>(d00, s0, w0);
-                                weight0 += A;
+                                s0 = _mm256_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    weight0 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz;
                         }
                         weight0 += dW;
                     }
@@ -152,7 +162,7 @@ namespace Simd
             const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
         {
             __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
-            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dWz = DivHi(srcC, 4) * A;
             const int8_t * weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
@@ -202,23 +212,28 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d01, s0, w1);
-                                Madd4<overflow>(d10, s0, w0);
-                                Madd4<overflow>(d11, s0, w1);
-                                Madd4<overflow>(d20, s0, w0);
-                                Madd4<overflow>(d21, s0, w1);
-                                Madd4<overflow>(d30, s0, w0);
-                                Madd4<overflow>(d31, s0, w1);
-                                Madd4<overflow>(d40, s0, w0);
-                                Madd4<overflow>(d41, s0, w1);
-                                weight0 += A, weight1 += A;
+                                s0 = _mm256_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                    w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    Madd4<overflow>(d01, s0, w1);
+                                    Madd4<overflow>(d10, s0, w0);
+                                    Madd4<overflow>(d11, s0, w1);
+                                    Madd4<overflow>(d20, s0, w0);
+                                    Madd4<overflow>(d21, s0, w1);
+                                    Madd4<overflow>(d30, s0, w0);
+                                    Madd4<overflow>(d31, s0, w1);
+                                    Madd4<overflow>(d40, s0, w0);
+                                    Madd4<overflow>(d41, s0, w1);
+                                    weight0 += A, weight1 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz, weight1 += dWz;
                         }
                         weight0 += dW, weight1 += dW;
                     }
@@ -283,17 +298,22 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                Madd4<overflow>(d00, s0, w0);
-                                Madd4<overflow>(d10, s0, w0);
-                                Madd4<overflow>(d20, s0, w0);
-                                Madd4<overflow>(d30, s0, w0);
-                                Madd4<overflow>(d40, s0, w0);
-                                weight0 += A;
+                                s0 = _mm256_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                    Madd4<overflow>(d00, s0, w0);
+                                    Madd4<overflow>(d10, s0, w0);
+                                    Madd4<overflow>(d20, s0, w0);
+                                    Madd4<overflow>(d30, s0, w0);
+                                    Madd4<overflow>(d40, s0, w0);
+                                    weight0 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz;
                         }
                         weight0 += dW;
                     }
@@ -332,7 +352,7 @@ namespace Simd
             const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
         {
             __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
-            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
+            size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC, dWz = DivHi(srcC, 4) * A;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             const uint8_t* src1 = src0 + 1 * dS;
             const uint8_t* src2 = src0 + 2 * dS;
@@ -372,18 +392,23 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                w1 = _mm256_loadu_si256((__m256i*)weight1);
-                                if (M > 0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
-                                if (M > 1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
-                                if (M > 2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
-                                if (M > 3) Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
-                                if (M > 4) Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
-                                weight0 += A, weight1 += A;
+                                s0 = _mm256_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                    w1 = _mm256_loadu_si256((__m256i*)weight1);
+                                    if (M > 0) Madd4<overflow>(d00, s0, w0), Madd4<overflow>(d01, s0, w1);
+                                    if (M > 1) Madd4<overflow>(d10, s0, w0), Madd4<overflow>(d11, s0, w1);
+                                    if (M > 2) Madd4<overflow>(d20, s0, w0), Madd4<overflow>(d21, s0, w1);
+                                    if (M > 3) Madd4<overflow>(d30, s0, w0), Madd4<overflow>(d31, s0, w1);
+                                    if (M > 4) Madd4<overflow>(d40, s0, w0), Madd4<overflow>(d41, s0, w1);
+                                    weight0 += A, weight1 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz, weight1 += dWz;
                         }
                         weight0 += dW, weight1 += dW;
                     }
@@ -433,17 +458,22 @@ namespace Simd
                         }
                         else
                         {
-                            s0 = _mm256_set1_epi32(a.zero);
-                            for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                            if (a.zero)
                             {
-                                w0 = _mm256_loadu_si256((__m256i*)weight0);
-                                if (M > 0) Madd4<overflow>(d00, s0, w0);
-                                if (M > 1) Madd4<overflow>(d10, s0, w0);
-                                if (M > 2) Madd4<overflow>(d20, s0, w0);
-                                if (M > 3) Madd4<overflow>(d30, s0, w0);
-                                if (M > 4) Madd4<overflow>(d40, s0, w0);
-                                weight0 += A;
+                                s0 = _mm256_set1_epi32(a.zero);
+                                for (size_t offs = 0, end = srcC; offs < end; offs += 4)
+                                {
+                                    w0 = _mm256_loadu_si256((__m256i*)weight0);
+                                    if (M > 0) Madd4<overflow>(d00, s0, w0);
+                                    if (M > 1) Madd4<overflow>(d10, s0, w0);
+                                    if (M > 2) Madd4<overflow>(d20, s0, w0);
+                                    if (M > 3) Madd4<overflow>(d30, s0, w0);
+                                    if (M > 4) Madd4<overflow>(d40, s0, w0);
+                                    weight0 += A;
+                                }
                             }
+                            else
+                                weight0 += dWz;
                         }
                         weight0 += dW;
                     }

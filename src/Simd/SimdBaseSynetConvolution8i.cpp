@@ -100,7 +100,7 @@ namespace Simd
                     scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
                     for (size_t k = 0, kc = 0; k < K; ++k)
                         for (size_t c = 0; c < C; ++c, ++kc)
-                            if (_srcCvt.neg)
+                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i))
                             {
                                 int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f);
                                 if (w & 1)
@@ -126,7 +126,7 @@ namespace Simd
                     scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
                     for (size_t c = 0, ck = 0; c < C; ++c)
                         for (size_t k = 0; k < K; ++k, ++ck)
-                            if (_srcCvt.neg)
+                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i))
                             {
                                 int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f);
                                 if (w & 1)
@@ -140,7 +140,7 @@ namespace Simd
                                 normB -= pDstW[d * CK + ck] * pSrcShift[c];
                             }
                 }
-                pDstS[d] = _srcCvt.neg ? 2 : 1;
+                pDstS[d] = _srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i) ? 2 : 1;
                 if (pSrcB)
                     normB += pSrcB[d] * scale;
                 pDstB[d] = Round(normB);
@@ -612,7 +612,7 @@ namespace Simd
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);
             ReorderWeight();
-            _alg.norm = _srcCvt.neg ? 2 : 1;
+            _alg.norm = _srcCvt.neg && (_param.compatibility & SimdSynetCompatibilityOverflow16i) ? 2 : 1;
             _alg.zero = _srcCvt.neg ? 0x80808080 : 0;
         }
 
