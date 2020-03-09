@@ -304,10 +304,10 @@ namespace Simd
             _mm256_storeu_ps(dst + 7 * F, max7);
         }
 
-        void SynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)
+        void SynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
         {
-            if (trans)
+            if (format == SimdTensorFormatNhwc)
             {
                 if (srcC >= F)
                 {
@@ -327,7 +327,7 @@ namespace Simd
                             size_t wStart = pw * strideX - padX;
                             size_t wEnd = Simd::Min(wStart + kernelX, srcW);
                             wStart = Simd::Max<ptrdiff_t>(0, wStart);
-                            const float * ps = src + hStart * srcS + wStart * srcC;
+                            const float* ps = src + hStart * srcS + wStart * srcC;
                             size_t c = 0;
                             for (; c < srcCF8; c += 8 * F)
                                 PoolingMaxHwc8(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
@@ -342,10 +342,9 @@ namespace Simd
                             dst += srcC;
                         }
                     }
-                    return;
                 }
             }
-            else
+            else if (format == SimdTensorFormatNchw)
             {
                 if (strideY == 2 && strideX == 2 && kernelY == 2 && kernelX == 2 && padY == 0 && padX == 0 && dstW >= F)
                 {
@@ -353,8 +352,10 @@ namespace Simd
                         Avx::NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
+                Sse::SynetPoolingForwardMax32f(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
             }
-            Sse::SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, trans);
+            else
+                assert(0);
         }
     }
 #endif// SIMD_AVX_ENABLE

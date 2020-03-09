@@ -125,6 +125,7 @@ int main()
     std::cout &lt;&lt; "AVX2: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AVX-512F: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512f) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "AVX-512BW: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512bw) ? "Yes" : "No") &lt;&lt; std::endl;
+    std::cout &lt;&lt; "AVX-512VNNI: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "PowerPC-Altivec: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoVmx) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "PowerPC-VSX: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoVsx) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "ARM-NEON: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") &lt;&lt; std::endl;

@@ -281,6 +281,26 @@ namespace Test
         FillRandom(tensor.Data(), tensor.Size(), lo, hi);
     }
 
+    void FillRandom(uint8_t* data, size_t size, uint8_t lo, uint8_t hi)
+    {
+        bool fast = (lo == 0) && (hi == 255);
+        if (fast)
+        {
+            for (size_t i = 0; i < size; i += INT16_MAX)
+                memcpy(data + i, Rand8u(), std::min<size_t>(INT16_MAX, size - i));
+        }
+        else
+        {
+            for (size_t i = 0; i < size; ++i)
+                data[i] = lo + Random(hi - lo + 1);
+        }
+    }
+
+    void FillRandom(Tensor8u & tensor, uint8_t lo, uint8_t hi)
+    {
+        FillRandom(tensor.Data(), tensor.Size(), lo, hi);
+    }
+
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle,
         const String & description)
     {

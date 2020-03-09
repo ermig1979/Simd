@@ -100,10 +100,10 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetPoolingForwardMax(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans)
+        void SynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
         {
-            if (trans)
+            if (format == SimdTensorFormatNhwc)
             {
                 for (size_t ph = 0; ph < dstH; ++ph)
                 {
@@ -121,7 +121,7 @@ namespace Simd
                         {
                             for (size_t w = wStart; w < wEnd; ++w)
                             {
-                                const float * pc = src + (h * srcW + w)*srcC;
+                                const float* pc = src + (h * srcW + w) * srcC;
                                 for (size_t c = 0; c < srcC; ++c)
                                     dst[c] = Simd::Max(dst[c], pc[c]);
                             }
@@ -130,7 +130,7 @@ namespace Simd
                     }
                 }
             }
-            else
+            else if (format == SimdTensorFormatNchw)
             {
                 for (size_t c = 0; c < srcC; ++c)
                 {
@@ -148,13 +148,15 @@ namespace Simd
                             for (size_t h = hStart; h < hEnd; ++h)
                                 for (size_t w = wStart; w < wEnd; ++w)
                                     max = Simd::Max(max, src[h * srcW + w]);
-                            dst[ph*dstW + pw] = max;
+                            dst[ph * dstW + pw] = max;
                         }
                     }
                     src += srcW * srcH;
                     dst += dstW * dstH;
                 }
             }
+            else
+                assert(0);
         }
     }
 }

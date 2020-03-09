@@ -172,41 +172,38 @@ namespace Test
 
     //---------------------------------------------------------------------
 
-    namespace 
+    template<class T> struct FuncPM
     {
-        struct FuncPM
+        typedef void(*FuncPtr)(const T * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, T * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+        FuncPtr func;
+        String desc;
+
+        FuncPM(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+        void Update(const ParamP & p)
         {
-            typedef void(*FuncPtr)(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-                size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool trans);
+            std::stringstream ss;
+            ss << desc;
+            ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
+            ss << "-" << p.kernelY << "x" << p.kernelX;
+            ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padY) << "-" << p.format;
+            ss << "]";
+            desc = ss.str();
+        }
 
-            FuncPtr func;
-            String desc;
+        void Call(const ParamP & p, const Tensor<T> & src, Tensor<T>& dst) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(src.Data(), p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX, p.padY, p.padX, dst.Data(), p.dstH, p.dstW, p.format);
+        }
+    };
+    typedef FuncPM<float> FuncPM32f;
 
-            FuncPM(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+#define FUNC_PM32F(function) FuncPM32f(function, #function)
 
-            void Update(const ParamP & p)
-            {
-                std::stringstream ss;
-                ss << desc;
-                ss << "[" << p.srcC << "x" << p.srcH << "x" << p.srcW;
-                ss << "-" << p.kernelY << "x" << p.kernelX;
-                ss << "-" << p.strideX << "-" << Simd::Max(p.padX, p.padY) << "-" << p.format;
-                ss << "]";
-                desc = ss.str();
-            }
-
-            void Call(const ParamP & p, const Tensor32f & src, Tensor32f & dst) const
-            {
-                TEST_PERFORMANCE_TEST(desc);
-                func(src.Data(), p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX, 
-                    p.padY, p.padX, dst.Data(), p.dstH, p.dstW, p.format == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
-            }
-        };
-    }
-
-#define FUNC_PM(function) FuncPM(function, #function)
-
-    bool SynetPoolingForwardMaxAutoTest(const ParamP & p, FuncPM f1, FuncPM f2)
+    bool SynetPoolingForwardMax32fAutoTest(const ParamP & p, FuncPM32f f1, FuncPM32f f2)
     {
         bool result = true;
 
@@ -232,61 +229,63 @@ namespace Test
         return result;
     }
 
-    bool SynetPoolingForwardMaxAutoTest(::SimdTensorFormatType f, ::SimdBool c, ::SimdBool e, const FuncPM & f1, const FuncPM& f2)
+    bool SynetPoolingForwardMax32fAutoTest(::SimdTensorFormatType f, ::SimdBool c, ::SimdBool e, const FuncPM32f & f1, const FuncPM32f & f2)
     {
         bool result = true;
 
         Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
 
-        result = result && SynetPoolingForwardMaxAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
-        result = result && SynetPoolingForwardMaxAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingForwardMaxAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
-        result = result && SynetPoolingForwardMaxAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax32fAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax32fAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax32fAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax32fAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
 
         return result;
     }
 
-    bool SynetPoolingForwardMaxAutoTest(const FuncPM& f1, const FuncPM& f2)
+    bool SynetPoolingForwardMax32fAutoTest(const FuncPM32f& f1, const FuncPM32f& f2)
     {
         bool result = true;
 
-        result = result && SynetPoolingForwardMaxAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
-        result = result && SynetPoolingForwardMaxAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdTrue, f1, f2);
+        result = result && SynetPoolingForwardMax32fAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
+        result = result && SynetPoolingForwardMax32fAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdTrue, f1, f2);
 
         return result;
     }
 
-    bool SynetPoolingForwardMaxAutoTest()
+    bool SynetPoolingForwardMax32fAutoTest()
     {
         bool result = true;
 
-        result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Base::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
+        result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Base::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 
 #ifdef SIMD_SSE_ENABLE
         if (Simd::Sse::Enable)
-            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Sse::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
+            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Sse::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
         if (Simd::Avx::Enable)
-            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
+            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Avx::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx2::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
+            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Avx2::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 #endif 
 
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
-            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Avx512f::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
+            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Avx512f::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
-            result = result && SynetPoolingForwardMaxAutoTest(FUNC_PM(Simd::Neon::SynetPoolingForwardMax), FUNC_PM(SimdSynetPoolingForwardMax));
+            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Neon::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 #endif 
 
         return result;
     }
+
+    //---------------------------------------------------------------------
 }

@@ -63,6 +63,10 @@ namespace Test
 
     void FillRandom(Tensor32f & tensor, float lo = -10.0f, float hi = 10.0f);
 
+    void FillRandom(uint8_t * data, size_t size, uint8_t lo = 0, uint8_t hi = 255);
+
+    void FillRandom(Tensor8u& tensor, uint8_t lo = 0, uint8_t hi = 255);
+
     bool Compare(const View & a, const View & b,
         int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0,
         const String & description = "");
