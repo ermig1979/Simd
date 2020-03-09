@@ -27,6 +27,7 @@
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdLog.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -36,13 +37,13 @@ namespace Simd
         template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, uint8_t* dst)
         {
             __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Avx::Load<align>(src), scale, shift));
-            *((int64_t*)dst) = _mm256_extract_epi64(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO), 0);
+            *((int64_t*)dst) = Extract64i<0>(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO));
         }
 
         template <bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, uint8_t* dst, __m256i tail)
         {
             __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Avx::Load(src, tail), scale, shift));
-            *((int64_t*)dst) = _mm256_extract_epi64(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO), 0);
+            *((int64_t*)dst) = Extract64i<0>(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO));
         }
 
         template <bool align, bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, uint8_t* dst)

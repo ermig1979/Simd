@@ -1031,9 +1031,9 @@ namespace Test
         const ptrdiff_t bodySize = dstW - padB.x - padE.x;
         for (size_t c = 0; c < srcC; ++c)
         {
-            for (size_t ky = 0; ky < core.y; ++ky)
+            for (size_t ky = 0; ky < (size_t)core.y; ++ky)
             {
-                for (size_t kx = 0; kx < core.x; ++kx)
+                for (size_t kx = 0; kx < (size_t)core.x; ++kx)
                 {
                     size_t sy = ky - padB.y;
                     for (size_t dy = 0; dy < dstH; ++dy, ++sy)
@@ -1042,7 +1042,7 @@ namespace Test
                         {
                             size_t sx = kx - padB.x, dx = 0;
                             const float * psrc = src + sy * srcW;
-                            for (; dx < padB.x; ++dx, ++sx)
+                            for (; dx < (size_t)padB.x; ++dx, ++sx)
                             {
                                 if (sx < srcW)
                                     *(dst++) = psrc[sx];
@@ -1084,12 +1084,12 @@ namespace Test
         {
             for (size_t dx = 0; dx < dstW; ++dx)
             {
-                for (size_t ky = 0; ky < core.y; ky++)
+                for (size_t ky = 0; ky < (size_t)core.y; ky++)
                 {
                     size_t sy = dy + ky - padB.y;
                     if (sy < srcH)
                     {
-                        for (size_t kx = 0; kx < core.x; kx++)
+                        for (size_t kx = 0; kx < (size_t)core.x; kx++)
                         {
                             size_t sx = dx + kx - padB.x;
                             if (sx < srcW)

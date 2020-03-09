@@ -28,6 +28,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdExtract.h"
 #include "Simd/SimdSynetConvolution8i.h"
 
 namespace Simd
@@ -263,7 +264,7 @@ namespace Simd
             {
                 __m256i i32 = Activate<type>(_mm256_add_epi32(_mm256_mullo_epi32(sum, norm), bias[index]), params, index);
                 __m256 f32 = Fmadd<nofma>(_mm256_cvtepi32_ps(i32), scale[index], shift[index]);
-                ((int64_t*)dst)[index] = _mm256_extract_epi64(PackI16ToU8(PackI32ToI16(_mm256_cvtps_epi32(f32), K_ZERO), K_ZERO), 0);
+                ((int64_t*)dst)[index] = Extract64i<0>(PackI16ToU8(PackI32ToI16(_mm256_cvtps_epi32(f32), K_ZERO), K_ZERO));
             }
 
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
@@ -339,7 +340,7 @@ namespace Simd
                 sum = _mm256_add_epi32(_mm256_loadu_si256((__m256i*)buf + index), sum);
                 __m256i i32 = Activate<type>(_mm256_add_epi32(_mm256_mullo_epi32(sum, norm), bias[index]), params, index);
                 __m256 f32 = Fmadd<nofma>(_mm256_cvtepi32_ps(i32), scale[index], shift[index]);
-                ((int64_t*)dst)[index] = _mm256_extract_epi64(PackI16ToU8(PackI32ToI16(_mm256_cvtps_epi32(f32), K_ZERO), K_ZERO), 0);
+                ((int64_t*)dst)[index] = Extract64i<0>(PackI16ToU8(PackI32ToI16(_mm256_cvtps_epi32(f32), K_ZERO), K_ZERO));
             }
 
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf,
