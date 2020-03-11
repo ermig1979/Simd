@@ -268,7 +268,7 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 384, 19, 19, 36, _3, _1, _1, _1, _1, 1, aRe, t1, f32, u8), 0, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 40, 128, 128, 128, _5, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 0, c, f1, f2);
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 48, 48, 96, _3, _1, _1, _1, _1, 1, aRe, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 16, 30, 30, 32, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 0, c, f1, f2);
 #endif
 #else
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 16, 24, 24, 16, _1, _1, _1, _0, _0, 1, aRe, t1, u8, u8), 1, c, f1, f2);
@@ -318,6 +318,11 @@ namespace Test
         if (Simd::Avx512vnni::Enable)
             result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512vnni::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Neon::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif 
 
         return result;
     }

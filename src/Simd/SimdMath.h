@@ -1389,6 +1389,18 @@ namespace Simd
             return vget_high_u8(a);
         }
 
+        template <int part> SIMD_INLINE int8x8_t Half(int8x16_t a);
+
+        template <> SIMD_INLINE int8x8_t Half<0>(int8x16_t a)
+        {
+            return vget_low_s8(a);
+        }
+
+        template <> SIMD_INLINE int8x8_t Half<1>(int8x16_t a)
+        {
+            return vget_high_s8(a);
+        }
+
         template <int part> SIMD_INLINE uint16x4_t Half(uint16x8_t a);
 
         template <> SIMD_INLINE uint16x4_t Half<0>(uint16x8_t a)
@@ -1445,6 +1457,11 @@ namespace Simd
         template <int part> SIMD_INLINE int16x8_t UnpackU8s(uint8x16_t a)
         {
             return (int16x8_t)vmovl_u8(Half<part>(a));
+        }
+
+        template <int part> SIMD_INLINE int16x8_t UnpackI8(int8x16_t a)
+        {
+            return vmovl_s8(Half<part>(a));
         }
 
         template <int part> SIMD_INLINE uint32x4_t UnpackU16(uint16x8_t a)

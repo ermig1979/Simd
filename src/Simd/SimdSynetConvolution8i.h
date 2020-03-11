@@ -346,6 +346,23 @@ namespace Simd
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class SynetConvolution8iNhwcDirect : public Base::SynetConvolution8iNhwcDirect
+        {
+        public:
+            SynetConvolution8iNhwcDirect(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Neon"; }
+
+            static bool Preferable(const ConvParam8i& p);
+        };
+
+        void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 }
 
 #endif//__SimdSynetConvolution8i_h__

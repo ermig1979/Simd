@@ -939,6 +939,11 @@ namespace Simd
 #endif
         }
 
+        template <bool align> SIMD_INLINE int8x16_t Load(const int8_t* p)
+        {
+            return (int8x16_t)Load<align>((const uint8_t*)p);
+        }
+
         template <bool align> SIMD_INLINE int16x8_t Load(const int16_t * p)
         {
             return (int16x8_t)Load<align>((const uint8_t*)p);

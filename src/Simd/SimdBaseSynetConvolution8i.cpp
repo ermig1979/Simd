@@ -41,7 +41,7 @@ namespace Simd
         _merge = 1;
         _src8u = p.srcT == SimdTensorData8u;
         _dst8u = p.dstT == SimdTensorData8u;
-        _overflow16i = p.compatibility & SimdSynetCompatibilityOverflow16i != 0;
+        _overflow16i = (p.compatibility & SimdSynetCompatibilityOverflow16i) != 0;
         _weight8i.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
         _norm32i.Resize(2 * p.dstC);
         _norm32f.Resize(2 * p.dstC);
