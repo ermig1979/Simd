@@ -365,6 +365,7 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetPoolingForwardAverage);
     TEST_ADD_GROUP_A00(SynetPoolingForwardMax32f);
+    TEST_ADD_GROUP_A00(SynetPoolingForwardMax8u);
 
     TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
     TEST_ADD_GROUP_AD0(TextureBoostedUv);

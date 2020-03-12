@@ -199,6 +199,7 @@ namespace Test
             func(src.Data(), p.srcC, p.srcH, p.srcW, p.kernelY, p.kernelX, p.strideY, p.strideX, p.padY, p.padX, dst.Data(), p.dstH, p.dstW, p.format);
         }
     };
+
     typedef FuncPM<float> FuncPM32f;
 
 #define FUNC_PM32F(function) FuncPM32f(function, #function)
@@ -288,4 +289,87 @@ namespace Test
     }
 
     //---------------------------------------------------------------------
+
+    typedef FuncPM<uint8_t> FuncPM8u;
+
+#define FUNC_PM8U(function) FuncPM8u(function, #function)
+
+    bool SynetPoolingForwardMax8uAutoTest(const ParamP& p, FuncPM8u f1, FuncPM8u f2)
+    {
+        bool result = true;
+
+        f1.Update(p);
+        f2.Update(p);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
+
+        Tensor8u src(ToShape(p.srcC, p.srcH, p.srcW, p.format));
+        FillRandom(src.Data(), src.Size(), 0, 255);
+
+        Tensor8u dst1(ToShape(p.srcC, p.dstH, p.dstW, p.format));
+        Tensor8u dst2(ToShape(p.srcC, p.dstH, p.dstW, p.format));
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, src, dst2));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+        return result;
+    }
+
+    bool SynetPoolingForwardMax8uAutoTest(::SimdTensorFormatType f, ::SimdBool c, ::SimdBool e, const FuncPM8u& f1, const FuncPM8u& f2)
+    {
+        bool result = true;
+
+        Size _0(0, 0), _1(1, 1), _2(2, 2), _3(3, 3);
+
+        result = result && SynetPoolingForwardMax8uAutoTest(ParamP(10, 238, 133, _2, _2, _0, _0, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax8uAutoTest(ParamP(28, 99, 99, _3, _1, _1, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax8uAutoTest(ParamP(32, 46, 46, _3, _2, _0, _1, f, c, e), f1, f2);
+        result = result && SynetPoolingForwardMax8uAutoTest(ParamP(64, 21, 21, _3, _2, _1, _1, f, c, e), f1, f2);
+
+        return result;
+    }
+
+    bool SynetPoolingForwardMax8uAutoTest(const FuncPM8u& f1, const FuncPM8u& f2)
+    {
+        bool result = true;
+
+        result = result && SynetPoolingForwardMax8uAutoTest(::SimdTensorFormatNchw, ::SimdTrue, ::SimdTrue, f1, f2);
+        result = result && SynetPoolingForwardMax8uAutoTest(::SimdTensorFormatNhwc, ::SimdTrue, ::SimdTrue, f1, f2);
+
+        return result;
+    }
+
+    bool SynetPoolingForwardMax8uAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Base::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+
+/*#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Sse::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx2::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#endif 
+
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx512f::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+           result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Neon::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#endif */ 
+
+        return result;
+    }
 }

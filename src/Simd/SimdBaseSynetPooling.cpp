@@ -100,8 +100,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+        template<class T> void SynetPoolingForwardMax(const T* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, T* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
         {
             if (format == SimdTensorFormatNhwc)
             {
@@ -116,14 +116,14 @@ namespace Simd
                         size_t wEnd = Simd::Min(wStart + kernelX, srcW);
                         wStart = Simd::Max<ptrdiff_t>(0, wStart);
                         for (size_t c = 0; c < srcC; ++c)
-                            dst[c] = -FLT_MAX;
+                            dst[c] = std::numeric_limits<T>::lowest();
                         for (size_t h = hStart; h < hEnd; ++h)
                         {
                             for (size_t w = wStart; w < wEnd; ++w)
                             {
-                                const float* pc = src + (h * srcW + w) * srcC;
+                                const T * ps = src + (h * srcW + w) * srcC;
                                 for (size_t c = 0; c < srcC; ++c)
-                                    dst[c] = Simd::Max(dst[c], pc[c]);
+                                    dst[c] = Simd::Max(dst[c], ps[c]);
                             }
                         }
                         dst += srcC;
@@ -144,7 +144,7 @@ namespace Simd
                             size_t wStart = pw * strideX - padX;
                             size_t wEnd = Simd::Min(wStart + kernelX, srcW);
                             wStart = Simd::Max<ptrdiff_t>(0, wStart);
-                            float max = -FLT_MAX;
+                            T max = std::numeric_limits<T>::lowest();;
                             for (size_t h = hStart; h < hEnd; ++h)
                                 for (size_t w = wStart; w < wEnd; ++w)
                                     max = Simd::Max(max, src[h * srcW + w]);
@@ -157,6 +157,18 @@ namespace Simd
             }
             else
                 assert(0);
+        }
+
+        void SynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+        {
+            SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+        }
+
+        void SynetPoolingForwardMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+        {
+            SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
         }
     }
 }

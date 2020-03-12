@@ -256,6 +256,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gabc93d025c73c860cdfe9462642eec47a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gabc93d025c73c860cdfe9462642eec47a">SimdSynetPoolingForwardMax32f</a> (const float *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gabc93d025c73c860cdfe9462642eec47a"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float).  <a href="group__synet.html#gabc93d025c73c860cdfe9462642eec47a">More...</a><br /></td></tr>
 <tr class="separator:gabc93d025c73c860cdfe9462642eec47a"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2b733e51ba3f41939d51da75201fa8b4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2b733e51ba3f41939d51da75201fa8b4">SimdSynetPoolingForwardMax8u</a> (const uint8_t *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
+<tr class="memdesc:ga2b733e51ba3f41939d51da75201fa8b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).  <a href="group__synet.html#ga2b733e51ba3f41939d51da75201fa8b4">More...</a><br /></td></tr>
+<tr class="separator:ga2b733e51ba3f41939d51da75201fa8b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabc8343dd3ac8df5b53706258b062b1af"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gabc8343dd3ac8df5b53706258b062b1af">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t channels, size_t height, size_t width, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
 <tr class="memdesc:gabc8343dd3ac8df5b53706258b062b1af"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="group__synet.html#gabc8343dd3ac8df5b53706258b062b1af">More...</a><br /></td></tr>
 <tr class="separator:gabc8343dd3ac8df5b53706258b062b1af"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -2091,6 +2094,128 @@ for(c = 0; c &lt; channels1; ++c)
     <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga2b733e51ba3f41939d51da75201fa8b4"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2b733e51ba3f41939d51da75201fa8b4">&#9670;&nbsp;</a></span>SimdSynetPoolingForwardMax8u()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetPoolingForwardMax8u </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcC</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>kernelX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>strideX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padY</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>padX</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstH</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>dstW</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer). </p>
+<dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to srcC*srcH*srcW. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcC</td><td>- a number of input and output channels. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcH</td><td>- an input height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcW</td><td>- an input width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelY</td><td>- a height of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">kernelX</td><td>- a width of the pooling kernel. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideY</td><td>- a y-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">strideX</td><td>- a x-stride of the pooling. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padY</td><td>- a pad to the top of the input image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">padX</td><td>- a pad to the left of the input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 8-bit unsigned integer array. The size of the array must be equal to srcC*dstH*dstW. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>

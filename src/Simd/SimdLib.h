@@ -6211,6 +6211,33 @@ extern "C"
     SIMD_API void SimdSynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
+    /*! @ingroup synet
+
+        \fn void SimdSynetPoolingForwardMax8u(const uint8_t * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+        \short This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to srcC*srcH*srcW.
+        \param [in] srcC - a number of input and output channels.
+        \param [in] srcH - an input height.
+        \param [in] srcW - an input width.
+        \param [in] kernelY - a height of the pooling kernel.
+        \param [in] kernelX - a width of the pooling kernel.
+        \param [in] strideY - a y-stride of the pooling.
+        \param [in] strideX - a x-stride of the pooling.
+        \param [in] padY - a pad to the top of the input image.
+        \param [in] padX - a pad to the left of the input image.
+        \param [out] dst - a pointer to the output 8-bit unsigned integer array. The size of the array must be equal to srcC*dstH*dstW.
+        \param [in] dstH - an output height.
+        \param [in] dstW - an output width.
+        \param [in] format - a format of (input/output) image tensor.
+    */
+    SIMD_API void SimdSynetPoolingForwardMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+        size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+
+
     /*! @ingroup synet_activation
 
         \fn void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
