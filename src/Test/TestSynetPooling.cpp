@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -355,11 +355,11 @@ namespace Test
             result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Sse41::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx2::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx2::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#endif 
+
 //#ifdef SIMD_AVX512F_ENABLE
 //        if (Simd::Avx512f::Enable)
 //            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx512f::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
