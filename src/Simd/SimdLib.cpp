@@ -5439,7 +5439,7 @@ SIMD_API void SimdSynetPoolingForwardMax32f(const float * src, size_t srcC, size
 
 typedef void(*SimdSynetPoolingForwardMax8uPtr) (const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-volatile SimdSynetPoolingForwardMax8uPtr simdSynetPoolingForwardMax8u = SIMD_FUNC3(SynetPoolingForwardMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+volatile SimdSynetPoolingForwardMax8uPtr simdSynetPoolingForwardMax8u = SIMD_FUNC4(SynetPoolingForwardMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
 SIMD_API void SimdSynetPoolingForwardMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)

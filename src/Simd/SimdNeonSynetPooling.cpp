@@ -365,6 +365,151 @@ namespace Simd
             else
                 assert(0);
         }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE void PoolingMaxNhwc1(const uint8_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const uint8x16_t& min, uint8_t* dst)
+        {
+            uint8x16_t max0 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    const uint8_t* ps = src + w * srcC;
+                    max0 = vmaxq_u8(max0, Load<false>(ps + 0 * A));
+                }
+                src += srcS;
+            }
+            Store<false>(dst + 0 * A, max0);
+        }
+
+        SIMD_INLINE void PoolingMaxNhwc2(const uint8_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const uint8x16_t& min, uint8_t* dst)
+        {
+            uint8x16_t max0 = min;
+            uint8x16_t max1 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    const uint8_t* ps = src + w * srcC;
+                    max0 = vmaxq_u8(max0, Load<false>(ps + 0 * A));
+                    max1 = vmaxq_u8(max1, Load<false>(ps + 1 * A));
+                }
+                src += srcS;
+            }
+            Store<false>(dst + 0 * A, max0);
+            Store<false>(dst + 1 * A, max1);
+        }
+
+        SIMD_INLINE void PoolingMaxNhwc4(const uint8_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const uint8x16_t& min, uint8_t* dst)
+        {
+            uint8x16_t max0 = min;
+            uint8x16_t max1 = min;
+            uint8x16_t max2 = min;
+            uint8x16_t max3 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    const uint8_t* ps = src + w * srcC;
+                    max0 = vmaxq_u8(max0, Load<false>(ps + 0 * A));
+                    max1 = vmaxq_u8(max1, Load<false>(ps + 1 * A));
+                    max2 = vmaxq_u8(max2, Load<false>(ps + 2 * A));
+                    max3 = vmaxq_u8(max3, Load<false>(ps + 3 * A));
+                }
+                src += srcS;
+            }
+            Store<false>(dst + 0 * A, max0);
+            Store<false>(dst + 1 * A, max1);
+            Store<false>(dst + 2 * A, max2);
+            Store<false>(dst + 3 * A, max3);
+        }
+
+        SIMD_INLINE void PoolingMaxNhwc8(const uint8_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const uint8x16_t& min, uint8_t* dst)
+        {
+            uint8x16_t max0 = min;
+            uint8x16_t max1 = min;
+            uint8x16_t max2 = min;
+            uint8x16_t max3 = min;
+            uint8x16_t max4 = min;
+            uint8x16_t max5 = min;
+            uint8x16_t max6 = min;
+            uint8x16_t max7 = min;
+            for (size_t h = 0; h < kH; ++h)
+            {
+                for (size_t w = 0; w < kW; ++w)
+                {
+                    const uint8_t* ps = src + w * srcC;
+                    max0 = vmaxq_u8(max0, Load<false>(ps + 0 * A));
+                    max1 = vmaxq_u8(max1, Load<false>(ps + 1 * A));
+                    max2 = vmaxq_u8(max2, Load<false>(ps + 2 * A));
+                    max3 = vmaxq_u8(max3, Load<false>(ps + 3 * A));
+                    max4 = vmaxq_u8(max4, Load<false>(ps + 4 * A));
+                    max5 = vmaxq_u8(max5, Load<false>(ps + 5 * A));
+                    max6 = vmaxq_u8(max6, Load<false>(ps + 6 * A));
+                    max7 = vmaxq_u8(max7, Load<false>(ps + 7 * A));
+                }
+                src += srcS;
+            }
+            Store<false>(dst + 0 * A, max0);
+            Store<false>(dst + 1 * A, max1);
+            Store<false>(dst + 2 * A, max2);
+            Store<false>(dst + 3 * A, max3);
+            Store<false>(dst + 4 * A, max4);
+            Store<false>(dst + 5 * A, max5);
+            Store<false>(dst + 6 * A, max6);
+            Store<false>(dst + 7 * A, max7);
+        }
+
+        void SynetPoolingForwardMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+        {
+            if (format == SimdTensorFormatNhwc)
+            {
+                if (srcC >= A)
+                {
+                    size_t srcS = srcW * srcC;
+                    size_t srcCA1 = AlignLo(srcC, 1 * A);
+                    size_t srcCA2 = AlignLo(srcC, 2 * A);
+                    size_t srcCA4 = AlignLo(srcC, 4 * A);
+                    size_t srcCA8 = AlignLo(srcC, 8 * A);
+                    uint8x16_t min = vdupq_n_u8(0);
+                    for (size_t ph = 0; ph < dstH; ++ph)
+                    {
+                        size_t hStart = ph * strideY - padY;
+                        size_t hEnd = Simd::Min(hStart + kernelY, srcH);
+                        hStart = Simd::Max<ptrdiff_t>(0, hStart);
+                        for (size_t pw = 0; pw < dstW; ++pw)
+                        {
+                            size_t wStart = pw * strideX - padX;
+                            size_t wEnd = Simd::Min(wStart + kernelX, srcW);
+                            wStart = Simd::Max<ptrdiff_t>(0, wStart);
+                            const uint8_t* ps = src + hStart * srcS + wStart * srcC;
+                            size_t c = 0;
+                            for (; c < srcCA8; c += 8 * A)
+                                PoolingMaxNhwc8(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            for (; c < srcCA4; c += 4 * A)
+                                PoolingMaxNhwc4(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            for (; c < srcCA2; c += 2 * A)
+                                PoolingMaxNhwc2(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            for (; c < srcCA1; c += 1 * A)
+                                PoolingMaxNhwc1(ps + c, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + c);
+                            if (c < srcC)
+                                PoolingMaxNhwc1(ps + srcC - A, srcS, srcC, hEnd - hStart, wEnd - wStart, min, dst + srcC - A);
+                            dst += srcC;
+                        }
+                    }
+                }
+                else
+                    Base::SynetPoolingForwardMax8u(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+            }
+            else if (format == SimdTensorFormatNchw)
+            {
+                Base::SynetPoolingForwardMax8u(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+            }
+            else
+                assert(0);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
