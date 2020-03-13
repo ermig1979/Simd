@@ -360,11 +360,11 @@ namespace Test
             result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx2::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
 #endif 
 
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx512f::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
-//#endif
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx512bw::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#endif
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //           result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Neon::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
