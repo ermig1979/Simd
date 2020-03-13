@@ -350,25 +350,25 @@ namespace Test
 
         result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Base::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
 
-/*#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Sse::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Sse41::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
 #endif 
 
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx2::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
-#endif 
-
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx512f::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
-#endif
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
-           result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Neon::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
-#endif */ 
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx2::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Avx512f::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+//#endif
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//           result = result && SynetPoolingForwardMax8uAutoTest(FUNC_PM8U(Simd::Neon::SynetPoolingForwardMax8u), FUNC_PM8U(SimdSynetPoolingForwardMax8u));
+//#endif 
 
         return result;
     }
