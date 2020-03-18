@@ -42,6 +42,8 @@
 
 #define SIMD_ALIGNED(x) __declspec(align(x))
 
+#define SIMD_NOINLINE __declspec(noinline)
+
 #ifdef _M_IX86
 #define SIMD_X86_ENABLE
 #endif
@@ -135,6 +137,8 @@
 #elif defined(__GNUC__)
 
 #define SIMD_ALIGNED(x) __attribute__ ((aligned(x)))
+
+#define SIMD_NOINLINE __attribute__ ((noinline))
 
 #ifdef __i386__
 #define SIMD_X86_ENABLE

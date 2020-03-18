@@ -104,7 +104,7 @@ endif()
     if ((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
         set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c -mbmi -mlzcnt")
     else()
-        set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma -mf16c -mbmi -mlzcnt -fabi-version=4")
+        set_source_files_properties(${SIMD_AVX2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -march=haswell")#-mavx2 -mfma -mf16c -mbmi -mlzcnt -fabi-version=4 -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store")
     endif()
 
     set(SIMD_LIB_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma")
