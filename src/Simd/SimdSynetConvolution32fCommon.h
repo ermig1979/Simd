@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -189,6 +189,28 @@ namespace Simd
                     ptr[i] = tmp[i];
             }
         };
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m128 val0, const __m128* bias, const __m128* params)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m128 val0, const __m128* bias, const __m128* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params, tail);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m128 val0, __m128 val1, const __m128* bias, const __m128* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m128 val0, __m128 val1, const __m128* bias, const __m128* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, tail);
+        }
     }
 #endif//SIMD_SSE2_ENABLE
 

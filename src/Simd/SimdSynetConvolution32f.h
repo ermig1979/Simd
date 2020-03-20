@@ -95,7 +95,27 @@ namespace Simd
             return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
         }
 
-#ifdef SIMD_PERFORMANCE_STATISTIC
+        SIMD_INLINE size_t NoseH() const
+        {
+            return DivHi(padY, strideY);
+        }
+
+        SIMD_INLINE size_t NoseW() const
+        {
+            return DivHi(padX, strideX);
+        }
+
+        SIMD_INLINE size_t BodyH() const
+        {
+            return (padY + srcH - (kernelY - 1) * dilationY - 1) / strideY + 1;
+        }
+
+        SIMD_INLINE size_t BodyW() const
+        {
+            return (padX + srcW - (kernelX - 1) * dilationX - 1) / strideX + 1;
+        }
+
+#if defined(SIMD_PERFORMANCE_STATISTIC) || 1
         String Info() const
         {
             std::stringstream ss;
@@ -380,7 +400,7 @@ namespace Simd
                 SIMD_INLINE String Info(const RunArgs& args) const
                 {
                     std::stringstream ss;
-                    //ss << "NhwcDirect [" << args.p.Info() << "]";
+                    ss << "NhwcDirect [" << args.p.Info() << "]";
                     return ss.str();
                 }
 #endif

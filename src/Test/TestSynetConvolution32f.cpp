@@ -488,7 +488,7 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1280, 8, 13, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 16, 26, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 12, 7, 13, 16, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }

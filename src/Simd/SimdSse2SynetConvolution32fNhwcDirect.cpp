@@ -30,10 +30,10 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+        using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
+
         namespace Old
         {
-            using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
-
             template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float* src0, const ConvParam32f& p,
                 size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const __m128* bias, const __m128* params, float* dst)
             {
@@ -797,16 +797,200 @@ namespace Simd
             }
         }
 
+        //---------------------------------------------------------------------
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float* src0, const ConvParam32f & p, 
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float * dst)
+        {
+            __m128 d00, d01, s0, w0, w1;
+            size_t dW = (p.srcC - srcC) * F, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = p.srcC*F;
+            const float * weight1 = weight0 + p.kernelY * p.kernelX * p.srcC * F;
+            size_t sy = dy * p.strideY - p.padY;
+            size_t sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY;
+            size_t kX = p.kernelX * p.dilationX;
+            if (dstC > F)
+            {
+                d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += p.dilationY)
+                {
+                    for (size_t kx = 0; kx < kX; kx += p.dilationX)
+                    {
+                        if (sy + ky < p.srcH && sx + kx < p.srcW)
+                        {
+                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                            for (; offs < end; ++offs)
+                            {
+                                w0 = _mm_loadu_ps(weight0);
+                                w1 = _mm_loadu_ps(weight1);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                                weight0 += F, weight1 += F;
+                            }
+                            weight0 += dW, weight1 += dW;
+                        }
+                        else
+                            weight0 += dWz, weight1 += dWz;
+                    }
+                }
+                if (dstC == DF)
+                    Save2<term, type>(dst, d00, d01, bias, params);
+                else
+                    Save2<term, type>(dst, d00, d01, bias, params, dstC - F);
+            }
+            else
+            {
+                d00 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += p.dilationY)
+                {
+                    for (size_t kx = 0; kx < kX; kx += p.dilationX)
+                    {
+                        if (sy + ky < p.srcH && sx + kx < p.srcW)
+                        {
+                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                            for (; offs < end; ++offs)
+                            {
+                                w0 = _mm_loadu_ps(weight0);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                                weight0 += F;
+                            }
+                            weight0 += dW;
+                        }
+                        else
+                            weight0 += dWz;
+                    }
+                }
+                if (dstC == F)
+                    Save1<term, type>(dst, d00, bias, params);
+                else
+                    Save1<term, type>(dst, d00, bias, params, dstC);
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float* src, const ConvParam32f& p, const AlgParam& a, 
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+        {
+            size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
+            size_t n = 6, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
+            //ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<overflow, term, type>(m);
+            size_t tailH = p.dstH, tailW = p.dstW;
+            size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
+
+            __m128 _params[2], _bias[2];
+            _params[0] = _mm_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+                _params[1] = _mm_set1_ps(params[1]);
+
+            for (size_t dc = 0; dc < dstC; dc += a.microD)
+            {
+                size_t dC = Simd::Min(a.microD, dstC - dc);
+                _bias[0] = _mm_loadu_ps(bias + dc + 0);
+                _bias[1] = _mm_loadu_ps(bias + dc + F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = _mm_loadu_ps(params + dc + 0);
+                    _params[1] = _mm_loadu_ps(params + dc + F);
+                }
+                float * d = dst + dc + yBeg * p.dstW * p.dstC;
+                size_t dy = yBeg;
+                for (; dy < noseH && dy < yEnd; dy++)
+                {
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
+                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
+                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                }
+                for (; dy < bodyH && dy < yEnd; dy++)
+                {
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
+                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
+                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                }
+                for (; dy < tailH && dy < yEnd; dy++)
+                {
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
+                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
+                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                }
+                weight += p.kernelY * p.kernelX * p.srcC * a.microD;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        template <TermType term, SimdConvolutionActivationType type> void Set(const ConvParam32f& p, AlgParam & a)
+        {
+            //if (p.Is1x1())
+            //    convolution = ConvolutionNhwcDirect1x1_2<type>;
+            //else
+                a.convolutions[term] = ConvolutionNhwcDirect_2<term, type>;
+        }
+
+        template <SimdConvolutionActivationType type> void Set(const ConvParam32f& p, AlgParam& a)
+        {
+            Set<TermSingle, type>(p, a);
+            Set<TermFirst, type>(p, a);
+            Set<TermIterim, type>(p, a);
+            Set<TermLast, type>(p, a);
+        }
+
+        bool Set(const ConvParam32f& p, AlgParam& a)
+        {
+            switch (p.activation)
+            {
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, a); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, a); break;
+            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, a); break;
+            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a); break;
+            case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, a); break;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, a); break;
+            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, a); break;
+            default: assert(0);
+            }
+            return true;
+        }
+
+        //---------------------------------------------------------------------
+
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f & p)
             : Base::SynetConvolution32fNhwcDirect(p)
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+            //_old.enable = false;
             if (_old.enable)
             {
                 if(Sse2::Old::Set(p, _old.convolution))
                     OldSetAlgParam(F);
             }
+            else
 #endif
+            {
+                RunFuncs funcs;
+                for (size_t i = 0; i < 2; ++i)
+                {
+                    funcs.push_back(RunFunc(Ext() + "-2"));
+                    SetAlgParam(F, 2, funcs[i].alg);
+                    if (!Set(p, funcs[i].alg))
+                        return;
+                }
+                _run.Init(funcs);
+            }
         }
 
         bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f & p)
