@@ -176,10 +176,16 @@ namespace Simd
         template <int index> SIMD_INLINE int64_t Extract64i(__m256i value)
         {
             assert(index >= 0 && index < 4);
-#if defined(_MSC_VER) && (_MSC_VER <= 1900)
+#if defined(SIMD_X64_ENABLE)
+#if (defined(_MSC_VER) && (_MSC_VER <= 1900))
             return _mm_extract_epi64(_mm256_extractf128_si256(value, index / 2), index % 2);
 #else
             return _mm256_extract_epi64(value, index);
+#endif
+#else
+            SIMD_ALIGNED(32) int64_t buffer[4];
+            _mm256_store_si256((__m256i*)buffer, value);
+            return buffer[index];
 #endif
         }
     }

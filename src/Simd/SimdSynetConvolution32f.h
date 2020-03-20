@@ -380,7 +380,7 @@ namespace Simd
                 SIMD_INLINE String Info(const RunArgs& args) const
                 {
                     std::stringstream ss;
-                    ss << "NhwcDirect [" << args.p.Info() << "]";
+                    //ss << "NhwcDirect [" << args.p.Info() << "]";
                     return ss.str();
                 }
 #endif
