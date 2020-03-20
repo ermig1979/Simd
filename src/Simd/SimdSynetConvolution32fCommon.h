@@ -37,6 +37,7 @@ namespace Simd
         TermFirst,
         TermIterim,
         TermLast,
+        TermSize
     };
 
     namespace Base

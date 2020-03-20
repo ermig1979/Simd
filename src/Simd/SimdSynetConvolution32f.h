@@ -252,7 +252,6 @@ namespace Simd
             void SetBlock(size_t blockY, size_t blockX);
             void ForwardMerged(const float * src, float * bufS, float * bufD, float * dst);
             void ForwardSplitted(const float * src, float * bufS, float * bufD, float * dst);
-
 #ifdef SIMD_PERFORMANCE_STATISTIC
             long long RealFlop() const
             {
@@ -260,41 +259,11 @@ namespace Simd
                 return p.batch * _count * p.srcC * _tileH * _tileW * p.dstC * 2 ;
             }
 #endif
-
             size_t _count, _blockY, _blockX, _tileH, _tileW, _strideW, _strideS, _strideD, _M, _N, _K, _batch, _sizeS, _sizeD, _nhwcStrideW, _merge, _split, _tileHs;
-
             Array32f _winogradWeight;
             SetFilter _setFilter;
             SetInput _setInput;
             SetOutput _setOutput;
-#if 0
-            struct WinArgs
-            {
-                const float * src; float * bufS; float * bufD; float * dst;
-                SIMD_INLINE WinArgs(const float * src_, float * bufS_, float * bufD_, float * dst_)
-                    :src(src_), bufS(bufS_), bufD(bufD_), dst(dst_)
-                {}
-            };  
-            
-            struct WinFunc
-            {
-                SIMD_INLINE WinFunc(const SynetConvolution32fWinograd * win, const String & name)
-                    : _win(win)
-                    , _name(name)
-                {
-                }
-
-                SIMD_INLINE String Name() const { return _name; }
-
-                SIMD_INLINE void Run(const WinArgs & args)
-                {
-                }
-
-            private:
-                const SynetConvolution32fWinograd * _win;
-                String _name;
-            };
-#endif
         };
 
         class SynetConvolution32fDirectNchw : public SynetConvolution32f
@@ -350,6 +319,8 @@ namespace Simd
             size_t _count, _size, _batch, _sizeS, _sizeD;
         }; 
 
+#define SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+
         class SynetConvolution32fNhwcDirect : public SynetConvolution32f
         {
         public:
@@ -362,20 +333,80 @@ namespace Simd
 
             static bool Preferable(const ConvParam32f & p);
 
+            struct AlgParam;
+
+            typedef void(*ConvolutionPtr)(const float * src, const ConvParam32f & p, const AlgParam & a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
+                const float * weight, const float * bias, const float * params, float * dst);
+
             struct AlgParam
             {
-                size_t microD, macroH, macroC, macroD;
+                size_t F, microD, macroH, macroC, macroD;
+                ConvolutionPtr convolutions[4];
             };
-            typedef void(*ConvolutionPtr)(const float * src, const ConvParam32f & p, const AlgParam & a, const float * weight, const float * bias, const float * params, float * dst);
+
+#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+            typedef void(*OldConvolutionPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, const float* weight, const float* bias, const float* params, float* dst);
+#endif
 
         protected:
-            void SetAlgParam(size_t microD, size_t L1, size_t L2, size_t L3);
-            void ReorderWeight(const float * src, float * dst);
-
             size_t _sizeS, _sizeD;
-            AlgParam _alg;
             Array32f _rWeight, _rBias, _rParams;
-            ConvolutionPtr _convolution;
+
+            static void Forward(const float* src, const ConvParam32f& p, const AlgParam& a, const float* weight, const float* bias, const float* params, float* dst);
+
+            struct RunArgs
+            {
+                const float* src; const ConvParam32f& p; const float* weight; const float* bias; const float* params; float* dst;
+                SIMD_INLINE RunArgs(const float* src_, const ConvParam32f& p_, const float* weight_, const float* bias_, const float* params_, float* dst_)
+                    :src(src_), p(p_), weight(weight_), bias(bias_), params(params_), dst(dst_)
+                {}
+            };
+
+            struct RunFunc
+            {
+                SIMD_INLINE RunFunc(const String& name)
+                    : _name(name)
+                {
+                }
+
+                SIMD_INLINE const String & Name() const { return _name; }
+
+                SIMD_INLINE void Run(const RunArgs& args)
+                {
+                    Forward(args.src, args.p, alg, args.weight, args.bias, args.params, args.dst);
+                }
+
+#ifdef SIMD_RUNTIME_STATISTIC
+                SIMD_INLINE String Info(const RunArgs& args) const
+                {
+                    std::stringstream ss;
+                    ss << "NhwcDirect [" << args.p.Info() << "]";
+                    return ss.str();
+                }
+#endif
+
+                AlgParam alg;
+            private:
+                String _name;
+            };
+            typedef std::vector<RunFunc> RunFuncs;
+            typedef Runtime<RunFunc, RunArgs> RuntimeRun;
+            RuntimeRun _run;
+
+#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+            struct Old
+            {
+                bool enable;
+                OldConvolutionPtr convolution;
+                AlgParam alg;
+                Array32f weight;
+            } _old;
+            void OldSetAlgParam(size_t F);
+            void OldReorderWeight(const float* src, float* dst);
+#endif
+
+            void SetAlgParam(size_t F, size_t N, AlgParam & alg);
+            void ReorderWeight(const float* src, float* dst);
         };
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);

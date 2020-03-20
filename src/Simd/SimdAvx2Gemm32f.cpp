@@ -49,7 +49,7 @@ namespace Simd
             }
         }
 
-        void GemmKernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernel4x24nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -117,7 +117,7 @@ namespace Simd
             AddProduct(C + 2 * F, _alpha, c32, tail);
         }
 
-        void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernel4x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -168,7 +168,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c31, tail);
         }
 
-        void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernel4x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c0 = _mm256_setzero_ps();
             __m256 c1 = _mm256_setzero_ps();
@@ -198,7 +198,7 @@ namespace Simd
             AddProduct(C + 3 * ldc, _alpha, c3, tail);
         }
 
-        void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernel6x16nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00 = _mm256_setzero_ps();
             __m256 c10 = _mm256_setzero_ps();
@@ -269,7 +269,7 @@ namespace Simd
             AddProduct(C + 1 * F, _alpha, c51, tail);
         }
 
-        void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernel6x8nn(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c0 = _mm256_setzero_ps();
             __m256 c1 = _mm256_setzero_ps();
@@ -307,7 +307,7 @@ namespace Simd
             AddProduct(C + 5 * ldc, _alpha, c5, tail);
         }
 
-        void GemmKernelMx24nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernelMx24nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[4][3];
             size_t oa[4];
@@ -348,7 +348,7 @@ namespace Simd
             }
         }
 
-        void GemmKernelMx16nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernelMx16nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c[6][2];
             size_t oa[6];
@@ -384,7 +384,7 @@ namespace Simd
             }
         }
 
-        void GemmKernelMx8nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        SIMD_NOINLINE void GemmKernelMx8nn(size_t M, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
 #ifdef SIMD_X64_ENABLE
             __m256 c[6];
@@ -417,7 +417,7 @@ namespace Simd
                 AddProduct(C + i * ldc, _alpha, c[i], tail);
         }
 
-        template<int M> void GemmKernelMx24nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        template<int M> SIMD_NOINLINE void GemmKernelMx24nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00, c01, c02, c03, c10, c11, c12, c13, c20, c21, c22, c23, b0, b1, b2, a0;
             if (M > 0) c00 = _mm256_setzero_ps(), c10 = _mm256_setzero_ps(), c20 = _mm256_setzero_ps();
@@ -452,7 +452,7 @@ namespace Simd
             if (M > 3) AddProduct(C + 0 * F, _alpha, c03), AddProduct(C + 1 * F, _alpha, c13), AddProduct(C + 2 * F, _alpha, c23, tail), C += ldc;
         }
 
-        template<int M> void GemmKernelMx16nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        template<int M> SIMD_NOINLINE void GemmKernelMx16nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00, c01, c02, c03, c04, c05, c10, c11, c12, c13, c14, c15, b0, b1, a0;
             if (M > 0) c00 = _mm256_setzero_ps(), c10 = _mm256_setzero_ps();
@@ -493,7 +493,7 @@ namespace Simd
             if (M > 5) AddProduct(C + 0 * F, _alpha, c05), AddProduct(C + 1 * F, _alpha, c15, tail), C += ldc;
         }
 
-        template<int M> void GemmKernelMx8nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
+        template<int M> SIMD_NOINLINE void GemmKernelMx8nnT(size_t, size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, size_t sb, float * C, size_t ldc, size_t tail)
         {
             __m256 c00, c01, c02, c03, c04, c05, b0;
             if (M > 0) c00 = _mm256_setzero_ps();
@@ -705,7 +705,7 @@ namespace Simd
             _mm_storeu_ps(dst, _mm_fmadd_ps(alpha, sum128, _mm_loadu_ps(dst)));
         }
 
-        static void Kernel1x1x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static SIMD_NOINLINE void Kernel1x1x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;
@@ -729,7 +729,7 @@ namespace Simd
             C[0] += alpha * Avx::ExtractSum(c00);
         }
 
-        static void Kernel1x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static SIMD_NOINLINE void Kernel1x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;
@@ -772,7 +772,7 @@ namespace Simd
             Add4ExtractedSums(c00, c01, c02, c03, _alpha, C + 0 * ldc);
         }
 
-        static void Kernel2x1x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static SIMD_NOINLINE void Kernel2x1x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;
@@ -803,7 +803,7 @@ namespace Simd
             C[1 * ldc] += alpha * Avx::ExtractSum(c10);
         }
 
-        static void Kernel2x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static SIMD_NOINLINE void Kernel2x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;
@@ -862,7 +862,7 @@ namespace Simd
             Add4ExtractedSums(c10, c11, c12, c13, _alpha, C + 1 * ldc);
         }
 
-        static void Kernel3x1x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static SIMD_NOINLINE void Kernel3x1x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;
@@ -900,7 +900,7 @@ namespace Simd
             C[2 * ldc] += alpha * Avx::ExtractSum(c20);
         }
 
-        static void Kernel3x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
+        static SIMD_NOINLINE void Kernel3x4x8nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
         {
             size_t K8 = K & (~7);
             const float * A0 = A + 0 * lda;

@@ -31,7 +31,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE)
     namespace Avx2
     {
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_2x6(const float * src0, size_t srcC,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution1x1_2x6(const float * src0, size_t srcC,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -84,7 +84,7 @@ namespace Simd
             _mm256_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
-        template<SimdConvolutionActivationType type, int M> SIMD_INLINE void InputConvolution1x1_2xM(const float * src0, size_t srcC,
+        template<SimdConvolutionActivationType type, int M> SIMD_NOINLINE void InputConvolution1x1_2xM(const float * src0, size_t srcC,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -136,7 +136,7 @@ namespace Simd
             return NULL;
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution1x1_1x6(const float * src0, size_t srcC,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution1x1_1x6(const float * src0, size_t srcC,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst0)
         {
             __m256 d00, d10, d20, d30, d40, d50, s0, w0;
@@ -176,7 +176,7 @@ namespace Simd
             _mm256_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
         }
 
-        template<SimdConvolutionActivationType type, int M> SIMD_INLINE void InputConvolution1x1_1xM(const float * src0, size_t srcC,
+        template<SimdConvolutionActivationType type, int M> SIMD_NOINLINE void InputConvolution1x1_1xM(const float * src0, size_t srcC,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst0)
         {
             __m256 d00, d10, d20, d30, d40, d50, s0, w0;
@@ -227,7 +227,7 @@ namespace Simd
             return NULL;
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1(const float * src, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution1x1(const float * src, const SimdConvolutionParameters & p,
             size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
@@ -313,7 +313,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_2x1(const float * src0, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution_2x1(const float * src0, const SimdConvolutionParameters & p,
             size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
             __m256 d00, d01, s0, w0, w1;
@@ -338,7 +338,7 @@ namespace Simd
             _mm256_storeu_ps(dst1, Activate<type>(d01, params, 1));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_1x1(const float * src0, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution_1x1(const float * src0, const SimdConvolutionParameters & p,
             size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0)
         {
             __m256 d00, s0, w0;
@@ -359,7 +359,7 @@ namespace Simd
             _mm256_storeu_ps(dst0, Activate<type>(d00, params, 0));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_2x6(const float * src0, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution_2x6(const float * src0, const SimdConvolutionParameters & p,
             size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0, float * dst1)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -418,7 +418,7 @@ namespace Simd
             _mm256_storeu_ps(dst1 + 5 * F, Activate<type>(d51, params, 1));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void InputConvolution_1x6(const float * src0, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution_1x6(const float * src0, const SimdConvolutionParameters & p,
             size_t kH, size_t kW, const float * weight, const __m256 * bias, const __m256 * params, float * dst0)
         {
             __m256 d00, d10, d20, d30, d40, d50, s0, w0;
@@ -464,7 +464,7 @@ namespace Simd
             _mm256_storeu_ps(dst0 + 5 * F, Activate<type>(d50, params, 0));
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution(const float * src, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void InputConvolution(const float * src, const SimdConvolutionParameters & p,
             size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
@@ -598,7 +598,7 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
             size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
         {
             size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
@@ -849,7 +849,7 @@ namespace Simd
             _mm256_storeu_ps(dst, Activate<type>(_mm256_add_ps(_mm256_add_ps(sum0, sum1), sum2), params, 0));
         }
 
-        template<SimdConvolutionActivationType type> void DepthwiseConvolution3x3(const float * src, const SimdConvolutionParameters & p,
+        template<SimdConvolutionActivationType type> SIMD_NOINLINE void DepthwiseConvolution3x3(const float * src, const SimdConvolutionParameters & p,
             size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
@@ -919,7 +919,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x6(const float * src, size_t srcC, size_t srcS,
+        template<TermType term, SimdConvolutionActivationType type> SIMD_NOINLINE void OutputConvolution_2x6(const float * src, size_t srcC, size_t srcS,
             const float * weight, const __m256 * bias, const __m256 * params, float * dst, size_t dstC, size_t tail)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -1061,7 +1061,7 @@ namespace Simd
             }
         }
 
-        template<TermType term, SimdConvolutionActivationType type, int M> void OutputConvolution_2xM(const float* src, size_t srcC, size_t srcS,
+        template<TermType term, SimdConvolutionActivationType type, int M> SIMD_NOINLINE void OutputConvolution_2xM(const float* src, size_t srcC, size_t srcS,
             const float* weight, const __m256* bias, const __m256* params, float* dst, size_t dstC, size_t tail)
         {
             __m256 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
@@ -1170,7 +1170,7 @@ namespace Simd
             return NULL;
         }
 
-        template<TermType term, SimdConvolutionActivationType type> void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
+        template<TermType term, SimdConvolutionActivationType type> SIMD_NOINLINE void OutputConvolution(const float * src, const SimdConvolutionParameters & p,
             size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst)
         {
             assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
