@@ -332,6 +332,42 @@ namespace Simd
                     ptr[i] = tmp[i];
             }
         };
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m256 val0, const __m256* bias, const __m256* params)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m256 val0, const __m256* bias, const __m256* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params, tail);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m256 val0, __m256 val1, const __m256* bias, const __m256* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m256 val0, __m256 val1, const __m256* bias, const __m256* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, tail);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m256 val0, __m256 val1, __m256 val2, const __m256* bias, const __m256* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m256 val0, __m256 val1, __m256 val2, const __m256* bias, const __m256* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tail);
+        }
     }
 #endif//SIMD_AVX_ENABLE
 
