@@ -484,11 +484,15 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 64, 17, 17, 256, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
 #endif
 #if 1
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 240, 135, 27, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 37, 47, 48, _3, _1, _2, _1, _1, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 16, 26, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1280, 8, 13, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 1280, 8, 13, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 12, 7, 13, 16, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 96, 16, 26, 256, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
+
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 3, 8, 8, _3, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }

@@ -211,6 +211,20 @@ namespace Simd
             Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
             Term<term>::template Save<type, 1>(dst + F, val1, bias, params, tail);
         }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m128 val0, __m128 val1, __m128 val2, const __m128* bias, const __m128* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m128 val0, __m128 val1, __m128 val2, const __m128* bias, const __m128* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tail);
+        }
     }
 #endif//SIMD_SSE2_ENABLE
 

@@ -32,6 +32,7 @@ namespace Simd
     {
         using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
 
+#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
         namespace Old
         {
             template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float* src0, const ConvParam32f& p,
@@ -599,7 +600,6 @@ namespace Simd
                 }
             }
 
-
             template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(const float* src0, const ConvParam32f& p,
                 size_t srcC, size_t dstC, const float* weight, const __m128* bias, const __m128* params, float* dst)
             {
@@ -796,40 +796,41 @@ namespace Simd
                 return true;
             }
         }
+#endif
 
         //---------------------------------------------------------------------
+
+        typedef void(*ConvolutionNhwcDirect_NxM_Ptr)(const float* src0, const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst);
+        typedef void(*ConvolutionNhwcDirect1x1_NxM_Ptr)(const float* src0, const ConvParam32f& p, const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst);
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float* src0, const ConvParam32f & p, 
             const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float * dst)
         {
             __m128 d00, d01, s0, w0, w1;
-            size_t dW = (p.srcC - srcC) * F, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = p.srcC*F;
-            const float * weight1 = weight0 + p.kernelY * p.kernelX * p.srcC * F;
-            size_t sy = dy * p.strideY - p.padY;
-            size_t sx = dx * p.strideX - p.padX;
-            size_t kY = p.kernelY * p.dilationY;
-            size_t kX = p.kernelX * p.dilationX;
+            size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dW = p.srcC*F;
+            size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
+            const float * weight1 = weight0 + a.stepW;
             if (dstC > F)
             {
                 d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
-                for (size_t ky = 0; ky < kY; ky += p.dilationY)
+                for (size_t ky = 0; ky < kY; ky += dilY)
                 {
-                    for (size_t kx = 0; kx < kX; kx += p.dilationX)
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
                     {
-                        if (sy + ky < p.srcH && sx + kx < p.srcW)
+                        if (sy + ky < srcH && sx + kx < srcW)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
-                            for (; offs < end; ++offs)
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
                             {
-                                w0 = _mm_loadu_ps(weight0);
-                                w1 = _mm_loadu_ps(weight1);
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                w1 = _mm_loadu_ps(weight1 + offw);
                                 s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
-                                weight0 += F, weight1 += F;
                             }
-                            weight0 += dW, weight1 += dW;
                         }
-                        else
-                            weight0 += dWz, weight1 += dWz;
+                        weight0 += dW, weight1 += dW;
                     }
                 }
                 if (dstC == DF)
@@ -840,23 +841,21 @@ namespace Simd
             else
             {
                 d00 = _mm_setzero_ps();
-                for (size_t ky = 0; ky < kY; ky += p.dilationY)
+                for (size_t ky = 0; ky < kY; ky += dilY)
                 {
-                    for (size_t kx = 0; kx < kX; kx += p.dilationX)
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
                     {
-                        if (sy + ky < p.srcH && sx + kx < p.srcW)
+                        if (sy + ky < srcH && sx + kx < srcW)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
-                            for (; offs < end; ++offs)
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
                             {
-                                w0 = _mm_loadu_ps(weight0);
+                                w0 = _mm_loadu_ps(weight0 + offw);
                                 s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
-                                weight0 += F;
                             }
-                            weight0 += dW;
                         }
-                        else
-                            weight0 += dWz;
+                        weight0 += dW;
                     }
                 }
                 if (dstC == F)
@@ -866,12 +865,273 @@ namespace Simd
             }
         }
 
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst)
+        {
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dW = p.srcC * F, dWz = p.kernelX * p.srcC * F, dD = p.dstC;
+            size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
+            const float* weight1 = weight0 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            const float* src4 = src0 + 4 * dS;
+            const float* src5 = src0 + 5 * dS;
+            if (dstC > F)
+            {
+                d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+                d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+                d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+                d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
+                d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    if (sy + ky < srcH)
+                    {
+                        size_t beg = (sy + ky) * dY + sx * dX;
+                        for (size_t kx = 0; kx < kX; kx += dilX)
+                        {
+                            assert(sx + kx < srcW && sx + kx + 6 <= srcW);
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                w1 = _mm_loadu_ps(weight1 + offw);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                                s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10), d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
+                                s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20), d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                                s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30), d31 = _mm_add_ps(_mm_mul_ps(s0, w1), d31);
+                                s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40), d41 = _mm_add_ps(_mm_mul_ps(s0, w1), d41);
+                                s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50), d51 = _mm_add_ps(_mm_mul_ps(s0, w1), d51);
+                            }
+                            weight0 += dW, weight1 += dW;
+                        }
+                    }
+                    else
+                        weight0 += dWz, weight1 += dWz;
+                }
+                if (dstC == DF)
+                {
+                    Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                    Save2<term, type>(dst, d40, d41, bias, params), dst += dD;
+                    Save2<term, type>(dst, d50, d51, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d40, d41, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d50, d51, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                d00 = _mm_setzero_ps();
+                d10 = _mm_setzero_ps();
+                d20 = _mm_setzero_ps();
+                d30 = _mm_setzero_ps();
+                d40 = _mm_setzero_ps();
+                d50 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    if (sy + ky < srcH)
+                    {
+                        size_t beg = (sy + ky) * dY + sx * dX;
+                        for (size_t kx = 0; kx < kX; kx += dilX)
+                        {
+                            assert(sx + kx < srcW && sx + kx + 6 <= srcW);
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                                s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                                s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                                s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                                s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                                s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
+                            }
+                            weight0 += dW;
+                        }
+                    }
+                    else
+                        weight0 += dWz;
+                }
+                if (dstC == F)
+                {
+                    Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params), dst += dD;
+                    Save1<term, type>(dst, d40, bias, params), dst += dD;
+                    Save1<term, type>(dst, d50, bias, params), dst += dD;
+                }
+                else
+                {
+                    Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d40, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d50, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_2xM(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst)
+        {
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dW = p.srcC * F, dWz = p.kernelX * p.srcC * F, dD = p.dstC;
+            size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
+            const float* weight1 = weight0 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            const float* src4 = src0 + 4 * dS;
+            const float* src5 = src0 + 5 * dS;
+            if (dstC > F)
+            {
+                if (M > 0) d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                if (M > 1) d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+                if (M > 2) d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+                if (M > 3) d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+                if (M > 4) d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
+                if (M > 5) d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    if (sy + ky < srcH)
+                    {
+                        size_t beg = (sy + ky) * dY + sx * dX;
+                        for (size_t kx = 0; kx < kX; kx += dilX)
+                        {
+                            assert(sx + kx < srcW && sx + kx + 6 <= srcW);
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                w1 = _mm_loadu_ps(weight1 + offw);
+                                if (M > 0) s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                                if (M > 1) s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10), d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
+                                if (M > 2) s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20), d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                                if (M > 3) s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30), d31 = _mm_add_ps(_mm_mul_ps(s0, w1), d31);
+                                if (M > 4) s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40), d41 = _mm_add_ps(_mm_mul_ps(s0, w1), d41);
+                                if (M > 5) s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50), d51 = _mm_add_ps(_mm_mul_ps(s0, w1), d51);
+                            }
+                            weight0 += dW, weight1 += dW;
+                        }
+                    }
+                    else
+                        weight0 += dWz, weight1 += dWz;
+                }
+                if (dstC == DF)
+                {
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                    if (M > 4) Save2<term, type>(dst, d40, d41, bias, params), dst += dD;
+                    if (M > 5) Save2<term, type>(dst, d50, d51, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                    if (M > 4) Save2<term, type>(dst, d40, d41, bias, params, dstC), dst += dD;
+                    if (M > 5) Save2<term, type>(dst, d50, d51, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                if (M > 0) d00 = _mm_setzero_ps();
+                if (M > 1) d10 = _mm_setzero_ps();
+                if (M > 2) d20 = _mm_setzero_ps();
+                if (M > 3) d30 = _mm_setzero_ps();
+                if (M > 4) d40 = _mm_setzero_ps();
+                if (M > 5) d50 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    if (sy + ky < srcH)
+                    {
+                        size_t beg = (sy + ky) * dY + sx * dX;
+                        for (size_t kx = 0; kx < kX; kx += dilX)
+                        {
+                            assert(sx + kx < srcW && sx + kx + 6 <= srcW);
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                if (M > 0) s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                                if (M > 1) s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                                if (M > 2) s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                                if (M > 3) s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                                if (M > 4) s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                                if (M > 5) s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
+                            }
+                            weight0 += dW;
+                        }
+                    }
+                    else
+                        weight0 += dWz;
+                }
+                if (dstC == F)
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params), dst += dD;
+                    if (M > 4) Save1<term, type>(dst, d40, bias, params), dst += dD;
+                    if (M > 5) Save1<term, type>(dst, d50, bias, params), dst += dD;
+                }
+                else
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                    if (M > 4) Save1<term, type>(dst, d40, bias, params, dstC), dst += dD;
+                    if (M > 5) Save1<term, type>(dst, d50, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect_NxM_Ptr GetConvolutionNhwcDirect_2xM(size_t M)
+        {
+            switch (M)
+            {
+            case 0: return NULL;
+            case 1: return ConvolutionNhwcDirect_2xM<term, type, 1>;
+            case 2: return ConvolutionNhwcDirect_2xM<term, type, 2>;
+            case 3: return ConvolutionNhwcDirect_2xM<term, type, 3>;
+            case 4: return ConvolutionNhwcDirect_2xM<term, type, 4>;
+            case 5: return ConvolutionNhwcDirect_2xM<term, type, 5>;
+            }
+            assert(0);
+            return NULL;
+        }
+
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float* src, const ConvParam32f& p, const AlgParam& a, 
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
         {
             size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
             size_t n = 6, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
-            //ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<overflow, term, type>(m);
+            ConvolutionNhwcDirect_NxM_Ptr convolutionNhwcDirect_2x1 = ConvolutionNhwcDirect_2x1<term, type>;
+            ConvolutionNhwcDirect_NxM_Ptr convolutionNhwcDirect_2xN = ConvolutionNhwcDirect_2x6<term, type>;
+            ConvolutionNhwcDirect_NxM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<term, type>(m);
             size_t tailH = p.dstH, tailW = p.dstW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
 
@@ -883,12 +1143,12 @@ namespace Simd
             for (size_t dc = 0; dc < dstC; dc += a.microD)
             {
                 size_t dC = Simd::Min(a.microD, dstC - dc);
-                _bias[0] = _mm_loadu_ps(bias + dc + 0);
-                _bias[1] = _mm_loadu_ps(bias + dc + F);
+                if (dC > 0 * F) _bias[0] = _mm_loadu_ps(bias + dc + 0 * F);
+                if (dC > 1 * F) _bias[1] = _mm_loadu_ps(bias + dc + 1 * F);
                 if (type == ::SimdConvolutionActivationPrelu)
                 {
-                    _params[0] = _mm_loadu_ps(params + dc + 0);
-                    _params[1] = _mm_loadu_ps(params + dc + F);
+                    if (dC > 0 * F) _params[0] = _mm_loadu_ps(params + dc + 0 * F);
+                    if (dC > 1 * F) _params[1] = _mm_loadu_ps(params + dc + 1 * F);
                 }
                 float * d = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t dy = yBeg;
@@ -896,37 +1156,425 @@ namespace Simd
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
-                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
-                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
-                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
-                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < bodyWn; dx += n, d += p.dstC * n)
+                        convolutionNhwcDirect_2xN(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < bodyW; dx += m, d += p.dstC * m)
+                        convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
                     for (; dx < tailW; dx++, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
                 }
                 for (; dy < bodyH && dy < yEnd; dy++)
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
-                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
-                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
-                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
-                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < bodyWn; dx += n, d += p.dstC * n)
+                        convolutionNhwcDirect_2xN(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < bodyW; dx += m, d += p.dstC * m)
+                        convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
                     for (; dx < tailW; dx++, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
                 }
                 for (; dy < tailH && dy < yEnd; dy++)
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < bodyWn; dx += n, d += p.dstC * n)
+                        convolutionNhwcDirect_2xN(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < bodyW; dx += m, d += p.dstC * m)
+                        convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                }
+                weight += p.kernelY * p.kernelX * p.srcC * a.microD;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst)
+        {
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            size_t dS = p.srcC, dD = p.dstC;
+            const float* weight1 = weight0 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            const float* src4 = src0 + 4 * dS;
+            const float* src5 = src0 + 5 * dS;
+            if (dstC > F)
+            {
+                d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+                d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+                d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+                d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
+                d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = _mm_loadu_ps(weight0 + offw);
+                    w1 = _mm_loadu_ps(weight1 + offw);
+                    s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                    s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10), d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
+                    s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20), d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                    s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30), d31 = _mm_add_ps(_mm_mul_ps(s0, w1), d31);
+                    s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40), d41 = _mm_add_ps(_mm_mul_ps(s0, w1), d41);
+                    s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50), d51 = _mm_add_ps(_mm_mul_ps(s0, w1), d51);
+                }
+                if (dstC == DF)
+                {
+                    Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                    Save2<term, type>(dst, d40, d41, bias, params), dst += dD;
+                    Save2<term, type>(dst, d50, d51, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d40, d41, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d50, d51, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                d00 = _mm_setzero_ps();
+                d10 = _mm_setzero_ps();
+                d20 = _mm_setzero_ps();
+                d30 = _mm_setzero_ps();
+                d40 = _mm_setzero_ps();
+                d50 = _mm_setzero_ps();
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = _mm_loadu_ps(weight0 + offw);
+                    s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                    s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                    s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                    s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                    s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                    s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
+                }
+                if (dstC == F)
+                {
+                    Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params), dst += dD;
+                    Save1<term, type>(dst, d40, bias, params), dst += dD;
+                    Save1<term, type>(dst, d50, bias, params), dst += dD;
+                }
+                else
+                {
+                    Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d40, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d50, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(const float* src0, const ConvParam32f& p, 
+            const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst)
+        {
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            size_t dS = p.srcC, dD = p.dstC;
+            const float* weight1 = weight0 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            const float* src4 = src0 + 4 * dS;
+            const float* src5 = src0 + 5 * dS;
+            if (dstC > F)
+            {
+                if (M > 0) d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                if (M > 1) d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+                if (M > 2) d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+                if (M > 3) d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+                if (M > 4) d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
+                if (M > 5) d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = _mm_loadu_ps(weight0 + offw);
+                    w1 = _mm_loadu_ps(weight1 + offw);
+                    if (M > 0) s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                    if (M > 1) s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10), d11 = _mm_add_ps(_mm_mul_ps(s0, w1), d11);
+                    if (M > 2) s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20), d21 = _mm_add_ps(_mm_mul_ps(s0, w1), d21);
+                    if (M > 3) s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30), d31 = _mm_add_ps(_mm_mul_ps(s0, w1), d31);
+                    if (M > 4) s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40), d41 = _mm_add_ps(_mm_mul_ps(s0, w1), d41);
+                    if (M > 5) s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50), d51 = _mm_add_ps(_mm_mul_ps(s0, w1), d51);
+                }
+                if (dstC == DF)
+                {
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                    if (M > 4) Save2<term, type>(dst, d40, d41, bias, params), dst += dD;
+                    if (M > 5) Save2<term, type>(dst, d50, d51, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                    if (M > 4) Save2<term, type>(dst, d40, d41, bias, params, dstC), dst += dD;
+                    if (M > 5) Save2<term, type>(dst, d50, d51, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                if (M > 0) d00 = _mm_setzero_ps();
+                if (M > 1) d10 = _mm_setzero_ps();
+                if (M > 2) d20 = _mm_setzero_ps();
+                if (M > 3) d30 = _mm_setzero_ps();
+                if (M > 4) d40 = _mm_setzero_ps();
+                if (M > 5) d50 = _mm_setzero_ps();
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = _mm_loadu_ps(weight0 + offw);
+                    if (M > 0) s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                    if (M > 1) s0 = _mm_set1_ps(src1[offs]), d10 = _mm_add_ps(_mm_mul_ps(s0, w0), d10);
+                    if (M > 2) s0 = _mm_set1_ps(src2[offs]), d20 = _mm_add_ps(_mm_mul_ps(s0, w0), d20);
+                    if (M > 3) s0 = _mm_set1_ps(src3[offs]), d30 = _mm_add_ps(_mm_mul_ps(s0, w0), d30);
+                    if (M > 4) s0 = _mm_set1_ps(src4[offs]), d40 = _mm_add_ps(_mm_mul_ps(s0, w0), d40);
+                    if (M > 5) s0 = _mm_set1_ps(src5[offs]), d50 = _mm_add_ps(_mm_mul_ps(s0, w0), d50);
+                }
+                if (dstC == F)
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params), dst += dD;
+                    if (M > 4) Save1<term, type>(dst, d40, bias, params), dst += dD;
+                    if (M > 5) Save1<term, type>(dst, d50, bias, params), dst += dD;
+                }
+                else
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                    if (M > 4) Save1<term, type>(dst, d40, bias, params, dstC), dst += dD;
+                    if (M > 5) Save1<term, type>(dst, d50, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_NxM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
+        {
+            switch (M)
+            {
+            case 0: return NULL;
+            case 1: return ConvolutionNhwcDirect1x1_2xM<term, type, 1>;
+            case 2: return ConvolutionNhwcDirect1x1_2xM<term, type, 2>;
+            case 3: return ConvolutionNhwcDirect1x1_2xM<term, type, 3>;
+            case 4: return ConvolutionNhwcDirect1x1_2xM<term, type, 4>;
+            case 5: return ConvolutionNhwcDirect1x1_2xM<term, type, 5>;
+            }
+            assert(0);
+            return NULL;
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float* src, const ConvParam32f& p, const AlgParam& a,
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+        {
+            size_t n = 6, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
+            ConvolutionNhwcDirect1x1_NxM_Ptr convolutionNhwcDirect1x1_2xN = ConvolutionNhwcDirect1x1_2x6<term, type>;
+            ConvolutionNhwcDirect1x1_NxM_Ptr convolutionNhwcDirect1x1_2xM = GetConvolutionNhwcDirect1x1_2xM<term, type>(m);
+
+            __m128 _params[2], _bias[2];
+            _params[0] = _mm_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+                _params[1] = _mm_set1_ps(params[1]);
+
+            for (size_t dc = 0; dc < dstC; dc += a.microD)
+            {
+                size_t dC = Simd::Min(a.microD, dstC - dc);
+                if (dC > 0 * F) _bias[0] = _mm_loadu_ps(bias + dc + 0 * F);
+                if (dC > 1 * F) _bias[1] = _mm_loadu_ps(bias + dc + 1 * F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    if (dC > 0 * F) _params[0] = _mm_loadu_ps(params + dc + 0 * F);
+                    if (dC > 1 * F) _params[1] = _mm_loadu_ps(params + dc + 1 * F);
+                }
+                const float* ps = src + yBeg * p.srcW * p.srcC;
+                float* pd = dst + dc + yBeg * p.dstW * p.dstC;
+                size_t i = 0;
+                for (; i < nn; i += n, ps += n * p.srcC, pd += n * p.dstC)
+                    convolutionNhwcDirect1x1_2xN(ps, p, a, srcC, dC, weight, _bias, _params, pd);
+                for (; i < n1; i += m, ps += m * p.srcC, pd += m * p.dstC)
+                    convolutionNhwcDirect1x1_2xM(ps, p, a, srcC, dC, weight, _bias, _params, pd);
+                weight += srcC * a.microD;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_3x1(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const __m128* bias, const __m128* params, float* dst)
+        {
+            __m128 d00, d01, d02, s0, w0, w1, w2;
+            size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dW = p.srcC * F;
+            size_t sy = dy * p.strideY - p.padY, sx = dx * p.strideX - p.padX;
+            size_t kY = p.kernelY * p.dilationY, kX = p.kernelX * p.dilationX;
+            const float* weight1 = weight0 + a.stepW;
+            const float* weight2 = weight1 + a.stepW;
+            if (dstC > 2 * F)
+            {
+                d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps(), d02 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
+                    {
+                        if (sy + ky < srcH && sx + kx < srcW)
+                        {
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                w1 = _mm_loadu_ps(weight1 + offw);
+                                w2 = _mm_loadu_ps(weight2 + offw);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01), d02 = _mm_add_ps(_mm_mul_ps(s0, w2), d02);
+                            }
+                        }
+                        weight0 += dW, weight1 += dW, weight2 += dW;
+                    }
+                }
+                if (dstC == 3 * F)
+                    Save3<term, type>(dst, d00, d01, d02, bias, params);
+                else
+                    Save3<term, type>(dst, d00, d01, d02, bias, params, dstC - F);
+            }
+            else if (dstC > F)
+            {
+                d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
+                    {
+                        if (sy + ky < srcH && sx + kx < srcW)
+                        {
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                w1 = _mm_loadu_ps(weight1 + offw);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00), d01 = _mm_add_ps(_mm_mul_ps(s0, w1), d01);
+                            }
+                        }
+                        weight0 += dW, weight1 += dW;
+                    }
+                }
+                if (dstC == 2 * F)
+                    Save2<term, type>(dst, d00, d01, bias, params);
+                else
+                    Save2<term, type>(dst, d00, d01, bias, params, dstC - F);
+            }
+            else
+            {
+                d00 = _mm_setzero_ps();
+                for (size_t ky = 0; ky < kY; ky += dilY)
+                {
+                    size_t beg = (sy + ky) * dY + sx * dX;
+                    for (size_t kx = 0; kx < kX; kx += dilX)
+                    {
+                        if (sy + ky < srcH && sx + kx < srcW)
+                        {
+                            size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
+                            for (; offs < end; ++offs, offw += F)
+                            {
+                                w0 = _mm_loadu_ps(weight0 + offw);
+                                s0 = _mm_set1_ps(src0[offs]), d00 = _mm_add_ps(_mm_mul_ps(s0, w0), d00);
+                            }
+                        }
+                        weight0 += dW;
+                    }
+                }
+                if (dstC == F)
+                    Save1<term, type>(dst, d00, bias, params);
+                else
+                    Save1<term, type>(dst, d00, bias, params, dstC);
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_3(const float* src, const ConvParam32f& p, const AlgParam& a,
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+        {
+            size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
+            size_t n = 4, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
+            //ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<overflow, term, type>(m);
+            size_t tailH = p.dstH, tailW = p.dstW;
+            size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
+
+            __m128 _params[3], _bias[3];
+            _params[0] = _mm_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+                _params[1] = _mm_set1_ps(params[1]);
+
+            for (size_t dc = 0; dc < dstC; dc += a.microD)
+            {
+                size_t dC = Simd::Min(a.microD, dstC - dc);
+                if (dC > 0 * F) _bias[0] = _mm_loadu_ps(bias + dc + 0 * F);
+                if (dC > 1 * F) _bias[1] = _mm_loadu_ps(bias + dc + 1 * F);
+                if (dC > 2 * F) _bias[2] = _mm_loadu_ps(bias + dc + 2 * F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    if (dC > 0 * F) _params[0] = _mm_loadu_ps(params + dc + 0 * F);
+                    if (dC > 1 * F) _params[1] = _mm_loadu_ps(params + dc + 1 * F);
+                    if (dC > 2 * F) _params[2] = _mm_loadu_ps(params + dc + 2 * F);
+                }
+                float* d = dst + dc + yBeg * p.dstW * p.dstC;
+                size_t dy = yBeg;
+                for (; dy < noseH && dy < yEnd; dy++)
+                {
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_3x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
                     //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
                     //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
                     //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
                     for (; dx < tailW; dx++, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                        ConvolutionNhwcDirect_3x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                }
+                for (; dy < bodyH && dy < yEnd; dy++)
+                {
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_3x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
+                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
+                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_3x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                }
+                for (; dy < tailH && dy < yEnd; dy++)
+                {
+                    size_t dx = 0;
+                    for (; dx < noseW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_3x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
+                    //for (; dx < bodyWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
+                    //    ConvolutionNhwcDirect_2x5<overflow, term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    //for (; dx < bodyW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
+                    //    convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, _scale, _shift, b, d);
+                    for (; dx < tailW; dx++, d += p.dstC)
+                        ConvolutionNhwcDirect_3x1<term, type>(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d);
                 }
                 weight += p.kernelY * p.kernelX * p.srcC * a.microD;
             }
@@ -936,10 +1584,12 @@ namespace Simd
 
         template <TermType term, SimdConvolutionActivationType type> void Set(const ConvParam32f& p, AlgParam & a)
         {
-            //if (p.Is1x1())
-            //    convolution = ConvolutionNhwcDirect1x1_2<type>;
-            //else
-                a.convolutions[term] = ConvolutionNhwcDirect_2<term, type>;
+            switch (a.microD)
+            {
+            case 2 * F: a.convolutions[term] = p.Is1x1() ? ConvolutionNhwcDirect1x1_2<term, type> : ConvolutionNhwcDirect_2<term, type>; break;
+            case 3 * F: a.convolutions[term] = ConvolutionNhwcDirect_3<term, type>; break;
+            default: assert(0);
+            }
         }
 
         template <SimdConvolutionActivationType type> void Set(const ConvParam32f& p, AlgParam& a)
@@ -972,7 +1622,7 @@ namespace Simd
             : Base::SynetConvolution32fNhwcDirect(p)
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            //_old.enable = false;
+            _old.enable = false;
             if (_old.enable)
             {
                 if(Sse2::Old::Set(p, _old.convolution))
@@ -982,11 +1632,11 @@ namespace Simd
 #endif
             {
                 RunFuncs funcs;
-                for (size_t i = 0; i < 2; ++i)
+                for (size_t n = 2; n <= 3; ++n)
                 {
-                    funcs.push_back(RunFunc(Ext() + "-2"));
-                    SetAlgParam(F, 2, funcs[i].alg);
-                    if (!Set(p, funcs[i].alg))
+                    funcs.push_back(RunFunc(Ext() + "-" + ToStr(n)));
+                    SetAlgParam(F, n, funcs.back().alg);
+                    if (!Set(p, funcs.back().alg))
                         return;
                 }
                 _run.Init(funcs);

@@ -362,6 +362,7 @@ namespace Simd
             {
                 size_t F, microD, macroH, macroC, macroD;
                 ConvolutionPtr convolutions[4];
+                size_t stepW;
             };
 
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD

@@ -1427,7 +1427,8 @@ namespace Simd
                     break;
             }
             alg.macroD = Simd::Min(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / alg.macroC, alg.microD), AlignHiAny(p.dstC, alg.microD));
-            _rWeight.Resize(AlignHiAny(p.dstC, alg.F) * p.kernelY * p.kernelX * p.srcC);
+            alg.stepW = p.kernelY * p.kernelX * p.srcC * alg.F;
+            _rWeight.Resize(DivHi(p.dstC, alg.F)*alg.stepW);
             _rBias.Resize(AlignHiAny(p.dstC, alg.F));
             if (p.activation == ::SimdConvolutionActivationPrelu)
                 _rParams.Resize(AlignHiAny(p.dstC, alg.F));
