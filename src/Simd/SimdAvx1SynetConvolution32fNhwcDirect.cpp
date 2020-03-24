@@ -2197,7 +2197,7 @@ namespace Simd
             : Sse2::SynetConvolution32fNhwcDirect(p)
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            _old.enable = false;
+            //_old.enable = false;
             if (_old.enable)
             {
                 if (Avx::Old::Set(p, _old.convolution))
@@ -2217,7 +2217,6 @@ namespace Simd
                 _run.Init(funcs);
             }
         }
-
     }
 #endif//SIMD_AVX_ENABLE
 }

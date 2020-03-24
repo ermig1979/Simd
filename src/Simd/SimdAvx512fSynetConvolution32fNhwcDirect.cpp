@@ -30,10 +30,11 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
+        using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
+
+#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
         namespace Old
         {
-            using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
-
             template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x12(const float* src0, const ConvParam32f& p,
                 size_t kernelH, size_t kernelW, size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2])
             {
@@ -1019,11 +1020,13 @@ namespace Simd
                 return true;
             }
         }
+#endif
 
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f & p)
             : Avx2::SynetConvolution32fNhwcDirect(p)
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+            _old.enable = true;
             if (_old.enable)
             {
                 if (Avx512f::Old::Set(p, _old.convolution))

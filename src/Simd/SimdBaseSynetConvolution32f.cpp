@@ -1323,7 +1323,7 @@ namespace Simd
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            _old.enable = true;
+            _old.enable = p.srcC == 3 && p.IsDilation(1);
             _old.convolution = NULL;
 #endif
         }
