@@ -595,6 +595,24 @@ namespace Simd
                 _mm512_mask_storeu_ps(ptr, tail, Activate<type>(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, ptr), value), bias[index]), params, index));
             }
         };
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, __m512 val0, const __m512* bias, const __m512* params, const __mmask16 * tails)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params, tails[0]);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, __m512 val0, __m512 val1, const __m512* bias, const __m512* params, const __mmask16* tails)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, tails[1]);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, __m512 val0, __m512 val1, __m512 val2, const __m512* bias, const __m512* params, const __mmask16* tails)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tails[2]);
+        }
     }
 #endif//SIMD_AVX512F_ENABLE
 

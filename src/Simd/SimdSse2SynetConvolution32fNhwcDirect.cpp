@@ -2199,7 +2199,6 @@ namespace Simd
             : Base::SynetConvolution32fNhwcDirect(p)
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            //_old.enable = false;
             if (_old.enable)
             {
                 if(Sse2::Old::Set(p, _old.convolution))

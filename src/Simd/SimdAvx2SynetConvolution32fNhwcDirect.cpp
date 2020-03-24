@@ -2186,6 +2186,7 @@ namespace Simd
             case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, a); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, a); break;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, a); break;
             case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, a); break;
             default: return false;
             }
@@ -2197,8 +2198,9 @@ namespace Simd
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
             : Avx::SynetConvolution32fNhwcDirect(p)
         {
+            if (p.dstC <= Sse::F)
+                return;
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            //_old.enable = false;
             if (_old.enable)
             {
                 if (Avx2::Old::Set(p, _old.convolution))

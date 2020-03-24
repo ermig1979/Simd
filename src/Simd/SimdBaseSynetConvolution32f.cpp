@@ -1323,7 +1323,7 @@ namespace Simd
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            _old.enable = p.srcC == 3 && p.IsDilation(1);
+            _old.enable = (p.srcC <= 3 && p.IsDilation(1));
             _old.convolution = NULL;
 #endif
         }
@@ -1407,7 +1407,7 @@ namespace Simd
                             a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
                         yBeg = yEnd;
                     }
-                    weight += AlignHiAny(macroD, a.microD) * macroC;
+                    weight += a.F * macroC;
                 }
                 if (p.activation == ::SimdConvolutionActivationPrelu)
                     params += macroD;
