@@ -725,6 +725,58 @@ namespace Simd
                     ptr[i] = tmp[i];
             }
         };
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(float* dst, float32x4_t val0, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst, val0, bias, params, tail);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, float32x4_t val0, float32x4_t val1, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(float* dst, float32x4_t val0, float32x4_t val1, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + F, val1, bias, params, tail);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, float32x4_t val0, float32x4_t val1, float32x4_t val2, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save3(float* dst, float32x4_t val0, float32x4_t val1, float32x4_t val2, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tail);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save4(float* dst, float32x4_t val0, float32x4_t val1, float32x4_t val2, float32x4_t val3, const float32x4_t* bias, const float32x4_t* params)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params);
+            Term<term>::template Save<type, 3>(dst + 3 * F, val3, bias, params);
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Save4(float* dst, float32x4_t val0, float32x4_t val1, float32x4_t val2, float32x4_t val3, const float32x4_t* bias, const float32x4_t* params, size_t tail)
+        {
+            Term<term>::template Save<type, 0>(dst + 0 * F, val0, bias, params);
+            Term<term>::template Save<type, 1>(dst + 1 * F, val1, bias, params);
+            Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params);
+            Term<term>::template Save<type, 3>(dst + 3 * F, val3, bias, params, tail);
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }

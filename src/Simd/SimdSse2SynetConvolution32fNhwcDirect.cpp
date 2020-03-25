@@ -1016,7 +1016,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 6 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
                             for (; offs < end; ++offs, offw += F)
                             {
@@ -1070,7 +1070,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 6 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
                             for (; offs < end; ++offs, offw += F)
                             {
@@ -1690,7 +1690,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 4 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
                             for (; offs < end; ++offs, offw += F)
                             {
@@ -1737,7 +1737,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 4 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t offs = beg + kx * dX, end = offs + srcC, offw = 0;
                             for (; offs < end; ++offs, offw += F)
                             {
