@@ -2997,6 +2997,592 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+#if defined(SIMD_ARM64_ENABLE)
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_3x8(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const float32x4_t* bias, const float32x4_t* params, float* dst)
+        {
+            float32x4_t d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72, s0, w0, w1, w2;
+            size_t dS = p.srcC, dD = p.dstC;
+            const float* weight1 = weight0 + a.stepW;
+            const float* weight2 = weight1 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            if (dstC > 2 * F)
+            {
+                d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f), d02 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f), d12 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f), d22 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f), d32 = vdupq_n_f32(0.0f);
+                d40 = vdupq_n_f32(0.0f), d41 = vdupq_n_f32(0.0f), d42 = vdupq_n_f32(0.0f);
+                d50 = vdupq_n_f32(0.0f), d51 = vdupq_n_f32(0.0f), d52 = vdupq_n_f32(0.0f);
+                d60 = vdupq_n_f32(0.0f), d61 = vdupq_n_f32(0.0f), d62 = vdupq_n_f32(0.0f);
+                d70 = vdupq_n_f32(0.0f), d71 = vdupq_n_f32(0.0f), d72 = vdupq_n_f32(0.0f);
+                for (size_t off0 = 0, off4 = 4 * dS, offw = 0; off0 < srcC; ++off0, ++off4, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    w2 = Load<false>(weight2 + offw);
+                    s0 = vdupq_n_f32(src0[off0]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1), d02 = vmlaq_f32(d02, s0, w2);
+                    s0 = vdupq_n_f32(src1[off0]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1), d12 = vmlaq_f32(d12, s0, w2);
+                    s0 = vdupq_n_f32(src2[off0]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1), d22 = vmlaq_f32(d22, s0, w2);
+                    s0 = vdupq_n_f32(src3[off0]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1), d32 = vmlaq_f32(d32, s0, w2);
+                    s0 = vdupq_n_f32(src0[off4]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1), d42 = vmlaq_f32(d42, s0, w2);
+                    s0 = vdupq_n_f32(src1[off4]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1), d52 = vmlaq_f32(d52, s0, w2);
+                    s0 = vdupq_n_f32(src2[off4]), d60 = vmlaq_f32(d60, s0, w0), d61 = vmlaq_f32(d61, s0, w1), d62 = vmlaq_f32(d62, s0, w2);
+                    s0 = vdupq_n_f32(src3[off4]), d70 = vmlaq_f32(d70, s0, w0), d71 = vmlaq_f32(d71, s0, w1), d72 = vmlaq_f32(d72, s0, w2);
+                }
+                if (dstC == 3 * F)
+                {
+                    Save3<term, type>(dst, d00, d01, d02, bias, params), dst += dD;
+                    Save3<term, type>(dst, d10, d11, d12, bias, params), dst += dD;
+                    Save3<term, type>(dst, d20, d21, d22, bias, params), dst += dD;
+                    Save3<term, type>(dst, d30, d31, d32, bias, params), dst += dD;
+                    Save3<term, type>(dst, d40, d41, d42, bias, params), dst += dD;
+                    Save3<term, type>(dst, d50, d51, d52, bias, params), dst += dD;
+                    Save3<term, type>(dst, d60, d61, d62, bias, params), dst += dD;
+                    Save3<term, type>(dst, d70, d71, d72, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= 2 * F;
+                    Save3<term, type>(dst, d00, d01, d02, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d10, d11, d12, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d20, d21, d22, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d30, d31, d32, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d40, d41, d42, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d50, d51, d52, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d60, d61, d62, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d70, d71, d72, bias, params, dstC), dst += dD;
+                }
+            }
+            else if (dstC > F)
+            {
+                d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
+                d40 = vdupq_n_f32(0.0f), d41 = vdupq_n_f32(0.0f);
+                d50 = vdupq_n_f32(0.0f), d51 = vdupq_n_f32(0.0f);
+                d60 = vdupq_n_f32(0.0f), d61 = vdupq_n_f32(0.0f);
+                d70 = vdupq_n_f32(0.0f), d71 = vdupq_n_f32(0.0f);
+                for (size_t off0 = 0, off4 = 4 * dS, offw = 0; off0 < srcC; ++off0, ++off4, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    s0 = vdupq_n_f32(src0[off0]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                    s0 = vdupq_n_f32(src1[off0]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                    s0 = vdupq_n_f32(src2[off0]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                    s0 = vdupq_n_f32(src3[off0]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                    s0 = vdupq_n_f32(src0[off4]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
+                    s0 = vdupq_n_f32(src1[off4]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
+                    s0 = vdupq_n_f32(src2[off4]), d60 = vmlaq_f32(d60, s0, w0), d61 = vmlaq_f32(d61, s0, w1);
+                    s0 = vdupq_n_f32(src3[off4]), d70 = vmlaq_f32(d70, s0, w0), d71 = vmlaq_f32(d71, s0, w1);
+                }
+                if (dstC == DF)
+                {
+                    Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                    Save2<term, type>(dst, d40, d41, bias, params), dst += dD;
+                    Save2<term, type>(dst, d50, d51, bias, params), dst += dD;
+                    Save2<term, type>(dst, d60, d61, bias, params), dst += dD;
+                    Save2<term, type>(dst, d70, d71, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d40, d41, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d50, d51, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d60, d61, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d70, d71, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                d00 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f);
+                d40 = vdupq_n_f32(0.0f);
+                d50 = vdupq_n_f32(0.0f);
+                d60 = vdupq_n_f32(0.0f);
+                d70 = vdupq_n_f32(0.0f);
+                for (size_t off0 = 0, off4 = 4 * dS, offw = 0; off0 < srcC; ++off0, ++off4, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    s0 = vdupq_n_f32(src0[off0]), d00 = vmlaq_f32(d00, s0, w0);
+                    s0 = vdupq_n_f32(src1[off0]), d10 = vmlaq_f32(d10, s0, w0);
+                    s0 = vdupq_n_f32(src2[off0]), d20 = vmlaq_f32(d20, s0, w0);
+                    s0 = vdupq_n_f32(src3[off0]), d30 = vmlaq_f32(d30, s0, w0);
+                    s0 = vdupq_n_f32(src0[off4]), d40 = vmlaq_f32(d40, s0, w0);
+                    s0 = vdupq_n_f32(src1[off4]), d50 = vmlaq_f32(d50, s0, w0);
+                    s0 = vdupq_n_f32(src2[off4]), d60 = vmlaq_f32(d60, s0, w0);
+                    s0 = vdupq_n_f32(src3[off4]), d70 = vmlaq_f32(d70, s0, w0);
+                }
+                if (dstC == F)
+                {
+                    Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params), dst += dD;
+                    Save1<term, type>(dst, d40, bias, params), dst += dD;
+                    Save1<term, type>(dst, d50, bias, params), dst += dD;
+                    Save1<term, type>(dst, d60, bias, params), dst += dD;
+                    Save1<term, type>(dst, d70, bias, params), dst += dD;
+                }
+                else
+                {
+                    Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d40, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d50, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d60, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d70, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_3xM(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const float32x4_t* bias, const float32x4_t* params, float* dst)
+        {
+            float32x4_t d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72, s0, w0, w1, w2;
+            size_t dS = p.srcC, dD = p.dstC;
+            const float* weight1 = weight0 + a.stepW;
+            const float* weight2 = weight1 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            if (dstC > 2 * F)
+            {
+                if (M > 0) d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f), d02 = vdupq_n_f32(0.0f);
+                if (M > 1) d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f), d12 = vdupq_n_f32(0.0f);
+                if (M > 2) d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f), d22 = vdupq_n_f32(0.0f);
+                if (M > 3) d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f), d32 = vdupq_n_f32(0.0f);
+                if (M > 4) d40 = vdupq_n_f32(0.0f), d41 = vdupq_n_f32(0.0f), d42 = vdupq_n_f32(0.0f);
+                if (M > 5) d50 = vdupq_n_f32(0.0f), d51 = vdupq_n_f32(0.0f), d52 = vdupq_n_f32(0.0f);
+                if (M > 6) d60 = vdupq_n_f32(0.0f), d61 = vdupq_n_f32(0.0f), d62 = vdupq_n_f32(0.0f);
+                if (M > 7) d70 = vdupq_n_f32(0.0f), d71 = vdupq_n_f32(0.0f), d72 = vdupq_n_f32(0.0f);
+                for (size_t off0 = 0, off4 = 4 * dS, offw = 0; off0 < srcC; ++off0, ++off4, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    w2 = Load<false>(weight2 + offw);
+                    if (M > 0) s0 = vdupq_n_f32(src0[off0]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1), d02 = vmlaq_f32(d02, s0, w2);
+                    if (M > 1) s0 = vdupq_n_f32(src1[off0]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1), d12 = vmlaq_f32(d12, s0, w2);
+                    if (M > 2) s0 = vdupq_n_f32(src2[off0]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1), d22 = vmlaq_f32(d22, s0, w2);
+                    if (M > 3) s0 = vdupq_n_f32(src3[off0]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1), d32 = vmlaq_f32(d32, s0, w2);
+                    if (M > 4) s0 = vdupq_n_f32(src0[off4]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1), d42 = vmlaq_f32(d42, s0, w2);
+                    if (M > 5) s0 = vdupq_n_f32(src1[off4]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1), d52 = vmlaq_f32(d52, s0, w2);
+                    if (M > 6) s0 = vdupq_n_f32(src2[off4]), d60 = vmlaq_f32(d60, s0, w0), d61 = vmlaq_f32(d61, s0, w1), d62 = vmlaq_f32(d62, s0, w2);
+                    if (M > 7) s0 = vdupq_n_f32(src3[off4]), d70 = vmlaq_f32(d70, s0, w0), d71 = vmlaq_f32(d71, s0, w1), d72 = vmlaq_f32(d72, s0, w2);
+                }
+                if (dstC == 3 * F)
+                {
+                    if (M > 0) Save3<term, type>(dst, d00, d01, d02, bias, params), dst += dD;
+                    if (M > 1) Save3<term, type>(dst, d10, d11, d12, bias, params), dst += dD;
+                    if (M > 2) Save3<term, type>(dst, d20, d21, d22, bias, params), dst += dD;
+                    if (M > 3) Save3<term, type>(dst, d30, d31, d32, bias, params), dst += dD;
+                    if (M > 4) Save3<term, type>(dst, d40, d41, d42, bias, params), dst += dD;
+                    if (M > 5) Save3<term, type>(dst, d50, d51, d52, bias, params), dst += dD;
+                    if (M > 6) Save3<term, type>(dst, d60, d61, d62, bias, params), dst += dD;
+                    if (M > 7) Save3<term, type>(dst, d70, d71, d72, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= 2 * F;
+                    if (M > 0) Save3<term, type>(dst, d00, d01, d02, bias, params, dstC), dst += dD;
+                    if (M > 1) Save3<term, type>(dst, d10, d11, d12, bias, params, dstC), dst += dD;
+                    if (M > 2) Save3<term, type>(dst, d20, d21, d22, bias, params, dstC), dst += dD;
+                    if (M > 3) Save3<term, type>(dst, d30, d31, d32, bias, params, dstC), dst += dD;
+                    if (M > 4) Save3<term, type>(dst, d40, d41, d42, bias, params, dstC), dst += dD;
+                    if (M > 5) Save3<term, type>(dst, d50, d51, d52, bias, params, dstC), dst += dD;
+                    if (M > 6) Save3<term, type>(dst, d60, d61, d62, bias, params, dstC), dst += dD;
+                    if (M > 7) Save3<term, type>(dst, d70, d71, d72, bias, params, dstC), dst += dD;
+                }
+            }
+            else if (dstC > F)
+            {
+                if (M > 0) d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                if (M > 1) d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
+                if (M > 2) d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
+                if (M > 3) d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
+                if (M > 4) d40 = vdupq_n_f32(0.0f), d41 = vdupq_n_f32(0.0f);
+                if (M > 5) d50 = vdupq_n_f32(0.0f), d51 = vdupq_n_f32(0.0f);
+                if (M > 6) d60 = vdupq_n_f32(0.0f), d61 = vdupq_n_f32(0.0f);
+                if (M > 7) d70 = vdupq_n_f32(0.0f), d71 = vdupq_n_f32(0.0f);
+                for (size_t off0 = 0, off4 = 4 * dS, offw = 0; off0 < srcC; ++off0, ++off4, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    if (M > 0) s0 = vdupq_n_f32(src0[off0]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                    if (M > 1) s0 = vdupq_n_f32(src1[off0]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                    if (M > 2) s0 = vdupq_n_f32(src2[off0]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                    if (M > 3) s0 = vdupq_n_f32(src3[off0]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                    if (M > 4) s0 = vdupq_n_f32(src0[off4]), d40 = vmlaq_f32(d40, s0, w0), d41 = vmlaq_f32(d41, s0, w1);
+                    if (M > 5) s0 = vdupq_n_f32(src1[off4]), d50 = vmlaq_f32(d50, s0, w0), d51 = vmlaq_f32(d51, s0, w1);
+                    if (M > 6) s0 = vdupq_n_f32(src2[off4]), d60 = vmlaq_f32(d60, s0, w0), d61 = vmlaq_f32(d61, s0, w1);
+                    if (M > 7) s0 = vdupq_n_f32(src3[off4]), d70 = vmlaq_f32(d70, s0, w0), d71 = vmlaq_f32(d71, s0, w1);
+                }
+                if (dstC == DF)
+                {
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                    if (M > 4) Save2<term, type>(dst, d40, d41, bias, params), dst += dD;
+                    if (M > 5) Save2<term, type>(dst, d50, d51, bias, params), dst += dD;
+                    if (M > 6) Save2<term, type>(dst, d60, d61, bias, params), dst += dD;
+                    if (M > 7) Save2<term, type>(dst, d70, d71, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                    if (M > 4) Save2<term, type>(dst, d40, d41, bias, params, dstC), dst += dD;
+                    if (M > 5) Save2<term, type>(dst, d50, d51, bias, params, dstC), dst += dD;
+                    if (M > 6) Save2<term, type>(dst, d60, d61, bias, params, dstC), dst += dD;
+                    if (M > 7) Save2<term, type>(dst, d70, d71, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                if (M > 0) d00 = vdupq_n_f32(0.0f);
+                if (M > 1) d10 = vdupq_n_f32(0.0f);
+                if (M > 2) d20 = vdupq_n_f32(0.0f);
+                if (M > 3) d30 = vdupq_n_f32(0.0f);
+                if (M > 4) d40 = vdupq_n_f32(0.0f);
+                if (M > 5) d50 = vdupq_n_f32(0.0f);
+                if (M > 6) d60 = vdupq_n_f32(0.0f);
+                if (M > 7) d70 = vdupq_n_f32(0.0f);
+                for (size_t off0 = 0, off4 = 4 * dS, offw = 0; off0 < srcC; ++off0, ++off4, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    if (M > 0) s0 = vdupq_n_f32(src0[off0]), d00 = vmlaq_f32(d00, s0, w0);
+                    if (M > 1) s0 = vdupq_n_f32(src1[off0]), d10 = vmlaq_f32(d10, s0, w0);
+                    if (M > 2) s0 = vdupq_n_f32(src2[off0]), d20 = vmlaq_f32(d20, s0, w0);
+                    if (M > 3) s0 = vdupq_n_f32(src3[off0]), d30 = vmlaq_f32(d30, s0, w0);
+                    if (M > 4) s0 = vdupq_n_f32(src0[off4]), d40 = vmlaq_f32(d40, s0, w0);
+                    if (M > 5) s0 = vdupq_n_f32(src1[off4]), d50 = vmlaq_f32(d50, s0, w0);
+                    if (M > 6) s0 = vdupq_n_f32(src2[off4]), d60 = vmlaq_f32(d60, s0, w0);
+                    if (M > 7) s0 = vdupq_n_f32(src3[off4]), d70 = vmlaq_f32(d70, s0, w0);
+                }
+                if (dstC == F)
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params), dst += dD;
+                    if (M > 4) Save1<term, type>(dst, d40, bias, params), dst += dD;
+                    if (M > 5) Save1<term, type>(dst, d50, bias, params), dst += dD;
+                    if (M > 6) Save1<term, type>(dst, d60, bias, params), dst += dD;
+                    if (M > 7) Save1<term, type>(dst, d70, bias, params), dst += dD;
+                }
+                else
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                    if (M > 4) Save1<term, type>(dst, d40, bias, params, dstC), dst += dD;
+                    if (M > 5) Save1<term, type>(dst, d50, bias, params, dstC), dst += dD;
+                    if (M > 6) Save1<term, type>(dst, d60, bias, params, dstC), dst += dD;
+                    if (M > 7) Save1<term, type>(dst, d70, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_NxM_Ptr GetConvolutionNhwcDirect1x1_3xM(size_t M)
+        {
+            switch (M)
+            {
+            case 0: return NULL;
+            case 1: return ConvolutionNhwcDirect1x1_3xM<term, type, 1>;
+            case 2: return ConvolutionNhwcDirect1x1_3xM<term, type, 2>;
+            case 3: return ConvolutionNhwcDirect1x1_3xM<term, type, 3>;
+            case 4: return ConvolutionNhwcDirect1x1_3xM<term, type, 4>;
+            case 5: return ConvolutionNhwcDirect1x1_3xM<term, type, 5>;
+            case 6: return ConvolutionNhwcDirect1x1_3xM<term, type, 6>;
+            case 7: return ConvolutionNhwcDirect1x1_3xM<term, type, 7>;
+            }
+            assert(0);
+            return NULL;
+        }
+#else
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_3x4(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const float32x4_t* bias, const float32x4_t* params, float* dst)
+        {
+            float32x4_t d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, s0, w0, w1, w2;
+            size_t dS = p.srcC, dD = p.dstC;
+            const float* weight1 = weight0 + a.stepW;
+            const float* weight2 = weight1 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            if (dstC > 2 * F)
+            {
+                d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f), d02 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f), d12 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f), d22 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f), d32 = vdupq_n_f32(0.0f);
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    w2 = Load<false>(weight2 + offw);
+                    s0 = vdupq_n_f32(src0[offs]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1), d02 = vmlaq_f32(d02, s0, w2);
+                    s0 = vdupq_n_f32(src1[offs]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1), d12 = vmlaq_f32(d12, s0, w2);
+                    s0 = vdupq_n_f32(src2[offs]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1), d22 = vmlaq_f32(d22, s0, w2);
+                    s0 = vdupq_n_f32(src3[offs]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1), d32 = vmlaq_f32(d32, s0, w2);
+                }
+                if (dstC == 3 * F)
+                {
+                    Save3<term, type>(dst, d00, d01, d02, bias, params), dst += dD;
+                    Save3<term, type>(dst, d10, d11, d12, bias, params), dst += dD;
+                    Save3<term, type>(dst, d20, d21, d22, bias, params), dst += dD;
+                    Save3<term, type>(dst, d30, d31, d32, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= 2 * F;
+                    Save3<term, type>(dst, d00, d01, d02, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d10, d11, d12, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d20, d21, d22, bias, params, dstC), dst += dD;
+                    Save3<term, type>(dst, d30, d31, d32, bias, params, dstC), dst += dD;
+                }
+            }
+            else if (dstC > F)
+            {
+                d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    s0 = vdupq_n_f32(src0[offs]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                    s0 = vdupq_n_f32(src1[offs]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                    s0 = vdupq_n_f32(src2[offs]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                    s0 = vdupq_n_f32(src3[offs]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                }
+                if (dstC == 2 * F)
+                {
+                    Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= 1 * F;
+                    Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                d00 = vdupq_n_f32(0.0f);
+                d10 = vdupq_n_f32(0.0f);
+                d20 = vdupq_n_f32(0.0f);
+                d30 = vdupq_n_f32(0.0f);
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    s0 = vdupq_n_f32(src0[offs]), d00 = vmlaq_f32(d00, s0, w0);
+                    s0 = vdupq_n_f32(src1[offs]), d10 = vmlaq_f32(d10, s0, w0);
+                    s0 = vdupq_n_f32(src2[offs]), d20 = vmlaq_f32(d20, s0, w0);
+                    s0 = vdupq_n_f32(src3[offs]), d30 = vmlaq_f32(d30, s0, w0);
+                }
+                if (dstC == F)
+                {
+                    Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params), dst += dD;
+                }
+                else
+                {
+                    Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_3xM(const float* src0, const ConvParam32f& p,
+            const AlgParam& a, size_t srcC, size_t dstC, const float* weight0, const float32x4_t* bias, const float32x4_t* params, float* dst)
+        {
+            float32x4_t d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, s0, w0, w1, w2;
+            size_t dS = p.srcC, dD = p.dstC;
+            const float* weight1 = weight0 + a.stepW;
+            const float* weight2 = weight1 + a.stepW;
+            const float* src1 = src0 + 1 * dS;
+            const float* src2 = src0 + 2 * dS;
+            const float* src3 = src0 + 3 * dS;
+            if (dstC > 2 * F)
+            {
+                if (M > 0) d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f), d02 = vdupq_n_f32(0.0f);
+                if (M > 1) d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f), d12 = vdupq_n_f32(0.0f);
+                if (M > 2) d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f), d22 = vdupq_n_f32(0.0f);
+                if (M > 3) d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f), d32 = vdupq_n_f32(0.0f);
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    w2 = Load<false>(weight2 + offw);
+                    if (M > 0) s0 = vdupq_n_f32(src0[offs]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1), d02 = vmlaq_f32(d02, s0, w2);
+                    if (M > 1) s0 = vdupq_n_f32(src1[offs]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1), d12 = vmlaq_f32(d12, s0, w2);
+                    if (M > 2) s0 = vdupq_n_f32(src2[offs]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1), d22 = vmlaq_f32(d22, s0, w2);
+                    if (M > 3) s0 = vdupq_n_f32(src3[offs]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1), d32 = vmlaq_f32(d32, s0, w2);
+                }
+                if (dstC == 3 * F)
+                {
+                    if (M > 0) Save3<term, type>(dst, d00, d01, d02, bias, params), dst += dD;
+                    if (M > 1) Save3<term, type>(dst, d10, d11, d12, bias, params), dst += dD;
+                    if (M > 2) Save3<term, type>(dst, d20, d21, d22, bias, params), dst += dD;
+                    if (M > 3) Save3<term, type>(dst, d30, d31, d32, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= 2 * F;
+                    if (M > 0) Save3<term, type>(dst, d00, d01, d02, bias, params, dstC), dst += dD;
+                    if (M > 1) Save3<term, type>(dst, d10, d11, d12, bias, params, dstC), dst += dD;
+                    if (M > 2) Save3<term, type>(dst, d20, d21, d22, bias, params, dstC), dst += dD;
+                    if (M > 3) Save3<term, type>(dst, d30, d31, d32, bias, params, dstC), dst += dD;
+                }
+            }
+            else if (dstC > F)
+            {
+                if (M > 0) d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                if (M > 1) d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
+                if (M > 2) d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
+                if (M > 3) d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    w1 = Load<false>(weight1 + offw);
+                    if (M > 0) s0 = vdupq_n_f32(src0[offs]), d00 = vmlaq_f32(d00, s0, w0), d01 = vmlaq_f32(d01, s0, w1);
+                    if (M > 1) s0 = vdupq_n_f32(src1[offs]), d10 = vmlaq_f32(d10, s0, w0), d11 = vmlaq_f32(d11, s0, w1);
+                    if (M > 2) s0 = vdupq_n_f32(src2[offs]), d20 = vmlaq_f32(d20, s0, w0), d21 = vmlaq_f32(d21, s0, w1);
+                    if (M > 3) s0 = vdupq_n_f32(src3[offs]), d30 = vmlaq_f32(d30, s0, w0), d31 = vmlaq_f32(d31, s0, w1);
+                }
+                if (dstC == DF)
+                {
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params), dst += dD;
+                }
+                else
+                {
+                    dstC -= F;
+                    if (M > 0) Save2<term, type>(dst, d00, d01, bias, params, dstC), dst += dD;
+                    if (M > 1) Save2<term, type>(dst, d10, d11, bias, params, dstC), dst += dD;
+                    if (M > 2) Save2<term, type>(dst, d20, d21, bias, params, dstC), dst += dD;
+                    if (M > 3) Save2<term, type>(dst, d30, d31, bias, params, dstC), dst += dD;
+                }
+            }
+            else
+            {
+                if (M > 0) d00 = vdupq_n_f32(0.0f);
+                if (M > 1) d10 = vdupq_n_f32(0.0f);
+                if (M > 2) d20 = vdupq_n_f32(0.0f);
+                if (M > 3) d30 = vdupq_n_f32(0.0f);
+                for (size_t offs = 0, offw = 0; offs < srcC; ++offs, offw += F)
+                {
+                    w0 = Load<false>(weight0 + offw);
+                    if (M > 0) s0 = vdupq_n_f32(src0[offs]), d00 = vmlaq_f32(d00, s0, w0);
+                    if (M > 1) s0 = vdupq_n_f32(src1[offs]), d10 = vmlaq_f32(d10, s0, w0);
+                    if (M > 2) s0 = vdupq_n_f32(src2[offs]), d20 = vmlaq_f32(d20, s0, w0);
+                    if (M > 3) s0 = vdupq_n_f32(src3[offs]), d30 = vmlaq_f32(d30, s0, w0);
+                }
+                if (dstC == F)
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params), dst += dD;
+                }
+                else
+                {
+                    if (M > 0) Save1<term, type>(dst, d00, bias, params, dstC), dst += dD;
+                    if (M > 1) Save1<term, type>(dst, d10, bias, params, dstC), dst += dD;
+                    if (M > 2) Save1<term, type>(dst, d20, bias, params, dstC), dst += dD;
+                    if (M > 3) Save1<term, type>(dst, d30, bias, params, dstC), dst += dD;
+                }
+            }
+        }
+
+        template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_NxM_Ptr GetConvolutionNhwcDirect1x1_3xM(size_t M)
+        {
+            switch (M)
+            {
+            case 0: return NULL;
+            case 1: return ConvolutionNhwcDirect1x1_3xM<term, type, 1>;
+            case 2: return ConvolutionNhwcDirect1x1_3xM<term, type, 2>;
+            case 3: return ConvolutionNhwcDirect1x1_3xM<term, type, 3>;
+            }
+            assert(0);
+            return NULL;
+        }
+#endif
+
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_3(const float* src, const ConvParam32f& p, const AlgParam& a,
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+        {
+#if defined(SIMD_ARM64_ENABLE)
+            size_t n = 8, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
+            ConvolutionNhwcDirect1x1_NxM_Ptr convolutionNhwcDirect1x1_3xN = ConvolutionNhwcDirect1x1_3x8<term, type>;
+#else
+            size_t n = 4, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
+            ConvolutionNhwcDirect1x1_NxM_Ptr convolutionNhwcDirect1x1_3xN = ConvolutionNhwcDirect1x1_3x4<term, type>;
+#endif
+            ConvolutionNhwcDirect1x1_NxM_Ptr convolutionNhwcDirect1x1_3xM = GetConvolutionNhwcDirect1x1_3xM<term, type>(m);
+
+            float32x4_t _params[3], _bias[3];
+            _params[0] = vdupq_n_f32(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+                _params[1] = vdupq_n_f32(params[1]);
+
+            for (size_t dc = 0; dc < dstC; dc += a.microD)
+            {
+                size_t dC = Simd::Min(a.microD, dstC - dc);
+                if (dC > 0 * F) _bias[0] = Load<false>(bias + dc + 0 * F);
+                if (dC > 1 * F) _bias[1] = Load<false>(bias + dc + 1 * F);
+                if (dC > 2 * F) _bias[2] = Load<false>(bias + dc + 2 * F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    if (dC > 0 * F) _params[0] = Load<false>(params + dc + 0 * F);
+                    if (dC > 1 * F) _params[1] = Load<false>(params + dc + 1 * F);
+                    if (dC > 2 * F) _params[2] = Load<false>(params + dc + 2 * F);
+                }
+                const float* ps = src + yBeg * p.srcW * p.srcC;
+                float* pd = dst + dc + yBeg * p.dstW * p.dstC;
+                size_t i = 0;
+                for (; i < nn; i += n, ps += n * p.srcC, pd += n * p.dstC)
+                    convolutionNhwcDirect1x1_3xN(ps, p, a, srcC, dC, weight, _bias, _params, pd);
+                for (; i < n1; i += m, ps += m * p.srcC, pd += m * p.dstC)
+                    convolutionNhwcDirect1x1_3xM(ps, p, a, srcC, dC, weight, _bias, _params, pd);
+                weight += srcC * a.microD;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_4x1(const float* src0, const ConvParam32f& p,
             const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const float* weight0, const float32x4_t* bias, const float32x4_t* params, float* dst)
         {
@@ -4029,16 +4615,10 @@ namespace Simd
 
         template <TermType term, SimdConvolutionActivationType type> void Set(const ConvParam32f& p, AlgParam& a)
         {
-            //switch (a.microD)
-            //{
-            //case 2 * F: a.convolutions[term] = p.Is1x1() ? ConvolutionNhwcDirect1x1_2<term, type> : ConvolutionNhwcDirect_2<term, type>; break;
-            //case 3 * F: a.convolutions[term] = p.Is1x1() ? ConvolutionNhwcDirect1x1_3<term, type> : ConvolutionNhwcDirect_3<term, type>; break;
-            //default: assert(0);
-            //}
             switch (a.microD)
             {
             case 2 * F: a.convolutions[term] = p.Is1x1() ? ConvolutionNhwcDirect1x1_2<term, type> : ConvolutionNhwcDirect_2<term, type>; break;
-            case 3 * F: a.convolutions[term] = ConvolutionNhwcDirect_3<term, type>; break;
+            case 3 * F: a.convolutions[term] = p.Is1x1() ? ConvolutionNhwcDirect1x1_3<term, type> : ConvolutionNhwcDirect_3<term, type>; break;
             case 4 * F: a.convolutions[term] = ConvolutionNhwcDirect_4<term, type>; break;
             default: assert(0);
             }
@@ -4083,7 +4663,7 @@ namespace Simd
 #endif
             {
                 RunFuncs funcs;
-                for (size_t n = 2; n <= 2; ++n)
+                for (size_t n = 2; n <= 3; ++n)
                 {
                     funcs.push_back(RunFunc(Ext() + "-" + ToStr(n)));
                     SetAlgParam(F, n, funcs.back().alg);
