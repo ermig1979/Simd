@@ -1597,6 +1597,46 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
+            : Avx::SynetConvolution32fNhwcDirect(p)
+        {
+            if (p.dstC <= Sse::F)
+                return;
+#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+            //_old.enable = true;
+            if (_old.enable)
+            {
+                if (Set2f(p, _old.convolution))
+                    OldSetAlgParam(F);
+            }
+            else
+#endif
+            {
+                RunFuncs funcs;
+                for (size_t n = 2; n <= 3; ++n)
+                {
+                    funcs.push_back(RunFunc(Ext() + "-" + ToStr(n)));
+                    SetAlgParam(F, n, funcs.back().alg);
+                    if (!SetRt(p, funcs.back().alg))
+                        return;
+                }
+                _run.Init(funcs);
+            }
+        }
+
+        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam32f& p, AlgParam& a)
+        {
+            switch (a.microD)
+            {
+            case 2 * F: return Set2r(p, a);
+            case 3 * F: return Set3r(p, a);
+            default:
+                return false;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             ConvParam32f param(batch, conv, gemm);
