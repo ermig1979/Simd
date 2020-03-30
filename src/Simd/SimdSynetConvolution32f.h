@@ -490,6 +490,11 @@ namespace Simd
             virtual String Ext() const { return "Sse2"; }
 
             static bool Preferable(const ConvParam32f & p);
+        private:
+            static bool Set2f(const ConvParam32f& p, OldConvolutionPtr& convolution);
+            static bool SetRt(const ConvParam32f& p, AlgParam& a);
+            static bool Set2r(const ConvParam32f& p, AlgParam& a);
+            static bool Set3r(const ConvParam32f& p, AlgParam& a);
         };
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);

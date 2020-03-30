@@ -1822,6 +1822,7 @@ namespace Simd
                 dst += _sizeD;
             }
         }
+
         //---------------------------------------------------------------------
 
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
@@ -1856,7 +1857,8 @@ namespace Simd
             case 2 * F: return Set2r(p, a);
             case 3 * F: return Set3r(p, a);
             case 4 * F: return Set4r(p, a);
-            default: false;
+            default:
+                return false;
             }
         }
 

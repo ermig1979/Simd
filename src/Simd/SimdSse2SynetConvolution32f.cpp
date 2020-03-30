@@ -1763,6 +1763,59 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
+            : Base::SynetConvolution32fNhwcDirect(p)
+        {
+#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
+            //_old.enable = true;
+            if (_old.enable)
+            {
+                if (Set2f(p, _old.convolution))
+                    OldSetAlgParam(F);
+            }
+            else
+#endif
+            {
+                RunFuncs funcs;
+                for (size_t n = 2; n <= 3; ++n)
+                {
+                    funcs.push_back(RunFunc(Ext() + "-" + ToStr(n)));
+                    SetAlgParam(F, n, funcs.back().alg);
+                    if (!SetRt(p, funcs.back().alg))
+                        return;
+                }
+                _run.Init(funcs);
+            }
+        }
+
+        bool SynetConvolution32fNhwcDirect::SetRt(const ConvParam32f& p, AlgParam& a)
+        {
+            switch (a.microD)
+            {
+            case 2 * F: return Set2r(p, a);
+            case 3 * F: return Set3r(p, a);
+            default: 
+                return false;
+            }
+        }
+
+        bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f& p)
+        {
+            if (p.trans != SimdTrue || p.group != 1 || !p.IsDilation(1))
+                return false;
+            if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
+                return false;
+            if (p.Is1x1() && (p.srcC >= 2 * p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 128) || p.srcC > 256))
+                return false;
+            if (p.kernelY > p.srcH || p.kernelX > p.srcW)
+                return false;
+            if ((p.strideY > 1 && p.strideX > 1) && p.srcC > 32 && float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX) < 3.0f)
+                return false;
+            return true;
+        }
+
+        //---------------------------------------------------------------------
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
             ConvParam32f param(batch, conv, gemm);
