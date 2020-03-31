@@ -1429,7 +1429,7 @@ namespace Simd
             alg.macroD = Simd::Min(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / alg.macroC, alg.microD), AlignHiAny(p.dstC, alg.microD));
             alg.stepW = p.kernelY * p.kernelX * p.srcC * alg.F;
             _rWeight.Resize(DivHi(p.dstC, alg.F)*alg.stepW);
-            _rBias.Resize(AlignHiAny(p.dstC, alg.F));
+            _rBias.Resize(AlignHiAny(p.dstC, alg.F), true);
             if (p.activation == ::SimdConvolutionActivationPrelu)
                 _rParams.Resize(AlignHiAny(p.dstC, alg.F));
         }
