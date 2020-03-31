@@ -650,18 +650,18 @@ namespace Simd
                     convolutionNhwcDirect1x1_2xN(ps, p, a, srcC, dC, weight, _bias, _params, pd);
                 for (; i < n1; i += m, ps += m * p.srcC, pd += m * p.dstC)
                     convolutionNhwcDirect1x1_2xM(ps, p, a, srcC, dC, weight, _bias, _params, pd);
-                weight += srcC * a.microD;
+                weight += p.srcC * a.microD;
             }
         }
 
         //---------------------------------------------------------------------
 
-        template <TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, AlgParam& a)
+        template <TermType term, SimdConvolutionActivationType type> static SIMD_INLINE void Set(const ConvParam32f& p, AlgParam& a)
         {
             a.convolutions[term] = p.Is1x1() ? ConvolutionNhwcDirect1x1_2<term, type> : ConvolutionNhwcDirect_2<term, type>;
         }
 
-        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, AlgParam& a)
+        template <SimdConvolutionActivationType type> static SIMD_INLINE void Set(const ConvParam32f& p, AlgParam& a)
         {
             Set<TermSingle, type>(p, a);
             Set<TermFirst, type>(p, a);
