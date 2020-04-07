@@ -44,12 +44,7 @@ namespace Test
 
     void Log::SetLogFile(String name)
     {
-        String dir = DirectoryByPath(name);
-        if (!DirectoryExists(dir))
-        {
-            if (!CreatePath(dir))
-                TEST_LOG_SS(Info, "Can't create directory '" << dir << "' !");
-        }
+        CreatePathIfNotExist(name);
         _file.open(name);
     }
 

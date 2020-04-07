@@ -725,4 +725,18 @@ namespace Test
         return std::system((String("mkdir -p ") + path).c_str()) == 0;
 #endif
     }
+
+    bool CreatePathIfNotExist(const String & path)
+    {
+        String directory = DirectoryByPath(path);
+        if (!DirectoryExists(directory))
+        {
+            if (!CreatePath(directory))
+            {
+                TEST_LOG_SS(Info, "Can't create directory '" << directory << "' !");
+                return false;
+            }
+        }
+        return true;
+    }
 }

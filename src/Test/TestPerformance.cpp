@@ -463,6 +463,7 @@ namespace Test
 
     bool PerformanceMeasurerStorage::HtmlReport(const String & path, bool align) const
     {
+        CreatePathIfNotExist(path);
         std::ofstream file(path);
         if (!file.is_open())
             return false;
