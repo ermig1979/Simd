@@ -534,9 +534,14 @@ namespace Test
         return Shape();
     }
 
+    inline Shape ToShape(size_t value)
+    {
+        return Shape(1, value);
+    }
+
     inline Shape ToShape(size_t channels, SimdTensorFormatType format)
     {
-        return Shape({ SimdAlign(channels, SimdSynetTensorAlignment(format)) });
+        return ToShape(SimdAlign(channels, SimdSynetTensorAlignment(format)));
     }
 
     const int TFM_ANY = (SIMD_ALIGN == 64 ? 29 : (SIMD_ALIGN == 32 ? 13 : (SIMD_ALIGN == 16 ? 5 : 1)));

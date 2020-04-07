@@ -55,9 +55,9 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
 
-        Tensor32f src( Shape({ size }));
-        Tensor32f dst1(Shape({ size }));
-        Tensor32f dst2(Shape({ size }));
+        Tensor32f src(ToShape(size));
+        Tensor32f dst1(ToShape(size));
+        Tensor32f dst2(ToShape(size));
 
         FillRandom(src, -10.0, 10.0);
         float alpha = 1.1f;
@@ -141,9 +141,9 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
 
-        Tensor32f src(Shape({ size }));
-        Tensor32f dst1(Shape({ size }));
-        Tensor32f dst2(Shape({ size }));
+        Tensor32f src(ToShape(size));
+        Tensor32f dst1(ToShape(size));
+        Tensor32f dst2(ToShape(size));
 
         FillRandom(src, -10.0, 10.0);
         float shift = 3.0f;

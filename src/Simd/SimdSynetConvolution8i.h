@@ -156,7 +156,7 @@ namespace Simd
             {
                 float abs = ::fmax(::fabs(min[i]), ::fabs(max[i]));
                 float inv = abs / (neg ? 127.0f : 255.0f);
-                if (fabs(inv) < 1e-7)
+                if (::fabs(inv) < 1e-7)
                     inv = 1.0f;
                 zero[i] = (neg ? 128 : 0);
                 scale[i] = float(1.0 / inv);
