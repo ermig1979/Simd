@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestLog.h"
+#include "Test/TestUtils.h"
 
 namespace Test
 {
@@ -37,11 +38,18 @@ namespace Test
 
     Log::~Log()
     {
-
+        if (_file.is_open())
+            _file.close();
     }
 
     void Log::SetLogFile(String name)
     {
+        String dir = DirectoryByPath(name);
+        if (!DirectoryExists(dir))
+        {
+            if (!CreatePath(dir))
+                TEST_LOG_SS(Info, "Can't create directory '" << dir << "' !");
+        }
         _file.open(name);
     }
 

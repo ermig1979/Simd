@@ -26,6 +26,17 @@
 #include "Simd/SimdDrawing.hpp"
 #include "Simd/SimdFont.hpp"
 
+#ifdef WIN32
+#define NOMINMAX
+#include <windows.h>
+#include <filesystem>
+#endif
+
+#ifdef __linux__
+#include <unistd.h>
+#include <dirent.h>
+#endif
+
 namespace Test
 {
     void FillSequence(View & view)
@@ -670,5 +681,48 @@ namespace Test
         {
             return ExpandToLeft("", iCount + fCount + 1);
         }
+    }
+
+    bool DirectoryExists(const String & path)
+    {
+#if defined(WIN32)
+        DWORD fileAttribute = GetFileAttributes(path.c_str());
+        return ((fileAttribute != INVALID_FILE_ATTRIBUTES) &&
+            (fileAttribute & FILE_ATTRIBUTE_DIRECTORY) != 0);
+#elif defined(__linux__)
+        DIR * dir = opendir(path.c_str());
+        if (dir != NULL)
+        {
+            ::closedir(dir);
+            return true;
+        }
+        else
+            return false;
+#else
+        return false;
+#endif
+    }
+
+    String DirectoryByPath(const String & path)
+    {
+#ifdef WIN32
+        String sep("\\");
+#else
+        String sep("/");
+#endif
+        size_t pos = path.find_last_of(sep);
+        if (pos == std::string::npos)
+            return path;
+        else
+            return path.substr(0, pos);
+    }
+
+    bool CreatePath(const String & path)
+    {
+#ifdef WIN32
+        return std::system((String("mkdir ") + path).c_str()) == 0;
+#else
+        return std::system((String("mkdir -p ") + path).c_str()) == 0;
+#endif
     }
 }

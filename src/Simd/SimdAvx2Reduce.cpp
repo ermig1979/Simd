@@ -42,7 +42,7 @@ namespace Simd
                 _mm256_and_si256(_mm256_srli_si256(s01, 1), K16_00FF),
                 _mm256_and_si256(s11, K16_00FF),
                 _mm256_and_si256(_mm256_srli_si256(s11, 1), K16_00FF));
-            return PackU16ToU8(lo, hi);
+            return PackI16ToU8(lo, hi);
         }
 #else
         SIMD_INLINE __m256i Average16(const __m256i & s0, const __m256i & s1)
