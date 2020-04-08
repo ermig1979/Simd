@@ -78,7 +78,13 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2, comp));
 
-        result = result && Compare(dst1, dst2, comp == SimdSynetCompatibilityNoFma ? 0 : 1, true, 64);
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
+        int differenceMax = (comp == SimdSynetCompatibilityNoFma ? 0 : 1);
+#else
+        int differenceMax = 1;
+#endif
+
+        result = result && Compare(dst1, dst2, differenceMax, true, 64);
 
         return result;
     }

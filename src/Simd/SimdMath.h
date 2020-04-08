@@ -76,7 +76,7 @@ namespace Simd
 
     SIMD_INLINE int Round(float value)
     {
-#if defined(SIMD_X64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || (defined(SIMD_X86_ENABLE) && !defined(SIMD_SSE_DISABLE))
         __m128 _value = _mm_set_ss(value);
         return _mm_cvtss_si32(_value);
 #else
