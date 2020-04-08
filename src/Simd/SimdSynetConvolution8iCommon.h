@@ -114,7 +114,7 @@ namespace Simd
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
+                Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
@@ -191,7 +191,7 @@ namespace Simd
                 __m128i sum, __m128i norm, const __m128i* bias, const __m128i* params, const __m128* scale, const __m128* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
+                Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
@@ -290,7 +290,7 @@ namespace Simd
                 __m256i sum, __m256i norm, const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, index, nofma>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
+                Save<type, index, nofma>(tmp - index * A, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
@@ -367,7 +367,7 @@ namespace Simd
                 __m256i sum, __m256i norm, const __m256i* bias, const __m256i* params, const __m256* scale, const __m256* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, index, nofma>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
+                Save<type, index, nofma>(tmp - index * A, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
@@ -571,7 +571,7 @@ namespace Simd
                 int32x4_t sum, int32x4_t norm, const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
+                Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
@@ -648,7 +648,7 @@ namespace Simd
                 int32x4_t sum, int32x4_t norm, const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, size_t tail)
             {
                 uint8_t tmp[A];
-                Save<type, index>(tmp - index * F, buf, sum, norm, bias, params, scale, shift);
+                Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
             }
