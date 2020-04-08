@@ -1437,6 +1437,18 @@ namespace Simd
             return vget_high_u32(a);
         }
 
+        template <int part> SIMD_INLINE int32x2_t Half(int32x4_t a);
+
+        template <> SIMD_INLINE int32x2_t Half<0>(int32x4_t a)
+        {
+            return vget_low_s32(a);
+        }
+
+        template <> SIMD_INLINE int32x2_t Half<1>(int32x4_t a)
+        {
+            return vget_high_s32(a);
+        }
+
         template <int part> SIMD_INLINE float32x2_t Half(float32x4_t a);
 
         template <> SIMD_INLINE float32x2_t Half<0>(float32x4_t a)
