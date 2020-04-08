@@ -28,6 +28,10 @@
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
 
+#if defined(SIMD_X86_ENABLE) && defined(_MSC_VER) && _MSC_VER < 1924
+#define SIMD_MSVS2017_WIN32_RELEASE_COMPILER_ERROR
+#endif
+
 namespace Simd
 {
 #ifdef SIMD_AVX512F_ENABLE    
@@ -35,6 +39,9 @@ namespace Simd
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)
         {
+#ifdef SIMD_MSVS2017_WIN32_RELEASE_COMPILER_ERROR
+            Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+#else
             size_t aligned = AlignLo(trans ? count : size, F);
             __mmask16 tail = __mmask16(-1) >> (F + aligned - (trans ? count : size));
             if (activation == ::SimdConvolutionActivationIdentity)
@@ -387,6 +394,7 @@ namespace Simd
             }
             else
                 assert(0);
+#endif
         }
 
         //---------------------------------------------------------------------

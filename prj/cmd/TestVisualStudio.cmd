@@ -10,17 +10,18 @@ set YEARS=%date:~6,4%
 set MONTHS=%date:~3,2%
 set DAYS=%date:~0,2%
 set HOURS=%time:~0,2%
+if "%HOURS:~0,1%" == " " set HOURS=0%HOURS:~1,1%
 SET MINUTES=%time:~3,2%
 set ROOT=..\..\
 
-call :TEST 2013 v120 Win32
-call :TEST 2013 v120 x64
-call :TEST 2015 v140 Win32
-call :TEST 2015 v140 x64
-call :TEST 2017 v141 Win32
-call :TEST 2017 v141 x64
-call :TEST 2019 v142 Win32
-call :TEST 2019 v142 x64
+if not errorlevel 1 ( call :TEST 2013 v120 Win32 )
+if not errorlevel 1 ( call :TEST 2013 v120 x64 )
+if not errorlevel 1 ( call :TEST 2015 v140 Win32 )
+if not errorlevel 1 ( call :TEST 2015 v140 x64 )
+if not errorlevel 1 ( call :TEST 2017 v141 Win32 )
+if not errorlevel 1 ( call :TEST 2017 v141 x64 )
+if not errorlevel 1 ( call :TEST 2019 v142 Win32 )
+if not errorlevel 1 ( call :TEST 2019 v142 x64 )
 
 pause
 goto :eof
@@ -38,9 +39,8 @@ if NOT EXIST "%BIN%" (
 ) else (
 	echo Start test of Visual Studio %VERSION% {%TOOLSET%\%PLATFORM%\Release}:
 	%BIN% -m=a -tt=1 -wt=1 -r=%ROOT% -fi=%FILTER_INCLUDE% -ot=%LOG% 
+	if errorlevel 1 ( exit /b 1 ) 
 )
 
 goto :eof
 ::------------------------------------------------------------------------------------------------
-
-pause
