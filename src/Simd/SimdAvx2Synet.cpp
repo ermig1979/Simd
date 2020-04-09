@@ -507,8 +507,8 @@ namespace Simd
             if (align)
                 assert(Aligned(src) && Aligned(scale) && Aligned(bias) && Aligned(channels, F) && Aligned(dst));
 
-            size_t channelsF = AlignLo(channels, QF);
-            size_t channelsQF = AlignLo(channels, F);
+            size_t channelsF = AlignLo(channels, F);
+            size_t channelsQF = AlignLo(channels, QF);
             if (bias)
             {
                 size_t widthF = AlignLo(width, F);
