@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5153F702-A5FD-440D-917D-FDA213663527}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Ssse3</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3AlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgraToBayer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgraToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgraToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToBayer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToRgb.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Deinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3GaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3GrayToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Interleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Laplace.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3MeanFilter3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Reduce.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3ReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3ReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Reorder.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3ResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Resizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Sobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3SquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Texture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Transform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

@@ -1,0 +1,369 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifferenceSum.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAlphaBlending.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBackground.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBayerToBgr.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBayerToBgra.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBayer.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBgr.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBayer.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBgra.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuv.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonConditional.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonDeinterleave.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonFloat16.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonFloat32.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur3x3.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32f.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgr.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonHogLite.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonInt16ToGray.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonInterference.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonInterleave.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonLaplace.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonLbp.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduce.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray3x3.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray4x4.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray5x5.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonResizeBilinear.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonResizer.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSegmentation.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonShiftBilinear.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSobel.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSquaredDifferenceSum.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonStatistic.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonStatisticMoments.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSvm.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect4r.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetFused.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32f.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Neon">
+      <UniqueIdentifier>{51c3a96e-009e-4de0-9c30-329e21957b9c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{e31a5615-a021-4e0f-b8c4-b542d164bc82}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdNeon.h">
+      <Filter>Neon</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBayer.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDetection.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExp.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPoint.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPow.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTranspose.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdView.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

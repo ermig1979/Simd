@@ -16,25 +16,147 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Test\Test*.h" />
-    <ClCompile Include="..\..\src\Test\Test*.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
+    <ProjectReference Include="Avx1.vcxproj">
+      <Project>{d6e29b9b-ee2d-4339-8417-dcadc283884f}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Avx2.vcxproj">
+      <Project>{4c82474f-3b9a-4b92-ac74-2434ca1d5064}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Avx512bw.vcxproj">
+      <Project>{3e24da78-24e3-41d2-9066-54c75be13b90}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Avx512f.vcxproj">
+      <Project>{eaef875c-436d-4760-8e30-87b334afd979}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Avx512vnni.vcxproj">
+      <Project>{e89969de-d5f1-44c5-81af-a4283851090b}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Base.vcxproj">
+      <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Msa.vcxproj">
+      <Project>{af08f27a-49fe-4a7f-84cc-3dd0005863ef}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Neon.vcxproj">
+      <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>
+    </ProjectReference>
     <ProjectReference Include="Simd.vcxproj">
       <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
     </ProjectReference>
-    <ProjectReference Include="Alg.vcxproj">
-      <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
+    <ProjectReference Include="Sse1.vcxproj">
+      <Project>{5bd9c258-d7fb-4477-bd5f-8f6ce6ec22ae}</Project>
     </ProjectReference>
+    <ProjectReference Include="Sse2.vcxproj">
+      <Project>{01bfb333-09d1-4d8e-85c0-c05d333cf807}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Sse3.vcxproj">
+      <Project>{541af1ec-146d-4904-909a-2ad6c26e3b38}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Sse41.vcxproj">
+      <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Sse42.vcxproj">
+      <Project>{310d4930-8048-41a0-87ec-b0987be24281}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Ssse3.vcxproj">
+      <Project>{5153f702-a5fd-440d-917d-fda213663527}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Vmx.vcxproj">
+      <Project>{a88b854a-fcf9-484a-bda2-e27f1ec3a0a9}</Project>
+    </ProjectReference>
+    <ProjectReference Include="Vsx.vcxproj">
+      <Project>{e3be9fd8-d69d-4b04-b719-c475d868c5eb}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Test\Test.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToAny.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToBayer.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCheckC.c" />
+    <ClCompile Include="..\..\src\Test\TestCheckCpp.cpp" />
+    <ClCompile Include="..\..\src\Test\TestConditional.cpp" />
+    <ClCompile Include="..\..\src\Test\TestContour.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCopy.cpp" />
+    <ClCompile Include="..\..\src\Test\TestCrc32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestData.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDetection.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
+    <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFill.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFloat16.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFloat32.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFont.cpp" />
+    <ClCompile Include="..\..\src\Test\TestGemm.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHistogram.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHog.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHogLite.cpp" />
+    <ClCompile Include="..\..\src\Test\TestHtml.cpp" />
+    <ClCompile Include="..\..\src\Test\TestImageMatcher.cpp" />
+    <ClCompile Include="..\..\src\Test\TestIntegral.cpp" />
+    <ClCompile Include="..\..\src\Test\TestInterference.cpp" />
+    <ClCompile Include="..\..\src\Test\TestInterleave.cpp" />
+    <ClCompile Include="..\..\src\Test\TestLog.cpp" />
+    <ClCompile Include="..\..\src\Test\TestMotion.cpp" />
+    <ClCompile Include="..\..\src\Test\TestNeural.cpp" />
+    <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
+    <ClCompile Include="..\..\src\Test\TestReduce.cpp" />
+    <ClCompile Include="..\..\src\Test\TestReorder.cpp" />
+    <ClCompile Include="..\..\src\Test\TestResize.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSegmentation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestShift.cpp" />
+    <ClCompile Include="..\..\src\Test\TestStatistic.cpp" />
+    <ClCompile Include="..\..\src\Test\TestStretchGray.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSvm.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynet.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetActivation.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetConversion.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetFused.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetMergedConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Test\TestSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Test\TestTable.cpp" />
+    <ClCompile Include="..\..\src\Test\TestTexture.cpp" />
+    <ClCompile Include="..\..\src\Test\TestTransform.cpp" />
+    <ClCompile Include="..\..\src\Test\TestUtils.cpp" />
+    <ClCompile Include="..\..\src\Test\TestVideo.cpp" />
+    <ClCompile Include="..\..\src\Test\TestWinograd.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToAny.cpp" />
+    <ClCompile Include="..\..\src\Test\TestYuvToBgra.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Test\TestConfig.h" />
+    <ClInclude Include="..\..\src\Test\TestData.h" />
+    <ClInclude Include="..\..\src\Test\TestHtml.h" />
+    <ClInclude Include="..\..\src\Test\TestLog.h" />
+    <ClInclude Include="..\..\src\Test\TestPerformance.h" />
+    <ClInclude Include="..\..\src\Test\TestSynetConvolutionParam.h" />
+    <ClInclude Include="..\..\src\Test\TestTable.h" />
+    <ClInclude Include="..\..\src\Test\TestTensor.h" />
+    <ClInclude Include="..\..\src\Test\TestUtils.h" />
+    <ClInclude Include="..\..\src\Test\TestVideo.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Fill.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Float32.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Gemm32f.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Hog.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Neural.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Resizer.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1SquaredDifferenceSum.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Svm.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Synet.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1SynetActivation.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1SynetConversion.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1SynetFused.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1SynetPooling.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Winograd.cpp">
+      <Filter>Sse1</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Sse1">
+      <UniqueIdentifier>{21b95509-f975-4c90-a028-4a79e5a6d875}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{4a32a281-edd4-423a-bb9e-782e88adc8a7}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdSse1.h">
+      <Filter>Sse1</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExp.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTranspose.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
