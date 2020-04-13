@@ -1011,7 +1011,11 @@ namespace Simd
 
         template <> SIMD_INLINE __m512 Fmadd<true>(__m512 a, __m512 b, __m512 c)
         {
+#ifdef _MSC_VER
+            return _mm512_add_ps(_mm512_fmadd_ps(a, b, _mm512_setzero_ps()), c);
+#else
             return _mm512_maskz_add_ps(-1, _mm512_mul_ps(a, b), c);
+#endif
         }
     }
 #endif //SIMD_AVX512F_ENABLE
