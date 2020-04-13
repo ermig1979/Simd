@@ -87,12 +87,10 @@ namespace Simd
 
         SIMD_INLINE void KahanSum(float value, float & sum, float & correction)
         {
-
             float term = value - correction;
             float temp = sum + term;
             correction = (temp - sum) - term;
             sum = temp;
-
         }
 
 #if defined(__GNUC__) && (defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE))
@@ -102,7 +100,7 @@ namespace Simd
 #pragma GCC push_options
 #pragma GCC optimize ("O1")
 #endif
-#elif defined(_MSC_VER) && (_MSC_VER >= 1920)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1914)
 #pragma optimize ("", off)
 #endif
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)

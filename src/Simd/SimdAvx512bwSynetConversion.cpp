@@ -180,7 +180,6 @@ namespace Simd
 
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
         {
-            __m128 a = _mm_maskz_loadu_ps(-1, src);
             if (!(compatibility & SimdSynetCompatibilityNoFmaTail))
             {
                 width = height * width;
