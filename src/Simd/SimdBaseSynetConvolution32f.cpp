@@ -1411,6 +1411,7 @@ namespace Simd
                 }
                 if (p.activation == ::SimdConvolutionActivationPrelu)
                     params += macroD;
+                weight += p.kernelY * p.kernelY * p.srcC * macroD - p.srcC * a.F;
             }
         }
 
