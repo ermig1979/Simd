@@ -559,14 +559,14 @@ namespace Simd
                     for (size_t w = 0; w < width; ++w)
                     {
                         size_t c = 0;
-                        for (; c < channelsF; c += QF)
+                        for (; c < channelsQF; c += QF)
                         {
                             SynetScaleLayerForward<align>(src, scale, dst, c + F * 0);
                             SynetScaleLayerForward<align>(src, scale, dst, c + F * 1);
                             SynetScaleLayerForward<align>(src, scale, dst, c + F * 2);
                             SynetScaleLayerForward<align>(src, scale, dst, c + F * 3);
                         }
-                        for (; c < channelsQF; c += F)
+                        for (; c < channelsF; c += F)
                             SynetScaleLayerForward<align>(src, scale, dst, c);
                         for (; c < channels; ++c)
                             dst[c] = src[c] * scale[c];
