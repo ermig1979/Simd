@@ -39,7 +39,8 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    sum0 = _mm512_add_ps(sum0, _mm512_maskz_loadu_ps(tail, src + w * srcC + 0 * F));
+                    const float* ps = src + w * srcC;
+                    sum0 = _mm512_add_ps(sum0, _mm512_maskz_loadu_ps(tail, ps + 0 * F));
                 }
                 src += srcS;
             }
@@ -54,8 +55,9 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    sum0 = _mm512_add_ps(sum0, _mm512_loadu_ps(src + w * srcC + 0 * F));
-                    sum1 = _mm512_add_ps(sum1, _mm512_loadu_ps(src + w * srcC + 1 * F));
+                    const float* ps = src + w * srcC;
+                    sum0 = _mm512_add_ps(sum0, _mm512_loadu_ps(ps + 0 * F));
+                    sum1 = _mm512_add_ps(sum1, _mm512_loadu_ps(ps + 1 * F));
                 }
                 src += srcS;
             }
@@ -73,10 +75,11 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    sum0 = _mm512_add_ps(sum0, _mm512_loadu_ps(src + w * srcC + 0 * F));
-                    sum1 = _mm512_add_ps(sum1, _mm512_loadu_ps(src + w * srcC + 1 * F));
-                    sum2 = _mm512_add_ps(sum2, _mm512_loadu_ps(src + w * srcC + 2 * F));
-                    sum3 = _mm512_add_ps(sum3, _mm512_loadu_ps(src + w * srcC + 3 * F));
+                    const float* ps = src + w * srcC;
+                    sum0 = _mm512_add_ps(sum0, _mm512_loadu_ps(ps + 0 * F));
+                    sum1 = _mm512_add_ps(sum1, _mm512_loadu_ps(ps + 1 * F));
+                    sum2 = _mm512_add_ps(sum2, _mm512_loadu_ps(ps + 2 * F));
+                    sum3 = _mm512_add_ps(sum3, _mm512_loadu_ps(ps + 3 * F));
                 }
                 src += srcS;
             }
@@ -100,14 +103,15 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    sum0 = _mm512_add_ps(sum0, _mm512_loadu_ps(src + w * srcC + 0 * F));
-                    sum1 = _mm512_add_ps(sum1, _mm512_loadu_ps(src + w * srcC + 1 * F));
-                    sum2 = _mm512_add_ps(sum2, _mm512_loadu_ps(src + w * srcC + 2 * F));
-                    sum3 = _mm512_add_ps(sum3, _mm512_loadu_ps(src + w * srcC + 3 * F));
-                    sum4 = _mm512_add_ps(sum4, _mm512_loadu_ps(src + w * srcC + 4 * F));
-                    sum5 = _mm512_add_ps(sum5, _mm512_loadu_ps(src + w * srcC + 5 * F));
-                    sum6 = _mm512_add_ps(sum6, _mm512_loadu_ps(src + w * srcC + 6 * F));
-                    sum7 = _mm512_add_ps(sum7, _mm512_loadu_ps(src + w * srcC + 7 * F));
+                    const float* ps = src + w * srcC;
+                    sum0 = _mm512_add_ps(sum0, _mm512_loadu_ps(ps + 0 * F));
+                    sum1 = _mm512_add_ps(sum1, _mm512_loadu_ps(ps + 1 * F));
+                    sum2 = _mm512_add_ps(sum2, _mm512_loadu_ps(ps + 2 * F));
+                    sum3 = _mm512_add_ps(sum3, _mm512_loadu_ps(ps + 3 * F));
+                    sum4 = _mm512_add_ps(sum4, _mm512_loadu_ps(ps + 4 * F));
+                    sum5 = _mm512_add_ps(sum5, _mm512_loadu_ps(ps + 5 * F));
+                    sum6 = _mm512_add_ps(sum6, _mm512_loadu_ps(ps + 6 * F));
+                    sum7 = _mm512_add_ps(sum7, _mm512_loadu_ps(ps + 7 * F));
                 }
                 src += srcS;
             }

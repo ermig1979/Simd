@@ -222,7 +222,8 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(src + w * srcC + 0 * F));
+                    const float * ps = src + w * srcC;
+                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(ps + 0 * F));
                 }
                 src += srcS;
             }
@@ -237,8 +238,9 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(src + w * srcC + 0 * F));
-                    max1 = _mm256_max_ps(max1, _mm256_loadu_ps(src + w * srcC + 1 * F));
+                    const float* ps = src + w * srcC;
+                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(ps + 0 * F));
+                    max1 = _mm256_max_ps(max1, _mm256_loadu_ps(ps + 1 * F));
                 }
                 src += srcS;
             }
@@ -256,10 +258,11 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(src + w * srcC + 0 * F));
-                    max1 = _mm256_max_ps(max1, _mm256_loadu_ps(src + w * srcC + 1 * F));
-                    max2 = _mm256_max_ps(max2, _mm256_loadu_ps(src + w * srcC + 2 * F));
-                    max3 = _mm256_max_ps(max3, _mm256_loadu_ps(src + w * srcC + 3 * F));
+                    const float* ps = src + w * srcC;
+                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(ps + 0 * F));
+                    max1 = _mm256_max_ps(max1, _mm256_loadu_ps(ps + 1 * F));
+                    max2 = _mm256_max_ps(max2, _mm256_loadu_ps(ps + 2 * F));
+                    max3 = _mm256_max_ps(max3, _mm256_loadu_ps(ps + 3 * F));
                 }
                 src += srcS;
             }
@@ -283,14 +286,15 @@ namespace Simd
             {
                 for (size_t w = 0; w < kW; ++w)
                 {
-                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(src + w * srcC + 0 * F));
-                    max1 = _mm256_max_ps(max1, _mm256_loadu_ps(src + w * srcC + 1 * F));
-                    max2 = _mm256_max_ps(max2, _mm256_loadu_ps(src + w * srcC + 2 * F));
-                    max3 = _mm256_max_ps(max3, _mm256_loadu_ps(src + w * srcC + 3 * F));
-                    max4 = _mm256_max_ps(max4, _mm256_loadu_ps(src + w * srcC + 4 * F));
-                    max5 = _mm256_max_ps(max5, _mm256_loadu_ps(src + w * srcC + 5 * F));
-                    max6 = _mm256_max_ps(max6, _mm256_loadu_ps(src + w * srcC + 6 * F));
-                    max7 = _mm256_max_ps(max7, _mm256_loadu_ps(src + w * srcC + 7 * F));
+                    const float* ps = src + w * srcC;
+                    max0 = _mm256_max_ps(max0, _mm256_loadu_ps(ps + 0 * F));
+                    max1 = _mm256_max_ps(max1, _mm256_loadu_ps(ps + 1 * F));
+                    max2 = _mm256_max_ps(max2, _mm256_loadu_ps(ps + 2 * F));
+                    max3 = _mm256_max_ps(max3, _mm256_loadu_ps(ps + 3 * F));
+                    max4 = _mm256_max_ps(max4, _mm256_loadu_ps(ps + 4 * F));
+                    max5 = _mm256_max_ps(max5, _mm256_loadu_ps(ps + 5 * F));
+                    max6 = _mm256_max_ps(max6, _mm256_loadu_ps(ps + 6 * F));
+                    max7 = _mm256_max_ps(max7, _mm256_loadu_ps(ps + 7 * F));
                 }
                 src += srcS;
             }
