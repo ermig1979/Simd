@@ -169,8 +169,10 @@ namespace Simd
             pDstB += D;
             pDstS += D;
             pSrcScale += C;
+            pSrcScaleInv += C;
             pSrcShift += C;
             pDstScale += D;
+            pDstScaleInv += D;
             pDstShift += D;
             pNormScale += D;
             pNormShift += D;
@@ -294,7 +296,7 @@ namespace Simd
             }
             _siK = p.kernelY * p.kernelX;
             _siC = p.srcC / p.group;
-            _siD = p.dstC;
+            _siD = p.dstC / p.group;
             _siS = p.dstH * p.dstW;
         }
 
