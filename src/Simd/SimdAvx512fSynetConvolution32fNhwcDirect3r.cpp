@@ -316,7 +316,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 8 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t off0 = beg + kx * dX, end = off0 + srcC, off5 = off0 + 5 * dS, offw = 0;
                             for (; off0 < end; ++off0, ++off5, offw += F)
                             {
@@ -367,7 +367,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 8 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t off0 = beg + kx * dX, end = off0 + srcC, off5 = off0 + 5 * dS, offw = 0;
                             for (; off0 < end; ++off0, ++off5, offw += F)
                             {
@@ -417,7 +417,7 @@ namespace Simd
                         size_t beg = (sy + ky) * dY + sx * dX;
                         for (size_t kx = 0; kx < kX; kx += dilX)
                         {
-                            assert(sx + kx < srcW && sx + kx + 8 <= srcW);
+                            assert(sx + kx < srcW && sx + kx + M <= srcW);
                             size_t off0 = beg + kx * dX, end = off0 + srcC, off5 = off0 + 5 * dS, offw = 0;
                             for (; off0 < end; ++off0, ++off5, offw += F)
                             {
