@@ -332,6 +332,11 @@
 */
 
 /*! @ingroup conversion
+    @defgroup rgb_conversion RGB-24 
+    \short Functions for RGB-24 image conversions.
+*/
+
+/*! @ingroup conversion
     @defgroup yuv_conversion YUV 
     \short Functions for YUV image conversions.
 */

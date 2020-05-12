@@ -85,6 +85,64 @@ namespace Simd
             else
                 BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
         }
+
+        //---------------------------------------------------------------------
+
+        const __m128i K16_RED_BLUE = SIMD_MM_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
+
+        SIMD_INLINE __m128i RgbaToGray32(__m128i rgba)
+        {
+            const __m128i g0a0 = _mm_and_si128(_mm_srli_si128(rgba, 1), K16_00FF);
+            const __m128i r0b0 = _mm_and_si128(rgba, K16_00FF);
+            const __m128i weightedSum = _mm_add_epi32(_mm_madd_epi16(g0a0, K16_GREEN_ROUND), _mm_madd_epi16(r0b0, K16_RED_BLUE));
+            return _mm_srli_epi32(weightedSum, Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m128i RgbaToGray(__m128i rgba[4])
+        {
+            const __m128i lo = _mm_packs_epi32(RgbaToGray32(rgba[0]), RgbaToGray32(rgba[1]));
+            const __m128i hi = _mm_packs_epi32(RgbaToGray32(rgba[2]), RgbaToGray32(rgba[3]));
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        template <bool align> SIMD_INLINE __m128i RgbToGray(const uint8_t* rgb, __m128i shuffle)
+        {
+            __m128i rgba[4];
+            rgba[0] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<align>((__m128i*)(rgb + 0)), shuffle));
+            rgba[1] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(rgb + 12)), shuffle));
+            rgba[2] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(Load<false>((__m128i*)(rgb + 24)), shuffle));
+            rgba[3] = _mm_or_si128(K32_01000000, _mm_shuffle_epi8(_mm_srli_si128(Load<align>((__m128i*)(rgb + 32)), 4), shuffle));
+            return RgbaToGray(rgba);
+        }
+
+        template <bool align> void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+
+            __m128i _shuffle = _mm_setr_epi8(0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    Store<align>((__m128i*)(gray + col), RgbToGray<align>(rgb + 3 * col, _shuffle));
+                if (width != alignedWidth)
+                    Store<false>((__m128i*)(gray + width - A), RgbToGray<false>(rgb + 3 * (width - A), _shuffle));
+                rgb += rgbStride;
+                gray += grayStride;
+            }
+        }
+
+        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        {
+            if (Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride))
+                RgbToGray<true>(rgb, width, height, rgbStride, gray, grayStride);
+            else
+                RgbToGray<false>(rgb, width, height, rgbStride, gray, grayStride);
+        }
     }
 #endif// SIMD_SSSE3_ENABLE
 }

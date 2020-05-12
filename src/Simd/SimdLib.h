@@ -4588,6 +4588,25 @@ extern "C"
     SIMD_API void SimdReduceGray5x5(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
         uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
+    /*! @ingroup rgb_conversion
+
+        \fn void SimdRgbToGray(const uint8_t * rgb, size_t width, size_t height, size_t rgbStride, uint8_t * gray, size_t grayStride);
+
+        \short Converts 24-bit RGB image to 8-bit gray image.
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::RgbToGray(const View<A>& rgb, View<A>& gray).
+
+        \param [in] rgb - a pointer to pixels data of input 24-bit RGB image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] rgbStride - a row size of the rgb image.
+        \param [out] gray - a pointer to pixels data of output 8-bit gray image.
+        \param [in] grayStride - a row size of the gray image.
+    */
+    SIMD_API void SimdRgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride);
+
     /*! @ingroup reordering
 
         \fn void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst);

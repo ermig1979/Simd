@@ -203,7 +203,7 @@
       <Filter>Utils</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Test\Test.cpp">
-      <Filter>Utils</Filter>
+      <Filter>Test</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -39,5 +39,18 @@ namespace Simd
                 }
             }
         }
+
+        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                const uint8_t* pRgb = rgb + row * rgbStride;
+                uint8_t* pGray = gray + row * grayStride;
+                for (const uint8_t* pGrayEnd = pGray + width; pGray < pGrayEnd; pGray += 1, pRgb += 3)
+                {
+                    *pGray = BgrToGray(pRgb[2], pRgb[1], pRgb[0]);
+                }
+            }
+        }
     }
 }

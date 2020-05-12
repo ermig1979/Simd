@@ -75,8 +75,8 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
 
         View src(width, height, srcType, NULL, TEST_ALIGN(width));
-        //FillRandom(src);
-        FillSequence(src);
+        FillRandom(src);
+        //FillSequence(src);
 
         View dst1(width, height, dstType, NULL, TEST_ALIGN(width));
         View dst2(width, height, dstType, NULL, TEST_ALIGN(width));
@@ -308,6 +308,35 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC_O(Simd::Neon::Int16ToGray), FUNC_O(SimdInt16ToGray));
 #endif 
+
+        return result;
+    }
+
+    bool RgbToGrayAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Base::RgbToGray), FUNC_O(SimdRgbToGray));
+
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
+            result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Ssse3::RgbToGray), FUNC_O(SimdRgbToGray));
+#endif 
+
+//#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
+//        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+//            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Avx2::BgrToGray), FUNC_O(SimdBgrToGray));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Avx512bw::BgrToGray), FUNC_O(SimdBgrToGray));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+//            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Neon::BgrToGray), FUNC_O(SimdBgrToGray));
+//#endif
 
         return result;
     }

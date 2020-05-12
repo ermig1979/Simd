@@ -95,6 +95,7 @@ namespace Test
     TEST_ADD_GROUP_A00(BgrToRgb);
     TEST_ADD_GROUP_AD0(GrayToBgr);
     TEST_ADD_GROUP_AD0(Int16ToGray);
+    TEST_ADD_GROUP_A00(RgbToGray);
 
     TEST_ADD_GROUP_AD0(BgraToBayer);
     TEST_ADD_GROUP_AD0(BgrToBayer);
