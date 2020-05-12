@@ -323,11 +323,11 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Ssse3::RgbToGray), FUNC_O(SimdRgbToGray));
 #endif 
 
-//#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
-//        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
-//            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Avx2::BgrToGray), FUNC_O(SimdBgrToGray));
-//#endif 
-//
+#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+            result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Avx2::RgbToGray), FUNC_O(SimdRgbToGray));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable)
 //            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Avx512bw::BgrToGray), FUNC_O(SimdBgrToGray));
