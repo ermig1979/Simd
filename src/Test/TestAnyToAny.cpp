@@ -328,15 +328,15 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Avx2::RgbToGray), FUNC_O(SimdRgbToGray));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Avx512bw::BgrToGray), FUNC_O(SimdBgrToGray));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable && W >= Simd::Neon::A)
-//            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Neon::BgrToGray), FUNC_O(SimdBgrToGray));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Avx512bw::RgbToGray), FUNC_O(SimdRgbToGray));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+            result = result && AnyToAnyAutoTest(View::Rgb24, View::Gray8, FUNC_O(Simd::Neon::RgbToGray), FUNC_O(SimdRgbToGray));
+#endif
 
         return result;
     }

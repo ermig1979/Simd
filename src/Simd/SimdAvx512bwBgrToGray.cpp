@@ -93,6 +93,70 @@ namespace Simd
             else
                 BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
         }
+
+        //---------------------------------------------------------------------
+
+        const __m512i K16_RED_BLUE = SIMD_MM512_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
+
+        SIMD_INLINE __m512i PermutedRgbToGray32(__m512i permutedRgb)
+        {
+            const __m512i r0b0 = _mm512_shuffle_epi8(permutedRgb, K8_SUFFLE_BGR_TO_B0R0);
+            const __m512i g000 = _mm512_shuffle_epi8(permutedRgb, K8_SUFFLE_BGR_TO_G000);
+            const __m512i weightedSum = _mm512_add_epi32(_mm512_madd_epi16(g000, K16_GREEN_0000), _mm512_madd_epi16(r0b0, K16_RED_BLUE));
+            return _mm512_srli_epi32(_mm512_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        }
+
+        template <bool align, bool mask> SIMD_INLINE void RgbToGray(const uint8_t* rgb, uint8_t* gray, const __mmask64 ms[4])
+        {
+            const __m512i rgb0 = Load<align, mask>(rgb + 0 * A, ms[0]);
+            const __m512i rgb1 = Load<align, mask>(rgb + 1 * A, ms[1]);
+            const __m512i rgb2 = Load<align, mask>(rgb + 2 * A, ms[2]);
+
+            const __m512i permutedRgb0 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_0, rgb0);
+            const __m512i permutedRgb1 = _mm512_permutex2var_epi32(rgb0, K32_PERMUTE_BGR_TO_BGRA_1, rgb1);
+            const __m512i permutedRgb2 = _mm512_permutex2var_epi32(rgb1, K32_PERMUTE_BGR_TO_BGRA_2, rgb2);
+            const __m512i permutedRgb3 = _mm512_permutexvar_epi32(K32_PERMUTE_BGR_TO_BGRA_3, rgb2);
+
+            __m512i gray0 = PermutedRgbToGray32(permutedRgb0);
+            __m512i gray1 = PermutedRgbToGray32(permutedRgb1);
+            __m512i gray2 = PermutedRgbToGray32(permutedRgb2);
+            __m512i gray3 = PermutedRgbToGray32(permutedRgb3);
+
+            __m512i gray01 = _mm512_packs_epi32(gray0, gray1);
+            __m512i gray23 = _mm512_packs_epi32(gray2, gray3);
+            __m512i gray0123 = _mm512_packus_epi16(gray01, gray23);
+            Store<align, mask>(gray, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, gray0123), ms[3]);
+        }
+
+        template <bool align> void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        {
+            if (align)
+                assert(Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            __mmask64 tailMasks[4];
+            for (size_t c = 0; c < 3; ++c)
+                tailMasks[c] = TailMask64((width - alignedWidth) * 3 - A * c);
+            tailMasks[3] = TailMask64(width - alignedWidth);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    RgbToGray<align, false>(rgb + col * 3, gray + col, tailMasks);
+                if (col < width)
+                    RgbToGray<align, true>(rgb + col * 3, gray + col, tailMasks);
+                rgb += rgbStride;
+                gray += grayStride;
+            }
+        }
+
+        void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
+        {
+            if (Aligned(gray) && Aligned(grayStride) && Aligned(rgb) && Aligned(rgbStride))
+                RgbToGray<true>(rgb, width, height, rgbStride, gray, grayStride);
+            else
+                RgbToGray<false>(rgb, width, height, rgbStride, gray, grayStride);
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 }
