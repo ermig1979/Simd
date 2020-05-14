@@ -781,12 +781,8 @@ namespace Simd
                 BgraToGray(src.planes[0], dst.planes[0]);
                 break;
             case Frame<A>::Rgb24:
-            {
-                View<A> bgr(src.Size(), View<A>::Bgr24);
-                BgraToBgr(src.planes[0], bgr);
-                BgrToRgb(bgr, dst.planes[0]);
+                BgraToRgb(src.planes[0], dst.planes[0]);
                 break;
-            }
             default:
                 assert(0);
             }

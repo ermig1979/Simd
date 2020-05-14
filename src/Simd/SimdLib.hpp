@@ -691,6 +691,26 @@ namespace Simd
 
     /*! @ingroup bgra_conversion
 
+        \fn void BgraToRgb(const View<A>& bgra, View<A>& rgb)
+
+        \short Converts 32-bit BGRA image to 24-bit RGB image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdBgraToRgb.
+
+        \param [in] bgra - an input 32-bit BGRA image.
+        \param [out] rgb - an output 24-bit RGB image.
+    */
+    template<template<class> class A> SIMD_INLINE void BgraToRgb(const View<A>& bgra, View<A>& rgb)
+    {
+        assert(EqualSize(bgra, rgb) && bgra.format == View<A>::Bgra32 && rgb.format == View<A>::Rgb24);
+
+        SimdBgraToRgb(bgra.data, bgra.width, bgra.height, bgra.stride, rgb.data, rgb.stride);
+    }
+
+    /*! @ingroup bgra_conversion
+
         \fn void BgraToYuv420p(const View<A>& bgra, View<A>& y, View<A>& u, View<A>& v)
 
         \short Converts 32-bit BGRA image to YUV420P.
@@ -4146,6 +4166,9 @@ namespace Simd
         case View<A>::Rgb24:
             switch (dst.format)
             {
+            case View<A>::Bgra32:
+                RgbToBgra(src, dst);
+                break;
             case View<A>::Bgr24:
                 BgrToRgb(src, dst);
                 break;
@@ -4165,6 +4188,9 @@ namespace Simd
                 break;
             case View<A>::Gray8:
                 BgraToGray(src, dst);
+                break;
+            case View<A>::Rgb24:
+                BgraToRgb(src, dst);
                 break;
             default:
                 assert(0);

@@ -1351,6 +1351,25 @@ extern "C"
 
     /*! @ingroup bgra_conversion
 
+        \fn void SimdBgraToRgb(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * rgb, size_t rgbStride);
+
+        \short Converts 32-bit BGRA image to 24-bit RGB image.
+
+        All images must have the same width and height.
+
+        \note This function has a C++ wrapper Simd::BgraToRgb(const View<A>& bgra, View<A>& rgb).
+
+        \param [in] bgra - a pointer to pixels data of input 32-bit BGRA image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] bgraStride - a row size of the bgra image.
+        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
+        \param [in] rgbStride - a row size of the rgb image.
+    */
+    SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride);
+
+    /*! @ingroup bgra_conversion
+
         \fn void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
         \short Converts 32-bit BGRA image to YUV420P.
