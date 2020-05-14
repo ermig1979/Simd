@@ -18,6 +18,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2BgrToBgra.cpp" />

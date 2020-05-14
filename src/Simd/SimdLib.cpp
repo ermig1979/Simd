@@ -845,6 +845,11 @@ SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, s
         Avx512bw::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
     else
 #endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
+    else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if(Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
@@ -900,11 +905,11 @@ SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, si
 //        Avx512bw::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::A)
-//        Avx2::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
-//    else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
+    else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if (Ssse3::Enable && width >= Ssse3::A)
         Ssse3::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);

@@ -83,6 +83,11 @@ namespace Simd
             _mm_store_si128(p, a);
         }
 
+        template <int part> SIMD_INLINE void StoreHalf(__m128i* p, __m128i a)
+        {
+            Sse::StoreHalf<part>((float*)p, _mm_castsi128_ps(a));
+        }
+
         template <bool align> SIMD_INLINE void StoreMasked(__m128i * p, __m128i value, __m128i mask)
         {
             __m128i old = Load<align>(p);
@@ -195,6 +200,12 @@ namespace Simd
             __m256i _lo = lo;
             lo = _mm256_permute2x128_si256(lo, hi, 0x20);
             hi = _mm256_permute2x128_si256(_lo, hi, 0x31);
+        }
+
+        template <bool align> SIMD_INLINE void Store24(uint8_t * p, __m256i a)
+        {
+            Sse2::Store<align>((__m128i*)p, _mm256_extractf128_si256(a, 0));
+            Sse2::StoreHalf<0>((__m128i*)p + 1, _mm256_extractf128_si256(a, 1));
         }
     }
 #endif//SIMD_SAVX2_ENABLE
