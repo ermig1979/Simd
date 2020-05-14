@@ -704,24 +704,24 @@ namespace Simd
 
         template<> SIMD_INLINE __m256i BgrToBgra<false>(const __m256i & bgr, const __m256i & alpha)
         {
-            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(bgr, 0x94), K8_BGRA_TO_BGR_SHUFFLE), alpha);
+            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(bgr, 0x94), K8_BGR_TO_BGRA_SHUFFLE), alpha);
         }
 
         template<> SIMD_INLINE __m256i BgrToBgra<true>(const __m256i & bgr, const __m256i & alpha)
         {
-            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(bgr, 0xE9), K8_BGRA_TO_BGR_SHUFFLE), alpha);
+            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(bgr, 0xE9), K8_BGR_TO_BGRA_SHUFFLE), alpha);
         }
 
         template<bool tail> __m256i RgbToBgra(const __m256i & rgb, const __m256i & alpha);
 
         template<> SIMD_INLINE __m256i RgbToBgra<false>(const __m256i & rgb, const __m256i & alpha)
         {
-            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(rgb, 0x94), K8_BGRA_TO_RGB_SHUFFLE), alpha);
+            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(rgb, 0x94), K8_RGB_TO_BGRA_SHUFFLE), alpha);
         }
 
         template<> SIMD_INLINE __m256i RgbToBgra<true>(const __m256i & rgb, const __m256i & alpha)
         {
-            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(rgb, 0xE9), K8_BGRA_TO_RGB_SHUFFLE), alpha);
+            return _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(rgb, 0xE9), K8_RGB_TO_BGRA_SHUFFLE), alpha);
         }
     }
 #endif// SIMD_AVX2_ENABLE

@@ -159,20 +159,20 @@ namespace Test
             result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Ssse3::RgbToBgra), FUNC(SimdRgbToBgra));
 #endif 
 
-/*#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
+#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
         if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
-            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx2::BgrToBgra), FUNC(SimdBgrToBgra));
+            result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Avx2::RgbToBgra), FUNC(SimdRgbToBgra));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
-            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Avx512bw::BgrToBgra), FUNC(SimdBgrToBgra));
+            result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Avx512bw::RgbToBgra), FUNC(SimdRgbToBgra));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
-            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Neon::BgrToBgra), FUNC(SimdBgrToBgra));
-#endif*/ 
+            result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Neon::RgbToBgra), FUNC(SimdRgbToBgra));
+#endif
 
         return result;
     }
