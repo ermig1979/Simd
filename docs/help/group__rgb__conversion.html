@@ -50,6 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga82e35d086903cd929da5fae2ef9e37d3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rgb__conversion.html#ga82e35d086903cd929da5fae2ef9e37d3">SimdRgbToBgra</a> (const uint8_t *rgb, size_t width, size_t height, size_t rgbStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha)</td></tr>
+<tr class="memdesc:ga82e35d086903cd929da5fae2ef9e37d3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit RGB image to 32-bit BGRA image.  <a href="group__rgb__conversion.html#ga82e35d086903cd929da5fae2ef9e37d3">More...</a><br /></td></tr>
+<tr class="separator:ga82e35d086903cd929da5fae2ef9e37d3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0e3435138ce8ebed7ede8f27d1994dc3"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__rgb__conversion.html#ga0e3435138ce8ebed7ede8f27d1994dc3">SimdRgbToGray</a> (const uint8_t *rgb, size_t width, size_t height, size_t rgbStride, uint8_t *gray, size_t grayStride)</td></tr>
 <tr class="memdesc:ga0e3435138ce8ebed7ede8f27d1994dc3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit RGB image to 8-bit gray image.  <a href="group__rgb__conversion.html#ga0e3435138ce8ebed7ede8f27d1994dc3">More...</a><br /></td></tr>
 <tr class="separator:ga0e3435138ce8ebed7ede8f27d1994dc3"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -57,10 +60,88 @@ Functions</h2></td></tr>
 <tr class="memitem:gac2e874a67829f06f51ebad6d1f73f065"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__rgb__conversion.html#gac2e874a67829f06f51ebad6d1f73f065">RgbToGray</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;rgb, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;gray)</td></tr>
 <tr class="memdesc:gac2e874a67829f06f51ebad6d1f73f065"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit RGB image to 8-bit gray image.  <a href="group__rgb__conversion.html#gac2e874a67829f06f51ebad6d1f73f065">More...</a><br /></td></tr>
 <tr class="separator:gac2e874a67829f06f51ebad6d1f73f065"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga4fc326e6f0327331d7f02d7d3b87fc0e"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga4fc326e6f0327331d7f02d7d3b87fc0e"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__rgb__conversion.html#ga4fc326e6f0327331d7f02d7d3b87fc0e">RgbToBgra</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;rgb, <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;bgra, uint8_t alpha=0xFF)</td></tr>
+<tr class="memdesc:ga4fc326e6f0327331d7f02d7d3b87fc0e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts 24-bit RGB image to 32-bit BGRA image.  <a href="group__rgb__conversion.html#ga4fc326e6f0327331d7f02d7d3b87fc0e">More...</a><br /></td></tr>
+<tr class="separator:ga4fc326e6f0327331d7f02d7d3b87fc0e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for RGB-24 image conversions. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga82e35d086903cd929da5fae2ef9e37d3"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga82e35d086903cd929da5fae2ef9e37d3">&#9670;&nbsp;</a></span>SimdRgbToBgra()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdRgbToBgra </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>rgb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>rgbStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>bgra</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>bgraStride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>alpha</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 24-bit RGB image to 32-bit BGRA image. </p>
+<p>All images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper Simd::RgbToBgra(const View&lt;A&gt;&amp; rgb, View&lt;A&gt;&amp; bgra, uint8_t alpha).</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgb</td><td>- a pointer to pixels data of input 24-bit RGB image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgbStride</td><td>- a row size of the rgb image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">bgra</td><td>- a pointer to pixels data of output 32-bit BGRA image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bgraStride</td><td>- a row size of the bgra image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="ga0e3435138ce8ebed7ede8f27d1994dc3"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga0e3435138ce8ebed7ede8f27d1994dc3">&#9670;&nbsp;</a></span>SimdRgbToGray()</h2>
 
@@ -161,6 +242,52 @@ Functions</h2></td></tr>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">rgb</td><td>- an input 24-bit RGB image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">gray</td><td>- an output 8-bit gray image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga4fc326e6f0327331d7f02d7d3b87fc0e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga4fc326e6f0327331d7f02d7d3b87fc0e">&#9670;&nbsp;</a></span>RgbToBgra()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void RgbToBgra </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rgb</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>bgra</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t&#160;</td>
+          <td class="paramname"><em>alpha</em> = <code>0xFF</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Converts 24-bit RGB image to 32-bit BGRA image. </p>
+<p>All images must have the same width and height.</p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__rgb__conversion.html#ga82e35d086903cd929da5fae2ef9e37d3" title="Converts 24-bit RGB image to 32-bit BGRA image.">SimdRgbToBgra</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rgb</td><td>- an input 24-bit RGB image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">bgra</td><td>- an output 32-bit BGRA image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a value of alpha channel. It is equal to 256 by default. </td></tr>
   </table>
   </dd>
 </dl>

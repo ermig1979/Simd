@@ -4261,6 +4261,31 @@ SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t s
     ((Resizer*)resizer)->Run(src, srcStride, dst, dstStride);
 }
 
+SIMD_API void SimdRgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+{
+//#ifdef SIMD_AVX512BW_ENABLE
+//    if (Avx512bw::Enable)
+//        Avx512bw::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+//    else
+//#endif
+//#if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
+//    if (Avx2::Enable && width >= Avx2::A)
+//        Avx2::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+//    else
+//#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::RgbToBgra(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
+    else
+#endif
+//#ifdef SIMD_NEON_ENABLE
+//    if (Neon::Enable && width >= Neon::A)
+//        Neon::BgrToBgra(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
+//    else
+//#endif
+        Base::RgbToBgra(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
+}
+
 SIMD_API void SimdRgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

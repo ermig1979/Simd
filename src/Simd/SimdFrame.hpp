@@ -865,19 +865,11 @@ namespace Simd
                 break;
             }
             case Frame<A>::Bgra32:
-            {
-                View<A> bgr(src.Size(), View<A>::Bgr24);
-                BgrToRgb(src.planes[0], bgr);
-                BgrToBgra(bgr, dst.planes[0]);
+                RgbToBgra(src.planes[0], dst.planes[0]);
                 break;
-            }
             case Frame<A>::Gray8:
-            {
-                View<A> bgr(src.Size(), View<A>::Bgr24);
-                BgrToRgb(src.planes[0], bgr);
-                BgrToGray(bgr, dst.planes[0]);
+                RgbToGray(src.planes[0], dst.planes[0]);
                 break;
-            }
             case Frame<A>::Rgb24:
                 BgrToRgb(src.planes[0], dst.planes[0]);
                 break;

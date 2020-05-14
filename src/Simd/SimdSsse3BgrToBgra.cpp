@@ -66,6 +66,46 @@ namespace Simd
             else
                 BgrToBgra<false>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
         }
+
+        //---------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void RgbToBgra(const uint8_t* rgb, uint8_t* bgra, __m128i alpha, __m128i shuffle)
+        {
+            Store<align>((__m128i*)bgra + 0, _mm_or_si128(alpha, _mm_shuffle_epi8(Load<align>((__m128i*)(rgb + 0)), shuffle)));
+            Store<align>((__m128i*)bgra + 1, _mm_or_si128(alpha, _mm_shuffle_epi8(Load<false>((__m128i*)(rgb + 12)), shuffle)));
+            Store<align>((__m128i*)bgra + 2, _mm_or_si128(alpha, _mm_shuffle_epi8(Load<false>((__m128i*)(rgb + 24)), shuffle)));
+            Store<align>((__m128i*)bgra + 3, _mm_or_si128(alpha, _mm_shuffle_epi8(_mm_srli_si128(Load<align>((__m128i*)(rgb + 32)), 4), shuffle)));
+        }
+
+        template <bool align> void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(bgrStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+
+            __m128i _alpha = _mm_slli_si128(_mm_set1_epi32(alpha), 3);
+            __m128i _shuffle = _mm_setr_epi8(0x2, 0x1, 0x0, -1, 0x5, 0x4, 0x3, -1, 0x8, 0x7, 0x6, -1, 0xB, 0xA, 0x9, -1);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    RgbToBgra<align>(rgb + 3 * col, bgra + 4 * col, _alpha, _shuffle);
+                if (width != alignedWidth)
+                    RgbToBgra<false>(rgb + 3 * (width - A), bgra + 4 * (width - A), _alpha, _shuffle);
+                 rgb += rgbStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(rgbStride))
+                RgbToBgra<true>(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
+            else
+                RgbToBgra<false>(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
+        }
     }
 #endif// SIMD_SSSE3_ENABLE
 }
