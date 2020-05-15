@@ -92,9 +92,9 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, colBgra = 0, colRgb = 0; col < alignedWidth; col += A, colBgra += A4, colRgb += A3)
-                    BgraToBgr<align>(bgra + colBgra, rgb + colRgb);
+                    BgraToRgb<align>(bgra + colBgra, rgb + colRgb);
                 if (width != alignedWidth)
-                    BgraToBgr<false>(bgra + 4 * (width - A), rgb + 3 * (width - A));
+                    BgraToRgb<false>(bgra + 4 * (width - A), rgb + 3 * (width - A));
                 bgra += bgraStride;
                 rgb += rgbStride;
             }
