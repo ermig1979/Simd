@@ -900,11 +900,11 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
 
 SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride)
 {
-//#ifdef SIMD_AVX512BW_ENABLE
-//    if (Avx512bw::Enable)
-//        Avx512bw::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
-//    else
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
@@ -915,11 +915,11 @@ SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, si
         Ssse3::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
     else
 #endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::A)
-//        Neon::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
-//    else
-//#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
+    else
+#endif
         Base::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
 }
 

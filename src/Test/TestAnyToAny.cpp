@@ -184,7 +184,7 @@ namespace Test
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Rgb24, FUNC_O(Simd::Avx2::BgraToRgb), FUNC_O(SimdBgraToRgb));
 #endif 
 
-/*#ifdef SIMD_AVX512BW_ENABLE
+#ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Rgb24, FUNC_O(Simd::Avx512bw::BgraToRgb), FUNC_O(SimdBgraToRgb));
 #endif 
@@ -192,7 +192,7 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Bgra32, View::Rgb24, FUNC_O(Simd::Neon::BgraToRgb), FUNC_O(SimdBgraToRgb));
-#endif*/ 
+#endif
 
         return result;
     }

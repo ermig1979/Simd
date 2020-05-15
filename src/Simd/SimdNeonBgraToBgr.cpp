@@ -66,6 +66,47 @@ namespace Simd
             else
                 BgraToBgr<false>(bgra, width, height, bgraStride, bgr, bgrStride);
         }
+
+        //---------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void BgraToRgb(const uint8_t* bgra, uint8_t* rgb)
+        {
+            uint8x16x4_t _bgra = Load4<align>(bgra);
+            uint8x16x3_t _rgb;
+            _rgb.val[0] = _bgra.val[2];
+            _rgb.val[1] = _bgra.val[1];
+            _rgb.val[2] = _bgra.val[0];
+            Store3<align>(rgb, _rgb);
+        }
+
+        template <bool align> void BgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(rgbStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            if (width == alignedWidth)
+                alignedWidth -= A;
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, colBgra = 0, colRgb = 0; col < alignedWidth; col += A, colBgra += A4, colRgb += A3)
+                    BgraToBgr<align>(bgra + colBgra, rgb + colRgb);
+                if (width != alignedWidth)
+                    BgraToBgr<false>(bgra + 4 * (width - A), rgb + 3 * (width - A));
+                bgra += bgraStride;
+                rgb += rgbStride;
+            }
+        }
+
+        void BgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride)
+        {
+            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(rgbStride))
+                BgraToRgb<true>(bgra, width, height, bgraStride, rgb, rgbStride);
+            else
+                BgraToRgb<false>(bgra, width, height, bgraStride, rgb, rgbStride);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }
