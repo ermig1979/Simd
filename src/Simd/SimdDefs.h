@@ -38,6 +38,54 @@
 #include <cmath>
 #include <limits>
 
+#if defined(SIMD_SSE_DISABLE) && !defined(SIMD_SSE2_DISABLE)
+#define SIMD_SSE2_DISABLE
+#endif
+
+#if defined(SIMD_SSE2_DISABLE) && !defined(SIMD_SSE3_DISABLE)
+#define SIMD_SSE3_DISABLE
+#endif
+
+#if defined(SIMD_SSE3_DISABLE) && !defined(SIMD_SSSE3_DISABLE)
+#define SIMD_SSSE3_DISABLE
+#endif
+
+#if defined(SIMD_SSSE3_DISABLE) && !defined(SIMD_SSE41_DISABLE)
+#define SIMD_SSE41_DISABLE
+#endif
+
+#if defined(SIMD_SSE41_DISABLE) && !defined(SIMD_SSE42_DISABLE)
+#define SIMD_SSE42_DISABLE
+#endif
+
+#if defined(SIMD_SSE41_DISABLE) && !defined(SIMD_SSE42_DISABLE)
+#define SIMD_SSE42_DISABLE
+#endif
+
+#if defined(SIMD_SSE42_DISABLE) && !defined(SIMD_AVX_DISABLE)
+#define SIMD_AVX_DISABLE
+#endif
+
+#if defined(SIMD_AVX_DISABLE) && !defined(SIMD_AVX2_DISABLE)
+#define SIMD_AVX2_DISABLE
+#endif
+
+#if defined(SIMD_AVX2_DISABLE) && !defined(SIMD_AVX512F_DISABLE)
+#define SIMD_AVX512F_DISABLE
+#endif
+
+#if defined(SIMD_AVX512F_DISABLE) && !defined(SIMD_AVX512BW_DISABLE)
+#define SIMD_AVX512BW_DISABLE
+#endif
+
+#if defined(SIMD_AVX512BW_DISABLE) && !defined(SIMD_AVX512VNNI_DISABLE)
+#define SIMD_AVX512VNNI_DISABLE
+#endif
+
+#if defined(SIMD_VMX_DISABLE) && !defined(SIMD_VSX_DISABLE)
+#define SIMD_VSX_DISABLE
+#endif
+
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
 #define SIMD_ALIGNED(x) __declspec(align(x))
