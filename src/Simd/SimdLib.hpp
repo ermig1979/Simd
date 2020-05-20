@@ -2358,6 +2358,24 @@ namespace Simd
         SimdLbpEstimate(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
     }
 
+    /*! @ingroup memory
+
+        \fn void LitterCpuCache(size_t k = 2)
+
+        \short It creates a large buffer and fills it. 
+
+        This function litters CPU cache. It is useful for test purposes.
+
+        \param [in] k - a boosting coefficient of stub buffer size relative to CPU L3 cache size. Its default value is 2.
+    */
+    SIMD_INLINE void LitterCpuCache(size_t k = 2)
+    {
+        size_t size = SimdCpuInfo(SimdCpuInfoCacheL3)*k;
+        uint8_t * buffer = (uint8_t*)SimdAllocate(size, SimdAlignment());
+        SimdFillBgra(buffer, size, size / 4, 1, 0, 1, 2, 3);
+        SimdFree(buffer);
+    }
+
     /*! @ingroup other_filter
 
         \fn void MeanFilter3x3(const View<A>& src, View<A>& dst)
