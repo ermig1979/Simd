@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -298,15 +298,15 @@ namespace Test
             result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Avx2::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Neon::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Neon::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+#endif
 
         return result;
     }
@@ -327,15 +327,15 @@ namespace Test
             result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx2::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Neon::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Neon::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+#endif
 
         return result;
     }
@@ -356,15 +356,15 @@ namespace Test
             result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx2::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx512bw::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Neon::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx512bw::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Neon::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+#endif
 
         return result;
     }

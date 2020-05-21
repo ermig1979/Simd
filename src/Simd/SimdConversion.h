@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar,
+* Copyright (c) 2011-2020 Yermalayeu Ihar,
 *               2014-2015 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -1178,6 +1178,15 @@ namespace Simd
             bgr.val[0] = PackSaturatedI16(YuvToBlue(yLo, uLo), YuvToBlue(yHi, uHi));
             bgr.val[1] = PackSaturatedI16(YuvToGreen(yLo, uLo, vLo), YuvToGreen(yHi, uHi, vHi));
             bgr.val[2] = PackSaturatedI16(YuvToRed(yLo, vLo), YuvToRed(yHi, vHi));
+        }
+
+        SIMD_INLINE void YuvToRgb(uint8x16_t y, uint8x16_t u, uint8x16_t v, uint8x16x3_t& rgb)
+        {
+            int16x8_t yLo = AdjustY<0>(y), uLo = AdjustUV<0>(u), vLo = AdjustUV<0>(v);
+            int16x8_t yHi = AdjustY<1>(y), uHi = AdjustUV<1>(u), vHi = AdjustUV<1>(v);
+            rgb.val[0] = PackSaturatedI16(YuvToRed(yLo, vLo), YuvToRed(yHi, vHi));
+            rgb.val[1] = PackSaturatedI16(YuvToGreen(yLo, uLo, vLo), YuvToGreen(yHi, uHi, vHi));
+            rgb.val[2] = PackSaturatedI16(YuvToBlue(yLo, uLo), YuvToBlue(yHi, uHi));
         }
     }
 #endif// SIMD_NEON_ENABLE
