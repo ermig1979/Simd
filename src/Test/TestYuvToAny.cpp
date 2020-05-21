@@ -288,11 +288,11 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Base::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
 
-//#ifdef SIMD_SSSE3_ENABLE
-//        if (Simd::Ssse3::Enable)
-//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
-//#endif 
-//
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable)
+            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Avx2::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
@@ -317,11 +317,11 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Base::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
 
-//#ifdef SIMD_SSSE3_ENABLE
-//        if (Simd::Ssse3::Enable)
-//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
-//#endif 
-//
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable)
+            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx2::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
@@ -346,11 +346,11 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Base::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
 
-//#ifdef SIMD_SSSE3_ENABLE
-//        if (Simd::Ssse3::Enable)
-//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Ssse3::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
-//#endif 
-//
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Ssse3::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx2::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
