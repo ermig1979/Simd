@@ -7404,6 +7404,80 @@ extern "C"
     SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
         size_t width, size_t height, uint8_t * hue, size_t hueStride);
 
+    /*! @ingroup yuv_conversion
+
+        \fn void SimdYuv420pToRgb(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride);
+
+        \short Converts YUV420P image to 24-bit RGB image.
+
+        The input Y and output RGB images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrappers: Simd::Yuv420pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb);
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
+        \param [in] rgbStride - a row size of the rgb image.
+    */
+    SIMD_API void SimdYuv420pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        size_t width, size_t height, uint8_t* rgb, size_t rgbStride);
+
+    /*! @ingroup yuv_conversion
+
+        \fn void SimdYuv422pToRgb(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride);
+
+        \short Converts YUV422P image to 24-bit RGB image.
+
+        The input Y and output RGB images must have the same width and height.
+        The input U and V images must have the same width and height (their width is equal to half width of Y component).
+
+        \note This function has a C++ wrappers: Simd::Yuv422pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb);
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
+        \param [in] rgbStride - a row size of the rgb image.
+    */
+    SIMD_API void SimdYuv422pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        size_t width, size_t height, uint8_t* rgb, size_t rgbStride);
+
+    /*! @ingroup yuv_conversion
+
+        \fn void SimdYuv444pToRgb(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride);
+
+        \short Converts YUV444P image to 24-bit RGB image.
+
+        The input Y, U, V and output RGB images must have the same width and height.
+
+        \note This function has a C++ wrappers: Simd::Yuv444pToRgb(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& rgb);
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
+        \param [in] rgbStride - a row size of the rgb image.
+    */
+    SIMD_API void SimdYuv444pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        size_t width, size_t height, uint8_t* rgb, size_t rgbStride);
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

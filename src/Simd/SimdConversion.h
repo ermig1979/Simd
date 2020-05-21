@@ -90,6 +90,13 @@ namespace Simd
             bgra[3] = alpha;
         }
 
+        SIMD_INLINE void YuvToRgb(int y, int u, int v, uint8_t* rgb)
+        {
+            rgb[0] = YuvToRed(y, v);
+            rgb[1] = YuvToGreen(y, u, v);
+            rgb[2] = YuvToBlue(y, u);
+        }
+
         SIMD_INLINE void BgrToHsv(int blue, int green, int red, uint8_t * hsv)
         {
             int max = Max(red, Max(green, blue));

@@ -83,5 +83,64 @@ namespace Simd
                 bgr += bgrStride;
             }
         }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE void Yuv422pToRgb(const uint8_t* y, int u, int v, uint8_t* rgb)
+        {
+            YuvToRgb(y[0], u, v, rgb);
+            YuvToRgb(y[1], u, v, rgb + 3);
+        }
+
+        void Yuv420pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colRgb = 0; colY < width; colY += 2, colUV++, colRgb += 6)
+                {
+                    int u_ = u[colUV];
+                    int v_ = v[colUV];
+                    Yuv422pToRgb(y + colY, u_, v_, rgb + colRgb);
+                    Yuv422pToRgb(y + yStride + colY, u_, v_, rgb + rgbStride + colRgb);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                rgb += 2 * rgbStride;
+            }
+        }
+
+        void Yuv422pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
+        {
+            assert((width % 2 == 0) && (width >= 2));
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t colUV = 0, colY = 0, colRgb = 0; colY < width; colY += 2, colUV++, colRgb += 6)
+                    Yuv422pToRgb(y + colY, u[colUV], v[colUV], rgb + colRgb);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                rgb += rgbStride;
+            }
+        }
+
+        void Yuv444pToRgb(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* rgb, size_t rgbStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, colRgb = 0; col < width; col++, colRgb += 3)
+                    YuvToRgb(y[col], u[col], v[col], rgb + colRgb);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                rgb += rgbStride;
+            }
+        }
     }
 }

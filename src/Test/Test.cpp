@@ -414,6 +414,9 @@ namespace Test
     TEST_ADD_GROUP_AD0(Yuv444pToHsv);
     TEST_ADD_GROUP_AD0(Yuv444pToHue);
     TEST_ADD_GROUP_AD0(Yuv420pToHue);
+    TEST_ADD_GROUP_A00(Yuv444pToRgb);
+    TEST_ADD_GROUP_A00(Yuv422pToRgb);
+    TEST_ADD_GROUP_A00(Yuv420pToRgb);
 
     TEST_ADD_GROUP_A00(Yuva420pToBgra);
     TEST_ADD_GROUP_AD0(Yuv444pToBgra);
@@ -633,7 +636,7 @@ namespace Test
                 for (size_t i = 0; i < tasks.size(); ++i)
                     progress += tasks[i]->Progress();
                 progress /= double(tasks.size());
-                std::cout << "\rTest progress: " << std::fixed << std::setprecision(1) << progress*100.0 << "%";
+                std::cout << "\rTest progress: " << std::fixed << std::setprecision(1) << progress*100.0 << "%" << std::flush;
                 Test::Sleep(40);
             } while (progress < 1.0 && !Test::Task::s_stopped);
             std::cout << std::endl << std::endl;

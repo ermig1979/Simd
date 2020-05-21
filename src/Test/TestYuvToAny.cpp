@@ -282,6 +282,93 @@ namespace Test
         return result;
     }
 
+    bool Yuv444pToRgbAutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Base::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+
+//#ifdef SIMD_SSSE3_ENABLE
+//        if (Simd::Ssse3::Enable)
+//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Avx2::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Neon::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+//#endif
+
+        return result;
+    }
+
+    bool Yuv422pToRgbAutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Base::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+
+//#ifdef SIMD_SSSE3_ENABLE
+//        if (Simd::Ssse3::Enable)
+//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx2::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Neon::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+//#endif
+
+        return result;
+    }
+
+    bool Yuv420pToRgbAutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Base::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+
+//#ifdef SIMD_SSSE3_ENABLE
+//        if (Simd::Ssse3::Enable)
+//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Ssse3::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx2::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx512bw::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Neon::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+//#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool YuvToAnyDataTest(bool create, int width, int height, int dx, int dy, View::Format dstType, const Func & f, int maxDifference = 0)
