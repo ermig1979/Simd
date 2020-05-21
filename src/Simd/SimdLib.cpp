@@ -6256,11 +6256,11 @@ SIMD_API void SimdYuv420pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
 //        Avx512bw::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::DA)
-//        Avx2::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
-//    else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::DA)
+        Avx2::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
+    else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if (Ssse3::Enable && width >= Ssse3::DA)
         Ssse3::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
@@ -6282,11 +6282,11 @@ SIMD_API void SimdYuv422pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
 //        Avx512bw::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::DA)
-//        Avx2::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
-//    else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::DA)
+        Avx2::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
+    else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if (Ssse3::Enable && width >= Ssse3::DA)
         Ssse3::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
@@ -6308,11 +6308,11 @@ SIMD_API void SimdYuv444pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
 //        Avx512bw::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
 //    else
 //#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::A)
-//        Avx2::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
-//    else
-//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
+    else
+#endif
 #ifdef SIMD_SSSE3_ENABLE
     if (Ssse3::Enable && width >= Ssse3::A)
         Ssse3::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
