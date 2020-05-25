@@ -97,7 +97,10 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[kc]);
                             maxW = Simd::Max(maxW, pNormW[kc]);
                         }
-                    scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
+                    float abs = Simd::Max(::abs(maxW), ::abs(minW));
+                    if(pSrcB)
+                        abs = Simd::Max(abs, ::abs(pSrcB[d]) / float(128 * 256 * 256));
+                    scale = 127.0f / abs;
                     for (size_t k = 0, kc = 0; k < K; ++k)
                         for (size_t c = 0; c < C; ++c, ++kc)
                             if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i))
@@ -123,7 +126,10 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[ck]);
                             maxW = Simd::Max(maxW, pNormW[ck]);
                         }
-                    scale = 127.0f / Simd::Max(abs(maxW), abs(minW));
+                    float abs = Simd::Max(::abs(maxW), ::abs(minW));
+                    if (pSrcB)
+                        abs = Simd::Max(abs, ::abs(pSrcB[d]) / float(128 * 256 * 256));
+                    scale = 127.0f / abs;
                     for (size_t c = 0, ck = 0; c < C; ++c)
                         for (size_t k = 0; k < K; ++k, ++ck)
                             if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i))
@@ -165,7 +171,8 @@ namespace Simd
                 pSrcW += CK * D;
                 pDstW += CK * D;
             }
-            pSrcB += D;
+            if(pSrcB)
+                pSrcB += D;
             pDstB += D;
             pDstS += D;
             pSrcScale += C;
