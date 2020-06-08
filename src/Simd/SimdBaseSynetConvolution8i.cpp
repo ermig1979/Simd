@@ -199,7 +199,7 @@ namespace Simd
         {
             if (!_src8u)
                 _convertSrc((float*)src + b * _sizeS, _merge, p.srcC, p.srcH, p.srcW, p.srcF, _srcCvt.scale.data, _srcCvt.shift.data, src8u, p.compatibility);
-            Forward8u(_src8u ? src + b * _sizeS : src8u, buf, dst + b * (_dst8u ? sizeof(uint8_t) : sizeof(float)));
+            Forward8u(_src8u ? src + b * _sizeS : src8u, buf, dst + b * _sizeD * (_dst8u ? sizeof(uint8_t) : sizeof(float)));
         }
     }
 
