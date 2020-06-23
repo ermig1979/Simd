@@ -32,6 +32,7 @@ namespace Simd
     {
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
         {
+            int upper = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MAX : Base::U8_PRECISE_MAX;
             for (size_t b = 0; b < batch; ++b)
             {
                 if (format == SimdTensorFormatNchw)
@@ -43,7 +44,7 @@ namespace Simd
                         for (size_t h = 0; h < height; ++h)
                         {
                             for (size_t w = 0; w < width; ++w)
-                                dst[w] = SynetConvert32fTo8u(src[w], _scale, _shift);
+                                dst[w] = SynetConvert32fTo8u(src[w], _scale, _shift, 0, upper);
                             src += width;
                             dst += width;
                         }
@@ -56,7 +57,7 @@ namespace Simd
                         for (size_t w = 0; w < width; ++w)
                         {
                             for (size_t c = 0; c < channels; ++c)
-                                dst[c] = SynetConvert32fTo8u(src[c], scale[c], shift[c]);
+                                dst[c] = SynetConvert32fTo8u(src[c], scale[c], shift[c], 0, upper);
                             src += channels;
                             dst += channels;
                         }

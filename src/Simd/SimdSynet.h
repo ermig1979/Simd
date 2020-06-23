@@ -30,6 +30,18 @@ namespace Simd
 {
     namespace Base
     {
+        const int U8_PRECISE_MIN = 0;
+        const int U8_PRECISE_MAX = 255;
+        const int I8_PRECISE_MAX = 127;
+        const int I8_PRECISE_MIN = -128;
+
+        const int U8_NARROWED_MIN = 0;
+        const int U8_NARROWED_MAX = 180;
+        const int I8_NARROWED_MAX = 90;
+        const int I8_NARROWED_MIN = -90;
+
+        //---------------------------------------------------------------------
+
         SIMD_INLINE bool NchwCompatible(size_t channels, size_t spatial, SimdTensorFormatType format)
         {
             return (format == SimdTensorFormatNchw && spatial != 1) || (format == SimdTensorFormatNhwc && channels == 1);
@@ -50,20 +62,53 @@ namespace Simd
             return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaNoTail;
         }
 
-        SIMD_INLINE bool Int8Overflow(SimdSynetCompatibilityType compatibility)
+        SIMD_INLINE bool Overflow(SimdSynetCompatibilityType compatibility)
         {
-            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibilityFmaNoTail;
+            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iOverflow;
         }
 
-        SIMD_INLINE uint8_t SynetConvert32fTo8u(float value, float scale, float shift)
+        SIMD_INLINE bool Narrowed(SimdSynetCompatibilityType compatibility)
         {
-            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), 0, 255);
+            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iNarrowed;
         }
 
-        SIMD_INLINE int8_t SynetConvert32fTo8i(float value, float scale, float shift)
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE uint8_t SynetConvert32fTo8u(float value, float scale, float shift, int lower, int upper)
         {
-            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), -128, 127);
+            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
         }
+
+        template<bool narrow> SIMD_INLINE uint8_t SynetConvert32fTo8u(float value, float scale, float shift);
+
+        template<> SIMD_INLINE uint8_t SynetConvert32fTo8u<false>(float value, float scale, float shift)
+        {
+            return SynetConvert32fTo8u(value, scale, shift, U8_PRECISE_MIN, U8_PRECISE_MAX);
+        }
+
+        template<> SIMD_INLINE uint8_t SynetConvert32fTo8u<true>(float value, float scale, float shift)
+        {
+            return SynetConvert32fTo8u(value, scale, shift, U8_NARROWED_MIN, U8_NARROWED_MAX);
+        }
+
+        SIMD_INLINE int8_t SynetConvert32fTo8i(float value, float scale, float shift, int lower, int upper)
+        {
+            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
+        }
+
+        template<bool narrow> SIMD_INLINE int8_t SynetConvert32fTo8i(float value, float scale, float shift);
+
+        template<> SIMD_INLINE int8_t SynetConvert32fTo8i<false>(float value, float scale, float shift)
+        {
+            return SynetConvert32fTo8i(value, scale, shift, I8_PRECISE_MIN, I8_PRECISE_MAX);
+        }
+
+        template<> SIMD_INLINE int8_t SynetConvert32fTo8i<true>(float value, float scale, float shift)
+        {
+            return SynetConvert32fTo8i(value, scale, shift, I8_NARROWED_MIN, I8_NARROWED_MAX);
+        }
+
+        //---------------------------------------------------------------------
 
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
 

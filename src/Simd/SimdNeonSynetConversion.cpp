@@ -33,18 +33,19 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, float32x4_t scale, float32x4_t shift, uint8_t* dst)
+        template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, float32x4_t scale, float32x4_t shift, uint8x8_t upper, uint8_t* dst)
         {
             int32x4_t i32 = Round(Fmadd<nofma>(Load<align>(src), scale, shift));
-            *((int32_t*)dst) = vget_lane_s32(vreinterpret_s32_u8(vqmovun_s16(vcombine_s16(vmovn_s32(i32), vcreate_s16(0)))), 0);
+            *((int32_t*)dst) = vget_lane_s32(vreinterpret_s32_u8(vmax_u8(vqmovun_s16(vcombine_s16(vmovn_s32(i32), vcreate_s16(0))), upper)), 0);
         }
 
-        template <bool align, bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, uint8_t* dst)
+        template <bool align, bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, int upper, uint8_t* dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(dst) && Aligned(spatial, F));
 
             size_t spatialF = AlignLo(spatial, F);
+            uint8x8_t _upper = vdup_n_u8(upper);
             for (size_t b = 0; b < batch; ++b)
             {
                 for (size_t c = 0; c < channels; ++c)
@@ -53,45 +54,45 @@ namespace Simd
                     float32x4_t _shift = vdupq_n_f32(shift[c]);
                     size_t s = 0;
                     for (; s < spatialF; s += F)
-                        SynetConvert32fTo8u<align, nofma>(src + s, _scale, _shift, dst + s);
+                        SynetConvert32fTo8u<align, nofma>(src + s, _scale, _shift, _upper, dst + s);
                     for (; s < spatial; s += 1)
-                        dst[s] = Base::SynetConvert32fTo8u(src[s], scale[c], shift[c]);
+                        dst[s] = Base::SynetConvert32fTo8u(src[s], scale[c], shift[c], 0, upper);
                     src += spatial;
                     dst += spatial;
                 }
             }
         }
 
-        template <bool align, bool nofma> void SynetConvert32fTo8uNhwc(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, uint8_t* dst)
+        template <bool align, bool nofma> void SynetConvert32fTo8uNhwc(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, int upper, uint8_t* dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(dst) && Aligned(channels, F) && Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
-
+            uint8x8_t _upper = vdup_n_u8(upper);
             for (size_t b = 0; b < batch; ++b)
             {
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c = 0;
                     for (; c < channelsF; c += F)
-                        SynetConvert32fTo8u<align, nofma>(src + c, Load<align>(scale + c), Load<align>(shift + c), dst + c);
+                        SynetConvert32fTo8u<align, nofma>(src + c, Load<align>(scale + c), Load<align>(shift + c), _upper, dst + c);
                     for (; c < channels; ++c)
-                        dst[c] = Base::SynetConvert32fTo8u(src[c], scale[c], shift[c]);
+                        dst[c] = Base::SynetConvert32fTo8u(src[c], scale[c], shift[c], 0, upper);
                     src += channels;
                     dst += channels;
                 }
             }
         }
 
-        template <bool align, bool nofma> void SynetConvert32fTo8uNhwc3(const float* src, size_t batch, size_t spatial, const float* scale, const float* shift, uint8_t* dst)
+        template <bool align, bool nofma> void SynetConvert32fTo8uNhwc3(const float* src, size_t batch, size_t spatial, const float* scale, const float* shift, int upper, uint8_t* dst)
         {
             if (align)
                 assert(Aligned(src) && Aligned(dst) && Aligned(spatial, A));
 
             size_t spatial3 = spatial * 3;
             size_t spatial3F = AlignLo(spatial, F) * 3;
-
+            uint8x8_t _upper = vdup_n_u8(upper);
             float _scale[F * 3], _shift[F * 3];
             for (size_t i = 0; i < F; ++i)
                 for (size_t c = 0; c < 3; ++c)
@@ -109,48 +110,48 @@ namespace Simd
                 size_t s = 0;
                 for (; s < spatial3F; s += 3 * F)
                 {
-                    SynetConvert32fTo8u<align, nofma>(src + 0 * F, _scale0, _shift0, dst + 0 * F);
-                    SynetConvert32fTo8u<align, nofma>(src + 1 * F, _scale1, _shift1, dst + 1 * F);
-                    SynetConvert32fTo8u<align, nofma>(src + 2 * F, _scale2, _shift2, dst + 2 * F);
+                    SynetConvert32fTo8u<align, nofma>(src + 0 * F, _scale0, _shift0, _upper, dst + 0 * F);
+                    SynetConvert32fTo8u<align, nofma>(src + 1 * F, _scale1, _shift1, _upper, dst + 1 * F);
+                    SynetConvert32fTo8u<align, nofma>(src + 2 * F, _scale2, _shift2, _upper, dst + 2 * F);
                     src += 3 * F;
                     dst += 3 * F;
                 }
                 for (; s < spatial3; s += 3)
                 {
-                    dst[0] = Base::SynetConvert32fTo8u(src[0], scale[0], shift[0]);
-                    dst[1] = Base::SynetConvert32fTo8u(src[1], scale[1], shift[1]);
-                    dst[2] = Base::SynetConvert32fTo8u(src[2], scale[2], shift[2]);
+                    dst[0] = Base::SynetConvert32fTo8u(src[0], scale[0], shift[0], 0, upper);
+                    dst[1] = Base::SynetConvert32fTo8u(src[1], scale[1], shift[1], 0, upper);
+                    dst[2] = Base::SynetConvert32fTo8u(src[2], scale[2], shift[2], 0, upper);
                     src += 3;
                     dst += 3;
                 }
             }
         }
 
-        template<bool nofma> void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst)
+        template<bool nofma> void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, int upper, uint8_t* dst)
         {
             size_t spatial = height * width;
             if (Base::NchwCompatible(channels, spatial, format))
             {
                 if (Aligned(src) && Aligned(dst) && Aligned(spatial, A))
-                    SynetConvert32fTo8uNchw<true, nofma>(src, batch, channels, spatial, scale, shift, dst);
+                    SynetConvert32fTo8uNchw<true, nofma>(src, batch, channels, spatial, scale, shift, upper, dst);
                 else
-                    SynetConvert32fTo8uNchw<false, nofma>(src, batch, channels, spatial, scale, shift, dst);
+                    SynetConvert32fTo8uNchw<false, nofma>(src, batch, channels, spatial, scale, shift, upper, dst);
             }
             else if (Base::NhwcCompatible(channels, spatial, format))
             {
                 if (channels == 3)
                 {
                     if (Aligned(src) && Aligned(dst) && Aligned(spatial, A))
-                        SynetConvert32fTo8uNhwc3<true, nofma>(src, batch, spatial, scale, shift, dst);
+                        SynetConvert32fTo8uNhwc3<true, nofma>(src, batch, spatial, scale, shift, upper, dst);
                     else
-                        SynetConvert32fTo8uNhwc3<false, nofma>(src, batch, spatial, scale, shift, dst);
+                        SynetConvert32fTo8uNhwc3<false, nofma>(src, batch, spatial, scale, shift, upper, dst);
                 }
                 else
                 {
                     if (Aligned(src) && Aligned(dst) && Aligned(channels, A) && Aligned(scale) && Aligned(shift))
-                        SynetConvert32fTo8uNhwc<true, nofma>(src, batch, channels, spatial, scale, shift, dst);
+                        SynetConvert32fTo8uNhwc<true, nofma>(src, batch, channels, spatial, scale, shift, upper, dst);
                     else
-                        SynetConvert32fTo8uNhwc<false, nofma>(src, batch, channels, spatial, scale, shift, dst);
+                        SynetConvert32fTo8uNhwc<false, nofma>(src, batch, channels, spatial, scale, shift, upper, dst);
                 }
             }
             else
@@ -159,10 +160,11 @@ namespace Simd
 
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
         {
+            int upper = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MAX : Base::U8_PRECISE_MAX;
             if (Base::FmaAvoid(compatibility))
-                SynetConvert32fTo8u<true>(src, batch, channels, height, width, format, scale, shift, dst);
+                SynetConvert32fTo8u<true>(src, batch, channels, height, width, format, scale, shift, upper, dst);
             else
-                SynetConvert32fTo8u<false>(src, batch, channels, height, width, format, scale, shift, dst);
+                SynetConvert32fTo8u<false>(src, batch, channels, height, width, format, scale, shift, upper, dst);
         }
 
         //---------------------------------------------------------------------

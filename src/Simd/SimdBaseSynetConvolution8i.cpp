@@ -30,6 +30,39 @@
 
 namespace Simd
 {
+    void CvtParam::Init(const float* min, const float* max, size_t size, SimdSynetCompatibilityType compatibility)
+    {
+        zero.Resize(size);
+        scale.Resize(size);
+        shift.Resize(size);
+        iScale.Resize(size);
+        iShift.Resize(size);
+        for (size_t i = 0; i < size; ++i)
+        {
+            assert(min[i] <= max[i]);
+            if (min[i] < 0.0f)
+                neg = true;
+        }
+        int uMin = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MIN : Base::U8_PRECISE_MIN;
+        int uMax = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MAX : Base::U8_PRECISE_MAX;
+        int iMin = Base::Narrowed(compatibility) ? Base::I8_NARROWED_MIN : Base::I8_PRECISE_MIN;
+        int iMax = Base::Narrowed(compatibility) ? Base::I8_NARROWED_MAX : Base::I8_PRECISE_MAX;
+        for (size_t i = 0; i < size; ++i)
+        {
+            float abs = ::fmax(::fabs(min[i]), ::fabs(max[i]));
+            float inv = abs / (neg ? iMax : uMax);
+            if (::fabs(inv) < 1e-7)
+                inv = 1.0f;
+            zero[i] = uint8_t(neg ? -iMin : uMin);
+            scale[i] = float(1.0 / inv);
+            shift[i] = float(zero[i]);
+            iScale[i] = inv;
+            iShift[i] = -float(zero[i]) * inv;
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
     SynetConvolution8i::SynetConvolution8i(const ConvParam8i& p)
         : _param(p)
 #if defined(SIMD_PERFORMANCE_STATISTIC)
@@ -62,17 +95,30 @@ namespace Simd
             _weight8i.size * sizeof(int8_t) + _norm32i.size * sizeof(int32_t) + _norm32f.size * sizeof(float);
     }
 
+    static inline float AvoidOverflow(float abs, const float* bias, const float* prelu, size_t index)
+    {
+        if (bias)
+        {
+            float min = ::abs(bias[index]);
+            if (prelu)
+                min *= Max(1.0f, ::abs(prelu[index]));
+            abs = Max(abs, min / float(128 * 256 * 256));
+        }
+        return abs;
+    }
+
     void SynetConvolution8i::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
     {
         const ConvParam8i& p = _param;
-        _srcCvt.Init(stats[0], stats[1], p.srcC);
-        _dstCvt.Init(stats[2], stats[3], p.dstC);
+        _params = params;
+        _srcCvt.Init(stats[0], stats[1], p.srcC, p.compatibility);
+        _dstCvt.Init(stats[2], stats[3], p.dstC, p.compatibility);
         size_t G = p.group, D = p.dstC / G, C = p.srcC / G, K = p.kernelY * p.kernelX, CK = C * K, GD = G * D;
         Array32f normW(CK);
         const float* pSrcW = weight;
         const float* pSrcB = bias;
+        const float* pPrelu = p.activation == SimdConvolutionActivationPrelu ? params : NULL;
         const float* pSrcScaleInv = _srcCvt.iScale.data;
-        const float* pSrcScale = _srcCvt.scale.data;
         const float* pSrcShift = _srcCvt.shift.data;
         const float* pDstScale = _dstCvt.iScale.data;
         const float* pDstScaleInv = _dstCvt.scale.data;
@@ -83,6 +129,9 @@ namespace Simd
         int32_t* pDstB = pDstS + p.dstC;
         float* pNormScale = _norm32f.data;
         float* pNormShift = pNormScale + p.dstC;
+        bool avoidOverflow = _srcCvt.neg && Base::Overflow(p.compatibility);
+        int iMin = Base::Narrowed(p.compatibility) ? Base::I8_NARROWED_MIN : Base::I8_PRECISE_MIN;
+        int iMax = Base::Narrowed(p.compatibility) ? Base::I8_NARROWED_MAX : Base::I8_PRECISE_MAX;
         for (size_t g = 0; g < G; ++g)
         {
             for (size_t d = 0; d < D; ++d)
@@ -97,15 +146,13 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[kc]);
                             maxW = Simd::Max(maxW, pNormW[kc]);
                         }
-                    float abs = Simd::Max(::abs(maxW), ::abs(minW));
-                    if(pSrcB)
-                        abs = Simd::Max(abs, ::abs(pSrcB[d]) / float(128 * 256 * 256));
-                    scale = 127.0f / abs;
+                    float abs = AvoidOverflow(Max(::abs(maxW), ::abs(minW)), pSrcB, pPrelu, d);
+                    scale = iMax / abs;
                     for (size_t k = 0, kc = 0; k < K; ++k)
                         for (size_t c = 0; c < C; ++c, ++kc)
-                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibility8iOverflow))
+                            if (avoidOverflow)
                             {
-                                int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f);
+                                int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f, iMin, iMax);
                                 if (w & 1)
                                     w = Round(w * 0.25f) * 4;
                                 pDstW[kc * GD + d] = w / 2;
@@ -113,7 +160,7 @@ namespace Simd
                             }
                             else
                             {
-                                pDstW[kc * GD + d] = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f);
+                                pDstW[kc * GD + d] = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f, iMin, iMax);
                                 normB -= pDstW[kc * GD + d] * pSrcShift[c];
                             }
                 }
@@ -126,15 +173,13 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[ck]);
                             maxW = Simd::Max(maxW, pNormW[ck]);
                         }
-                    float abs = Simd::Max(::abs(maxW), ::abs(minW));
-                    if (pSrcB)
-                        abs = Simd::Max(abs, ::abs(pSrcB[d]) / float(128 * 256 * 256));
-                    scale = 127.0f / abs;
+                    float abs = AvoidOverflow(Max(::abs(maxW), ::abs(minW)), pSrcB, pPrelu, d);
+                    scale = iMax / abs;
                     for (size_t c = 0, ck = 0; c < C; ++c)
                         for (size_t k = 0; k < K; ++k, ++ck)
-                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibility8iOverflow))
+                            if (avoidOverflow)
                             {
-                                int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f);
+                                int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f, iMin, iMax);
                                 if (w & 1)
                                     w = Round(w * 0.25f) * 4;
                                 pDstW[d * CK + ck] = w / 2;
@@ -142,11 +187,11 @@ namespace Simd
                             }
                             else
                             {
-                                pDstW[d * CK + ck] = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f);
+                                pDstW[d * CK + ck] = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f, iMin, iMax);
                                 normB -= pDstW[d * CK + ck] * pSrcShift[c];
                             }
                 }
-                pDstS[d] = _srcCvt.neg && (p.compatibility & SimdSynetCompatibility8iOverflow) ? 2 : 1;
+                pDstS[d] = avoidOverflow ? 2 : 1;
                 if (pSrcB)
                     normB += pSrcB[d] * scale;
                 pDstB[d] = Round(normB);
@@ -173,9 +218,10 @@ namespace Simd
             }
             if(pSrcB)
                 pSrcB += D;
+            if (pPrelu)
+                pPrelu += D;
             pDstB += D;
             pDstS += D;
-            pSrcScale += C;
             pSrcScaleInv += C;
             pSrcShift += C;
             pDstScale += D;

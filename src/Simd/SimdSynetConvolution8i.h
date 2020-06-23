@@ -134,41 +134,16 @@ namespace Simd
         Array32f scale, shift, iScale, iShift;
         bool neg;
 
-        CvtParam()
-            : neg(false)
+        CvtParam() 
+            : neg(false) 
         {
         }
 
-        void Init(const float * min, const float * max, size_t size)
-        {
-            zero.Resize(size);
-            scale.Resize(size);
-            shift.Resize(size);
-            iScale.Resize(size);
-            iShift.Resize(size);
-            for (size_t i = 0; i < size; ++i)
-            {
-                assert(min[i] <= max[i]);
-                if (min[i] < 0.0f)
-                    neg = true;
-            }
-            for (size_t i = 0; i < size; ++i)
-            {
-                float abs = ::fmax(::fabs(min[i]), ::fabs(max[i]));
-                float inv = abs / (neg ? 127.0f : 255.0f);
-                if (::fabs(inv) < 1e-7)
-                    inv = 1.0f;
-                zero[i] = (neg ? 128 : 0);
-                scale[i] = float(1.0 / inv);
-                shift[i] = float(zero[i]);
-                iScale[i] = inv;
-                iShift[i] = -float(zero[i]) * inv;
-            }        
-        }
+        void Init(const float* min, const float* max, size_t size, SimdSynetCompatibilityType compatibility);
 
         size_t Size() const
         {
-            return (zero.size)*sizeof(uint8_t) + (scale.size + shift.size + iScale.size + iShift.size) * sizeof(float);
+            return (zero.size) * sizeof(uint8_t) + (scale.size + shift.size + iScale.size + iShift.size) * sizeof(float);
         }
     };
 
@@ -177,10 +152,7 @@ namespace Simd
     public:
         SynetConvolution8i(const ConvParam8i& p);
 
-        const ConvParam8i & Param() const 
-        {
-            return _param;
-        }
+        const ConvParam8i & Param() const { return _param; }
 
         virtual String Ext() const = 0;
         virtual String Desc() const = 0;
@@ -212,6 +184,7 @@ namespace Simd
         Array8i _weight8i;
         Array32i _norm32i;
         Array32f _norm32f; 
+        const float* _params;
         bool _src8u, _dst8u, _overflow16i;
         size_t _merge, _sizeS, _sizeD;
     };
