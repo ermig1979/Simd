@@ -40,6 +40,21 @@ namespace Simd
             return (format == SimdTensorFormatNhwc && channels != 1) || (format == SimdTensorFormatNchw && spatial == 1);
         }
 
+        SIMD_INLINE bool FmaAvoid(SimdSynetCompatibilityType compatibility)
+        {
+            return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaAvoid;
+        }
+
+        SIMD_INLINE bool FmaNoTail(SimdSynetCompatibilityType compatibility)
+        {
+            return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaNoTail;
+        }
+
+        SIMD_INLINE bool Int8Overflow(SimdSynetCompatibilityType compatibility)
+        {
+            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibilityFmaNoTail;
+        }
+
         SIMD_INLINE uint8_t SynetConvert32fTo8u(float value, float scale, float shift)
         {
             return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), 0, 255);

@@ -41,7 +41,7 @@ namespace Simd
         _merge = 1;
         _src8u = p.srcT == SimdTensorData8u;
         _dst8u = p.dstT == SimdTensorData8u;
-        _overflow16i = (p.compatibility & SimdSynetCompatibilityOverflow16i) != 0;
+        _overflow16i = (p.compatibility & SimdSynetCompatibility8iOverflow) != 0;
         _weight8i.Resize(p.kernelY * p.kernelX * p.srcC / p.group * p.dstC);
         _norm32i.Resize(2 * p.dstC);
         _norm32f.Resize(2 * p.dstC);
@@ -103,7 +103,7 @@ namespace Simd
                     scale = 127.0f / abs;
                     for (size_t k = 0, kc = 0; k < K; ++k)
                         for (size_t c = 0; c < C; ++c, ++kc)
-                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i))
+                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibility8iOverflow))
                             {
                                 int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f);
                                 if (w & 1)
@@ -132,7 +132,7 @@ namespace Simd
                     scale = 127.0f / abs;
                     for (size_t c = 0, ck = 0; c < C; ++c)
                         for (size_t k = 0; k < K; ++k, ++ck)
-                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i))
+                            if (_srcCvt.neg && (p.compatibility & SimdSynetCompatibility8iOverflow))
                             {
                                 int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f);
                                 if (w & 1)
@@ -146,7 +146,7 @@ namespace Simd
                                 normB -= pDstW[d * CK + ck] * pSrcShift[c];
                             }
                 }
-                pDstS[d] = _srcCvt.neg && (p.compatibility & SimdSynetCompatibilityOverflow16i) ? 2 : 1;
+                pDstS[d] = _srcCvt.neg && (p.compatibility & SimdSynetCompatibility8iOverflow) ? 2 : 1;
                 if (pSrcB)
                     normB += pSrcB[d] * scale;
                 pDstB[d] = Round(normB);
@@ -599,7 +599,7 @@ namespace Simd
 
         String SynetConvolution8iNhwcDirect::Desc() const 
         { 
-            return Ext() + "::NhwcDirect" + ((_param.compatibility& SimdSynetCompatibilityOverflow16i) ? "-o" : "-e");
+            return Ext() + "::NhwcDirect" + ((_param.compatibility& SimdSynetCompatibility8iOverflow) ? "-o" : "-e");
         }
 
         size_t SynetConvolution8iNhwcDirect::InternalBufferSize() const
@@ -621,7 +621,7 @@ namespace Simd
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);
             ReorderWeight();
-            _alg.norm = _srcCvt.neg && (_param.compatibility & SimdSynetCompatibilityOverflow16i) ? 2 : 1;
+            _alg.norm = _srcCvt.neg && (_param.compatibility & SimdSynetCompatibility8iOverflow) ? 2 : 1;
             _alg.zero = _srcCvt.neg ? 0x80808080 : 0;
         }
 

@@ -79,7 +79,7 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2, comp));
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
-        int differenceMax = (comp == SimdSynetCompatibilityNoFma ? 0 : 1);
+        int differenceMax = (comp == SimdSynetCompatibilityFmaAvoid ? 0 : 1);
 #else
         int differenceMax = 1;
 #endif
@@ -94,7 +94,7 @@ namespace Test
         bool result = true;
 
         SimdTensorFormatType format[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
-        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFast, SimdSynetCompatibilityNoFmaTail, SimdSynetCompatibilityNoFma };
+        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFmaUse, SimdSynetCompatibilityFmaNoTail, SimdSynetCompatibilityFmaAvoid };
 
         for (int f = 0; f <= 1; ++f)
         {

@@ -319,11 +319,15 @@ typedef enum
 */
 typedef enum
 {
-    SimdSynetCompatibilityFast = 0, /*!< Fast (No compatibility for fast code). */
-    SimdSynetCompatibilityNoFmaTail = 1, /*!< Not use FMA instructions at row tail. */
-    SimdSynetCompatibilityNoFma = 2, /*!< Not use FMA instructions. */
+    SimdSynetCompatibilityFmaUse = 0, /*!< Fast (No compatibility for fast code). */
+    SimdSynetCompatibilityFmaNoTail = 1, /*!< Not use FMA instructions at row tail. */
+    SimdSynetCompatibilityFmaAvoid = 2, /*!< Not use FMA instructions. */
     SimdSynetCompatibilityFmaMask = 3, /*!< Bit mask of options of FMA instructions using. */
-    SimdSynetCompatibilityOverflow16i = 4, /*!< 16-bit integer overflow. */
+    SimdSynetCompatibility8iPrecise = 0, /*!< Using of precise 8-bit integer multiplication (VNNI, or its 16-bit emulation). */
+    SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit integer overflow. */
+    SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (siggned: [-90 .. 90], unsigned: [0 .. 180]) to awoid 16-bit integer overflow. */
+    SimdSynetCompatibility8iMask = 12, /*!< Bit mask of options of 8-bit integer multiplication. */
+    SimdSynetCompatibilityFloatZero = 16, /*!< Bit flag of asymmetric 8-bit integer quantization. */
 } SimdSynetCompatibilityType;
 
 /*! @ingroup synet

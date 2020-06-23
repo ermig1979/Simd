@@ -159,7 +159,7 @@ namespace Simd
 
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
         {
-            if (compatibility & SimdSynetCompatibilityNoFma)
+            if (Base::FmaAvoid(compatibility))
                 SynetConvert32fTo8u<true>(src, batch, channels, height, width, format, scale, shift, dst);
             else
                 SynetConvert32fTo8u<false>(src, batch, channels, height, width, format, scale, shift, dst);

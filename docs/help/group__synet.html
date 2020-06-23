@@ -100,15 +100,23 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="separator:gac0134d6cef9d64de8b89171e79ef4568"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3c885cc5d2f09e6d18834f67d91f168d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> { <br />
-&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da32825f1e8d6c5cdb50af6095cf5fc8af">SimdSynetCompatibilityFast</a> = 0, 
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e">SimdSynetCompatibilityFmaUse</a> = 0, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168dafa49a627c896ff9c48d027218d77e794">SimdSynetCompatibilityNoFmaTail</a> = 1, 
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da45fb28ba2167cef086f28754e95d3c45">SimdSynetCompatibilityFmaNoTail</a> = 1, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da9c056879cfbfbaf8995e651798a7b893">SimdSynetCompatibilityNoFma</a> = 2, 
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da331ef6e79ec276057ef28ee5c54a160a">SimdSynetCompatibilityFmaAvoid</a> = 2, 
 <br />
 &#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da5005ef1ddac089b956d26088f96aaaa4">SimdSynetCompatibilityFmaMask</a> = 3, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168dac7bb3f913610dd8bfd6644f6b5b02680">SimdSynetCompatibilityOverflow16i</a> = 4
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299">SimdSynetCompatibility8iPrecise</a> = 0, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da8a1fe20e60c22b02f57ed79b40e29a7c">SimdSynetCompatibility8iOverflow</a> = 4, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da1838f4339e31ecfe080f3441e9782182">SimdSynetCompatibility8iNarrowed</a> = 8, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168dae078ad20725a8ac353bc3118813da152">SimdSynetCompatibility8iMask</a> = 12, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#gga3c885cc5d2f09e6d18834f67d91f168da9df044e769908ff65ddf9826075a4465">SimdSynetCompatibilityFloatZero</a> = 16
 <br />
  }</td></tr>
 <tr class="separator:ga3c885cc5d2f09e6d18834f67d91f168d"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -375,15 +383,23 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p>Describes Synet compatibility flags. This type used in functions <a class="el" href="group__synet.html#gabc8343dd3ac8df5b53706258b062b1af" title="This function is used for forward propagation of ScaleLayer.">SimdSynetScaleLayerForward</a>, <a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76" title="Converts 32-bit float point image to 8-bit unsigned integer image.">SimdSynetConvert32fTo8u</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da32825f1e8d6c5cdb50af6095cf5fc8af"></a>SimdSynetCompatibilityFast&#160;</td><td class="fielddoc"><p>Fast (No compatibility for fast code). </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e"></a>SimdSynetCompatibilityFmaUse&#160;</td><td class="fielddoc"><p>Fast (No compatibility for fast code). </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dafa49a627c896ff9c48d027218d77e794"></a>SimdSynetCompatibilityNoFmaTail&#160;</td><td class="fielddoc"><p>Not use FMA instructions at row tail. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da45fb28ba2167cef086f28754e95d3c45"></a>SimdSynetCompatibilityFmaNoTail&#160;</td><td class="fielddoc"><p>Not use FMA instructions at row tail. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da9c056879cfbfbaf8995e651798a7b893"></a>SimdSynetCompatibilityNoFma&#160;</td><td class="fielddoc"><p>Not use FMA instructions. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da331ef6e79ec276057ef28ee5c54a160a"></a>SimdSynetCompatibilityFmaAvoid&#160;</td><td class="fielddoc"><p>Not use FMA instructions. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da5005ef1ddac089b956d26088f96aaaa4"></a>SimdSynetCompatibilityFmaMask&#160;</td><td class="fielddoc"><p>Bit mask of options of FMA instructions using. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dac7bb3f913610dd8bfd6644f6b5b02680"></a>SimdSynetCompatibilityOverflow16i&#160;</td><td class="fielddoc"><p>16-bit integer overflow. </p>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da75910205dcd9bd69855308eb40048299"></a>SimdSynetCompatibility8iPrecise&#160;</td><td class="fielddoc"><p>Using of precise 8-bit integer multiplication (VNNI, or its 16-bit emulation). </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da8a1fe20e60c22b02f57ed79b40e29a7c"></a>SimdSynetCompatibility8iOverflow&#160;</td><td class="fielddoc"><p>Allow 16-bit integer overflow. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da1838f4339e31ecfe080f3441e9782182"></a>SimdSynetCompatibility8iNarrowed&#160;</td><td class="fielddoc"><p>Using of narrowed range (siggned: [-90 .. 90], unsigned: [0 .. 180]) to awoid 16-bit integer overflow. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168dae078ad20725a8ac353bc3118813da152"></a>SimdSynetCompatibility8iMask&#160;</td><td class="fielddoc"><p>Bit mask of options of 8-bit integer multiplication. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da9df044e769908ff65ddf9826075a4465"></a>SimdSynetCompatibilityFloatZero&#160;</td><td class="fielddoc"><p>Bit flag of asymmetric 8-bit integer quantization. </p>
 </td></tr>
 </table>
 

@@ -845,7 +845,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            if (p.compatibility & SimdSynetCompatibilityOverflow16i)
+            if (p.compatibility & SimdSynetCompatibility8iOverflow)
                 Set<true, term, activation>(p, a, d);
             else
                 Set<false, term, activation>(p, a, d);

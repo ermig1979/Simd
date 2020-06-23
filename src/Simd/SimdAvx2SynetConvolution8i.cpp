@@ -845,7 +845,7 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            if (p.compatibility & SimdSynetCompatibilityNoFma)
+            if (Base::FmaAvoid(p.compatibility))
                 Set<overflow, term, activation, true>(p, a, d);
             else
                 Set<overflow, term, activation, false>(p, a, d);
@@ -853,7 +853,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            if (p.compatibility & SimdSynetCompatibilityOverflow16i)
+            if (p.compatibility & SimdSynetCompatibility8iOverflow)
                 Set<true, term, activation>(p, a, d);
             else
                 Set<false, term, activation>(p, a, d);

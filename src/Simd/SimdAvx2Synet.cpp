@@ -484,7 +484,7 @@ namespace Simd
 
         SIMD_INLINE void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if (!((compatibility & SimdSynetCompatibilityNoFma) && bias))
+            if (!(Base::FmaAvoid(compatibility) && bias))
             {
                 width = height * width;
                 height = 1;
@@ -579,9 +579,9 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetScaleLayerForwardNhwc(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if ((compatibility & SimdSynetCompatibilityNoFma) && bias)
+            if (Base::FmaAvoid(compatibility) && bias)
                 SynetScaleLayerForwardNhwc<align, true, true>(src, scale, bias, channels, height, width, dst);
-            else if((compatibility & SimdSynetCompatibilityNoFmaTail) && bias)
+            else if(Base::FmaNoTail(compatibility) && bias)
                 SynetScaleLayerForwardNhwc<align, false, true>(src, scale, bias, channels, height, width, dst);
             else
                 SynetScaleLayerForwardNhwc<align, false, false>(src, scale, bias, channels, height, width, dst);
@@ -657,14 +657,14 @@ namespace Simd
 
         SIMD_INLINE void SynetScaleLayerForwardNhwc(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdSynetCompatibilityType compatibility)
         {
-            if (!((compatibility & SimdSynetCompatibilityNoFmaTail) && bias))
+            if (!(Base::FmaNoTail(compatibility) && bias))
             {
                 width = height * width;
                 height = 1;
             }
             if (channels == 3)
             {
-                if ((compatibility & SimdSynetCompatibilityNoFma) && bias)
+                if (Base::FmaAvoid(compatibility) && bias)
                 {
                     if (Aligned(src) && Aligned(dst) && Aligned(width))
                         SynetScaleLayerForwardNhwc3<true, true>(src, scale, bias, height, width, dst);
@@ -738,7 +738,7 @@ namespace Simd
 
         SIMD_INLINE void SynetScaleLayerForwardNchw8c(const float* src, const float* scale, const float* bias, size_t channels, size_t spatial, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if (compatibility & SimdSynetCompatibilityNoFma)
+            if (Base::FmaAvoid(compatibility))
             {
                 if (Aligned(src) && Aligned(dst))
                     SynetScaleLayerForwardNchw8c<true, true>(src, scale, bias, channels, spatial, dst);

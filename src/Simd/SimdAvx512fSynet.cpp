@@ -683,9 +683,9 @@ namespace Simd
 
         SIMD_INLINE void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if((compatibility & SimdSynetCompatibilityNoFma) && bias)
+            if(Base::FmaAvoid(compatibility) && bias)
                 SynetScaleLayerForwardNchw<true, true>(src, scale, bias, channels, height, width, dst);
-            else if ((compatibility & SimdSynetCompatibilityNoFmaTail) && bias)
+            else if (Base::FmaNoTail(compatibility) && bias)
                 SynetScaleLayerForwardNchw<false, true>(src, scale, bias, channels, height, width, dst);
             else
                 SynetScaleLayerForwardNchw<false, false>(src, scale, bias, channels, 1, height*width, dst);
@@ -854,9 +854,9 @@ namespace Simd
 
         SIMD_INLINE void SynetScaleLayerForwardNhwc(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdSynetCompatibilityType compatibility)
         {
-            if ((compatibility & SimdSynetCompatibilityNoFma) && bias)
+            if (Base::FmaAvoid(compatibility) && bias)
                 SynetScaleLayerForwardNhwc<true, true>(src, scale, bias, channels, 1, height * width, dst);
-            else if ((compatibility & SimdSynetCompatibilityNoFmaTail) && bias)
+            else if (Base::FmaNoTail(compatibility) && bias)
                 SynetScaleLayerForwardNhwc<false, true>(src, scale, bias, channels, height, width, dst);
             else
                 SynetScaleLayerForwardNhwc<false, false>(src, scale, bias, channels, 1, height * width, dst);
@@ -912,7 +912,7 @@ namespace Simd
 
         SIMD_INLINE void SynetScaleLayerForwardNchw16c(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdSynetCompatibilityType compatibility)
         {
-            if ((compatibility & SimdSynetCompatibilityNoFma) && bias)
+            if (Base::FmaAvoid(compatibility) && bias)
             {
                 if (Aligned(src) && Aligned(dst))
                     SynetScaleLayerForwardNchw16c<true, true>(src, scale, bias, channels, spatial, dst);

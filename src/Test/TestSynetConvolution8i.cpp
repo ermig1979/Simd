@@ -46,7 +46,7 @@ namespace Test
 
             void Update(const Param & p, SimdSynetCompatibilityType c)
             {
-                desc = desc + p.Decription(((c&SimdSynetCompatibilityOverflow16i) ? "-o" : "-e"));
+                desc = desc + p.Decription(((c&SimdSynetCompatibility8iOverflow) ? "-o" : "-e"));
             }
 
             void Call(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst) const
@@ -252,7 +252,7 @@ namespace Test
         const SimdBool t0 = SimdFalse, t1 = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
         const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu;
-        //SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)((SimdCpuInfo(SimdCpuInfoAvx512vnni) ? SimdSynetCompatibilityFast : SimdSynetCompatibilityOverflow16i)  | SimdSynetCompatibilityNoFma);
+        //SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)((SimdCpuInfo(SimdCpuInfoAvx512vnni) ? SimdSynetCompatibilityFmaUse : SimdSynetCompatibility8iOverflow)  | SimdSynetCompatibilityFmaAvoid);
 
 #ifdef NDEBUG
 #if 0
@@ -287,8 +287,8 @@ namespace Test
     {
         bool result = true;
 
-        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibilityOverflow16i | SimdSynetCompatibilityNoFma);
-        SimdSynetCompatibilityType e = (SimdSynetCompatibilityType)(SimdSynetCompatibilityFast | SimdSynetCompatibilityNoFma);
+        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
+        SimdSynetCompatibilityType e = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
 
         result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
         result = result && SynetConvolution8iForwardAutoTest(f1, f2, e);

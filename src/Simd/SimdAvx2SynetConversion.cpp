@@ -180,7 +180,7 @@ namespace Simd
 
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
         {
-            if (!(compatibility & SimdSynetCompatibilityNoFmaTail))
+            if (!Base::FmaNoTail(compatibility))
             {
                 width = height * width;
                 height = 1;
@@ -188,7 +188,7 @@ namespace Simd
             size_t spatial = height * width;
             if (Base::NchwCompatible(channels, spatial, format))
             {
-                if(compatibility & SimdSynetCompatibilityNoFma)
+                if(Base::FmaAvoid(compatibility))
                     SynetConvert32fTo8uNchw<true>(src, batch, channels, height, width, scale, shift, dst);
                 else
                     SynetConvert32fTo8uNchw<false>(src, batch, channels, height, width, scale, shift, dst);
@@ -197,16 +197,16 @@ namespace Simd
             {
                 if (channels == 3)
                 {
-                    if (compatibility & SimdSynetCompatibilityNoFma)
+                    if (Base::FmaAvoid(compatibility))
                         SynetConvert32fTo8uNhwc3<true>(src, batch, height, width, scale, shift, dst);
                     else
                         SynetConvert32fTo8uNhwc3<false>(src, batch, height, width, scale, shift, dst);
                 }
                 else
                 {
-                    if (compatibility & SimdSynetCompatibilityNoFma)
+                    if (Base::FmaAvoid(compatibility))
                         SynetConvert32fTo8uNhwc<true, true>(src, batch, channels, height, width, scale, shift, dst);
-                    else if (compatibility & SimdSynetCompatibilityNoFmaTail)
+                    else if (Base::FmaNoTail(compatibility))
                         SynetConvert32fTo8uNhwc<false, true>(src, batch, channels, height, width, scale, shift, dst);
                     else
                         SynetConvert32fTo8uNhwc<false, false>(src, batch, channels, height, width, scale, shift, dst);
