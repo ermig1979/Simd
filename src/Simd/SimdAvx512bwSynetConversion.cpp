@@ -37,7 +37,7 @@ namespace Simd
         {
             __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(Avx512f::Load<align, mask>(src, tail), scale, shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(i32, K_ZERO), K_ZERO));
-            Store<align, mask>(dst, _mm_max_epu8(_mm512_extracti32x4_epi32(u8, 0), upper), tail);
+            Store<align, mask>(dst, _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper), tail);
         }
 
         template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, const float* scale, const float* shift, __m128i upper, uint8_t* dst, __mmask16 tail = -1)

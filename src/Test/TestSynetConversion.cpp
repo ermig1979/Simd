@@ -94,11 +94,11 @@ namespace Test
         bool result = true;
 
         SimdTensorFormatType format[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
-        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFmaUse, SimdSynetCompatibilityFmaNoTail, SimdSynetCompatibilityFmaAvoid };
+        SimdSynetCompatibilityType compatibility[4] = { SimdSynetCompatibilityFmaUse, SimdSynetCompatibilityFmaNoTail, SimdSynetCompatibilityFmaAvoid, SimdSynetCompatibility8iNarrowed };
 
         for (int f = 0; f <= 1; ++f)
         {
-            for (int c = 0; c <= 2; ++c)
+            for (int c = 0; c <= 3; ++c)
             {
                 result = result && SynetConvert32fTo8uAutoTest(2, C/2, (int)sqrt(H), (int)sqrt(W), format[f], compatibility[c], f1, f2);
                 result = result && SynetConvert32fTo8uAutoTest(1, 3, H / 3 + O, W / 5 - O, format[f], compatibility[c], f1, f2);

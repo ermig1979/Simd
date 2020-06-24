@@ -36,7 +36,7 @@ namespace Simd
         template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, float32x4_t scale, float32x4_t shift, uint8x8_t upper, uint8_t* dst)
         {
             int32x4_t i32 = Round(Fmadd<nofma>(Load<align>(src), scale, shift));
-            *((int32_t*)dst) = vget_lane_s32(vreinterpret_s32_u8(vmax_u8(vqmovun_s16(vcombine_s16(vmovn_s32(i32), vcreate_s16(0))), upper)), 0);
+            *((int32_t*)dst) = vget_lane_s32(vreinterpret_s32_u8(vmin_u8(vqmovun_s16(vcombine_s16(vmovn_s32(i32), vcreate_s16(0))), upper)), 0);
         }
 
         template <bool align, bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, int upper, uint8_t* dst)

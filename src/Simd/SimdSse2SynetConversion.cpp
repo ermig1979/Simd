@@ -34,7 +34,7 @@ namespace Simd
         template <bool align> SIMD_INLINE void SynetConvert32fTo8u(const float * src, __m128 scale, __m128 shift, __m128i upper, uint8_t* dst)
         {
             __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse::Load<align>(src), scale), shift));
-            *((int32_t*)dst) = _mm_cvtsi128_si32(_mm_max_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
+            *((int32_t*)dst) = _mm_cvtsi128_si32(_mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
         }
 
         template <bool align> SIMD_INLINE void SynetConvert32fTo8uNchw(const float* src, __m128 scale, __m128 shift, __m128i upper, uint8_t* dst)
@@ -43,7 +43,7 @@ namespace Simd
             __m128i i32_1 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse::Load<align>(src + 1 * F), scale), shift));
             __m128i i32_2 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse::Load<align>(src + 2 * F), scale), shift));
             __m128i i32_3 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse::Load<align>(src + 3 * F), scale), shift));
-            Store<align>((__m128i*)dst, _mm_max_epu8(_mm_packus_epi16(_mm_packs_epi32(i32_0, i32_1), _mm_packs_epi32(i32_2, i32_3)), upper));
+            Store<align>((__m128i*)dst, _mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32_0, i32_1), _mm_packs_epi32(i32_2, i32_3)), upper));
         }        
         
         template <bool align> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t spatial, const float* scale, const float* shift, int upper, uint8_t* dst)
