@@ -133,6 +133,7 @@ namespace Simd
         Array8u zero;
         Array32f scale, shift, iScale, iShift;
         bool neg;
+        int iMin, iMax, uMin, uMax;
 
         CvtParam() 
             : neg(false) 
@@ -238,11 +239,11 @@ namespace Simd
             struct AlgParam
             {
                 size_t F, microD, macroH, macroC, macroD;
-                int32_t zero, norm, high, size;
+                int32_t zero, norm, high, size, upper;
             };
 
             typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
-                const int8_t* weight, const int32_t* bias, const int32_t* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
+                const int8_t* weight, const int32_t* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3);

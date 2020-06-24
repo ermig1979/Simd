@@ -28,6 +28,7 @@
 #include "Test/TestSynetConvolutionParam.h"
 
 #include "Simd/SimdSynetConvolution8i.h"
+#include "Simd/SimdSynet.h"
 
 namespace Test
 {
@@ -46,7 +47,7 @@ namespace Test
 
             void Update(const Param & p, SimdSynetCompatibilityType c)
             {
-                desc = desc + p.Decription(((c&SimdSynetCompatibility8iOverflow) ? "-o" : "-e"));
+                desc = desc + p.Decription(Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p");
             }
 
             void Call(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst) const
@@ -91,24 +92,18 @@ namespace Test
         }
     }
 
-    inline int Quantize(float value)
+    void FillSrc8u(const Param& p, int neg, SimdSynetCompatibilityType comp, const Tensor32f& src, const float* min, const float* max, Tensor8u & dst)
     {
-        return (int)(value + (value >= 0 ? 0.5f : -0.5f));
-    }
-
-    inline uint8_t To8u(float value, float scale, float shift)
-    {
-        return (uint8_t)std::min(std::max(0, Quantize(value * scale + shift)), 255);
-    }
-
-    void FillSrc8u(const Param& p, int neg, const Tensor32f& src, const float* min, const float* max, Tensor8u & dst)
-    {
+        int uMin = Simd::Base::Narrowed(comp) ? Simd::Base::U8_NARROWED_MIN : Simd::Base::U8_PRECISE_MIN;
+        int uMax = Simd::Base::Narrowed(comp) ? Simd::Base::U8_NARROWED_MAX : Simd::Base::U8_PRECISE_MAX;
+        int iMin = Simd::Base::Narrowed(comp) ? Simd::Base::I8_NARROWED_MIN : Simd::Base::I8_PRECISE_MIN;
+        int iMax = Simd::Base::Narrowed(comp) ? Simd::Base::I8_NARROWED_MAX : Simd::Base::I8_PRECISE_MAX;
         Buffer32f scale(p.conv.srcC), shift(p.conv.srcC);
         for (size_t i = 0; i < p.conv.srcC; ++i)
         {
             float abs = std::max(std::abs(min[i]), std::abs(max[i]));
-            scale[i] = (neg ? 127.0f : 255.0f) / abs;
-            shift[i] = float(neg ? 128 : 0);// -min[i] * scale[i];
+            scale[i] = (neg ? iMax : uMax) / abs;
+            shift[i] = float(neg ? -iMin : uMin);// -min[i] * scale[i];
         }
         for (size_t b = 0; b < p.batch; ++b)
         {
@@ -117,7 +112,7 @@ namespace Test
                 for (size_t y = 0; y < p.conv.srcH; ++y)
                     for (size_t x = 0; x < p.conv.srcW; ++x)
                         for (size_t c = 0; c < p.conv.srcC; ++c)
-                            dst.Data({ b, y, x, c })[0] = To8u(src.Data({ b, y, x, c })[0], scale[c], shift[c]);
+                            dst.Data({ b, y, x, c })[0] = Simd::Base::SynetConvert32fTo8u(src.Data({ b, y, x, c })[0], scale[c], shift[c], uMin, uMax);
 
             }
             else
@@ -125,7 +120,7 @@ namespace Test
                 for (size_t c = 0; c < p.conv.srcC; ++c)
                     for (size_t y = 0; y < p.conv.srcH; ++y)
                         for (size_t x = 0; x < p.conv.srcW; ++x)
-                            dst.Data({ b, c, y, x })[0] = To8u(src.Data({ b, c, y, x })[0], scale[c], shift[c]);
+                            dst.Data({ b, c, y, x })[0] = Simd::Base::SynetConvert32fTo8u(src.Data({ b, c, y, x })[0], scale[c], shift[c], uMin, uMax);
             }
         }
     }
@@ -185,7 +180,7 @@ namespace Test
         FillRandom(bias.Data(), bias.Size(), -1.0, 1.0f);
 
         Tensor32f params({ c.dstC });
-        FillRandom(params.Data(), params.Size(), 0.0f, 2.0f);
+        FillRandom(params.Data(), params.Size(), -3.0f, 3.0f);
         if (p.conv.activation == ::SimdConvolutionActivationHswish)
         {
             params.Data()[0] = 3.0f;
@@ -203,7 +198,7 @@ namespace Test
         //dst8u2.Reshape({ 1000000 }); dst8u2.Extend(p.DstShape());
 
         FillSrc32f(p, neg, src32f, srcMin.Data(), srcMax.Data());
-        FillSrc8u(p, neg, src32f, srcMin.Data(), srcMax.Data(), src8u);
+        FillSrc8u(p, neg, comp, src32f, srcMin.Data(), srcMax.Data(), src8u);
         FillDstStat(p, weight, bias, params, src32f, buf32f, dst32f1, dstMin.Data(), dstMax.Data());
 
         const float* stats[4] = { srcMin.Data(), srcMax.Data(), dstMin.Data(), dstMax.Data() };
@@ -235,10 +230,16 @@ namespace Test
         ::SimdRelease(context1);
         ::SimdRelease(context2);
 
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
+        int differenceMax = (Simd::Base::FmaAvoid(comp) ? 0 : 1);
+#else
+        int differenceMax = 1;
+#endif
+
         if(p.conv.dstT == SimdTensorData32f)
             result = result && Compare(dst32f1, dst32f2, eps*eps, true, 64, DifferenceBoth);
         else
-            result = result && Compare(dst8u1, dst8u2, 0, true, 64);
+            result = result && Compare(dst8u1, dst8u2, differenceMax, true, 64);
 
         return result;
     }
@@ -251,7 +252,7 @@ namespace Test
         const float e = EPS;
         const SimdBool t0 = SimdFalse, t1 = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
-        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu;
+        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu, aPr = SimdConvolutionActivationPrelu;
         //SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)((SimdCpuInfo(SimdCpuInfoAvx512vnni) ? SimdSynetCompatibilityFmaUse : SimdSynetCompatibility8iOverflow)  | SimdSynetCompatibilityFmaAvoid);
 
 #ifdef NDEBUG
@@ -272,12 +273,18 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 2000, 2000, 32, _1, _1, _1, _0, _0, 1, aId, t1, u8, u8), 0, c, f1, f2);
         //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 3000, 3000, 32, _3, _1, _1, _1, _1, 1, aId, t1, f32, u8), 0, c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 300, 300, 32, _1, _1, _1, _0, _0, 1, aId, t1, u8, u8), 0, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(10, 3, 300, 300, 32, _1, _1, _1, _0, _0, 1, aId, t1, u8, u8), 0, c, f1, f2);
 #endif
+#if 1
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 60, 60, 64, _1, _1, _1, _0, _0, 1, aId, t1, f32, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(2, 32, 150, 150, 32, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(3, 3, 300, 300, 32, _5, _2, _3, _0, _0, 1, aRe, t1, u8, f32), 1, c, f1, f2);
+#endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 1000, 1000, 32, _1, _1, _1, _0, _0, 1, aId, t1, u8, u8), 0, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(2, 32, 150, 150, 32, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        //result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 3, 1000, 1000, 32, _1, _1, _1, _0, _0, 1, aId, t1, u8, u8), 0, c, f1, f2);
 #endif
 
         return result;
@@ -287,11 +294,13 @@ namespace Test
     {
         bool result = true;
 
+        SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
-        SimdSynetCompatibilityType e = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
+        SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
 
+        result = result && SynetConvolution8iForwardAutoTest(f1, f2, p);
         result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
-        result = result && SynetConvolution8iForwardAutoTest(f1, f2, e);
+        result = result && SynetConvolution8iForwardAutoTest(f1, f2, n);
 
         return result;
     }

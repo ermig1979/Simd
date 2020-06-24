@@ -43,10 +43,10 @@ namespace Simd
             if (min[i] < 0.0f)
                 neg = true;
         }
-        int uMin = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MIN : Base::U8_PRECISE_MIN;
-        int uMax = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MAX : Base::U8_PRECISE_MAX;
-        int iMin = Base::Narrowed(compatibility) ? Base::I8_NARROWED_MIN : Base::I8_PRECISE_MIN;
-        int iMax = Base::Narrowed(compatibility) ? Base::I8_NARROWED_MAX : Base::I8_PRECISE_MAX;
+        uMin = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MIN : Base::U8_PRECISE_MIN;
+        uMax = Base::Narrowed(compatibility) ? Base::U8_NARROWED_MAX : Base::U8_PRECISE_MAX;
+        iMin = Base::Narrowed(compatibility) ? Base::I8_NARROWED_MIN : Base::I8_PRECISE_MIN;
+        iMax = Base::Narrowed(compatibility) ? Base::I8_NARROWED_MAX : Base::I8_PRECISE_MAX;
         for (size_t i = 0; i < size; ++i)
         {
             float abs = ::fmax(::fabs(min[i]), ::fabs(max[i]));
@@ -262,27 +262,28 @@ namespace Simd
 
     namespace Base
     {
-        template<class S, class D, class F> SIMD_INLINE D Convert(S value, F scale, F shift)
+        template<class S, class D, class F> SIMD_INLINE D Convert(S value, F scale, F shift, int lower, int upper)
         {
             return (D)(F(value) * scale + shift);
         }
 
-        template<> SIMD_INLINE uint8_t Convert<int32_t, uint8_t, float>(int32_t value, float scale, float shift)
+        template<> SIMD_INLINE uint8_t Convert<int32_t, uint8_t, float>(int32_t value, float scale, float shift, int lower, int upper)
         {
-            return (uint8_t)Simd::RestrictRange(Round(float(value) * scale + shift), 0, 255);
+            return (uint8_t)Simd::RestrictRange(Round(float(value) * scale + shift), lower, upper);
         }
 
-        template<> SIMD_INLINE uint8_t Convert<float, uint8_t, float>(float value, float scale, float shift)
+        template<> SIMD_INLINE uint8_t Convert<float, uint8_t, float>(float value, float scale, float shift, int lower, int upper)
         {
-            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), 0, 255);
+            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
         }
 
-        template<> SIMD_INLINE int8_t Convert<float, int8_t, float>(float value, float scale, float shift)
+        template<> SIMD_INLINE int8_t Convert<float, int8_t, float>(float value, float scale, float shift, int lower, int upper)
         {
-            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), -128, 127);
+            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
         }
 
-        template<class S, class D, class F> void Convert(const S * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const F* scale, const F* shift, D * dst)
+        template<class S, class D, class F> void Convert(const S * src, size_t batch, size_t channels, size_t height, size_t width, 
+            SimdTensorFormatType format, const F* scale, const F* shift, int lower, int upper, D * dst)
         {
             for (size_t b = 0; b < batch; ++b)
             {
@@ -295,7 +296,7 @@ namespace Simd
                         for (size_t h = 0; h < height; ++h)
                         {
                             for (size_t w = 0; w < width; ++w)
-                                dst[w] = Convert<S, D, F>(src[w], _scale, _shift);
+                                dst[w] = Convert<S, D, F>(src[w], _scale, _shift, lower, upper);
                             src += width;
                             dst += width;
                         }
@@ -308,7 +309,7 @@ namespace Simd
                         for (size_t w = 0; w < width; ++w)
                         {
                             for (size_t c = 0; c < channels; ++c)
-                                dst[c] = Convert<S, D, F>(src[c], scale[c], shift[c]);
+                                dst[c] = Convert<S, D, F>(src[c], scale[c], shift[c], lower, upper);
                             src += channels;
                             dst += channels;
                         }
@@ -362,10 +363,52 @@ namespace Simd
             return size;
         }
 
-        template <typename T> void Relu(T* data, size_t size)
+        static void Relu32i(const int32_t * src, size_t size, int32_t* dst)
         {
             for (size_t i = 0; i < size; ++i)
-                data[i] = Simd::Max(data[i], T(0));
+                dst[i] = Simd::Max(src[i], 0);
+        }
+
+        SIMD_INLINE int32_t Prelu32i(int32_t value, float slope)
+        {
+            return value >= 0 ? value : Round(float(value) * slope);
+        }
+
+        static void Prelu32i(const int32_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* slope, int32_t* dst)
+        {
+            for (size_t b = 0; b < batch; ++b)
+            {
+                switch (format)
+                {
+                case SimdTensorFormatNchw:
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        float _slope = slope[c];
+                        for (size_t h = 0; h < height; ++h)
+                        {
+                            for (size_t w = 0; w < width; ++w)
+                                dst[w] = Prelu32i(src[w], _slope);
+                            src += width;
+                            dst += width;
+                        }
+                    }
+                    break;
+                case SimdTensorFormatNhwc:
+                    for (size_t h = 0; h < height; ++h)
+                    {
+                        for (size_t w = 0; w < width; ++w)
+                        {
+                            for (size_t c = 0; c < channels; ++c)
+                                dst[c] = Prelu32i(src[c], slope[c]);
+                            src += channels;
+                            dst += channels;
+                        }
+                    }
+                    break;
+                default:
+                    assert(0);
+                }
+            }
         }
 
         void SynetConvolution8iGemmNN::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
@@ -397,21 +440,24 @@ namespace Simd
                         GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD);
                 }
             }
-            Convert<int32_t, int32_t, int32_t>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, sum);
+            Convert<int32_t, int32_t, int32_t>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32i.data, _norm32i.data + p.dstC, INT_MIN, INT_MAX, sum);
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity:
                 break;
             case SimdConvolutionActivationRelu:
-                Relu(sum, _sizeD * _merge);
+                Relu32i(sum, _sizeD * _merge, sum);
+                break;
+            case SimdConvolutionActivationPrelu:
+                Prelu32i(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _params, sum);
                 break;
             default:
                 assert(0);
             }
             if (_dst8u)
-                Convert<int32_t, uint8_t, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, dst);
+                Convert<int32_t, uint8_t, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, _dstCvt.uMin, _dstCvt.uMax, dst);
             else
-                Convert<int32_t, float, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, (float*)dst);
+                Convert<int32_t, float, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm32f.data, _norm32f.data + p.dstC, INT_MIN, INT_MAX, (float*)dst);
         }
 
         void SynetConvolution8iGemmNN::ImgToCol(const uint8_t* src, uint8_t* dst)
@@ -663,12 +709,18 @@ namespace Simd
             return size;
         }
 
+        static SIMD_INLINE int32_t Set4(uint8_t value)
+        {
+            return int32_t(value) | (int32_t(value) << 8) | (int32_t(value) << 16) | (int32_t(value) << 24);
+        }
+
         void SynetConvolution8iNhwcDirect::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);
             ReorderWeight();
             _alg.norm = _srcCvt.neg && (_param.compatibility & SimdSynetCompatibility8iOverflow) ? 2 : 1;
-            _alg.zero = _srcCvt.neg ? 0x80808080 : 0;
+            _alg.zero = Set4(_srcCvt.zero[0]);
+            _alg.upper = Set4(_dstCvt.uMax);
         }
 
         bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
@@ -742,7 +794,7 @@ namespace Simd
             const ConvParam8i& p = _param;
             const int8_t* weight = _weight8i.data;
             const int32_t* bias = _norm32i.data + p.dstC;
-            const int32_t* params = NULL;
+            const float* params = _params;
             const float* scale = _norm32f.data;
             const float* shift = _norm32f.data + p.dstC;
             for (size_t dc = 0; dc < p.dstC; dc += _alg.macroD)
@@ -778,8 +830,8 @@ namespace Simd
                 }
                 weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * macroD * 4 - DivHi(p.srcC, 4) * _alg.F * 4;
                 bias += _alg.macroD;
-                //if (type == ::SimdConvolutionActivationPrelu)
-                //    params += macroD;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroD;
                 shift += _alg.macroD;
                 scale += _alg.macroD;
                 if (buf)

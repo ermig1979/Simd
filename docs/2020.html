@@ -36,7 +36,9 @@
 <h5>New features</h5>
 <ul>
  <li>Extend SimdSynetCompatibilityType enumeration.</li>
- <li>Add support of SimdSynetCompatibility8iNarrowed to function SynetConvert32fTo8u.</li>
+ <li>Add support of SimdSynetCompatibility8iNarrowed to Base implementation, SSE2, AVX2, AVX-512BW and NEON optimizations of function SynetConvert32fTo8u.</li>
+ <li>Add support of SimdSynetCompatibility8iNarrowed to Base implementation, SSE4.1 optimizations of SynetConvolution8iNhwcDirect class.</li>
+ <li>Add support of SimdConvolutionActivationPrelu to Base implementation, SSE4.1 optimizations of SynetConvolution8iNhwcDirect class.</li>
 </ul>
 <h5>Improving</h5>
 <ul>
@@ -55,9 +57,9 @@
 <ul>
  <li>Rgb24 format in Frame structure.</li>
  <li>Rgb24 format in Convert function.</li>
- <li>Base implementation, SSS3, AVX2, AVX-512BW and NEON optimizations of function RgbToGray.</li>
- <li>Base implementation, SSS3, AVX2, AVX-512BW and NEON optimizations of function RgbToBgra.</li>
- <li>Base implementation, SSS3, AVX2, AVX-512BW and NEON optimizations of function BgraToRgb.</li>
+ <li>Base implementation, SSSE3, AVX2, AVX-512BW and NEON optimizations of function RgbToGray.</li>
+ <li>Base implementation, SSSE3, AVX2, AVX-512BW and NEON optimizations of function RgbToBgra.</li>
+ <li>Base implementation, SSSE3, AVX2, AVX-512BW and NEON optimizations of function BgraToRgb.</li>
  <li>AVX2 optimization of function BgraToBgr.</li>
  <li>Function LitterCpuCache.</li>
  <li>Base implementation, SSSE3, AVX2, AVX-512BW and NEON optimizations of function Yuv444pToRgb.</li>
