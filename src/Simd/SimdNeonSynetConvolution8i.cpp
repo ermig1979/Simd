@@ -83,7 +83,7 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
-            const int32x4_t* bias, const int32x4_t * params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
+            const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
         {
             int32x4_t d00, d01;
             uint8x16_t s0;
@@ -91,6 +91,7 @@ namespace Simd
             size_t dW = (DivHi(p.srcC, 4) - DivHi(srcC, 4)) * A, dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(srcC, 4) * A;
             const int8_t* weight1 = weight0 + p.kernelY * p.kernelX * DivHi(p.srcC, 4) * A;
             int32x4_t norm = vdupq_n_s32(a.norm);
+            uint8x8_t upper = vdup_n_u8(a.upper);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
@@ -136,9 +137,9 @@ namespace Simd
                     }
                 }
                 if (dstC == DF)
-                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift);
+                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper);
                 else
-                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F);
+                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, dstC - F);
             }
             else
             {
@@ -177,15 +178,15 @@ namespace Simd
                     }
                 }
                 if (dstC == F)
-                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift);
+                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper);
                 else
-                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, dstC);
+                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper, dstC);
             }
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x5(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
-            const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
+            const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
         {
             int32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
             uint8x16_t s0;
@@ -197,6 +198,7 @@ namespace Simd
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
             int32x4_t norm = vdupq_n_s32(a.norm);
+            uint8x8_t upper = vdup_n_u8(a.upper);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
@@ -269,28 +271,28 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift);
+                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift);
+                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift);
+                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift);
+                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift);
+                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
                 }
                 else
                 {
-                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F);
+                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, dstC - F);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F);
+                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper, dstC - F);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F);
+                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper, dstC - F);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F);
+                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper, dstC - F);
                     dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F);
+                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper, dstC - F);
                     dst += dD, buf += dB;
                 }
             }
@@ -350,28 +352,28 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift);
+                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift);
+                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift);
+                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift);
+                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift);
+                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper);
                     dst += dD, buf += dB;
                 }
                 else
                 {
-                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, dstC);
+                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper, dstC);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, dstC);
+                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper, dstC);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, dstC);
+                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper, dstC);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, dstC);
+                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper, dstC);
                     dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, dstC);
+                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper, dstC);
                     dst += dD, buf += dB;
                 }
             }
@@ -379,7 +381,7 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_2xM(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
-            const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
+            const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
         {
             int32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
             uint8x16_t s0;
@@ -391,6 +393,7 @@ namespace Simd
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
             int32x4_t norm = vdupq_n_s32(a.norm);
+            uint8x8_t upper = vdup_n_u8(a.upper);
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
@@ -448,19 +451,19 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift), dst += dD, buf += dB;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
                 }
                 else
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
                 }
             }
             else
@@ -514,25 +517,25 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift), dst += dD, buf += dB;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
                 }
                 else
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
                 }
             }
         }
 
         typedef void(*ConvolutionNhwcDirect_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC,
-            const int8_t* weight0, const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst);
+            const int8_t* weight0, const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst);
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect_2xM_Ptr GetConvolutionNhwcDirect_2xM(size_t M)
         {
@@ -550,24 +553,29 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const uint8_t* src,
             const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
-            const int32_t* bias, const int32_t* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
+            const int32_t* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
         {
             size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
             size_t n = 5, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<overflow, term, type>(m);
             size_t tailH = p.dstH, tailW = p.dstW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
-            int32x4_t _params[2], _bias[2];
-            _params[0] = vdupq_n_s32(0);
+            int32x4_t _bias[2];
+            float32x4_t _params[2], _scale[2], _shift[2];
+            _params[0] = vdupq_n_f32(0);
             if (type == ::SimdConvolutionActivationRestrictRange)
-                _params[1] = vdupq_n_s32(a.high);
-            float32x4_t _scale[2], _shift[2];
+                _params[1] = vreinterpretq_f32_s32(vdupq_n_s32(a.high));
 
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
                 _bias[0] = Load<false>(bias + dc + 0);
                 _bias[1] = Load<false>(bias + dc + F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = Load<false>(params + dc + 0);
+                    _params[1] = Load<false>(params + dc + F);
+                }
                 _scale[0] = Load<false>(scale + dc + 0);
                 _scale[1] = Load<false>(scale + dc + F);
                 _shift[0] = Load<false>(shift + dc + 0);
@@ -620,7 +628,7 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x5(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
+            const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
         {
             int32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
             uint8x16_t s0;
@@ -632,6 +640,7 @@ namespace Simd
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
             int32x4_t norm = vdupq_n_s32(a.norm);
+            uint8x8_t upper = vdup_n_u8(a.upper);
             if (dstC > F)
             {
                 d00 = vdupq_n_s32(0), d01 = vdupq_n_s32(0);
@@ -662,19 +671,19 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
                 }
                 else
                 {
-                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
                 }
             }
             else
@@ -701,26 +710,26 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
                 }
                 else
                 {
-                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
                 }
             }
         }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
+            const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst)
         {
             int32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41;
             uint8x16_t s0;
@@ -732,6 +741,7 @@ namespace Simd
             const uint8_t* src3 = src0 + 3 * dS;
             const uint8_t* src4 = src0 + 4 * dS;
             int32x4_t norm = vdupq_n_s32(a.norm);
+            uint8x8_t upper = vdup_n_u8(a.upper);
             if (dstC > F)
             {
                 if (M > 0) d00 = vdupq_n_s32(0), d01 = vdupq_n_s32(0);
@@ -752,19 +762,19 @@ namespace Simd
                 }
                 if (dstC == DF)
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift), dst += dD, buf += dB;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
                 }
                 else
                 {
-                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
-                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, dstC - F), dst += dD, buf += dB;
+                    if (M > 0) Save2<term, type>(dst, buf, d00, d01, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 1) Save2<term, type>(dst, buf, d10, d11, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 2) Save2<term, type>(dst, buf, d20, d21, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 3) Save2<term, type>(dst, buf, d30, d31, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
+                    if (M > 4) Save2<term, type>(dst, buf, d40, d41, norm, bias, params, scale, shift, upper, dstC - F), dst += dD, buf += dB;
                 }
             }
             else
@@ -786,25 +796,25 @@ namespace Simd
                 }
                 if (dstC == F)
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift), dst += dD, buf += dB;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper), dst += dD, buf += dB;
                 }
                 else
                 {
-                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
-                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, dstC), dst += dD, buf += dB;
+                    if (M > 0) Save1<term, type>(dst, buf, d00, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 1) Save1<term, type>(dst, buf, d10, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 2) Save1<term, type>(dst, buf, d20, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 3) Save1<term, type>(dst, buf, d30, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
+                    if (M > 4) Save1<term, type>(dst, buf, d40, norm, bias, params, scale, shift, upper, dstC), dst += dD, buf += dB;
                 }
             }
         }
 
         typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC,
-            const int8_t* weight0, const int32x4_t* bias, const int32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst);
+            const int8_t* weight0, const int32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, int32_t* buf, uint8_t* dst);
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
         {
@@ -822,21 +832,26 @@ namespace Simd
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const uint8_t* src,
             const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
-            const int32_t* bias, const int32_t* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
+            const int32_t* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
         {
             size_t n1 = (yEnd - yBeg) * p.dstW, n5 = AlignLoAny(n1, 5), m = n1 - n5;
             ConvolutionNhwcDirect1x1_2xM_Ptr convolutionNhwcDirect1x1_2xM = GetConvolutionNhwcDirect1x1_2xM<overflow, term, type>(m);
-            int32x4_t _params[2], _bias[2];
-            _params[0] = vdupq_n_s32(0);
+            int32x4_t _bias[2];
+            float32x4_t _params[2], _scale[2], _shift[2];
+            _params[0] = vdupq_n_f32(0);
             if (type == ::SimdConvolutionActivationRestrictRange)
-                _params[1] = vdupq_n_s32(a.high);
-            float32x4_t _scale[2], _shift[2];
+                _params[1] = vreinterpretq_f32_s32(vdupq_n_s32(a.high));
 
             for (size_t dc = 0; dc < dstC; dc += DF)
             {
                 size_t dC = Simd::Min(DF, dstC - dc);
                 _bias[0] = Load<false>(bias + dc + 0);
                 _bias[1] = Load<false>(bias + dc + F);
+                if (type == ::SimdConvolutionActivationPrelu)
+                {
+                    _params[0] = Load<false>(params + dc + 0);
+                    _params[1] = Load<false>(params + dc + F);
+                }
                 _scale[0] = Load<false>(scale + dc + 0);
                 _scale[1] = Load<false>(scale + dc + F);
                 _shift[0] = Load<false>(shift + dc + 0);
@@ -879,7 +894,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            if (p.compatibility & SimdSynetCompatibility8iOverflow)
+            if (Base::Overflow(p.compatibility))
                 Set<true, term, activation>(p, a, d);
             else
                 Set<false, term, activation>(p, a, d);
@@ -902,6 +917,7 @@ namespace Simd
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, a, d); break;
             case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, a, d); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a, d); break;
+            case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, a, d); break;
             default: assert(0);
             }
         }
