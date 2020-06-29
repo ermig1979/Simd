@@ -177,7 +177,9 @@ namespace Test
 
             void Update(const Scale8iParam & p)
             {
-               // desc = desc + p.Decription(Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p");
+                desc = desc + "[" + ToString(p.batch) + "x" + ToString(p.channels) + "x" + ToString(p.spatial) + 
+                    (p.srcType == SimdTensorData8u ? "-u" : "-f") + (p.dstType == SimdTensorData8u ? "-u" : "-f") +
+                    (p.format == SimdTensorFormatNhwc ? "-1" : "-0") + (Simd::Base::Narrowed(p.compatibility) ? "-n" : "-p") + "]";
             }
 
             void Call(void* context, const uint8_t* src, uint8_t* dst) const
@@ -361,10 +363,12 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 64, 3600, f32, u8, nhwc, cP, 1, 1), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 256, 10000, u8, u8, nhwc, cP, 1, 1), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 256, 10001, f32, u8, nhwc, cN, 1, 0), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 257, 10000, u8, f32, nchw, cP, 0, 1), f1, f2);
 #endif
 #else
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 64, 3600, f32, u8, nhwc, cP, 1, 1), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 64, 3601, u8, f32, nchw, cP, 0, 1), f1, f2);
 #endif
 
         return result;
