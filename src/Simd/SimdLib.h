@@ -5633,7 +5633,7 @@ extern "C"
 
         \fn void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-        \short Sets weights, beases and parameters of activation function required for FP32 convolution algorithm.
+        \short Sets weights, biases and parameters of activation function required for FP32 convolution algorithm.
 
         \param [in, out] context - a pointer to FP32 convolution context. It must be created by function ::SimdSynetConvolution32fInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to convolution weights.
@@ -5696,7 +5696,7 @@ extern "C"
 
         \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
 
-        \short Sets weights, beases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.
+        \short Sets weights, biases, parameters of activation function, input/output tensor statistics required for INT8 convolution algorithm.
 
         \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetConvolution8iInit and released by function ::SimdRelease.
         \param [in] weight - a pointer to original (32-bit float point) convolution weights.
@@ -6403,7 +6403,7 @@ extern "C"
     */
     SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_scale
 
         \fn void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
@@ -6430,6 +6430,60 @@ extern "C"
         \param [in] compatibility - a flags of bitwise compatibility.
     */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet_scale
+
+        \fn void * SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
+        \short Initilizes INT8 scale algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] channels - a numbeo of channels.
+        \param [in] spatial - a spatial image size.
+        \param [in] srcType - an input data type (SimdTensorData32f or SimdTensorData8u).
+        \param [in] dstType - an output data type (SimdTensorData32f or SimdTensorData8u).
+        \param [in] format - a format of (input/output) image tensor.
+        \param [in] compatibility - a flags of bitwise compatibility.
+        \return a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetScale8iInternalBufferSize, ::SimdSynetScale8iSetParams and ::SimdSynetScale8iForward.
+    */
+    SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet_scale
+
+        \fn size_t SimdSynetScale8iInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside INT8 scale algorithm.
+
+        \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside INT8 scale algorithm.
+    */
+    SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_scale
+
+        \fn void SimdSynetScale8iSetParams(void * context, const float * scale, const float * bias, const float * const * stats);
+
+        \short Sets scale, bias, parameters of activation function, input/output tensor statistics required for INT8 scale algorithm.
+
+        \param [in, out] context - a pointer to INT8 convolution context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
+        \param [in] scale - a pointer to original (32-bit float point) scale.
+        \param [in] bias - a pointer to original (32-bit float point) bias. Can be NULL.
+        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]) and output(min - stats[2], max - stats[3]) tensors. Can be NULL for subsequent calls of this function.
+    */
+    SIMD_API void SimdSynetScale8iSetParams(void* context, const float* scale, const float* bias, const float* const* stats);
+
+    /*! @ingroup synet_scale
+
+        \fn void SimdSynetScale8iForward(void * context, const uint8_t * src, uint8_t * dst);
+
+        \short Performs forward propagation of INT8 scale algorithm.
+
+        \param [in] context - a pointer to INT8 scale context. It must be created by function ::SimdSynetScale8iInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst);
 
     /*! @ingroup synet_conversion
 

@@ -63,6 +63,9 @@ Modules</h2></td></tr>
 <tr class="memitem:group__synet__convolution"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution.html">Convolution framework</a></td></tr>
 <tr class="memdesc:group__synet__convolution"><td class="mdescLeft">&#160;</td><td class="mdescRight">A framework to accelerate convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:group__synet__scale"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__scale.html">Scale functions</a></td></tr>
+<tr class="memdesc:group__synet__scale"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions to acceleratе layer scale in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. <br /></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:group__synet__winograd"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__winograd.html">Winograd functions</a></td></tr>
 <tr class="memdesc:group__synet__winograd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Functions to acceleratе Winograd convolution algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. <br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -267,9 +270,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2b733e51ba3f41939d51da75201fa8b4"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga2b733e51ba3f41939d51da75201fa8b4">SimdSynetPoolingForwardMax8u</a> (const uint8_t *src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t *dst, size_t dstH, size_t dstW, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:ga2b733e51ba3f41939d51da75201fa8b4"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).  <a href="group__synet.html#ga2b733e51ba3f41939d51da75201fa8b4">More...</a><br /></td></tr>
 <tr class="separator:ga2b733e51ba3f41939d51da75201fa8b4"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gabc8343dd3ac8df5b53706258b062b1af"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gabc8343dd3ac8df5b53706258b062b1af">SimdSynetScaleLayerForward</a> (const float *src, const float *scale, const float *bias, size_t channels, size_t height, size_t width, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
-<tr class="memdesc:gabc8343dd3ac8df5b53706258b062b1af"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ScaleLayer.  <a href="group__synet.html#gabc8343dd3ac8df5b53706258b062b1af">More...</a><br /></td></tr>
-<tr class="separator:gabc8343dd3ac8df5b53706258b062b1af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga77a432773d73095b275c5cf974ae0d76"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga77a432773d73095b275c5cf974ae0d76">SimdSynetShuffleLayerForward</a> (const float *src0, const float *src1, size_t channels0, size_t channels1, size_t spatial, float *dst0, float *dst1, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, int type)</td></tr>
 <tr class="memdesc:ga77a432773d73095b275c5cf974ae0d76"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of ShuffleLayer.  <a href="group__synet.html#ga77a432773d73095b275c5cf974ae0d76">More...</a><br /></td></tr>
 <tr class="separator:ga77a432773d73095b275c5cf974ae0d76"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -381,7 +381,7 @@ Functions</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Describes Synet compatibility flags. This type used in functions <a class="el" href="group__synet.html#gabc8343dd3ac8df5b53706258b062b1af" title="This function is used for forward propagation of ScaleLayer.">SimdSynetScaleLayerForward</a>, <a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76" title="Converts 32-bit float point image to 8-bit unsigned integer image.">SimdSynetConvert32fTo8u</a>. </p>
+<p>Describes Synet compatibility flags. This type used in functions <a class="el" href="group__synet__scale.html#gabc8343dd3ac8df5b53706258b062b1af" title="This function is used for forward propagation of ScaleLayer.">SimdSynetScaleLayerForward</a>, <a class="el" href="group__synet__conversion.html#gadf0f8eea2dfcad07e1cac06c4a0a1b76" title="Converts 32-bit float point image to 8-bit unsigned integer image.">SimdSynetConvert32fTo8u</a>. </p>
 <table class="fieldtable">
 <tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="gga3c885cc5d2f09e6d18834f67d91f168da002a8392f57197cbd8b84145063b192e"></a>SimdSynetCompatibilityFmaUse&#160;</td><td class="fielddoc"><p>Fast (No compatibility for fast code). </p>
 </td></tr>
@@ -2235,97 +2235,6 @@ for(c = 0; c &lt; channels1; ++c)
     <tr><td class="paramdir">[in]</td><td class="paramname">dstH</td><td>- an output height. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstW</td><td>- an output width. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gabc8343dd3ac8df5b53706258b062b1af"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gabc8343dd3ac8df5b53706258b062b1af">&#9670;&nbsp;</a></span>SimdSynetScaleLayerForward()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdSynetScaleLayerForward </td>
-          <td>(</td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>scale</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>bias</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>channels</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">float *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
-          <td class="paramname"><em>format</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
-          <td class="paramname"><em>compatibility</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>This function is used for forward propagation of ScaleLayer. </p>
-<p>Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(c = 0; c &lt; channels; ++c)
-    for(h = 0; h &lt; height; ++h)
-        for(w = 0; w &lt; width; ++w)
-            dst[(c*height + h)*width + w] = src[(c*height + h)*width + w]*scale[c] + (bias ? bias[c] : 0);
-</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array with input image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to the 32-bit float array with scale coefficients. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)). </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the 32-bit float array with bias coefficients. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)). Can be NULL. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in the (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the 32-bit float array with output image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of (input/output) image tensor. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of bitwise compatibility. </td></tr>
   </table>
   </dd>
 </dl>

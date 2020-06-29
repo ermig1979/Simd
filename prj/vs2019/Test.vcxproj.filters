@@ -205,6 +205,9 @@
     <ClCompile Include="..\..\src\Test\Test.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestSynetScale.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">

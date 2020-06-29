@@ -247,6 +247,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHue.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseSynetScale.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -367,6 +370,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdXml.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

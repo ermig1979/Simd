@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+project(Simd)
 
 option(SIMD_AVX512 "AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) enable" ON)
 option(SIMD_AVX512VNNI "AVX-512-VNNI enable" ON)

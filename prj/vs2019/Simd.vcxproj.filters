@@ -166,6 +166,9 @@
     <ClInclude Include="..\..\src\Simd\SimdVsx.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="C++">

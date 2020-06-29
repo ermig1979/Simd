@@ -66,6 +66,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetScale8i.h"
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
@@ -5571,6 +5572,29 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
     const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
+}
+
+SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
+{
+    typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC0(SynetScale8iInit);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+    return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
+}
+
+SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context)
+{
+    return ((Base::SynetScale8i*)context)->InternalBufferSize();
+}
+
+SIMD_API void SimdSynetScale8iSetParams(void* context, const float* weight, const float* bias, const float* const* stats)
+{
+    ((Base::SynetScale8i*)context)->SetParams(weight, bias, stats);
+}
+
+SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst)
+{
+    ((Base::SynetScale8i*)context)->Forward(src, dst);
 }
 
 SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,

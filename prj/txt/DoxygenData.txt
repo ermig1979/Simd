@@ -542,6 +542,11 @@
 */
 
 /*! @ingroup synet
+    @defgroup synet_scale Scale functions
+    \short Functions to acceleratе layer scale in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+*/
+
+/*! @ingroup synet
     @defgroup synet_winograd Winograd functions
     \short Functions to acceleratе Winograd convolution algorithm in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
