@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSse1.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
@@ -60,6 +61,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse1SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1SynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1SynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse1SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Winograd.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

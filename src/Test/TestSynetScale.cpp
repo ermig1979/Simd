@@ -351,25 +351,37 @@ namespace Test
         return result;
     }
 
-    bool SynetScale8iForwardAutoTest(const FuncS8i& f1, const FuncS8i& f2)
+    bool SynetScale8iForwardAutoTest(const FuncS8i& f1, const FuncS8i& f2, SimdTensorDataType s, SimdTensorDataType d, SimdTensorFormatType f)
     {
         bool result = true;
 
         const float e = EPS;
-        const SimdTensorFormatType nchw = SimdTensorFormatNchw, nhwc = SimdTensorFormatNhwc;
-        const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
         SimdSynetCompatibilityType cP = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
         SimdSynetCompatibilityType cN = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
 
-#ifdef NDEBUG
-#if 1
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 256, 10000, u8, u8, nhwc, cP, 1, 1), f1, f2);
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 256, 10001, f32, u8, nhwc, cN, 1, 0), f1, f2);
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 257, 10000, u8, f32, nchw, cP, 0, 1), f1, f2);
-#endif
-#else
-        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 64, 3601, u8, f32, nchw, cP, 0, 1), f1, f2);
-#endif
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(2, 3, 90007, s, d, f, cN, 1, 1), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 255, 10005, s, d, f, cP, 1, 0), f1, f2);
+        result = result && SynetScale8iForwardAutoTest(e, Scale8iParam(1, 65, 1603, s, d, f, cN, 0, 1), f1, f2);
+
+        return result;
+    }
+
+    bool SynetScale8iForwardAutoTest(const FuncS8i& f1, const FuncS8i& f2)
+    {
+        const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
+        const SimdTensorFormatType nchw = SimdTensorFormatNchw, nhwc = SimdTensorFormatNhwc;
+
+        bool result = true;
+
+        result = result && SynetScale8iForwardAutoTest(f1, f2, u8, u8, nchw);
+        result = result && SynetScale8iForwardAutoTest(f1, f2, u8, f32, nchw);
+        result = result && SynetScale8iForwardAutoTest(f1, f2, f32, u8, nchw);
+        result = result && SynetScale8iForwardAutoTest(f1, f2, f32, f32, nchw);
+
+        result = result && SynetScale8iForwardAutoTest(f1, f2, u8, u8, nhwc);
+        result = result && SynetScale8iForwardAutoTest(f1, f2, u8, f32, nhwc);
+        result = result && SynetScale8iForwardAutoTest(f1, f2, f32, u8, nhwc);
+        result = result && SynetScale8iForwardAutoTest(f1, f2, f32, f32, nhwc);
 
         return result;
     }
@@ -380,30 +392,15 @@ namespace Test
 
         result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Base::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sse41::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif 
-//
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx2::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif
-//
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512bw::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif
-//
-//#ifdef SIMD_AVX512VNNI_ENABLE
-//        if (Simd::Avx512vnni::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512vnni::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Neon::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif 
+#ifdef SIMD_SSE_ENABLE
+        if (Simd::Sse::Enable)
+            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sse::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
+#endif 
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sse41::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
+#endif 
 
         return result;
     }

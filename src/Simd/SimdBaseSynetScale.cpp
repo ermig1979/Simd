@@ -169,7 +169,6 @@ namespace Simd
         SynetScale8i::SynetScale8i(const Scale8iParam& p)
             : _param(p)
         {
-            _size = p.channels * p.spatial;
         }
 
         size_t SynetScale8i::InternalBufferSize() const
@@ -193,8 +192,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < p.channels; ++c)
                 {
-                    _scale[c] = _srcCvt.scale[c];
-                    _shift[c] = _srcCvt.shift[c];
+                    _scale[c] = _srcCvt.iScale[c];
+                    _shift[c] = _srcCvt.iShift[c];
                 }
             }
             else
@@ -225,8 +224,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < p.channels; ++c)
                 {
-                    _scale[c] = _scale[c] * _dstCvt.iScale[c];
-                    _shift[c] = _shift[c] * _dstCvt.iScale[c] + _dstCvt.iShift[c];
+                    _scale[c] = _scale[c] * _dstCvt.scale[c];
+                    _shift[c] = _shift[c] * _dstCvt.scale[c] + _dstCvt.shift[c];
                 }
             }
         }
@@ -240,20 +239,22 @@ namespace Simd
                 Scale((const float*)src, (uint8_t*)dst);
             else if (p.srcType == SimdTensorData8u && p.dstType == SimdTensorData32f)
                 Scale((const uint8_t*)src, (float*)dst);
+            else if (p.srcType == SimdTensorData32f && p.dstType == SimdTensorData32f)
+                Scale((const float*)src, (float*)dst);
             else
                 assert(0);
         }
 
         template<class S, class D> D Scale(S value, float scale, float shift, int lower, int upper);
 
-        template<> SIMD_INLINE float Scale<uint8_t, float>(uint8_t value, float scale, float shift, int lower, int upper)
-        {
-            return float(value) * scale + shift;
-        }
-
         template<> SIMD_INLINE uint8_t Scale<uint8_t, uint8_t>(uint8_t value, float scale, float shift, int lower, int upper)
         {
             return (uint8_t)Simd::RestrictRange(Round(float(value) * scale + shift), lower, upper);
+        }
+
+        template<> SIMD_INLINE float Scale<uint8_t, float>(uint8_t value, float scale, float shift, int lower, int upper)
+        {
+            return float(value) * scale + shift;
         }
 
         template<> SIMD_INLINE uint8_t Scale<float, uint8_t>(float value, float scale, float shift, int lower, int upper)
@@ -261,8 +262,13 @@ namespace Simd
             return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
         }
 
-        template<class S, class D> void Scale(const S * src, size_t batch, size_t channels, size_t spatial,
-            SimdTensorFormatType format, const float * scale, const float * shift, int lower, int upper, D * dst)
+        template<> SIMD_INLINE float Scale<float, float>(float value, float scale, float shift, int lower, int upper)
+        {
+            return value * scale + shift;
+        }
+
+        template<class S, class D> void Scale(const S* src, size_t batch, size_t channels, size_t spatial,
+            SimdTensorFormatType format, const float* scale, const float* shift, int lower, int upper, D* dst)
         {
             for (size_t b = 0; b < batch; ++b)
             {
@@ -296,24 +302,30 @@ namespace Simd
         void SynetScale8i::Scale(const uint8_t* src, uint8_t* dst)
         {
             const Scale8iParam& p = _param;
-            Base::Scale<uint8_t, uint8_t>(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
+            Base::Scale(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
+        }
+
+        void SynetScale8i::Scale(const uint8_t* src, float* dst)
+        {
+            const Scale8iParam& p = _param;
+            Base::Scale(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
         }
 
         void SynetScale8i::Scale(const float* src, uint8_t* dst)
         {
             const Scale8iParam& p = _param;
-            Base::Scale<float, uint8_t>(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
+            Base::Scale(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
         }
-        
-        void SynetScale8i::Scale(const uint8_t* src, float* dst)
+
+        void SynetScale8i::Scale(const float* src, float* dst)
         {
             const Scale8iParam& p = _param;
-            Base::Scale<uint8_t, float>(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
+            Base::Scale(src, p.batch, p.channels, p.spatial, p.format, _scale.data, _shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
         }
 
         void* SynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
         {
-            Scale8iParam param(batch, channels, spatial, srcType, dstType, format, compatibility);
+            Base::Scale8iParam param(batch, channels, spatial, srcType, dstType, format, compatibility);
             if (!param.Valid())
                 return NULL;
             return new Base::SynetScale8i(param);

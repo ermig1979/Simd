@@ -18,6 +18,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
