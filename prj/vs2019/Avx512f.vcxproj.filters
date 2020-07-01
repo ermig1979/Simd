@@ -55,6 +55,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetScale.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512f">

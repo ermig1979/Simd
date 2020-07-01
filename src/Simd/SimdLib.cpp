@@ -5577,7 +5577,7 @@ SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, c
 SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
 {
     typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC2(SynetScale8iInit, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC3(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
 }

@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd.cpp" />
   </ItemGroup>
   <ItemGroup>
