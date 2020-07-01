@@ -125,7 +125,7 @@ namespace Simd
         {
             assert(channels >= F);
             if (align)
-                assert(Aligned(scale, F) && Aligned(shift, F));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             size_t channelsA = AlignLo(channels, A);
@@ -149,7 +149,7 @@ namespace Simd
 
         SIMD_INLINE void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, uint8_t* dst)
         {
-            if (Aligned(scale, F) && Aligned(shift, F))
+            if (Aligned(scale) && Aligned(shift))
                 ScaleNhwc<true>(src, scale, shift, batch, channels, spatial, upper, dst);
             else
                 ScaleNhwc<false>(src, scale, shift, batch, channels, spatial, upper, dst);
@@ -288,7 +288,7 @@ namespace Simd
         {
             assert(channels >= F);
             if (align)
-                assert(Aligned(scale, F) && Aligned(shift, F));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             size_t channelsA = AlignLo(channels, A);
@@ -311,7 +311,7 @@ namespace Simd
 
         SIMD_INLINE void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, float* dst)
         {
-            if (Aligned(scale, F) && Aligned(shift, F))
+            if (Aligned(scale) && Aligned(shift))
                 ScaleNhwc<true>(src, scale, shift, batch, channels, spatial, dst);
             else
                 ScaleNhwc<false>(src, scale, shift, batch, channels, spatial, dst);
@@ -454,7 +454,7 @@ namespace Simd
         {
             assert(channels >= F);
             if (align)
-                assert(Aligned(scale, F) && Aligned(shift, F));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             size_t channelsA = AlignLo(channels, A);
@@ -478,7 +478,7 @@ namespace Simd
 
         SIMD_INLINE void ScaleNhwc(const float* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, uint8_t* dst)
         {
-            if (Aligned(scale, F) && Aligned(shift, F))
+            if (Aligned(scale) && Aligned(shift))
                 ScaleNhwc<true>(src, scale, shift, batch, channels, spatial, upper, dst);
             else
                 ScaleNhwc<false>(src, scale, shift, batch, channels, spatial, upper, dst);

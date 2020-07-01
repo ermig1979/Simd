@@ -83,7 +83,7 @@ namespace Simd
         template <bool align, bool nofma> void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, uint8_t* dst)
         {
             if (align)
-                assert(Aligned(scale, F) && Aligned(shift, F));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             __mmask16 tailF = TailMask16(channels - channelsF);
@@ -105,7 +105,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, uint8_t* dst)
         {
-            if (Aligned(scale, F) && Aligned(shift, F))
+            if (Aligned(scale) && Aligned(shift))
                 ScaleNhwc<true, nofma>(src, scale, shift, batch, channels, spatial, upper, dst);
             else
                 ScaleNhwc<false, nofma>(src, scale, shift, batch, channels, spatial, upper, dst);
@@ -226,7 +226,7 @@ namespace Simd
         template <bool align, bool nofma> void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, float* dst)
         {
             if (align)
-                assert(Aligned(scale, F) && Aligned(shift, F));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             __mmask16 tailF = TailMask16(channels - channelsF);
@@ -247,7 +247,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, float* dst)
         {
-            if (Aligned(scale, F) && Aligned(shift, F))
+            if (Aligned(scale) && Aligned(shift))
                 ScaleNhwc<true, nofma>(src, scale, shift, batch, channels, spatial, dst);
             else
                 ScaleNhwc<false, nofma>(src, scale, shift, batch, channels, spatial, dst);
@@ -369,7 +369,7 @@ namespace Simd
         template <bool align, bool nofma> void ScaleNhwc(const float* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, uint8_t* dst)
         {
             if (align)
-                assert(Aligned(scale, F) && Aligned(shift, F));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             __mmask16 tailF = TailMask16(channels - channelsF);
@@ -391,7 +391,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc(const float* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, int upper, uint8_t* dst)
         {
-            if (Aligned(scale, F) && Aligned(shift, F))
+            if (Aligned(scale) && Aligned(shift))
                 ScaleNhwc<true, nofma>(src, scale, shift, batch, channels, spatial, upper, dst);
             else
                 ScaleNhwc<false, nofma>(src, scale, shift, batch, channels, spatial, upper, dst);
