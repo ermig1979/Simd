@@ -74,26 +74,10 @@ namespace Simd
         void * SynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
     }
 
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
-    {
-        class SynetScale8i : public Base::SynetScale8i
-        {
-        public:
-            SynetScale8i(const Base::Scale8iParam& param);
-
-        protected:
-            virtual void Scale(const float* src, float* dst);
-        };
-
-        void* SynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
-    }
-#endif
-
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        class SynetScale8i : public Sse::SynetScale8i
+        class SynetScale8i : public Base::SynetScale8i
         {
         public:
             SynetScale8i(const Base::Scale8iParam& param);
@@ -102,6 +86,7 @@ namespace Simd
             virtual void Scale(const uint8_t* src, uint8_t* dst);
             virtual void Scale(const uint8_t* src, float* dst);
             virtual void Scale(const float* src, uint8_t* dst);
+            virtual void Scale(const float* src, float* dst);
         };
 
         void* SynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);

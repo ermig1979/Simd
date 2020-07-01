@@ -392,14 +392,14 @@ namespace Test
 
         result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Base::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sse::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Sse41::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetScale8iForwardAutoTest(FUNC_S8I(Simd::Avx2::SynetScale8iInit), FUNC_S8I(SimdSynetScale8iInit));
 #endif 
 
         return result;
