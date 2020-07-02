@@ -224,7 +224,7 @@ namespace Test
         Point c = rect.Center();
         for (ptrdiff_t row = rect.top; row < rect.bottom; ++row)
         {
-            ptrdiff_t indent = std::abs(row - c.y)*rect.Width() / rect.Height();
+            ptrdiff_t indent = Simd::Abs(row - c.y)*rect.Width() / rect.Height();
             ptrdiff_t left = rect.left + indent;
             ptrdiff_t right = rect.right - indent;
             ptrdiff_t offset = row*mask.stride + left;
@@ -311,6 +311,61 @@ namespace Test
     {
         FillRandom(tensor.Data(), tensor.Size(), lo, hi);
     }
+
+    void FillRandom(Tensor32f & tensor, float* min, float* max, size_t channels, int negative, float upper, float range)
+    {
+        const float lower = negative ? -upper : 0.0f;
+        Buffer32f buf(channels * 2);
+        FillRandom(buf, lower + range, upper - range);
+        for (size_t i = 0; i < channels; ++i)
+        {
+            min[i] = negative ? std::min(buf[i * 2 + 0], buf[i * 2 + 1]) - range : 0;
+            max[i] = std::max(buf[i * 2 + 0], buf[i * 2 + 1]) + range;
+        }
+        FillRandom(tensor, 0.0f, 1.0f);
+        if (tensor.Count() == 4)
+        {
+            for (size_t b = 0; b < tensor.Axis(0); ++b)
+            {
+                if (tensor.Format() == SimdTensorFormatNhwc)
+                {
+                    for (size_t y = 0; y < tensor.Axis(1); ++y)
+                        for (size_t x = 0; x < tensor.Axis(2); ++x)
+                            for (size_t c = 0; c < tensor.Axis(3); ++c)
+                                tensor.Data({ b, y, x, c })[0] = min[c] + tensor.Data({ b, y, x, c })[0] * (max[c] - min[c]);
+                }
+                else
+                {
+                    for (size_t c = 0; c < tensor.Axis(1); ++c)
+                        for (size_t y = 0; y < tensor.Axis(2); ++y)
+                            for (size_t x = 0; x < tensor.Axis(3); ++x)
+                                tensor.Data({ b, c, y, x })[0] = min[c] + tensor.Data({ b, c, y, x })[0] * (max[c] - min[c]);
+                }
+            }
+        }
+        else if (tensor.Count() == 3)
+        {
+            for (size_t b = 0; b < tensor.Axis(0); ++b)
+            {
+                if (tensor.Format() == SimdTensorFormatNhwc)
+                {
+                    for (size_t s = 0; s < tensor.Axis(1); ++s)
+                        for (size_t c = 0; c < tensor.Axis(2); ++c)
+                            tensor.Data({ b, s, c })[0] = min[c] + tensor.Data({ b, s, c })[0] * (max[c] - min[c]);
+                }
+                else
+                {
+                    for (size_t c = 0; c < tensor.Axis(1); ++c)
+                        for (size_t s = 0; s < tensor.Axis(2); ++s)
+                            tensor.Data({ b, c, s })[0] = min[c] + tensor.Data({ b, c, s })[0] * (max[c] - min[c]);
+                }
+            }
+        }
+        else
+            assert(0);
+    }
+
+    //-------------------------------------------------------------------------
 
     template <class Channel> bool Compare(const View & a, const View & b, int differenceMax, bool printError, int errorCountMax, int valueCycle,
         const String & description)

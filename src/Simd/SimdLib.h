@@ -3783,7 +3783,7 @@ extern "C"
 
         For every element:
         \verbatim
-        x = ::abs(src[i]*slope);
+        x = abs(src[i]*slope);
         e = 1 + x + x*x*0.5417 + x*x*x*x*0.1460;
         dst[i] = 1 / (1 + (src[i] > 0 ? 1 / e : e));
         \endverbatim
@@ -5571,6 +5571,45 @@ extern "C"
         \param [in] format - a format of image tensor.
     */
     SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
+
+    /*! @ingroup synet
+
+        \fn void SimdSynetAddLayerForward8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
+        \short Adds two INT8 layers.
+
+         Algorithm's details (example for NCHW tensor format):
+        \verbatim
+        for(b = 0; b < batch; ++b)
+            for(c = 0; c < channels; ++c)
+                for(s = 0; s < spatial; ++s)
+                {
+                     offs = (b*channels + c)*spatial + s;
+                     A = aData[offs]*aScale[c] + aShift[c]; 
+                     B = bData[offs]*bScale[c] + bShift[c];
+                     cData[offs] = round((A + B)*cScale[c] + cShift[c]);
+                }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] aData - a pointer to the first input 8-bit integer tensor.
+        \param [in] aScale - a pointer to the 32-bit float array with scale coefficients of the first input tensor.
+        \param [in] aShift - a pointer to the 32-bit float array with shift coefficients of the first input tensor.
+        \param [in] bData - a pointer to the second input 8-bit integer tensor.
+        \param [in] bScale - a pointer to the 32-bit float array with scale coefficients of the second input tensor.
+        \param [in] bShift - a pointer to the 32-bit float array with shift coefficients of the second input tensor.
+        \param [out] cData - a pointer to the output 8-bit integer tensor.
+        \param [in] cScale - a pointer to the 32-bit float array with scale coefficients of the output tensor.
+        \param [in] cShift - a pointer to the 32-bit float array with shift coefficients of the output tensor.
+        \param [in] batch - a batch size of input and output image tensors.
+        \param [in] channels - a number of channels in input and output image tensors.
+        \param [in] spatial - a spatial size of input and output image tensors.
+        \param [in] format - a format of input and output image tensors.
+        \param [in] compatibility - a flags of bitwise compatibility.
+    */
+    SIMD_API void SimdSynetAddLayerForward8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+        uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_conversion
 

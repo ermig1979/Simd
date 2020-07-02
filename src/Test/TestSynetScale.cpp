@@ -193,35 +193,6 @@ namespace Test
 #define FUNC_S8I(function) \
     FuncS8i(function, std::string(#function))
 
-    void FillSrc32f(const Scale8iParam & p, Tensor32f& src, float* min, float* max)
-    {
-        const float lo = p.neg ? -1.0f : 0.0f, hi = 1.0f, hr = 0.01f;
-        Buffer32f buf(p.channels * 2);
-        FillRandom(buf, lo + hr, hi - hr);
-        for (size_t i = 0; i < p.channels; ++i)
-        {
-            min[i] = p.neg ? std::min(buf[i * 2 + 0], buf[i * 2 + 1]) - hr : 0;
-            max[i] = std::max(buf[i * 2 + 0], buf[i * 2 + 1]) + hr;
-        }
-        FillRandom(src, 0.0f, 1.0f);
-        for (size_t b = 0; b < p.batch; ++b)
-        {
-            if (p.format == SimdTensorFormatNhwc)
-            {
-                for (size_t s = 0; s < p.spatial; ++s)
-                    for (size_t c = 0; c < p.channels; ++c)
-                        src.Data({ b, s, c })[0] = min[c] + src.Data({ b, s, c })[0] * (max[c] - min[c]);
-
-            }
-            else
-            {
-                for (size_t c = 0; c < p.channels; ++c)
-                    for (size_t s = 0; s < p.spatial; ++s)
-                        src.Data({ b, c, s })[0] = min[c] + src.Data({ b, c, s })[0] * (max[c] - min[c]);
-            }
-        }
-    }
-
     void FillSrc8u(const Scale8iParam& p, const Tensor32f& src, const float* min, const float* max, Tensor8u& dst)
     {
         int uMin = Simd::Base::Narrowed(p.compatibility) ? Simd::Base::U8_NARROWED_MIN : Simd::Base::U8_PRECISE_MIN;
@@ -231,7 +202,7 @@ namespace Test
         Buffer32f scale(p.channels), shift(p.channels);
         for (size_t i = 0; i < p.channels; ++i)
         {
-            float abs = std::max(std::abs(min[i]), std::abs(max[i]));
+            float abs = std::max(Simd::Abs(min[i]), Simd::Abs(max[i]));
             scale[i] = (p.neg ? iMax : uMax) / abs;
             shift[i] = float(p.neg ? -iMin : uMin);// -min[i] * scale[i];
         }
@@ -301,10 +272,10 @@ namespace Test
         }
 
         Tensor32f srcMin({ p.channels }), srcMax({ p.channels }), dstMin({ p.channels }), dstMax({ p.channels });
-        Tensor32f src32f(p.SrcShape()), dst32f1(p.SrcShape()), dst32f2(p.SrcShape());
-        Tensor8u src8u(p.SrcShape()), dst8u1(p.SrcShape()), dst8u2(p.SrcShape());
+        Tensor32f src32f(p.SrcShape(), p.format), dst32f1(p.SrcShape(), p.format), dst32f2(p.SrcShape(), p.format);
+        Tensor8u src8u(p.SrcShape(), p.format), dst8u1(p.SrcShape(), p.format), dst8u2(p.SrcShape(), p.format);
 
-        FillSrc32f(p, src32f, srcMin.Data(), srcMax.Data());
+        FillRandom(src32f, srcMin.Data(), srcMax.Data(), p.channels, p.neg);
         FillSrc8u(p, src32f, srcMin.Data(), srcMax.Data(), src8u);
         FillDstStat(p, scale, bias, src32f, dst32f1, dstMin.Data(), dstMax.Data());
 

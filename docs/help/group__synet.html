@@ -201,6 +201,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaecd5e6923ee3500f4268ec996edf7082"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gaecd5e6923ee3500f4268ec996edf7082">SimdSynetAddBias</a> (const float *bias, size_t channels, size_t spatial, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gaecd5e6923ee3500f4268ec996edf7082"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds a bias to given vector.  <a href="group__synet.html#gaecd5e6923ee3500f4268ec996edf7082">More...</a><br /></td></tr>
 <tr class="separator:gaecd5e6923ee3500f4268ec996edf7082"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga34b2e1ac6b150372953b46fea9481991"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#ga34b2e1ac6b150372953b46fea9481991">SimdSynetAddLayerForward8i</a> (const uint8_t *aData, const float *aScale, const float *aShift, const uint8_t *bData, const float *bScale, const float *bShift, uint8_t *cData, const float *cScale, const float *cShift, size_t batch, size_t channels, size_t spatial, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format, int upper)</td></tr>
+<tr class="memdesc:ga34b2e1ac6b150372953b46fea9481991"><td class="mdescLeft">&#160;</td><td class="mdescRight">Adds two INT8 layers.  <a href="group__synet.html#ga34b2e1ac6b150372953b46fea9481991">More...</a><br /></td></tr>
+<tr class="separator:ga34b2e1ac6b150372953b46fea9481991"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gae02f8007bd04cf7d2b9227285c12a6c1"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gae02f8007bd04cf7d2b9227285c12a6c1">SimdSynetDeconvolution32fInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *conv, <a class="el" href="group__synet.html#ga9cf0daa7caaedd178a1a5e2180d1d0b5">SimdGemm32fNNPtr</a> gemm)</td></tr>
 <tr class="memdesc:gae02f8007bd04cf7d2b9227285c12a6c1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 deconvolution algorithm.  <a href="group__synet.html#gae02f8007bd04cf7d2b9227285c12a6c1">More...</a><br /></td></tr>
 <tr class="separator:gae02f8007bd04cf7d2b9227285c12a6c1"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -590,6 +593,137 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of image tensor. </td></tr>
     <tr><td class="paramdir">[in,out]</td><td class="paramname">dst</td><td>- a pointer to cumulative 32-bit image tensor. The size of the array is <a class="el" href="group__memory.html#ga25d97184e429b85ebde28c4a390004db" title="Gets aligned size.">SimdAlign</a> (channels, <a class="el" href="group__synet.html#ga2fcc0ee0376a986bd32423815a689ea7" title="Gets alignment requred for current tensor format.">SimdSynetTensorAlignment</a> (format)) * spatial. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of image tensor. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga34b2e1ac6b150372953b46fea9481991"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga34b2e1ac6b150372953b46fea9481991">&#9670;&nbsp;</a></span>SimdSynetAddLayerForward8i()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetAddLayerForward8i </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>aData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>aScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>aShift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>bData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>bShift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>cData</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>cScale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>cShift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>batch</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>spatial</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a>&#160;</td>
+          <td class="paramname"><em>format</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>upper</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Adds two INT8 layers. </p>
+<p>Algorithm's details (example for NCHW tensor format): </p><pre class="fragment">for(b = 0; b &lt; batch; ++b)
+    for(c = 0; c &lt; channels; ++c)
+        for(s = 0; s &lt; spatial; ++s)
+        {
+             offs = (b*channels + c)*spatial + s;
+             A = aData[offs]*aScale[c] + aShift[c]; 
+             B = bData[offs]*bScale[c] + bShift[c];
+             cData[offs] = min(max(0, round((A + B)*cScale[c] + cShift[c])), upper);
+        }
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">aData</td><td>- a pointer to the first input 8-bit integer tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">aScale</td><td>- a pointer to the 32-bit float array with scale coefficients of the first input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">aShift</td><td>- a pointer to the 32-bit float array with shift coefficients of the first input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bData</td><td>- a pointer to the second input 8-bit integer tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bScale</td><td>- a pointer to the 32-bit float array with scale coefficients of the second input tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">bShift</td><td>- a pointer to the 32-bit float array with shift coefficients of the second input tensor. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">cData</td><td>- a pointer to the output 8-bit integer tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cScale</td><td>- a pointer to the 32-bit float array with scale coefficients of the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">cShift</td><td>- a pointer to the 32-bit float array with shift coefficients of the output tensor. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">batch</td><td>- a batch size of input and output image tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a number of channels in input and output image tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">spatial</td><td>- a spatial size of input and output image tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a format of input and output image tensors. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">upper</td><td>- an upper bound of saturation in the output tensor. </td></tr>
   </table>
   </dd>
 </dl>

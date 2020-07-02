@@ -99,9 +99,9 @@ namespace Simd
     {
         if (bias)
         {
-            float min = ::abs(bias[index]);
+            float min = Simd::Abs(bias[index]);
             if (prelu)
-                min *= Max(1.0f, ::abs(prelu[index]));
+                min *= Max(1.0f, Simd::Abs(prelu[index]));
             abs = Max(abs, min / float(128 * 256 * 256));
         }
         return abs;
@@ -146,7 +146,7 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[kc]);
                             maxW = Simd::Max(maxW, pNormW[kc]);
                         }
-                    float abs = AvoidOverflow(Max(::abs(maxW), ::abs(minW)), pSrcB, pPrelu, d);
+                    float abs = AvoidOverflow(Max(Simd::Abs(maxW), Simd::Abs(minW)), pSrcB, pPrelu, d);
                     scale = iMax / abs;
                     for (size_t k = 0, kc = 0; k < K; ++k)
                         for (size_t c = 0; c < C; ++c, ++kc)
@@ -173,7 +173,7 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[ck]);
                             maxW = Simd::Max(maxW, pNormW[ck]);
                         }
-                    float abs = AvoidOverflow(Max(::abs(maxW), ::abs(minW)), pSrcB, pPrelu, d);
+                    float abs = AvoidOverflow(Max(Simd::Abs(maxW), Simd::Abs(minW)), pSrcB, pPrelu, d);
                     scale = iMax / abs;
                     for (size_t c = 0, ck = 0; c < C; ++c)
                         for (size_t k = 0; k < K; ++k, ++ck)
@@ -691,7 +691,8 @@ namespace Simd
 
         String SynetConvolution8iNhwcDirect::Desc() const 
         { 
-            return Ext() + "::NhwcDirect" + ((_param.compatibility& SimdSynetCompatibility8iOverflow) ? "-o" : "-e");
+            const ConvParam8i& p = _param;
+            return Ext() + "::NhwcDirect" + (Overflow(p.compatibility) ? "-o" : (Narrowed(p.compatibility) ? "-n" : "-p"));
         }
 
         size_t SynetConvolution8iNhwcDirect::InternalBufferSize() const

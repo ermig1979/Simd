@@ -404,7 +404,7 @@ namespace Test
         {
             int _a = *a.Data(index);
             int _b = *b.Data(index);
-            int difference = ::abs(_a - _b);
+            int difference = Simd::Abs(_a - _b);
             bool error = difference > differenceMax;
             if (error)
             {
