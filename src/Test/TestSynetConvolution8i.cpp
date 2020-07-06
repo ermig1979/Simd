@@ -61,37 +61,6 @@ namespace Test
 #define FUNC_C(function) \
     FuncC(function, std::string(#function))
 
-    void FillSrc32f(const Param & p, int neg, Tensor32f & src, float * min, float* max)
-    {
-        const float lo = neg ? -1.0f : 0.0f, hi = 1.0f, hr = 0.01f;
-        Buffer32f buf(p.conv.srcC * 2);
-        FillRandom(buf, lo + hr, hi - hr);
-        for (size_t i = 0; i < p.conv.srcC; ++i)
-        {
-            min[i] = neg ? std::min(buf[i * 2 + 0], buf[i * 2 + 1]) - hr : 0;
-            max[i] = std::max(buf[i * 2 + 0], buf[i * 2 + 1]) + hr;
-        }
-        FillRandom(src, 0.0f, 1.0f);
-        for (size_t b = 0; b < p.batch; ++b)
-        {
-            if (p.trans)
-            {
-                for (size_t y = 0; y < p.conv.srcH; ++y)
-                    for (size_t x = 0; x < p.conv.srcW; ++x)
-                        for (size_t c = 0; c < p.conv.srcC; ++c)
-                            src.Data({ b, y, x, c })[0] = min[c] + src.Data({ b, y, x, c })[0] * (max[c] - min[c]);
-
-            }
-            else
-            {
-                for (size_t c = 0; c < p.conv.srcC; ++c)
-                    for (size_t y = 0; y < p.conv.srcH; ++y)
-                        for (size_t x = 0; x < p.conv.srcW; ++x)
-                            src.Data({ b, c, y, x })[0] = min[c] + src.Data({ b, c, y, x })[0] * (max[c] - min[c]);
-            }
-        }
-    }
-
     void FillSrc8u(const Param& p, int neg, SimdSynetCompatibilityType comp, const Tensor32f& src, const float* min, const float* max, Tensor8u & dst)
     {
         int uMin = Simd::Base::Narrowed(comp) ? Simd::Base::U8_NARROWED_MIN : Simd::Base::U8_PRECISE_MIN;
@@ -101,7 +70,7 @@ namespace Test
         Buffer32f scale(p.conv.srcC), shift(p.conv.srcC);
         for (size_t i = 0; i < p.conv.srcC; ++i)
         {
-            float abs = std::max(std::abs(min[i]), std::abs(max[i]));
+            float abs = std::max(Simd::Abs(min[i]), Simd::Abs(max[i]));
             scale[i] = (neg ? iMax : uMax) / abs;
             shift[i] = float(neg ? -iMin : uMin);// -min[i] * scale[i];
         }
@@ -193,11 +162,11 @@ namespace Test
         }
 
         Tensor32f srcMin({ c.srcC }), srcMax({ c.srcC }), dstMin({ c.dstC }), dstMax({ c.dstC });
-        Tensor32f src32f(p.SrcShape()), dst32f1(p.DstShape()), dst32f2(p.DstShape()), buf32f;
-        Tensor8u src8u(p.SrcShape()), dst8u1(p.DstShape()), dst8u2(p.DstShape()), buf8u;
+        Tensor32f src32f(p.SrcShape(), p.conv.srcF), dst32f1(p.DstShape(), p.conv.dstF), dst32f2(p.DstShape(), p.conv.dstF), buf32f;
+        Tensor8u src8u(p.SrcShape(), p.conv.srcF), dst8u1(p.DstShape(), p.conv.dstF), dst8u2(p.DstShape(), p.conv.dstF), buf8u;
         //dst8u2.Reshape({ 1000000 }); dst8u2.Extend(p.DstShape());
 
-        FillSrc32f(p, neg, src32f, srcMin.Data(), srcMax.Data());
+        FillRandom(src32f, srcMin.Data(), srcMax.Data(), p.conv.srcC, neg);
         FillSrc8u(p, neg, comp, src32f, srcMin.Data(), srcMax.Data(), src8u);
         FillDstStat(p, weight, bias, params, src32f, buf32f, dst32f1, dstMin.Data(), dstMax.Data());
 
