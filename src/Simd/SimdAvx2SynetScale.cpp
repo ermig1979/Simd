@@ -842,7 +842,7 @@ namespace Simd
         {
             assert(channels >= F);
             if (align)
-                assert(Aligned(scale F) && Aligned(shift));
+                assert(Aligned(scale) && Aligned(shift));
 
             size_t channelsF = AlignLo(channels, F);
             size_t channelsDF = AlignLo(channels, DF);
