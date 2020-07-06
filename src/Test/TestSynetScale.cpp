@@ -193,63 +193,10 @@ namespace Test
 #define FUNC_S8I(function) \
     FuncS8i(function, std::string(#function))
 
-    void FillSrc8u(const Scale8iParam& p, const Tensor32f& src, const float* min, const float* max, Tensor8u& dst)
-    {
-        int uMin = Simd::Base::Narrowed(p.compatibility) ? Simd::Base::U8_NARROWED_MIN : Simd::Base::U8_PRECISE_MIN;
-        int uMax = Simd::Base::Narrowed(p.compatibility) ? Simd::Base::U8_NARROWED_MAX : Simd::Base::U8_PRECISE_MAX;
-        int iMin = Simd::Base::Narrowed(p.compatibility) ? Simd::Base::I8_NARROWED_MIN : Simd::Base::I8_PRECISE_MIN;
-        int iMax = Simd::Base::Narrowed(p.compatibility) ? Simd::Base::I8_NARROWED_MAX : Simd::Base::I8_PRECISE_MAX;
-        Buffer32f scale(p.channels), shift(p.channels);
-        for (size_t i = 0; i < p.channels; ++i)
-        {
-            float abs = std::max(Simd::Abs(min[i]), Simd::Abs(max[i]));
-            scale[i] = (p.neg ? iMax : uMax) / abs;
-            shift[i] = float(p.neg ? -iMin : uMin);// -min[i] * scale[i];
-        }
-        for (size_t b = 0; b < p.batch; ++b)
-        {
-            if (p.format == SimdTensorFormatNhwc)
-            {
-                for (size_t s = 0; s < p.spatial; ++s)
-                    for (size_t c = 0; c < p.channels; ++c)
-                        dst.Data({ b, s, c })[0] = Simd::Base::SynetConvert32fTo8u(src.Data({ b, s, c })[0], scale[c], shift[c], uMin, uMax);
-
-            }
-            else
-            {
-                for (size_t c = 0; c < p.channels; ++c)
-                    for (size_t s = 0; s < p.spatial; ++s)
-                        dst.Data({ b, c, s })[0] = Simd::Base::SynetConvert32fTo8u(src.Data({ b, c, s })[0], scale[c], shift[c], uMin, uMax);
-            }
-        }
-    }
-
-    void FillDstStat(const Scale8iParam& p, const Tensor32f& scale, const Tensor32f& bias, const Tensor32f& src, Tensor32f& dst, float* min, float* max)
+    void FillDstStat(const Scale8iParam& p, const Tensor32f& scale, const Tensor32f& bias, const Tensor32f& src, Tensor32f& dst, float* dstMin, float* dstMax, float* dstScale, float* dstShift)
     {
         SimdSynetScaleLayerForward(src.Data(), scale.Data(), bias.Data(), p.channels, 1, p.spatial, dst.Data(), p.format, p.compatibility);
-        Fill(min, p.channels, FLT_MAX);
-        Fill(max, p.channels, -FLT_MAX);
-        for (size_t b = 0; b < p.batch; ++b)
-        {
-            if (p.format == SimdTensorFormatNhwc)
-            {
-                for (size_t s = 0; s < p.spatial; ++s)
-                    for (size_t c = 0; c < p.channels; ++c)
-                    {
-                        min[c] = std::min(min[c], dst.Data({ b, s, c })[0]);
-                        max[c] = std::max(max[c], dst.Data({ b, s, c })[0]);
-                    }
-            }
-            else
-            {
-                for (size_t c = 0; c < p.channels; ++c)
-                    for (size_t s = 0; s < p.spatial; ++s)
-                    {
-                        min[c] = std::min(min[c], dst.Data({ b, c, s })[0]);
-                        max[c] = std::max(max[c], dst.Data({ b, c, s })[0]);
-                    }
-            }
-        }
+        SetDstStat(p.channels, p.neg, p.compatibility, dst, dstMin, dstMax, dstScale, dstShift);
     }
 
     bool SynetScale8iForwardAutoTest(float eps, const Scale8iParam& p, FuncS8i f1, FuncS8i f2)
@@ -272,12 +219,13 @@ namespace Test
         }
 
         Tensor32f srcMin({ p.channels }), srcMax({ p.channels }), dstMin({ p.channels }), dstMax({ p.channels });
+        Tensor32f srcScale({ p.channels }), srcShift({ p.channels }), dstScale({ p.channels }), dstShift({ p.channels });
         Tensor32f src32f(p.SrcShape(), p.format), dst32f1(p.SrcShape(), p.format), dst32f2(p.SrcShape(), p.format);
         Tensor8u src8u(p.SrcShape(), p.format), dst8u1(p.SrcShape(), p.format), dst8u2(p.SrcShape(), p.format);
 
         FillRandom(src32f, srcMin.Data(), srcMax.Data(), p.channels, p.neg);
-        FillSrc8u(p, src32f, srcMin.Data(), srcMax.Data(), src8u);
-        FillDstStat(p, scale, bias, src32f, dst32f1, dstMin.Data(), dstMax.Data());
+        SetSrc32fTo8u(src32f, srcMin.Data(), srcMax.Data(), p.channels, p.neg, p.compatibility, srcScale.Data(), srcShift.Data(), src8u);
+        FillDstStat(p, scale, bias, src32f, dst32f1, dstMin.Data(), dstMax.Data(), dstScale.Data(), dstShift.Data());
 
         const float* stats[4] = { srcMin.Data(), srcMax.Data(), dstMin.Data(), dstMax.Data() };
         const uint8_t* src = p.srcType == SimdTensorData32f ? (uint8_t*)src32f.Data() : src8u.Data();

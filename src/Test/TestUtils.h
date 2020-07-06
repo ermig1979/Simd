@@ -69,6 +69,12 @@ namespace Test
 
     void FillRandom(Tensor32f& tensor, float* min, float* max, size_t channels, int negative, float upper = 1.0f, float range = 0.01f);
 
+    void SetSrc32fTo8u(const Tensor32f& src, const float* min, const float* max, size_t channels, int negative,
+        SimdSynetCompatibilityType compatibility, float* shift, float* scale, Tensor8u& dst);
+
+    void SetDstStat(size_t channels, int negative, SimdSynetCompatibilityType compatibility, 
+        const Tensor32f& dst, float* min, float* max, float* scale, float* shift);
+
     bool Compare(const View & a, const View & b,
         int differenceMax = 0, bool printError = false, int errorCountMax = 0, int valueCycle = 0,
         const String & description = "");
