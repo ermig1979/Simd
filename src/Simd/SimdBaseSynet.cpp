@@ -149,9 +149,9 @@ namespace Simd
         {
             int lower, upper;
             if (Base::Narrowed(compatibility))
-                lower = U8_NARROWED_MIN, upper = U8_NARROWED_MAX;
+                lower = Base::U8_NARROWED_MIN, upper = Base::U8_NARROWED_MAX;
             else
-                lower = U8_PRECISE_MIN, upper = U8_PRECISE_MAX;
+                lower = Base::U8_PRECISE_MIN, upper = Base::U8_PRECISE_MAX;
             for (size_t b = 0; b < batch; ++b)
             {
                 if (format == SimdTensorFormatNchw)
@@ -162,7 +162,7 @@ namespace Simd
                         {
                             float a = float(aData[s]) * aScale[c] + aShift[c];
                             float b = float(bData[s]) * bScale[c] + bShift[c];
-                            cData[s] = SynetConvert32fTo8u(a + b, cScale[c], cShift[c], lower, upper);
+                            cData[s] = Base::SynetConvert32fTo8u(a + b, cScale[c], cShift[c], lower, upper);
                         }
                         aData += spatial, bData += spatial, cData += spatial;
                     }
@@ -175,7 +175,7 @@ namespace Simd
                         {
                             float a = float(aData[c]) * aScale[c] + aShift[c];
                             float b = float(bData[c]) * bScale[c] + bShift[c];
-                            cData[c] = SynetConvert32fTo8u(a + b, cScale[c], cShift[c], lower, upper);
+                            cData[c] = Base::SynetConvert32fTo8u(a + b, cScale[c], cShift[c], lower, upper);
                         }
                         aData += channels, bData += channels, cData += channels;
                     }

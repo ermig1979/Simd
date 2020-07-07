@@ -15,6 +15,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
