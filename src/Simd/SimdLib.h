@@ -5574,9 +5574,9 @@ extern "C"
 
     /*! @ingroup synet
 
-        \fn void SimdSynetAddLayerForward8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+        \fn void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift, uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
-        \short Adds two INT8 layers.
+        \short Adds two INT8 tensors.
 
          Algorithm's details (example for NCHW tensor format):
         \verbatim
@@ -5608,7 +5608,7 @@ extern "C"
         \param [in] format - a format of input and output image tensors.
         \param [in] compatibility - a flags of bitwise compatibility.
     */
-    SIMD_API void SimdSynetAddLayerForward8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+    SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_conversion

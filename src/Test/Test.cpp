@@ -328,6 +328,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(SvmSumLinear);
 
     TEST_ADD_GROUP_A00(SynetAddBias);
+    TEST_ADD_GROUP_A00(SynetAdd8i);
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A00(SynetInnerProductLayerForward);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);

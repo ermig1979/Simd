@@ -25,6 +25,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 #include "Test/TestTensor.h"
+#include "Simd/SimdSynet.h"
 
 namespace Test
 {
@@ -127,6 +128,118 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncA8I
+        {
+            typedef void(*FuncPtr)(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+                uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
+            FuncPtr func;
+            String desc;
+
+            FuncA8I(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t b, size_t c, size_t s, SimdTensorFormatType f, SimdSynetCompatibilityType comp)
+            {
+                desc = desc + "[" + ToString(b) + "x" + ToString(c) + "x" + ToString(s) +
+                    (f == SimdTensorFormatNhwc ? "-1" : "-0") + (Simd::Base::Narrowed(comp) ? "-n" : "-p") + "]";
+            }
+
+            void Call(const Tensor8u& aData, const Tensor32f & aScale, const Tensor32f& aShift,
+                const Tensor8u& bData, const Tensor32f& bScale, const Tensor32f& bShift, 
+                Tensor8u& cData, const Tensor32f& cScale, const Tensor32f& cShift, SimdSynetCompatibilityType comp) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                size_t channels = aData.Format() == SimdTensorFormatNhwc ? aData.Axis(2) : aData.Axis(1);
+                size_t spatial = aData.Format() == SimdTensorFormatNhwc ? aData.Axis(1) : aData.Axis(2);
+                func(aData.Data(), aScale.Data(), aShift.Data(), bData.Data(), bScale.Data(), bShift.Data(), cData.Data(), cScale.Data(), cShift.Data(),
+                    aData.Axis(0), channels, spatial, aData.Format(), comp);
+            }
+        };
+    }
+
+#define FUNC_A8I(function) FuncA8I(function, #function)
+
+    bool SynetAdd8iAutoTest(size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, int negative, SimdSynetCompatibilityType compatibility, FuncA8I f1, FuncA8I f2)
+    {
+        bool result = true;
+
+        f1.Update(batch, channels, spatial, format, compatibility);
+        f2.Update(batch, channels, spatial, format, compatibility);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        Shape shape = (format == SimdTensorFormatNhwc ? Shape({ batch, spatial, channels }) : Shape({ batch, channels, spatial }));
+        Tensor32f aMin({ channels }), aMax({ channels }), bMin({ channels }), bMax({ channels }), cMin({ channels }), cMax({ channels });
+        Tensor32f aScale({ channels }), aShift({ channels }), bScale({ channels }), bShift({ channels }), cScale({ channels }), cShift({ channels });
+        Tensor32f a(shape, format), b(shape, format), c(shape, format);
+        Tensor8u aData(shape, format), bData(shape, format), cData1(shape, format), cData2(shape, format);
+
+        FillRandom(a, aMin.Data(), aMax.Data(), channels, negative);
+        SetSrc32fTo8u(a, aMin.Data(), aMax.Data(), channels, negative, compatibility, aScale.Data(), aShift.Data(), aData);
+
+        FillRandom(b, bMin.Data(), bMax.Data(), channels, negative);
+        SetSrc32fTo8u(b, bMin.Data(), bMax.Data(), channels, negative, compatibility, bScale.Data(), bShift.Data(), bData);
+
+        for (size_t i = 0; i < a.Size(); ++i)
+            c.Data()[i] = a.Data()[i] + b.Data()[i];
+        SetDstStat(channels, negative, compatibility, c, cMin.Data(), cMax.Data(), cScale.Data(), cShift.Data());
+
+        Fill(cData1, uint8_t(1));
+        Fill(cData2, uint8_t(2));
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(aData, aScale, aShift, bData, bScale, bShift, cData1, cScale, cShift, compatibility));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(aData, aScale, aShift, bData, bScale, bShift, cData2, cScale, cShift, compatibility));
+
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
+        int differenceMax = (Simd::Base::FmaAvoid(compatibility) ? 0 : 1);
+#else
+        int differenceMax = 1;
+#endif
+
+        result = result && Compare(cData1, cData2, differenceMax, true, 64);
+
+        return result;
+    }
+
+    bool SynetAdd8iAutoTest(const FuncA8I& f1, const FuncA8I& f2)
+    {
+        bool result = true;
+
+        const SimdTensorFormatType nchw = SimdTensorFormatNchw, nhwc = SimdTensorFormatNhwc;
+        SimdSynetCompatibilityType cP = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
+        SimdSynetCompatibilityType cN = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
+
+        result = result && SynetAdd8iAutoTest(1, 255, 10000, nchw, 1, cN, f1, f2);
+        result = result && SynetAdd8iAutoTest(1, 255, 10005, nchw, 0, cP, f1, f2);
+        result = result && SynetAdd8iAutoTest(1, 256, 10005, nhwc, 1, cN, f1, f2);
+        result = result && SynetAdd8iAutoTest(1, 255, 10005, nhwc, 0, cP, f1, f2);
+
+        result = result && SynetAdd8iAutoTest(2, 65, 1603, nhwc, 0, cP, f1, f2);
+        result = result && SynetAdd8iAutoTest(2, 64, 1603, nhwc, 1, cN, f1, f2);
+        result = result && SynetAdd8iAutoTest(2, 65, 1603, nchw, 0, cP, f1, f2);
+        result = result && SynetAdd8iAutoTest(2, 65, 1600, nchw, 1, cN, f1, f2);
+
+        return result;
+    }
+
+    bool SynetAdd8iAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Base::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
 
     SIMD_INLINE String ToString(SimdSynetEltwiseOperationType type)
     {
@@ -243,6 +356,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------
+
     namespace
     {
         struct FuncIPLF
@@ -340,6 +455,8 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------
 
     namespace
     {
@@ -441,6 +558,8 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------
 
     namespace
     {
@@ -550,6 +669,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------
+
     namespace
     {
         struct FuncSM
@@ -641,6 +762,8 @@ namespace Test
 
         return result;
     }
+
+    //-------------------------------------------------------------------------
 
     SIMD_INLINE String ToString(SimdSynetUnaryOperation32fType type)
     {

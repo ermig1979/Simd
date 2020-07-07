@@ -5271,10 +5271,14 @@ SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spati
     simdSynetAddBias(bias, channels, spatial, dst, format);
 }
 
-SIMD_API void SimdSynetAddLayerForward8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
     uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
 {
+    typedef void(*SimdSynetAdd8iPtr) (const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+        uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+    const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC0(SynetAdd8i);
 
+    simdSynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
 }
 
 SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)

@@ -263,7 +263,7 @@ Functions</h2></td></tr>
 
 <p>Calculates rough sigmoid for 32-bit float array. </p>
 <p>All arrays must have the same size.</p>
-<p>For every element: </p><pre class="fragment">x = ::abs(src[i]*slope);
+<p>For every element: </p><pre class="fragment">x = abs(src[i]*slope);
 e = 1 + x + x*x*0.5417 + x*x*x*x*0.1460;
 dst[i] = 1 / (1 + (src[i] &gt; 0 ? 1 / e : e));
 </pre><p> It is approximate way (maximal absolute error is 0.002294 (~0.23%) ) of sigmoid function (<a class="el" href="group__synet__activation.html#ga7c3b2e316df7f6820b1e7067e74924e8" title="This function is used for forward propagation of SigmoidLayer.">SimdSynetSigmoid32f</a>) calculation: </p><pre class="fragment">dst[i] = 1/(1 + exp(-slope*src[i]));
