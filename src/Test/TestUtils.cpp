@@ -313,6 +313,18 @@ namespace Test
         FillRandom(tensor.Data(), tensor.Size(), lo, hi);
     }
 
+    void FillRandom(Tensor8i& tensor, int8_t lo, int8_t hi)
+    {
+        for (size_t i = 0; i < tensor.Size(); ++i)
+            tensor.Data()[i] = lo + Random(hi - lo + 1);
+    }
+
+    void FillRandom(Tensor32i& tensor, int32_t lo, int32_t hi)
+    {
+        for (size_t i = 0; i < tensor.Size(); ++i)
+            tensor.Data()[i] = lo + Random(hi - lo + 1);
+    }
+
     //-------------------------------------------------------------------------
 
     void FillRandom(Tensor32f & tensor, float* min, float* max, size_t channels, int negative, float upper, float range)

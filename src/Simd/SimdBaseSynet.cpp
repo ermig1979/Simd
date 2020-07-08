@@ -295,6 +295,29 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
+        {
+            const size_t K2 = Base::Precise(compatibility) ? 0 : K / 2 * 2;
+            for (size_t i = 0; i < M; ++i)
+            {
+                for (size_t j = 0; j < N; ++j)
+                {
+                    const int8_t* w = weight + j * K;
+                    size_t k = 0;
+                    int32_t sum = 0;
+                    for (; k < K2; k += 2)
+                        sum += RestrictRange(int(src[k + 0]) * int(w[k + 0]) + int(src[k + 1]) * int(w[k + 1]), SHRT_MIN, SHRT_MAX);
+                    for (; k < K; ++k)
+                        sum += int(src[k + 0]) * int(w[k + 0]);
+                    dst[j] = sum;
+                }
+                src += K;
+                dst += N;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetLrnLayerCrossChannelsNchw(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)
         {
             float k0 = k[0], k1 = k[1], k2 = k[2];

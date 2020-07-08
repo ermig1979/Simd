@@ -6165,6 +6165,38 @@ extern "C"
 
     /*! @ingroup synet
 
+        \fn void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
+
+        \short This function is used for INT8 forward propagation of InnerProductLayer.
+
+        Algorithm's details:
+        \verbatim
+        for (i = 0; i < M; ++i)
+        {
+            for (j = 0; j < N; ++j)
+            {
+                sum = 0;
+                for (k = 0; k < K; ++k)
+                    sum += src[i * K + k] * weight[j * K + k];
+                dst[i*N + j] = sum;
+            }
+        }
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] M - a batch size.
+        \param [in] N - an output size.
+        \param [in] K - an input size.
+        \param [in] src - a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to M*K.
+        \param [in] weight - a pointer to the 8-bit signed integer array with weight. The size of the array must be equal to N*K.
+        \param [out] dst - a pointer to the output 32-bit integer array. The size of the array must be equal to M*N.
+        \param [in] compatibility - a flags of bitwise compatibility.
+    */
+    SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet
+
         \fn void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of LrnLayer (cross channels normalization).

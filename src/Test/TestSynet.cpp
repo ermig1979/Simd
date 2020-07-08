@@ -475,6 +475,106 @@ namespace Test
 
     namespace
     {
+        struct FuncIP8I
+        {
+            typedef void(*FuncPtr)(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
+
+            FuncPtr func;
+            String desc;
+
+            FuncIP8I(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(size_t M, size_t N, size_t K, SimdSynetCompatibilityType c)
+            {
+                desc = desc + "[" + ToString(M) + "x" + ToString(N) + "x" + ToString(K) + "-"
+                    + (Simd::Base::Narrowed(c) ? "n" : Simd::Base::Overflow(c) ? "o" : "p") + "]";
+            }
+
+            void Call(const Tensor8u & src, const Tensor8i & weight, Tensor32i& dst, SimdSynetCompatibilityType c) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Axis(0), weight.Axis(0), weight.Axis(1), src.Data(), weight.Data(), dst.Data(), c);
+            }
+        };
+    }
+
+#define FUNC_IP8I(function) FuncIP8I(function, #function)
+
+    bool SynetInnerProduct8iAutoTest(size_t M, size_t N, size_t K, SimdSynetCompatibilityType c, FuncIP8I f1, FuncIP8I f2)
+    {
+        bool result = true;
+
+        f1.Update(M, N, K, c);
+        f2.Update(M, N, K, c);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        int uMin = Simd::Base::Narrowed(c) ? Simd::Base::U8_NARROWED_MIN : Simd::Base::U8_PRECISE_MIN;
+        int uMax = Simd::Base::Narrowed(c) ? Simd::Base::U8_NARROWED_MAX : Simd::Base::U8_PRECISE_MAX;
+        int iMin = Simd::Base::Narrowed(c) ? Simd::Base::I8_NARROWED_MIN : Simd::Base::I8_PRECISE_MIN;
+        int iMax = Simd::Base::Narrowed(c) ? Simd::Base::I8_NARROWED_MAX : Simd::Base::I8_PRECISE_MAX;
+
+        Tensor8u src(Shp(M, K));
+        FillRandom(src, uMin, uMax);
+
+        Tensor8i weight(Shp(N, K));
+        FillRandom(weight, iMin, iMax);
+
+        Tensor32i dst1(Shp(M, N)), dst2(Shp(M, N));
+        FillRandom(dst1, 1, 1);
+        FillRandom(dst1, 2, 2);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, weight, dst1, c));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, weight, dst2, c));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+        return result;
+    }
+
+    bool SynetInnerProduct8iAutoTest(SimdSynetCompatibilityType c, const FuncIP8I& f1, const FuncIP8I& f2)
+    {
+        bool result = true;
+
+        result = result && SynetInnerProduct8iAutoTest(1, 256, 6912, c, f1, f2);
+        result = result && SynetInnerProduct8iAutoTest(10, 256, 6912, c, f1, f2);
+        result = result && SynetInnerProduct8iAutoTest(15, 65, 255, c, f1, f2);
+
+        return result;
+    }
+
+    bool SynetInnerProduct8iAutoTest(const FuncIP8I& f1, const FuncIP8I& f2)
+    {
+        bool result = true;
+
+        result = result && SynetInnerProduct8iAutoTest(SimdSynetCompatibility8iPrecise, f1, f2);
+        result = result && SynetInnerProduct8iAutoTest(SimdSynetCompatibility8iOverflow, f1, f2);
+        result = result && SynetInnerProduct8iAutoTest(SimdSynetCompatibility8iNarrowed, f1, f2);
+
+        return result;
+    }
+
+    bool SynetInnerProduct8iAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Base::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Sse41::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncLLCC
         {
             typedef void(*FuncPtr)(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);

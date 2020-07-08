@@ -67,6 +67,10 @@ namespace Test
 
     void FillRandom(Tensor8u& tensor, uint8_t lo = 0, uint8_t hi = 255);
 
+    void FillRandom(Tensor8i& tensor, int8_t lo = -128, int8_t hi = 127);
+
+    void FillRandom(Tensor32i& tensor, int32_t lo, int32_t hi);
+
     void FillRandom(Tensor32f& tensor, float* min, float* max, size_t channels, int negative, float upper = 1.0f, float range = 0.01f);
 
     void SetSrc32fTo8u(const Tensor32f& src, const float* min, const float* max, size_t channels, int negative,

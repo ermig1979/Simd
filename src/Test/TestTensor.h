@@ -329,6 +329,36 @@ namespace Test
 
     //-------------------------------------------------------------------------
 
+    inline Shape Shp()
+    {
+        return Shape();
+    }
+
+    inline Shape Shp(size_t axis0)
+    {
+        return Shape({ axis0 });
+    }
+
+    inline Shape Shp(size_t axis0, size_t axis1)
+    {
+        return Shape({ axis0, axis1 });
+    }
+
+    inline Shape Shp(size_t axis0, size_t axis1, size_t axis2)
+    {
+        return Shape({ axis0, axis1, axis2 });
+    }
+
+    inline Shape Shp(size_t axis0, size_t axis1, size_t axis2, size_t axis3)
+    {
+        return Shape({ axis0, axis1, axis2, axis3 });
+    }
+
+    inline Shape Shp(size_t axis0, size_t axis1, size_t axis2, size_t axis3, size_t axis4)
+    {
+        return Shape({ axis0, axis1, axis2, axis3, axis4 });
+    }
+
     template<class T> inline void Copy(const Tensor<T> & src, Tensor<T> & dst)
     {
         assert(src.Size() == dst.Size());
@@ -397,7 +427,7 @@ namespace Test
         return errorCount == 0;
     }
 
-    inline void Compare(const Tensor8u& a, const Tensor8u& b, int differenceMax, bool printError, int errorCountMax, const String& description,
+    template<class T> inline void Compare(const Tensor<T>& a, const Tensor<T>& b, int differenceMax, bool printError, int errorCountMax, const String& description,
         Shape index, size_t order, int& errorCount, std::stringstream& message)
     {
         if (order == a.Count())
@@ -433,10 +463,9 @@ namespace Test
         }
     }
 
-    inline bool Compare(const Tensor8u& a, const Tensor8u& b, int differenceMax, bool printError, int errorCountMax, const String& description = "")
+    template<class T> inline bool Compare(const Tensor<T>& a, const Tensor<T>& b, int differenceMax, bool printError, int errorCountMax, const String& description = "")
     {
         std::stringstream message;
-        message << std::fixed << std::setprecision(6);
         int errorCount = 0;
         Index index(a.Count(), 0);
         Compare(a, b, differenceMax, printError, errorCountMax, description, index, 0, errorCount, message);
@@ -491,16 +520,16 @@ namespace Test
     {
         switch (format)
         {
-        case SimdTensorFormatNchw: return Shape({ batchOrOutput, channelsOrInput, height, width });
-        case SimdTensorFormatNhwc: return Shape({ batchOrOutput, height, width, channelsOrInput });
-        case SimdTensorFormatNchw4c: return Shape({ batchOrOutput, (channelsOrInput + 3) / 4, height, width, 4 });
-        case SimdTensorFormatNchw8c: return Shape({ batchOrOutput, (channelsOrInput + 7) / 8, height, width, 8 });
-        case SimdTensorFormatNchw16c: return Shape({ batchOrOutput, (channelsOrInput + 15) / 16, height, width, 16 });
-        case SimdTensorFormatOiyx: return Shape({ batchOrOutput, channelsOrInput, height, width });
-        case SimdTensorFormatYxio: return Shape({ height, width, channelsOrInput, batchOrOutput });
-        case SimdTensorFormatOyxi4o: return Shape({ (batchOrOutput + 3) / 4, height, width, channelsOrInput, 4 });
-        case SimdTensorFormatOyxi8o: return Shape({ (batchOrOutput + 7) / 8, height, width, channelsOrInput, 8 });
-        case SimdTensorFormatOyxi16o: return Shape({ (batchOrOutput + 15) / 16, height, width, channelsOrInput, 16 });
+        case SimdTensorFormatNchw: return Shp(batchOrOutput, channelsOrInput, height, width);
+        case SimdTensorFormatNhwc: return Shp(batchOrOutput, height, width, channelsOrInput);
+        case SimdTensorFormatNchw4c: return Shp(batchOrOutput, (channelsOrInput + 3) / 4, height, width, 4);
+        case SimdTensorFormatNchw8c: return Shp(batchOrOutput, (channelsOrInput + 7) / 8, height, width, 8);
+        case SimdTensorFormatNchw16c: return Shp(batchOrOutput, (channelsOrInput + 15) / 16, height, width, 16);
+        case SimdTensorFormatOiyx: return Shp(batchOrOutput, channelsOrInput, height, width);
+        case SimdTensorFormatYxio: return Shp(height, width, channelsOrInput, batchOrOutput);
+        case SimdTensorFormatOyxi4o: return Shp((batchOrOutput + 3) / 4, height, width, channelsOrInput, 4);
+        case SimdTensorFormatOyxi8o: return Shp((batchOrOutput + 7) / 8, height, width, channelsOrInput, 8);
+        case SimdTensorFormatOyxi16o: return Shp((batchOrOutput + 15) / 16, height, width, channelsOrInput, 16);
         }
         assert(0);
         return Shape();
@@ -510,11 +539,11 @@ namespace Test
     {
         switch (format)
         {
-        case SimdTensorFormatNchw: return Shape({ channels, height, width });
-        case SimdTensorFormatNhwc: return Shape({ height, width, channels });
-        case SimdTensorFormatNchw4c: return Shape({ (channels + 3) / 4, height, width, 4 });
-        case SimdTensorFormatNchw8c: return Shape({ (channels + 7) / 8, height, width, 8 });
-        case SimdTensorFormatNchw16c: return Shape({ (channels + 15) / 16, height, width, 16 });
+        case SimdTensorFormatNchw: return Shp(channels, height, width);
+        case SimdTensorFormatNhwc: return Shp(height, width, channels);
+        case SimdTensorFormatNchw4c: return Shp((channels + 3) / 4, height, width, 4);
+        case SimdTensorFormatNchw8c: return Shp((channels + 7) / 8, height, width, 8);
+        case SimdTensorFormatNchw16c: return Shp((channels + 15) / 16, height, width, 16);
         }
         assert(0);
         return Shape();
@@ -524,11 +553,11 @@ namespace Test
     {
         switch (format)
         {
-        case SimdTensorFormatNchw: return Shape({ channels, spatial });
-        case SimdTensorFormatNhwc: return Shape({ spatial, channels });
-        case SimdTensorFormatNchw4c: return Shape({ (channels + 3) / 4, spatial, 4 });
-        case SimdTensorFormatNchw8c: return Shape({ (channels + 7) / 8, spatial, 8 });
-        case SimdTensorFormatNchw16c: return Shape({ (channels + 15) / 16, spatial, 16 });
+        case SimdTensorFormatNchw: return Shp(channels, spatial);
+        case SimdTensorFormatNhwc: return Shp(spatial, channels);
+        case SimdTensorFormatNchw4c: return Shp((channels + 3) / 4, spatial, 4);
+        case SimdTensorFormatNchw8c: return Shp((channels + 7) / 8, spatial, 8);
+        case SimdTensorFormatNchw16c: return Shp((channels + 15) / 16, spatial, 16);
         }
         assert(0);
         return Shape();

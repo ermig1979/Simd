@@ -62,6 +62,11 @@ namespace Simd
             return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaNoTail;
         }
 
+        SIMD_INLINE bool Precise(SimdSynetCompatibilityType compatibility)
+        {
+            return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iPrecise;
+        }
+
         SIMD_INLINE bool Overflow(SimdSynetCompatibilityType compatibility)
         {
             return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iOverflow;

@@ -5468,6 +5468,14 @@ SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float *
     simdSynetInnerProductLayerForward(src, weight, bias, count, size, dst);
 }
 
+SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
+{
+    typedef void(*SimdSynetInnerProduct8iPtr) (size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
+    const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC1(SynetInnerProduct8i, SIMD_SSE41_FUNC);
+
+    simdSynetInnerProduct8i(M, N, K, src, weight, dst, compatibility);
+}
+
 SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format)
 {
     typedef void(*SimdSynetLrnLayerCrossChannelsPtr) (const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);

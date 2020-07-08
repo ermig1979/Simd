@@ -331,6 +331,7 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetAdd8i);
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
     TEST_ADD_GROUP_A00(SynetInnerProductLayerForward);
+    TEST_ADD_GROUP_A00(SynetInnerProduct8i);
     TEST_ADD_GROUP_A00(SynetLrnLayerCrossChannels);
     TEST_ADD_GROUP_A00(SynetShuffleLayerForward);
     TEST_ADD_GROUP_A00(SynetSoftmaxLayerForward);

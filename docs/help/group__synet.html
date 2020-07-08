@@ -246,6 +246,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gadd304757589cbb35f82bdd83011f76bd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gadd304757589cbb35f82bdd83011f76bd">SimdSynetInnerProductLayerForward</a> (const float *src, const float *weight, const float *bias, size_t count, size_t size, float *dst)</td></tr>
 <tr class="memdesc:gadd304757589cbb35f82bdd83011f76bd"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of InnerProductLayer.  <a href="group__synet.html#gadd304757589cbb35f82bdd83011f76bd">More...</a><br /></td></tr>
 <tr class="separator:gadd304757589cbb35f82bdd83011f76bd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad6b0d81ec96511ae3116f65110429e3f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gad6b0d81ec96511ae3116f65110429e3f">SimdSynetInnerProduct8i</a> (size_t M, size_t N, size_t K, const uint8_t *src, const int8_t *weight, int32_t *dst, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memdesc:gad6b0d81ec96511ae3116f65110429e3f"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for INT8 forward propagation of InnerProductLayer.  <a href="group__synet.html#gad6b0d81ec96511ae3116f65110429e3f">More...</a><br /></td></tr>
+<tr class="separator:gad6b0d81ec96511ae3116f65110429e3f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet.html#gafe109c39f05fcaf7d856b068b8e45f1e">SimdSynetLrnLayerCrossChannels</a> (const float *src, size_t half, size_t channels, size_t spatial, const float *k, float *dst, <a class="el" href="group__synet.html#ga9d571aa9489cf536d4df8eef93aebc6f">SimdTensorFormatType</a> format)</td></tr>
 <tr class="memdesc:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of LrnLayer (cross channels normalization).  <a href="group__synet.html#gafe109c39f05fcaf7d856b068b8e45f1e">More...</a><br /></td></tr>
 <tr class="separator:gafe109c39f05fcaf7d856b068b8e45f1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -1698,6 +1701,89 @@ for(c = 0; c &lt; channels1; ++c)
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a size of output array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input array. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. The size of the array must be equal to count. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gad6b0d81ec96511ae3116f65110429e3f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad6b0d81ec96511ae3116f65110429e3f">&#9670;&nbsp;</a></span>SimdSynetInnerProduct8i()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetInnerProduct8i </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>M</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>K</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const int8_t *&#160;</td>
+          <td class="paramname"><em>weight</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int32_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramname"><em>compatibility</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for INT8 forward propagation of InnerProductLayer. </p>
+<p>Algorithm's details: </p><pre class="fragment">for (i = 0; i &lt; M; ++i)
+{
+    for (j = 0; j &lt; N; ++j)
+    {
+        sum = 0;
+        for (k = 0; k &lt; K; ++k)
+            sum += src[i * K + k] * weight[j * K + k];
+        dst[i*N + j] = sum;
+    }
+}
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">M</td><td>- a batch size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- an output size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- an input size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to M*K. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the 8-bit signed integer array with weight. The size of the array must be equal to N*K. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit integer array. The size of the array must be equal to M*N. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of bitwise compatibility. </td></tr>
   </table>
   </dd>
 </dl>
