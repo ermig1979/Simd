@@ -160,7 +160,7 @@ namespace Simd
         {
             const Base::Scale8iParam& p = _param;
             bool nofma = Base::FmaAvoid(p.compatibility);
-            if (p.format == SimdTensorFormatNchw && p.spatial >= F)
+            if (p.format == SimdTensorFormatNchw && p.spatial > HF)
             {
                 if (nofma)
                     ScaleNchw<true>(src, _scale.data, _shift.data, p.batch, p.channels, p.spatial, _dstCvt.uMax, dst);

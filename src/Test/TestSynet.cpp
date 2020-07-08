@@ -246,6 +246,11 @@ namespace Test
             result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Avx2::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetAdd8iAutoTest(FUNC_A8I(Simd::Avx512bw::SynetAdd8i), FUNC_A8I(SimdSynetAdd8i));
+#endif
+
         return result;
     }
 

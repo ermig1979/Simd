@@ -389,6 +389,9 @@ namespace Simd
         void StretchGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+        void SynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
+            uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
         void SynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,

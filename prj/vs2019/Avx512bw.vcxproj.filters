@@ -190,6 +190,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynet.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
