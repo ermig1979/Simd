@@ -334,6 +334,25 @@ namespace Simd
     }
 #endif//SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        template<bool overflow> void Madd4(__m512i& i32, __m512i u8, __m512i i8);
+
+        template<> SIMD_INLINE void Madd4<true>(__m512i& i32, __m512i u8, __m512i i8)
+        {
+            i32 = _mm512_add_epi32(i32, _mm512_madd_epi16(_mm512_maddubs_epi16(u8, i8), Avx512bw::K16_0001));
+        }
+
+        template<> SIMD_INLINE void Madd4<false>(__m512i& i32, __m512i u8, __m512i i8)
+        {
+            __m512i lo = _mm512_madd_epi16(Cvt8uTo16i<0>(u8), Cvt8iTo16i<0>(i8));
+            __m512i hi = _mm512_madd_epi16(Cvt8uTo16i<1>(u8), Cvt8iTo16i<1>(i8));
+            i32 = _mm512_add_epi32(i32, Hadd32(lo, hi));
+        }
+    }
+#endif//SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {

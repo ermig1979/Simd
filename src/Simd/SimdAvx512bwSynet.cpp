@@ -26,6 +26,7 @@
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
@@ -143,6 +144,347 @@ namespace Simd
             }
             else
                 Avx2::SynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
+        }
+
+        //---------------------------------------------------------------------
+
+        static SIMD_INLINE void Save4Sums(const __m512i& sum0, const __m512i sum1, const __m512i& sum2, const __m512i& sum3, int32_t* dst)
+        {
+            __m512i sum02 = _mm512_add_epi32(_mm512_unpacklo_epi32(sum0, sum2), _mm512_unpackhi_epi32(sum0, sum2));
+            __m512i sum13 = _mm512_add_epi32(_mm512_unpacklo_epi32(sum1, sum3), _mm512_unpackhi_epi32(sum1, sum3));
+            __m512i sum512 = _mm512_add_epi32(_mm512_unpacklo_epi32(sum02, sum13), _mm512_unpackhi_epi32(sum02, sum13));
+            _mm_storeu_si128((__m128i*)dst, _mm_add_epi32(_mm_add_epi32(_mm512_extracti32x4_epi32(sum512, 0), _mm512_extracti32x4_epi32(sum512, 1)),
+                _mm_add_epi32(_mm512_extracti32x4_epi32(sum512, 2), _mm512_extracti32x4_epi32(sum512, 3))));
+        }
+
+        template<bool overflow> static void SynetInnerProduct8i1x1(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
+        {
+            size_t KA = AlignLo(K, A);
+            const uint8_t* S0 = S + 0 * lds;
+            const int8_t* W0 = W + 0 * ldw;
+            __m512i d00 = _mm512_setzero_si512();
+            __m512i s0, w0;
+            for (size_t k = 0; k < KA; k += A)
+            {
+                s0 = _mm512_loadu_si512((__m512i*)(S0 + k));
+                w0 = _mm512_loadu_si512((__m512i*)(W0 + k));
+                Madd4<overflow>(d00, s0, w0);
+            }
+            if (KA < K)
+            {
+                __mmask64 tail = TailMask64(K - KA);
+                s0 = Load<false, true>(S0 + KA, tail);
+                w0 = Load<false, true>(W0 + KA, tail);
+                Madd4<overflow>(d00, s0, w0);
+            }
+            D[0] = ExtractSum<uint32_t>(d00);
+        }
+
+        template<bool overflow> static void SynetInnerProduct8i1x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
+        {
+            size_t KA = AlignLo(K, A);
+            const uint8_t* S0 = S + 0 * lds;
+            const int8_t* W0 = W + 0 * ldw;
+            const int8_t* W1 = W + 1 * ldw;
+            const int8_t* W2 = W + 2 * ldw;
+            const int8_t* W3 = W + 3 * ldw;
+            __m512i d00 = _mm512_setzero_si512();
+            __m512i d01 = _mm512_setzero_si512();
+            __m512i d02 = _mm512_setzero_si512();
+            __m512i d03 = _mm512_setzero_si512();
+            __m512i s0, w0;
+            for (size_t k = 0; k < KA; k += A)
+            {
+                s0 = _mm512_loadu_si512((__m512i*)(S0 + k));
+                w0 = _mm512_loadu_si512((__m512i*)(W0 + k));
+                Madd4<overflow>(d00, s0, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W1 + k));
+                Madd4<overflow>(d01, s0, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W2 + k));
+                Madd4<overflow>(d02, s0, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W3 + k));
+                Madd4<overflow>(d03, s0, w0);
+            }
+            if (KA < K)
+            {
+                __mmask64 tail = TailMask64(K - KA);
+                s0 = Load<false, true>(S0 + KA, tail);
+                w0 = Load<false, true>(W0 + KA, tail);
+                Madd4<overflow>(d00, s0, w0);
+                w0 = Load<false, true>(W1 + KA, tail);
+                Madd4<overflow>(d01, s0, w0);
+                w0 = Load<false, true>(W2 + KA, tail);
+                Madd4<overflow>(d02, s0, w0);
+                w0 = Load<false, true>(W3 + KA, tail);
+                Madd4<overflow>(d03, s0, w0);
+            }
+            Save4Sums(d00, d01, d02, d03, D);
+        }
+
+        template<bool overflow> static void SynetInnerProduct8i2x1(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
+        {
+            size_t KA = AlignLo(K, A);
+            const uint8_t* S0 = S + 0 * lds;
+            const uint8_t* S1 = S + 1 * lds;
+            const int8_t* W0 = W + 0 * ldw;
+            __m512i d00 = _mm512_setzero_si512();
+            __m512i d10 = _mm512_setzero_si512();
+            __m512i s0, s1, w0;
+            for (size_t k = 0; k < KA; k += A)
+            {
+                s0 = _mm512_loadu_si512((__m512i*)(S0 + k));
+                s1 = _mm512_loadu_si512((__m512i*)(S1 + k));
+                w0 = _mm512_loadu_si512((__m512i*)(W0 + k));
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+            }
+            if (KA < K)
+            {
+                __mmask64 tail = TailMask64(K - KA);
+                s0 = Load<false, true>(S0 + KA, tail);
+                s1 = Load<false, true>(S1 + KA, tail);
+                w0 = Load<false, true>(W0 + KA, tail);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+            }
+            D[0 * ldd] = ExtractSum<uint32_t>(d00);
+            D[1 * ldd] = ExtractSum<uint32_t>(d10);
+        }
+
+        template<bool overflow> static void SynetInnerProduct8i2x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
+        {
+            size_t KA = AlignLo(K, A);
+            const uint8_t* S0 = S + 0 * lds;
+            const uint8_t* S1 = S + 1 * lds;
+            const int8_t* W0 = W + 0 * ldw;
+            const int8_t* W1 = W + 1 * ldw;
+            const int8_t* W2 = W + 2 * ldw;
+            const int8_t* W3 = W + 3 * ldw;
+            __m512i d00 = _mm512_setzero_si512();
+            __m512i d01 = _mm512_setzero_si512();
+            __m512i d02 = _mm512_setzero_si512();
+            __m512i d03 = _mm512_setzero_si512();
+            __m512i d10 = _mm512_setzero_si512();
+            __m512i d11 = _mm512_setzero_si512();
+            __m512i d12 = _mm512_setzero_si512();
+            __m512i d13 = _mm512_setzero_si512();
+            __m512i s0, s1, w0;
+            for (size_t k = 0; k < KA; k += A)
+            {
+                s0 = _mm512_loadu_si512((__m512i*)(S0 + k));
+                s1 = _mm512_loadu_si512((__m512i*)(S1 + k));
+                w0 = _mm512_loadu_si512((__m512i*)(W0 + k));
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W1 + k));
+                Madd4<overflow>(d01, s0, w0);
+                Madd4<overflow>(d11, s1, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W2 + k));
+                Madd4<overflow>(d02, s0, w0);
+                Madd4<overflow>(d12, s1, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W3 + k));
+                Madd4<overflow>(d03, s0, w0);
+                Madd4<overflow>(d13, s1, w0);
+            }
+            if (KA < K)
+            {
+                __mmask64 tail = TailMask64(K - KA);
+                s0 = Load<false, true>(S0 + KA, tail);
+                s1 = Load<false, true>(S1 + KA, tail);
+                w0 = Load<false, true>(W0 + KA, tail);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                w0 = Load<false, true>(W1 + KA, tail);
+                Madd4<overflow>(d01, s0, w0);
+                Madd4<overflow>(d11, s1, w0);
+                w0 = Load<false, true>(W2 + KA, tail);
+                Madd4<overflow>(d02, s0, w0);
+                Madd4<overflow>(d12, s1, w0);
+                w0 = Load<false, true>(W3 + KA, tail);
+                Madd4<overflow>(d03, s0, w0);
+                Madd4<overflow>(d13, s1, w0);
+            }
+            Save4Sums(d00, d01, d02, d03, D + 0 * ldd);
+            Save4Sums(d10, d11, d12, d13, D + 1 * ldd);
+        }
+
+        template<bool overflow> static void SynetInnerProduct8i4x1(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
+        {
+            size_t KA = AlignLo(K, A);
+            const uint8_t* S0 = S + 0 * lds;
+            const uint8_t* S1 = S + 1 * lds;
+            const uint8_t* S2 = S + 2 * lds;
+            const uint8_t* S3 = S + 3 * lds;
+            const int8_t* W0 = W + 0 * ldw;
+            __m512i d00 = _mm512_setzero_si512();
+            __m512i d10 = _mm512_setzero_si512();
+            __m512i d20 = _mm512_setzero_si512();
+            __m512i d30 = _mm512_setzero_si512();
+            __m512i s0, s1, s2, s3, w0;
+            for (size_t k = 0; k < KA; k += A)
+            {
+                s0 = _mm512_loadu_si512((__m512i*)(S0 + k));
+                s1 = _mm512_loadu_si512((__m512i*)(S1 + k));
+                s2 = _mm512_loadu_si512((__m512i*)(S2 + k));
+                s3 = _mm512_loadu_si512((__m512i*)(S3 + k));
+                w0 = _mm512_loadu_si512((__m512i*)(W0 + k));
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                Madd4<overflow>(d20, s2, w0);
+                Madd4<overflow>(d30, s3, w0);
+            }
+            if (KA < K)
+            {
+                __mmask64 tail = TailMask64(K - KA);
+                s0 = Load<false, true>(S0 + KA, tail);
+                s1 = Load<false, true>(S1 + KA, tail);
+                s2 = Load<false, true>(S2 + KA, tail);
+                s3 = Load<false, true>(S3 + KA, tail);
+                w0 = Load<false, true>(W0 + KA, tail);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                Madd4<overflow>(d20, s2, w0);
+                Madd4<overflow>(d30, s3, w0);
+            }
+            D[0 * ldd] = ExtractSum<uint32_t>(d00);
+            D[1 * ldd] = ExtractSum<uint32_t>(d10);
+            D[2 * ldd] = ExtractSum<uint32_t>(d20);
+            D[3 * ldd] = ExtractSum<uint32_t>(d30);
+        }
+
+        template<bool overflow> static void SynetInnerProduct8i4x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
+        {
+            size_t KA = AlignLo(K, A);
+            const uint8_t* S0 = S + 0 * lds;
+            const uint8_t* S1 = S + 1 * lds;
+            const uint8_t* S2 = S + 2 * lds;
+            const uint8_t* S3 = S + 3 * lds;
+            const int8_t* W0 = W + 0 * ldw;
+            const int8_t* W1 = W + 1 * ldw;
+            const int8_t* W2 = W + 2 * ldw;
+            const int8_t* W3 = W + 3 * ldw;
+            __m512i d00 = _mm512_setzero_si512();
+            __m512i d01 = _mm512_setzero_si512();
+            __m512i d02 = _mm512_setzero_si512();
+            __m512i d03 = _mm512_setzero_si512();
+            __m512i d10 = _mm512_setzero_si512();
+            __m512i d11 = _mm512_setzero_si512();
+            __m512i d12 = _mm512_setzero_si512();
+            __m512i d13 = _mm512_setzero_si512();
+            __m512i d20 = _mm512_setzero_si512();
+            __m512i d21 = _mm512_setzero_si512();
+            __m512i d22 = _mm512_setzero_si512();
+            __m512i d23 = _mm512_setzero_si512();
+            __m512i d30 = _mm512_setzero_si512();
+            __m512i d31 = _mm512_setzero_si512();
+            __m512i d32 = _mm512_setzero_si512();
+            __m512i d33 = _mm512_setzero_si512();
+            __m512i s0, s1, s2, s3, w0;
+            for (size_t k = 0; k < KA; k += A)
+            {
+                s0 = _mm512_loadu_si512((__m512i*)(S0 + k));
+                s1 = _mm512_loadu_si512((__m512i*)(S1 + k));
+                s2 = _mm512_loadu_si512((__m512i*)(S2 + k));
+                s3 = _mm512_loadu_si512((__m512i*)(S3 + k));
+                w0 = _mm512_loadu_si512((__m512i*)(W0 + k));
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                Madd4<overflow>(d20, s2, w0);
+                Madd4<overflow>(d30, s3, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W1 + k));
+                Madd4<overflow>(d01, s0, w0);
+                Madd4<overflow>(d11, s1, w0);
+                Madd4<overflow>(d21, s2, w0);
+                Madd4<overflow>(d31, s3, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W2 + k));
+                Madd4<overflow>(d02, s0, w0);
+                Madd4<overflow>(d12, s1, w0);
+                Madd4<overflow>(d22, s2, w0);
+                Madd4<overflow>(d32, s3, w0);
+                w0 = _mm512_loadu_si512((__m512i*)(W3 + k));
+                Madd4<overflow>(d03, s0, w0);
+                Madd4<overflow>(d13, s1, w0);
+                Madd4<overflow>(d23, s2, w0);
+                Madd4<overflow>(d33, s3, w0);
+            }
+            if (KA < K)
+            {
+                __mmask64 tail = TailMask64(K - KA);
+                s0 = Load<false, true>(S0 + KA, tail);
+                s1 = Load<false, true>(S1 + KA, tail);
+                s2 = Load<false, true>(S2 + KA, tail);
+                s3 = Load<false, true>(S3 + KA, tail);
+                w0 = Load<false, true>(W0 + KA, tail);
+                Madd4<overflow>(d00, s0, w0);
+                Madd4<overflow>(d10, s1, w0);
+                Madd4<overflow>(d20, s2, w0);
+                Madd4<overflow>(d30, s3, w0);
+                w0 = Load<false, true>(W1 + KA, tail);
+                Madd4<overflow>(d01, s0, w0);
+                Madd4<overflow>(d11, s1, w0);
+                Madd4<overflow>(d21, s2, w0);
+                Madd4<overflow>(d31, s3, w0);
+                w0 = Load<false, true>(W2 + KA, tail);
+                Madd4<overflow>(d02, s0, w0);
+                Madd4<overflow>(d12, s1, w0);
+                Madd4<overflow>(d22, s2, w0);
+                Madd4<overflow>(d32, s3, w0);
+                w0 = Load<false, true>(W3 + KA, tail);
+                Madd4<overflow>(d03, s0, w0);
+                Madd4<overflow>(d13, s1, w0);
+                Madd4<overflow>(d23, s2, w0);
+                Madd4<overflow>(d33, s3, w0);
+            }
+            Save4Sums(d00, d01, d02, d03, D + 0 * ldd);
+            Save4Sums(d10, d11, d12, d13, D + 1 * ldd);
+            Save4Sums(d20, d21, d22, d23, D + 2 * ldd);
+            Save4Sums(d30, d31, d32, d33, D + 3 * ldd);
+        }
+
+        template<bool overflow> void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst)
+        {
+            size_t M2 = AlignLoAny(M, 2);
+            size_t M4 = AlignLoAny(M, 4);
+            size_t N4 = AlignLoAny(N, 4);
+            size_t i = 0;
+            for (; i < M4; i += 4)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    SynetInnerProduct8i4x4<overflow>(K, src, K, weight + j * K, K, dst + j, N);
+                for (; j < N; j += 1)
+                    SynetInnerProduct8i4x1<overflow>(K, src, K, weight + j * K, K, dst + j, N);
+                src += K * 4;
+                dst += N * 4;
+            }
+            for (; i < M2; i += 2)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    SynetInnerProduct8i2x4<overflow>(K, src, K, weight + j * K, K, dst + j, N);
+                for (; j < N; j += 1)
+                    SynetInnerProduct8i2x1<overflow>(K, src, K, weight + j * K, K, dst + j, N);
+                src += K * 2;
+                dst += N * 2;
+            }
+            for (; i < M; i += 1)
+            {
+                size_t j = 0;
+                for (; j < N4; j += 4)
+                    SynetInnerProduct8i1x4<overflow>(K, src, K, weight + j * K, K, dst + j, N);
+                for (; j < N; j += 1)
+                    SynetInnerProduct8i1x1<overflow>(K, src, K, weight + j * K, K, dst + j, N);
+                src += K;
+                dst += N;
+            }
+        }
+
+        void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
+        {
+            if (Base::Precise(compatibility))
+                SynetInnerProduct8i<false>(M, N, K, src, weight, dst);
+            else
+                SynetInnerProduct8i<true>(M, N, K, src, weight, dst);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

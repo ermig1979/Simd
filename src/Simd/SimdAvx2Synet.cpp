@@ -440,7 +440,7 @@ namespace Simd
                 w0 = LoadTail(W0 + KA, tail);
                 Madd4<overflow>(d00, s0, w0);
             }
-            D[0] = ExtractSum<int32_t>(d00);
+            D[0] = ExtractSum<uint32_t>(d00);
         }
 
         template<bool overflow> static void SynetInnerProduct8i1x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
@@ -510,8 +510,8 @@ namespace Simd
                 Madd4<overflow>(d00, s0, w0);
                 Madd4<overflow>(d10, s1, w0);
             }
-            D[0 * ldd] = ExtractSum<int32_t>(d00);
-            D[1 * ldd] = ExtractSum<int32_t>(d10);
+            D[0 * ldd] = ExtractSum<uint32_t>(d00);
+            D[1 * ldd] = ExtractSum<uint32_t>(d10);
         }
 
         template<bool overflow> static void SynetInnerProduct8i2x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)

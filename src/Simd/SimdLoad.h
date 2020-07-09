@@ -525,6 +525,11 @@ namespace Simd
 #endif
         }
 
+        template <bool align, bool mask> SIMD_INLINE __m512i Load(const int8_t* p, __mmask64 m)
+        {
+            return Load<align, mask>((uint8_t*)p, m);
+        }
+
         template <bool align, bool mask> SIMD_INLINE __m512i Load(const int16_t * p, __mmask32 m)
         {
             return Load<align>(p);

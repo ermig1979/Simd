@@ -5471,7 +5471,7 @@ SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float *
 SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
 {
     typedef void(*SimdSynetInnerProduct8iPtr) (size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC2(SynetInnerProduct8i, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC3(SynetInnerProduct8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetInnerProduct8i(M, N, K, src, weight, dst, compatibility);
 }
