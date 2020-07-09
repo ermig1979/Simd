@@ -262,6 +262,25 @@ namespace Simd
     }
 #endif//SIMD_SSE_ENABLE
 
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
+    {
+        template<bool overflow> void Madd4(__m128i& i32, __m128i u8, __m128i i8);
+
+        template<> SIMD_INLINE void Madd4<true>(__m128i& i32, __m128i u8, __m128i i8)
+        {
+            i32 = _mm_add_epi32(i32, _mm_madd_epi16(_mm_maddubs_epi16(u8, i8), Sse2::K16_0001));
+        }
+
+        template<> SIMD_INLINE void Madd4<false>(__m128i& i32, __m128i u8, __m128i i8)
+        {
+            __m128i lo = _mm_madd_epi16(UnpackU8<0>(u8), UnpackI8<0>(i8));
+            __m128i hi = _mm_madd_epi16(UnpackU8<1>(u8), UnpackI8<1>(i8));
+            i32 = _mm_add_epi32(i32, _mm_hadd_epi32(lo, hi));
+        }
+    }
+#endif//SIMD_SSE41_ENABLE
+
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
@@ -278,6 +297,25 @@ namespace Simd
         }
     }
 #endif//SIMD_AVX_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE
+    namespace Avx2
+    {
+        template<bool overflow> void Madd4(__m256i& i32, __m256i u8, __m256i i8);
+
+        template<> SIMD_INLINE void Madd4<true>(__m256i& i32, __m256i u8, __m256i i8)
+        {
+            i32 = _mm256_add_epi32(i32, _mm256_madd_epi16(_mm256_maddubs_epi16(u8, i8), Avx2::K16_0001));
+        }
+
+        template<> SIMD_INLINE void Madd4<false>(__m256i& i32, __m256i u8, __m256i i8)
+        {
+            __m256i lo = _mm256_madd_epi16(Cvt8uTo16i<0>(u8), Cvt8iTo16i<0>(i8));
+            __m256i hi = _mm256_madd_epi16(Cvt8uTo16i<1>(u8), Cvt8iTo16i<1>(i8));
+            i32 = _mm256_add_epi32(i32, PermutedHadd32i(lo, hi));
+        }
+    }
+#endif//SIMD_AVX2_ENABLE
 
 #ifdef SIMD_AVX512F_ENABLE
     namespace Avx512f

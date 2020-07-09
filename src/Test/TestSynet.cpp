@@ -568,6 +568,11 @@ namespace Test
             result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Sse41::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
 #endif
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetInnerProduct8iAutoTest(FUNC_IP8I(Simd::Avx2::SynetInnerProduct8i), FUNC_IP8I(SimdSynetInnerProduct8i));
+#endif
+
         return result;
     }
 

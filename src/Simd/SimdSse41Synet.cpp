@@ -192,23 +192,10 @@ namespace Simd
         SIMD_INLINE __m128i LoadTail(const void * ptr, size_t tail)
         {
             int8_t buf[A];
+            _mm_storeu_si128((__m128i*)buf, _mm_setzero_si128());
             for (size_t i = 0; i < tail; ++i)
                 buf[i] = ((int8_t*)ptr)[i];
             return _mm_loadu_si128((__m128i*)buf);
-        }
-
-        template<bool overflow> void Madd4(__m128i& i32, __m128i u8, __m128i i8);
-
-        template<> SIMD_INLINE void Madd4<true>(__m128i& i32, __m128i u8, __m128i i8)
-        {
-            i32 = _mm_add_epi32(i32, _mm_madd_epi16(_mm_maddubs_epi16(u8, i8), Sse2::K16_0001));
-        }
-
-        template<> SIMD_INLINE void Madd4<false>(__m128i& i32, __m128i u8, __m128i i8)
-        {
-            __m128i lo = _mm_madd_epi16(UnpackU8<0>(u8), UnpackI8<0>(i8));
-            __m128i hi = _mm_madd_epi16(UnpackU8<1>(u8), UnpackI8<1>(i8));
-            i32 = _mm_add_epi32(i32, _mm_hadd_epi32(lo, hi));
         }
 
         static SIMD_INLINE void Save4Sums(const __m128i& sum0, const __m128i sum1, const __m128i& sum2, const __m128i& sum3, int32_t * dst)
@@ -218,21 +205,22 @@ namespace Simd
 
         template<bool overflow> static void SynetInnerProduct8i1x1(size_t K, const uint8_t* S, size_t lds, const int8_t * W, size_t ldw, int32_t* D, size_t ldd)
         {
-            size_t K16 = K & (~15);
+            size_t KA = AlignLo(K, A);
             const uint8_t* S0 = S + 0 * lds;
             const int8_t* W0 = W + 0 * ldw;
             __m128i d00 = _mm_setzero_si128();
             __m128i s0, w0;
-            for (size_t k = 0; k < K16; k += 16)
+            for (size_t k = 0; k < KA; k += A)
             {
                 s0 = _mm_loadu_si128((__m128i*)(S0 + k));
                 w0 = _mm_loadu_si128((__m128i*)(W0 + k));
                 Madd4<overflow>(d00, s0, w0);
             }
-            if (K16 < K)
+            if (KA < K)
             {
-                s0 = LoadTail(S0 + K16, K - K16);
-                w0 = LoadTail(W0 + K16, K - K16);
+                size_t tail = K - KA;
+                s0 = LoadTail(S0 + KA, tail);
+                w0 = LoadTail(W0 + KA, tail);
                 Madd4<overflow>(d00, s0, w0);
             }
             D[0] = ExtractInt32Sum(d00);
@@ -240,7 +228,7 @@ namespace Simd
 
         template<bool overflow> static void SynetInnerProduct8i1x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
-            size_t K16 = K & (~15);
+            size_t KA = AlignLo(K, A);
             const uint8_t* S0 = S + 0 * lds;
             const int8_t* W0 = W + 0 * ldw;
             const int8_t* W1 = W + 1 * ldw;
@@ -251,7 +239,7 @@ namespace Simd
             __m128i d02 = _mm_setzero_si128();
             __m128i d03 = _mm_setzero_si128();
             __m128i s0, w0;
-            for (size_t k = 0; k < K16; k += 16)
+            for (size_t k = 0; k < KA; k += A)
             {
                 s0 = _mm_loadu_si128((__m128i*)(S0 + k));
                 w0 = _mm_loadu_si128((__m128i*)(W0 + k));
@@ -263,16 +251,17 @@ namespace Simd
                 w0 = _mm_loadu_si128((__m128i*)(W3 + k));
                 Madd4<overflow>(d03, s0, w0);
             }
-            if (K16 < K)
+            if (KA < K)
             {
-                s0 = LoadTail(S0 + K16, K - K16);
-                w0 = LoadTail(W0 + K16, K - K16);
+                size_t tail = K - KA;
+                s0 = LoadTail(S0 + KA, tail);
+                w0 = LoadTail(W0 + KA, tail);
                 Madd4<overflow>(d00, s0, w0);
-                w0 = LoadTail(W1 + K16, K - K16);
+                w0 = LoadTail(W1 + KA, tail);
                 Madd4<overflow>(d01, s0, w0);
-                w0 = LoadTail(W2 + K16, K - K16);
+                w0 = LoadTail(W2 + KA, tail);
                 Madd4<overflow>(d02, s0, w0);
-                w0 = LoadTail(W3 + K16, K - K16);
+                w0 = LoadTail(W3 + KA, tail);
                 Madd4<overflow>(d03, s0, w0);
             }
             Save4Sums(d00, d01, d02, d03, D);
@@ -280,14 +269,14 @@ namespace Simd
 
         template<bool overflow> static void SynetInnerProduct8i2x1(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
-            size_t K16 = K & (~15);
+            size_t KA = AlignLo(K, A);
             const uint8_t* S0 = S + 0 * lds;
             const uint8_t* S1 = S + 1 * lds;
             const int8_t* W0 = W + 0 * ldw;
             __m128i d00 = _mm_setzero_si128();
             __m128i d10 = _mm_setzero_si128();
             __m128i s0, s1, w0;
-            for (size_t k = 0; k < K16; k += 16)
+            for (size_t k = 0; k < KA; k += A)
             {
                 s0 = _mm_loadu_si128((__m128i*)(S0 + k));
                 s1 = _mm_loadu_si128((__m128i*)(S1 + k));
@@ -295,11 +284,12 @@ namespace Simd
                 Madd4<overflow>(d00, s0, w0);
                 Madd4<overflow>(d10, s1, w0);
             }
-            if (K16 < K)
+            if (KA < K)
             {
-                s0 = LoadTail(S0 + K16, K - K16);
-                s1 = LoadTail(S1 + K16, K - K16);
-                w0 = LoadTail(W0 + K16, K - K16);
+                size_t tail = K - KA;
+                s0 = LoadTail(S0 + KA, tail);
+                s1 = LoadTail(S1 + KA, tail);
+                w0 = LoadTail(W0 + KA, tail);
                 Madd4<overflow>(d00, s0, w0);
                 Madd4<overflow>(d10, s1, w0);
             }
@@ -309,7 +299,7 @@ namespace Simd
 
         template<bool overflow> static void SynetInnerProduct8i2x4(size_t K, const uint8_t* S, size_t lds, const int8_t* W, size_t ldw, int32_t* D, size_t ldd)
         {
-            size_t K16 = K & (~15);
+            size_t KA = AlignLo(K, A);
             const uint8_t* S0 = S + 0 * lds;
             const uint8_t* S1 = S + 1 * lds;
             const int8_t* W0 = W + 0 * ldw;
@@ -325,7 +315,7 @@ namespace Simd
             __m128i d12 = _mm_setzero_si128();
             __m128i d13 = _mm_setzero_si128();
             __m128i s0, s1, w0;
-            for (size_t k = 0; k < K16; k += 16)
+            for (size_t k = 0; k < KA; k += A)
             {
                 s0 = _mm_loadu_si128((__m128i*)(S0 + k));
                 s1 = _mm_loadu_si128((__m128i*)(S1 + k));
@@ -342,26 +332,26 @@ namespace Simd
                 Madd4<overflow>(d03, s0, w0);
                 Madd4<overflow>(d13, s1, w0);
             }
-            if (K16 < K)
+            if (KA < K)
             {
-                s0 = LoadTail(S0 + K16, K - K16);
-                s1 = LoadTail(S1 + K16, K - K16);
-                w0 = LoadTail(W0 + K16, K - K16);
+                size_t tail = K - KA;
+                s0 = LoadTail(S0 + KA, tail);
+                s1 = LoadTail(S1 + KA, tail);
+                w0 = LoadTail(W0 + KA, tail);
                 Madd4<overflow>(d00, s0, w0);
                 Madd4<overflow>(d10, s1, w0);
-                w0 = LoadTail(W1 + K16, K - K16);
+                w0 = LoadTail(W1 + KA, tail);
                 Madd4<overflow>(d01, s0, w0);
                 Madd4<overflow>(d11, s1, w0);
-                w0 = LoadTail(W2 + K16, K - K16);
+                w0 = LoadTail(W2 + KA, tail);
                 Madd4<overflow>(d02, s0, w0);
                 Madd4<overflow>(d12, s1, w0);
-                w0 = LoadTail(W3 + K16, K - K16);
+                w0 = LoadTail(W3 + KA, tail);
                 Madd4<overflow>(d03, s0, w0);
                 Madd4<overflow>(d13, s1, w0);
             }
             Save4Sums(d00, d01, d02, d03, D + 0 * ldd);
             Save4Sums(d10, d11, d12, d13, D + 1 * ldd);
-
         }
 
         template<bool overflow> void SynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst)

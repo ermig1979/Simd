@@ -43,20 +43,6 @@ namespace Simd
             return _mm256_set1_epi32(*(int32_t*)src);
         }
 
-        template<bool overflow> void Madd4(__m256i& i32, __m256i u8, __m256i i8);
-
-        template<> SIMD_INLINE void Madd4<true>(__m256i& i32, __m256i u8, __m256i i8)
-        {
-            i32 = _mm256_add_epi32(i32, _mm256_madd_epi16(_mm256_maddubs_epi16(u8, i8), Avx2::K16_0001));
-        }
-
-        template<> SIMD_INLINE void Madd4<false>(__m256i& i32, __m256i u8, __m256i i8)
-        {
-            __m256i lo = _mm256_madd_epi16(Cvt8uTo16i<0>(u8), Cvt8iTo16i<0>(i8));
-            __m256i hi = _mm256_madd_epi16(Cvt8uTo16i<1>(u8), Cvt8iTo16i<1>(i8));
-            i32 = _mm256_add_epi32(i32, PermutedHadd32i(lo, hi));
-        }
-
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x1(const uint8_t * src0,
             const ConvParam8i& p, const AlgParam & a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t * weight0, 
             const __m256i * bias, const __m256* params, const __m256 * scale, const __m256* shift, int32_t * buf, uint8_t* dst)
