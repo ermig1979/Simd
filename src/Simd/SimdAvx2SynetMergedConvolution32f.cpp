@@ -1250,15 +1250,15 @@ namespace Simd
                 if (p.add)
                 {
                     convolution[2] = OutputConvolution<TermLast, type>;
-                    convolution[3] = OutputConvolution<TermIterim, type>;
-                    convolution[4] = OutputConvolution<TermIterim, type>;
+                    convolution[3] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
+                    convolution[4] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
                     convolution[5] = OutputConvolution<TermLast, type>;
                 }
                 else
                 {
                     convolution[2] = OutputConvolution<TermSingle, type>;
-                    convolution[3] = OutputConvolution<TermFirst, type>;
-                    convolution[4] = OutputConvolution<TermIterim, type>;
+                    convolution[3] = OutputConvolution<TermFirst, SimdConvolutionActivationIdentity>;
+                    convolution[4] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
                     convolution[5] = OutputConvolution<TermLast, type>;
                 }
                 break;

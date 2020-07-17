@@ -904,8 +904,8 @@ namespace Simd
         {
             Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u, activation>(p, a, d);
             Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f, activation>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iFirst, activation>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iIterim, activation>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iFirst, SimdConvolutionActivationIdentity>(p, a, d);
+            Set<Base::SynetConvolution8iNhwcDirect::Term8iIterim, SimdConvolutionActivationIdentity>(p, a, d);
             Set<Base::SynetConvolution8iNhwcDirect::Term8iLast8u, activation>(p, a, d);
             Set<Base::SynetConvolution8iNhwcDirect::Term8iLast32f, activation>(p, a, d);
         }
