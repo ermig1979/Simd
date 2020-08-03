@@ -450,7 +450,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNchwF(const uint8_t* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst, size_t offset)
         {
-            __m128i _src = _mm_cvtsi64_si128(*(int64_t*)(src + offset));
+            __m128i _src = _mm_loadl_epi64((__m128i*)(src + offset));
             __m256i d0 = _mm256_cvtps_epi32(Fmadd<nofma>(Cvt8uTo32f<0>(_src), scale, shift));
             *((int64_t*)(dst + offset)) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(d0, K_ZERO), K_ZERO), upper));
         }
@@ -496,7 +496,7 @@ namespace Simd
 
         template <bool align, bool nofma> SIMD_INLINE void ScaleNhwcF(const uint8_t* src, const float* scale, const float* shift, __m256i upper, uint8_t* dst, size_t offset)
         {
-            __m128i s0 = _mm_cvtsi64_si128(*(int64_t*)(src + offset));
+            __m128i s0 = _mm_loadl_epi64((__m128i*)(src + offset));
             __m256i d0 = ScaleNhwcF<0, align, nofma>(s0, scale + offset, shift + offset);
             *(int64_t*)(dst + offset) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(d0, K_ZERO), K_ZERO), upper));
         }
@@ -536,7 +536,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const uint8_t* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst, size_t offset)
         {
-            __m128i _src = _mm_cvtsi64_si128(*(int64_t*)(src + offset));
+            __m128i _src = _mm_loadl_epi64((__m128i*)(src + offset));
             __m256i d0 = _mm256_cvtps_epi32(Fmadd<nofma>(Cvt8uTo32f<0>(_src), scale, shift));
             *(int64_t*)(dst + offset) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(d0, K_ZERO), K_ZERO), upper));
         }
@@ -618,7 +618,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNchwF(const uint8_t* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
-            __m128i s0 = _mm_cvtsi64_si128(*(int64_t*)(src + offset));
+            __m128i s0 = _mm_loadl_epi64((__m128i*)(src + offset));
             Avx::Store<false>(dst + offset + 0, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
         }
 
@@ -661,7 +661,7 @@ namespace Simd
 
         template <bool align, bool nofma> SIMD_INLINE void ScaleNhwcF(const uint8_t* src, const float* scale, const float* shift, float* dst, size_t offset)
         {
-            __m128i s0 = _mm_cvtsi64_si128(*(int64_t*)(src + offset));
+            __m128i s0 = _mm_loadl_epi64((__m128i*)(src + offset));
             ScaleNhwcF<0, align, nofma>(s0, scale + offset, shift + offset, dst + offset);
         }
 
@@ -700,7 +700,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const uint8_t* src, __m256 scale, __m256 shift, float* dst, size_t offset)
         {
-            __m128i s0 = _mm_cvtsi64_si128(*(int64_t*)(src + offset));
+            __m128i s0 = _mm_loadl_epi64((__m128i*)(src + offset));
             Avx::Store<false>(dst + offset, Fmadd<nofma>(Cvt8uTo32f<0>(s0), scale, shift));
         }
 

@@ -62,8 +62,8 @@ namespace Simd
 
         template<bool nofma> SIMD_INLINE void SynetAdd8iNchwF(const uint8_t* a, const uint8_t* b, __m256 scale[3], __m256 shift[3], __m256i upper, uint8_t* c, size_t offset)
         {
-            __m128i _a = _mm_cvtsi64_si128(*(int64_t*)(a + offset));
-            __m128i _b = _mm_cvtsi64_si128(*(int64_t*)(b + offset));
+            __m128i _a = _mm_loadl_epi64((__m128i*)(a + offset));
+            __m128i _b = _mm_loadl_epi64((__m128i*)(b + offset));
             __m256i c0 = SynetAdd8iNchw<nofma, 0>(_a, _b, scale, shift);
             *(int64_t*)(c + offset) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(c0, K_ZERO), K_ZERO), upper));
         }
@@ -122,8 +122,8 @@ namespace Simd
         template <bool align, bool nofma> SIMD_INLINE void SynetAdd8iNhwcF(const uint8_t* a, const float* aScale, const float* aShift,
             const uint8_t* b, const float* bScale, const float* bShift, const float* cScale, const float* cShift, __m256i upper, uint8_t* c, size_t offset)
         {
-            __m128i _a = _mm_cvtsi64_si128(*(int64_t*)(a + offset));
-            __m128i _b = _mm_cvtsi64_si128(*(int64_t*)(b + offset));
+            __m128i _a = _mm_loadl_epi64((__m128i*)(a + offset));
+            __m128i _b = _mm_loadl_epi64((__m128i*)(b + offset));
             __m256i c0 = SynetAdd8iNhwc<0, align, nofma>(_a, aScale, aShift, _b, bScale, bShift, cScale, cShift, offset + 0 * F);
             *(int64_t*)(c + offset) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(c0, K_ZERO), K_ZERO), upper));
         }
