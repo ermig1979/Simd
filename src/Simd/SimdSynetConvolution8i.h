@@ -182,11 +182,10 @@ namespace Simd
 #endif
         Convert32fTo8u _convertSrc;
         CvtParam _srcCvt, _dstCvt;
-        Array8i _weight8i;
-        Array32i _norm32i;
-        Array32f _norm32f; 
+        Array8i _weight;
+        Array32f _norm, _bias; 
         const float* _params;
-        bool _src8u, _dst8u, _overflow16i;
+        bool _src8u, _dst8u;
         size_t _merge, _sizeS, _sizeD;
     };
 
