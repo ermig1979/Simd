@@ -248,11 +248,11 @@ namespace Test
 //        if (Simd::Avx512vnni::Enable)
 //            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx512vnni::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 //#endif
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Neon::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Neon::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif 
 
         return result;
     }
