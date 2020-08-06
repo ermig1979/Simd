@@ -90,14 +90,13 @@ namespace Simd
 
     size_t SynetConvolution8i::InternalBufferSize() const
     {
-        return _buffer.size * sizeof(uint8_t) + _srcCvt.Size() + _dstCvt.Size() +
-            _weight.size * sizeof(int8_t) + (_norm.size + _bias.size) * sizeof(float);
+        return (_buffer.size + _weight.size) * sizeof(uint8_t) + _srcCvt.Size() + 
+            _dstCvt.Size() + (_norm.size + _bias.size + _params.size) * sizeof(float);
     }
 
     void SynetConvolution8i::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
     {
         const ConvParam8i& p = _param;
-        _params = params;
         _srcCvt.Init(stats[0], stats[1], p.srcC, p.compatibility);
         _dstCvt.Init(stats[2], stats[3], p.dstC, p.compatibility);
         size_t G = p.group, D = p.dstC / G, C = p.srcC / G, K = p.kernelY * p.kernelX, CK = C * K, GD = G * D;
@@ -189,6 +188,42 @@ namespace Simd
             pShift += C;
             pNorm += D;
             pBias += D;
+        }
+        if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
+            _params.Resize(p.dstC);
+        else
+            _params.Resize(2);
+        switch (p.activation)
+        {
+        case SimdConvolutionActivationIdentity:
+            _params[0] = -FLT_MAX;
+            _params[1] = FLT_MAX;
+            break;
+        case SimdConvolutionActivationRelu:
+            _params[0] = 0;
+            _params[1] = FLT_MAX;
+            break;
+        case SimdConvolutionActivationLeakyRelu:
+            for (size_t d = 0; d < p.dstC; ++d)
+                _params[d] = params[0];
+            break;
+        case SimdConvolutionActivationRestrictRange:
+            _params[0] = params[0];
+            _params[1] = params[1];
+            break;
+        case SimdConvolutionActivationPrelu:
+            for (size_t d = 0; d < p.dstC; ++d)
+                _params[d] = params[d];
+            break;
+        case SimdConvolutionActivationElu:
+            _params[0] = params[0];
+            break;
+        case SimdConvolutionActivationHswish:
+            _params[0] = params[0];
+            _params[1] = params[1];
+            break;
+        default:
+            assert(0);
         }
     }
 
@@ -367,20 +402,20 @@ namespace Simd
                 break;
             }
             case SimdConvolutionActivationLeakyRelu:
-                SynetRelu32f(dst32f, _merge * _sizeD, _params + 1, dst32f);
+                SynetRelu32f(dst32f, _merge * _sizeD, _params.data, dst32f);
                 break;
             case SimdConvolutionActivationRestrictRange:
-                SynetRestrictRange32f(dst32f, _merge * _sizeD, _params + 0, _params + 1, dst32f);
+                SynetRestrictRange32f(dst32f, _merge * _sizeD, _params.data, _params.data + 1, dst32f);
                 break;
             case SimdConvolutionActivationPrelu:
                 for (size_t m = 0; m < _merge; ++m)
-                    SynetPreluLayerForward(dst32f + m * _sizeD, _params, p.dstC, p.dstH*p.dstW, dst32f + m * _sizeD, p.dstF);
+                    SynetPreluLayerForward(dst32f + m * _sizeD, _params.data, p.dstC, p.dstH*p.dstW, dst32f + m * _sizeD, p.dstF);
                 break;
             case SimdConvolutionActivationElu:
-                SynetElu32f(dst32f, _merge * _sizeD, _params + 0, dst32f);
+                SynetElu32f(dst32f, _merge * _sizeD, _params.data, dst32f);
                 break;
             case SimdConvolutionActivationHswish:
-                SynetHswish32f(dst32f, _merge * _sizeD, _params + 0, _params + 1, dst32f);
+                SynetHswish32f(dst32f, _merge * _sizeD, _params.data, _params.data + 1, dst32f);
                 break;
             default:
                 assert(0);
@@ -648,7 +683,6 @@ namespace Simd
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);
             ReorderWeight();
-            _alg.norm = _srcCvt.neg && Overflow(_param.compatibility) ? 2 : 1;
             _alg.zero = Set4(_srcCvt.zero[0]);
             _alg.upper = Set4(_dstCvt.uMax);
         }
@@ -723,10 +757,11 @@ namespace Simd
         {
             const ConvParam8i& p = _param;
             const int8_t* weight = _weight.data;
-            const int32_t* bias = NULL;// _norm32i.data + p.dstC;
-            const float* params = _params;
-            const float* scale = NULL;// _norm32f.data;
-            const float* shift = NULL;// _norm32f.data + p.dstC;
+            const float* norm = _norm.data;
+            const float* bias = _bias.data;
+            const float* params = _params.data;
+            const float* scale = _dstCvt.scale.data;
+            const float* shift = _dstCvt.shift.data;
             for (size_t dc = 0; dc < p.dstC; dc += _alg.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, dc + _alg.macroD) - dc;
@@ -739,31 +774,32 @@ namespace Simd
                         if (_alg.macroC == p.srcC)
                         {
                             if (_alg.size == 1)
-                                _convolutions[Term8iSingle8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                                _convolutions[Term8iSingle8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst);
                             else
-                                _convolutions[Term8iSingle32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                                _convolutions[Term8iSingle32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst);
                         }
                         else if (sc == 0)
-                            _convolutions[Term8iFirst](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                            _convolutions[Term8iFirst](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst);
                         else if (sc + macroC == p.srcC)
                         {
                             if (_alg.size == 1)
-                                _convolutions[Term8iLast8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                                _convolutions[Term8iLast8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst);
                             else
-                                _convolutions[Term8iLast32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                                _convolutions[Term8iLast32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst);
                         }
                         else
-                            _convolutions[Term8iIterim](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, bias, params, scale, shift, buf, dst);
+                            _convolutions[Term8iIterim](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst);
                         yBeg = yEnd;
                     }
                     weight += DivHi(macroC, 4) * _alg.F * 4;
                 }
                 weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * macroD * 4 - DivHi(p.srcC, 4) * _alg.F * 4;
-                bias += _alg.macroD;
-                if (p.activation == ::SimdConvolutionActivationPrelu)
+                norm += macroD;
+                bias += macroD;
+                if (p.activation == ::SimdConvolutionActivationLeakyRelu || p.activation == ::SimdConvolutionActivationPrelu)
                     params += macroD;
-                shift += _alg.macroD;
-                scale += _alg.macroD;
+                shift += macroD;
+                scale += macroD;
                 if (buf)
                     buf += _alg.macroD;
                 dst += _alg.macroD * _alg.size;

@@ -183,8 +183,7 @@ namespace Simd
         Convert32fTo8u _convertSrc;
         CvtParam _srcCvt, _dstCvt;
         Array8i _weight;
-        Array32f _norm, _bias; 
-        const float* _params;
+        Array32f _norm, _bias, _params; 
         bool _src8u, _dst8u;
         size_t _merge, _sizeS, _sizeD;
     };
@@ -238,11 +237,11 @@ namespace Simd
             struct AlgParam
             {
                 size_t F, microD, macroH, macroC, macroD;
-                int32_t zero, norm, high, size, upper;
+                int32_t zero, size, upper;
             };
 
             typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
-                const int8_t* weight, const int32_t* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
+                const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3);

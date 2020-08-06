@@ -32,7 +32,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE    
+#if defined(SIMD_NEON_ENABLE) && 0
     namespace Neon
     {
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;

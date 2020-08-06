@@ -5322,7 +5322,7 @@ SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, 
 SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
 {
     typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC0(SynetConvolution8iInit);// , SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC1(SynetConvolution8iInit, SIMD_SSE41_FUNC);// , SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetConvolution8iInit(batch, conv, compatibility);
 }
@@ -5335,7 +5335,6 @@ SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void* context)
 SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
 {
     return ((SynetConvolution8i*)context)->InternalBufferSize();
-
 }
 
 SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight, const float* bias, const float* params, const float* const* stats)

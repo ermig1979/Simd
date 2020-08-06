@@ -229,11 +229,11 @@ namespace Test
 
         result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Base::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sse41::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Sse41::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && SynetConvolution8iForwardAutoTest(FUNC_C(Simd::Avx2::SynetConvolution8iInit), FUNC_C(SimdSynetConvolution8iInit));
