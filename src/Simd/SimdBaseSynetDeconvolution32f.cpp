@@ -303,8 +303,10 @@ namespace Simd
             _alg.macroD = Simd::Min(AlignLoAny(L3 / sizeof(float) / p.kernelY / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
             _rWeight.Resize(AlignHiAny(p.dstC, _alg.microD) * p.kernelY * p.kernelX * p.srcC);
             _rBias.Resize(AlignHiAny(p.dstC, _alg.microD), true);
-            if (p.activation == ::SimdConvolutionActivationPrelu)
-                _rParams.Resize(AlignHiAny(p.dstC, _alg.microD));
+            if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
+                _rParams.Resize(AlignHiAny(p.dstC, _alg.microD), true);
+            else
+                _rParams.Resize(2, true);
         }
 
         void SynetDeconvolution32fNhwcDirect2x2::ReorderWeight(const float * src, float * dst)
@@ -363,9 +365,41 @@ namespace Simd
                     memcpy(_rBias.data, bias, _param.dstC * sizeof(float));
                 _bias = _rBias.data;
             }
-            if (_rParams.data && _param.activation == ::SimdConvolutionActivationPrelu)
+            if (_rParams.data)
             {
-                memcpy(_rParams.data, params, _param.dstC * sizeof(float));
+                const DeconvParam32f& p = _param;
+                switch (p.activation)
+                {
+                case SimdConvolutionActivationIdentity:
+                    _rParams.data[0] = -FLT_MAX;
+                    _rParams.data[1] = FLT_MAX;
+                    break;
+                case SimdConvolutionActivationRelu:
+                    _rParams.data[0] = 0;
+                    _rParams.data[1] = FLT_MAX;
+                    break;
+                case SimdConvolutionActivationLeakyRelu:
+                    for (size_t d = 0; d < p.dstC; ++d)
+                        _rParams.data[d] = params[0];
+                    break;
+                case SimdConvolutionActivationRestrictRange:
+                    _rParams.data[0] = params[0];
+                    _rParams.data[1] = params[1];
+                    break;
+                case SimdConvolutionActivationPrelu:
+                    for (size_t d = 0; d < p.dstC; ++d)
+                        _rParams.data[d] = params[d];
+                    break;
+                case SimdConvolutionActivationElu:
+                    _rParams.data[0] = params[0];
+                    break;
+                case SimdConvolutionActivationHswish:
+                    _rParams.data[0] = params[0];
+                    _rParams.data[1] = params[1];
+                    break;
+                default:
+                    assert(0);
+                }
                 _params = _rParams.data;
             }
         }

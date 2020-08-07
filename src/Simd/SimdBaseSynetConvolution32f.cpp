@@ -1363,9 +1363,41 @@ namespace Simd
                     memcpy(_rBias.data, bias, _param.dstC * sizeof(float));
                 _bias = _rBias.data;
             }
-            if (_rParams.data && _param.activation == ::SimdConvolutionActivationPrelu)
+            if (_rParams.data)
             {
-                memcpy(_rParams.data, params, _param.dstC * sizeof(float));
+                const ConvParam32f& p = _param;
+                switch (p.activation)
+                {
+                case SimdConvolutionActivationIdentity:
+                    _rParams.data[0] = -FLT_MAX;
+                    _rParams.data[1] = FLT_MAX;
+                    break;
+                case SimdConvolutionActivationRelu:
+                    _rParams.data[0] = 0;
+                    _rParams.data[1] = FLT_MAX;
+                    break;
+                case SimdConvolutionActivationLeakyRelu:
+                    for (size_t d = 0; d < p.dstC; ++d)
+                        _rParams.data[d] = params[0];
+                    break;
+                case SimdConvolutionActivationRestrictRange:
+                    _rParams.data[0] = params[0];
+                    _rParams.data[1] = params[1];
+                    break;
+                case SimdConvolutionActivationPrelu:
+                    for (size_t d = 0; d < p.dstC; ++d)
+                        _rParams.data[d] = params[d];
+                    break;
+                case SimdConvolutionActivationElu:
+                    _rParams.data[0] = params[0];
+                    break;
+                case SimdConvolutionActivationHswish:
+                    _rParams.data[0] = params[0];
+                    _rParams.data[1] = params[1];
+                    break;
+                default:
+                    assert(0);
+                }
                 _params = _rParams.data;
             }
         }
@@ -1431,8 +1463,10 @@ namespace Simd
             alg.stepW = p.kernelY * p.kernelX * p.srcC * alg.F;
             _rWeight.Resize(DivHi(p.dstC, alg.F)*alg.stepW);
             _rBias.Resize(AlignHiAny(p.dstC, alg.F), true);
-            if (p.activation == ::SimdConvolutionActivationPrelu)
-                _rParams.Resize(AlignHiAny(p.dstC, alg.F));
+            if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
+                _rParams.Resize(AlignHiAny(p.dstC, alg.F), true);
+            else
+                _rParams.Resize(2, true);
         }
 
         void SynetConvolution32fNhwcDirect::ReorderWeight(const float* src, float* dst)
@@ -1479,8 +1513,10 @@ namespace Simd
             a.macroD = Simd::Min(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / a.macroC, a.microD), AlignHiAny(p.dstC, a.microD));
             _old.weight.Resize(AlignHiAny(p.dstC, a.microD) * p.kernelY * p.kernelX * p.srcC);
             _rBias.Resize(AlignHiAny(p.dstC, a.microD), true);
-            if (p.activation == ::SimdConvolutionActivationPrelu)
-                _rParams.Resize(AlignHiAny(p.dstC, a.microD));
+            if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
+                _rParams.Resize(AlignHiAny(p.dstC, a.microD), true);
+            else
+                _rParams.Resize(2, true);
         }
 
         void SynetConvolution32fNhwcDirect::OldReorderWeight(const float* src, float* dst)

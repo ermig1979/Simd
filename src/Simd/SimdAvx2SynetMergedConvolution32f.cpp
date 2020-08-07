@@ -1274,9 +1274,9 @@ namespace Simd
             {
                 switch (p.conv[i].activation)
                 {
-                case SimdConvolutionActivationIdentity: SetConvolutionPtr<SimdConvolutionActivationIdentity>(_param, i, _convolution); break;
-                case SimdConvolutionActivationRelu: SetConvolutionPtr<SimdConvolutionActivationRelu>(_param, i, _convolution); break;
-                case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationLeakyRelu>(_param, i, _convolution); break;
+                case SimdConvolutionActivationIdentity: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
+                case SimdConvolutionActivationRelu: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
+                case SimdConvolutionActivationLeakyRelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationRestrictRange: SetConvolutionPtr<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
                 case SimdConvolutionActivationPrelu: SetConvolutionPtr<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationElu: SetConvolutionPtr<SimdConvolutionActivationElu>(_param, i, _convolution); break;

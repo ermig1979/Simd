@@ -1709,9 +1709,9 @@ namespace Simd
             assert(a.microD == 4 * F);
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, a); break;
-            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, a); break;
-            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, a); break;
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, a); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRestrictRange>(p, a); break;
+            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationPrelu>(p, a); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, a); break;
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, a); break;

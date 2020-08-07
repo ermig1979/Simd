@@ -190,8 +190,10 @@ namespace Simd
                 size_t dstC = AlignHiAny(p.conv[i].dstC, i == 1 ? _miC : 2 * _miC);
                 _rWeight[i].Resize(dstC*p.conv[i].kernelY*p.conv[i].kernelX*p.conv[i].srcC);
                 _rBias[i].Resize(dstC, true);
-                if (p.conv[i].activation == ::SimdConvolutionActivationPrelu)
+                if (p.conv[i].activation == SimdConvolutionActivationLeakyRelu || p.conv[i].activation == SimdConvolutionActivationPrelu)
                     _rParams[i].Resize(dstC, true);
+                else
+                    _rParams[i].Resize(2);
             }
             _dp[0] = p.conv[0].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
             _dp[1] = p.conv[1].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
@@ -319,9 +321,40 @@ namespace Simd
                 }
                 else
                     _bias[i] = bias[i];
-                if (_rParams[i].size)
+                if (_rParams[i].data)
                 {
-                    memcpy(_rParams[i].data, params[i], p.conv[i].dstC * sizeof(float));
+                    switch (p.conv[i].activation)
+                    {
+                    case SimdConvolutionActivationIdentity:
+                        _rParams[i].data[0] = -FLT_MAX;
+                        _rParams[i].data[1] = FLT_MAX;
+                        break;
+                    case SimdConvolutionActivationRelu:
+                        _rParams[i].data[0] = 0;
+                        _rParams[i].data[1] = FLT_MAX;
+                        break;
+                    case SimdConvolutionActivationLeakyRelu:
+                        for (size_t d = 0; d < p.conv[i].dstC; ++d)
+                            _rParams[i].data[d] = params[i][0];
+                        break;
+                    case SimdConvolutionActivationRestrictRange:
+                        _rParams[i].data[0] = params[i][0];
+                        _rParams[i].data[1] = params[i][1];
+                        break;
+                    case SimdConvolutionActivationPrelu:
+                        for (size_t d = 0; d < p.conv[i].dstC; ++d)
+                            _rParams[i].data[d] = params[i][d];
+                        break;
+                    case SimdConvolutionActivationElu:
+                        _rParams[i].data[0] = params[i][0];
+                        break;
+                    case SimdConvolutionActivationHswish:
+                        _rParams[i].data[0] = params[i][0];
+                        _rParams[i].data[1] = params[i][1];
+                        break;
+                    default:
+                        assert(0);
+                    }
                     _params[i] = _rParams[i].data;
                 }
                 else

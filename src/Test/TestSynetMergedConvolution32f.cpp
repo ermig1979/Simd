@@ -213,8 +213,8 @@ namespace Test
     {
         bool result = true;
         const SimdBool t = SimdTrue, f = SimdFalse;
-        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationIdentity;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRelu, a2 = ::SimdConvolutionActivationHswish;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRelu, a1 = ::SimdConvolutionActivationLeakyRelu, a2 = ::SimdConvolutionActivationIdentity;
+        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationHswish;
 #ifdef NDEBUG
 #if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 3, 384, 389, 3, 2, a0, 32, 3, 1, a1, 16, a2, f), f1, f2);
@@ -241,8 +241,8 @@ namespace Test
 #endif
 #if 1
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 3, 320, 320, 3, 2, a0, 16, 3, 1, a1, 8, a2, f), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 160, 160, 1, 1, a0, 48, 3, 2, a1, 8, a2, f), f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 80, 80, 1, 1, a0, 48, 3, 1, a1, 8, a2, f), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 160, 160, 1, 1, a0, 48, 3, 2, a1, 8, a2, f), f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 80, 80, 1, 1, a0, 48, 3, 1, a1, 8, a2, f), f1, f2);
 #endif
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(1, 8, 80, 80, 1, 1, a0, 48, 3, 1, a1, 8, a2, f), f1, f2);

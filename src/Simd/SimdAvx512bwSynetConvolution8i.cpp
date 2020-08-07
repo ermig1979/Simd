@@ -942,9 +942,9 @@ namespace Simd
         {
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(p, a, d); break;
-            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(p, a, d); break;
-            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(p, a, d); break;
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, a, d); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRestrictRange>(p, a, d); break;
+            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationPrelu>(p, a, d); break;
             case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a, d); break;
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, a, d); break;
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, a, d); break;
