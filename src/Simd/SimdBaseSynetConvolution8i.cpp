@@ -653,8 +653,8 @@ namespace Simd
                 _convolutions[i] = NULL;
         }
 
-        String SynetConvolution8iNhwcDirect::Desc() const 
-        { 
+        String SynetConvolution8iNhwcDirect::Desc() const
+        {
             const ConvParam8i& p = _param;
             return Ext() + "::NhwcDirect" + (Overflow(p.compatibility) ? "-o" : (Narrowed(p.compatibility) ? "-n" : "-p"));
         }
@@ -664,13 +664,13 @@ namespace Simd
             size_t size = SynetConvolution8i::InternalBufferSize();
             return size;
         }
-        
+
         size_t SynetConvolution8iNhwcDirect::ExternalBufferSize() const
         {
             const ConvParam8i& p = _param;
             size_t size = SynetConvolution8i::ExternalBufferSize();
             if (_alg.macroC < p.srcC)
-                size += AlignHi(_sizeD*sizeof(int32_t), SIMD_ALIGN);
+                size += AlignHi(_sizeD * sizeof(int32_t), SIMD_ALIGN);
             return size;
         }
 
@@ -722,7 +722,7 @@ namespace Simd
                     {
                         for (size_t c = 0; c < C; ++c)
                         {
-                            const int8_t* src = _weight.data + ((ky*p.kernelX + kx)*p.srcC + c*4)*p.dstC + d*_alg.F;
+                            const int8_t* src = _weight.data + ((ky * p.kernelX + kx) * p.srcC + c * 4) * p.dstC + d * _alg.F;
                             for (size_t f = 0; f < _alg.F; ++f)
                             {
                                 for (size_t i = 0; i < 4; ++i)
@@ -749,7 +749,7 @@ namespace Simd
             {
                 Forward8u(src, sum, dst);
                 src += _sizeS;
-                dst += _sizeD*(_dst8u ? sizeof(uint8_t) : sizeof(float));
+                dst += _sizeD * (_dst8u ? sizeof(uint8_t) : sizeof(float));
             }
         }
 
@@ -808,6 +808,49 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam8i& p)
+            : SynetConvolution8i(p)
+        {
+            _convolution = NULL;
+        }
+
+        String SynetConvolution8iNhwcDepthwise::Desc() const
+        {
+            const ConvParam8i& p = _param;
+            return Ext() + "::NhwcDepthwise" + (Overflow(p.compatibility) ? "-o" : (Narrowed(p.compatibility) ? "-n" : "-p"));
+        }
+
+        void SynetConvolution8iNhwcDepthwise::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
+        {
+            SynetConvolution8i::SetParams(weight, bias, params, stats);
+            _alg.zero = Set4(_srcCvt.zero[0]);
+            _alg.upper = Set4(_dstCvt.uMax);
+            _alg.size = (_param.dstT == SimdTensorData32f ? 4 : 1);
+        }
+
+        bool SynetConvolution8iNhwcDepthwise::Preferable(const ConvParam8i& p)
+        {
+            return false;
+        }
+
+        void SynetConvolution8iNhwcDepthwise::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        {
+            const int8_t* weight = _weight.data;
+            const float* norm = _norm.data;
+            const float* bias = _bias.data;
+            const float* params = _params.data;
+            const float* scale = _dstCvt.scale.data;
+            const float* shift = _dstCvt.shift.data;
+            for (size_t m = 0; m < _merge; ++m)
+            {
+                _convolution(src, _param, _alg, weight, norm, bias, params, scale, shift, dst);
+                src += _sizeS;
+                dst += _sizeD * _alg.size;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
 //#define SIMD_BASE_ONLY_GEMM_NN
 
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
@@ -816,6 +859,8 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
 #if !defined(SIMD_BASE_ONLY_GEMM_NN)
+            else if (SynetConvolution8iNhwcDepthwise::Preferable(param))
+                return new SynetConvolution8iNhwcDepthwise(param);
             else if (SynetConvolution8iNhwcDirect::Preferable(param))
                 return new SynetConvolution8iNhwcDirect(param);
 #endif

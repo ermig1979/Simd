@@ -254,6 +254,32 @@ namespace Simd
             ConvolutionPtr _convolutions[Term8iSize];
         };
 
+        class SynetConvolution8iNhwcDepthwise : public SynetConvolution8i
+        {
+        public:
+            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const;
+            virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
+
+            static bool Preferable(const ConvParam8i& p);
+
+            struct AlgParam
+            {
+                int32_t zero, size, upper;
+            };
+
+            typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, 
+                const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst);
+
+        protected:
+
+            virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            AlgParam _alg;
+            ConvolutionPtr _convolution;
+        };
+
         void * SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 
