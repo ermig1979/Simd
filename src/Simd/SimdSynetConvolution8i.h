@@ -296,6 +296,16 @@ namespace Simd
             static bool Preferable(const ConvParam8i& p);
         };
 
+        class SynetConvolution8iNhwcDepthwise : public Base::SynetConvolution8iNhwcDepthwise
+        {
+        public:
+            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Sse41"; }
+
+            static bool Preferable(const ConvParam8i& p);
+        };
+
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif

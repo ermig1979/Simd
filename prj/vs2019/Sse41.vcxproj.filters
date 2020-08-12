@@ -19,9 +19,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8i.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
@@ -29,6 +26,12 @@
       <Filter>Sse41</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
   </ItemGroup>
@@ -41,9 +44,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\Simd\SimdSse41.h">
-      <Filter>Sse41</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -141,6 +141,15 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse41.h">
+      <Filter>Sse41</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse1.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

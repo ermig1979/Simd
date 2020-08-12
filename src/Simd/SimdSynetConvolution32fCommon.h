@@ -83,6 +83,45 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const float* params, size_t offset);
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationIdentity>(__m128 value, const float* params, size_t offset)
+        {
+            return value;
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationRelu>(__m128 value, const float* params, size_t offset)
+        {
+            return _mm_max_ps(_mm_setzero_ps(), value);
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationLeakyRelu>(__m128 value, const float* params, size_t offset)
+        {
+            return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(_mm_set1_ps(params[0]), _mm_min_ps(_mm_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationRestrictRange>(__m128 value, const float* params, size_t offset)
+        {
+            return _mm_min_ps(_mm_max_ps(_mm_set1_ps(params[0]), value), _mm_set1_ps(params[1]));
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationPrelu>(__m128 value, const float* params, size_t offset)
+        {
+            return _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), value), _mm_mul_ps(_mm_loadu_ps(params + offset), _mm_min_ps(_mm_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationElu>(__m128 value, const float* params, size_t offset)
+        {
+            return Sse2::Elu(value, _mm_set1_ps(params[0]));
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const float* params, size_t offset)
+        {
+            return Sse::SynetHswish32f(value, _mm_set1_ps(params[0]), _mm_set1_ps(params[1]));
+        }
+
+        //---------------------------------------------------------------------
+
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const __m128 * params, size_t index);
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationIdentity>(__m128 value, const __m128 * params, size_t index)
@@ -119,6 +158,8 @@ namespace Simd
         {
             return Sse::SynetHswish32f(value, params[0], params[1]);
         }
+
+        //---------------------------------------------------------------------
 
         template <TermType term> struct Term
         {

@@ -823,7 +823,7 @@ namespace Simd
         void SynetConvolution8iNhwcDepthwise::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);
-            _alg.zero = Set4(_srcCvt.zero[0]);
+            _alg.zero = _srcCvt.zero[0];
             _alg.upper = Set4(_dstCvt.uMax);
             _alg.size = (_param.dstT == SimdTensorData32f ? 4 : 1);
         }
