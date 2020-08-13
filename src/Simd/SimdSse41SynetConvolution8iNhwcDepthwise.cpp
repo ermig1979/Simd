@@ -66,18 +66,54 @@ namespace Simd
             __m128i upper = _mm_set1_epi32(a.upper);
             size_t size = p.group;
             size_t sizeF = AlignLo(size, F);
-            size_t size2F = AlignLo(size, 2 * F);
-            size_t size4F = AlignLo(size, 4 * F);
-            size_t size8F = AlignLo(size, 8 * F);
+            size_t sizeF4 = AlignLo(size, F * 4);
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
                 {
                     size_t i = 0;
+                    for (; i < sizeF4; i += F*4)
+                    {
+                        __m128i d00, d01, d02, d03, w0, s0;
+                        d00 = _mm_setzero_si128();
+                        d01 = _mm_setzero_si128();
+                        d02 = _mm_setzero_si128();
+                        d03 = _mm_setzero_si128();
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
+                        {
+                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                            for (size_t kx = 0; kx < p.kernelX; ++kx)
+                            {
+                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                w0 = _mm_loadu_si128((__m128i*)(weight + (ky * p.kernelX + kx) * size + i));
+                                if (sy < p.srcH && sx < p.srcW)
+                                {
+                                    s0 = _mm_loadu_si128((__m128i*)(src + (sy * p.srcW + sx) * size + i));
+                                    Madd4<true>(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
+                                    Madd4<true>(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
+                                    Madd4<true>(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
+                                    Madd4<true>(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
+                                }
+                                else
+                                {
+                                    Madd4<true>(d00, zero, Cvt8iTo32i<0>(w0));
+                                    Madd4<true>(d01, zero, Cvt8iTo32i<1>(w0));
+                                    Madd4<true>(d02, zero, Cvt8iTo32i<2>(w0));
+                                    Madd4<true>(d03, zero, Cvt8iTo32i<3>(w0));
+
+                                }
+                            }
+                        }
+                        Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, i + F * 0);
+                        Save<term, activation>(dst, d01, norm, bias, params, scale, shift, upper, i + F * 1);
+                        Save<term, activation>(dst, d02, norm, bias, params, scale, shift, upper, i + F * 2);
+                        Save<term, activation>(dst, d03, norm, bias, params, scale, shift, upper, i + F * 3);
+                    }
                     for (; i < size; i += F)
                     {
                         size_t ci = i >= sizeF ? size - F : i;
-                        __m128i d00 = _mm_setzero_si128(), w0, s0;
+                        __m128i d00, w0, s0;
+                        d00 = _mm_setzero_si128();
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
                             size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;

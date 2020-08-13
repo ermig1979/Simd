@@ -72,7 +72,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32fNhwcDirect3r.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />

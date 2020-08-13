@@ -172,9 +172,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConversion.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8i.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution32f.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
@@ -212,6 +209,12 @@
       <Filter>Avx2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDepthwise.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
   </ItemGroup>
@@ -366,6 +369,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdView.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
