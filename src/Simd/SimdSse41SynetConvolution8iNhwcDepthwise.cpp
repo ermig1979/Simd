@@ -64,17 +64,17 @@ namespace Simd
         {
             __m128i zero = _mm_set1_epi32(a.zero);
             __m128i upper = _mm_set1_epi32(a.upper);
+            __m128i d00, d01, d02, d03, w0, s0;
             size_t size = p.group;
             size_t sizeF = AlignLo(size, F);
-            size_t sizeF4 = AlignLo(size, F * 4);
+            size_t sizeA = AlignLo(size, A);
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
                 for (size_t dx = 0; dx < p.dstW; ++dx)
                 {
                     size_t i = 0;
-                    for (; i < sizeF4; i += F*4)
+                    for (; i < sizeA; i += A)
                     {
-                        __m128i d00, d01, d02, d03, w0, s0;
                         d00 = _mm_setzero_si128();
                         d01 = _mm_setzero_si128();
                         d02 = _mm_setzero_si128();
@@ -112,7 +112,6 @@ namespace Simd
                     for (; i < size; i += F)
                     {
                         size_t ci = i >= sizeF ? size - F : i;
-                        __m128i d00, w0, s0;
                         d00 = _mm_setzero_si128();
                         for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
@@ -135,29 +134,247 @@ namespace Simd
             }
         }
 
+        template<Term8iType term, SimdConvolutionActivationType activation> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Edge(
+            const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, const int8_t* weight, 
+            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+        {
+            __m128i zero = _mm_set1_epi32(a.zero);
+            __m128i upper = _mm_set1_epi32(a.upper);
+            __m128i d00, d01, d02, d03, w0, s0;
+            size_t size = p.group;
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeA = AlignLo(size, A);
+            size_t i = 0;
+            for (; i < sizeA; i += A)
+            {
+                d00 = _mm_setzero_si128();
+                d01 = _mm_setzero_si128();
+                d02 = _mm_setzero_si128();
+                d03 = _mm_setzero_si128();
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t sy = dy * p.strideY + ky - p.padY;
+                    for (size_t kx = 0; kx < 3; ++kx)
+                    {
+                        size_t sx = dx * p.strideX + kx - p.padX;
+                        w0 = _mm_loadu_si128((__m128i*)(weight + (ky * p.kernelX + kx) * size + i));
+                        if (sy < p.srcH && sx < p.srcW)
+                        {
+                            s0 = _mm_loadu_si128((__m128i*)(src + (sy * p.srcW + sx) * size + i));
+                            Madd4<true>(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
+                            Madd4<true>(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
+                            Madd4<true>(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
+                            Madd4<true>(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
+                        }
+                        else
+                        {
+                            Madd4<true>(d00, zero, Cvt8iTo32i<0>(w0));
+                            Madd4<true>(d01, zero, Cvt8iTo32i<1>(w0));
+                            Madd4<true>(d02, zero, Cvt8iTo32i<2>(w0));
+                            Madd4<true>(d03, zero, Cvt8iTo32i<3>(w0));
+
+                        }
+                    }
+                }
+                Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, i + F * 0);
+                Save<term, activation>(dst, d01, norm, bias, params, scale, shift, upper, i + F * 1);
+                Save<term, activation>(dst, d02, norm, bias, params, scale, shift, upper, i + F * 2);
+                Save<term, activation>(dst, d03, norm, bias, params, scale, shift, upper, i + F * 3);
+            }
+            for (; i < size; i += F)
+            {
+                size_t ci = i >= sizeF ? size - F : i;
+                d00 = _mm_setzero_si128();
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    size_t sy = dy * p.strideY + ky - p.padY;
+                    for (size_t kx = 0; kx < 3; ++kx)
+                    {
+                        size_t sx = dx * p.strideX + kx - p.padX;
+                        w0 = LoadAs32i(weight + (ky * 3 + kx) * size + ci);
+                        if (sy < p.srcH && sx < p.srcW)
+                            s0 = LoadAs32i(src + (sy * p.srcW + sx) * size + ci);
+                        else
+                            s0 = zero;
+                        Madd4<true>(d00, s0, w0);
+                    }
+                }
+                Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ci);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType activation> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Main1(
+            const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm, 
+            const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+        {
+            __m128i d00, d01, d02, d03, w0, s0;
+            __m128i upper = _mm_set1_epi32(a.upper);
+            size_t srcC = p.srcC;
+            size_t srcCF = AlignLo(srcC, F);
+            size_t srcCA = AlignLo(srcC, A);
+            size_t srcS = srcC * p.srcW;
+            size_t c = 0;
+            for (; c < srcCA; c += A)
+            {
+                d00 = _mm_setzero_si128();
+                d01 = _mm_setzero_si128();
+                d02 = _mm_setzero_si128();
+                d03 = _mm_setzero_si128();
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const uint8_t* ps = src + ky * srcS + c;
+                    const int8_t* pw = weight + ky * 3 * srcC + c;
+                    for (size_t kx = 0; kx < 3; ++kx)
+                    {
+                        w0 = _mm_loadu_si128((__m128i*)(pw + kx * srcC));
+                        s0 = _mm_loadu_si128((__m128i*)(ps + kx * srcC));
+                        Madd4<true>(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
+                        Madd4<true>(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
+                        Madd4<true>(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
+                        Madd4<true>(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
+                    }
+                }
+                Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+                Save<term, activation>(dst, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+                Save<term, activation>(dst, d02, norm, bias, params, scale, shift, upper, c + F * 2);
+                Save<term, activation>(dst, d03, norm, bias, params, scale, shift, upper, c + F * 3);
+            }
+            for (; c < srcC; c += F)
+            {
+                size_t ct = c >= srcCF ? srcC - F : c;
+                d00 = _mm_setzero_si128();
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const uint8_t* ps = src + ky * srcS + ct;
+                    const int8_t* pw = weight + ky * 3 * srcC + ct;
+                    for (size_t kx = 0; kx < 3; ++kx)
+                    {
+                        w0 = LoadAs32i(pw + kx * srcC);
+                        s0 = LoadAs32i(ps + kx * srcC);
+                        Madd4<true>(d00, s0, w0);
+                    }
+                }
+                Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ct);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType activation> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Main2(
+            const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+            const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+        {
+            __m128i d00, d01, d02, d03, d10, d11, d12, d13, w0, w00, s0, s1;
+            __m128i upper = _mm_set1_epi32(a.upper);
+            size_t srcC = p.srcC;
+            size_t srcCF = AlignLo(srcC, F);
+            size_t srcCA = AlignLo(srcC, A);
+            size_t srcS = srcC * p.srcW;
+            size_t srcX = srcC * p.strideX;
+            size_t c = 0;
+            for (; c < srcCA; c += A)
+            {
+                d00 = _mm_setzero_si128();
+                d01 = _mm_setzero_si128();
+                d02 = _mm_setzero_si128();
+                d03 = _mm_setzero_si128();
+                d10 = _mm_setzero_si128();
+                d11 = _mm_setzero_si128();
+                d12 = _mm_setzero_si128();
+                d13 = _mm_setzero_si128();
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const uint8_t* ps = src + ky * srcS + c;
+                    const int8_t* pw = weight + ky * 3 * srcC + c;
+                    for (size_t kx = 0; kx < 3; ++kx)
+                    {
+                        w0 = _mm_loadu_si128((__m128i*)(pw + kx * srcC));
+                        s0 = _mm_loadu_si128((__m128i*)(ps + kx * srcC));
+                        s1 = _mm_loadu_si128((__m128i*)(ps + kx * srcC + srcX));
+                        w00 = Cvt8iTo32i<0>(w0);
+                        Madd4<true>(d00, Cvt8uTo32i<0>(s0), w00);
+                        Madd4<true>(d10, Cvt8uTo32i<0>(s1), w00);
+                        w00 = Cvt8iTo32i<1>(w0);
+                        Madd4<true>(d01, Cvt8uTo32i<1>(s0), w00);
+                        Madd4<true>(d11, Cvt8uTo32i<1>(s1), w00);
+                        w00 = Cvt8iTo32i<2>(w0);
+                        Madd4<true>(d02, Cvt8uTo32i<2>(s0), w00);
+                        Madd4<true>(d12, Cvt8uTo32i<2>(s1), w00);
+                        w00 = Cvt8iTo32i<3>(w0);
+                        Madd4<true>(d03, Cvt8uTo32i<3>(s0), w00);
+                        Madd4<true>(d13, Cvt8uTo32i<3>(s1), w00);
+                    }
+                }
+                Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+                Save<term, activation>(dst, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+                Save<term, activation>(dst, d02, norm, bias, params, scale, shift, upper, c + F * 2);
+                Save<term, activation>(dst, d03, norm, bias, params, scale, shift, upper, c + F * 3);
+                Save<term, activation>(dst + srcC, d10, norm, bias, params, scale, shift, upper, c + F * 0);
+                Save<term, activation>(dst + srcC, d11, norm, bias, params, scale, shift, upper, c + F * 1);
+                Save<term, activation>(dst + srcC, d12, norm, bias, params, scale, shift, upper, c + F * 2);
+                Save<term, activation>(dst + srcC, d13, norm, bias, params, scale, shift, upper, c + F * 3);
+            }
+            for (; c < srcC; c += F)
+            {
+                size_t ct = c >= srcCF ? srcC - F : c;
+                d00 = _mm_setzero_si128();
+                d10 = _mm_setzero_si128();
+                for (size_t ky = 0; ky < 3; ++ky)
+                {
+                    const uint8_t* ps = src + ky * srcS + ct;
+                    const int8_t* pw = weight + ky * 3 * srcC + ct;
+                    for (size_t kx = 0; kx < 3; ++kx)
+                    {
+                        w0 = LoadAs32i(pw + kx * srcC);
+                        s0 = LoadAs32i(ps + kx * srcC);
+                        s1 = LoadAs32i(ps + kx * srcC + srcX);
+                        Madd4<true>(d00, s0, w0);
+                        Madd4<true>(d10, s1, w0);
+                    }
+                }
+                Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ct);
+                Save<term, activation>(dst + srcC, d10, norm, bias, params, scale, shift, upper, ct);
+            }
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType activation> SIMD_INLINE void ConvolutionNhwcDepthwise3x3(
+            const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+            const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+        {
+            size_t srcS = p.srcC * p.srcW;
+            size_t srcX = p.srcC * p.strideX;
+            size_t dstH = p.dstH - p.padH;
+            size_t dstW = p.dstW - p.padW;
+            size_t dstC = p.dstC * a.size;
+            size_t dstW2 = AlignLo(dstW - p.padX, 2) + p.padX;
+            size_t dy = 0;
+            for (; dy < p.padY; ++dy)
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                    ConvolutionNhwcDepthwise3x3Edge<term, activation>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+            for (; dy < dstH; ++dy)
+            {
+                size_t dx = 0;
+                for (; dx < p.padX; ++dx)
+                    ConvolutionNhwcDepthwise3x3Edge<term, activation>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+                size_t offset = ((dy * p.strideY - p.padY) * p.srcW + dx * p.strideX - p.padX) * p.srcC;
+                for (; dx < dstW2; dx += 2)
+                    ConvolutionNhwcDepthwise3x3Main2<term, activation>(src + offset, p, a, weight, norm, bias, params, scale, shift, dst), dst += dstC * 2, offset += srcX * 2;
+                for (; dx < dstW; dx += 1)
+                    ConvolutionNhwcDepthwise3x3Main1<term, activation>(src + offset, p, a, weight, norm, bias, params, scale, shift, dst), dst += dstC, offset += srcX;
+                for (; dx < p.dstW; ++dx)
+                    ConvolutionNhwcDepthwise3x3Edge<term, activation>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+            }
+            for (; dy < p.dstH; ++dy)
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                    ConvolutionNhwcDepthwise3x3Edge<term, activation>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+        }
+
         //---------------------------------------------------------------------
 
         template <Term8iType term, SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, ConvolutionPtr & d)
         {
-            d = ConvolutionNhwcDepthwiseDefault<term, activation>;
-            //if (p.Is1x1())
-            //{
-            //    switch (a.microD)
-            //    {
-            //    case 2 * F: d[term] = ConvolutionNhwcDirect1x1_2<term, activation>; break;
-            //    default:
-            //        assert(0);
-            //    }
-            //}
-            //else
-            //{
-            //    switch (a.microD)
-            //    {
-            //    case 2 * F: d[term] = ConvolutionNhwcDirect_2<term, activation>; break;
-            //    default:
-            //        assert(0);
-            //    }
-            //}
+            if(p.IsKernel(3) && p.IsDilation(1))
+                d = ConvolutionNhwcDepthwise3x3<term, activation>;
+            else
+                d = ConvolutionNhwcDepthwiseDefault<term, activation>;
         }
         
         template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, ConvolutionPtr & d)
