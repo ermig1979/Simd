@@ -304,6 +304,8 @@ namespace Simd
             return Avx::SynetHswish32f(value, params[0], params[1]);
         }
 
+        //---------------------------------------------------------------------
+
         template <TermType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params);
@@ -415,6 +417,45 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const float* params, size_t offset);
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const float* params, size_t offset)
+        {
+            return value;
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRelu>(__m256 value, const float* params, size_t offset)
+        {
+            return _mm256_max_ps(_mm256_setzero_ps(), value);
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationLeakyRelu>(__m256 value, const float* params, size_t offset)
+        {
+            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(_mm256_set1_ps(params[0]), _mm256_min_ps(_mm256_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationRestrictRange>(__m256 value, const float* params, size_t offset)
+        {
+            return _mm256_min_ps(_mm256_max_ps(_mm256_set1_ps(params[0]), value), _mm256_set1_ps(params[1]));
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationPrelu>(__m256 value, const float* params, size_t offset)
+        {
+            return _mm256_add_ps(_mm256_max_ps(_mm256_setzero_ps(), value), _mm256_mul_ps(_mm256_loadu_ps(params + offset), _mm256_min_ps(_mm256_setzero_ps(), value)));
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationElu>(__m256 value, const float* params, size_t offset)
+        {
+            return Avx2::Elu(value, _mm256_set1_ps(params[0]));
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const float* params, size_t offset)
+        {
+            return Avx::SynetHswish32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
+        }
+
+        //---------------------------------------------------------------------
+
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const __m256 * params, size_t index);
 
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationIdentity>(__m256 value, const __m256 * params, size_t index)
@@ -451,6 +492,8 @@ namespace Simd
         {
             return Avx::SynetHswish32f(value, params[0], params[1]);
         }
+
+        //---------------------------------------------------------------------
 
         template <TermType term> struct Term
         {
