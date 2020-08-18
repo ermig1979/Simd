@@ -511,6 +511,49 @@ namespace Simd
             Term8i<term>::template Save<type, 0, nofma>(dst, buf, sum0, norm, bias, params, scale, shift, upper);
             Term8i<term>::template Save<type, 1, nofma>(dst, buf, sum1, norm, bias, params, scale, shift, upper, tail);
         }
+
+        //---------------------------------------------------------------------
+
+        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8iDepthwise
+        {
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm, 
+                const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail);
+        };
+
+        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        {
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm,
+                const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail)
+            {
+                __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
+                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + offset);
+                __m512 f32 = Avx512f::Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
+                __m512 _scale = _mm512_maskz_loadu_ps(tail, scale + offset);
+                __m512 _shift = _mm512_maskz_loadu_ps(tail, shift + offset);
+                __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(f32, _scale, _shift));
+                __m128i u8 = _mm256_castsi256_si128(Avx2::PackI16ToU8(_mm512_cvtepi32_epi16(i32), Avx2::K_ZERO));
+                _mm_mask_storeu_epi8(dst + offset, tail, _mm_min_epu8(u8, upper));
+            }
+        };
+
+        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        {
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm,
+                const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail)
+            {
+                __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
+                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + offset);
+                __m512 f32 = Avx512f::Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
+                _mm512_mask_storeu_ps((float*)dst + offset, tail, f32);
+            }
+        };
+
+        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm, const float* bias, const float* params, 
+            const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail = -1)
+        {
+            Term8iDepthwise<term>::template Save<type, nofma>(dst, sum, norm, bias, params, scale, shift, upper, offset, tail);
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 

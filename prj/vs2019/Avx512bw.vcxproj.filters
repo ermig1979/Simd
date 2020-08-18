@@ -169,9 +169,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8i.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
@@ -191,6 +188,12 @@
       <Filter>Avx512bw</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynet.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDepthwise.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
   </ItemGroup>

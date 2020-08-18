@@ -217,8 +217,8 @@ namespace Test
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
 
-        //result = result && SynetConvolution8iForwardAutoTest(f1, f2, p);
-        //result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
+        result = result && SynetConvolution8iForwardAutoTest(f1, f2, p);
+        result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
         result = result && SynetConvolution8iForwardAutoTest(f1, f2, n);
 
         return result;
