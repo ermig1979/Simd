@@ -176,14 +176,372 @@ namespace Simd
 			}
 		}
 
+		//---------------------------------------------------------------------
+
+		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Edge(
+			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, const int8_t* weight,
+			const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+		{
+			__m512i zero = _mm512_set1_epi32(a.zero);
+			__m128i upper = _mm_set1_epi32(a.upper);
+			__m512i d00, d01, d02, d03, w0, w1, w2, w3, s0;
+			size_t srcC = p.srcC;
+			size_t srcCF = AlignLo(srcC, F);
+			size_t srcCF2 = AlignLo(srcC, F * 2);
+			size_t srcCF4 = AlignLo(srcC, F * 4);
+			__mmask16 tail = TailMask16(srcC - srcCF);
+			size_t c = 0;
+			for (; c < srcCF4; c += F * 4)
+			{
+				d00 = _mm512_setzero_si512();
+				d01 = _mm512_setzero_si512();
+				d02 = _mm512_setzero_si512();
+				d03 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					size_t sy = dy * p.strideY + ky - p.padY;
+					for (size_t kx = 0; kx < 3; ++kx)
+					{
+						size_t sx = dx * p.strideX + kx - p.padX;
+						size_t ow = (ky * 3 + kx) * srcC + c;
+						w0 = LoadAs32i(weight + ow + 0 * F);
+						w1 = LoadAs32i(weight + ow + 1 * F);
+						w2 = LoadAs32i(weight + ow + 2 * F);
+						w3 = LoadAs32i(weight + ow + 3 * F);
+						if (sy < p.srcH && sx < p.srcW)
+						{
+							size_t os = (sy * p.srcW + sx) * srcC + c;
+							Madd4<true>(d00, LoadAs32i(src + os + 0 * F), w0);
+							Madd4<true>(d01, LoadAs32i(src + os + 1 * F), w1);
+							Madd4<true>(d02, LoadAs32i(src + os + 2 * F), w2);
+							Madd4<true>(d03, LoadAs32i(src + os + 3 * F), w3);
+						}
+						else
+						{
+							Madd4<true>(d00, zero, w0);
+							Madd4<true>(d01, zero, w1);
+							Madd4<true>(d02, zero, w2);
+							Madd4<true>(d03, zero, w3);
+						}
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+				Save<term, activation, nofma>(dst, d02, norm, bias, params, scale, shift, upper, c + F * 2);
+				Save<term, activation, nofma>(dst, d03, norm, bias, params, scale, shift, upper, c + F * 3);
+			}
+			for (; c < srcCF2; c += F * 2)
+			{
+				d00 = _mm512_setzero_si512();
+				d01 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					size_t sy = dy * p.strideY + ky - p.padY;
+					for (size_t kx = 0; kx < 3; ++kx)
+					{
+						size_t sx = dx * p.strideX + kx - p.padX;
+						size_t ow = (ky * 3 + kx) * srcC + c;
+						w0 = LoadAs32i(weight + ow + 0 * F);
+						w1 = LoadAs32i(weight + ow + 1 * F);
+						if (sy < p.srcH && sx < p.srcW)
+						{
+							size_t os = (sy * p.srcW + sx) * srcC + c;
+							Madd4<true>(d00, LoadAs32i(src + os + 0 * F), w0);
+							Madd4<true>(d01, LoadAs32i(src + os + 1 * F), w1);
+						}
+						else
+						{
+							Madd4<true>(d00, zero, w0);
+							Madd4<true>(d01, zero, w1);
+						}
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+			}
+			for (; c < srcCF; c += F)
+			{
+				d00 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					size_t sy = dy * p.strideY + ky - p.padY;
+					for (size_t kx = 0; kx < 3; ++kx)
+					{
+						size_t sx = dx * p.strideX + kx - p.padX;
+						w0 = LoadAs32i(weight + (ky * 3 + kx) * srcC + c);
+						if (sy < p.srcH && sx < p.srcW)
+							s0 = LoadAs32i(src + (sy * p.srcW + sx) * srcC + c);
+						else
+							s0 = zero;
+						Madd4<true>(d00, s0, w0);
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c);
+			}
+			for (; c < srcC; c += F)
+			{
+				d00 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					size_t sy = dy * p.strideY + ky - p.padY;
+					for (size_t kx = 0; kx < 3; ++kx)
+					{
+						size_t sx = dx * p.strideX + kx - p.padX;
+						w0 = LoadAs32i(weight + (ky * 3 + kx) * srcC + c, tail);
+						if (sy < p.srcH && sx < p.srcW)
+							s0 = LoadAs32i(src + (sy * p.srcW + sx) * srcC + c, tail);
+						else
+							s0 = zero;
+						Madd4<true>(d00, s0, w0);
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c, tail);
+			}
+		}
+
+		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Main1(
+			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight,
+			const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+		{
+			__m512i zero = _mm512_set1_epi32(a.zero);
+			__m128i upper = _mm_set1_epi32(a.upper);
+			__m512i d00, d01, d02, d03, w0, s0;
+			size_t srcC = p.srcC;
+			size_t srcCF = AlignLo(srcC, F);
+			size_t srcCF2 = AlignLo(srcC, F * 2);
+			size_t srcCF4 = AlignLo(srcC, F * 4);
+			size_t srcS = srcC * p.srcW;
+			__mmask16 tail = TailMask16(srcC - srcCF);
+			size_t c = 0;
+			for (; c < srcCF4; c += F * 4)
+			{
+				d00 = _mm512_setzero_si512();
+				d01 = _mm512_setzero_si512();
+				d02 = _mm512_setzero_si512();
+				d03 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
+					{
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
+						Madd4<true>(d01, LoadAs32i(ps + 1 * F), LoadAs32i(pw + 1 * F));
+						Madd4<true>(d02, LoadAs32i(ps + 2 * F), LoadAs32i(pw + 2 * F));
+						Madd4<true>(d03, LoadAs32i(ps + 3 * F), LoadAs32i(pw + 3 * F));
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+				Save<term, activation, nofma>(dst, d02, norm, bias, params, scale, shift, upper, c + F * 2);
+				Save<term, activation, nofma>(dst, d03, norm, bias, params, scale, shift, upper, c + F * 3);
+			}
+			for (; c < srcCF2; c += F * 2)
+			{
+				d00 = _mm512_setzero_si512();
+				d01 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
+					{
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
+						Madd4<true>(d01, LoadAs32i(ps + 1 * F), LoadAs32i(pw + 1 * F));
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+			}
+			for (; c < srcCF; c += F)
+			{
+				d00 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx)
+					{
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c);
+			}
+			for (; c < srcC; c += F)
+			{
+				d00 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx)
+					{
+						w0 = LoadAs32i(pw + kx * srcC, tail);
+						s0 = LoadAs32i(ps + kx * srcC, tail);
+						Madd4<true>(d00, s0, w0);
+					}
+				}
+				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c, tail);
+			}
+		}
+
+		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3Main2(
+			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight,
+			const float* norm, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+		{
+			__m512i zero = _mm512_set1_epi32(a.zero);
+			__m128i upper = _mm_set1_epi32(a.upper);
+			__m512i d00, d01, d02, d03, d10, d11, d12, d13, w0;
+			size_t srcC = p.srcC;
+			size_t srcCF = AlignLo(srcC, F);
+			size_t srcCF2 = AlignLo(srcC, F * 2);
+			size_t srcCF4 = AlignLo(srcC, F * 4);
+			size_t srcS = srcC * p.srcW;
+			size_t srcX = srcC * p.strideX;
+			__mmask16 tail = TailMask16(srcC - srcCF);
+			size_t c = 0;
+			for (; c < srcCF4; c += F * 4)
+			{
+				d00 = _mm512_setzero_si512();
+				d01 = _mm512_setzero_si512();
+				d02 = _mm512_setzero_si512();
+				d03 = _mm512_setzero_si512();
+				d10 = _mm512_setzero_si512();
+				d11 = _mm512_setzero_si512();
+				d12 = _mm512_setzero_si512();
+				d13 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
+					{
+						w0 = LoadAs32i(pw + 0 * F);
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
+						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
+						w0 = LoadAs32i(pw + 1 * F);
+						Madd4<true>(d01, LoadAs32i(ps + 1 * F + 0 * srcX), w0);
+						Madd4<true>(d11, LoadAs32i(ps + 1 * F + 1 * srcX), w0);
+						w0 = LoadAs32i(pw + 2 * F);
+						Madd4<true>(d02, LoadAs32i(ps + 2 * F + 0 * srcX), w0);
+						Madd4<true>(d12, LoadAs32i(ps + 2 * F + 1 * srcX), w0);
+						w0 = LoadAs32i(pw + 3 * F);
+						Madd4<true>(d03, LoadAs32i(ps + 3 * F + 0 * srcX), w0);
+						Madd4<true>(d13, LoadAs32i(ps + 3 * F + 1 * srcX), w0);
+					}
+				}
+				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst + 0 * srcC, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+				Save<term, activation, nofma>(dst + 0 * srcC, d02, norm, bias, params, scale, shift, upper, c + F * 2);
+				Save<term, activation, nofma>(dst + 0 * srcC, d03, norm, bias, params, scale, shift, upper, c + F * 3);
+				Save<term, activation, nofma>(dst + 1 * srcC, d10, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst + 1 * srcC, d11, norm, bias, params, scale, shift, upper, c + F * 1);
+				Save<term, activation, nofma>(dst + 1 * srcC, d12, norm, bias, params, scale, shift, upper, c + F * 2);
+				Save<term, activation, nofma>(dst + 1 * srcC, d13, norm, bias, params, scale, shift, upper, c + F * 3);
+			}
+			for (; c < srcCF2; c += F * 2)
+			{
+				d00 = _mm512_setzero_si512();
+				d01 = _mm512_setzero_si512();
+				d10 = _mm512_setzero_si512();
+				d11 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
+					{
+						w0 = LoadAs32i(pw + 0 * F);
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
+						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
+						w0 = LoadAs32i(pw + 1 * F);
+						Madd4<true>(d01, LoadAs32i(ps + 1 * F + 0 * srcX), w0);
+						Madd4<true>(d11, LoadAs32i(ps + 1 * F + 1 * srcX), w0);
+					}
+				}
+				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst + 0 * srcC, d01, norm, bias, params, scale, shift, upper, c + F * 1);
+				Save<term, activation, nofma>(dst + 1 * srcC, d10, norm, bias, params, scale, shift, upper, c + F * 0);
+				Save<term, activation, nofma>(dst + 1 * srcC, d11, norm, bias, params, scale, shift, upper, c + F * 1);
+			}
+			for (; c < srcCF; c += F)
+			{
+				d00 = _mm512_setzero_si512();
+				d10 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
+					{
+						w0 = LoadAs32i(pw + 0 * F);
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
+						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
+					}
+				}
+				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c);
+				Save<term, activation, nofma>(dst + 1 * srcC, d10, norm, bias, params, scale, shift, upper, c);
+			}
+			for (; c < srcC; c += F)
+			{
+				d00 = _mm512_setzero_si512();
+				d10 = _mm512_setzero_si512();
+				for (size_t ky = 0; ky < 3; ++ky)
+				{
+					const uint8_t* ps = src + ky * srcS + c;
+					const int8_t* pw = weight + ky * 3 * srcC + c;
+					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
+					{
+						w0 = LoadAs32i(pw + 0 * F, tail);
+						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX, tail), w0);
+						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX, tail), w0);
+					}
+				}
+				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c, tail);
+				Save<term, activation, nofma>(dst + 1 * srcC, d10, norm, bias, params, scale, shift, upper, c, tail);
+			}
+		}
+
+		template<Term8iType term, SimdConvolutionActivationType activation, bool nofma> SIMD_INLINE void ConvolutionNhwcDepthwise3x3(
+			const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm,
+			const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+		{
+			size_t srcS = p.srcC * p.srcW;
+			size_t srcX = p.srcC * p.strideX;
+			size_t dstH = p.dstH - p.padH;
+			size_t dstW = p.dstW - p.padW;
+			size_t dstC = p.dstC * a.size;
+			size_t dstW2 = AlignLo(dstW - p.padX, 2) + p.padX;
+			size_t dy = 0;
+			for (; dy < p.padY; ++dy)
+				for (size_t dx = 0; dx < p.dstW; ++dx)
+					ConvolutionNhwcDepthwise3x3Edge<term, activation, nofma>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+			for (; dy < dstH; ++dy)
+			{
+				size_t dx = 0;
+				for (; dx < p.padX; ++dx)
+					ConvolutionNhwcDepthwise3x3Edge<term, activation, nofma>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+				size_t offset = ((dy * p.strideY - p.padY) * p.srcW + dx * p.strideX - p.padX) * p.srcC;
+				for (; dx < dstW2; dx += 2)
+					ConvolutionNhwcDepthwise3x3Main2<term, activation, nofma>(src + offset, p, a, weight, norm, bias, params, scale, shift, dst), dst += dstC * 2, offset += srcX * 2;
+				for (; dx < dstW; dx += 1)
+					ConvolutionNhwcDepthwise3x3Main1<term, activation, nofma>(src + offset, p, a, weight, norm, bias, params, scale, shift, dst), dst += dstC, offset += srcX;
+				for (; dx < p.dstW; ++dx)
+					ConvolutionNhwcDepthwise3x3Edge<term, activation, nofma>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+			}
+			for (; dy < p.dstH; ++dy)
+				for (size_t dx = 0; dx < p.dstW; ++dx)
+					ConvolutionNhwcDepthwise3x3Edge<term, activation, nofma>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
+		}
+
 
         //---------------------------------------------------------------------
 
 		template <Term8iType term, SimdConvolutionActivationType activation, bool nofma> void Set(const ConvParam8i& p, ConvolutionPtr& d)
 		{
-			//if (p.IsKernel(3) && p.IsDilation(1))
-			//	d = ConvolutionNhwcDepthwise3x3<term, activation, nofma>;
-			//else
+			if (p.IsKernel(3) && p.IsDilation(1))
+				d = ConvolutionNhwcDepthwise3x3<term, activation, nofma>;
+			else
 				d = ConvolutionNhwcDepthwiseDefault<term, activation, nofma>;
 		}
 
