@@ -367,6 +367,14 @@ namespace Simd
             virtual String Ext() const { return "Avx512vnni"; }
         };
 
+        class SynetConvolution8iNhwcDepthwise : public Avx512bw::SynetConvolution8iNhwcDepthwise
+        {
+        public:
+            SynetConvolution8iNhwcDepthwise(const ConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
 #endif

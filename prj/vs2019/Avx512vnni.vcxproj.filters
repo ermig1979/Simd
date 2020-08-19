@@ -9,11 +9,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8i.cpp">
-      <Filter>Avx512vnni</Filter>
-    </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAvx512vnni.h">
       <Filter>Avx512vnni</Filter>
     </ClInclude>
@@ -80,5 +75,16 @@
     <ClInclude Include="..\..\src\Simd\SimdTime.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDepthwise.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

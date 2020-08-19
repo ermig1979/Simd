@@ -27,12 +27,13 @@
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdAvx512bw.h"
+#include "Simd/SimdAvx512vnni.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX512BW_ENABLE)
-    namespace Avx512bw
+#if defined(SIMD_AVX512VNNI_ENABLE)
+    namespace Avx512vnni
     {
 		using AlgParam = SynetConvolution8iNhwcDepthwise::AlgParam;
 		using ConvolutionPtr = SynetConvolution8iNhwcDepthwise::ConvolutionPtr;
@@ -85,17 +86,17 @@ namespace Simd
 								if (sy < p.srcH && sx < p.srcW)
 								{
 									size_t os = (sy * p.srcW + sx) * size + i;
-									Madd4<true>(d00, LoadAs32i(src + os + 0 * F), w0);
-									Madd4<true>(d01, LoadAs32i(src + os + 1 * F), w1);
-									Madd4<true>(d02, LoadAs32i(src + os + 2 * F), w2);
-									Madd4<true>(d03, LoadAs32i(src + os + 3 * F), w3);
+									Madd4<false>(d00, LoadAs32i(src + os + 0 * F), w0);
+									Madd4<false>(d01, LoadAs32i(src + os + 1 * F), w1);
+									Madd4<false>(d02, LoadAs32i(src + os + 2 * F), w2);
+									Madd4<false>(d03, LoadAs32i(src + os + 3 * F), w3);
 								}
 								else
 								{
-									Madd4<true>(d00, zero, w0);
-									Madd4<true>(d01, zero, w1);
-									Madd4<true>(d02, zero, w2);
-									Madd4<true>(d03, zero, w3);
+									Madd4<false>(d00, zero, w0);
+									Madd4<false>(d01, zero, w1);
+									Madd4<false>(d02, zero, w2);
+									Madd4<false>(d03, zero, w3);
 								}
 							}
 						}
@@ -120,13 +121,13 @@ namespace Simd
 								if (sy < p.srcH && sx < p.srcW)
 								{
 									size_t os = (sy * p.srcW + sx) * size + i;
-									Madd4<true>(d00, LoadAs32i(src + os + 0 * F), w0);
-									Madd4<true>(d01, LoadAs32i(src + os + 1 * F), w1);
+									Madd4<false>(d00, LoadAs32i(src + os + 0 * F), w0);
+									Madd4<false>(d01, LoadAs32i(src + os + 1 * F), w1);
 								}
 								else
 								{
-									Madd4<true>(d00, zero, w0);
-									Madd4<true>(d01, zero, w1);
+									Madd4<false>(d00, zero, w0);
+									Madd4<false>(d01, zero, w1);
 								}
 							}
 						}
@@ -147,7 +148,7 @@ namespace Simd
 									s0 = LoadAs32i(src + (sy * p.srcW + sx) * size + i);
 								else
 									s0 = zero;
-								Madd4<true>(d00, s0, w0);
+								Madd4<false>(d00, s0, w0);
 							}
 						}
 						Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, i);
@@ -166,7 +167,7 @@ namespace Simd
 									s0 = LoadAs32i(src + (sy * p.srcW + sx) * size + i, tail);
 								else
 									s0 = zero;
-								Madd4<true>(d00, s0, w0);
+								Madd4<false>(d00, s0, w0);
 							}
 						}
 						Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, i, tail);
@@ -211,17 +212,17 @@ namespace Simd
 						if (sy < p.srcH && sx < p.srcW)
 						{
 							size_t os = (sy * p.srcW + sx) * srcC + c;
-							Madd4<true>(d00, LoadAs32i(src + os + 0 * F), w0);
-							Madd4<true>(d01, LoadAs32i(src + os + 1 * F), w1);
-							Madd4<true>(d02, LoadAs32i(src + os + 2 * F), w2);
-							Madd4<true>(d03, LoadAs32i(src + os + 3 * F), w3);
+							Madd4<false>(d00, LoadAs32i(src + os + 0 * F), w0);
+							Madd4<false>(d01, LoadAs32i(src + os + 1 * F), w1);
+							Madd4<false>(d02, LoadAs32i(src + os + 2 * F), w2);
+							Madd4<false>(d03, LoadAs32i(src + os + 3 * F), w3);
 						}
 						else
 						{
-							Madd4<true>(d00, zero, w0);
-							Madd4<true>(d01, zero, w1);
-							Madd4<true>(d02, zero, w2);
-							Madd4<true>(d03, zero, w3);
+							Madd4<false>(d00, zero, w0);
+							Madd4<false>(d01, zero, w1);
+							Madd4<false>(d02, zero, w2);
+							Madd4<false>(d03, zero, w3);
 						}
 					}
 				}
@@ -246,13 +247,13 @@ namespace Simd
 						if (sy < p.srcH && sx < p.srcW)
 						{
 							size_t os = (sy * p.srcW + sx) * srcC + c;
-							Madd4<true>(d00, LoadAs32i(src + os + 0 * F), w0);
-							Madd4<true>(d01, LoadAs32i(src + os + 1 * F), w1);
+							Madd4<false>(d00, LoadAs32i(src + os + 0 * F), w0);
+							Madd4<false>(d01, LoadAs32i(src + os + 1 * F), w1);
 						}
 						else
 						{
-							Madd4<true>(d00, zero, w0);
-							Madd4<true>(d01, zero, w1);
+							Madd4<false>(d00, zero, w0);
+							Madd4<false>(d01, zero, w1);
 						}
 					}
 				}
@@ -273,7 +274,7 @@ namespace Simd
 							s0 = LoadAs32i(src + (sy * p.srcW + sx) * srcC + c);
 						else
 							s0 = zero;
-						Madd4<true>(d00, s0, w0);
+						Madd4<false>(d00, s0, w0);
 					}
 				}
 				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c);
@@ -292,7 +293,7 @@ namespace Simd
 							s0 = LoadAs32i(src + (sy * p.srcW + sx) * srcC + c, tail);
 						else
 							s0 = zero;
-						Madd4<true>(d00, s0, w0);
+						Madd4<false>(d00, s0, w0);
 					}
 				}
 				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c, tail);
@@ -325,10 +326,10 @@ namespace Simd
 					const int8_t* pw = weight + ky * 3 * srcC + c;
 					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
 					{
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
-						Madd4<true>(d01, LoadAs32i(ps + 1 * F), LoadAs32i(pw + 1 * F));
-						Madd4<true>(d02, LoadAs32i(ps + 2 * F), LoadAs32i(pw + 2 * F));
-						Madd4<true>(d03, LoadAs32i(ps + 3 * F), LoadAs32i(pw + 3 * F));
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
+						Madd4<false>(d01, LoadAs32i(ps + 1 * F), LoadAs32i(pw + 1 * F));
+						Madd4<false>(d02, LoadAs32i(ps + 2 * F), LoadAs32i(pw + 2 * F));
+						Madd4<false>(d03, LoadAs32i(ps + 3 * F), LoadAs32i(pw + 3 * F));
 					}
 				}
 				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
@@ -346,8 +347,8 @@ namespace Simd
 					const int8_t* pw = weight + ky * 3 * srcC + c;
 					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
 					{
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
-						Madd4<true>(d01, LoadAs32i(ps + 1 * F), LoadAs32i(pw + 1 * F));
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
+						Madd4<false>(d01, LoadAs32i(ps + 1 * F), LoadAs32i(pw + 1 * F));
 					}
 				}
 				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
@@ -362,7 +363,7 @@ namespace Simd
 					const int8_t* pw = weight + ky * 3 * srcC + c;
 					for (size_t kx = 0; kx < 3; ++kx)
 					{
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F), LoadAs32i(pw + 0 * F));
 					}
 				}
 				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c);
@@ -378,7 +379,7 @@ namespace Simd
 					{
 						w0 = LoadAs32i(pw + kx * srcC, tail);
 						s0 = LoadAs32i(ps + kx * srcC, tail);
-						Madd4<true>(d00, s0, w0);
+						Madd4<false>(d00, s0, w0);
 					}
 				}
 				Save<term, activation, nofma>(dst, d00, norm, bias, params, scale, shift, upper, c, tail);
@@ -417,17 +418,17 @@ namespace Simd
 					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
 					{
 						w0 = LoadAs32i(pw + 0 * F);
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
-						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
+						Madd4<false>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
 						w0 = LoadAs32i(pw + 1 * F);
-						Madd4<true>(d01, LoadAs32i(ps + 1 * F + 0 * srcX), w0);
-						Madd4<true>(d11, LoadAs32i(ps + 1 * F + 1 * srcX), w0);
+						Madd4<false>(d01, LoadAs32i(ps + 1 * F + 0 * srcX), w0);
+						Madd4<false>(d11, LoadAs32i(ps + 1 * F + 1 * srcX), w0);
 						w0 = LoadAs32i(pw + 2 * F);
-						Madd4<true>(d02, LoadAs32i(ps + 2 * F + 0 * srcX), w0);
-						Madd4<true>(d12, LoadAs32i(ps + 2 * F + 1 * srcX), w0);
+						Madd4<false>(d02, LoadAs32i(ps + 2 * F + 0 * srcX), w0);
+						Madd4<false>(d12, LoadAs32i(ps + 2 * F + 1 * srcX), w0);
 						w0 = LoadAs32i(pw + 3 * F);
-						Madd4<true>(d03, LoadAs32i(ps + 3 * F + 0 * srcX), w0);
-						Madd4<true>(d13, LoadAs32i(ps + 3 * F + 1 * srcX), w0);
+						Madd4<false>(d03, LoadAs32i(ps + 3 * F + 0 * srcX), w0);
+						Madd4<false>(d13, LoadAs32i(ps + 3 * F + 1 * srcX), w0);
 					}
 				}
 				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c + F * 0);
@@ -452,11 +453,11 @@ namespace Simd
 					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
 					{
 						w0 = LoadAs32i(pw + 0 * F);
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
-						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
+						Madd4<false>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
 						w0 = LoadAs32i(pw + 1 * F);
-						Madd4<true>(d01, LoadAs32i(ps + 1 * F + 0 * srcX), w0);
-						Madd4<true>(d11, LoadAs32i(ps + 1 * F + 1 * srcX), w0);
+						Madd4<false>(d01, LoadAs32i(ps + 1 * F + 0 * srcX), w0);
+						Madd4<false>(d11, LoadAs32i(ps + 1 * F + 1 * srcX), w0);
 					}
 				}
 				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c + F * 0);
@@ -475,8 +476,8 @@ namespace Simd
 					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
 					{
 						w0 = LoadAs32i(pw + 0 * F);
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
-						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F + 0 * srcX), w0);
+						Madd4<false>(d10, LoadAs32i(ps + 0 * F + 1 * srcX), w0);
 					}
 				}
 				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c);
@@ -493,8 +494,8 @@ namespace Simd
 					for (size_t kx = 0; kx < 3; ++kx, ps += srcC, pw += srcC)
 					{
 						w0 = LoadAs32i(pw + 0 * F, tail);
-						Madd4<true>(d00, LoadAs32i(ps + 0 * F + 0 * srcX, tail), w0);
-						Madd4<true>(d10, LoadAs32i(ps + 0 * F + 1 * srcX, tail), w0);
+						Madd4<false>(d00, LoadAs32i(ps + 0 * F + 0 * srcX, tail), w0);
+						Madd4<false>(d10, LoadAs32i(ps + 0 * F + 1 * srcX, tail), w0);
 					}
 				}
 				Save<term, activation, nofma>(dst + 0 * srcC, d00, norm, bias, params, scale, shift, upper, c, tail);
@@ -534,7 +535,7 @@ namespace Simd
 					ConvolutionNhwcDepthwise3x3Edge<term, activation, nofma>(src, p, a, dy, dx, weight, norm, bias, params, scale, shift, dst), dst += dstC;
 		}
 
-        //---------------------------------------------------------------------
+		//---------------------------------------------------------------------
 
 		template <Term8iType term, SimdConvolutionActivationType activation, bool nofma> void Set(const ConvParam8i& p, ConvolutionPtr& d)
 		{
@@ -575,12 +576,12 @@ namespace Simd
 			}
 		}
 
-        SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam8i& p)
-            : Avx2::SynetConvolution8iNhwcDepthwise(p)
-        {
-            Set(p, _convolution);
-            _convertSrc = Avx512bw::SynetConvert32fTo8u;
-        }
+		SynetConvolution8iNhwcDepthwise::SynetConvolution8iNhwcDepthwise(const ConvParam8i& p)
+			: Avx512bw::SynetConvolution8iNhwcDepthwise(p)
+		{
+			Set(p, _convolution);
+			_convertSrc = Avx512bw::SynetConvert32fTo8u;
+		}
     }
 #endif
 }

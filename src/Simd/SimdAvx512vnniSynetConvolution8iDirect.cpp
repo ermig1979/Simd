@@ -44,18 +44,6 @@ namespace Simd
             return _mm512_set1_epi32(*(int32_t*)src);
         }
 
-        template<bool overflow> void Madd4(__m512i& i32, __m512i u8, __m512i i8);
-
-        template<> SIMD_INLINE void Madd4<true>(__m512i& i32, __m512i u8, __m512i i8)
-        {
-            i32 = _mm512_add_epi32(i32, _mm512_madd_epi16(_mm512_maddubs_epi16(u8, i8), Avx512bw::K16_0001));
-        }
-
-        template<> SIMD_INLINE void Madd4<false>(__m512i& i32, __m512i u8, __m512i i8)
-        {
-            i32 = _mm512_dpbusd_epi32(i32, u8, i8);
-        }
-
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x1(const uint8_t* src0,
             const ConvParam8i& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t* weight0,
             const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
@@ -928,6 +916,8 @@ namespace Simd
             ConvParam8i param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
+            else if (SynetConvolution8iNhwcDepthwise::Preferable(param))
+                return new SynetConvolution8iNhwcDepthwise(param);
             else if (SynetConvolution8iNhwcDirect::Preferable(param))
                 return new SynetConvolution8iNhwcDirect(param);
             else
