@@ -58,6 +58,11 @@ namespace Simd
             return _mm_cvtepi8_epi32(_mm_cvtsi32_si128(*(int32_t*)src));
         }
 
+        SIMD_INLINE void Madd1(__m128i& i32, __m128i u8, __m128i i8)
+        {
+            i32 = _mm_add_epi32(i32, _mm_madd_epi16(u8, i8));
+        }
+
         template <Term8iType term, SimdConvolutionActivationType activation> void ConvolutionNhwcDepthwiseDefault(
             const uint8_t* src, const ConvParam8i& p, const AlgParam& a, const int8_t* weight, const float* norm, 
             const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
@@ -89,17 +94,17 @@ namespace Simd
                                 if (sy < p.srcH && sx < p.srcW)
                                 {
                                     s0 = _mm_loadu_si128((__m128i*)(src + (sy * p.srcW + sx) * size + i));
-                                    Madd4<true>(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
-                                    Madd4<true>(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
-                                    Madd4<true>(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
-                                    Madd4<true>(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
+                                    Madd1(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
+                                    Madd1(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
+                                    Madd1(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
+                                    Madd1(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
                                 }
                                 else
                                 {
-                                    Madd4<true>(d00, zero, Cvt8iTo32i<0>(w0));
-                                    Madd4<true>(d01, zero, Cvt8iTo32i<1>(w0));
-                                    Madd4<true>(d02, zero, Cvt8iTo32i<2>(w0));
-                                    Madd4<true>(d03, zero, Cvt8iTo32i<3>(w0));
+                                    Madd1(d00, zero, Cvt8iTo32i<0>(w0));
+                                    Madd1(d01, zero, Cvt8iTo32i<1>(w0));
+                                    Madd1(d02, zero, Cvt8iTo32i<2>(w0));
+                                    Madd1(d03, zero, Cvt8iTo32i<3>(w0));
 
                                 }
                             }
@@ -124,7 +129,7 @@ namespace Simd
                                     s0 = LoadAs32i(src + (sy * p.srcW + sx) * size + ci);
                                 else
                                     s0 = zero;
-                                Madd4<true>(d00, s0, w0);
+                                Madd1(d00, s0, w0);
                             }
                         }
                         Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ci);
@@ -161,17 +166,17 @@ namespace Simd
                         if (sy < p.srcH && sx < p.srcW)
                         {
                             s0 = _mm_loadu_si128((__m128i*)(src + (sy * p.srcW + sx) * size + i));
-                            Madd4<true>(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
-                            Madd4<true>(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
-                            Madd4<true>(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
-                            Madd4<true>(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
+                            Madd1(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
+                            Madd1(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
+                            Madd1(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
+                            Madd1(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
                         }
                         else
                         {
-                            Madd4<true>(d00, zero, Cvt8iTo32i<0>(w0));
-                            Madd4<true>(d01, zero, Cvt8iTo32i<1>(w0));
-                            Madd4<true>(d02, zero, Cvt8iTo32i<2>(w0));
-                            Madd4<true>(d03, zero, Cvt8iTo32i<3>(w0));
+                            Madd1(d00, zero, Cvt8iTo32i<0>(w0));
+                            Madd1(d01, zero, Cvt8iTo32i<1>(w0));
+                            Madd1(d02, zero, Cvt8iTo32i<2>(w0));
+                            Madd1(d03, zero, Cvt8iTo32i<3>(w0));
 
                         }
                     }
@@ -196,7 +201,7 @@ namespace Simd
                             s0 = LoadAs32i(src + (sy * p.srcW + sx) * size + ci);
                         else
                             s0 = zero;
-                        Madd4<true>(d00, s0, w0);
+                        Madd1(d00, s0, w0);
                     }
                 }
                 Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ci);
@@ -228,10 +233,10 @@ namespace Simd
                     {
                         w0 = _mm_loadu_si128((__m128i*)(pw + kx * srcC));
                         s0 = _mm_loadu_si128((__m128i*)(ps + kx * srcC));
-                        Madd4<true>(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
-                        Madd4<true>(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
-                        Madd4<true>(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
-                        Madd4<true>(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
+                        Madd1(d00, Cvt8uTo32i<0>(s0), Cvt8iTo32i<0>(w0));
+                        Madd1(d01, Cvt8uTo32i<1>(s0), Cvt8iTo32i<1>(w0));
+                        Madd1(d02, Cvt8uTo32i<2>(s0), Cvt8iTo32i<2>(w0));
+                        Madd1(d03, Cvt8uTo32i<3>(s0), Cvt8iTo32i<3>(w0));
                     }
                 }
                 Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
@@ -251,7 +256,7 @@ namespace Simd
                     {
                         w0 = LoadAs32i(pw + kx * srcC);
                         s0 = LoadAs32i(ps + kx * srcC);
-                        Madd4<true>(d00, s0, w0);
+                        Madd1(d00, s0, w0);
                     }
                 }
                 Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ct);
@@ -290,17 +295,17 @@ namespace Simd
                         s0 = _mm_loadu_si128((__m128i*)(ps + kx * srcC));
                         s1 = _mm_loadu_si128((__m128i*)(ps + kx * srcC + srcX));
                         w00 = Cvt8iTo32i<0>(w0);
-                        Madd4<true>(d00, Cvt8uTo32i<0>(s0), w00);
-                        Madd4<true>(d10, Cvt8uTo32i<0>(s1), w00);
+                        Madd1(d00, Cvt8uTo32i<0>(s0), w00);
+                        Madd1(d10, Cvt8uTo32i<0>(s1), w00);
                         w00 = Cvt8iTo32i<1>(w0);
-                        Madd4<true>(d01, Cvt8uTo32i<1>(s0), w00);
-                        Madd4<true>(d11, Cvt8uTo32i<1>(s1), w00);
+                        Madd1(d01, Cvt8uTo32i<1>(s0), w00);
+                        Madd1(d11, Cvt8uTo32i<1>(s1), w00);
                         w00 = Cvt8iTo32i<2>(w0);
-                        Madd4<true>(d02, Cvt8uTo32i<2>(s0), w00);
-                        Madd4<true>(d12, Cvt8uTo32i<2>(s1), w00);
+                        Madd1(d02, Cvt8uTo32i<2>(s0), w00);
+                        Madd1(d12, Cvt8uTo32i<2>(s1), w00);
                         w00 = Cvt8iTo32i<3>(w0);
-                        Madd4<true>(d03, Cvt8uTo32i<3>(s0), w00);
-                        Madd4<true>(d13, Cvt8uTo32i<3>(s1), w00);
+                        Madd1(d03, Cvt8uTo32i<3>(s0), w00);
+                        Madd1(d13, Cvt8uTo32i<3>(s1), w00);
                     }
                 }
                 Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, c + F * 0);
@@ -326,8 +331,8 @@ namespace Simd
                         w0 = LoadAs32i(pw + kx * srcC);
                         s0 = LoadAs32i(ps + kx * srcC);
                         s1 = LoadAs32i(ps + kx * srcC + srcX);
-                        Madd4<true>(d00, s0, w0);
-                        Madd4<true>(d10, s1, w0);
+                        Madd1(d00, s0, w0);
+                        Madd1(d10, s1, w0);
                     }
                 }
                 Save<term, activation>(dst, d00, norm, bias, params, scale, shift, upper, ct);
