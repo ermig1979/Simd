@@ -83,14 +83,17 @@ namespace Simd
                 if (c.dstW == (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1) - 1) / c.strideX + 1)
                     c.padW--;
             }
-            if (conv[0].group != 1 || (conv[0].kernelY != 1 && conv[0].kernelY != 3))
-                return false;
-            if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || (conv[1].kernelY != 3 && conv[1].kernelY != 5 && conv[1].kernelY != 7))
-                return false;
-            if (conv[2].group != 1 || conv[2].kernelY != 1 || conv[2].strideY != 1)
-                return false;
-            if (add && (conv[0].srcC != conv[2].dstC || conv[0].srcH != conv[2].dstH || conv[0].srcW != conv[2].dstW))
-                return false;
+            if (count == 3)
+            {
+                if (conv[0].group != 1 || (conv[0].kernelY != 1 && conv[0].kernelY != 3))
+                    return false;
+                if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || (conv[1].kernelY != 3 && conv[1].kernelY != 5 && conv[1].kernelY != 7))
+                    return false;
+                if (conv[2].group != 1 || conv[2].kernelY != 1 || conv[2].strideY != 1)
+                    return false;
+                if (add && (conv[0].srcC != conv[2].dstC || conv[0].srcH != conv[2].dstH || conv[0].srcW != conv[2].dstW))
+                    return false;
+            }
             return true;
         }
 
@@ -103,9 +106,9 @@ namespace Simd
         String Info() const
         {
             std::stringstream ss;
-            ss << batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
-            ss << "-" << conv[0].dstC << "x" << conv[0].kernelY << "x" << conv[0].strideY;
-            ss << "-" << conv[1].kernelY << "x" << conv[1].strideY << "-" << conv[2].dstC;
+            ss << count << ":" << batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
+            for (size_t i = 0; i < count; ++i)
+                ss << "-" << (conv[i].group != 1 ? String("") : ToStr(conv[i].dstC) + "x") << conv[i].kernelY << "x" << conv[i].strideY;
             return ss.str();
         }
 
