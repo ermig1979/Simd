@@ -205,9 +205,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetFused.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32f.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
@@ -224,6 +221,9 @@
       <Filter>Neon</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
   </ItemGroup>

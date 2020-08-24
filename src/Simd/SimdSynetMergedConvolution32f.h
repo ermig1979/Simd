@@ -158,10 +158,10 @@ namespace Simd
 
     namespace Base
     {
-        class SynetMergedConvolution32f : public Simd::SynetMergedConvolution32f
+        class SynetMergedConvolution32fCdc : public Simd::SynetMergedConvolution32f
         {
         public:
-            SynetMergedConvolution32f(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
 
             virtual String Desc() const { return "Base"; }
             virtual const MergConvParam32f & Param() const { return _param; }
@@ -194,10 +194,10 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        class SynetMergedConvolution32f : public Base::SynetMergedConvolution32f
+        class SynetMergedConvolution32fCdc : public Base::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32f(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Desc() const { return "Sse2"; }
         };
 
@@ -208,10 +208,10 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class SynetMergedConvolution32f : public Sse2::SynetMergedConvolution32f
+        class SynetMergedConvolution32fCdc : public Sse2::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32f(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Desc() const { return "Avx"; }
         };
 
@@ -222,10 +222,10 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class SynetMergedConvolution32f : public Avx::SynetMergedConvolution32f
+        class SynetMergedConvolution32fCdc : public Avx::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32f(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Desc() const { return "Avx2"; }
         };
 
@@ -236,10 +236,10 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        class SynetMergedConvolution32f : public Avx2::SynetMergedConvolution32f
+        class SynetMergedConvolution32fCdc : public Avx2::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32f(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Desc() const { return "Avx512f"; }
         };
 
@@ -250,10 +250,10 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-        class SynetMergedConvolution32f : public Base::SynetMergedConvolution32f
+        class SynetMergedConvolution32fCdc : public Base::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32f(const MergConvParam32f & p);
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Desc() const { return "Neon"; }
         };
 

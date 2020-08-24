@@ -121,7 +121,7 @@ namespace Simd
             }
         }
 
-        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam32f & p, size_t index, SynetMergedConvolution32f::ConvolutionPtr convolution[3])
+        template <SimdConvolutionActivationType type> void SetConvolutionPtr(const MergConvParam32f & p, size_t index, SynetMergedConvolution32fCdc::ConvolutionPtr convolution[3])
         {
             switch (index)
             {
@@ -142,7 +142,7 @@ namespace Simd
             }
         }
 
-        SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f & p)
+        SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam32f & p)
             : _param(p), _base(true)
         {
             _sizeS = p.conv[0].srcH*p.conv[0].srcW*p.conv[0].srcC;
@@ -165,7 +165,7 @@ namespace Simd
             }       
         }
 
-        void SynetMergedConvolution32f::SetSize(size_t L1, size_t L2, size_t L3, size_t F)
+        void SynetMergedConvolution32fCdc::SetSize(size_t L1, size_t L2, size_t L3, size_t F)
         {
             const MergConvParam32f & p = _param;
             _miC = F;
@@ -203,7 +203,7 @@ namespace Simd
             _base = false;
         }
 
-        float * SynetMergedConvolution32f::GetBuffer(float * buffer)
+        float * SynetMergedConvolution32fCdc::GetBuffer(float * buffer)
         {
             if (buffer)
                 return buffer;
@@ -214,7 +214,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32f::ReorderInputWeight(const float * src, float * dst) const
+        void SynetMergedConvolution32fCdc::ReorderInputWeight(const float * src, float * dst) const
         {
             const SimdConvolutionParameters & p = _param.conv[0];
             size_t size = p.kernelY*p.kernelX*p.srcC, dstC = p.dstC, micD = _miC*2;
@@ -233,7 +233,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32f::ReorderDepthwiseWeight(const float * src, float * dst) const
+        void SynetMergedConvolution32fCdc::ReorderDepthwiseWeight(const float * src, float * dst) const
         {
             const SimdConvolutionParameters & p = _param.conv[1];
             size_t dstC = p.dstC, size = p.kernelY*p.kernelX, micD = _miC;
@@ -252,7 +252,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32f::ReorderOutputWeight(const float * src, float * dst) const
+        void SynetMergedConvolution32fCdc::ReorderOutputWeight(const float * src, float * dst) const
         {
             const SimdConvolutionParameters & p = _param.conv[2];
             size_t srcC = p.srcC, dstC = p.dstC, micD = _miC * 2;
@@ -276,12 +276,12 @@ namespace Simd
             }
         }
 
-        size_t SynetMergedConvolution32f::ExternalBufferSize() const
+        size_t SynetMergedConvolution32fCdc::ExternalBufferSize() const
         {
             return _sizeB[0] + _sizeB[1];
         }
 
-        size_t SynetMergedConvolution32f::InternalBufferSize() const
+        size_t SynetMergedConvolution32fCdc::InternalBufferSize() const
         {
             size_t size = _buffer.size;
             for (size_t i = 0; i < 3; ++i)
@@ -289,7 +289,7 @@ namespace Simd
             return size;
         }
 
-        void SynetMergedConvolution32f::SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
+        void SynetMergedConvolution32fCdc::SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
         {
             const MergConvParam32f & p = _param;
             for (size_t i = 0; i < p.count; ++i)
@@ -362,7 +362,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32f::Forward(const float * src, float * buf, float * dst)
+        void SynetMergedConvolution32fCdc::Forward(const float * src, float * buf, float * dst)
         {
             const MergConvParam32f & p = _param;
             float * buf0 = GetBuffer(buf);
@@ -418,7 +418,7 @@ namespace Simd
             MergConvParam32f param(batch, convs, count, add);
             if (!param.Valid())
                 return NULL;
-            return new Base::SynetMergedConvolution32f(param);
+            return new Base::SynetMergedConvolution32fCdc(param);
         }
     }
 }

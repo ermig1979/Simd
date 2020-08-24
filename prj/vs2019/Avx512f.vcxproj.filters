@@ -46,9 +46,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetFused.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32f.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetPooling.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
@@ -56,6 +53,9 @@
       <Filter>Avx512f</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetScale.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fCdc.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
   </ItemGroup>

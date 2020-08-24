@@ -187,9 +187,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetDeconvolution32f.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32f.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
@@ -215,6 +212,9 @@
       <Filter>Avx2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetConvolution8iDirect.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fCdc.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
   </ItemGroup>
