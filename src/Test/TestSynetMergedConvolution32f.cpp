@@ -225,8 +225,13 @@ namespace Test
 #if 1
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 320, 320), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 8), f), f1, f2);
 #endif
+#if 1
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 60, 80), Cnv(a0, 1, 1, 48), Cnv(a1, 3, 1)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 48, 70, 81), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 64)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 320, 320), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1)), f1, f2);
+#endif
 #else
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 8, 80, 80), Cnv(a0, 1, 1, 48), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 8), f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 30, 40), Cnv(a0, 1, 1, 48), Cnv(a1, 3, 1)), f1, f2);
 #endif
         return result;
     }

@@ -1434,7 +1434,10 @@ namespace Simd
 			MergConvParam32f param(batch, convs, count, add);
 			if (!param.Valid())
 				return NULL;
-			return new Neon::SynetMergedConvolution32fCdc(param);
+			if (SynetMergedConvolution32fCdc::Preferable(param))
+				return new Neon::SynetMergedConvolution32fCdc(param);
+			else
+				return new Base::SynetMergedConvolution32f(param);
 		}
 	}
 #endif//SIMD_NEON_ENABLE

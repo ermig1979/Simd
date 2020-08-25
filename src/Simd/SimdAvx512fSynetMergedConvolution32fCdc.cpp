@@ -1515,10 +1515,15 @@ namespace Simd
 			MergConvParam32f param(batch, convs, count, add);
 			if (!param.Valid())
 				return NULL;
-			if (param.conv[1].dstC <= HF && param.conv[2].dstC <= HF)
-				return new Avx2::SynetMergedConvolution32fCdc(param);
+			if (SynetMergedConvolution32fCdc::Preferable(param))
+			{
+				if (param.conv[1].dstC <= HF && param.conv[2].dstC <= HF)
+					return new Avx2::SynetMergedConvolution32fCdc(param);
+				else
+					return new Avx512f::SynetMergedConvolution32fCdc(param);
+			}
 			else
-				return new Avx512f::SynetMergedConvolution32fCdc(param);
+				return new Base::SynetMergedConvolution32f(param);
 		}
 	}
 #endif//SIMD_AVX512f_ENABLE

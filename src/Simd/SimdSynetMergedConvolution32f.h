@@ -58,7 +58,7 @@ namespace Simd
         {
             if (trans != SimdTrue)
                 return false;
-            if (count != 3)
+            if (count < 2 || count > 3)
                 return false;
             for (size_t i = 0; i < count; ++i)
             {
@@ -94,6 +94,23 @@ namespace Simd
                 if (add && (conv[0].srcC != conv[2].dstC || conv[0].srcH != conv[2].dstH || conv[0].srcW != conv[2].dstW))
                     return false;
             }
+            else
+            {
+                if (conv[0].group == 1)
+                {
+                    if (conv[0].kernelY != 1 && conv[0].kernelY != 3)
+                        return false;
+                    if (conv[1].group != conv[1].srcC || conv[1].group != conv[1].dstC || (conv[1].kernelY != 3 && conv[1].kernelY != 5 && conv[1].kernelY != 7))
+                        return false;
+                }
+                else
+                {
+                    if (conv[0].group != conv[0].srcC || conv[0].group != conv[0].dstC || (conv[0].kernelY != 3 && conv[0].kernelY != 5 && conv[0].kernelY != 7))
+                        return false;
+                    if (conv[1].group != 1 || conv[1].kernelY != 1 || conv[1].strideY != 1)
+                        return false;
+                }
+            }
             return true;
         }
 
@@ -127,15 +144,6 @@ namespace Simd
     class SynetMergedConvolution32f : public Deletable
     {
     public:
-        SynetMergedConvolution32f()
-        {
-#if defined(SIMD_PERFORMANCE_STATISTIC)
-            _perf = NULL;
-#endif
-        }
-
-        virtual String Desc() const = 0;
-
         virtual const MergConvParam32f & Param() const = 0;
 
         virtual size_t ExternalBufferSize() const = 0;
@@ -147,45 +155,66 @@ namespace Simd
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        Base::PerformanceMeasurer* Perf(const String& func);
-#endif
-
-    private:
-#if defined(SIMD_PERFORMANCE_STATISTIC)
-        Base::PerformanceMeasurer * _perf;
+        virtual Base::PerformanceMeasurer* Perf(const String& func) = 0;
 #endif
     };
 
     namespace Base
     {
-        class SynetMergedConvolution32fCdc : public Simd::SynetMergedConvolution32f
+        class SynetMergedConvolution32f : public Simd::SynetMergedConvolution32f
         {
         public:
-            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
+            SynetMergedConvolution32f(const MergConvParam32f& p);
 
             virtual String Desc() const { return "Base"; }
             virtual const MergConvParam32f & Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
+            virtual void Forward(const float* src, float* buf, float* dst);
+
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+            virtual Base::PerformanceMeasurer* Perf(const String& func);
+#endif
+
+            typedef void(*ConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
+                const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst);
+
+        protected:
+            float* GetBuffer(float* buffer);
+
+            virtual void ReorderInputWeight(const float* src, float* dst) const {}
+            virtual void ReorderDepthwiseWeight(const float* src, float* dst) const {}
+            virtual void ReorderOutputWeight(const float* src, float* dst) const {}
+
+            MergConvParam32f _param;
+            ConvolutionPtr _convolution[6];
+            size_t _sizeS, _sizeD, _sizeB[2];
+            Array32f _buffer, _rWeight[3], _rBias[3], _rParams[3];
+            const float * _weight[3], * _bias[3], * _params[3];
+
+        private:
+#if defined(SIMD_PERFORMANCE_STATISTIC)
+            Base::PerformanceMeasurer * _perf;
+#endif        
+        };
+
+        class SynetMergedConvolution32fCdc : public SynetMergedConvolution32f
+        {
+        public:
+            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
+
             virtual void Forward(const float * src, float * buf, float * dst);
 
-            typedef void(*ConvolutionPtr)(const float * src, const SimdConvolutionParameters & p, size_t maC, size_t yBeg, size_t yEnd, 
-                const size_t bufH[2], const float * weight, const float * bias, const float * params, float * dst);
+            static bool Preferable(const MergConvParam32f& p);
 
         protected:
             void SetSize(size_t L1, size_t L2, size_t L3, size_t F);
-            float * GetBuffer(float * buffer);
             virtual void ReorderInputWeight(const float * src, float * dst) const;
             virtual void ReorderDepthwiseWeight(const float * src, float * dst) const;
             virtual void ReorderOutputWeight(const float * src, float * dst) const;
 
-            MergConvParam32f _param;
-            bool _base;
-            size_t _sizeS, _sizeD, _miC, _maC, _yStep[2], _bufH[2], _sizeB[2], _dp[2], _dw[3];
-            ConvolutionPtr _convolution[6];
-            Array32f _buffer, _rWeight[3], _rBias[3], _rParams[3];
-            const float * _weight[3], * _bias[3], * _params[3];
+            size_t _miC, _maC, _yStep[2], _bufH[2], _dp[2], _dw[3];
         };
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
