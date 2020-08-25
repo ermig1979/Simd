@@ -212,12 +212,12 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 160, 12, 16), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 320), f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 160, 12, 15), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), f), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 384, 384), Cnv(a0, 3, 2, 35), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 17), f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 17, 192, 192), Cnv(a0, 1, 1, 99), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 27), f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 27, 96, 96), Cnv(a0, 1, 1, 147), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 27), f), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 34, 32, 32), Cnv(a0, 1, 1, 34), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 34), f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 34, 32, 32), Cnv(a0, 1, 1, 34), Cnv(a1, 5, 1), Cnv(a2, 1, 1, 34), f), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 34, 32, 32), Cnv(a0, 1, 1, 34), Cnv(a1, 7, 1), Cnv(a2, 1, 1, 34), f), f1, f2);
@@ -229,6 +229,7 @@ namespace Test
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 60, 80), Cnv(a0, 1, 1, 48), Cnv(a1, 3, 1)), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 48, 70, 81), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 64)), f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 320, 320), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1)), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 60, 80), Cnv(a0, 1, 1, 50), Cnv(a1, 3, 1)), f1, f2);
 #endif
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 30, 40), Cnv(a0, 1, 1, 48), Cnv(a1, 3, 1)), f1, f2);

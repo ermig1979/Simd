@@ -406,7 +406,7 @@ namespace Simd
 
         void SynetMergedConvolution32fCdc::Forward(const float * src, float * buf, float * dst)
         {
-            if (_rWeight->data == NULL)
+            if (_rWeight[0].data == NULL)
             {
                 SynetMergedConvolution32f::Forward(src, buf, dst);
                 return;
@@ -450,6 +450,121 @@ namespace Simd
         bool SynetMergedConvolution32fCdc::Preferable(const MergConvParam32f& p)
         {
             return p.count == 3;
+        }
+
+        //---------------------------------------------------------------------
+
+        SynetMergedConvolution32fCd::SynetMergedConvolution32fCd(const MergConvParam32f& p)
+            : SynetMergedConvolution32f(p)
+        {
+        }
+
+        void SynetMergedConvolution32fCd::SetSize(size_t L1, size_t L2, size_t L3, size_t F)
+        {
+            const MergConvParam32f& p = _param;
+            _miC = F;
+            size_t size = 0;
+            for (size_t i = 0; i < 2; ++i)
+                size += p.conv[i].kernelY * p.conv[i].kernelX * p.conv[i].srcC * p.conv[i].dstC / p.conv[i].group;
+            size_t count = size * sizeof(float) / (L3 / 2) + 1;
+            _maC = AlignHiAny(p.conv[0].dstC / count, 2 * _miC);
+            for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
+            {
+                _yStep[1] = Simd::Max<size_t>(1, yStep);
+                _yStep[0] = _yStep[1] * p.conv[1].strideY;
+                for (_bufH[0] = 1; _bufH[0] < (_yStep[1] - 1) * p.conv[1].strideY + p.conv[1].kernelY; _bufH[0] *= 2);
+                _sizeB[0] = _bufH[0] * p.conv[0].dstW * _maC;
+                if (_sizeB[0] * sizeof(float) <= L2)
+                    break;
+            }
+            _sizeB[1] = 0;
+            for (size_t i = 0; i < 2; ++i)
+            {
+                size_t dstC = AlignHiAny(p.conv[i].dstC, i == 1 ? _miC : 2 * _miC);
+                _rWeight[i].Resize(dstC * p.conv[i].kernelY * p.conv[i].kernelX * p.conv[i].srcC);
+                _rBias[i].Resize(dstC, true);
+                if (p.conv[i].activation == SimdConvolutionActivationLeakyRelu || p.conv[i].activation == SimdConvolutionActivationPrelu)
+                    _rParams[i].Resize(dstC, true);
+                else
+                    _rParams[i].Resize(2);
+            }
+            _dp[0] = p.conv[0].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            _dp[1] = p.conv[1].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            _dw[0] = p.conv[0].kernelY * p.conv[0].kernelX * p.conv[0].srcC;
+            _dw[1] = p.conv[1].kernelY * p.conv[1].kernelX;
+        }
+
+        void SynetMergedConvolution32fCd::ReorderInputWeight(const float* src, float* dst) const
+        {
+            const SimdConvolutionParameters& p = _param.conv[0];
+            size_t size = p.kernelY * p.kernelX * p.srcC, dstC = p.dstC, micD = _miC * 2;
+            for (size_t c = 0; c < dstC; c += micD)
+            {
+                size_t n = Simd::Min(micD, dstC - c);
+                for (size_t s = 0; s < size; s++)
+                {
+                    size_t i = 0;
+                    for (; i < n; ++i)
+                        dst[i] = src[s * dstC + c + i];
+                    for (; i < micD; ++i)
+                        dst[i] = 0;
+                    dst += micD;
+                }
+            }
+        }
+
+        void SynetMergedConvolution32fCd::ReorderDepthwiseWeight(const float* src, float* dst) const
+        {
+            const SimdConvolutionParameters& p = _param.conv[1];
+            size_t dstC = p.dstC, size = p.kernelY * p.kernelX, micD = _miC;
+            for (size_t c = 0; c < dstC; c += micD)
+            {
+                size_t n = Simd::Min(micD, dstC - c);
+                for (size_t s = 0; s < size; s++)
+                {
+                    size_t i = 0;
+                    for (; i < n; ++i)
+                        dst[i] = src[s * dstC + c + i];
+                    for (; i < micD; ++i)
+                        dst[i] = 0;
+                    dst += micD;
+                }
+            }
+        }
+
+        void SynetMergedConvolution32fCd::Forward(const float* src, float* buf, float* dst)
+        {
+            if (_rWeight[0].data == NULL)
+            {
+                SynetMergedConvolution32f::Forward(src, buf, dst);
+                return;
+            }
+            const MergConvParam32f& p = _param;
+            float* buf0 = GetBuffer(buf);
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                for (size_t c = 0, C = p.conv[1].dstC; c < C; c += _maC)
+                {
+                    size_t maC = Simd::Min(C, c + _maC) - c;
+                    for (size_t yBeg1 = 0, yBeg0 = 0; yBeg1 < p.conv[1].dstH;)
+                    {
+                        size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
+                        size_t yEnd0 = Simd::Min(Simd::Max(yBeg0 + _yStep[0], (_yStep[1] - 1) * p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY), p.conv[0].dstH);
+                        _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
+                        _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], dst);
+                        yBeg1 = yEnd1;
+                        yBeg0 = yEnd0;
+                    }
+                }
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+
+        bool SynetMergedConvolution32fCd::Preferable(const MergConvParam32f& p)
+        {
+            return p.count == 2 && p.conv[0].group == 1;
         }
 
         //---------------------------------------------------------------------

@@ -169,6 +169,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCdc.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCd.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse2">
