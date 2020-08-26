@@ -1414,19 +1414,22 @@ namespace Simd
 				if (p.conv[i].activation == SimdConvolutionActivationElu)
 					return;
 			for (size_t i = 0; i < _param.count; ++i)
-			{
-				switch (p.conv[i].activation)
-				{
-				case SimdConvolutionActivationIdentity: Cdc::Set<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
-				case SimdConvolutionActivationRelu: Cdc::Set<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
-				case SimdConvolutionActivationLeakyRelu: Cdc::Set<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
-				case SimdConvolutionActivationRestrictRange: Cdc::Set<SimdConvolutionActivationRestrictRange>(_param, i, _convolution); break;
-				case SimdConvolutionActivationPrelu: Cdc::Set<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
-				case SimdConvolutionActivationHswish: Cdc::Set<SimdConvolutionActivationHswish>(_param, i, _convolution); break;
-				default: assert(0);
-				}
-			}
+				Set(p, i, _convolution);
 			SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::F);
+		}
+
+		void SynetMergedConvolution32fCdc::Set(const MergConvParam32f& p, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
+		{
+			switch (p.conv[i].activation)
+			{
+			case SimdConvolutionActivationIdentity: Cdc::Set<SimdConvolutionActivationRestrictRange>(p, i, c); break;
+			case SimdConvolutionActivationRelu: Cdc::Set<SimdConvolutionActivationRestrictRange>(p, i, c); break;
+			case SimdConvolutionActivationLeakyRelu: Cdc::Set<SimdConvolutionActivationPrelu>(p, i, c); break;
+			case SimdConvolutionActivationRestrictRange: Cdc::Set<SimdConvolutionActivationRestrictRange>(p, i, c); break;
+			case SimdConvolutionActivationPrelu: Cdc::Set<SimdConvolutionActivationPrelu>(p, i, c); break;
+			case SimdConvolutionActivationHswish: Cdc::Set<SimdConvolutionActivationHswish>(p, i, c); break;
+			default: assert(0);
+			}
 		}
 
 		//---------------------------------------------------------------------
@@ -1445,6 +1448,13 @@ namespace Simd
 					return new Sse2::SynetMergedConvolution32fCdc(param);
 				else
 					return new Avx::SynetMergedConvolution32fCdc(param);
+			}
+			else if (SynetMergedConvolution32fCd::Preferable(param))
+			{
+				if (param.conv[1].dstC < F)
+					return new Sse2::SynetMergedConvolution32fCd(param);
+				else
+					return new Avx::SynetMergedConvolution32fCd(param);
 			}
 			else
 				return new Base::SynetMergedConvolution32f(param);
