@@ -28,7 +28,6 @@ namespace Simd
 {
     namespace Base
     {
-
         SIMD_INLINE double Miliseconds(int64_t count)
         {
             return double(count) / double(TimeFrequency()) * 1000.0;

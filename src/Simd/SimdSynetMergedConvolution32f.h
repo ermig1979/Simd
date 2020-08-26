@@ -136,7 +136,10 @@ namespace Simd
 
         long long Flop() const
         {
-            return Flop(0) + Flop(1) + Flop(2);
+            long long flop = 0;
+            for (size_t i = 0; i < count; ++i)
+                flop += Flop(i);
+            return flop;
         }
 #endif
     };
@@ -245,6 +248,8 @@ namespace Simd
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Desc() const { return "Sse2"; }
+
+            static void Set(const MergConvParam32f& p, size_t i, SynetMergedConvolution32f::ConvolutionPtr * c);
         };
 
         class SynetMergedConvolution32fCd : public Base::SynetMergedConvolution32fCd
@@ -252,6 +257,8 @@ namespace Simd
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
             virtual String Desc() const { return "Sse2"; }
+
+            static void Set(const MergConvParam32f& p, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
