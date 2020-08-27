@@ -1373,30 +1373,30 @@ namespace Simd
 				{
 				case 0:
 					if (p.conv[0].kernelY == 1 && p.conv[0].strideY == 1)
-						convolution[0] = InputConvolution1x1<type>;
+						convolution[index + 0] = InputConvolution1x1<type>;
 					else
-						convolution[0] = InputConvolution<type>;
+						convolution[index + 0] = InputConvolution<type>;
 					break;
 				case 1:
 					if (p.conv[1].kernelY == 3)
-						convolution[1] = DepthwiseConvolution3x3<type>;
+						convolution[index + 0] = DepthwiseConvolution3x3<type>;
 					else
-						convolution[1] = DepthwiseConvolution<type>;
+						convolution[index + 0] = DepthwiseConvolution<type>;
 					break;
 				case 2:
 					if (p.add)
 					{
-						convolution[2] = OutputConvolution<TermLast, type>;
-						convolution[3] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
-						convolution[4] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
-						convolution[5] = OutputConvolution<TermLast, type>;
+						convolution[index + 0] = OutputConvolution<TermLast, type>;
+						convolution[index + 1] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
+						convolution[index + 2] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
+						convolution[index + 3] = OutputConvolution<TermLast, type>;
 					}
 					else
 					{
-						convolution[2] = OutputConvolution<TermSingle, type>;
-						convolution[3] = OutputConvolution<TermFirst, SimdConvolutionActivationIdentity>;
-						convolution[4] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
-						convolution[5] = OutputConvolution<TermLast, type>;
+						convolution[index + 0] = OutputConvolution<TermSingle, type>;
+						convolution[index + 1] = OutputConvolution<TermFirst, SimdConvolutionActivationIdentity>;
+						convolution[index + 2] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
+						convolution[index + 3] = OutputConvolution<TermLast, type>;
 					}
 					break;
 				default:

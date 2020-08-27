@@ -186,15 +186,17 @@ namespace Simd
         protected:
             float* GetBuffer(float* buffer);
 
-            virtual void ReorderInputWeight(const float* src, float* dst) const {}
-            virtual void ReorderDepthwiseWeight(const float* src, float* dst) const {}
-            virtual void ReorderOutputWeight(const float* src, float* dst) const {}
+            virtual void ReorderFirstWeight(const float* src, float* dst) const {}
+            virtual void ReorderSecondWeight(const float* src, float* dst) const {}
+            virtual void ReorderThirdWeight(const float* src, float* dst) const {}
 
             MergConvParam32f _param;
             ConvolutionPtr _convolution[6];
             size_t _sizeS, _sizeD, _sizeB[2];
             Array32f _buffer, _rWeight[3], _rBias[3], _rParams[3];
             const float * _weight[3], * _bias[3], * _params[3];
+
+            size_t _miC, _maC, _yStep[2], _bufH[2], _dp[2], _dw[3];
 
         private:
 #if defined(SIMD_PERFORMANCE_STATISTIC)
@@ -213,11 +215,9 @@ namespace Simd
 
         protected:
             void SetSize(size_t L1, size_t L2, size_t L3, size_t F);
-            virtual void ReorderInputWeight(const float * src, float * dst) const;
-            virtual void ReorderDepthwiseWeight(const float * src, float * dst) const;
-            virtual void ReorderOutputWeight(const float * src, float * dst) const;
-
-            size_t _miC, _maC, _yStep[2], _bufH[2], _dp[2], _dw[3];
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
+            virtual void ReorderThirdWeight(const float* src, float* dst) const;
         };
 
         class SynetMergedConvolution32fCd : public SynetMergedConvolution32f
@@ -231,10 +231,23 @@ namespace Simd
 
         protected:
             void SetSize(size_t L1, size_t L2, size_t L3, size_t F);
-            virtual void ReorderInputWeight(const float* src, float* dst) const;
-            virtual void ReorderDepthwiseWeight(const float* src, float* dst) const;
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
+        };
 
-            size_t _miC, _maC, _yStep[2], _bufH[1], _dp[2], _dw[2];
+        class SynetMergedConvolution32fDc : public SynetMergedConvolution32f
+        {
+        public:
+            SynetMergedConvolution32fDc(const MergConvParam32f& p);
+
+            virtual void Forward(const float* src, float* buf, float* dst);
+
+            static bool Preferable(const MergConvParam32f& p);
+
+        protected:
+            void SetSize(size_t L1, size_t L2, size_t L3, size_t F);
+            virtual void ReorderFirstWeight(const float* src, float* dst) const;
+            virtual void ReorderSecondWeight(const float* src, float* dst) const;
         };
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
@@ -256,6 +269,15 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
+            virtual String Desc() const { return "Sse2"; }
+
+            static void Set(const MergConvParam32f& p, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
+        };
+
+        class SynetMergedConvolution32fDc : public Base::SynetMergedConvolution32fDc
+        {
+        public:
+            SynetMergedConvolution32fDc(const MergConvParam32f& p);
             virtual String Desc() const { return "Sse2"; }
 
             static void Set(const MergConvParam32f& p, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
