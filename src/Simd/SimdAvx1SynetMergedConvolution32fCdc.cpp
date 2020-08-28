@@ -1456,6 +1456,13 @@ namespace Simd
 				else
 					return new Avx::SynetMergedConvolution32fCd(param);
 			}
+			else if (SynetMergedConvolution32fDc::Preferable(param))
+			{
+				if (param.conv[0].dstC < F || param.conv[1].dstC < F)
+					return new Sse2::SynetMergedConvolution32fDc(param);
+				else
+					return new Avx::SynetMergedConvolution32fDc(param);
+			}
 			else
 				return new Base::SynetMergedConvolution32f(param);
 		}
