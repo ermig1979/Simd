@@ -60,146 +60,146 @@ namespace Simd
 					for (size_t dy = yBeg; dy < yEnd; ++dy)
 					{
 						float* pd = dst + (dy & dstM) * dstW;
-						//if (dy >= noseY && dy < bodyY)
-						//{
-						//	size_t dx = 0;
-						//	for (; dx < noseX; ++dx, pd += F)
-						//	{
-						//		__m128 sum = _bias;
-						//		for (size_t ky = 0; ky < p.kernelY; ++ky)
-						//		{
-						//			size_t sy = dy * p.strideY + ky - padY;
-						//			for (size_t kx = 0; kx < p.kernelX; ++kx)
-						//			{
-						//				size_t sx = dx * p.strideX + kx - padX;
-						//				if (sx < p.srcW)
-						//				{
-						//					const float* pw = weight + (ky * p.kernelX + kx) * F;
-						//					const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
-						//					sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
-						//				}
-						//			}
-						//		}
-						//		_mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
-						//	}
-						//	for (; dx < bodyX8; dx += 8, pd += 8 * F)
-						//	{
-						//		__m128 sum0 = _bias;
-						//		__m128 sum1 = _bias;
-						//		__m128 sum2 = _bias;
-						//		__m128 sum3 = _bias;
-						//		__m128 sum4 = _bias;
-						//		__m128 sum5 = _bias;
-						//		__m128 sum6 = _bias;
-						//		__m128 sum7 = _bias;
-						//		const float* pw = weight;
-						//		for (size_t ky = 0; ky < p.kernelY; ++ky)
-						//		{
-						//			size_t sy = dy * strideY + ky - padY;
-						//			const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-						//			for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-						//			{
-						//				__m128 w0 = _mm_loadu_ps(pw);
-						//				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
-						//				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
-						//				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXF), w0), sum2);
-						//				sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXF), w0), sum3);
-						//				sum4 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 4 * strideXF), w0), sum4);
-						//				sum5 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 5 * strideXF), w0), sum5);
-						//				sum6 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 6 * strideXF), w0), sum6);
-						//				sum7 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 7 * strideXF), w0), sum7);
-						//			}
-						//		}
-						//		_mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
-						//		_mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
-						//		_mm_storeu_ps(pd + 2 * F, Activate<type>(sum2, _params, 0));
-						//		_mm_storeu_ps(pd + 3 * F, Activate<type>(sum3, _params, 0));
-						//		_mm_storeu_ps(pd + 4 * F, Activate<type>(sum4, _params, 0));
-						//		_mm_storeu_ps(pd + 5 * F, Activate<type>(sum5, _params, 0));
-						//		_mm_storeu_ps(pd + 6 * F, Activate<type>(sum6, _params, 0));
-						//		_mm_storeu_ps(pd + 7 * F, Activate<type>(sum7, _params, 0));
-						//	}
-						//	for (; dx < bodyX4; dx += 4, pd += 4 * F)
-						//	{
-						//		__m128 sum0 = _bias;
-						//		__m128 sum1 = _bias;
-						//		__m128 sum2 = _bias;
-						//		__m128 sum3 = _bias;
-						//		const float* pw = weight;
-						//		for (size_t ky = 0; ky < p.kernelY; ++ky)
-						//		{
-						//			size_t sy = dy * strideY + ky - padY;
-						//			const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-						//			for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-						//			{
-						//				__m128 w0 = _mm_loadu_ps(pw);
-						//				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
-						//				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
-						//				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXF), w0), sum2);
-						//				sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXF), w0), sum3);
-						//			}
-						//		}
-						//		_mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
-						//		_mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
-						//		_mm_storeu_ps(pd + 2 * F, Activate<type>(sum2, _params, 0));
-						//		_mm_storeu_ps(pd + 3 * F, Activate<type>(sum3, _params, 0));
-						//	}
-						//	for (; dx < bodyX2; dx += 2, pd += 2 * F)
-						//	{
-						//		__m128 sum0 = _bias;
-						//		__m128 sum1 = _bias;
-						//		const float* pw = weight;
-						//		for (size_t ky = 0; ky < p.kernelY; ++ky)
-						//		{
-						//			size_t sy = dy * strideY + ky - padY;
-						//			const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-						//			for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-						//			{
-						//				__m128 w0 = _mm_loadu_ps(pw);
-						//				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
-						//				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
-						//			}
-						//		}
-						//		_mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
-						//		_mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
-						//	}
-						//	for (; dx < bodyX; ++dx, pd += F)
-						//	{
-						//		__m128 sum = _bias;
-						//		const float* pw = weight;
-						//		for (size_t ky = 0; ky < p.kernelY; ++ky)
-						//		{
-						//			size_t sy = dy * strideY + ky - padY;
-						//			const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-						//			for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-						//			{
-						//				__m128 w0 = _mm_loadu_ps(pw);
-						//				sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), w0), sum);
-						//			}
-						//		}
-						//		_mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
-						//	}
-						//	for (; dx < p.dstW; ++dx, pd += F)
-						//	{
-						//		__m128 sum = _bias;
-						//		for (size_t ky = 0; ky < p.kernelY; ++ky)
-						//		{
-						//			size_t sy = dy * strideY + ky - padY;
-						//			for (size_t kx = 0; kx < p.kernelX; ++kx)
-						//			{
-						//				size_t sx = dx * strideX + kx - padX;
-						//				if (sx < p.srcW)
-						//				{
-						//					const float* pw = weight + (ky * p.kernelX + kx) * F;
-						//					const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
-						//					sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
-						//				}
-						//			}
-						//		}
-						//		_mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
-						//	}
-						//}
-						//else
+						if (dy >= noseY && dy < bodyY)
+						{
+							size_t dx = 0;
+							for (; dx < noseX; ++dx, pd += F)
+							{
+								__m128 sum = _bias;
+								for (size_t ky = 0; ky < p.kernelY; ++ky)
+								{
+									size_t sy = dy * p.strideY + ky - padY;
+									for (size_t kx = 0; kx < p.kernelX; ++kx)
+									{
+										size_t sx = dx * p.strideX + kx - padX;
+										if (sx < p.srcW)
+										{
+											const float* pw = weight + (ky * p.kernelX + kx) * F;
+											const float* ps = src + sy * srcW + sx * srcX;
+											sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
+										}
+									}
+								}
+								_mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
+							}
+							for (; dx < bodyX8; dx += 8, pd += 8 * F)
+							{
+								__m128 sum0 = _bias;
+								__m128 sum1 = _bias;
+								__m128 sum2 = _bias;
+								__m128 sum3 = _bias;
+								__m128 sum4 = _bias;
+								__m128 sum5 = _bias;
+								__m128 sum6 = _bias;
+								__m128 sum7 = _bias;
+								const float* pw = weight;
+								for (size_t ky = 0; ky < p.kernelY; ++ky)
+								{
+									size_t sy = dy * strideY + ky - padY;
+									const float* ps = src + sy * srcW + (dx * strideX - padX) * srcX;
+									for (size_t kx = 0; kx < p.kernelX; ++kx, ps += srcX, pw += F)
+									{
+										__m128 w0 = _mm_loadu_ps(pw);
+										sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXC), w0), sum0);
+										sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXC), w0), sum1);
+										sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXC), w0), sum2);
+										sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXC), w0), sum3);
+										sum4 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 4 * strideXC), w0), sum4);
+										sum5 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 5 * strideXC), w0), sum5);
+										sum6 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 6 * strideXC), w0), sum6);
+										sum7 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 7 * strideXC), w0), sum7);
+									}
+								}
+								_mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
+								_mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
+								_mm_storeu_ps(pd + 2 * F, Activate<type>(sum2, _params, 0));
+								_mm_storeu_ps(pd + 3 * F, Activate<type>(sum3, _params, 0));
+								_mm_storeu_ps(pd + 4 * F, Activate<type>(sum4, _params, 0));
+								_mm_storeu_ps(pd + 5 * F, Activate<type>(sum5, _params, 0));
+								_mm_storeu_ps(pd + 6 * F, Activate<type>(sum6, _params, 0));
+								_mm_storeu_ps(pd + 7 * F, Activate<type>(sum7, _params, 0));
+							}
+							for (; dx < bodyX4; dx += 4, pd += 4 * F)
+							{
+								__m128 sum0 = _bias;
+								__m128 sum1 = _bias;
+								__m128 sum2 = _bias;
+								__m128 sum3 = _bias;
+								const float* pw = weight;
+								for (size_t ky = 0; ky < p.kernelY; ++ky)
+								{
+									size_t sy = dy * strideY + ky - padY;
+									const float* ps = src + sy * srcW + (dx * strideX - padX) * srcX;
+									for (size_t kx = 0; kx < p.kernelX; ++kx, ps += srcX, pw += F)
+									{
+										__m128 w0 = _mm_loadu_ps(pw);
+										sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXC), w0), sum0);
+										sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXC), w0), sum1);
+										sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXC), w0), sum2);
+										sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXC), w0), sum3);
+									}
+								}
+								_mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
+								_mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
+								_mm_storeu_ps(pd + 2 * F, Activate<type>(sum2, _params, 0));
+								_mm_storeu_ps(pd + 3 * F, Activate<type>(sum3, _params, 0));
+							}
+							for (; dx < bodyX2; dx += 2, pd += 2 * F)
+							{
+								__m128 sum0 = _bias;
+								__m128 sum1 = _bias;
+								const float* pw = weight;
+								for (size_t ky = 0; ky < p.kernelY; ++ky)
+								{
+									size_t sy = dy * strideY + ky - padY;
+									const float* ps = src + sy * srcW + (dx * strideX - padX) * srcX;
+									for (size_t kx = 0; kx < p.kernelX; ++kx, ps += srcX, pw += F)
+									{
+										__m128 w0 = _mm_loadu_ps(pw);
+										sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXC), w0), sum0);
+										sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXC), w0), sum1);
+									}
+								}
+								_mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
+								_mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
+							}
+							for (; dx < bodyX; ++dx, pd += F)
+							{
+								__m128 sum = _bias;
+								const float* pw = weight;
+								for (size_t ky = 0; ky < p.kernelY; ++ky)
+								{
+									size_t sy = dy * strideY + ky - padY;
+									const float* ps = src + sy * srcW + (dx * strideX - padX) * srcX;
+									for (size_t kx = 0; kx < p.kernelX; ++kx, ps += srcX, pw += F)
+									{
+										__m128 w0 = _mm_loadu_ps(pw);
+										sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), w0), sum);
+									}
+								}
+								_mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
+							}
+							for (; dx < p.dstW; ++dx, pd += F)
+							{
+								__m128 sum = _bias;
+								for (size_t ky = 0; ky < p.kernelY; ++ky)
+								{
+									size_t sy = dy * strideY + ky - padY;
+									for (size_t kx = 0; kx < p.kernelX; ++kx)
+									{
+										size_t sx = dx * strideX + kx - padX;
+										if (sx < p.srcW)
+										{
+											const float* pw = weight + (ky * p.kernelX + kx) * F;
+											const float* ps = src + sy * srcW + sx * srcX;
+											sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
+										}
+									}
+								}
+								_mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
+							}
+						}
+						else
 						{
 							for (size_t dx = 0; dx < p.dstW; ++dx, pd += F)
 							{
@@ -231,67 +231,112 @@ namespace Simd
 				}
 			}
 
+			//---------------------------------------------------------------------
+
 			template<SimdConvolutionActivationType type> SIMD_INLINE void ConvolutionDepthwise3x3Edge2x2(
-				const float* src0, const float* src1, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
+				const float* src0, const float* src1, size_t srcC, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
 			{
 				__m128 sum0 = bias, sum1 = _mm_setzero_ps();
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * srcC), weight[0]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * srcC), weight[1]), sum1);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * srcC), weight[3]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * srcC), weight[4]), sum1);
 				_mm_storeu_ps(dst, Activate<type>(_mm_add_ps(sum0, sum1), params, 0));
 			}
 
 			template<SimdConvolutionActivationType type> SIMD_INLINE void ConvolutionDepthwise3x3Edge2x3(
-				const float* src0, const float* src1, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
+				const float* src0, const float* src1, size_t srcC, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
 			{
 				__m128 sum0 = bias, sum1 = _mm_setzero_ps(), sum2 = _mm_setzero_ps();
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
-				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * F), weight[2]), sum2);
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
-				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * F), weight[5]), sum2);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * srcC), weight[0]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * srcC), weight[1]), sum1);
+				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * srcC), weight[2]), sum2);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * srcC), weight[3]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * srcC), weight[4]), sum1);
+				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * srcC), weight[5]), sum2);
 				_mm_storeu_ps(dst, Activate<type>(_mm_add_ps(_mm_add_ps(sum0, sum1), sum2), params, 0));
 			}
 
 			template<SimdConvolutionActivationType type> SIMD_INLINE void ConvolutionDepthwise3x3Edge3x2(
-				const float* src0, const float* src1, const float* src2, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
+				const float* src0, const float* src1, const float* src2, size_t srcC, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
 			{
 				__m128 sum0 = bias, sum1 = _mm_setzero_ps();
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * F), weight[6]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * F), weight[7]), sum1);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * srcC), weight[0]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * srcC), weight[1]), sum1);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * srcC), weight[3]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * srcC), weight[4]), sum1);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * srcC), weight[6]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * srcC), weight[7]), sum1);
 				_mm_storeu_ps(dst, Activate<type>(_mm_add_ps(sum0, sum1), params, 0));
 			}
 
 			template<SimdConvolutionActivationType type> SIMD_INLINE void ConvolutionDepthwise3x3Main1x1(
-				const float* src0, const float* src1, const float* src2, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
+				const float* src0, const float* src1, const float* src2, size_t srcC, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
 			{
 				__m128 sum0 = bias, sum1 = _mm_setzero_ps(), sum2 = _mm_setzero_ps();
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
-				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * F), weight[2]), sum2);
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
-				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * F), weight[5]), sum2);
-				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * F), weight[6]), sum0);
-				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * F), weight[7]), sum1);
-				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 2 * F), weight[8]), sum2);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * srcC), weight[0]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * srcC), weight[1]), sum1);
+				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * srcC), weight[2]), sum2);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * srcC), weight[3]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * srcC), weight[4]), sum1);
+				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * srcC), weight[5]), sum2);
+				sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * srcC), weight[6]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * srcC), weight[7]), sum1);
+				sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 2 * srcC), weight[8]), sum2);
 				_mm_storeu_ps(dst, Activate<type>(_mm_add_ps(_mm_add_ps(sum0, sum1), sum2), params, 0));
+			}
+
+			template<SimdConvolutionActivationType type> SIMD_INLINE void ConvolutionDepthwise3x3Main1x2(
+				const float* src0, const float* src1, const float* src2, size_t srcC, const __m128* weight, const __m128& bias, const __m128* params, float* dst)
+			{
+				__m128 sum0 = bias, sum1 = bias, s0;
+
+				s0 = _mm_loadu_ps(src0 + 0 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[0]), sum0);
+				s0 = _mm_loadu_ps(src0 + 1 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[1]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[0]), sum1);
+				s0 = _mm_loadu_ps(src0 + 2 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[2]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[1]), sum1);
+				s0 = _mm_loadu_ps(src0 + 3 * srcC);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[2]), sum1);
+
+				s0 = _mm_loadu_ps(src1 + 0 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[3]), sum0);
+				s0 = _mm_loadu_ps(src1 + 1 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[4]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[3]), sum1);
+				s0 = _mm_loadu_ps(src1 + 2 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[5]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[4]), sum1);
+				s0 = _mm_loadu_ps(src1 + 3 * srcC);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[5]), sum1);
+
+				s0 = _mm_loadu_ps(src2 + 0 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[6]), sum0);
+				s0 = _mm_loadu_ps(src2 + 1 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[7]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[6]), sum1);
+				s0 = _mm_loadu_ps(src2 + 2 * srcC);
+				sum0 = _mm_add_ps(_mm_mul_ps(s0, weight[8]), sum0);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[7]), sum1);
+				s0 = _mm_loadu_ps(src2 + 3 * srcC);
+				sum1 = _mm_add_ps(_mm_mul_ps(s0, weight[8]), sum1);
+
+				_mm_storeu_ps(dst + 0 * F, Activate<type>(sum0, params, 0));
+				_mm_storeu_ps(dst + 1 * F, Activate<type>(sum1, params, 0));
 			}
 
 			template<SimdConvolutionActivationType type> void DepthwiseConvolution3x3(const float* src, const SimdConvolutionParameters& p,
 				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
 			{
 				size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
-				size_t srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
-				size_t srcM = (bufH[0] - 1), dstM = (bufH[1] - 1), srcS = bufH[0] * srcW, dstS = bufH[1] * dstW;
-				size_t xStep = F * p.strideX, xStep0 = (p.strideX - p.padX) * F;
-				size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
+				size_t srcX = p.srcC, srcW = p.srcW * srcX, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
+				size_t dstM = (bufH[1] - 1), srcS = bufH[0] * srcW, dstS = bufH[1] * dstW;
+				size_t xStep = srcX * p.strideX, xStep0 = (p.strideX - p.padX) * srcX;
+				size_t xMainEnd = p.dstW - p.padW, xMainEnd2 = AlignLo(xMainEnd - padX, 2)* (p.strideX == 1 ? 1 : 0) + padX;
+				size_t yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
 
 				__m128 _params[2];
 				_params[0] = _mm_set1_ps(params[0]);
@@ -310,45 +355,47 @@ namespace Simd
 					if (yBeg == 0 && padY)
 					{
 						size_t sy = 0, dx = 0;
-						const float* src0 = src + ((sy + 0) & srcM) * srcW;
-						const float* src1 = src + ((sy + 1) & srcM) * srcW;
+						const float* src0 = src + (sy + 0) * srcW;
+						const float* src1 = src + (sy + 1) * srcW;
 						float* pDst = dst + (dy & dstM) * dstW;
 						if (padX)
-							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 4, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0;
+							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, srcX, _weight + 4, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0;
 						for (; dx < xMainEnd; dx++, pDst += F, src0 += xStep, src1 += xStep)
-							ConvolutionDepthwise3x3Edge2x3<type>(src0, src1, _weight + 3, _bias, _params, pDst);
+							ConvolutionDepthwise3x3Edge2x3<type>(src0, src1, srcX, _weight + 3, _bias, _params, pDst);
 						if (padW)
-							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 3, _bias, _params, pDst);
+							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, srcX, _weight + 3, _bias, _params, pDst);
 						dy++;
 					}
 					for (; dy < yMainEnd; ++dy)
 					{
 						size_t sy = dy * strideY - padY, dx = 0;
-						const float* src0 = src + ((sy + 0) & srcM) * srcW;
-						const float* src1 = src + ((sy + 1) & srcM) * srcW;
-						const float* src2 = src + ((sy + 2) & srcM) * srcW;
+						const float* src0 = src + (sy + 0) * srcW;
+						const float* src1 = src + (sy + 1) * srcW;
+						const float* src2 = src + (sy + 2) * srcW;
 						float* pDst = dst + (dy & dstM) * dstW;
 						if (padX)
-							ConvolutionDepthwise3x3Edge3x2<type>(src0, src1, src2, _weight + 1, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0, src2 += xStep0;
+							ConvolutionDepthwise3x3Edge3x2<type>(src0, src1, src2, srcX, _weight + 1, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0, src2 += xStep0;
+						for (; dx < xMainEnd2; dx += 2, pDst += F * 2, src0 += xStep * 2, src1 += xStep * 2, src2 += xStep * 2)
+							ConvolutionDepthwise3x3Main1x2<type>(src0, src1, src2, srcX, _weight + 0, _bias, _params, pDst);
 						for (; dx < xMainEnd; dx++, pDst += F, src0 += xStep, src1 += xStep, src2 += xStep)
-							ConvolutionDepthwise3x3Main1x1<type>(src0, src1, src2, _weight + 0, _bias, _params, pDst);
+							ConvolutionDepthwise3x3Main1x1<type>(src0, src1, src2, srcX, _weight + 0, _bias, _params, pDst);
 						if (padW)
-							ConvolutionDepthwise3x3Edge3x2<type>(src0, src1, src2, _weight + 0, _bias, _params, pDst);
+							ConvolutionDepthwise3x3Edge3x2<type>(src0, src1, src2, srcX, _weight + 0, _bias, _params, pDst);
 					}
 					if (dy < yEnd)
 					{
 						size_t sy = dy * strideY - padY, dx = 0;
-						const float* src0 = src + ((sy + 0) & srcM) * srcW;
-						const float* src1 = src + ((sy + 1) & srcM) * srcW;
+						const float* src0 = src + (sy + 0) * srcW;
+						const float* src1 = src + (sy + 1) * srcW;
 						float* pDst = dst + (dy & dstM) * dstW;
 						if (padX)
-							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 1, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0;
+							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, srcX, _weight + 1, _bias, _params, pDst), pDst += F, dx++, src0 += xStep0, src1 += xStep0;
 						for (; dx < xMainEnd; dx++, pDst += F, src0 += xStep, src1 += xStep)
-							ConvolutionDepthwise3x3Edge2x3<type>(src0, src1, _weight + 0, _bias, _params, pDst);
+							ConvolutionDepthwise3x3Edge2x3<type>(src0, src1, srcX, _weight + 0, _bias, _params, pDst);
 						if (padW)
-							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, _weight + 0, _bias, _params, pDst);
+							ConvolutionDepthwise3x3Edge2x2<type>(src0, src1, srcX, _weight + 0, _bias, _params, pDst);
 					}
-					src += srcS;
+					src += F;
 					dst += dstS;
 					weight += weightS;
 				}
@@ -361,9 +408,9 @@ namespace Simd
 				switch (t)
 				{
 				case 1:
-					//if (p.conv[i].kernelY == 3)
-					//	c[i + 0] = DepthwiseConvolution3x3<type>;
-					//else
+					if (p.conv[i].kernelY == 3)
+						c[i + 0] = DepthwiseConvolution3x3<type>;
+					else
 						c[i + 0] = DepthwiseConvolution<type>;
 					break;
 				default:
