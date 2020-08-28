@@ -444,15 +444,15 @@ namespace Simd
 
 			//---------------------------------------------------------------------
 
-			template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t index, SynetMergedConvolution32fCd::ConvolutionPtr* convolution)
+			template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32fCd::ConvolutionPtr* c)
 			{
-				switch (index)
+				switch (t)
 				{
 				case 1:
-					if (p.conv[1].kernelY == 3 && Aligned(p.conv[1].dstC, F))
-						convolution[1] = DepthwiseConvolution3x3<type>;
+					if (p.conv[i].kernelY == 3 && Aligned(p.conv[i].dstC, F))
+						c[i] = DepthwiseConvolution3x3<type>;
 					else
-						convolution[1] = DepthwiseConvolution<type>;
+						c[i] = DepthwiseConvolution<type>;
 					break;
 				default:
 					assert(0);
@@ -468,21 +468,21 @@ namespace Simd
 			for (size_t i = 0; i < _param.count; ++i)
 				if (p.conv[i].activation == SimdConvolutionActivationElu)
 					return;
-			SynetMergedConvolution32fCdc::Set(_param, 0, _convolution);
-			SynetMergedConvolution32fCd::Set(_param, 1, _convolution);
+			SynetMergedConvolution32fCdc::Set(_param, 0, 0, _convolution);
+			SynetMergedConvolution32fCd::Set(_param, 1, 1, _convolution);
 			SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::F);
 		}
 
-		void SynetMergedConvolution32fCd::Set(const MergConvParam32f& p, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
+		void SynetMergedConvolution32fCd::Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)
 		{
 			switch (p.conv[i].activation)
 			{
-			case SimdConvolutionActivationIdentity: Cd::Set<SimdConvolutionActivationRestrictRange>(p, i, c); break;
-			case SimdConvolutionActivationRelu: Cd::Set<SimdConvolutionActivationRestrictRange>(p, i, c); break;
-			case SimdConvolutionActivationLeakyRelu: Cd::Set<SimdConvolutionActivationPrelu>(p, i, c); break;
-			case SimdConvolutionActivationRestrictRange: Cd::Set<SimdConvolutionActivationRestrictRange>(p, i, c); break;
-			case SimdConvolutionActivationPrelu: Cd::Set<SimdConvolutionActivationPrelu>(p, i, c); break;
-			case SimdConvolutionActivationHswish: Cd::Set<SimdConvolutionActivationHswish>(p, i, c); break;
+			case SimdConvolutionActivationIdentity: Cd::Set<SimdConvolutionActivationRestrictRange>(p, t, i, c); break;
+			case SimdConvolutionActivationRelu: Cd::Set<SimdConvolutionActivationRestrictRange>(p, t, i, c); break;
+			case SimdConvolutionActivationLeakyRelu: Cd::Set<SimdConvolutionActivationPrelu>(p, t, i, c); break;
+			case SimdConvolutionActivationRestrictRange: Cd::Set<SimdConvolutionActivationRestrictRange>(p, t, i, c); break;
+			case SimdConvolutionActivationPrelu: Cd::Set<SimdConvolutionActivationPrelu>(p, t, i, c); break;
+			case SimdConvolutionActivationHswish: Cd::Set<SimdConvolutionActivationHswish>(p, t, i, c); break;
 			default: assert(0);
 			}
 		}
