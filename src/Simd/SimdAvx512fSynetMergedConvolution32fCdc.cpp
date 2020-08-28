@@ -1520,7 +1520,7 @@ namespace Simd
 				return NULL;
 			if (SynetMergedConvolution32fCdc::Preferable(param))
 			{
-				if (param.conv[1].dstC <= HF && param.conv[2].dstC <= HF)
+				if (param.conv[1].dstC <= HF || param.conv[2].dstC <= HF)
 					return new Avx2::SynetMergedConvolution32fCdc(param);
 				else
 					return new Avx512f::SynetMergedConvolution32fCdc(param);
@@ -1531,6 +1531,13 @@ namespace Simd
 					return new Avx2::SynetMergedConvolution32fCd(param);
 				else
 					return new Avx512f::SynetMergedConvolution32fCd(param);
+			}
+			else if (SynetMergedConvolution32fDc::Preferable(param))
+			{
+				if (param.conv[0].dstC <= HF || param.conv[1].dstC <= HF)
+					return new Avx2::SynetMergedConvolution32fDc(param);
+				else
+					return new Avx512f::SynetMergedConvolution32fDc(param);
 			}
 			else
 				return new Base::SynetMergedConvolution32f(param);

@@ -376,6 +376,15 @@ namespace Simd
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
+        class SynetMergedConvolution32fDc : public Avx2::SynetMergedConvolution32fDc
+        {
+        public:
+            SynetMergedConvolution32fDc(const MergConvParam32f& p);
+            virtual String Desc() const { return "Avx512f"; }
+
+            static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
+        };
+
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     }
 #endif//SIMD_AVX512F_ENABLE
