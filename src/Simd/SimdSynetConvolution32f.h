@@ -121,7 +121,9 @@ namespace Simd
             std::stringstream ss;
             ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
             ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
-            ss << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group << "-" << trans;
+            ss << "-" << Simd::Max(dilationX, dilationY) << "-" << Simd::Max(strideX, strideY);
+            //ss << "-" << Simd::Max(padX, padW);
+            ss << "-" << group << "-" << trans;
             return ss.str();
         }
 
