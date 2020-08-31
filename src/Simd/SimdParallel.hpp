@@ -24,8 +24,8 @@
 #ifndef __SimdParallel_hpp__
 #define __SimdParallel_hpp__
 
-#include <thread>
 #include <vector>
+#include <thread>
 #ifndef SIMD_FUTURE_DISABLE
 #include <future>
 #endif

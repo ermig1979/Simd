@@ -1731,7 +1731,7 @@ namespace Simd
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             //_old.enable = true;
-            if (_old.enable)
+            if (_old.enable && p.IsDilation(1))
             {
                 if (Set2f(p, _old.convolution))
                     OldSetAlgParam(F);
@@ -1764,9 +1764,9 @@ namespace Simd
 
         bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f& p)
         {
-            if (p.trans != SimdTrue || p.group != 1 || !p.IsDilation(1))
+            if (p.trans != SimdTrue || p.group != 1)
                 return false;
-            if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
+            if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padW)
                 return false;
             if (p.Is1x1() && (p.srcC >= 2 * p.dstC || (p.activation == SimdConvolutionActivationIdentity && p.srcC > 512) || p.srcC > 512))
                 return false;
@@ -1774,7 +1774,7 @@ namespace Simd
                 return false;
             if ((p.strideY > 1 && p.strideX > 1) && p.srcC > 32 && float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX) < 3.0f)
                 return false;
-            if ((p.padX + p.padW)*3.0f > float(p.srcW))
+            if ((p.padX + p.padW)*2.0f > float(p.srcW))
                 return false;
             return true;
         }
