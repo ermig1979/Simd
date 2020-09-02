@@ -495,14 +495,17 @@ namespace Test
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 3, 1, 1, 48, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 6, 1, 1, 96, _1, _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 40, 23, 16, _3, _1, _1, _1, _1, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 40, 23, 16, _3, _2, _1, _2, _2, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 40, 23, 16, _3, _3, _1, _3, _3, 1, a, t), f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 40, 23, 16, _3, _5, _1, _5, _5, 1, a, t), f1, f2);
 #endif
+#if 1
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 7, 59, 256, Size(9, 3), _1, _1, _0, _0, 1, a, t), f1, f2);
+#endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 16, 40, 23, 16, _3, _5, _1, _5, _5, 1, a, t), f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 512, 7, 59, 256, Size(9, 3), _1, _1, _0, _0, 1, a, t), f1, f2);
 #endif
         return result;
     }
@@ -515,16 +518,16 @@ namespace Test
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRelu, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationLeakyRelu, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationRestrictRange, ::SimdTrue, f1, f2);
-        //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
 
         return result;
     }
 
     bool SynetConvolution32fForwardAutoTest()
     {
-        const float EPS = 0.00001f;
+        const float EPS = 0.001f;
         bool result = true;
 
         result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Base::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));

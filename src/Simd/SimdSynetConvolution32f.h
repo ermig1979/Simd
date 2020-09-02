@@ -115,8 +115,23 @@ namespace Simd
             return (padX + srcW - (kernelX - 1) * dilationX - 1) / strideX + 1;
         }
 
+        SIMD_INLINE size_t SizeS() const
+        {
+            return batch * srcC * srcH * srcW;
+        }
+
+        SIMD_INLINE size_t SizeW() const
+        {
+            return kernelY * kernelX * srcC * dstC / group;
+        }
+
+        SIMD_INLINE size_t SizeD() const
+        {
+            return batch * dstC * dstH * dstW;
+        }
+
 #if defined(SIMD_PERFORMANCE_STATISTIC) || 1
-        String Info() const
+        SIMD_INLINE String Info() const
         {
             std::stringstream ss;
             ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
@@ -127,7 +142,7 @@ namespace Simd
             return ss.str();
         }
 
-        long long Flop() const
+        SIMD_INLINE long long Flop() const
         {
             return batch* kernelY* kernelX* srcC* dstH* dstW* dstC / group * 2;
         }

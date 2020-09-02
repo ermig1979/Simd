@@ -1323,7 +1323,14 @@ namespace Simd
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-            _old.enable = (p.srcC <= 3 && p.IsDilation(1));
+            _old.enable = false;
+            if (p.IsDilation(1))
+            {
+                if (p.srcC <= 3)
+                    _old.enable = true;
+                if (p.SizeW()*sizeof(float) > Base::AlgCacheL3() * 3.0)
+                    _old.enable = true;
+            }
             _old.convolution = NULL;
 #endif
         }

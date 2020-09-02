@@ -1731,7 +1731,7 @@ namespace Simd
         {
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             //_old.enable = true;
-            if (_old.enable && p.IsDilation(1))
+            if (_old.enable)
             {
                 if (Set2f(p, _old.convolution))
                     OldSetAlgParam(F);
