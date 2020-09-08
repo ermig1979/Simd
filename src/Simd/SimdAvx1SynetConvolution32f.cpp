@@ -306,7 +306,7 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                if (NHWC_GEMM_RUNTIME)
+                if (GemmRuntime())
                 {
                     _gemmCb.Init(InitGemmCbFuncs(Avx::Gemm32fNNcbBufferSize, Avx::Gemm32fNNcbReorderB, Avx::Gemm32fNNcbRun, "Avx", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));

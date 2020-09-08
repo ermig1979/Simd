@@ -30,7 +30,6 @@
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdSynet.h"
 
-
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
@@ -114,7 +113,7 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                if (NHWC_GEMM_RUNTIME)
+                if (GemmRuntime())
                 {
                     _gemmCb.Init(InitGemmCbFuncs(Avx2::Gemm32fNNcbBufferSize, Avx2::Gemm32fNNcbReorderB, Avx2::Gemm32fNNcbRun, "Avx2", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));

@@ -501,6 +501,11 @@ namespace Simd
             }
         }
 
+        bool SynetConvolution32fGemmNN::GemmRuntime() const
+        {
+            return NHWC_GEMM_RUNTIME && _param.SizeW() * sizeof(float) < Base::AlgCacheL3() * 1.0f;
+        }
+
         //---------------------------------------------------------------------
 
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
@@ -1328,7 +1333,7 @@ namespace Simd
             {
                 if (p.srcC <= 3)
                     _old.enable = true;
-                if (p.SizeW()*sizeof(float) > Base::AlgCacheL3() * 3.0)
+                if (p.SizeW()*sizeof(float) > Base::AlgCacheL3() * 1.0)
                     _old.enable = true;
             }
             _old.convolution = NULL;

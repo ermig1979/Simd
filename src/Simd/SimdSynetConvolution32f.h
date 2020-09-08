@@ -246,6 +246,7 @@ namespace Simd
         protected:
             virtual void ImgToCol(const float * src, float * dst);
             virtual void ImgToRow(const float * src, float * dst);
+            bool GemmRuntime() const;
 
             bool _skipConv;
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD, _merge;

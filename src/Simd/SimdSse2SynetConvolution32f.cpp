@@ -305,7 +305,7 @@ namespace Simd
             _gemm.Init(InitGemmFuncs(Sse::Gemm32fNN, "Sse", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
-                if (NHWC_GEMM_RUNTIME)
+                if (GemmRuntime())
                 {
                     _gemmCb.Init(InitGemmCbFuncs(Sse::Gemm32fNNcbBufferSize, Sse::Gemm32fNNcbReorderB, Sse::Gemm32fNNcbRun, "Sse", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
@@ -1774,7 +1774,7 @@ namespace Simd
                 return false;
             if ((p.strideY > 1 && p.strideX > 1) && p.srcC > 32 && float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX) < 3.0f)
                 return false;
-            if ((p.padX + p.padW)*2.0f > float(p.srcW))
+            if ((p.padX + p.padW)*3.0f > float(p.srcW))
                 return false;
             return true;
         }
