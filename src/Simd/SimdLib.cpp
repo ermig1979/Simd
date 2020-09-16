@@ -66,6 +66,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
+#include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetScale8i.h"
 
 #include "Simd/SimdBase.h"
@@ -5509,6 +5510,36 @@ SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float
 SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst)
 {
     SynetMergedConvolution32f * c = (SynetMergedConvolution32f*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, buf, dst);
+}
+
+SIMD_API void* SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility)
+{
+    typedef void* (*SimdSynetMergedConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+    const static SimdSynetMergedConvolution8iInitPtr simdSynetMergedConvolution8iInit = SIMD_FUNC0(SynetMergedConvolution8iInit);// , SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
+
+    return simdSynetMergedConvolution8iInit(batch, convs, count, compatibility);
+}
+
+SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* context)
+{
+    return ((SynetMergedConvolution8i*)context)->ExternalBufferSize();
+}
+
+SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context)
+{
+    return ((SynetMergedConvolution8i*)context)->InternalBufferSize();
+}
+
+SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)
+{
+    ((SynetMergedConvolution8i*)context)->SetParams(weight, internal, bias, params, stats);
+}
+
+SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
+{
+    SynetMergedConvolution8i* c = (SynetMergedConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
 }

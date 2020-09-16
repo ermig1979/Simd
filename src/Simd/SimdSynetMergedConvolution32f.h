@@ -46,7 +46,6 @@ namespace Simd
         MergConvParam32f(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
         {
             assert(count <= 3);
-            this->trans = (convs[0].dstF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
             this->add = add;
             this->batch = batch;
             this->count = count;
@@ -56,8 +55,6 @@ namespace Simd
 
         bool Valid()
         {
-            if (trans != SimdTrue)
-                return false;
             if (count < 2 || count > 3)
                 return false;
             for (size_t i = 0; i < count; ++i)
