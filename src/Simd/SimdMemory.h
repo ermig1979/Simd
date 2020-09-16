@@ -28,7 +28,7 @@
 #include "Simd/SimdDefs.h"
 #include "Simd/SimdMath.h"
 
-#if defined(__GNUC__) && defined(SIMD_ALLOCATE_ERROR_MESSAGE)
+#if defined(SIMD_ALLOCATE_ERROR_MESSAGE)
 #include <iostream>
 #endif
 
@@ -93,17 +93,18 @@ namespace Simd
         align = AlignHi(align, sizeof(void *));
         size = AlignHi(size, align);
         int result = ::posix_memalign(&ptr, align, size);
-#ifdef SIMD_ALLOCATE_ERROR_MESSAGE
         if (result != 0)
-            std::cout << "The function posix_memalign can't allocate " << size << " bytes with align " << align << " !" << std::endl << std::flush;
-#endif
-#ifdef SIMD_ALLOCATE_ASSERT
-        assert(result == 0);
-#endif
+            ptr = NULL;
 #else
         ptr = malloc(size);
 #endif
-
+#ifdef SIMD_ALLOCATE_ERROR_MESSAGE
+        if (ptr == NULL)
+            std::cout << "The function posix_memalign can't allocate " << size << " bytes with align " << align << " !" << std::endl << std::flush;
+#endif
+#ifdef SIMD_ALLOCATE_ASSERT
+        assert(ptr);
+#endif
 #ifdef SIMD_NO_MANS_LAND
         if (ptr)
             ptr = (char*)ptr + SIMD_NO_MANS_LAND;

@@ -435,7 +435,8 @@ typedef enum
 typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
 /*! @ingroup synet
-    Describes convolution (deconvolution) parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit and ::SimdSynetMergedConvolution32fInit.
+    Describes convolution (deconvolution) parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, 
+    ::SimdSynetDeconvolution32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
 */
 typedef struct SimdConvolutionParameters
 {
@@ -5632,7 +5633,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_fp32
 
         \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
@@ -5646,7 +5647,7 @@ extern "C"
     */
     SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_fp32
 
         \fn size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
@@ -5657,7 +5658,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_fp32
 
         \fn size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
@@ -5668,7 +5669,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_fp32
 
         \fn void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -5682,7 +5683,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_fp32
 
         \fn void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -5695,7 +5696,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_int8
 
         \fn void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
@@ -5709,7 +5710,7 @@ extern "C"
     */
     SIMD_API void * SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_int8
 
         \fn size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
@@ -5720,7 +5721,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void * context);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_int8
 
         \fn size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
@@ -5731,7 +5732,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void * context);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_int8
 
         \fn void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const * stats);
 
@@ -5745,7 +5746,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution8iSetParams(void * context, const float * weight, const float * bias, const float * params, const float * const* stats);
 
-    /*! @ingroup synet_convolution
+    /*! @ingroup synet_convolution_int8
 
         \fn void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
@@ -5758,7 +5759,7 @@ extern "C"
     */
     SIMD_API void SimdSynetConvolution8iForward(void * context, const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_deconvolution_fp32
 
         \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
@@ -5772,7 +5773,7 @@ extern "C"
     */
     SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_deconvolution_fp32
 
         \fn size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
 
@@ -5783,7 +5784,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_deconvolution_fp32
 
         \fn size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
 
@@ -5794,7 +5795,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_deconvolution_fp32
 
         \fn void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
@@ -5808,7 +5809,7 @@ extern "C"
     */
     SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_deconvolution_fp32
 
         \fn void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -5897,7 +5898,7 @@ extern "C"
     */
     SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -5926,7 +5927,7 @@ extern "C"
     */
     SIMD_API void SimdSynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -5956,7 +5957,7 @@ extern "C"
         */
     SIMD_API void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format);
 
@@ -5986,7 +5987,7 @@ extern "C"
         */
     SIMD_API void SimdSynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward3(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -6015,7 +6016,7 @@ extern "C"
         */
     SIMD_API void SimdSynetFusedLayerForward3(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward4(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -6045,7 +6046,7 @@ extern "C"
         */
     SIMD_API void SimdSynetFusedLayerForward4(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
@@ -6073,7 +6074,7 @@ extern "C"
         */
     SIMD_API void SimdSynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_fused
 
         \fn void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
 
@@ -6227,7 +6228,7 @@ extern "C"
     */
     SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_merged_convolution_fp32
 
         \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
@@ -6242,7 +6243,7 @@ extern "C"
     */
     SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_merged_convolution_fp32
 
         \fn size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context);
 
@@ -6253,7 +6254,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_merged_convolution_fp32
 
         \fn size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
 
@@ -6264,7 +6265,7 @@ extern "C"
     */
     SIMD_API size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_merged_convolution_fp32
 
         \fn void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
@@ -6278,7 +6279,7 @@ extern "C"
     */
     SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_merged_convolution_fp32
 
         \fn void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
 
@@ -6290,6 +6291,71 @@ extern "C"
         \param [out] dst - a pointer to output image.
     */
     SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst);
+
+    /*! @ingroup synet_merged_convolution_int8
+
+        \fn void * SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+
+        \short Initilizes INT8 merged convolution algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] convs - an array with convolutions parameters.
+        \param [in] count - a number of merged convolutions.
+        \param [in] compatibility - a flags of bitwise compatibility.
+        \return a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetMergedConvolution8iExternalBufferSize, ::SimdSynetMergedConvolution8iInternalBufferSize, ::SimdSynetMergedConvolution8iSetParams and ::SimdSynetMergedConvolution8iForward.
+    */
+    SIMD_API void* SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet_merged_convolution_int8
+
+        \fn size_t SimdSynetMergedConvolution8iExternalBufferSize(const void * context);
+
+        \short Gets size in bytes of external temporary buffer required for INT8 merged convolution algorithm.
+
+        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
+        \return size in bytes of external temporary buffer required for INT8 merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* context);
+
+    /*! @ingroup synet_merged_convolution_int8
+
+        \fn size_t SimdSynetMergedConvolution8iInternalBufferSize(const void * context);
+
+        \short Gets size in bytes of internal buffer used inside INT8 merged convolution algorithm.
+
+        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
+        \return size in bytes of internal buffer used inside INT8 merged convolution algorithm.
+    */
+    SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_merged_convolution_int8
+
+        \fn void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
+
+        \short Sets weights, beases and parameters of activation function required for INT8 merged convolution algorithm.
+
+        \param [in, out] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions.
+        \param [out] internal - a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] bias - a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] params - a pointer to the array with pointers to parameters of the activation functions (see ::SimdConvolutionActivationType). The array size is determined by number of merged convolutions. Can be NULL.
+        \param [in] stats - a pointer to pointers with statistics of input(min - stats[0], max - stats[1]), interim(min - stats[2], max - stats[3]) and output(min - stats[4], max - stats[5]) tensors.
+    */
+    SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats);
+
+    /*! @ingroup synet_merged_convolution_int8
+
+        \fn void SimdSynetMergedConvolution8iForward(void * context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+        \short Performs forward propagation of INT8 merged convolution algorithm.
+
+        \param [in] context - a pointer to INT8 merged convolution context. It must be created by function ::SimdSynetMergedConvolution8iInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input image.
+        \param [out] buf - a pointer to external temporary buffer. The sizein bytes of the external temporary buffer is determined by function ::SimdSynetMergedConvolution8iExternalBufferSize. Can be NULL (it causes usage of internal buffer).
+        \param [out] dst - a pointer to output image.
+    */
+    SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
     /*! @ingroup synet
 
