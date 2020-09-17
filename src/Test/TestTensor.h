@@ -86,6 +86,14 @@ namespace Test
             Extend();
         }
 
+        SIMD_INLINE void Clone(const Tensor& tensor)
+        {
+            _shape = tensor._shape;
+            _format = tensor._format;
+            _size = tensor._size;
+            _data = tensor._data;
+        }
+
         SIMD_INLINE SimdTensorFormatType Format() const
         {
             return _format;

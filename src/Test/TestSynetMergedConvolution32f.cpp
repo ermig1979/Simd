@@ -115,21 +115,10 @@ namespace Test
                 description = ss.str();
             }
 
-            void Call(const Param & p, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
+            void Call(void* context, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
-                void * context = func(p.batch, p.conv, p.count, p.add);
-                buf.Extend({ ::SimdSynetMergedConvolution32fExternalBufferSize(context) });
-                ::SimdSynetMergedConvolution32fSetParams(context, p.weight, NULL, p.bias, p.params);
-                if (p.add)
-                {
-                    float value = 1.1f;
-                    SimdFill32f(dst.Data(), dst.Size(), &value);
-                }
-                {
-                    TEST_PERFORMANCE_TEST(description);
-                    ::SimdSynetMergedConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
-                }
-                ::SimdRelease(context);
+                TEST_PERFORMANCE_TEST(description);
+                ::SimdSynetMergedConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
             }
         };
     }
@@ -183,9 +172,23 @@ namespace Test
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(p, src, buf, dst1));
+        void* context1 = f1.func(p.batch, p.conv, p.count, p.add);
+        void* context2 = f2.func(p.batch, p.conv, p.count, p.add);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(p, src, buf, dst2));
+        buf.Extend({ ::SimdSynetMergedConvolution32fExternalBufferSize(context1) });
+        buf.Extend({ ::SimdSynetMergedConvolution32fExternalBufferSize(context2) });
+
+        ::SimdSynetMergedConvolution32fSetParams(context1, p.weight, NULL, p.bias, p.params);
+        ::SimdSynetMergedConvolution32fSetParams(context2, p.weight, NULL, p.bias, p.params);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf, dst2));
+
+        ::SimdRelease(context1);
+        ::SimdRelease(context2);
 
         result = result && Compare(dst1, dst2, eps, true, 64, DifferenceBoth);
 

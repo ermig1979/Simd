@@ -387,6 +387,13 @@ namespace Test
         int uMax = Simd::Base::Narrowed(compatibility) ? Simd::Base::U8_NARROWED_MAX : Simd::Base::U8_PRECISE_MAX;
         int iMin = Simd::Base::Narrowed(compatibility) ? Simd::Base::I8_NARROWED_MIN : Simd::Base::I8_PRECISE_MIN;
         int iMax = Simd::Base::Narrowed(compatibility) ? Simd::Base::I8_NARROWED_MAX : Simd::Base::I8_PRECISE_MAX;
+        Tensor32f buffer;
+        if (scale == NULL && shift == NULL)
+        {
+            buffer.Reshape(Shp(2, channels));
+            scale = buffer.Data(Shp(0, 0));
+            shift = buffer.Data(Shp(1, 0));
+        }
         for (size_t i = 0; i < channels; ++i)
         {
             float abs = std::max(Simd::Abs(min[i]), Simd::Abs(max[i]));
@@ -495,11 +502,14 @@ namespace Test
         int uMax = Simd::Base::Narrowed(compatibility) ? Simd::Base::U8_NARROWED_MAX : Simd::Base::U8_PRECISE_MAX;
         int iMin = Simd::Base::Narrowed(compatibility) ? Simd::Base::I8_NARROWED_MIN : Simd::Base::I8_PRECISE_MIN;
         int iMax = Simd::Base::Narrowed(compatibility) ? Simd::Base::I8_NARROWED_MAX : Simd::Base::I8_PRECISE_MAX;
-        for (size_t i = 0; i < channels; ++i)
+        if (scale != NULL && shift != NULL)
         {
-            float abs = std::max(Simd::Abs(min[i]), Simd::Abs(max[i]));
-            scale[i] = abs / (negative ? iMax : uMax);
-            shift[i] = float(negative ? iMin : uMin) * scale[i];
+            for (size_t i = 0; i < channels; ++i)
+            {
+                float abs = std::max(Simd::Abs(min[i]), Simd::Abs(max[i]));
+                scale[i] = abs / (negative ? iMax : uMax);
+                shift[i] = float(negative ? iMin : uMin) * scale[i];
+            }            
         }
     }
 

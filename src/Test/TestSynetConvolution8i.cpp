@@ -106,14 +106,13 @@ namespace Test
         }
 
         Tensor32f srcMin({ c.srcC }), srcMax({ c.srcC }), dstMin({ c.dstC }), dstMax({ c.dstC });
-        Tensor32f srcScale({ c.srcC }), srcShift({ c.srcC }), dstScale({ c.dstC }), dstShift({ c.dstC });
         Tensor32f src32f(p.SrcShape(), p.conv.srcF), dst32f1(p.DstShape(), p.conv.dstF), dst32f2(p.DstShape(), p.conv.dstF), buf32f;
         Tensor8u src8u(p.SrcShape(), p.conv.srcF), dst8u1(p.DstShape(), p.conv.dstF), dst8u2(p.DstShape(), p.conv.dstF), buf8u;
         //dst8u2.Reshape({ 1000000 }); dst8u2.Extend(p.DstShape());
 
         FillRandom(src32f, srcMin.Data(), srcMax.Data(), p.conv.srcC, neg);
-        SetSrc32fTo8u(src32f, srcMin.Data(), srcMax.Data(), c.srcC, neg, comp, srcScale.Data(), srcShift.Data(), src8u);
-        FillDstStat(p, neg, comp, weight, bias, params, src32f, buf32f, dst32f1, dstMin.Data(), dstMax.Data(), dstScale.Data(), dstShift.Data());
+        SetSrc32fTo8u(src32f, srcMin.Data(), srcMax.Data(), c.srcC, neg, comp, NULL, NULL, src8u);
+        FillDstStat(p, neg, comp, weight, bias, params, src32f, buf32f, dst32f1, dstMin.Data(), dstMax.Data(), NULL, NULL);
 
         const float* stats[4] = { srcMin.Data(), srcMax.Data(), dstMin.Data(), dstMax.Data() };
         const uint8_t * src = p.conv.srcT == SimdTensorData32f ? (uint8_t*)src32f.Data() : src8u.Data();

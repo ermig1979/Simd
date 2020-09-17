@@ -57,7 +57,7 @@ namespace Simd
             for (size_t i = 0; i < count; ++i)
             {
                 SimdConvolutionParameters & c = conv[i];                
-                if (c.srcT != SimdTensorData32f || c.dstT != SimdTensorData32f)
+                if ((c.srcT != SimdTensorData32f && c.srcT != SimdTensorData8u) || (c.dstT != SimdTensorData32f && c.dstT != SimdTensorData8u))
                     return false;
                 if (c.srcF != SimdTensorFormatNhwc || c.dstF != SimdTensorFormatNhwc)
                     return false;
