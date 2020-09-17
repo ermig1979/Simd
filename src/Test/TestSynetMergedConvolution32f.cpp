@@ -115,8 +115,13 @@ namespace Test
                 description = ss.str();
             }
 
-            void Call(void* context, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
+            void Call(void* context, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst, int add) const
             {
+                if (add)
+                {
+                    float value = 1.1f;
+                    SimdFill32f(dst.Data(), dst.Size(), &value);
+                }
                 TEST_PERFORMANCE_TEST(description);
                 ::SimdSynetMergedConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
             }
@@ -183,9 +188,9 @@ namespace Test
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(context1, src, buf, dst1, p.add));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(context2, src, buf, dst2, p.add));
 
         ::SimdRelease(context1);
         ::SimdRelease(context2);
@@ -262,6 +267,7 @@ namespace Test
 #endif
 #if 1
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), f), f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 64, 10, 6), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 64), t), f1, f2);
 #endif
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 1280, 12, 21), Cnv(a0, 1, 1, 256), Cnv(a1, 3, 2)), f1, f2);
