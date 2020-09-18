@@ -365,6 +365,8 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetFusedLayerForward8);
     TEST_ADD_GROUP_A00(SynetFusedLayerForward9);
 
+    TEST_ADD_GROUP_A00(SynetMergedConvolution8iForward);
+
     TEST_ADD_GROUP_A00(SynetMergedConvolution32fForward);
 
     TEST_ADD_GROUP_A00(SynetPoolingForwardAverage);

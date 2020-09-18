@@ -41,7 +41,7 @@ namespace Simd
     }
 }
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)// && defined(NDEBUG)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
 
 #include "Simd/SimdTime.h"
 

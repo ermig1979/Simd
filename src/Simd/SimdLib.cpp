@@ -159,7 +159,7 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
 
 SIMD_API const char * SimdPerformanceStatistic()
 {
-#if defined(SIMD_PERFORMANCE_STATISTIC) && defined(NDEBUG)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
     return Base::PerformanceMeasurerStorage::s_storage.PerformanceStatistic();
 #else
     return "";

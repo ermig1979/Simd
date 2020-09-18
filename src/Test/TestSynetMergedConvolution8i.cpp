@@ -68,7 +68,7 @@ namespace Test
                 SetConv(conv + 0, c0, in);
                 SetConv(conv + 1, c1);
                 conv[0].srcT = s;
-                conv[2].dstT = d;
+                conv[1].dstT = d;
                 neg = n;
                 comp = c;
             }
@@ -124,7 +124,7 @@ namespace Test
             void Call(void * context, const uint8_t* src, uint8_t * buf, uint8_t* dst) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                ::SimdSynetConvolution8iForward(context, src, buf, dst);
+                ::SimdSynetMergedConvolution8iForward(context, src, buf, dst);
             }
         };
     }
@@ -140,7 +140,7 @@ namespace Test
         conv.dstT = SimdTensorData32f;
         void* context = SimdSynetConvolution32fInit(p.batch, &conv, NULL);
         buf.Extend({ SimdSynetConvolution32fExternalBufferSize(context) });
-        dst.Reshape(Shp(p.batch, conv.dstH, conv.dstW, conv.dstC));
+        dst.Reshape(Shp(p.batch, conv.dstH, conv.dstW, conv.dstC), conv.dstF);
         SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
         SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());
         SimdRelease(context);
@@ -249,10 +249,10 @@ namespace Test
         const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationHswish, a2 = ::SimdConvolutionActivationIdentity;
 #ifdef NDEBUG
 #if 1
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 80, 45), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 20, 12), Cnv(a0, 1, 1, 24), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 80, 45), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 20, 12), Cnv(a0, 1, 1, 24), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
 #endif
         return result;
     }

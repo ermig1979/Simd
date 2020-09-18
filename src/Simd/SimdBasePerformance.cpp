@@ -23,7 +23,7 @@
 */
 #include "Simd/SimdPerformance.h"
 
-#if defined(SIMD_PERFORMANCE_STATISTIC) && defined(NDEBUG)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
 namespace Simd
 {
     namespace Base
