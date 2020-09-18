@@ -27,6 +27,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdRuntime.h"
+#include "Simd/SimdSynetConvolution8i.h"
 
 #ifdef _N
 #undef _N
@@ -175,8 +176,18 @@ namespace Simd
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
 
+            typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
+                const size_t* bufH, const float* weight, const float* bias, const float* params, float* dst);
+
+
             MergConvParam8i _param;
+            bool _src8u, _dst8u, _dw0;
+            size_t _sizeS, _sizeD, _sizeB[2];
+            CvtParam _cvt[3];
             Array8u _buffer;
+            Array8i _weight8i[2];
+            Array32f _weight32f, _norm[2], _bias[3], _params[3];
+            DepthwisePtr _depthwise;
 
         private:
 #if defined(SIMD_PERFORMANCE_STATISTIC)

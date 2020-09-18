@@ -58,15 +58,21 @@ namespace Simd
                 }
                 *(size_t*)&size = size_;
                 if (size_)
-                    *(T**)&data = (T*)Simd::Allocate(size * sizeof(T), align);
+                    *(T**)&data = (T*)Simd::Allocate(RawSize(), align);
             }
             if (clear)
                 Clear();
         }
 
+        SIMD_INLINE void Assign(const T * src, size_t size_)
+        {
+            Resize(size_);
+            memcpy(data, src, RawSize());
+        }
+
         SIMD_INLINE void Clear()
         {
-            ::memset(data, 0, size * sizeof(T));
+            memset(data, 0, RawSize());
         }
 
         SIMD_INLINE void Swap(const Array & array)
@@ -83,6 +89,11 @@ namespace Simd
         SIMD_INLINE const T & operator[] (size_t i) const
         {
             return data[i];
+        }
+
+        SIMD_INLINE size_t RawSize() const
+        {
+            return size * sizeof(T);
         }
     };
 

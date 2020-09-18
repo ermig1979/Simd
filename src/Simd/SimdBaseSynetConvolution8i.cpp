@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution8i.h"
+#include "Simd/SimdSynetConvolution8iCommon.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
@@ -368,12 +369,13 @@ namespace Simd
             float * dst32f = _dst8u ? Allocate<float>(buf, _sizeD * _merge) : (float*)dst;
             if (!_skipConv)
             {
+                const uint8_t* zero = _srcCvt.zero.data;
                 if(p.trans)
                     for (size_t m = 0; m < _merge; ++m)
-                        ImgToRow(src + m * _sizeS, buf + m * _sizeB);
+                        ImgToRow(src + m * _sizeS, p, zero, buf + m * _sizeB);
                 else
                     for (size_t m = 0; m < _merge; ++m)
-                        ImgToCol(src + m * _sizeS, buf + m * _sizeB);
+                        ImgToCol(src + m * _sizeS, p, zero, buf + m * _sizeB);
                 src = buf;
             }
             if (_merge > 1)
@@ -382,12 +384,13 @@ namespace Simd
             }
             else
             {
+                bool overflow = Overflow(p.compatibility);
                 for (size_t g = 0; g < p.group; ++g)
                 {
                     if (p.trans)
-                        GemmNhwc(_siS, _siD, _siK, _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD);
+                        GemmNhwc(_siS, _siD, _siK, _siC, src + _grS * g, _ldS, weight + _grW * g, _ldW, sum + _grD * g, _ldD, overflow);
                     else
-                        GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD);
+                        GemmNchw(_siD, _siS, _siC, _siK, weight + _grW * g, _ldW, src + _grS * g, _ldS, sum + _grD * g, _ldD, overflow);
                 }
             }
             Convert<int32_t, float, float>(sum, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _norm.data, _bias.data, 0, 0, dst32f);
@@ -422,226 +425,6 @@ namespace Simd
             }
             if (_dst8u)
                 Convert<float, uint8_t, float>(dst32f, _merge, p.dstC, p.dstH, p.dstW, p.dstF, _dstCvt.scale.data, _dstCvt.shift.data, _dstCvt.uMin, _dstCvt.uMax, dst);
-        }
-
-        void SynetConvolution8iGemmNN::ImgToCol(const uint8_t* src, uint8_t* dst)
-        {
-            const ConvParam8i& p = _param;
-            assert(!p.trans);
-            size_t srcSize = p.srcW * p.srcH;
-            const uint8_t* zero = _srcCvt.zero.data;
-            if (p.IsDilation(1) && p.IsStride(2) && p.IsPad(0) && p.IsKernel(1))
-            {
-                for (size_t channel = 0; channel < p.srcC; ++channel)
-                {
-                    for (size_t dy = 0; dy < p.dstH; ++dy)
-                    {
-                        const uint8_t * psrc = src + 2 * dy * p.srcW;
-                        for (size_t dx = 0, sx = 0; dx < p.dstW; ++dx, sx += 2)
-                            *(dst++) = psrc[sx];
-                    }
-                    src += srcSize;
-                }
-            }
-            else if (p.IsDilation(1) && p.IsStride(1))
-            {
-                const ptrdiff_t bodySize = p.dstW - p.padX - p.padW;
-                for (size_t channel = 0; channel < p.srcC; ++channel)
-                {
-                    for (size_t ky = 0; ky < p.kernelY; ++ky)
-                    {
-                        for (size_t kx = 0; kx < p.kernelX; ++kx)
-                        {
-                            size_t sy = ky - p.padY;
-                            for (size_t dy = 0; dy < p.dstH; ++dy, ++sy)
-                            {
-                                if (sy < p.srcH)
-                                {
-                                    size_t sx = kx - p.padX, dx = 0;
-                                    const uint8_t * psrc = src + sy * p.srcW;
-                                    for (; dx < p.padX; ++dx, ++sx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = psrc[sx];
-                                        else
-                                            *(dst++) = zero[channel];
-                                    }
-                                    if (bodySize > 0)
-                                    {
-                                        memcpy(dst, psrc + sx, bodySize * sizeof(uint8_t));
-                                        dst += bodySize;
-                                        dx += bodySize;
-                                        sx += bodySize;
-                                    }
-                                    for (; dx < p.dstW; ++dx, ++sx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = psrc[sx];
-                                        else
-                                            *(dst++) = zero[channel];
-                                    }
-                                }
-                                else
-                                {
-                                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                                        *(dst++) = zero[channel];
-                                }
-                            }
-                        }
-                    }
-                    src += srcSize;
-                }
-            }
-            else
-            {
-                for (size_t channel = 0; channel < p.srcC; ++channel)
-                {
-                    for (size_t ky = 0; ky < p.kernelY; ky++)
-                    {
-                        for (size_t kx = 0; kx < p.kernelX; kx++)
-                        {
-                            size_t sy = ky * p.dilationY - p.padY;
-                            for (size_t dy = 0; dy < p.dstH; ++dy)
-                            {
-                                if (sy < p.srcH)
-                                {
-                                    size_t sx = kx * p.dilationX - p.padX;
-                                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = src[sy * p.srcW + sx];
-                                        else
-                                            *(dst++) = zero[channel];
-                                        sx += p.strideX;
-                                    }
-                                }
-                                else
-                                {
-                                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                                        *(dst++) = zero[channel];
-                                }
-                                sy += p.strideY;
-                            }
-                        }
-                    }
-                    src += srcSize;
-                }
-            }
-        }
-
-        void SynetConvolution8iGemmNN::ImgToRow(const uint8_t* src, uint8_t* dst)
-        {
-            const ConvParam8i& p = _param;
-            assert(p.trans);
-            size_t size = p.srcC / p.group;
-            const uint8_t* zero = _srcCvt.zero.data;
-            for (size_t g = 0; g < p.group; ++g)
-            {
-                for (size_t dy = 0; dy < p.dstH; ++dy)
-                {
-                    for (size_t dx = 0; dx < p.dstW; ++dx)
-                    {
-                        for (size_t ky = 0; ky < p.kernelY; ky++)
-                        {
-                            size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                            if (sy < p.srcH)
-                            {
-                                for (size_t kx = 0; kx < p.kernelX; kx++)
-                                {
-                                    size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                    if (sx < p.srcW)
-                                    {
-                                        memcpy(dst, src + (sy * p.srcW + sx) * p.srcC, size * sizeof(uint8_t));
-                                        dst += size;
-                                    }
-                                    else
-                                    {
-                                        memcpy(dst, zero, size * sizeof(uint8_t));
-                                        dst += size;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                for (size_t kx = 0; kx < p.kernelX; kx++)
-                                {
-                                    memcpy(dst, zero, size * sizeof(uint8_t));
-                                    dst += size;
-                                }
-                            }
-                        }
-                    }
-                }
-                src += size;
-                zero += size;
-            }
-        }
-
-        void SynetConvolution8iGemmNN::GemmNchw(size_t D, size_t S, size_t C, size_t K, const int8_t* wgt, size_t ldw, const uint8_t* src, size_t lds, int32_t* dst, size_t ldd)
-        {
-            const size_t C2 = Overflow(_param.compatibility) ? AlignLo(C, 2) : 0;
-            for (size_t i = 0; i < D; ++i)
-            {
-                for (size_t j = 0; j < S; ++j)
-                    dst[j] = 0;
-                size_t c = 0;
-                for (; c < C2; c += 2)
-                {
-                    for (size_t k = 0; k < K; k++)
-                    {
-                        int32_t w0 = wgt[(c + 0) * K + k];
-                        int32_t w1 = wgt[(c + 1) * K + k];
-                        const uint8_t* s0 = src + ((c + 0) * K + k) * lds;
-                        const uint8_t* s1 = src + ((c + 1) * K + k) * lds;
-                        for (size_t j = 0; j < S; ++j)
-                            dst[j] += Simd::RestrictRange(s0[j] * w0 + s1[j] * w1, SHRT_MIN, SHRT_MAX);
-                    }
-                }
-                for (; c < C; ++c)
-                {
-                    for (size_t k = 0; k < K; k++)
-                    {
-                        int32_t w0 = wgt[(c + 0) * K + k];
-                        const uint8_t* s0 = src + ((c + 0) * K + k) * lds;
-                        for (size_t j = 0; j < S; ++j)
-                            dst[j] += s0[j] * w0;
-                    }
-                }
-                wgt += ldw;
-                dst += ldd;
-            }
-        }
-
-        void SynetConvolution8iGemmNN::GemmNhwc(size_t S, size_t D, size_t K, size_t C, const uint8_t* src, size_t lds, const int8_t* wgt, size_t ldw, int32_t* dst, size_t ldd)
-        {
-            const size_t C2 = Overflow(_param.compatibility) ? AlignLo(C, 2) : 0;
-            for (size_t i = 0; i < S; ++i)
-            {
-                for (size_t j = 0; j < D; ++j)
-                    dst[j] = 0;
-                for (size_t k = 0, o = 0; k < K; k++)
-                {
-                    size_t c = 0;
-                    for (; c < C2; c += 2, o += 2)
-                    {
-                        int32_t s0 = src[o + 0];
-                        int32_t s1 = src[o + 1];
-                        const int8_t* w0 = wgt + (o + 0) * ldw;
-                        const int8_t* w1 = wgt + (o + 1) * ldw;
-                        for (size_t j = 0; j < D; ++j)
-                            dst[j] += Simd::RestrictRange(s0 * w0[j] + s1 * w1[j], SHRT_MIN, SHRT_MAX);
-                    }
-                    for (; c < C; ++c, ++o)
-                    {
-                        int32_t s0 = src[o];
-                        const int8_t* w0 = wgt + o * ldw;
-                        for (size_t j = 0; j < D; ++j)
-                            dst[j] += s0 * w0[j];
-                    }
-                }
-                src += lds;
-                dst += ldd;
-            }
         }
 
         //---------------------------------------------------------------------

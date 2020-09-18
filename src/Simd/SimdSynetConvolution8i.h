@@ -200,12 +200,6 @@ namespace Simd
         protected:
             virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-            virtual void ImgToCol(const uint8_t* src, uint8_t* dst);
-            virtual void ImgToRow(const uint8_t* src, uint8_t* dst);
-
-            virtual void GemmNchw(size_t D, size_t S, size_t C, size_t K, const int8_t * wgt, size_t ldw, const uint8_t * src, size_t lds, int32_t * dst, size_t ldd);
-            virtual void GemmNhwc(size_t S, size_t D, size_t K, size_t C, const uint8_t * src, size_t lds, const int8_t * wgt, size_t ldw, int32_t * dst, size_t ldd);
-
             bool _skipConv;
             size_t _ldW, _ldS, _ldD, _grW, _grS, _grD, _siC, _siK, _siS, _siD, _sizeB;
         };

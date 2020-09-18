@@ -75,43 +75,6 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
-        {
-            assert(p.group == p.srcC && p.group == p.dstC);
-            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
-            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
-            for (size_t dy = yBeg; dy < yEnd; ++dy)
-            {
-                for (size_t dx = 0; dx < dstW; ++dx)
-                {
-                    for (size_t c = 0; c < srcC; ++c)
-                    {
-                        float sum = bias ? bias[c] : 0;
-                        for (size_t ky = 0; ky < kernelY; ++ky)
-                        {
-                            size_t sy = dy * strideY + ky - padY;
-                            if (sy < srcH)
-                            {
-                                for (size_t kx = 0; kx < kernelX; ++kx)
-                                {
-                                    size_t sx = dx * strideX + kx - padX;
-                                    if (sx < srcW)
-                                    {
-                                        const float* pw = weight + (ky * kernelX + kx) * srcC + c;
-                                        const float* ps = src + (sy * srcW + sx) * srcC + c;
-                                        sum += ps[0] * pw[0];
-                                    }
-                                }
-                            }
-                        }
-                        dst[c] = Activate<type>(sum, params, c);
-                    }
-                    dst += srcC;
-                }
-            }
-        }
-
         template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t index, SynetMergedConvolution32fCdc::ConvolutionPtr * convolution)
         {
             switch (index)
@@ -147,7 +110,6 @@ namespace Simd
            , _perf(NULL)
 #endif        
         {
-            const size_t n = p.count;
             for (size_t i = 0; i < 6; ++i)
                 _convolution[i] = NULL;
             const SimdConvolutionParameters& beg = p.conv[0];
@@ -156,7 +118,7 @@ namespace Simd
             _sizeD = end.dstH * end.dstW * end.dstC;
             _sizeB[0] = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
             _sizeB[1] = p.count == 3 ? p.conv[1].dstH * p.conv[1].dstW * p.conv[1].dstC : 0;
-            for (size_t i = 0; i < _param.count; ++i)
+            for (size_t i = 0; i < p.count; ++i)
             {
                 switch (p.conv[i].activation)
                 {

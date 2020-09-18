@@ -78,6 +78,43 @@ namespace Simd
         {
             return SynetHswish32f(value, params[0], params[1]);
         }
+
+        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+        {
+            assert(p.group == p.srcC && p.group == p.dstC);
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
+            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
+            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < dstW; ++dx)
+                {
+                    for (size_t c = 0; c < srcC; ++c)
+                    {
+                        float sum = bias ? bias[c] : 0;
+                        for (size_t ky = 0; ky < kernelY; ++ky)
+                        {
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
+                            {
+                                for (size_t kx = 0; kx < kernelX; ++kx)
+                                {
+                                    size_t sx = dx * strideX + kx - padX;
+                                    if (sx < srcW)
+                                    {
+                                        const float* pw = weight + (ky * kernelX + kx) * srcC + c;
+                                        const float* ps = src + (sy * srcW + sx) * srcC + c;
+                                        sum += ps[0] * pw[0];
+                                    }
+                                }
+                            }
+                        }
+                        dst[c] = Activate<type>(sum, params, c);
+                    }
+                    dst += srcC;
+                }
+            }
+        }
     }
 
 #ifdef SIMD_SSE2_ENABLE    

@@ -38,6 +38,26 @@ namespace Simd
            , _perf(NULL)
 #endif        
         {
+            const SimdConvolutionParameters& beg = p.conv[0];
+            const SimdConvolutionParameters& end = p.conv[p.count - 1];
+            _sizeS = beg.srcH * beg.srcW * beg.srcC;
+            _sizeD = end.dstH * end.dstW * end.dstC;
+            _sizeB[0] = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
+            _sizeB[1] = p.count == 3 ? p.conv[1].dstH * p.conv[1].dstW * p.conv[1].dstC : 0;
+            _src8u = beg.srcT == SimdTensorData8u;
+            _dst8u = end.dstT == SimdTensorData8u;
+            _dw0 = beg.group != 1;
+            switch (p.conv[_dw0 ? 0 : 1].activation)
+            {
+            case SimdConvolutionActivationIdentity: _depthwise = DepthwiseConvolution<SimdConvolutionActivationIdentity>; break;
+            case SimdConvolutionActivationRelu: _depthwise = DepthwiseConvolution<SimdConvolutionActivationRelu>; break;
+            case SimdConvolutionActivationLeakyRelu: _depthwise = DepthwiseConvolution<SimdConvolutionActivationLeakyRelu>; break;
+            case SimdConvolutionActivationRestrictRange: _depthwise = DepthwiseConvolution<SimdConvolutionActivationRestrictRange>; break;
+            case SimdConvolutionActivationPrelu: _depthwise = DepthwiseConvolution<SimdConvolutionActivationPrelu>; break;
+            case SimdConvolutionActivationElu: _depthwise = DepthwiseConvolution<SimdConvolutionActivationElu>; break;
+            case SimdConvolutionActivationHswish: _depthwise = DepthwiseConvolution<SimdConvolutionActivationHswish>; break;
+            default: assert(0);
+            }
         }
 
         size_t SynetMergedConvolution8i::ExternalBufferSize() const
@@ -47,16 +67,37 @@ namespace Simd
 
         size_t SynetMergedConvolution8i::InternalBufferSize() const
         {
-            size_t size = _buffer.size;
+            size_t size = _buffer.RawSize() + _weight32f.RawSize();
+            for (size_t i = 0; i < 3; ++i)
+            {
+                if (i < 2) 
+                    size += _norm[i].RawSize() + _weight8i[i].RawSize();
+                size += _bias[i].RawSize() + _params[i].RawSize() + _cvt[i].Size();
+            }
             return size;
         }
 
         void SynetMergedConvolution8i::SetParams(const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)
         {
             const MergConvParam8i& p = _param;
-            for (size_t i = 0; i < p.count; ++i)
+            for (size_t i = 0, ci = 0; i < p.count; ++i)
             {
-
+                const SimdConvolutionParameters& c = p.conv[i];
+                if (p.conv[i].group == 1)
+                {
+                    _weight8i[ci].Resize(c.dstC * c.kernelY * c.kernelX * c.srcC);
+                    _norm[ci].Resize(c.dstC);
+                    _bias[i].Resize(c.dstC);
+                    ci++;
+                }
+                else
+                {
+                    _weight32f.Assign(weight[i], c.dstC * c.kernelY * c.kernelX);
+                    _bias[i].Assign(bias[i], c.dstC);
+                }
+                _params[i].Assign(params[i], c.dstC);
+                if (internal)
+                    internal[i] = SimdTrue;
             }
         }
 
