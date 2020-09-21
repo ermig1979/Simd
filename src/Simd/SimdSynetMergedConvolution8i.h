@@ -175,14 +175,15 @@ namespace Simd
 
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
+            void Quantize(const float* weight, const float* bias, size_t i, size_t q);
+            void DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst);
 
             typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
                 const size_t* bufH, const float* weight, const float* bias, const float* params, float* dst);
 
-
             MergConvParam8i _param;
-            bool _src8u, _dst8u, _dw0;
-            size_t _sizeS, _sizeD, _sizeB[2];
+            bool _s8u, _d8u, _dw0, _1x1;
+            size_t _sizeS, _sizeD, _sizeI[2], _sizeB[5];
             CvtParam _cvt[3];
             Array8u _buffer;
             Array8i _weight8i[2];

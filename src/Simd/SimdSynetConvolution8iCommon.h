@@ -36,6 +36,61 @@ namespace Simd
 {
     namespace Base
     {
+        template<class S, class D, class F> SIMD_INLINE D Convert(S value, F scale, F shift, int lower, int upper)
+        {
+            return (D)(F(value) * scale + shift);
+        }
+
+        template<> SIMD_INLINE uint8_t Convert<float, uint8_t, float>(float value, float scale, float shift, int lower, int upper)
+        {
+            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
+        }
+
+        template<> SIMD_INLINE int8_t Convert<float, int8_t, float>(float value, float scale, float shift, int lower, int upper)
+        {
+            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
+        }
+
+        template<class S, class D, class F> void Convert(const S* src, size_t batch, size_t channels, size_t height, size_t width,
+            SimdTensorFormatType format, const F* scale, const F* shift, int lower, int upper, D* dst)
+        {
+            for (size_t b = 0; b < batch; ++b)
+            {
+                if (format == SimdTensorFormatNchw)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        F _scale = scale[c];
+                        F _shift = shift[c];
+                        for (size_t h = 0; h < height; ++h)
+                        {
+                            for (size_t w = 0; w < width; ++w)
+                                dst[w] = Convert<S, D, F>(src[w], _scale, _shift, lower, upper);
+                            src += width;
+                            dst += width;
+                        }
+                    }
+                }
+                else if (format == SimdTensorFormatNhwc)
+                {
+                    for (size_t h = 0; h < height; ++h)
+                    {
+                        for (size_t w = 0; w < width; ++w)
+                        {
+                            for (size_t c = 0; c < channels; ++c)
+                                dst[c] = Convert<S, D, F>(src[c], scale[c], shift[c], lower, upper);
+                            src += channels;
+                            dst += channels;
+                        }
+                    }
+                }
+                else
+                    assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         inline void ImgToCol(const uint8_t* src, const ConvParam8i& p, const uint8_t* zero, uint8_t* dst)
         {
             assert(!p.trans);
@@ -139,9 +194,9 @@ namespace Simd
             }
         }
 
-        inline void ImgToRow(const uint8_t* src, const ConvParam8i& p, const uint8_t* zero, uint8_t* dst)
+        inline void ImgToRow(const uint8_t* src, const SimdConvolutionParameters & p, const uint8_t* zero, uint8_t* dst)
         {
-            assert(p.trans);
+            assert(p.srcF == SimdTensorFormatNhwc);
             size_t size = p.srcC / p.group;
             for (size_t g = 0; g < p.group; ++g)
             {

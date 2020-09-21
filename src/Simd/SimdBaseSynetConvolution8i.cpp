@@ -111,8 +111,6 @@ namespace Simd
         float* pNorm = _norm.data;
         float* pBias = _bias.data;
         bool avoidOverflow = _srcCvt.neg && Base::Overflow(p.compatibility);
-        int iMin = Base::Narrowed(p.compatibility) ? Base::I8_NARROWED_MIN : Base::I8_PRECISE_MIN;
-        int iMax = Base::Narrowed(p.compatibility) ? Base::I8_NARROWED_MAX : Base::I8_PRECISE_MAX;
         for (size_t g = 0; g < G; ++g)
         {
             for (size_t d = 0; d < D; ++d)
@@ -127,12 +125,12 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[kc]);
                             maxW = Simd::Max(maxW, pNormW[kc]);
                         }
-                    scale = iMax / Max(Simd::Abs(maxW), Simd::Abs(minW));
+                    scale = _srcCvt.iMax / Max(Simd::Abs(maxW), Simd::Abs(minW));
                     for (size_t k = 0, kc = 0; k < K; ++k)
                         for (size_t c = 0; c < C; ++c, ++kc)
                             if (avoidOverflow)
                             {
-                                int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f, iMin, iMax);
+                                int w = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f, _srcCvt.iMin, _srcCvt.iMax);
                                 if (w & 1)
                                     w = Round(w * 0.25f) * 4;
                                 pDstW[kc * GD + d] = w / 2;
@@ -140,7 +138,7 @@ namespace Simd
                             }
                             else
                             {
-                                pDstW[kc * GD + d] = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f, iMin, iMax);
+                                pDstW[kc * GD + d] = Base::SynetConvert32fTo8i(pNormW[kc], scale, 0.0f, _srcCvt.iMin, _srcCvt.iMax);
                                 normB -= pDstW[kc * GD + d] * pShift[c];
                             }
                 }
@@ -153,12 +151,12 @@ namespace Simd
                             minW = Simd::Min(minW, pNormW[ck]);
                             maxW = Simd::Max(maxW, pNormW[ck]);
                         }
-                    scale = iMax / Max(Simd::Abs(maxW), Simd::Abs(minW));
+                    scale = _srcCvt.iMax / Max(Simd::Abs(maxW), Simd::Abs(minW));
                     for (size_t c = 0, ck = 0; c < C; ++c)
                         for (size_t k = 0; k < K; ++k, ++ck)
                             if (avoidOverflow)
                             {
-                                int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f, iMin, iMax);
+                                int w = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f, _srcCvt.iMin, _srcCvt.iMax);
                                 if (w & 1)
                                     w = Round(w * 0.25f) * 4;
                                 pDstW[d * CK + ck] = w / 2;
@@ -166,7 +164,7 @@ namespace Simd
                             }
                             else
                             {
-                                pDstW[d * CK + ck] = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f, iMin, iMax);
+                                pDstW[d * CK + ck] = Base::SynetConvert32fTo8i(pNormW[ck], scale, 0.0f, _srcCvt.iMin, _srcCvt.iMax);
                                 normB -= pDstW[d * CK + ck] * pShift[c];
                             }
                 }
@@ -258,64 +256,6 @@ namespace Simd
 
     namespace Base
     {
-        template<class S, class D, class F> SIMD_INLINE D Convert(S value, F scale, F shift, int lower, int upper)
-        {
-            return (D)(F(value) * scale + shift);
-        }
-
-        template<> SIMD_INLINE uint8_t Convert<int32_t, uint8_t, float>(int32_t value, float scale, float shift, int lower, int upper)
-        {
-            return (uint8_t)Simd::RestrictRange(Round(float(value) * scale + shift), lower, upper);
-        }
-
-        template<> SIMD_INLINE uint8_t Convert<float, uint8_t, float>(float value, float scale, float shift, int lower, int upper)
-        {
-            return (uint8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
-        }
-
-        template<> SIMD_INLINE int8_t Convert<float, int8_t, float>(float value, float scale, float shift, int lower, int upper)
-        {
-            return (int8_t)Simd::RestrictRange(Round(value * scale + shift), lower, upper);
-        }
-
-        template<class S, class D, class F> void Convert(const S * src, size_t batch, size_t channels, size_t height, size_t width, 
-            SimdTensorFormatType format, const F* scale, const F* shift, int lower, int upper, D * dst)
-        {
-            for (size_t b = 0; b < batch; ++b)
-            {
-                if (format == SimdTensorFormatNchw)
-                {
-                    for (size_t c = 0; c < channels; ++c)
-                    {
-                        F _scale = scale[c];
-                        F _shift = shift[c];
-                        for (size_t h = 0; h < height; ++h)
-                        {
-                            for (size_t w = 0; w < width; ++w)
-                                dst[w] = Convert<S, D, F>(src[w], _scale, _shift, lower, upper);
-                            src += width;
-                            dst += width;
-                        }
-                    }
-                }
-                else if (format == SimdTensorFormatNhwc)
-                {
-                    for (size_t h = 0; h < height; ++h)
-                    {
-                        for (size_t w = 0; w < width; ++w)
-                        {
-                            for (size_t c = 0; c < channels; ++c)
-                                dst[c] = Convert<S, D, F>(src[c], scale[c], shift[c], lower, upper);
-                            src += channels;
-                            dst += channels;
-                        }
-                    }
-                }
-                else
-                    assert(0);
-            }
-        }
-
         SynetConvolution8iGemmNN::SynetConvolution8iGemmNN(const ConvParam8i& p)
             : SynetConvolution8i(p)
         {
