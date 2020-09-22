@@ -75,6 +75,45 @@ namespace Simd
             return value * scale + shift;
         }
 
+        void SynetConvert8uTo32f(const uint8_t * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
+        {
+            for (size_t b = 0; b < batch; ++b)
+            {
+                if (format == SimdTensorFormatNchw)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        float _scale = scale[c];
+                        float _shift = shift[c];
+                        for (size_t h = 0; h < height; ++h)
+                        {
+                            for (size_t w = 0; w < width; ++w)
+                                dst[w] = ToFloat(src[w], _scale, _shift);
+                            src += width;
+                            dst += width;
+                        }
+                    }
+                }
+                else if (format == SimdTensorFormatNhwc)
+                {
+                    for (size_t h = 0; h < height; ++h)
+                    {
+                        for (size_t w = 0; w < width; ++w)
+                        {
+                            for (size_t c = 0; c < channels; ++c)
+                                dst[c] = ToFloat(src[c], scale[c], shift[c]);
+                            src += channels;
+                            dst += channels;
+                        }
+                    }
+                }
+                else
+                    assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         template<SimdPixelFormatType format> SIMD_INLINE int ToGray(const uint8_t* src);
 
         template<> SIMD_INLINE int ToGray<SimdPixelFormatGray8>(const uint8_t* src)

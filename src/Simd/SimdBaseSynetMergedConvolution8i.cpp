@@ -54,6 +54,9 @@ namespace Simd
             _d8u = end.dstT == SimdTensorData8u;
             _dw0 = beg.group != 1;
             _1x1 = beg.kernelY == 1 && beg.strideY == 1;
+
+            _cvt8uTo32f = Base::SynetConvert8uTo32f;
+            _cvt32fTo8u = Base::SynetConvert32fTo8u;
             switch (p.conv[_dw0 ? 0 : 1].activation)
             {
             case SimdConvolutionActivationIdentity: _depthwise = DepthwiseConvolution<SimdConvolutionActivationIdentity>; break;
@@ -65,6 +68,7 @@ namespace Simd
             case SimdConvolutionActivationHswish: _depthwise = DepthwiseConvolution<SimdConvolutionActivationHswish>; break;
             default: assert(0);
             }
+
             for (size_t i = 0; i < 5; ++i)
                 _sizeB[i] = 0;
             if (_dw0)
@@ -195,20 +199,20 @@ namespace Simd
                 {
                     if (_s8u)
                     {
-                        Convert<uint8_t, float, float>(src8u, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].iScale.data, _cvt[0].iShift.data, 0, 0, src32f);
+                        _cvt8uTo32f(src8u, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].iScale.data, _cvt[0].iShift.data, src32f, p.compatibility);
                         src8u += _sizeS;
                     }
                     _depthwise(src32f, p.conv[0], 0, 0, p.conv[0].dstH, NULL, _weight32f.data, _bias[0].data, _params[0].data, buf1);
                     if (!_s8u)
                         src32f += _sizeS;
-                    Convert<float, uint8_t, float>(buf1, 1, p.conv[1].srcC, p.conv[1].srcH, p.conv[1].srcW, p.conv[1].srcF, _cvt[1].scale.data, _cvt[1].shift.data, _cvt[1].uMin, _cvt[1].uMax, buf2);
+                    _cvt32fTo8u(buf1, 1, p.conv[1].srcC, p.conv[1].srcH, p.conv[1].srcW, p.conv[1].srcF, _cvt[1].scale.data, _cvt[1].shift.data, buf2, p.compatibility);
                     DirectConvolution8i(buf2, 1, 0, NULL, buf4, dst32f);
                 }
                 else
                 {
                     if (!_s8u)
                     {
-                        Convert<float, uint8_t, float>(src32f, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].scale.data, _cvt[0].shift.data, _cvt[0].uMin, _cvt[0].uMax, src8u);
+                        _cvt32fTo8u(src32f, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].scale.data, _cvt[0].shift.data, src8u, p.compatibility);
                         src32f += _sizeS;
                     }                    
                     DirectConvolution8i(src8u, 0, 0, buf3, buf4, buf0);
@@ -217,14 +221,14 @@ namespace Simd
                     _depthwise(buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight32f.data, _bias[1].data, _params[1].data, p.count == 3 ? buf1 : dst32f);
                     if (p.count == 3)
                     {
-                        Convert<float, uint8_t, float>(buf1, 1, p.conv[2].srcC, p.conv[2].srcH, p.conv[2].srcW, p.conv[2].srcF, _cvt[1].scale.data, _cvt[1].shift.data, _cvt[1].uMin, _cvt[1].uMax, buf2);
+                        _cvt32fTo8u(buf1, 1, p.conv[2].srcC, p.conv[2].srcH, p.conv[2].srcW, p.conv[2].srcF, _cvt[1].scale.data, _cvt[1].shift.data, buf2, p.compatibility);
                         DirectConvolution8i(buf2, 2, 1, NULL, buf4, dst32f);
                     }
                 }
                 if (_d8u)
                 {
                     const SimdConvolutionParameters& end = p.conv[p.count - 1];
-                    Convert<float, uint8_t, float>(dst32f, 1, end.dstC, end.dstH, end.dstW, end.dstF, _cvt[2].scale.data, _cvt[2].shift.data, _cvt[2].uMin, _cvt[2].uMax, dst8u);
+                    _cvt32fTo8u(dst32f, 1, end.dstC, end.dstH, end.dstW, end.dstF, _cvt[2].scale.data, _cvt[2].shift.data, dst8u, p.compatibility);
                     dst8u += _sizeD;
                 }
                 else

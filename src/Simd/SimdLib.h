@@ -315,7 +315,8 @@ typedef enum
 } SimdResizeMethodType;
 
 /*! @ingroup synet
-    Describes Synet compatibility flags. This type used in functions ::SimdSynetScaleLayerForward, ::SimdSynetConvert32fTo8u.
+    Describes Synet compatibility flags. This type used in functions ::SimdSynetScaleLayerForward, ::SimdSynetConvert32fTo8u, 
+    ::SimdSynetConvolution8iInit, and ::SimdSynetMergedConvolution8iInit.
 */
 typedef enum
 {
@@ -5632,6 +5633,27 @@ extern "C"
         \param [in] compatibility - a flags of bitwise compatibility.
     */
     SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+
+    /*! @ingroup synet_conversion
+
+        \fn void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
+
+        \short Converts 8-bit unsigned integer image to 32-bit float point image.
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the 8-bit unsigned integer array with input image tensor.
+        \param [in] batch - a number of images in the batch of (input/output) image tensor.
+        \param [in] channels - a number of channels in the (input/output) image tensor.
+        \param [in] height - a height of (input/output) image tensor.
+        \param [in] width - a width of (input/output) image tensor.
+        \param [in] format - a format of (input/output) image tensor.
+        \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
+        \param [in] shift - a pointer to the 32-bit float array with shift coefficients.
+        \param [out] dst - a pointer to the array with 32-bit float output image tensor.
+        \param [in] compatibility - a flags of bitwise compatibility.
+    */
+    SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_convolution_fp32
 

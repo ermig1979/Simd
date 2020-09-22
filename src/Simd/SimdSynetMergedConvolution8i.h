@@ -173,13 +173,19 @@ namespace Simd
             virtual Base::PerformanceMeasurer* Perf(const String& func);
 #endif
 
+            typedef void(*Cvt8uTo32fPtr)(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, 
+                SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
+
+            typedef void(*Cvt32fTo8uPtr)(const float* src, size_t batch, size_t channels, size_t height, size_t width, 
+                SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+
+            typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
+                const size_t* bufH, const float* weight, const float* bias, const float* params, float* dst);
+
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
             void Quantize(const float* weight, const float* bias, size_t i, size_t q);
             void DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst);
-
-            typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
-                const size_t* bufH, const float* weight, const float* bias, const float* params, float* dst);
 
             MergConvParam8i _param;
             bool _s8u, _d8u, _dw0, _1x1;
@@ -188,6 +194,8 @@ namespace Simd
             Array8u _buffer;
             Array8i _weight8i[2];
             Array32f _weight32f, _norm[2], _bias[3], _params[3];
+            Cvt8uTo32fPtr _cvt8uTo32f;
+            Cvt32fTo8uPtr _cvt32fTo8u;
             DepthwisePtr _depthwise;
 
         private:

@@ -139,6 +139,70 @@ namespace Test
 
     //-------------------------------------------------------------------------
 
+    typedef FuncCvt<uint8_t, float> FuncCvt8uTo32f;
+
+#define FUNC_C_8U_32F(function) FuncCvt8uTo32f(function, #function)
+
+    bool SynetConvert8uTo32fAutoTest(size_t n, size_t c, size_t h, size_t w, SimdTensorFormatType f, SimdSynetCompatibilityType comp, FuncCvt8uTo32f f1, FuncCvt8uTo32f f2)
+    {
+        bool result = true;
+
+        f1.Update(n, c, h, w, f, comp);
+        f2.Update(n, c, h, w, f, comp);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        Tensor8u src(ToShape(n, c, h, w, f), f);
+        FillRandom(src);
+
+        Tensor32f dst1(ToShape(n, c, h, w, f), f);
+        Tensor32f dst2(ToShape(n, c, h, w, f), f);
+
+        Buffer32f scale(c), shift(c);
+        FillRandom(scale, -1.0f, 1.0f);
+        FillRandom(shift, -1.0f, 1.0f);
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, shift, dst1, comp));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2, comp));
+
+        result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetConvert8uTo32fAutoTest(const FuncCvt8uTo32f& f1, const FuncCvt8uTo32f& f2)
+    {
+        bool result = true;
+
+        SimdTensorFormatType format[2] = { SimdTensorFormatNchw, SimdTensorFormatNhwc };
+        SimdSynetCompatibilityType compatibility[3] = { SimdSynetCompatibilityFmaUse, SimdSynetCompatibilityFmaNoTail, SimdSynetCompatibilityFmaAvoid};
+
+        for (int f = 0; f <= 1; ++f)
+        {
+            for (int c = 0; c <= 2; ++c)
+            {
+                result = result && SynetConvert8uTo32fAutoTest(2, C / 2, (int)sqrt(H), (int)sqrt(W), format[f], compatibility[c], f1, f2);
+                result = result && SynetConvert8uTo32fAutoTest(1, 3, H / 3 + O, W / 5 - O, format[f], compatibility[c], f1, f2);
+            }
+        }
+
+        return result;
+    }
+
+    bool SynetConvert8uTo32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Base::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
     namespace
     {
         struct FuncSI

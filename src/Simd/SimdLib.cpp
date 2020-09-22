@@ -5290,6 +5290,14 @@ SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t cha
     simdSynetConvert32fTo8u(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
 }
 
+SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
+{
+    typedef void(*SimdSynetConvert8uTo32fPtr) (const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
+    const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC0(SynetConvert8uTo32f);// , SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetConvert8uTo32f(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
+}
+
 SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
 {
     typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);

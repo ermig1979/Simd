@@ -347,6 +347,7 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetTanh32f);
 
     TEST_ADD_GROUP_A00(SynetConvert32fTo8u);
+    TEST_ADD_GROUP_A00(SynetConvert8uTo32f);
     TEST_ADD_GROUP_A00(SynetSetInput);
     TEST_ADD_GROUP_A00(SynetReorderImage);
     TEST_ADD_GROUP_A00(SynetReorderFilter);
