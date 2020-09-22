@@ -117,7 +117,7 @@ namespace Test
                 ss << "[" << p.count << ":" << p.batch << "x" << p.conv[0].srcC << "x" << p.conv[0].srcH << "x" << p.conv[0].srcW;
                 for (size_t i = 0; i < p.count; ++i)
                     ss << "-" << (p.conv[i].group != 1 ? String("") : ToString(p.conv[i].dstC) + "x") << p.conv[i].kernelY << "x" << p.conv[i].strideY;
-                ss << "]";
+                ss << "-" << (p.conv[0].srcT == SimdTensorData32f ? "f" : "u") << (p.conv[p.count - 1].dstT == SimdTensorData32f ? "f" : "u") << "]";
                 desc = ss.str();
             }
 
@@ -164,8 +164,8 @@ namespace Test
         Tensor32f dst32f1(Shp(p.batch, end.dstH, end.dstW, end.dstC), end.dstF), dst32f2(dst32f1.Shape(), dst32f1.Format());
         Tensor8u src8u(src32f.Shape(), src32f.Format()), dst8u1(dst32f1.Shape(), dst32f1.Format()), dst8u2(dst32f1.Shape(), dst32f1.Format()), buf8u;
 
-        min[0].Reshape(Shp(beg.srcC)), p.stats[0] = min[0].Data();
-        max[0].Reshape(Shp(beg.srcC)), p.stats[1] = max[0].Data();
+        min[0].Reshape(Shp(beg.srcC));
+        max[0].Reshape(Shp(beg.srcC));
         FillRandom(src32f, min[0].Data(), max[0].Data(), beg.srcC, p.neg);
         SetSrc32fTo8u(src32f, min[0].Data(), max[0].Data(), beg.srcC, p.neg, p.comp, NULL, NULL, src8u);
         for (size_t i = 0; i < p.count; ++i)
@@ -193,10 +193,17 @@ namespace Test
             }
             p.params[i] = params[i].Data();
 
-            min[i + 1].Reshape(Shp(dc)), p.stats[i*2 + 2] = min[i + 1].Data();
-            max[i + 1].Reshape(Shp(dc)), p.stats[i*2 + 3] = max[i + 1].Data();
+            min[i + 1].Reshape(Shp(dc));
+            max[i + 1].Reshape(Shp(dc));
             FillDstStat(p, i, weight[i], bias[i], params[i], i ? tmp[i - 1] : src32f, buf32f, tmp[i], min[i + 1].Data(), max[i + 1].Data());
         }
+
+        p.stats[0] = min[0].Data();
+        p.stats[1] = max[0].Data();
+        p.stats[2] = min[p.count - 1].Data(); 
+        p.stats[3] = max[p.count - 1].Data();
+        p.stats[4] = min[p.count].Data(); 
+        p.stats[5] = max[p.count].Data();
 
         Fill(dst32f1, 1.0f);
         Fill(dst32f2, 2.0f);
@@ -247,12 +254,39 @@ namespace Test
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
         const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationHswish, a2 = ::SimdConvolutionActivationIdentity;
-#ifdef NDEBUG
-#if 1
+#if defined(NDEBUG)
+#if 0
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 20, 12), Cnv(a0, 1, 1, 24), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
 #endif
+#if 1
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 3, 320, 180), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 160, 90), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 2), f32, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 80, 45), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 1), u8, f32, 0, o), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 80, 45), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 2), f32, f32, 0, p), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 40, 23), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
+#endif
+#if 1
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 30), f32, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 12), u8, f32, 0, o), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 6), f32, f32, 0, p), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 128), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 256), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 8), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 4), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 256), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 8), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 4), u8, u8, 1, n), f1, f2);
+#endif
+#if 1
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), u8, u8, 1, n), f1, f2);
+#endif
+
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 20, 12), Cnv(a0, 1, 1, 24), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 12), u8, f32, 0, o), f1, f2);
 #endif
         return result;
     }

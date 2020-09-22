@@ -90,7 +90,7 @@ namespace Simd
                     ExtendSize(_sizeD, _sizeB[4]);
                 }
             }
-            if (!_d8u)
+            if (_d8u)
                 ExtendSize(_sizeD, _sizeB[1]);
         }
 
@@ -201,8 +201,8 @@ namespace Simd
                     _depthwise(src32f, p.conv[0], 0, 0, p.conv[0].dstH, NULL, _weight32f.data, _bias[0].data, _params[0].data, buf1);
                     if (!_s8u)
                         src32f += _sizeS;
-                    Convert<float, uint8_t, float>(buf1, 1, p.conv[1].srcC, p.conv[1].srcH, p.conv[1].srcW, p.conv[1].srcF, _cvt[1].scale.data, _cvt[1].shift.data, _cvt[1].uMin, _cvt[1].uMax, buf3);
-                    DirectConvolution8i(buf3, 1, 0, NULL, buf4, dst32f);
+                    Convert<float, uint8_t, float>(buf1, 1, p.conv[1].srcC, p.conv[1].srcH, p.conv[1].srcW, p.conv[1].srcF, _cvt[1].scale.data, _cvt[1].shift.data, _cvt[1].uMin, _cvt[1].uMax, buf2);
+                    DirectConvolution8i(buf2, 1, 0, NULL, buf4, dst32f);
                 }
                 else
                 {
@@ -214,7 +214,7 @@ namespace Simd
                     DirectConvolution8i(src8u, 0, 0, buf3, buf4, buf0);
                     if (_s8u)
                         src8u += _sizeS;
-                    _depthwise(buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight32f.data, _bias[1].data, _params[1].data, buf1);
+                    _depthwise(buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight32f.data, _bias[1].data, _params[1].data, p.count == 3 ? buf1 : dst32f);
                     if (p.count == 3)
                     {
                         Convert<float, uint8_t, float>(buf1, 1, p.conv[2].srcC, p.conv[2].srcH, p.conv[2].srcW, p.conv[2].srcF, _cvt[1].scale.data, _cvt[1].shift.data, _cvt[1].uMin, _cvt[1].uMax, buf2);
@@ -224,7 +224,7 @@ namespace Simd
                 if (_d8u)
                 {
                     const SimdConvolutionParameters& end = p.conv[p.count - 1];
-                    Convert<float, uint8_t, float>(src32f, 1, end.dstC, end.dstH, end.dstW, end.dstF, _cvt[2].scale.data, _cvt[2].shift.data, _cvt[2].uMin, _cvt[2].uMax, src8u);
+                    Convert<float, uint8_t, float>(dst32f, 1, end.dstC, end.dstH, end.dstW, end.dstF, _cvt[2].scale.data, _cvt[2].shift.data, _cvt[2].uMin, _cvt[2].uMax, dst8u);
                     dst8u += _sizeD;
                 }
                 else
