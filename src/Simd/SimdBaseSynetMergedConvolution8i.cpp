@@ -255,7 +255,7 @@ namespace Simd
         void SynetMergedConvolution8i::Quantize(const float* weight, const float* bias, size_t i, size_t q)
         {
             const SimdConvolutionParameters & conv = _param.conv[i];
-            const CvtParam& cvt = _cvt[q];
+            const CvtParam& cvt = _cvt[i ? 1 : 0];
             size_t D = conv.dstC, C = conv.srcC, K = conv.kernelY * conv.kernelX;
             Array32f  normW(C * K);
             bool avoidOverflow16i = cvt.neg && Base::Overflow(_param.compatibility);

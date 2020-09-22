@@ -66,8 +66,9 @@ namespace Simd
 
         SIMD_INLINE void Assign(const T * src, size_t size_)
         {
-            Resize(size_);
-            memcpy(data, src, RawSize());
+            Resize(size_, src == NULL);
+            if(src)
+                memcpy(data, src, RawSize());
         }
 
         SIMD_INLINE void Clear()
