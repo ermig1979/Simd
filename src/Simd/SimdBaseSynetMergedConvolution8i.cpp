@@ -38,6 +38,12 @@ namespace Simd
             size = Simd::Max(size, AlignHi(value, SIMD_ALIGN));
         }
 
+        template<SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p, const SynetMergedConvolution8i::AlgParam& a,
+            size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+        {
+            DepthwiseConvolution<type>(src, p, 0, 0, p.dstH, NULL, weight, bias, params, (float*)dst);
+        }
+
         SynetMergedConvolution8i::SynetMergedConvolution8i(const MergConvParam8i& p)
            :  _param(p)
 #if defined(SIMD_PERFORMANCE_STATISTIC)
@@ -202,7 +208,7 @@ namespace Simd
                         _cvt8uTo32f(src8u, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].iScale.data, _cvt[0].iShift.data, src32f, p.compatibility);
                         src8u += _sizeS;
                     }
-                    _depthwise(src32f, p.conv[0], 0, 0, p.conv[0].dstH, NULL, _weight32f.data, _bias[0].data, _params[0].data, buf1);
+                    _depthwise(src32f, p.conv[0], _alg, 0, 0, p.conv[0].dstH, _weight32f.data, _bias[0].data, _params[0].data, NULL, NULL, (uint8_t*)buf1);
                     if (!_s8u)
                         src32f += _sizeS;
                     _cvt32fTo8u(buf1, 1, p.conv[1].srcC, p.conv[1].srcH, p.conv[1].srcW, p.conv[1].srcF, _cvt[1].scale.data, _cvt[1].shift.data, buf2, p.compatibility);
@@ -218,7 +224,7 @@ namespace Simd
                     DirectConvolution8i(src8u, 0, 0, buf3, buf4, buf0);
                     if (_s8u)
                         src8u += _sizeS;
-                    _depthwise(buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight32f.data, _bias[1].data, _params[1].data, p.count == 3 ? buf1 : dst32f);
+                    _depthwise(buf0, p.conv[1], _alg, 0, 0, p.conv[1].dstH, _weight32f.data, _bias[1].data, _params[1].data, NULL, NULL, (uint8_t*)(p.count == 3 ? buf1 : dst32f));
                     if (p.count == 3)
                     {
                         _cvt32fTo8u(buf1, 1, p.conv[2].srcC, p.conv[2].srcH, p.conv[2].srcW, p.conv[2].srcF, _cvt[1].scale.data, _cvt[1].shift.data, buf2, p.compatibility);

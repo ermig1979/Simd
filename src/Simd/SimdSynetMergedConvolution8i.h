@@ -173,14 +173,31 @@ namespace Simd
             virtual Base::PerformanceMeasurer* Perf(const String& func);
 #endif
 
+            enum Term8iType
+            {
+                Term8iSingle8u,
+                Term8iSingle32f,
+                Term8iFirst,
+                Term8iIterim,
+                Term8iLast8u,
+                Term8iLast32f,
+                Term8iSize
+            };
+
+            struct AlgParam
+            {
+                size_t miC, maC, yStep[3], bufH[3], dp[2], dw[3];
+                int32_t zero, size, upper;
+            };
+
             typedef void(*Cvt8uTo32fPtr)(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, 
                 SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
             typedef void(*Cvt32fTo8uPtr)(const float* src, size_t batch, size_t channels, size_t height, size_t width, 
                 SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
-            typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
-                const size_t* bufH, const float* weight, const float* bias, const float* params, float* dst);
+            typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, const AlgParam & a, size_t maC, size_t yBeg, size_t yEnd,
+                const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t * dst);
 
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
@@ -194,6 +211,7 @@ namespace Simd
             Array8u _buffer;
             Array8i _weight8i[2];
             Array32f _weight32f, _norm[2], _bias[3], _params[3];
+            AlgParam _alg;
             Cvt8uTo32fPtr _cvt8uTo32f;
             Cvt32fTo8uPtr _cvt32fTo8u;
             DepthwisePtr _depthwise;
