@@ -50,6 +50,7 @@ namespace Simd
            , _perf(NULL)
 #endif        
         {
+            _alg.miC = 0;
             const SimdConvolutionParameters& beg = p.conv[0];
             const SimdConvolutionParameters& end = p.conv[p.count - 1];
             _sizeS = beg.srcH * beg.srcW * beg.srcC;
@@ -138,11 +139,16 @@ namespace Simd
                     _norm[q].Resize(c.dstC);
                     _bias[i].Resize(c.dstC);
                     Quantize(weight[i], bias[i], i, q++);
+                    if (i)
+                        ReorderOutputWeight(c, _weight8i[q]);
+                    else
+                        ReorderInputWeight(c, _weight8i[q]);
                 }
                 else
                 {
                     _weight32f.Assign(weight[i], c.dstC * c.kernelY * c.kernelX);
                     _bias[i].Assign(bias[i], c.dstC);
+                    ReorderDepthwiseWeight(c, _weight32f);
                 }
                 if (c.activation == SimdConvolutionActivationLeakyRelu || c.activation == SimdConvolutionActivationPrelu)
                     _params[i].Resize(c.dstC);
@@ -300,6 +306,106 @@ namespace Simd
                 _norm[q][d] = (avoidOverflow16i ? 2.0f : 1.0f) / scale;
                 _bias[i][d] = (bias ? bias[d] : 0.0f) + normB / scale;
             }
+        }
+
+        void SynetMergedConvolution8i::ReorderInputWeight(const SimdConvolutionParameters& p, Array8i& weight)
+        {
+            if (_alg.miC == 0)
+                return;
+            size_t F = _alg.miC * 2, C = DivHi(p.srcC, 4), D = DivHi(p.dstC, F), K = p.kernelY*p.kernelX;
+            Array8i buf(K * C * D * F * 4);
+            int8_t* dst = buf.data;
+            for (size_t d = 0; d < D; d++)
+            {
+                for (size_t k = 0; k < K; ++k)
+                {
+                    for (size_t c = 0; c < C; ++c)
+                    {
+                        const int8_t* src = weight.data + (k* p.srcC + c * 4) * p.dstC + d * F;
+                        for (size_t f = 0; f < F; ++f)
+                        {
+                            for (size_t i = 0; i < 4; ++i)
+                            {
+                                if (d * F + f < p.dstC && c * 4 + i < p.srcC)
+                                    *(dst++) = src[i * p.dstC];
+                                else
+                                    *(dst++) = 0;
+                            }
+                            src++;
+                        }
+                    }
+                }
+            }
+            weight.Swap(buf);
+        }
+
+        void SynetMergedConvolution8i::ReorderDepthwiseWeight(const SimdConvolutionParameters& p, Array32f& weight)
+        {
+            if (_alg.miC == 0)
+                return;
+            size_t D = p.dstC, K = p.kernelY * p.kernelX, F = _alg.miC;
+            Array32f buf(AlignHiAny(D, F)* K);
+            const float* src = weight.data;
+            float* dst = buf.data;
+            for (size_t d = 0; d < D; d += F)
+            {
+                size_t n = Simd::Min(F, D - d);
+                for (size_t k = 0; k < K; k++)
+                {
+                    size_t i = 0;
+                    for (; i < n; ++i)
+                        dst[i] = src[k * D + d + i];
+                    for (; i < F; ++i)
+                        dst[i] = 0;
+                    dst += F;
+                }
+            }
+            weight.Swap(buf);
+        }
+
+        void SynetMergedConvolution8i::ReorderOutputWeight(const SimdConvolutionParameters& p, Array8i& weight)
+        {
+            if (_alg.miC == 0)
+                return;
+            //size_t F = _alg.miC * 2, C = DivHi(p.srcC, 4), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 4);
+            //Array8i buf(C * D * F * 4);
+            //int8_t* dst = buf.data;
+            //for (size_t m = 0; m < p.srcC; m += _alg.maC)
+            //{
+            //    size_t cE = Simd::Min(p.srcC, cB + M);
+            //    for (size_t d = 0; d < D; d++)
+            //    {
+            //        for (size_t c = 0; c < C; ++c)
+            //        {
+            //            const int8_t* src = weight.data + (m + c * 4) * p.dstC + d * F;
+            //            for (size_t f = 0; f < F; ++f)
+            //            {
+            //                for (size_t i = 0; i < 4; ++i)
+            //                {
+            //                    if (d * F + f < p.dstC && c * 4 + i < p.srcC)
+            //                        *(dst++) = src[i * p.dstC];
+            //                    else
+            //                        *(dst++) = 0;
+            //                }
+            //                src++;
+            //            }
+            //        }
+            //    }
+            //    for (size_t d = 0; d < dstC; d += micD)
+            //    {
+            //        size_t n = Simd::Min(micD, dstC - d);
+            //        for (size_t s = 0; s < maC; s++)
+            //        {
+            //            size_t i = 0;
+            //            for (; i < n; ++i)
+            //                dst[i] = src[s * dstC + d + i];
+            //            for (; i < micD; ++i)
+            //                dst[i] = 0;
+            //            dst += micD;
+            //        }
+            //    }
+            //    src += p.dstC * maC;
+            //}
         }
 
         void SynetMergedConvolution8i::DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst)

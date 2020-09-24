@@ -186,8 +186,8 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t miC, maC, yStep[3], bufH[3], dp[2], dw[3];
-                int32_t zero, size, upper;
+                size_t miC, maC, yStep[3], bufH[3], dp[2], dw[3], sizeC, sizeD;
+                int32_t zeroC, zeroD, upper;
             };
 
             typedef void(*Cvt8uTo32fPtr)(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, 
@@ -196,12 +196,21 @@ namespace Simd
             typedef void(*Cvt32fTo8uPtr)(const float* src, size_t batch, size_t channels, size_t height, size_t width, 
                 SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
-            typedef void(*DepthwisePtr)(const float* src, const SimdConvolutionParameters& p, const AlgParam & a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*InputConvolutionPtr)(const uint8_t* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                const int8_t* weight, const float* norm, const float* bias, const float* params, float* dst);
+
+            typedef void(*DepthwiseConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, const AlgParam & a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t * dst);
+
+            typedef void(*OutputConvolutionPtr)(const uint8_t* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+                const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
 
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
             void Quantize(const float* weight, const float* bias, size_t i, size_t q);
+            void ReorderInputWeight(const SimdConvolutionParameters& p, Array8i & weight);
+            void ReorderDepthwiseWeight(const SimdConvolutionParameters& p, Array32f & weight);
+            void ReorderOutputWeight(const SimdConvolutionParameters& p, Array8i& weight);
             void DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst);
 
             MergConvParam8i _param;
@@ -214,7 +223,9 @@ namespace Simd
             AlgParam _alg;
             Cvt8uTo32fPtr _cvt8uTo32f;
             Cvt32fTo8uPtr _cvt32fTo8u;
-            DepthwisePtr _depthwise;
+            InputConvolutionPtr _input;
+            DepthwiseConvolutionPtr _depthwise;
+            OutputConvolutionPtr _output[Term8iSize];
 
         private:
 #if defined(SIMD_PERFORMANCE_STATISTIC)
