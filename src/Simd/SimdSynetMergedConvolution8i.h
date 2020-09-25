@@ -190,11 +190,11 @@ namespace Simd
                 int32_t zeroC, zeroD, upper;
             };
 
-            typedef void(*Cvt8uTo32fPtr)(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, 
-                SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
+            typedef void(*Convert8uTo32fPtr)(const uint8_t* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+                const float* scale, const float* shift, float* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
-            typedef void(*Cvt32fTo8uPtr)(const float* src, size_t batch, size_t channels, size_t height, size_t width, 
-                SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
+            typedef void(*Convert32fTo8uPtr)(const float* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+                const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
             typedef void(*InputConvolutionPtr)(const uint8_t* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const int8_t* weight, const float* norm, const float* bias, const float* params, float* dst);
@@ -221,16 +221,55 @@ namespace Simd
             Array8i _weight8i[2];
             Array32f _weight32f, _norm[2], _bias[3], _params[3];
             AlgParam _alg;
-            Cvt8uTo32fPtr _cvt8uTo32f;
-            Cvt32fTo8uPtr _cvt32fTo8u;
+            Convert8uTo32fPtr _cvt8uTo32f;
+            Convert32fTo8uPtr _cvt32fTo8u;
             InputConvolutionPtr _input;
             DepthwiseConvolutionPtr _depthwise;
-            OutputConvolutionPtr _output[Term8iSize];
+            OutputConvolutionPtr _output[4];
 
         private:
 #if defined(SIMD_PERFORMANCE_STATISTIC)
             Base::PerformanceMeasurer * _perf;
 #endif        
+        };
+
+        class SynetMergedConvolution8iCdc : public SynetMergedConvolution8i
+        {
+        public:
+            SynetMergedConvolution8iCdc(const MergConvParam8i& p);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const MergConvParam8i& p);
+
+        protected:
+            void SetSize(size_t F);
+        };
+
+        class SynetMergedConvolution8iCd : public SynetMergedConvolution8i
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const MergConvParam8i& p);
+
+        protected:
+            void SetSize(size_t F);
+        };
+
+        class SynetMergedConvolution8iDc : public SynetMergedConvolution8i
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
+
+            virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
+
+            static bool Preferable(const MergConvParam8i& p);
+
+        protected:
+            void SetSize(size_t F);
         };
 
         void * SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdSynetCompatibilityType compatibility);

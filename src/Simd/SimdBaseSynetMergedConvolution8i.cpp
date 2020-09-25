@@ -28,6 +28,7 @@
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -36,6 +37,18 @@ namespace Simd
         SIMD_INLINE void ExtendSize(size_t value, size_t& size)
         {
             size = Simd::Max(size, AlignHi(value, SIMD_ALIGN));
+        }
+
+        SIMD_INLINE void Convert8uTo32f(const uint8_t* src, size_t channels, size_t yBeg, size_t yEnd, size_t width, 
+            const float* scale, const float* shift, float* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
+        {
+            Base::SynetConvert8uTo32f(src, 1, channels, yEnd, width, SimdTensorFormatNhwc, scale, shift, dst, compatibility);
+        }
+
+        SIMD_INLINE void Convert32fTo8u(const float* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+            const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
+        {
+            Base::SynetConvert32fTo8u(src, 1, channels, yEnd, width, SimdTensorFormatNhwc, scale, shift, dst, compatibility);
         }
 
         template<SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p, const SynetMergedConvolution8i::AlgParam& a,
@@ -62,8 +75,8 @@ namespace Simd
             _dw0 = beg.group != 1;
             _1x1 = beg.kernelY == 1 && beg.strideY == 1;
 
-            _cvt8uTo32f = Base::SynetConvert8uTo32f;
-            _cvt32fTo8u = Base::SynetConvert32fTo8u;
+            _cvt8uTo32f = Convert8uTo32f;
+            _cvt32fTo8u = Convert32fTo8u;
             switch (p.conv[_dw0 ? 0 : 1].activation)
             {
             case SimdConvolutionActivationIdentity: _depthwise = DepthwiseConvolution<SimdConvolutionActivationIdentity>; break;
@@ -194,6 +207,7 @@ namespace Simd
         void SynetMergedConvolution8i::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
+            buf = GetBuffer(buf);
             float* buf0 = Allocate<float>(buf, _sizeB[0]);
             float* buf1 = Allocate<float>(buf, _sizeB[1]);
             uint8_t* buf2 = Allocate<uint8_t>(buf, _sizeB[2]);
@@ -211,20 +225,20 @@ namespace Simd
                 {
                     if (_s8u)
                     {
-                        _cvt8uTo32f(src8u, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].iScale.data, _cvt[0].iShift.data, src32f, p.compatibility);
+                        _cvt8uTo32f(src8u, p.conv[0].srcC, 0, p.conv[0].srcH, p.conv[0].srcW, _cvt[0].iScale.data, _cvt[0].iShift.data, src32f, 0, p.compatibility);
                         src8u += _sizeS;
                     }
                     _depthwise(src32f, p.conv[0], _alg, 0, 0, p.conv[0].dstH, _weight32f.data, _bias[0].data, _params[0].data, NULL, NULL, (uint8_t*)buf1);
                     if (!_s8u)
                         src32f += _sizeS;
-                    _cvt32fTo8u(buf1, 1, p.conv[1].srcC, p.conv[1].srcH, p.conv[1].srcW, p.conv[1].srcF, _cvt[1].scale.data, _cvt[1].shift.data, buf2, p.compatibility);
+                    _cvt32fTo8u(buf1, p.conv[1].srcC, 0, p.conv[1].srcH, p.conv[1].srcW,  _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, p.compatibility);
                     DirectConvolution8i(buf2, 1, 0, NULL, buf4, dst32f);
                 }
                 else
                 {
                     if (!_s8u)
                     {
-                        _cvt32fTo8u(src32f, 1, p.conv[0].srcC, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcF, _cvt[0].scale.data, _cvt[0].shift.data, src8u, p.compatibility);
+                        _cvt32fTo8u(src32f, p.conv[0].srcC, 0, p.conv[0].srcH, p.conv[0].srcW, _cvt[0].scale.data, _cvt[0].shift.data, src8u, 0, p.compatibility);
                         src32f += _sizeS;
                     }                    
                     DirectConvolution8i(src8u, 0, 0, buf3, buf4, buf0);
@@ -233,14 +247,14 @@ namespace Simd
                     _depthwise(buf0, p.conv[1], _alg, 0, 0, p.conv[1].dstH, _weight32f.data, _bias[1].data, _params[1].data, NULL, NULL, (uint8_t*)(p.count == 3 ? buf1 : dst32f));
                     if (p.count == 3)
                     {
-                        _cvt32fTo8u(buf1, 1, p.conv[2].srcC, p.conv[2].srcH, p.conv[2].srcW, p.conv[2].srcF, _cvt[1].scale.data, _cvt[1].shift.data, buf2, p.compatibility);
+                        _cvt32fTo8u(buf1, p.conv[2].srcC, 0, p.conv[2].srcH, p.conv[2].srcW, _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, p.compatibility);
                         DirectConvolution8i(buf2, 2, 1, NULL, buf4, dst32f);
                     }
                 }
                 if (_d8u)
                 {
                     const SimdConvolutionParameters& end = p.conv[p.count - 1];
-                    _cvt32fTo8u(dst32f, 1, end.dstC, end.dstH, end.dstW, end.dstF, _cvt[2].scale.data, _cvt[2].shift.data, dst8u, p.compatibility);
+                    _cvt32fTo8u(dst32f, end.dstC, 0, end.dstH, end.dstW, _cvt[2].scale.data, _cvt[2].shift.data, dst8u, 0, p.compatibility);
                     dst8u += _sizeD;
                 }
                 else
@@ -367,45 +381,32 @@ namespace Simd
         {
             if (_alg.miC == 0)
                 return;
-            //size_t F = _alg.miC * 2, C = DivHi(p.srcC, 4), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 4);
-            //Array8i buf(C * D * F * 4);
-            //int8_t* dst = buf.data;
-            //for (size_t m = 0; m < p.srcC; m += _alg.maC)
-            //{
-            //    size_t cE = Simd::Min(p.srcC, cB + M);
-            //    for (size_t d = 0; d < D; d++)
-            //    {
-            //        for (size_t c = 0; c < C; ++c)
-            //        {
-            //            const int8_t* src = weight.data + (m + c * 4) * p.dstC + d * F;
-            //            for (size_t f = 0; f < F; ++f)
-            //            {
-            //                for (size_t i = 0; i < 4; ++i)
-            //                {
-            //                    if (d * F + f < p.dstC && c * 4 + i < p.srcC)
-            //                        *(dst++) = src[i * p.dstC];
-            //                    else
-            //                        *(dst++) = 0;
-            //                }
-            //                src++;
-            //            }
-            //        }
-            //    }
-            //    for (size_t d = 0; d < dstC; d += micD)
-            //    {
-            //        size_t n = Simd::Min(micD, dstC - d);
-            //        for (size_t s = 0; s < maC; s++)
-            //        {
-            //            size_t i = 0;
-            //            for (; i < n; ++i)
-            //                dst[i] = src[s * dstC + d + i];
-            //            for (; i < micD; ++i)
-            //                dst[i] = 0;
-            //            dst += micD;
-            //        }
-            //    }
-            //    src += p.dstC * maC;
-            //}
+            size_t F = _alg.miC * 2, C = DivHi(p.srcC, 4), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 4);
+            Array8i buf(C * D * F * 4);
+            int8_t* dst = buf.data;
+            for (size_t cB = 0; cB < C; cB += M)
+            {
+                size_t cE = Simd::Min(C, cB + M);
+                for (size_t d = 0; d < D; d++)
+                {
+                    for (size_t c = cB; c < cE; ++c)
+                    {
+                        const int8_t* src = weight.data + c * 4 * p.dstC + d * F;
+                        for (size_t f = 0; f < F; ++f)
+                        {
+                            for (size_t i = 0; i < 4; ++i)
+                            {
+                                if (d * F + f < p.dstC && c * 4 + i < p.srcC)
+                                    *(dst++) = src[i * p.dstC];
+                                else
+                                    *(dst++) = 0;
+                            }
+                            src++;
+                        }
+                    }
+                }
+            }
+            weight.Swap(buf);
         }
 
         void SynetMergedConvolution8i::DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst)
@@ -453,6 +454,152 @@ namespace Simd
         }
 
         //---------------------------------------------------------------------
+
+        SynetMergedConvolution8iCdc::SynetMergedConvolution8iCdc(const MergConvParam8i& p)
+            : SynetMergedConvolution8i(p)
+        {
+        }
+
+        void SynetMergedConvolution8iCdc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        {
+            const MergConvParam8i& p = _param;
+            const SimdConvolutionParameters& c0 = p.conv[0];
+            const SimdConvolutionParameters& c1 = p.conv[1];
+            const SimdConvolutionParameters& c2 = p.conv[2];
+            const AlgParam& a = _alg;
+
+            buf = GetBuffer(buf);
+            float* buf0 = Allocate<float>(buf, _sizeB[0]);
+            uint8_t* buf2 = Allocate<uint8_t>(buf, _sizeB[2]);
+            uint8_t* buf3 = Allocate<uint8_t>(buf, _sizeB[3]);
+            int32_t* buf4 = Allocate<int32_t>(buf, _sizeB[4]);
+
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                for (size_t c = 0, C = p.conv[1].dstC; c < C; c += a.maC)
+                {
+                    size_t maC = Simd::Min(C, c + a.maC) - c;
+                    for (size_t yBeg2 = 0, yBeg1 = 0, yBeg0 = 0; yBeg2 < c1.dstH;)
+                    {
+                        size_t yEnd2 = Simd::Min(yBeg2 + a.yStep[2], c1.dstH);
+                        size_t yEnd1 = Simd::Min(Simd::Max(yBeg1 + a.yStep[1], (a.yStep[2] - 1) * c1.strideY + c1.kernelY - c1.padY), c1.srcH);
+                        size_t yEnd0 = Simd::Min(Simd::Max(yBeg0 + a.yStep[0], (a.yStep[1] - 1) * c0.strideY + c0.kernelY - c0.padY), c0.srcH);
+                        size_t srcOffs = yBeg0 * c0.srcW * c0.srcC;
+                        const uint8_t* src8u = _s8u ? src + srcOffs : buf2;
+                        if (!_s8u)
+                            _cvt32fTo8u((float*)src + srcOffs, c0.srcC, yBeg0, yEnd0, c0.srcW, _cvt[0].scale.data, _cvt[0].shift.data, buf2, a.bufH[0], p.compatibility);
+                        _input(src8u, c0, a, maC, yBeg1, yEnd1, _weight8i[0].data + c * a.dw[0], _norm[0].data + c, _bias[0].data + c, _params[0].data + c * a.dp[0], buf0);
+                        _depthwise(buf0, c1, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[1], _bias[1].data + c, _params[1].data + c * a.dp[1], 
+                            _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf3);
+                        if (maC == C)
+                            _output[0](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c, 
+                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, NULL, dst);
+                        else if (c == 0)
+                            _output[1](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c,
+                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, buf4, dst);
+                        else if (c + maC < C)
+                            _output[2](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c,
+                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, buf4, dst);
+                        else
+                            _output[3](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c,
+                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, buf4, dst);
+                        yBeg2 = yEnd2;
+                        yBeg1 = yEnd1;
+                        yBeg0 = yEnd0;
+                    }
+                }
+                src += _sizeS * (_s8u ? 1 : 4);
+                dst += _sizeD * (_d8u ? 1 : 4);
+            }
+        }
+
+        bool SynetMergedConvolution8iCdc::Preferable(const MergConvParam8i& p)
+        {
+            return p.count == 3;
+        }
+
+        void SynetMergedConvolution8iCdc::SetSize(size_t F)
+        {
+            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const MergConvParam8i& p = _param;
+            AlgParam & a = _alg;
+            a.miC = F;
+            size_t size = 0;
+            for (size_t i = 0; i < 3; ++i)
+            {
+                const SimdConvolutionParameters& c = p.conv[i];
+                size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC : 4);
+            }
+            size_t count = size / (L3 / 2) + 1;
+            a.maC = AlignHiAny(p.conv[0].dstC / count, 2 * a.miC);
+            for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
+            {
+                a.yStep[2] = Simd::Max<size_t>(1, yStep);
+                a.bufH[2] = Pow2Hi(a.yStep[2]);
+                a.yStep[1] = a.yStep[2] * p.conv[1].strideY;
+                a.bufH[1] = Pow2Hi((a.yStep[2] - 1) * p.conv[1].strideY + p.conv[1].kernelY);
+                a.yStep[0] = a.yStep[1] * p.conv[0].strideY;
+                a.bufH[0] = Pow2Hi((a.yStep[1] - 1) * p.conv[0].strideY + p.conv[0].kernelY);
+
+                _sizeB[2] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC * (_s8u ? 0 : 1);
+                _sizeB[0] = a.bufH[1] * p.conv[1].srcW * a.maC;
+                _sizeB[3] = a.bufH[2] * p.conv[1].dstW * a.maC;
+                if (_sizeB[0]*4 + _sizeB[2] + _sizeB[3] <= L2)
+                    break;
+            }
+            _sizeB[1] = 0;
+            _sizeB[4] = count > 1 ? _sizeD : 0;
+            a.dp[0] = p.conv[0].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dp[1] = p.conv[1].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dw[0] = p.conv[0].kernelY * p.conv[0].kernelX * p.conv[0].srcC;
+            a.dw[1] = p.conv[1].kernelY * p.conv[1].kernelX;
+            a.dw[2] = AlignHiAny(p.conv[2].dstC, 2 * a.miC);
+        }
+
+        //---------------------------------------------------------------------
+
+        SynetMergedConvolution8iCd::SynetMergedConvolution8iCd(const MergConvParam8i& p)
+            : SynetMergedConvolution8i(p)
+        {
+        }
+
+        void SynetMergedConvolution8iCd::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        {
+        }
+
+        bool SynetMergedConvolution8iCd::Preferable(const MergConvParam8i& p)
+        {
+            return p.count == 2 && p.conv[0].group == 1;
+        }
+
+        void SynetMergedConvolution8iCd::SetSize(size_t F)
+        {
+            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+        }
+
+        //---------------------------------------------------------------------
+
+        SynetMergedConvolution8iDc::SynetMergedConvolution8iDc(const MergConvParam8i& p)
+            : SynetMergedConvolution8i(p)
+        {
+        }
+
+        void SynetMergedConvolution8iDc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
+        {
+        }
+
+        bool SynetMergedConvolution8iDc::Preferable(const MergConvParam8i& p)
+        {
+            return p.count == 2 && p.conv[1].group == 1;
+        }
+
+        void SynetMergedConvolution8iDc::SetSize(size_t F)
+        {
+            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+        }
+
+        //---------------------------------------------------------------------
+
 
         void * SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdSynetCompatibilityType compatibility)
         {
