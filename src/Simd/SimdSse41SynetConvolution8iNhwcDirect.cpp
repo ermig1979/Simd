@@ -36,12 +36,6 @@ namespace Simd
     {
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;
         using ConvolutionPtr = SynetConvolution8iNhwcDirect::ConvolutionPtr;
-        using Term8iType = Base::SynetConvolution8iNhwcDirect::Term8iType;
-
-        SIMD_INLINE __m128i Set4(const uint8_t* src)
-        {
-            return _mm_set1_epi32(*(int32_t*)src);
-        }
 
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const uint8_t * src0, 
             const ConvParam8i& p, const AlgParam & a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t * weight0, 
@@ -693,12 +687,12 @@ namespace Simd
         
         template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u, activation>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f, activation>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iFirst, SimdConvolutionActivationIdentity>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iIterim, SimdConvolutionActivationIdentity>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iLast8u, activation>(p, a, d);
-            Set<Base::SynetConvolution8iNhwcDirect::Term8iLast32f, activation>(p, a, d);
+            Set<Term8iSingle8u, activation>(p, a, d);
+            Set<Term8iSingle32f, activation>(p, a, d);
+            Set<Term8iFirst, SimdConvolutionActivationIdentity>(p, a, d);
+            Set<Term8iIterim, SimdConvolutionActivationIdentity>(p, a, d);
+            Set<Term8iLast8u, activation>(p, a, d);
+            Set<Term8iLast32f, activation>(p, a, d);
         }
 
         static void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr * d)

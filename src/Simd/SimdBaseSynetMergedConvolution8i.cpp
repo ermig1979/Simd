@@ -51,7 +51,7 @@ namespace Simd
             Base::SynetConvert32fTo8u(src, 1, channels, yEnd, width, SimdTensorFormatNhwc, scale, shift, dst, compatibility);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p, const SynetMergedConvolution8i::AlgParam& a,
+        template<SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolution(const float* src, const ConvParam8i& p, const SynetMergedConvolution8i::AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
         {
             DepthwiseConvolution<type>(src, p, 0, 0, p.dstH, NULL, weight, bias, params, (float*)dst);
@@ -64,8 +64,8 @@ namespace Simd
 #endif        
         {
             _alg.miC = 0;
-            const SimdConvolutionParameters& beg = p.conv[0];
-            const SimdConvolutionParameters& end = p.conv[p.count - 1];
+            const ConvParam8i& beg = p.conv[0];
+            const ConvParam8i& end = p.conv[p.count - 1];
             _sizeS = beg.srcH * beg.srcW * beg.srcC;
             _sizeD = end.dstH * end.dstW * end.dstC;
             _sizeI[0] = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
@@ -138,24 +138,25 @@ namespace Simd
         void SynetMergedConvolution8i::SetParams(const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)
         {
             const MergConvParam8i& p = _param;
-            const SimdConvolutionParameters& beg = p.conv[0];
-            const SimdConvolutionParameters& end = p.conv[p.count - 1];
-            _cvt[0].Init(stats[0], stats[1], beg.srcC, p.compatibility);
-            _cvt[1].Init(stats[2], stats[3], end.srcC, p.compatibility);
-            _cvt[2].Init(stats[4], stats[5], end.dstC, p.compatibility);
+            const ConvParam8i& beg = p.conv[0];
+            const ConvParam8i& end = p.conv[p.count - 1];
+            _cvt[0].Init(stats[0], stats[1], beg.srcC, beg.compatibility);
+            _cvt[1].Init(stats[2], stats[3], end.srcC, beg.compatibility);
+            _cvt[2].Init(stats[4], stats[5], end.dstC, beg.compatibility);
             for (size_t i = 0, q = 0; i < p.count; ++i)
             {
-                const SimdConvolutionParameters& c = p.conv[i];
+                const ConvParam8i& c = p.conv[i];
                 if (p.conv[i].group == 1)
                 {
                     _weight8i[q].Resize(c.dstC * c.kernelY * c.kernelX * c.srcC);
                     _norm[q].Resize(c.dstC);
                     _bias[i].Resize(c.dstC);
-                    Quantize(weight[i], bias[i], i, q++);
+                    Quantize(weight[i], bias[i], i, q);
                     if (i)
                         ReorderOutputWeight(c, _weight8i[q]);
                     else
                         ReorderInputWeight(c, _weight8i[q]);
+                    q++;
                 }
                 else
                 {
@@ -207,6 +208,10 @@ namespace Simd
         void SynetMergedConvolution8i::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
+            const ConvParam8i& c0 = p.conv[0];
+            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam8i& c2 = p.conv[2];
+
             buf = GetBuffer(buf);
             float* buf0 = Allocate<float>(buf, _sizeB[0]);
             float* buf1 = Allocate<float>(buf, _sizeB[1]);
@@ -219,42 +224,42 @@ namespace Simd
             float* dst32f = _d8u ? buf1 : (float*)dst;
             uint8_t* dst8u = _d8u ? dst : NULL;
 
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < c0.batch; ++b)
             {
                 if (_dw0)
                 {
                     if (_s8u)
                     {
-                        _cvt8uTo32f(src8u, p.conv[0].srcC, 0, p.conv[0].srcH, p.conv[0].srcW, _cvt[0].iScale.data, _cvt[0].iShift.data, src32f, 0, p.compatibility);
+                        _cvt8uTo32f(src8u, c0.srcC, 0, c0.srcH, c0.srcW, _cvt[0].iScale.data, _cvt[0].iShift.data, src32f, 0, c0.compatibility);
                         src8u += _sizeS;
                     }
-                    _depthwise(src32f, p.conv[0], _alg, 0, 0, p.conv[0].dstH, _weight32f.data, _bias[0].data, _params[0].data, NULL, NULL, (uint8_t*)buf1);
+                    _depthwise(src32f, c0, _alg, 0, 0, c0.dstH, _weight32f.data, _bias[0].data, _params[0].data, NULL, NULL, (uint8_t*)buf1);
                     if (!_s8u)
                         src32f += _sizeS;
-                    _cvt32fTo8u(buf1, p.conv[1].srcC, 0, p.conv[1].srcH, p.conv[1].srcW,  _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, p.compatibility);
+                    _cvt32fTo8u(buf1, c1.srcC, 0, c1.srcH, c1.srcW,  _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, c0.compatibility);
                     DirectConvolution8i(buf2, 1, 0, NULL, buf4, dst32f);
                 }
                 else
                 {
                     if (!_s8u)
                     {
-                        _cvt32fTo8u(src32f, p.conv[0].srcC, 0, p.conv[0].srcH, p.conv[0].srcW, _cvt[0].scale.data, _cvt[0].shift.data, src8u, 0, p.compatibility);
+                        _cvt32fTo8u(src32f, c0.srcC, 0, c0.srcH, c0.srcW, _cvt[0].scale.data, _cvt[0].shift.data, src8u, 0, c0.compatibility);
                         src32f += _sizeS;
                     }                    
                     DirectConvolution8i(src8u, 0, 0, buf3, buf4, buf0);
                     if (_s8u)
                         src8u += _sizeS;
-                    _depthwise(buf0, p.conv[1], _alg, 0, 0, p.conv[1].dstH, _weight32f.data, _bias[1].data, _params[1].data, NULL, NULL, (uint8_t*)(p.count == 3 ? buf1 : dst32f));
+                    _depthwise(buf0, c1, _alg, 0, 0, c1.dstH, _weight32f.data, _bias[1].data, _params[1].data, NULL, NULL, (uint8_t*)(p.count == 3 ? buf1 : dst32f));
                     if (p.count == 3)
                     {
-                        _cvt32fTo8u(buf1, p.conv[2].srcC, 0, p.conv[2].srcH, p.conv[2].srcW, _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, p.compatibility);
+                        _cvt32fTo8u(buf1, c2.srcC, 0, c2.srcH, c2.srcW, _cvt[1].scale.data, _cvt[1].shift.data, buf2, 0, c0.compatibility);
                         DirectConvolution8i(buf2, 2, 1, NULL, buf4, dst32f);
                     }
                 }
                 if (_d8u)
                 {
-                    const SimdConvolutionParameters& end = p.conv[p.count - 1];
-                    _cvt32fTo8u(dst32f, end.dstC, 0, end.dstH, end.dstW, _cvt[2].scale.data, _cvt[2].shift.data, dst8u, 0, p.compatibility);
+                    const ConvParam8i& e = p.conv[p.count - 1];
+                    _cvt32fTo8u(dst32f, e.dstC, 0, e.dstH, e.dstW, _cvt[2].scale.data, _cvt[2].shift.data, dst8u, 0, c0.compatibility);
                     dst8u += _sizeD;
                 }
                 else
@@ -284,11 +289,11 @@ namespace Simd
 
         void SynetMergedConvolution8i::Quantize(const float* weight, const float* bias, size_t i, size_t q)
         {
-            const SimdConvolutionParameters & conv = _param.conv[i];
+            const ConvParam8i& conv = _param.conv[i];
             const CvtParam& cvt = _cvt[i ? 1 : 0];
             size_t D = conv.dstC, C = conv.srcC, K = conv.kernelY * conv.kernelX;
             Array32f  normW(C * K);
-            bool avoidOverflow16i = cvt.neg && Base::Overflow(_param.compatibility);
+            bool avoidOverflow16i = cvt.neg && Base::Overflow(conv.compatibility);
             for (size_t d = 0; d < D; ++d)
             {
                 float normB = 0, minW = FLT_MAX, maxW = -FLT_MAX, scale = 1.0f;
@@ -322,7 +327,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution8i::ReorderInputWeight(const SimdConvolutionParameters& p, Array8i& weight)
+        void SynetMergedConvolution8i::ReorderInputWeight(const ConvParam8i & p, Array8i& weight)
         {
             if (_alg.miC == 0)
                 return;
@@ -353,7 +358,7 @@ namespace Simd
             weight.Swap(buf);
         }
 
-        void SynetMergedConvolution8i::ReorderDepthwiseWeight(const SimdConvolutionParameters& p, Array32f& weight)
+        void SynetMergedConvolution8i::ReorderDepthwiseWeight(const ConvParam8i& p, Array32f& weight)
         {
             if (_alg.miC == 0)
                 return;
@@ -377,7 +382,7 @@ namespace Simd
             weight.Swap(buf);
         }
 
-        void SynetMergedConvolution8i::ReorderOutputWeight(const SimdConvolutionParameters& p, Array8i& weight)
+        void SynetMergedConvolution8i::ReorderOutputWeight(const ConvParam8i& p, Array8i& weight)
         {
             if (_alg.miC == 0)
                 return;
@@ -411,7 +416,7 @@ namespace Simd
 
         void SynetMergedConvolution8i::DirectConvolution8i(const uint8_t* src, size_t i, size_t q, uint8_t* buf, int32_t* sum, float* dst)
         {
-            const SimdConvolutionParameters& conv = _param.conv[i];
+            const ConvParam8i& conv = _param.conv[i];
             const float* params = _params[i].data;
             const uint8_t* tmp = src;
             if (!_1x1 && i == 0)
@@ -463,9 +468,9 @@ namespace Simd
         void SynetMergedConvolution8iCdc::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
             const MergConvParam8i& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
-            const SimdConvolutionParameters& c2 = p.conv[2];
+            const ConvParam8i& c0 = p.conv[0];
+            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam8i& c2 = p.conv[2];
             const AlgParam& a = _alg;
 
             buf = GetBuffer(buf);
@@ -474,9 +479,9 @@ namespace Simd
             uint8_t* buf3 = Allocate<uint8_t>(buf, _sizeB[3]);
             int32_t* buf4 = Allocate<int32_t>(buf, _sizeB[4]);
 
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < c0.batch; ++b)
             {
-                for (size_t c = 0, C = p.conv[1].dstC; c < C; c += a.maC)
+                for (size_t c = 0, C = c1.dstC; c < C; c += a.maC)
                 {
                     size_t maC = Simd::Min(C, c + a.maC) - c;
                     for (size_t yBeg2 = 0, yBeg1 = 0, yBeg0 = 0; yBeg2 < c1.dstH;)
@@ -487,7 +492,7 @@ namespace Simd
                         size_t srcOffs = yBeg0 * c0.srcW * c0.srcC;
                         const uint8_t* src8u = _s8u ? src + srcOffs : buf2;
                         if (!_s8u)
-                            _cvt32fTo8u((float*)src + srcOffs, c0.srcC, yBeg0, yEnd0, c0.srcW, _cvt[0].scale.data, _cvt[0].shift.data, buf2, a.bufH[0], p.compatibility);
+                            _cvt32fTo8u((float*)src + srcOffs, c0.srcC, yBeg0, yEnd0, c0.srcW, _cvt[0].scale.data, _cvt[0].shift.data, buf2, a.bufH[0], c0.compatibility);
                         _input(src8u, c0, a, maC, yBeg1, yEnd1, _weight8i[0].data + c * a.dw[0], _norm[0].data + c, _bias[0].data + c, _params[0].data + c * a.dp[0], buf0);
                         _depthwise(buf0, c1, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[1], _bias[1].data + c, _params[1].data + c * a.dp[1], 
                             _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf3);
@@ -527,7 +532,7 @@ namespace Simd
             size_t size = 0;
             for (size_t i = 0; i < 3; ++i)
             {
-                const SimdConvolutionParameters& c = p.conv[i];
+                const ConvParam8i & c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC : 4);
             }
             size_t count = size / (L3 / 2) + 1;

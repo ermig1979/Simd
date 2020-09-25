@@ -39,6 +39,10 @@ namespace Simd
         size_t batch;
         SimdSynetCompatibilityType compatibility;
 
+        ConvParam8i()
+        {
+        }
+
         ConvParam8i(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
             *((SimdConvolutionParameters*)this) = *conv;
@@ -215,17 +219,6 @@ namespace Simd
             virtual void SetParams(const float* weight, const float* bias, const float* params, const float* const* stats);
 
             static bool Preferable(const ConvParam8i& p);
-
-            enum Term8iType
-            {
-                Term8iSingle8u,
-                Term8iSingle32f,
-                Term8iFirst,
-                Term8iIterim,
-                Term8iLast8u,
-                Term8iLast32f,
-                Term8iSize
-            };
         
             struct AlgParam
             {
@@ -244,7 +237,7 @@ namespace Simd
             void Forward8u(const uint8_t* src, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
-            ConvolutionPtr _convolutions[Term8iSize];
+            ConvolutionPtr _convolutions[6];
         };
 
         class SynetConvolution8iNhwcDepthwise : public SynetConvolution8i

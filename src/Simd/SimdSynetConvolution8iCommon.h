@@ -34,6 +34,17 @@
 
 namespace Simd
 {
+    enum Term8iType
+    {
+        Term8iSingle8u,
+        Term8iSingle32f,
+        Term8iFirst,
+        Term8iIterim,
+        Term8iLast8u,
+        Term8iLast32f,
+        Term8iSize
+    };
+
     namespace Base
     {
         template<class S, class D, class F> SIMD_INLINE D Convert(S value, F scale, F shift, int lower, int upper)
@@ -311,7 +322,7 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE)   
     namespace Sse41
     {
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8i
+        template <Term8iType term> struct Term8i
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf, __m128i sum, 
                 const __m128 * norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper);
@@ -319,7 +330,7 @@ namespace Simd
                 const __m128 * norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper, size_t tail);
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8i<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
@@ -339,7 +350,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8i<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
@@ -358,7 +369,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iFirst>
+        template <> struct Term8i<Term8iFirst>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
@@ -376,7 +387,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iIterim>
+        template <> struct Term8i<Term8iIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
@@ -394,7 +405,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast8u>
+        template <> struct Term8i<Term8iLast8u>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
@@ -415,7 +426,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast32f>
+        template <> struct Term8i<Term8iLast32f>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
@@ -435,21 +446,21 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        template<Term8iType term, SimdConvolutionActivationType type>
         SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum, const __m128* norm, const __m128* bias,
             const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum, norm, bias, params, scale, shift, upper);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        template<Term8iType term, SimdConvolutionActivationType type>
         SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m128i sum, const __m128* norm, const __m128* bias,
             const __m128* params, const __m128* scale, const __m128* shift, __m128i upper, size_t tail)
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum, norm, bias, params, scale, shift, upper, tail);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type> 
+        template<Term8iType term, SimdConvolutionActivationType type> 
         SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1, const __m128* norm, const __m128* bias,
             const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
         {
@@ -457,7 +468,7 @@ namespace Simd
             Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift, upper);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        template<Term8iType term, SimdConvolutionActivationType type>
         SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m128i sum0, __m128i sum1, const __m128* norm, const __m128* bias,
             const __m128* params, const __m128* scale, const __m128* shift, __m128i upper, size_t tail)
         {
@@ -467,13 +478,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8iDepthwise
+        template <Term8iType term> struct Term8iDepthwise
         {
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
                 const float * norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset);
         };
 
-        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8iDepthwise<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
@@ -484,7 +495,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8iDepthwise<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
@@ -494,7 +505,7 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type>
+        template<Term8iType term, SimdConvolutionActivationType type>
         SIMD_INLINE void Save(uint8_t* dst, __m128i sum, const float* norm, const float* bias, 
             const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
         {
@@ -506,7 +517,7 @@ namespace Simd
 #if defined(SIMD_AVX2_ENABLE) 
     namespace Avx2
     {
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8i
+        template <Term8iType term> struct Term8i
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum, 
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper);
@@ -514,7 +525,7 @@ namespace Simd
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper, size_t tail);
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8i<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
@@ -534,7 +545,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8i<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
@@ -553,7 +564,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iFirst>
+        template <> struct Term8i<Term8iFirst>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
@@ -571,7 +582,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iIterim>
+        template <> struct Term8i<Term8iIterim>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
@@ -589,7 +600,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast8u>
+        template <> struct Term8i<Term8iLast8u>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
@@ -610,7 +621,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast32f>
+        template <> struct Term8i<Term8iLast32f>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
@@ -630,21 +641,21 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m256i sum, const __m256* norm, 
             const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
         {
             Term8i<term>::template Save<type, 0, nofma>(dst, buf, sum, norm, bias, params, scale, shift, upper);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m256i sum, const __m256* norm,
             const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper, size_t tail)
         {
             Term8i<term>::template Save<type, 0, nofma>(dst, buf, sum, norm, bias, params, scale, shift, upper, tail);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m256i sum0, __m256i sum1, const __m256* norm,
             const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper)
         {
@@ -652,7 +663,7 @@ namespace Simd
             Term8i<term>::template Save<type, 1, nofma>(dst, buf, sum1, norm, bias, params, scale, shift, upper);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m256i sum0, __m256i sum1, const __m256* norm,
             const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper, size_t tail)
         {
@@ -662,13 +673,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8iDepthwise
+        template <Term8iType term> struct Term8iDepthwise
         {
             template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m256i upper, size_t offset);
         };
 
-        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8iDepthwise<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m256i upper, size_t offset)
@@ -679,7 +690,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8iDepthwise<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m256i upper, size_t offset)
@@ -689,7 +700,7 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save(uint8_t* dst, __m256i sum, const float* norm, const float* bias,
             const float* params, const float* scale, const float* shift, __m256i upper, size_t offset)
         {
@@ -701,13 +712,13 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE)  
     namespace Avx512bw
     {
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8i
+        template <Term8iType term> struct Term8i
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum, 
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1);
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8i<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
@@ -719,7 +730,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8i<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
@@ -729,7 +740,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iFirst>
+        template <> struct Term8i<Term8iFirst>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
@@ -738,7 +749,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iIterim>
+        template <> struct Term8i<Term8iIterim>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
@@ -747,7 +758,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast8u>
+        template <> struct Term8i<Term8iLast8u>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
@@ -760,7 +771,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast32f>
+        template <> struct Term8i<Term8iLast32f>
         {
             template<SimdConvolutionActivationType type, int index, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum,
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
@@ -771,14 +782,14 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, __m512i sum, const __m512* norm, const __m512* bias,
             const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
         {
             Term8i<term>::template Save<type, 0, nofma>(dst, buf, sum, norm, bias, params, scale, shift, upper, tail);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, __m512i sum0, __m512i sum1, const __m512* norm, const __m512* bias,
             const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
         {
@@ -788,13 +799,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8iDepthwise
+        template <Term8iType term> struct Term8iDepthwise
         {
             template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm, 
                 const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail);
         };
 
-        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8iDepthwise<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm,
                 const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail)
@@ -810,7 +821,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8iDepthwise<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8iDepthwise<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm,
                 const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail)
@@ -822,7 +833,7 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void Save(uint8_t* dst, __m512i sum, const float* norm, const float* bias, const float* params, 
             const float* scale, const float* shift, __m128i upper, size_t offset, __mmask16 tail = -1)
         {
@@ -834,7 +845,7 @@ namespace Simd
 #if defined(SIMD_NEON_ENABLE)
     namespace Neon
     {
-        template <Base::SynetConvolution8iNhwcDirect::Term8iType term> struct Term8i
+        template <Term8iType term> struct Term8i
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm, 
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t * scale, const float32x4_t* shift, uint8x8_t upper);
@@ -842,7 +853,7 @@ namespace Simd
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper, size_t tail);
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u>
+        template <> struct Term8i<Term8iSingle8u>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
@@ -863,7 +874,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f>
+        template <> struct Term8i<Term8iSingle32f>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
@@ -882,7 +893,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iFirst>
+        template <> struct Term8i<Term8iFirst>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
@@ -900,7 +911,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iIterim>
+        template <> struct Term8i<Term8iIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
@@ -918,7 +929,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast8u>
+        template <> struct Term8i<Term8iLast8u>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
@@ -940,7 +951,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term8i<Base::SynetConvolution8iNhwcDirect::Term8iLast32f>
+        template <> struct Term8i<Term8iLast32f>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, int32x4_t sum, const float32x4_t* norm,
                 const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
@@ -960,26 +971,26 @@ namespace Simd
             }
         };
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, int32x4_t sum, 
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, int32x4_t sum, 
             const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum, norm, bias, params, scale, shift, upper);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, int32x4_t sum, 
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint8_t* dst, int32_t* buf, int32x4_t sum, 
             const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper, size_t tail)
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum, norm, bias, params, scale, shift, upper, tail);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, int32x4_t sum0, 
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, int32x4_t sum0, 
             int32x4_t sum1, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper)
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift, upper);
             Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift, upper);
         }
 
-        template<Base::SynetConvolution8iNhwcDirect::Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, int32x4_t sum0,
+        template<Term8iType term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint8_t* dst, int32_t* buf, int32x4_t sum0,
             int32x4_t sum1, const float32x4_t* norm, const float32x4_t* bias, const float32x4_t* params, const float32x4_t* scale, const float32x4_t* shift, uint8x8_t upper, size_t tail)
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift, upper);

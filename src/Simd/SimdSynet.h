@@ -265,6 +265,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        SIMD_INLINE __m128i Set4(const uint8_t* src)
+        {
+            return _mm_set1_epi32(*(int32_t*)src);
+        }
+
         template<bool overflow> void Madd4(__m128i& i32, __m128i u8, __m128i i8);
 
         template<> SIMD_INLINE void Madd4<true>(__m128i& i32, __m128i u8, __m128i i8)

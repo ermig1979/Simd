@@ -291,7 +291,7 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 96, 16, 26), Cnv(a0, 1, 1, 576), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 96), f32, f32, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 6), f32, f32, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), u8, u8, 1, n), f1, f2);
 #endif
         return result;
     }
@@ -301,6 +301,11 @@ namespace Test
         bool result = true;
 
         result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetMergedConvolution8iForwardAutoTest(EPS, FUNC_MC(Simd::Sse41::SynetMergedConvolution8iInit), FUNC_MC(SimdSynetMergedConvolution8iInit));
+#endif 
 
         return result;
     }

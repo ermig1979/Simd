@@ -37,7 +37,6 @@ namespace Simd
     {
 		using AlgParam = SynetConvolution8iNhwcDepthwise::AlgParam;
 		using ConvolutionPtr = SynetConvolution8iNhwcDepthwise::ConvolutionPtr;
-		using Term8iType = Base::SynetConvolution8iNhwcDirect::Term8iType;
 
 		SIMD_INLINE __m512i LoadAs32i(const uint8_t* src, __mmask16 tail = -1)
 		{
@@ -724,9 +723,9 @@ namespace Simd
 		template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, ConvolutionPtr& d)
 		{
 			if (p.dstT == SimdTensorData8u)
-				Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle8u, activation>(p, d);
+				Set<Term8iSingle8u, activation>(p, d);
 			else
-				Set<Base::SynetConvolution8iNhwcDirect::Term8iSingle32f, activation>(p, d);
+				Set<Term8iSingle32f, activation>(p, d);
 		}
 
 		static void Set(const ConvParam8i& p, ConvolutionPtr& d)
