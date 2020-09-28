@@ -156,20 +156,9 @@ namespace Simd
             virtual Base::PerformanceMeasurer* Perf(const String& func);
 #endif
 
-            enum Term8iType
-            {
-                Term8iSingle8u,
-                Term8iSingle32f,
-                Term8iFirst,
-                Term8iIterim,
-                Term8iLast8u,
-                Term8iLast32f,
-                Term8iSize
-            };
-
             struct AlgParam
             {
-                size_t miC, maC, yStep[3], bufH[3], dp[2], dw[3], sizeC, sizeD;
+                size_t miC, maC, yStep[3], yStart[3], bufH[3], dp[2], dw[3], size;
                 int32_t zero, upper;
             };
 

@@ -203,6 +203,8 @@ namespace Simd
                 if (internal)
                     internal[i] = SimdTrue;
             }
+            _alg.zero = Set4(_cvt[0].zero[0]);
+            _alg.upper = Set4(_cvt[0].uMax);
         }
 
         void SynetMergedConvolution8i::Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst)
@@ -486,9 +488,9 @@ namespace Simd
                     size_t maC = Simd::Min(C, c + a.maC) - c;
                     for (size_t yBeg2 = 0, yBeg1 = 0, yBeg0 = 0; yBeg2 < c1.dstH;)
                     {
-                        size_t yEnd2 = Simd::Min(yBeg2 + a.yStep[2], c1.dstH);
-                        size_t yEnd1 = Simd::Min(Simd::Max(yBeg1 + a.yStep[1], (a.yStep[2] - 1) * c1.strideY + c1.kernelY - c1.padY), c1.srcH);
-                        size_t yEnd0 = Simd::Min(Simd::Max(yBeg0 + a.yStep[0], (a.yStep[1] - 1) * c0.strideY + c0.kernelY - c0.padY), c0.srcH);
+                        size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
+                        size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
+                        size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
                         size_t srcOffs = yBeg0 * c0.srcW * c0.srcC;
                         const uint8_t* src8u = _s8u ? src + srcOffs : buf2;
                         if (!_s8u)
@@ -527,6 +529,9 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam8i& p = _param;
+            const ConvParam8i& c0 = p.conv[0];
+            const ConvParam8i& c1 = p.conv[1];
+            const ConvParam8i& c2 = p.conv[2];
             AlgParam & a = _alg;
             a.miC = F;
             size_t size = 0;
@@ -536,15 +541,20 @@ namespace Simd
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC : 4);
             }
             size_t count = size / (L3 / 2) + 1;
-            a.maC = AlignHiAny(p.conv[0].dstC / count, 2 * a.miC);
-            for (size_t yStep = p.conv[1].dstH; yStep >= 1; yStep--)
+            a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
+            for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
             {
                 a.yStep[2] = Simd::Max<size_t>(1, yStep);
+                a.yStart[2] = a.yStep[2];
                 a.bufH[2] = Pow2Hi(a.yStep[2]);
-                a.yStep[1] = a.yStep[2] * p.conv[1].strideY;
-                a.bufH[1] = Pow2Hi((a.yStep[2] - 1) * p.conv[1].strideY + p.conv[1].kernelY);
-                a.yStep[0] = a.yStep[1] * p.conv[0].strideY;
-                a.bufH[0] = Pow2Hi((a.yStep[1] - 1) * p.conv[0].strideY + p.conv[0].kernelY);
+
+                a.yStep[1] = a.yStep[2] * c1.strideY;
+                a.yStart[1] = (a.yStart[2] - 1) * c1.strideY + c1.kernelY - c1.padY;
+                a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c1.strideY + c1.kernelY, a.yStart[1]));
+
+                a.yStep[0] = a.yStep[1] * c0.strideY;
+                a.yStart[0] = (a.yStart[1] - 1) * c0.strideY + c0.kernelY - c0.padY;
+                a.bufH[0] = Pow2Hi(Simd::Max((a.yStep[1] - 1) * c0.strideY + c0.kernelY, a.yStart[0]));
 
                 _sizeB[2] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC * (_s8u ? 0 : 1);
                 _sizeB[0] = a.bufH[1] * p.conv[1].srcW * a.maC;
@@ -554,11 +564,12 @@ namespace Simd
             }
             _sizeB[1] = 0;
             _sizeB[4] = count > 1 ? _sizeD : 0;
-            a.dp[0] = p.conv[0].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
-            a.dp[1] = p.conv[1].activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
-            a.dw[0] = p.conv[0].kernelY * p.conv[0].kernelX * p.conv[0].srcC;
-            a.dw[1] = p.conv[1].kernelY * p.conv[1].kernelX;
-            a.dw[2] = AlignHiAny(p.conv[2].dstC, 2 * a.miC);
+            a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dw[0] = c0.kernelY * c0.kernelX * c0.srcC;
+            a.dw[1] = c1.kernelY * c1.kernelX;
+            a.dw[2] = AlignHiAny(c2.dstC, 2 * a.miC);
+            a.size = _d8u ? 1 : 4;
         }
 
         //---------------------------------------------------------------------

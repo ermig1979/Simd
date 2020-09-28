@@ -259,7 +259,7 @@ namespace Test
 #if 0
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 20, 12), Cnv(a0, 1, 1, 24), Cnv(a1, 3, 2), u8, u8, 1, n), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 3, 320, 180), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 160, 90), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 2), f32, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 80, 45), Cnv(a0, 1, 1, 32), Cnv(a1, 3, 1), u8, f32, 0, o), f1, f2);
@@ -267,7 +267,7 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 32, 40, 23), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 2), Cnv(a1, 1, 1, 128), u8, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 30), f32, u8, 1, p), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 64, 40, 23), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 12), u8, f32, 0, o), f1, f2);
@@ -291,7 +291,7 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 96, 16, 26), Cnv(a0, 1, 1, 576), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 96), f32, f32, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 160, 8, 13), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), u8, f32, 1, o), f1, f2);
 #endif
         return result;
     }

@@ -397,11 +397,6 @@ namespace Simd
             return size;
         }
 
-        static SIMD_INLINE int32_t Set4(uint8_t value)
-        {
-            return int32_t(value) | (int32_t(value) << 8) | (int32_t(value) << 16) | (int32_t(value) << 24);
-        }
-
         void SynetConvolution8iNhwcDirect::SetParams(const float* weight, const float* bias, const float* params, const float* const* stats)
         {
             SynetConvolution8i::SetParams(weight, bias, params, stats);

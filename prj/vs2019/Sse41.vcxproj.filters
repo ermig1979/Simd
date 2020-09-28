@@ -155,5 +155,8 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
