@@ -295,7 +295,7 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 3, 320, 320), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 8), f32, u8, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 160, 8, 13), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), u8, f32, 1, o), f1, f2);
 #endif
         return result;
     }
