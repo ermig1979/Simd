@@ -117,7 +117,8 @@ namespace Test
                 ss << "[" << p.count << ":" << p.batch << "x" << p.conv[0].srcC << "x" << p.conv[0].srcH << "x" << p.conv[0].srcW;
                 for (size_t i = 0; i < p.count; ++i)
                     ss << "-" << (p.conv[i].group != 1 ? String("") : ToString(p.conv[i].dstC) + "x") << p.conv[i].kernelY << "x" << p.conv[i].strideY;
-                ss << "-" << (p.conv[0].srcT == SimdTensorData32f ? "f" : "u") << (p.conv[p.count - 1].dstT == SimdTensorData32f ? "f" : "u") << "]";
+                ss << "-" << (p.conv[0].srcT == SimdTensorData32f ? "f" : "u") << (p.conv[p.count - 1].dstT == SimdTensorData32f ? "f" : "u");
+                ss << "-" << ((Simd::Base::Overflow(p.comp) ? "o" : Simd::Base::Narrowed(p.comp) ? "n" : "p")) << "]";
                 desc = ss.str();
             }
 
@@ -250,9 +251,10 @@ namespace Test
     {
         bool result = true;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
-        SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
-        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
-        SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
+        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaAvoid;
+        SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
+        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
+        SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationPrelu, a1 = SimdConvolutionActivationHswish, a2 = SimdConvolutionActivationIdentity;
         const SimdConvolutionActivationType a0 = SimdConvolutionActivationHswish, a1 = SimdConvolutionActivationIdentity, a2 = SimdConvolutionActivationPrelu;
 #if defined(NDEBUG)
@@ -286,13 +288,13 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), u8, u8, 1, n), f1, f2);
 #endif
 #if 1
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 1060, 6, 7), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 1060), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 1060, 6, 7), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 1060), f32, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 160, 8, 13), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), u8, f32, 1, o), f1, f2);
-        //result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 128, 208), Cnv(a0, 1, 1, 96), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 24), f32, u8, 0, p), f1, f2);
-        //result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 96, 16, 26), Cnv(a0, 1, 1, 576), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 96), f32, f32, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 16, 128, 208), Cnv(a0, 1, 1, 96), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 24), f32, u8, 0, p), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 96, 16, 26), Cnv(a0, 1, 1, 576), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 96), f32, f32, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 1060, 6, 7), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 1060), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 256, 10, 6), Cnv(a0, 1, 1, 64), Cnv(a1, 3, 2), Cnv(a2, 1, 1, 256), u8, u8, 1, n), f1, f2);
 #endif
         return result;
     }

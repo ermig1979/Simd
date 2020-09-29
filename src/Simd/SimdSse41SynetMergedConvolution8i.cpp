@@ -43,6 +43,19 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        SIMD_INLINE void Convert32fTo8u(const float* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+            const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
+        {
+            size_t size = width * channels, mask = bufH - 1; 
+            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
+            if (yInt > yBeg)
+                Sse2::SynetConvert32fTo8u(src + yBeg * size, 1, channels, yInt - yBeg, width, SimdTensorFormatNhwc, scale, shift, dst + (yBeg&mask) * size, compatibility);
+            if(yEnd > yInt)
+                Sse2::SynetConvert32fTo8u(src + yInt * size, 1, channels, yEnd - yInt, width, SimdTensorFormatNhwc, scale, shift, dst + (yInt&mask) * size, compatibility);
+        }
+
+        //---------------------------------------------------------------------
+
         template<SimdConvolutionActivationType type>
         SIMD_INLINE void SaveInput1(float* dst, __m128i sum, const __m128* norm, const __m128* bias, const __m128* params)
         {
@@ -61,7 +74,7 @@ namespace Simd
             const __m128* norm, const __m128* bias, const __m128* params, float * dst0, float* dst1)
         {
             __m128i d00, d01, s0, w0, w1;
-            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(p.srcC, 4) * DA;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(p.srcC, 4) * DA, sM = a.bufH[0] - 1;
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
@@ -75,7 +88,7 @@ namespace Simd
                     {
                         if (sy + ky < p.srcH && sx + kx < p.srcW)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + p.srcC;
+                            size_t offs = (sM&(sy + ky)) * dY + (sx + kx) * dX, end = offs + p.srcC;
                             for (; offs < end; offs += 4)
                             {
                                 w0 = _mm_loadu_si128((__m128i*)weight + 0);
@@ -116,7 +129,7 @@ namespace Simd
                     {
                         if (sy + ky < p.srcH && sx + kx < p.srcW)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + p.srcC;
+                            size_t offs = (sM & (sy + ky)) * dY + (sx + kx) * dX, end = offs + p.srcC;
                             for (; offs < end; offs += 4)
                             {
                                 w0 = _mm_loadu_si128((__m128i*)weight + 0);
@@ -276,10 +289,10 @@ namespace Simd
             for (size_t c = 0; c < maC; c += F)
             {
                 __m128 _bias = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
-                __m128 _scale = _mm_loadu_ps(scale + c);
-                __m128 _shift = _mm_loadu_ps(shift + c);
                 if (type == ::SimdConvolutionActivationPrelu)
                     _params[0] = _mm_loadu_ps(params + c);
+                __m128 _scale = _mm_loadu_ps(scale + c);
+                __m128 _shift = _mm_loadu_ps(shift + c);
 
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
@@ -455,9 +468,200 @@ namespace Simd
             }
         }
 
+        template<SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x2(const float* src0, const float* src1,
+            const __m128* weight, const __m128& bias, const __m128* params, const __m128& scale, const __m128& shift, const __m128i& upper, uint8_t * dst)
+        {
+            if (nofma)
+            {
+                __m128 sum = bias;
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum);
+                SaveDepthwise<type>(dst, sum, params, scale, shift, upper);
+            }
+            else
+            {
+                __m128 sum0 = bias, sum1 = _mm_setzero_ps();
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
+                SaveDepthwise<type>(dst, _mm_add_ps(sum0, sum1), params, scale, shift, upper);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge2x3(const float* src0, const float* src1,
+            const __m128* weight, const __m128& bias, const __m128* params, const __m128& scale, const __m128& shift, const __m128i& upper, uint8_t* dst)
+        {
+            if (nofma)
+            {
+                __m128 sum = bias;
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * F), weight[2]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * F), weight[5]), sum);
+                SaveDepthwise<type>(dst, sum, params, scale, shift, upper);
+            }
+            else
+            {
+                __m128 sum0 = bias, sum1 = _mm_setzero_ps(), sum2 = _mm_setzero_ps();
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
+                sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * F), weight[2]), sum2);
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
+                sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * F), weight[5]), sum2);
+                SaveDepthwise<type>(dst, _mm_add_ps(_mm_add_ps(sum0, sum1), sum2), params, scale, shift, upper);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Edge3x2(const float* src0, const float* src1, const float* src2,
+            const __m128* weight, const __m128& bias, const __m128* params, const __m128& scale, const __m128& shift, const __m128i& upper, uint8_t* dst)
+        {
+            if (nofma)
+            {
+                __m128 sum = bias;
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * F), weight[6]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * F), weight[7]), sum);
+                SaveDepthwise<type>(dst, sum, params, scale, shift, upper);
+            }
+            else
+            {
+                __m128 sum0 = bias, sum1 = _mm_setzero_ps();
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * F), weight[6]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * F), weight[7]), sum1);
+                SaveDepthwise<type>(dst, _mm_add_ps(sum0, sum1), params, scale, shift, upper);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x1(const float* src0, const float* src1, const float* src2,
+            const __m128* weight, const __m128& bias, const __m128* params, const __m128& scale, const __m128& shift, const __m128i& upper, uint8_t* dst)
+        {
+            if (nofma)
+            {
+                __m128 sum = bias;
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * F), weight[2]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * F), weight[5]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * F), weight[6]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * F), weight[7]), sum);
+                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 2 * F), weight[8]), sum);
+                SaveDepthwise<type>(dst, sum, params, scale, shift, upper);
+            }
+            else
+            {
+                __m128 sum0 = bias, sum1 = _mm_setzero_ps(), sum2 = _mm_setzero_ps();
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 0 * F), weight[0]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 1 * F), weight[1]), sum1);
+                sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src0 + 2 * F), weight[2]), sum2);
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 0 * F), weight[3]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 1 * F), weight[4]), sum1);
+                sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src1 + 2 * F), weight[5]), sum2);
+                sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 0 * F), weight[6]), sum0);
+                sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 1 * F), weight[7]), sum1);
+                sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(src2 + 2 * F), weight[8]), sum2);
+                SaveDepthwise<type>(dst, _mm_add_ps(_mm_add_ps(sum0, sum1), sum2), params, scale, shift, upper);
+            }
+        }
+
+        template<SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam8i& p, const AlgParam& a, size_t maC,
+            size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
+        {
+            size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
+            size_t srcW = p.srcW * F, dstW = p.dstW * a.maC, weightS = p.kernelY * p.kernelX * F;
+            size_t srcM = (a.bufH[1] - 1), srcS = a.bufH[1] * srcW;
+            size_t xStep = F * p.strideX, xStep0 = (p.strideX - p.padX) * F;
+            size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
+
+            __m128i _upper = _mm_set1_epi32(a.upper);
+            __m128 _params[2];
+            _params[0] = _mm_set1_ps(params[0]);
+            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+                _params[1] = _mm_set1_ps(params[1]);
+            for (size_t c = 0; c < maC; c += F)
+            {
+                __m128 _weight[9];
+                for (size_t i = 0; i < 9; ++i)
+                    _weight[i] = _mm_loadu_ps(weight + i * F);
+                __m128 _bias = bias ? _mm_loadu_ps(bias + c) : _mm_setzero_ps();
+                if (type == ::SimdConvolutionActivationPrelu)
+                    _params[0] = _mm_loadu_ps(params + c);
+                __m128 _scale = _mm_loadu_ps(scale + c);
+                __m128 _shift = _mm_loadu_ps(shift + c);
+
+                size_t dy = yBeg;
+                if (yBeg == 0 && padY)
+                {
+                    size_t sy = 0, dx = 0;
+                    const float* src0 = src + ((sy + 0) & srcM) * srcW;
+                    const float* src1 = src + ((sy + 1) & srcM) * srcW;
+                    uint8_t* pDst = dst + (dy - yBeg) * dstW;
+                    if (padX)
+                        DepthwiseConvolution3x3Edge2x2<type, nofma>(src0, src1, _weight + 4, _bias, _params, _scale, _shift, _upper, pDst), pDst += a.maC, dx++, src0 += xStep0, src1 += xStep0;
+                    for (; dx < xMainEnd; dx++, pDst += a.maC, src0 += xStep, src1 += xStep)
+                        DepthwiseConvolution3x3Edge2x3<type, nofma>(src0, src1, _weight + 3, _bias, _params, _scale, _shift, _upper, pDst);
+                    if (padW)
+                        DepthwiseConvolution3x3Edge2x2<type, nofma>(src0, src1, _weight + 3, _bias, _params, _scale, _shift, _upper, pDst);
+                    dy++;
+                }
+                for (; dy < yMainEnd; ++dy)
+                {
+                    size_t sy = dy * strideY - padY, dx = 0;
+                    const float* src0 = src + ((sy + 0) & srcM) * srcW;
+                    const float* src1 = src + ((sy + 1) & srcM) * srcW;
+                    const float* src2 = src + ((sy + 2) & srcM) * srcW;
+                    uint8_t* pDst = dst + (dy - yBeg) * dstW;
+                    if (padX)
+                        DepthwiseConvolution3x3Edge3x2<type, nofma>(src0, src1, src2, _weight + 1, _bias, _params, _scale, _shift, _upper, pDst), pDst += a.maC, dx++, src0 += xStep0, src1 += xStep0, src2 += xStep0;
+                    for (; dx < xMainEnd; dx++, pDst += a.maC, src0 += xStep, src1 += xStep, src2 += xStep)
+                        DepthwiseConvolution3x3Main1x1<type, nofma>(src0, src1, src2, _weight + 0, _bias, _params, _scale, _shift, _upper, pDst);
+                    if (padW)
+                        DepthwiseConvolution3x3Edge3x2<type, nofma>(src0, src1, src2, _weight + 0, _bias, _params, _scale, _shift, _upper, pDst);
+                }
+                if (dy < yEnd)
+                {
+                    size_t sy = dy * strideY - padY, dx = 0;
+                    const float* src0 = src + ((sy + 0) & srcM) * srcW;
+                    const float* src1 = src + ((sy + 1) & srcM) * srcW;
+                    uint8_t* pDst = dst + (dy - yBeg) * dstW;
+                    if (padX)
+                        DepthwiseConvolution3x3Edge2x2<type, nofma>(src0, src1, _weight + 1, _bias, _params, _scale, _shift, _upper, pDst), pDst += a.maC, dx++, src0 += xStep0, src1 += xStep0;
+                    for (; dx < xMainEnd; dx++, pDst += a.maC, src0 += xStep, src1 += xStep)
+                        DepthwiseConvolution3x3Edge2x3<type, nofma>(src0, src1, _weight + 0, _bias, _params, _scale, _shift, _upper, pDst);
+                    if (padW)
+                        DepthwiseConvolution3x3Edge2x2<type, nofma>(src0, src1, _weight + 0, _bias, _params, _scale, _shift, _upper, pDst);
+                }
+                src += srcS;
+                dst += F;
+                weight += weightS;
+            }
+        }
+
         template<SimdConvolutionActivationType type> SIMD_INLINE void SetDepthwise(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise)
         {
-            depthwise = DepthwiseConvolution<type>;
+            if (p.IsKernel(3) && p.IsDilation(1))
+            {
+                if(Base::FmaAvoid(p.compatibility))
+                    depthwise = DepthwiseConvolution3x3<type, true>;
+                else
+                    depthwise = DepthwiseConvolution3x3<type, false>;
+            }
+            else
+                depthwise = DepthwiseConvolution<type>;
         }
 
         SIMD_INLINE void SetDepthwise(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise)
@@ -475,10 +679,6 @@ namespace Simd
         }
 
         //---------------------------------------------------------------------
-
-        typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-            const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
-
 
         template<Term8iType term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight,
@@ -675,11 +875,11 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-
         SynetMergedConvolution8iCdc::SynetMergedConvolution8iCdc(const MergConvParam8i& p)
             : Base::SynetMergedConvolution8iCdc(p)
         {
             SetSize(Sse::F);
+            _cvt32fTo8u = Convert32fTo8u;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
             SetOutput(_param.conv[2], _output);
