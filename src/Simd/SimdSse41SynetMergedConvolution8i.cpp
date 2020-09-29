@@ -262,14 +262,11 @@ namespace Simd
         {
             size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
             size_t srcW = p.srcW * F, dstW = p.dstW * a.maC, weightS = p.kernelY * p.kernelX * F, strideXF = strideX * F;
-            size_t srcM = (a.bufH[1] - 1), dstM = (a.bufH[2] - 1), srcS = a.bufH[1] * srcW;// , dstS = bufH[1] * dstW;
-            //size_t noseY = p.NoseH(); (p.padY + p.strideY - 1) / p.strideY;
-            //size_t bodyY = (p.srcH + p.padY + p.strideY - p.kernelY) / p.strideY;
-            //size_t noseX = (p.padX + p.strideX - 1) / p.strideX;
-            //size_t bodyX = (p.srcW + p.padX + p.strideX - p.kernelX) / p.strideX;
-            //size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
-            //size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
-            //size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
+            size_t srcM = (a.bufH[1] - 1), srcS = a.bufH[1] * srcW;
+            size_t noseY = p.NoseH(), bodyY = p.BodyH(), noseX = p.NoseW(), bodyX = p.BodyW();
+            size_t bodyX2 = AlignLo(bodyX - noseX, 2) + noseX;
+            size_t bodyX4 = AlignLo(bodyX - noseX, 4) + noseX;
+            size_t bodyX8 = AlignLo(bodyX - noseX, 8) + noseX;
 
             __m128i _upper = _mm_set1_epi32(a.upper);
             __m128 _params[2];
@@ -286,147 +283,147 @@ namespace Simd
 
                 for (size_t dy = yBeg; dy < yEnd; ++dy)
                 {
-                    uint8_t * pd = dst + (dy & dstM) * dstW;
-                    //if (dy >= noseY && dy < bodyY)
-                    //{
-                    //    size_t dx = 0;
-                    //    for (; dx < noseX; ++dx, pd += F)
-                    //    {
-                    //        __m128 sum = _bias;
-                    //        for (size_t ky = 0; ky < p.kernelY; ++ky)
-                    //        {
-                    //            size_t sy = dy * p.strideY + ky - padY;
-                    //            for (size_t kx = 0; kx < p.kernelX; ++kx)
-                    //            {
-                    //                size_t sx = dx * p.strideX + kx - padX;
-                    //                if (sx < p.srcW)
-                    //                {
-                    //                    const float* pw = weight + (ky * p.kernelX + kx) * F;
-                    //                    const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
-                    //                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
-                    //                }
-                    //            }
-                    //        }
-                    //        _mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
-                    //    }
-                        //for (; dx < bodyX8; dx += 8, pd += 8 * F)
-                        //{
-                        //    __m128 sum0 = _bias;
-                        //    __m128 sum1 = _bias;
-                        //    __m128 sum2 = _bias;
-                        //    __m128 sum3 = _bias;
-                        //    __m128 sum4 = _bias;
-                        //    __m128 sum5 = _bias;
-                        //    __m128 sum6 = _bias;
-                        //    __m128 sum7 = _bias;
-                        //    const float* pw = weight;
-                        //    for (size_t ky = 0; ky < p.kernelY; ++ky)
-                        //    {
-                        //        size_t sy = dy * strideY + ky - padY;
-                        //        const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-                        //        for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-                        //        {
-                        //            __m128 w0 = _mm_loadu_ps(pw);
-                        //            sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
-                        //            sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
-                        //            sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXF), w0), sum2);
-                        //            sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXF), w0), sum3);
-                        //            sum4 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 4 * strideXF), w0), sum4);
-                        //            sum5 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 5 * strideXF), w0), sum5);
-                        //            sum6 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 6 * strideXF), w0), sum6);
-                        //            sum7 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 7 * strideXF), w0), sum7);
-                        //        }
-                        //    }
-                        //    _mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
-                        //    _mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
-                        //    _mm_storeu_ps(pd + 2 * F, Activate<type>(sum2, _params, 0));
-                        //    _mm_storeu_ps(pd + 3 * F, Activate<type>(sum3, _params, 0));
-                        //    _mm_storeu_ps(pd + 4 * F, Activate<type>(sum4, _params, 0));
-                        //    _mm_storeu_ps(pd + 5 * F, Activate<type>(sum5, _params, 0));
-                        //    _mm_storeu_ps(pd + 6 * F, Activate<type>(sum6, _params, 0));
-                        //    _mm_storeu_ps(pd + 7 * F, Activate<type>(sum7, _params, 0));
-                        //}
-                        //for (; dx < bodyX4; dx += 4, pd += 4 * F)
-                        //{
-                        //    __m128 sum0 = _bias;
-                        //    __m128 sum1 = _bias;
-                        //    __m128 sum2 = _bias;
-                        //    __m128 sum3 = _bias;
-                        //    const float* pw = weight;
-                        //    for (size_t ky = 0; ky < p.kernelY; ++ky)
-                        //    {
-                        //        size_t sy = dy * strideY + ky - padY;
-                        //        const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-                        //        for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-                        //        {
-                        //            __m128 w0 = _mm_loadu_ps(pw);
-                        //            sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
-                        //            sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
-                        //            sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXF), w0), sum2);
-                        //            sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXF), w0), sum3);
-                        //        }
-                        //    }
-                        //    _mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
-                        //    _mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
-                        //    _mm_storeu_ps(pd + 2 * F, Activate<type>(sum2, _params, 0));
-                        //    _mm_storeu_ps(pd + 3 * F, Activate<type>(sum3, _params, 0));
-                        //}
-                        //for (; dx < bodyX2; dx += 2, pd += 2 * F)
-                        //{
-                        //    __m128 sum0 = _bias;
-                        //    __m128 sum1 = _bias;
-                        //    const float* pw = weight;
-                        //    for (size_t ky = 0; ky < p.kernelY; ++ky)
-                        //    {
-                        //        size_t sy = dy * strideY + ky - padY;
-                        //        const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-                        //        for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-                        //        {
-                        //            __m128 w0 = _mm_loadu_ps(pw);
-                        //            sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
-                        //            sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
-                        //        }
-                        //    }
-                        //    _mm_storeu_ps(pd + 0 * F, Activate<type>(sum0, _params, 0));
-                        //    _mm_storeu_ps(pd + 1 * F, Activate<type>(sum1, _params, 0));
-                        //}
-                    //    for (; dx < bodyX; ++dx, pd += F)
-                    //    {
-                    //        __m128 sum = _bias;
-                    //        const float* pw = weight;
-                    //        for (size_t ky = 0; ky < p.kernelY; ++ky)
-                    //        {
-                    //            size_t sy = dy * strideY + ky - padY;
-                    //            const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
-                    //            for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
-                    //            {
-                    //                __m128 w0 = _mm_loadu_ps(pw);
-                    //                sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), w0), sum);
-                    //            }
-                    //        }
-                    //        _mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
-                    //    }
-                    //    for (; dx < p.dstW; ++dx, pd += F)
-                    //    {
-                    //        __m128 sum = _bias;
-                    //        for (size_t ky = 0; ky < p.kernelY; ++ky)
-                    //        {
-                    //            size_t sy = dy * strideY + ky - padY;
-                    //            for (size_t kx = 0; kx < p.kernelX; ++kx)
-                    //            {
-                    //                size_t sx = dx * strideX + kx - padX;
-                    //                if (sx < p.srcW)
-                    //                {
-                    //                    const float* pw = weight + (ky * p.kernelX + kx) * F;
-                    //                    const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
-                    //                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
-                    //                }
-                    //            }
-                    //        }
-                    //        _mm_storeu_ps(pd, Activate<type>(sum, _params, 0));
-                    //    }
-                    //}
-                    //else
+                    uint8_t * pd = dst + (dy - yBeg) * dstW;
+                    if (dy >= noseY && dy < bodyY)
+                    {
+                        size_t dx = 0;
+                        for (; dx < noseX; dx += 1, pd += a.maC)
+                        {
+                            __m128 sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * p.strideY + ky - padY;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                {
+                                    size_t sx = dx * p.strideX + kx - padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
+                                        sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
+                                    }
+                                }
+                            }
+                            SaveDepthwise<type>(pd, sum, _params, _scale, _shift, _upper);
+                        }
+                        for (; dx < bodyX8; dx += 8, pd += 8 * a.maC)
+                        {
+                            __m128 sum0 = _bias;
+                            __m128 sum1 = _bias;
+                            __m128 sum2 = _bias;
+                            __m128 sum3 = _bias;
+                            __m128 sum4 = _bias;
+                            __m128 sum5 = _bias;
+                            __m128 sum6 = _bias;
+                            __m128 sum7 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    __m128 w0 = _mm_loadu_ps(pw);
+                                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
+                                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
+                                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXF), w0), sum2);
+                                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXF), w0), sum3);
+                                    sum4 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 4 * strideXF), w0), sum4);
+                                    sum5 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 5 * strideXF), w0), sum5);
+                                    sum6 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 6 * strideXF), w0), sum6);
+                                    sum7 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 7 * strideXF), w0), sum7);
+                                }
+                            }
+                            SaveDepthwise<type>(pd + 0 * a.maC, sum0, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 1 * a.maC, sum1, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 2 * a.maC, sum2, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 3 * a.maC, sum3, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 4 * a.maC, sum4, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 5 * a.maC, sum5, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 6 * a.maC, sum6, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 7 * a.maC, sum7, _params, _scale, _shift, _upper);
+                        }
+                        for (; dx < bodyX4; dx += 4, pd += 4 * a.maC)
+                        {
+                            __m128 sum0 = _bias;
+                            __m128 sum1 = _bias;
+                            __m128 sum2 = _bias;
+                            __m128 sum3 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    __m128 w0 = _mm_loadu_ps(pw);
+                                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
+                                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
+                                    sum2 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 2 * strideXF), w0), sum2);
+                                    sum3 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 3 * strideXF), w0), sum3);
+                                }
+                            }
+                            SaveDepthwise<type>(pd + 0 * a.maC, sum0, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 1 * a.maC, sum1, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 2 * a.maC, sum2, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 3 * a.maC, sum3, _params, _scale, _shift, _upper);
+                        }
+                        for (; dx < bodyX2; dx += 2, pd += 2 * a.maC)
+                        {
+                            __m128 sum0 = _bias;
+                            __m128 sum1 = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    __m128 w0 = _mm_loadu_ps(pw);
+                                    sum0 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 0 * strideXF), w0), sum0);
+                                    sum1 = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps + 1 * strideXF), w0), sum1);
+                                }
+                            }
+                            SaveDepthwise<type>(pd + 0 * a.maC, sum0, _params, _scale, _shift, _upper);
+                            SaveDepthwise<type>(pd + 1 * a.maC, sum1, _params, _scale, _shift, _upper);
+                        }
+                        for (; dx < bodyX; dx += 1, pd += a.maC)
+                        {
+                            __m128 sum = _bias;
+                            const float* pw = weight;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                const float* ps = src + ((sy & srcM) * p.srcW + dx * strideX - padX) * F;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx, ps += F, pw += F)
+                                {
+                                    __m128 w0 = _mm_loadu_ps(pw);
+                                    sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), w0), sum);
+                                }
+                            }
+                            SaveDepthwise<type>(pd, sum, _params, _scale, _shift, _upper);
+                        }
+                        for (; dx < p.dstW; dx += 1, pd += a.maC)
+                        {
+                            __m128 sum = _bias;
+                            for (size_t ky = 0; ky < p.kernelY; ++ky)
+                            {
+                                size_t sy = dy * strideY + ky - padY;
+                                for (size_t kx = 0; kx < p.kernelX; ++kx)
+                                {
+                                    size_t sx = dx * strideX + kx - padX;
+                                    if (sx < p.srcW)
+                                    {
+                                        const float* pw = weight + (ky * p.kernelX + kx) * F;
+                                        const float* ps = src + ((sy & srcM) * p.srcW + sx) * F;
+                                        sum = _mm_add_ps(_mm_mul_ps(_mm_loadu_ps(ps), _mm_loadu_ps(pw)), sum);
+                                    }
+                                }
+                            }
+                            SaveDepthwise<type>(pd, sum, _params, _scale, _shift, _upper);
+                        }
+                    }
+                    else
                     {
                         for (size_t dx = 0; dx < p.dstW; ++dx, pd += a.maC)
                         {
@@ -620,12 +617,6 @@ namespace Simd
             const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const int8_t* weight,
             const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
         {
-            //size_t yInt = Simd::Max(yBeg, yEnd & (~dstM)), nBeg = yBeg * dstW, nInt = yInt * dstW, nEnd = yEnd * dstW;
-            //size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
-            //InputConvolution1x1_2xM_Ptr tailInt_2 = GetInputConvolution1x1_2xM<type>(nIntTail);
-            //InputConvolution1x1_2xM_Ptr tailEnd_2 = GetInputConvolution1x1_2xM<type>(nEndTail);
-
-            size_t dstM = (a.bufH[2] - 1), yInt = Simd::Max(yBeg, yEnd & (~dstM));
             size_t n = 5, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             OutputConvolution1x1_2xM_Ptr outputConvolution1x1_2xN = GetOutputConvolution1x1_2xM<term, type>(n);
             OutputConvolution1x1_2xM_Ptr outputConvolution1x1_2xM = GetOutputConvolution1x1_2xM<term, type>(m);
@@ -648,13 +639,13 @@ namespace Simd
                 _scale[1] = _mm_loadu_ps(scale + dc + F);
                 _shift[0] = _mm_loadu_ps(shift + dc + 0);
                 _shift[1] = _mm_loadu_ps(shift + dc + F);
-                const uint8_t* s = src + yBeg * p.srcW * p.srcC;
+                const uint8_t* s = src;
                 uint8_t* d = dst + (dc + yBeg * p.dstW * p.dstC) * a.size;
                 int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
-                for (; i < nn; i += n, s += p.srcC * n, b += p.dstC * n, d += p.dstC * a.size * n)
+                for (; i < nn; i += n, s += a.maC * n, b += p.dstC * n, d += p.dstC * a.size * n)
                     outputConvolution1x1_2xN(s, p, a, maC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
-                for (; i < n1; i += m, s += p.srcC * m, b += p.dstC * m, d += p.dstC * a.size * m)
+                for (; i < n1; i += m, s += a.maC * m, b += p.dstC * m, d += p.dstC * a.size * m)
                     outputConvolution1x1_2xM(s, p, a, maC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
                 weight += DivHi(maC, 4) * DA;
             }

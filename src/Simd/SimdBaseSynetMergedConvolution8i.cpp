@@ -492,24 +492,24 @@ namespace Simd
                         size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
                         size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
                         size_t srcOffs = yBeg0 * c0.srcW * c0.srcC;
-                        const uint8_t* src8u = _s8u ? src + srcOffs : buf2;
+                        const uint8_t* src8u = _s8u ? src /*+ srcOffs*/ : buf2;
                         if (!_s8u)
                             _cvt32fTo8u((float*)src + srcOffs, c0.srcC, yBeg0, yEnd0, c0.srcW, _cvt[0].scale.data, _cvt[0].shift.data, buf2, a.bufH[0], c0.compatibility);
                         _input(src8u, c0, a, maC, yBeg1, yEnd1, _weight8i[0].data + c * a.dw[0], _norm[0].data + c, _bias[0].data + c, _params[0].data + c * a.dp[0], buf0);
                         _depthwise(buf0, c1, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[1], _bias[1].data + c, _params[1].data + c * a.dp[1], 
                             _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf3);
                         if (maC == C)
-                            _output[0](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c, 
-                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, NULL, dst);
+                            _output[0](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data, 
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, NULL, dst);
                         else if (c == 0)
-                            _output[1](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c,
-                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, buf4, dst);
+                            _output[1](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
                         else if (c + maC < C)
-                            _output[2](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c,
-                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, buf4, dst);
+                            _output[2](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
                         else
-                            _output[3](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[3], _norm[1].data + c, _bias[2].data + c,
-                                _params[2].data + c * a.dp[2], _cvt[2].scale.data + c, _cvt[2].shift.data + c, buf4, dst);
+                            _output[3](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
@@ -549,14 +549,14 @@ namespace Simd
                 a.bufH[2] = Pow2Hi(a.yStep[2]);
 
                 a.yStep[1] = a.yStep[2] * c1.strideY;
-                a.yStart[1] = (a.yStart[2] - 1) * c1.strideY + c1.kernelY - c1.padY;
+                a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c1.strideY + c1.kernelY - c1.padY, c1.srcH);
                 a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c1.strideY + c1.kernelY, a.yStart[1]));
 
                 a.yStep[0] = a.yStep[1] * c0.strideY;
-                a.yStart[0] = (a.yStart[1] - 1) * c0.strideY + c0.kernelY - c0.padY;
-                a.bufH[0] = Pow2Hi(Simd::Max((a.yStep[1] - 1) * c0.strideY + c0.kernelY, a.yStart[0]));
+                a.yStart[0] = Simd::Min((a.yStart[1] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
+                a.bufH[0] = Pow2Hi(Simd::Max((a.yStep[1] - 1) * c0.strideY + c0.kernelY, a.yStart[0])) * (_s8u ? 0 : 1);
 
-                _sizeB[2] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC * (_s8u ? 0 : 1);
+                _sizeB[2] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC;
                 _sizeB[0] = a.bufH[1] * p.conv[1].srcW * a.maC;
                 _sizeB[3] = a.bufH[2] * p.conv[1].dstW * a.maC;
                 if (_sizeB[0]*4 + _sizeB[2] + _sizeB[3] <= L2)
