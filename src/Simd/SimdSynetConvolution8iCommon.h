@@ -328,6 +328,11 @@ namespace Simd
                 const __m128 * norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper);
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t * dst, int32_t * buf, __m128i sum, 
                 const __m128 * norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper, size_t tail);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum, 
+                const __m128* params, const __m128 & scale, const __m128 & shift, __m128i upper);
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
+                const __m128* params, const __m128 & scale, const __m128 & shift, __m128i upper, size_t tail);
         };
 
         template <> struct Term8i<Term8iSingle8u>
@@ -348,6 +353,22 @@ namespace Simd
                 for (size_t i = 0; i < tail; ++i)
                     dst[index * F + i] = tmp[i];
             }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
+                const __m128* params, const __m128 & scale, const __m128 & shift, __m128i upper)
+            {
+                __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse2::Activate<type>(sum, params, 0), scale), shift));
+                ((int32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
+                const __m128* params, const __m128& scale, const __m128& shift, __m128i upper, size_t tail)
+            {
+                uint8_t tmp[F];
+                Term8i::Save<type>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[i] = tmp[i];
+            }
         };
 
         template <> struct Term8i<Term8iSingle32f>
@@ -366,6 +387,21 @@ namespace Simd
                 Term8i::Save<type, index>(tmp - index * A, buf, sum, norm, bias, params, scale, shift, upper);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
+                const __m128* params, const __m128& scale, const __m128& shift, __m128i upper)
+            {
+                _mm_storeu_ps((float*)dst, Sse2::Activate<type>(sum, params, 0));
+            }
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
+                const __m128* params, const __m128& scale, const __m128& shift, __m128i upper, size_t tail)
+            {
+                uint8_t tmp[A];
+                Term8i::Save<type>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)dst)[i] = ((float*)tmp)[i];
             }
         };
 
@@ -474,6 +510,20 @@ namespace Simd
         {
             Term8i<term>::template Save<type, 0>(dst, buf, sum0, norm, bias, params, scale, shift, upper);
             Term8i<term>::template Save<type, 1>(dst, buf, sum1, norm, bias, params, scale, shift, upper, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, __m128 sum, const __m128* params, 
+            const __m128 & scale, const __m128 & shift, __m128i upper)
+        {
+            Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type>
+        SIMD_INLINE void Save1(uint8_t* dst, __m128 sum, const __m128* params, 
+            const __m128& scale, const __m128& shift, __m128i upper, size_t tail)
+        {
+            Term8i<term>::template Save<type>(dst, sum, params, scale, shift, upper, tail);
         }
 
         //---------------------------------------------------------------------

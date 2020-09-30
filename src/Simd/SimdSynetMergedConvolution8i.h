@@ -145,7 +145,7 @@ namespace Simd
         public:
             SynetMergedConvolution8i(const MergConvParam8i& p);
 
-            virtual String Desc() const { return "Base"; }
+            virtual String Ext() const { return "Base"; }
             virtual const MergConvParam8i& Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
@@ -256,6 +256,22 @@ namespace Simd
             SynetMergedConvolution8iCdc(const MergConvParam8i& p);
 
             virtual String Ext() const { return "Sse41"; }
+
+            static void Set(Convert32fTo8uPtr & cvt32fTo8u);
+            static void Set(const ConvParam8i& p, InputConvolutionPtr& input);
+            static void Set(const ConvParam8i& p, DepthwiseConvolutionPtr & depthwise);
+            static void Set(const ConvParam8i& p, OutputConvolutionPtr * output);
+        };
+
+        class SynetMergedConvolution8iCd : public Base::SynetMergedConvolution8iCd
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Sse41"; }
+
+        protected:
+            static void Set(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise);
         };
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
