@@ -162,10 +162,10 @@ namespace Simd
                 int32_t zero, upper;
             };
 
-            typedef void(*Convert8uTo32fPtr)(const uint8_t* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+            typedef void(*Convert8uTo32fPtr)(const uint8_t* src, size_t maC, size_t yBeg, size_t yEnd, size_t width, size_t channels, 
                 const float* scale, const float* shift, float* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
-            typedef void(*Convert32fTo8uPtr)(const float* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+            typedef void(*Convert32fTo8uPtr)(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels, 
                 const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
             typedef void(*InputConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
@@ -267,6 +267,17 @@ namespace Simd
         {
         public:
             SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Sse41"; }
+
+        protected:
+            static void Set(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise);
+        };
+
+        class SynetMergedConvolution8iDc : public Base::SynetMergedConvolution8iDc
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
 
             virtual String Ext() const { return "Sse41"; }
 

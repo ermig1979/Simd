@@ -45,7 +45,7 @@ namespace Simd
 
             //---------------------------------------------------------------------
 
-            SIMD_INLINE void Convert32fTo8u(const float* src, size_t channels, size_t yBeg, size_t yEnd, size_t width,
+            SIMD_INLINE void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels, 
                 const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
             {
                 size_t size = width * channels, mask = bufH - 1;
