@@ -39,19 +39,19 @@ namespace Simd
             size = Simd::Max(size, AlignHi(value, SIMD_ALIGN));
         }
 
-        SIMD_INLINE void Convert8uTo32f(const uint8_t* src, size_t maC, size_t yBeg, size_t yEnd, size_t width, size_t channels,
+        void Convert8uTo32f(const uint8_t* src, size_t maC, size_t yBeg, size_t yEnd, size_t width, size_t channels,
             const float* scale, const float* shift, float* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
         {
             Base::SynetConvert8uTo32f(src, 1, channels, yEnd, width, SimdTensorFormatNhwc, scale, shift, dst, compatibility);
         }
 
-        SIMD_INLINE void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels,
+        void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels,
             const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
         {
             Base::SynetConvert32fTo8u(src, 1, channels, yEnd, width, SimdTensorFormatNhwc, scale, shift, dst, compatibility);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void DepthwiseConvolution(const float* src, const ConvParam8i& p, const SynetMergedConvolution8i::AlgParam& a,
+        template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const ConvParam8i& p, const SynetMergedConvolution8i::AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
         {
             DepthwiseConvolution<type>(src, p, 0, 0, p.dstH, NULL, weight, bias, params, (float*)dst);
@@ -692,11 +692,12 @@ namespace Simd
                     size_t maC = Simd::Min(C, c + a.maC) - c;
                     for (size_t yBeg2 = 0, yBeg1 = 0, yBeg0 = 0; yBeg2 < c0.dstH;)
                     {
-                        size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
-                        size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
+                        size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c0.dstH);
+                        size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c0.srcH);
                         if (_s8u)
-                            _cvt8uTo32f(src + c, maC, yBeg1, yEnd1, c1.srcW, c0.srcC, _cvt[0].scale.data, _cvt[0].shift.data, buf0, a.bufH[1], c0.compatibility);
-                        _depthwise(_s8u ? buf0 : (float*)src, c0, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[0], _bias[0].data + c,
+                            _cvt8uTo32f(src + c, maC, yBeg1, yEnd1, c0.srcW, c0.srcC, _cvt[0].iScale.data + c, 
+                                _cvt[0].iShift.data + c, buf0, a.bufH[1], c0.compatibility);
+                        _depthwise(_s8u ? buf0 : (float*)src + c, c0, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[0], _bias[0].data + c,
                             _params[0].data + c * a.dp[0], _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf2);
                         if (maC == C)
                             _output[0](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
@@ -748,13 +749,14 @@ namespace Simd
 
                 a.yStep[1] = a.yStep[2] * c0.strideY;
                 a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
-                a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c0.strideY + c0.kernelY, a.yStart[1])) * (_s8u ? 0 : 1);
+                a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c0.strideY + c0.kernelY, a.yStart[1])) * (_s8u ? 1 : 0);
 
-                _sizeB[0] = a.bufH[1] * p.conv[1].srcW * a.maC;
-                _sizeB[2] = a.bufH[0] * p.conv[0].srcW * a.maC;
+                _sizeB[0] = a.bufH[1] * p.conv[0].srcW * a.maC;
+                _sizeB[2] = a.bufH[2] * p.conv[1].srcW * a.maC;
                 if (_sizeB[0] * 4 + _sizeB[2] <= L2)
                     break;
             }
+            a.bufH[0] = 0;
             _sizeB[1] = 0;
             _sizeB[3] = 0;
             _sizeB[4] = count > 1 ? _sizeD : 0;

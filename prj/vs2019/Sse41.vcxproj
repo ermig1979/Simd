@@ -19,8 +19,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iCd.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iCdc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
   </ItemGroup>

@@ -70,6 +70,8 @@ namespace Simd
                     c.padH--;
                 if (c.dstW == (c.srcW + c.padX + c.padW - (c.dilationY * (c.kernelX - 1) + 1) - 1) / c.strideX + 1)
                     c.padW--;
+                if (c.IsDepthwise() && i != count - 1)
+                    c.dstT = SimdTensorData8u;
             }
             if (count == 3)
             {
@@ -256,11 +258,6 @@ namespace Simd
             SynetMergedConvolution8iCdc(const MergConvParam8i& p);
 
             virtual String Ext() const { return "Sse41"; }
-
-            static void Set(Convert32fTo8uPtr & cvt32fTo8u);
-            static void Set(const ConvParam8i& p, InputConvolutionPtr& input);
-            static void Set(const ConvParam8i& p, DepthwiseConvolutionPtr & depthwise);
-            static void Set(const ConvParam8i& p, OutputConvolutionPtr * output);
         };
 
         class SynetMergedConvolution8iCd : public Base::SynetMergedConvolution8iCd
@@ -269,9 +266,6 @@ namespace Simd
             SynetMergedConvolution8iCd(const MergConvParam8i& p);
 
             virtual String Ext() const { return "Sse41"; }
-
-        protected:
-            static void Set(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise);
         };
 
         class SynetMergedConvolution8iDc : public Base::SynetMergedConvolution8iDc
@@ -280,9 +274,6 @@ namespace Simd
             SynetMergedConvolution8iDc(const MergConvParam8i& p);
 
             virtual String Ext() const { return "Sse41"; }
-
-        protected:
-            static void Set(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise);
         };
 
         void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);

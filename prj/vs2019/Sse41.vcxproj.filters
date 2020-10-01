@@ -34,10 +34,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iCdc.cpp">
-      <Filter>Sse41</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iCd.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
   </ItemGroup>
