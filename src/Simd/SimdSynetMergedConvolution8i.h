@@ -109,6 +109,7 @@ namespace Simd
             ss << count << ":" << conv[0].batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
             for (size_t i = 0; i < count; ++i)
                 ss << "-" << (conv[i].group != 1 ? String("") : ToStr(conv[i].dstC) + "x") << conv[i].kernelY << "x" << conv[i].strideY;
+            ss << "-" << (conv[0].srcT == SimdTensorData32f ? "f" : "u") << (conv[count - 1].dstT == SimdTensorData32f ? "f" : "u");
             return ss.str();
         }
 
@@ -283,6 +284,31 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class SynetMergedConvolution8iCdc : public Sse41::SynetMergedConvolution8iCdc
+        {
+        public:
+            SynetMergedConvolution8iCdc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        class SynetMergedConvolution8iCd : public Sse41::SynetMergedConvolution8iCd
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        class SynetMergedConvolution8iDc : public Sse41::SynetMergedConvolution8iDc
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX2_ENABLE
 

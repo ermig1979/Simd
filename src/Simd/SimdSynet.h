@@ -313,6 +313,11 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
+        SIMD_INLINE __m256i Set4(const uint8_t* src)
+        {
+            return _mm256_set1_epi32(*(int32_t*)src);
+        }
+
         template<bool overflow> void Madd4(__m256i& i32, __m256i u8, __m256i i8);
 
         template<> SIMD_INLINE void Madd4<true>(__m256i& i32, __m256i u8, __m256i i8)

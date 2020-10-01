@@ -573,6 +573,11 @@ namespace Simd
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper);
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m256i sum,
                 const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, __m256i upper, size_t tail);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m256 sum,
+                const __m256* params, const __m256& scale, const __m256& shift, __m256i upper);
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m256 sum,
+                const __m256* params, const __m256& scale, const __m256& shift, __m256i upper, size_t tail);
         };
 
         template <> struct Term8i<Term8iSingle8u>
@@ -593,6 +598,22 @@ namespace Simd
                 for (size_t i = 0; i < tail; ++i)
                     dst[index * F + i] = tmp[i];
             }
+
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256 sum,
+                const __m256* params, const __m256& scale, const __m256& shift, __m256i upper)
+            {
+                __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Activate<type>(sum, params, 0), scale, shift));
+                ((int64_t*)dst)[0] = Extract64i<0>(_mm256_min_epu8(PackI16ToU8(PackI32ToI16(i32, K_ZERO), K_ZERO), upper));
+            }
+
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256 sum,
+                const __m256* params, const __m256& scale, const __m256& shift, __m256i upper, size_t tail)
+            {
+                uint8_t tmp[F];
+                Term8i::Save<type, nofma>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    dst[i] = tmp[i];
+            }
         };
 
         template <> struct Term8i<Term8iSingle32f>
@@ -611,6 +632,21 @@ namespace Simd
                 Term8i::Save<type, index, nofma>(tmp - index * A, buf, sum, norm, bias, params, scale, shift, upper);
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)dst)[index * F + i] = ((float*)tmp)[i];
+            }
+
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256 sum,
+                const __m256* params, const __m256& scale, const __m256& shift, __m256i upper)
+            {
+                _mm256_storeu_ps((float*)dst, Avx2::Activate<type>(sum, params, 0));
+            }
+
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m256 sum,
+                const __m256* params, const __m256& scale, const __m256& shift, __m256i upper, size_t tail)
+            {
+                uint8_t tmp[A];
+                Term8i::Save<type, nofma>(tmp, sum, params, scale, shift, upper);
+                for (size_t i = 0; i < tail; ++i)
+                    ((float*)dst)[i] = ((float*)tmp)[i];
             }
         };
 
@@ -719,6 +755,20 @@ namespace Simd
         {
             Term8i<term>::template Save<type, 0, nofma>(dst, buf, sum0, norm, bias, params, scale, shift, upper);
             Term8i<term>::template Save<type, 1, nofma>(dst, buf, sum1, norm, bias, params, scale, shift, upper, tail);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        SIMD_INLINE void Save1(uint8_t* dst, __m256 sum, const __m256* params,
+            const __m256& scale, const __m256& shift, __m256i upper)
+        {
+            Term8i<term>::template Save<type, nofma>(dst, sum, params, scale, shift, upper);
+        }
+
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        SIMD_INLINE void Save1(uint8_t* dst, __m256 sum, const __m256* params,
+            const __m256& scale, const __m256& shift, __m256i upper, size_t tail)
+        {
+            Term8i<term>::template Save<type, nofma>(dst, sum, params, scale, shift, upper, tail);
         }
 
         //---------------------------------------------------------------------

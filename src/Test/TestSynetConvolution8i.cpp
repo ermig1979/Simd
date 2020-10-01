@@ -196,10 +196,15 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 80, 100, 100, 80, _1, _1, _1, _0, _0, 1, aEl, t1, u8, u8), 0, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 384, 8, 12, 256, _3, _1, _1, _1, _1, 1, aHs, t1, u8, u8), 1, c, f1, f2);
 #endif
-#if 1
+#if 0
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 40, 60, 128, _3, _1, _1, _1, _1, 128, aRe, t1, u8, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 99, 90, 130, 99, _3, _1, _2, _1, _1, 99, aPr, t1, f32, u8), 1, c, f1, f2);
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 70, 102, 64, _5, _1, _2, _2, _2, 64, aId, t1, u8, f32), 0, c, f1, f2);
+#endif
+#if 1
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 20, _1, _1, _1, _0, _0, 1, aHs, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _1, _1, _1, _0, _0, 1, aHs, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _3, _1, _1, _1, _1, 128, aHs, t1, u8, u8), 1, c, f1, f2);
 #endif
 #else
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 99, 90, 130, 99, _3, _1, _2, _1, _1, 99, aPr, t1, f32, u8), 1, c, f1, f2);
@@ -216,8 +221,8 @@ namespace Test
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
 
-        result = result && SynetConvolution8iForwardAutoTest(f1, f2, p);
-        result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
+        //result = result && SynetConvolution8iForwardAutoTest(f1, f2, p);
+        //result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);
         result = result && SynetConvolution8iForwardAutoTest(f1, f2, n);
 
         return result;

@@ -37,11 +37,6 @@ namespace Simd
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;
         using ConvolutionPtr = SynetConvolution8iNhwcDirect::ConvolutionPtr;
 
-        SIMD_INLINE __m256i Set4(const uint8_t* src)
-        {
-            return _mm256_set1_epi32(*(int32_t*)src);
-        }
-
         template<bool overflow, Term8iType term, SimdConvolutionActivationType type, bool nofma> void ConvolutionNhwcDirect_2x1(const uint8_t * src0,
             const ConvParam8i& p, const AlgParam & a, size_t dy, size_t dx, size_t srcC, size_t dstC, const int8_t * weight0, const __m256* norm,
             const __m256 * bias, const __m256* params, const __m256 * scale, const __m256* shift, int32_t * buf, uint8_t* dst)

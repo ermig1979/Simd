@@ -78,6 +78,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fCd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fCdc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution32fDc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2SynetMergedConvolution8i.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp" />
