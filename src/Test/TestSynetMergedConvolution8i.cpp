@@ -236,11 +236,13 @@ namespace Test
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
         int differenceMax = (Simd::Base::FmaAvoid(p.comp) ? 0 : 1);
+        float epsilon = (Simd::Base::FmaAvoid(p.comp) ? eps * eps : 0.04f);
 #else
         int differenceMax = 1;
+        float epsilon = eps * eps;
 #endif
         if (end.dstT == SimdTensorData32f)
-            result = result && Compare(dst32f1, dst32f2, eps * eps, true, 64, DifferenceBoth);
+            result = result && Compare(dst32f1, dst32f2, epsilon, true, 64, DifferenceBoth);
         else
             result = result && Compare(dst8u1, dst8u2, differenceMax, true, 64);
 
@@ -251,14 +253,14 @@ namespace Test
     {
         bool result = true;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
-        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaAvoid;
+        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaUse;
         SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationPrelu, a1 = SimdConvolutionActivationHswish, a2 = SimdConvolutionActivationIdentity;
         const SimdConvolutionActivationType a0 = SimdConvolutionActivationHswish, a1 = SimdConvolutionActivationIdentity, a2 = SimdConvolutionActivationPrelu;
 #if defined(NDEBUG)
-#if 0
+#if 1
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), u8, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), f32, u8, 1, n), f1, f2);
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 128), u8, u8, 1, n), f1, f2);
@@ -299,7 +301,7 @@ namespace Test
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 3, 320, 320), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 8), f32, u8, 1, n), f1, f2);
 #endif
 #else
-        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), u8, u8, 1, n), f1, f2);
+        result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 3, 320, 180), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1), u8, u8, 1, n), f1, f2);
 #endif
         return result;
     }

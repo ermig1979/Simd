@@ -1064,6 +1064,48 @@ namespace Simd
             }
         }
 
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma> SIMD_INLINE void DepthwiseConvolution3x3Main1x2(const float* src0, const float* src1, const float* src2,
+            size_t sX, const __m256* weight, const __m256& bias, const __m256* params, const __m256& scale, const __m256& shift, const __m256i& upper, uint8_t* dst, size_t dX)
+        {
+            __m256 sum0 = bias, sum1 = bias, s0;
+
+            s0 = _mm256_loadu_ps(src0 + 0 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[0], sum0);
+            s0 = _mm256_loadu_ps(src0 + 1 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[1], sum0);
+            sum1 = Fmadd<nofma>(s0, weight[0], sum1);
+            s0 = _mm256_loadu_ps(src0 + 2 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[2], sum0);
+            sum1 = Fmadd<nofma>(s0, weight[1], sum1);
+            s0 = _mm256_loadu_ps(src0 + 3 * sX);
+            sum1 = Fmadd<nofma>(s0, weight[2], sum1);
+
+            s0 = _mm256_loadu_ps(src1 + 0 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[3], sum0);
+            s0 = _mm256_loadu_ps(src1 + 1 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[4], sum0);
+            sum1 = Fmadd<nofma>(s0, weight[3], sum1);
+            s0 = _mm256_loadu_ps(src1 + 2 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[5], sum0);
+            sum1 = Fmadd<nofma>(s0, weight[4], sum1);
+            s0 = _mm256_loadu_ps(src1 + 3 * sX);
+            sum1 = Fmadd<nofma>(s0, weight[5], sum1);
+
+            s0 = _mm256_loadu_ps(src2 + 0 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[6], sum0);
+            s0 = _mm256_loadu_ps(src2 + 1 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[7], sum0);
+            sum1 = Fmadd<nofma>(s0, weight[6], sum1);
+            s0 = _mm256_loadu_ps(src2 + 2 * sX);
+            sum0 = Fmadd<nofma>(s0, weight[8], sum0);
+            sum1 = Fmadd<nofma>(s0, weight[7], sum1);
+            s0 = _mm256_loadu_ps(src2 + 3 * sX);
+            sum1 = Fmadd<nofma>(s0, weight[8], sum1);
+
+            Save1<term, type, nofma>(dst + 0 * dX, sum0, params, scale, shift, upper);
+            Save1<term, type, nofma>(dst + 1 * dX, sum1, params, scale, shift, upper);
+        }
+
         template<Term8iType term, SimdConvolutionActivationType type, bool nofma> void DepthwiseConvolution3x3(const float* src, const ConvParam8i& p, const AlgParam& a,
             size_t dstC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
         {
@@ -1071,7 +1113,8 @@ namespace Simd
             size_t sM = (a.bufH[1] - 1), sD = a.bufH[1] ? a.bufH[1] * p.srcW * F : F, sX = a.bufH[1] ? F : p.srcC, sY = sX * p.srcW;
             size_t dX = (a.bufH[2] ? a.maC : p.dstC * a.size), dY = p.dstW * dX, dy0 = a.bufH[2] ? yBeg : 0, dD = a.bufH[2] ? F : F * a.size;
             size_t wD = p.kernelY * p.kernelX * F, ssX = p.strideX * sX, ssX0 = (p.strideX - p.padX)*sX;
-            size_t xMainEnd = p.dstW - p.padW, yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
+            size_t xMainEnd = p.dstW - p.padW, xMainEnd2 = AlignLo(xMainEnd - padX, 2) * (p.strideX == 1 ? 1 : 0) + padX;
+            size_t yMainEnd = yEnd == p.dstH && p.padH ? yEnd - 1 : yEnd;
 
             __m256i _upper = _mm256_set1_epi32(a.upper);
             __m256 _params[2];
@@ -1115,6 +1158,8 @@ namespace Simd
                     if (padX)
                         DepthwiseConvolution3x3Edge3x2<term, type, nofma>(src0, src1, src2, sX, _weight + 1, _bias, _params, _scale, _shift, _upper, pDst),
                         pDst += dX, dx++, src0 += ssX0, src1 += ssX0, src2 += ssX0;
+                    for (; dx < xMainEnd2; dx += 2, pDst += dX * 2, src0 += ssX * 2, src1 += ssX * 2, src2 += ssX * 2)
+                        DepthwiseConvolution3x3Main1x2<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, _scale, _shift, _upper, pDst, dX);
                     for (; dx < xMainEnd; dx++, pDst += dX, src0 += ssX, src1 += ssX, src2 += ssX)
                         DepthwiseConvolution3x3Main1x1<term, type, nofma>(src0, src1, src2, sX, _weight + 0, _bias, _params, _scale, _shift, _upper, pDst);
                     if (padW)
