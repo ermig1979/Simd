@@ -354,6 +354,11 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
+        SIMD_INLINE __m512i Set4(const uint8_t* src)
+        {
+            return _mm512_set1_epi32(*(int32_t*)src);
+        }
+
         template<bool overflow> void Madd4(__m512i& i32, __m512i u8, __m512i i8);
 
         template<> SIMD_INLINE void Madd4<true>(__m512i& i32, __m512i u8, __m512i i8)

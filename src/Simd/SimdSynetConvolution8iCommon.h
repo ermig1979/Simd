@@ -816,6 +816,9 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m512i sum, 
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1);
+
+            template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m512 sum,
+                const __m512* params, const __m512 & scale, const __m512 & shift, __m128i upper, __mmask16 tail = -1);
         };
 
         template <> struct Term8i<Term8iSingle8u>
@@ -824,9 +827,15 @@ namespace Simd
                 const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, __m128i upper, __mmask16 tail = -1)
             {
                 __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), norm[index], bias[index]), params, index);
-                __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(f32, scale[index], shift[index]));
-                __m128i u8 = _mm256_castsi256_si128(Avx2::PackI16ToU8(_mm512_cvtepi32_epi16(i32), Avx2::K_ZERO));
+                __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(f32, scale[index], shift[index]));
                 _mm_mask_storeu_epi8(dst + index * F, tail, _mm_min_epu8(u8, upper));
+            }
+
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512 sum,
+                const __m512* params, const __m512& scale, const __m512& shift, __m128i upper, __mmask16 tail)
+            {
+                __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(Activate<type>(sum, params, 0), scale, shift));
+                _mm_mask_storeu_epi8(dst, tail, _mm_min_epu8(u8, upper));
             }
         };
 
@@ -837,6 +846,12 @@ namespace Simd
             {
                 __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), norm[index], bias[index]), params, index);
                 _mm512_mask_storeu_ps((float*)dst + index * F, tail, f32);
+            }
+
+            template<SimdConvolutionActivationType type, bool nofma> static SIMD_INLINE void Save(uint8_t* dst, __m512 sum,
+                const __m512* params, const __m512& scale, const __m512& shift, __m128i upper, __mmask16 tail)
+            {
+                _mm512_mask_storeu_ps((float*)dst, tail, Activate<type>(sum, params, 0));
             }
         };
 
@@ -865,8 +880,7 @@ namespace Simd
             {
                 sum = _mm512_add_epi32(_mm512_maskz_loadu_epi32(tail, buf + index * F), sum);
                 __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), norm[index], bias[index]), params, index);
-                __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(f32, scale[index], shift[index]));
-                __m128i u8 = _mm256_castsi256_si128(Avx2::PackI16ToU8(_mm512_cvtepi32_epi16(i32), Avx2::K_ZERO));
+                __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(f32, scale[index], shift[index]));
                 _mm_mask_storeu_epi8(dst + index * F, tail, _mm_min_epu8(u8, upper));
             }
         };
@@ -897,6 +911,12 @@ namespace Simd
             Term8i<term>::template Save<type, 1, nofma>(dst, buf, sum1, norm, bias, params, scale, shift, upper, tail);
         }
 
+        template<Term8iType term, SimdConvolutionActivationType type, bool nofma>
+        SIMD_INLINE void Save1(uint8_t* dst, __m512 sum, const __m512* params, const __m512& scale, const __m512& shift, __m128i upper, __mmask16 tail = -1)
+        {
+            Term8i<term>::template Save<type, nofma>(dst, sum, params, scale, shift, upper, tail);
+        }
+
         //---------------------------------------------------------------------
 
         template <Term8iType term> struct Term8iDepthwise
@@ -915,8 +935,7 @@ namespace Simd
                 __m512 f32 = Avx512f::Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
                 __m512 _scale = _mm512_maskz_loadu_ps(tail, scale + offset);
                 __m512 _shift = _mm512_maskz_loadu_ps(tail, shift + offset);
-                __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(f32, _scale, _shift));
-                __m128i u8 = _mm256_castsi256_si128(Avx2::PackI16ToU8(_mm512_cvtepi32_epi16(i32), Avx2::K_ZERO));
+                __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(f32, _scale, _shift));
                 _mm_mask_storeu_epi8(dst + offset, tail, _mm_min_epu8(u8, upper));
             }
         };

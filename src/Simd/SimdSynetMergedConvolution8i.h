@@ -315,6 +315,31 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        class SynetMergedConvolution8iCdc : public Avx2::SynetMergedConvolution8iCdc
+        {
+        public:
+            SynetMergedConvolution8iCdc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        class SynetMergedConvolution8iCd : public Avx2::SynetMergedConvolution8iCd
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        class SynetMergedConvolution8iDc : public Avx2::SynetMergedConvolution8iDc
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX512BW_ENABLE
 

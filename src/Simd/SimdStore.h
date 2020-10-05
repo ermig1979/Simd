@@ -253,6 +253,15 @@ namespace Simd
             Sse::Store<align>(p2, _mm512_extractf32x4_ps(a, 2));
             Sse::Store<align>(p3, _mm512_extractf32x4_ps(a, 3));
         }
+
+        SIMD_INLINE __m128i Cvt32fTo8u(__m512 a)
+        {
+#if 1
+            return _mm512_cvtusepi32_epi8(_mm512_max_epi32(_mm512_cvtps_epu32(a), _mm512_setzero_si512()));
+#else
+            return _mm256_castsi256_si128(Avx2::PackI16ToU8(_mm512_cvtepi32_epi16(_mm512_cvtps_epi32(a)), _mm256_setzero_si256()));
+#endif
+        }
     }
 #endif//SIMD_AVX512F_ENABLE
 
