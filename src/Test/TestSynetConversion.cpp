@@ -198,6 +198,11 @@ namespace Test
 
         result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Base::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Sse41::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
+#endif 
+
         return result;
     }
 

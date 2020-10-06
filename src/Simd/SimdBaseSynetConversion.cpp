@@ -70,11 +70,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SIMD_INLINE float ToFloat(int value, float scale, float shift)
-        {
-            return value * scale + shift;
-        }
-
         void SynetConvert8uTo32f(const uint8_t * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
         {
             for (size_t b = 0; b < batch; ++b)
@@ -88,7 +83,7 @@ namespace Simd
                         for (size_t h = 0; h < height; ++h)
                         {
                             for (size_t w = 0; w < width; ++w)
-                                dst[w] = ToFloat(src[w], _scale, _shift);
+                                dst[w] = SynetConvert8uTo32f(src[w], _scale, _shift);
                             src += width;
                             dst += width;
                         }
@@ -101,7 +96,7 @@ namespace Simd
                         for (size_t w = 0; w < width; ++w)
                         {
                             for (size_t c = 0; c < channels; ++c)
-                                dst[c] = ToFloat(src[c], scale[c], shift[c]);
+                                dst[c] = SynetConvert8uTo32f(src[c], scale[c], shift[c]);
                             src += channels;
                             dst += channels;
                         }
@@ -136,7 +131,7 @@ namespace Simd
             for (size_t y = 0; y < height; ++y)
             {
                 for (size_t x = 0; x < width; ++x, src += step)
-                    *dst++ = ToFloat(ToGray<format>(src), scale[0], shift[0]);
+                    *dst++ = SynetConvert8uTo32f(ToGray<format>(src), scale[0], shift[0]);
                 src += (stride - width * step);
             }
         }
@@ -166,9 +161,9 @@ namespace Simd
             {
                 for (size_t x = 0; x < width; ++x, src += step)
                 {
-                    *dst0++ = ToFloat(ToBgr<format>(src, 0), scale[0], shift[0]);
-                    *dst1++ = ToFloat(ToBgr<format>(src, 1), scale[1], shift[1]);
-                    *dst2++ = ToFloat(ToBgr<format>(src, 2), scale[2], shift[2]);
+                    *dst0++ = SynetConvert8uTo32f(ToBgr<format>(src, 0), scale[0], shift[0]);
+                    *dst1++ = SynetConvert8uTo32f(ToBgr<format>(src, 1), scale[1], shift[1]);
+                    *dst2++ = SynetConvert8uTo32f(ToBgr<format>(src, 2), scale[2], shift[2]);
                 }
                 src += (stride - width * step);
             }
@@ -180,9 +175,9 @@ namespace Simd
             {
                 for (size_t x = 0; x < width; ++x, src += step)
                 {
-                    *dst++ = ToFloat(ToBgr<format>(src, 0), scale[0], shift[0]);
-                    *dst++ = ToFloat(ToBgr<format>(src, 1), scale[1], shift[1]);
-                    *dst++ = ToFloat(ToBgr<format>(src, 2), scale[2], shift[2]);
+                    *dst++ = SynetConvert8uTo32f(ToBgr<format>(src, 0), scale[0], shift[0]);
+                    *dst++ = SynetConvert8uTo32f(ToBgr<format>(src, 1), scale[1], shift[1]);
+                    *dst++ = SynetConvert8uTo32f(ToBgr<format>(src, 2), scale[2], shift[2]);
                 }
                 src += (stride - width * step);
             }

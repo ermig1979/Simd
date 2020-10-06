@@ -115,6 +115,13 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        SIMD_INLINE float SynetConvert8uTo32f(int value, float scale, float shift)
+        {
+            return value * scale + shift;
+        }
+
+        //---------------------------------------------------------------------
+
         template <SimdSynetEltwiseOperationType type> float SynetEltwiseLayerForward(float a, float b);
 
         template <> SIMD_INLINE float SynetEltwiseLayerForward<SimdSynetEltwiseOperationProduct>(float a, float b)
