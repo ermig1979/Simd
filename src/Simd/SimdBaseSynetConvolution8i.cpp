@@ -244,7 +244,7 @@ namespace Simd
     }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-    Base::PerformanceMeasurer * SynetConvolution8i::Perf(const String& func)
+    Base::PerformanceMeasurer * SynetConvolution8i::Perf(const char* func)
     {
         if (_perf == NULL)
             _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());

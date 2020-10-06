@@ -155,7 +155,7 @@ namespace Simd
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        virtual Base::PerformanceMeasurer* Perf(const String& func) = 0;
+        virtual Base::PerformanceMeasurer* Perf(const char* func) = 0;
 #endif
     };
 
@@ -174,7 +174,7 @@ namespace Simd
             virtual void Forward(const float* src, float* buf, float* dst);
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-            virtual Base::PerformanceMeasurer* Perf(const String& func);
+            virtual Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
             typedef void(*ConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,

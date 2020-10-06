@@ -170,7 +170,7 @@ namespace Simd
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        Base::PerformanceMeasurer* Perf(const String & func);
+        Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
     protected:

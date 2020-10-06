@@ -137,7 +137,7 @@ namespace Simd
         virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        virtual Base::PerformanceMeasurer* Perf(const String& func) = 0;
+        virtual Base::PerformanceMeasurer* Perf(const char *func) = 0;
 #endif
     };
 
@@ -156,7 +156,7 @@ namespace Simd
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-            virtual Base::PerformanceMeasurer* Perf(const String& func);
+            virtual Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
             struct AlgParam
@@ -346,6 +346,31 @@ namespace Simd
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
+        class SynetMergedConvolution8iCdc : public Avx512bw::SynetMergedConvolution8iCdc
+        {
+        public:
+            SynetMergedConvolution8iCdc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
+        class SynetMergedConvolution8iCd : public Avx512bw::SynetMergedConvolution8iCd
+        {
+        public:
+            SynetMergedConvolution8iCd(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
+        class SynetMergedConvolution8iDc : public Avx512bw::SynetMergedConvolution8iDc
+        {
+        public:
+            SynetMergedConvolution8iDc(const MergConvParam8i& p);
+
+            virtual String Ext() const { return "Avx512vnni"; }
+        };
+
+        void* SynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX512VNNI_ENABLE
 }

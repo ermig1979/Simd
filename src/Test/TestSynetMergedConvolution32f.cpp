@@ -204,7 +204,7 @@ namespace Test
     {
         bool result = true;
         const SimdBool t = SimdTrue, f = SimdFalse;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationHswish, a2 = ::SimdConvolutionActivationIdentity;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationHswish, a1 = ::SimdConvolutionActivationIdentity, a2 = ::SimdConvolutionActivationPrelu;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationHswish;
 #ifdef NDEBUG
 #if 0

@@ -206,7 +206,7 @@ namespace Simd
         }
 
 #if defined(SIMD_PERFORMANCE_STATISTIC)
-        Base::PerformanceMeasurer* Perf(const String & func);
+        Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
     protected:
