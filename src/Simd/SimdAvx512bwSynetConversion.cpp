@@ -220,6 +220,124 @@ namespace Simd
         }
 
         //---------------------------------------------------------------------
+
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const float* scale, const float* shift, float* dst, __mmask16 tail = -1)
+        {
+            __m512 f32 = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, src)));
+            _mm512_mask_storeu_ps(dst, tail, Fmadd<nofma>(f32, _mm512_maskz_loadu_ps(tail, scale), _mm512_maskz_loadu_ps(tail, shift)));
+        }
+
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const __m512& scale, const __m512& shift, float* dst, __mmask16 tail = -1)
+        {
+            __m512 f32 = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm_maskz_loadu_epi8(tail, src)));
+            _mm512_mask_storeu_ps(dst, tail, Fmadd<nofma>(f32, scale, shift));
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNchw(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, float* dst)
+        {
+            size_t spatial = height * width;
+            size_t spatialF = AlignLo(spatial, F);
+            __mmask16 tail = TailMask16(spatial - spatialF);
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    __m512 _scale = _mm512_set1_ps(scale[c]);
+                    __m512 _shift = _mm512_set1_ps(shift[c]);
+                    size_t s = 0;
+                    for (; s < spatialF; s += F)
+                        SynetConvert8uTo32f<nofma>(src + s, _scale, _shift, dst + s);
+                    if(s < spatial)
+                        SynetConvert8uTo32f<nofma>(src + s, _scale, _shift, dst + s, tail);
+                    src += spatial;
+                    dst += spatial;
+                }
+            }
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNhwc(const uint8_t* src, size_t spatial, size_t channels, const float* scale, const float* shift, float* dst)
+        {
+            size_t channelsF = AlignLo(channels, F);
+            __mmask16 tail = TailMask16(channels - channelsF);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                size_t c = 0;
+                for (; c < channelsF; c += F)
+                    SynetConvert8uTo32f<nofma>(src + c, scale + c, shift + c, dst + c);
+                if (c < channels)
+                    SynetConvert8uTo32f<nofma>(src + c, scale + c, shift + c, dst + c, tail);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNhwc3(const uint8_t* src, size_t spatial, const float* scale, const float* shift, float* dst)
+        {
+            size_t spatial3 = spatial * 3;
+            size_t spatial3F = AlignLo(spatial, F) * 3;
+
+            float _scale[F * 3], _shift[F * 3];
+            for (size_t i = 0; i < F; ++i)
+                for (size_t c = 0; c < 3; ++c)
+                    _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
+
+            __m512 _scale0 = _mm512_loadu_ps(_scale + 0 * F);
+            __m512 _scale1 = _mm512_loadu_ps(_scale + 1 * F);
+            __m512 _scale2 = _mm512_loadu_ps(_scale + 2 * F);
+            __m512 _shift0 = _mm512_loadu_ps(_shift + 0 * F);
+            __m512 _shift1 = _mm512_loadu_ps(_shift + 1 * F);
+            __m512 _shift2 = _mm512_loadu_ps(_shift + 2 * F);
+
+            size_t s = 0;
+            for (; s < spatial3F; s += 3 * F)
+            {
+                SynetConvert8uTo32f<nofma>(src + 0 * F, _scale0, _shift0, dst + 0 * F);
+                SynetConvert8uTo32f<nofma>(src + 1 * F, _scale1, _shift1, dst + 1 * F);
+                SynetConvert8uTo32f<nofma>(src + 2 * F, _scale2, _shift2, dst + 2 * F);
+                src += 3 * F;
+                dst += 3 * F;
+            }
+            if (s < spatial3)
+            {
+                SynetConvert8uTo32f<nofma>(src + 0 * F, _scale0, _shift0, dst + 0 * F, TailMask16(spatial3 - spatial3F - 0 * F));
+                SynetConvert8uTo32f<nofma>(src + 1 * F, _scale1, _shift1, dst + 1 * F, TailMask16(spatial3 - spatial3F - 1 * F));
+                SynetConvert8uTo32f<nofma>(src + 2 * F, _scale2, _shift2, dst + 2 * F, TailMask16(spatial3 - spatial3F - 2 * F));
+            }
+        }
+
+        void SynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
+        {
+            bool nofma = Base::FmaAvoid(compatibility);
+            if (format == SimdTensorFormatNchw)
+            {
+                if (nofma)
+                    SynetConvert8uTo32fNchw<true>(src, batch, channels, height, width, scale, shift, dst);
+                else
+                    SynetConvert8uTo32fNchw<false>(src, batch, channels, height, width, scale, shift, dst);
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t spatial = batch * height * width;
+                if (channels == 3)
+                {
+                    if (nofma)
+                        SynetConvert8uTo32fNhwc3<true>(src, spatial, scale, shift, dst);
+                    else
+                        SynetConvert8uTo32fNhwc3<false>(src, spatial, scale, shift, dst);
+                }
+                else
+                {
+                    if (nofma)
+                        SynetConvert8uTo32fNhwc<true>(src, spatial, channels, scale, shift, dst);
+                    else
+                        SynetConvert8uTo32fNhwc<false>(src, spatial, channels, scale, shift, dst);
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
  
 
         template <bool align> SIMD_INLINE void StoreScaled(float * ptr, __m512i value32, __m512 scale, __m512 shift)

@@ -208,6 +208,11 @@ namespace Test
             result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Avx2::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
 #endif 
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetConvert8uTo32fAutoTest(FUNC_C_8U_32F(Simd::Avx512bw::SynetConvert8uTo32f), FUNC_C_8U_32F(SimdSynetConvert8uTo32f));
+#endif 
+
         return result;
     }
 
