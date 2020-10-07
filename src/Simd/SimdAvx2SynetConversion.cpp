@@ -221,6 +221,122 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const float* scale, const float* shift, float* dst)
+        {
+            __m256 f32 = _mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)src)));
+            _mm256_storeu_ps(dst, Fmadd<nofma>(f32, _mm256_loadu_ps(scale), _mm256_loadu_ps(shift)));
+        }
+
+        template <bool nofma> SIMD_INLINE void SynetConvert8uTo32f(const uint8_t* src, const __m256& scale, const __m256& shift, float* dst)
+        {
+            __m256 f32 = _mm256_cvtepi32_ps(_mm256_cvtepu8_epi32(_mm_loadl_epi64((__m128i*)src)));
+            _mm256_storeu_ps(dst, Fmadd<nofma>(f32, scale, shift));
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNchw(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, float* dst)
+        {
+            size_t spatial = height * width;
+            size_t spatialF = AlignLo(spatial, F);
+            for (size_t b = 0; b < batch; ++b)
+            {
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    __m256 _scale = _mm256_set1_ps(scale[c]);
+                    __m256 _shift = _mm256_set1_ps(shift[c]);
+                    for (size_t s = 0; s < spatialF; s += F)
+                        SynetConvert8uTo32f<nofma>(src + s, _scale, _shift, dst + s);
+                    for (size_t s = spatialF; s < spatial; ++s)
+                        dst[s] = Base::SynetConvert8uTo32f(src[s], scale[c], shift[c]);
+                    src += spatial;
+                    dst += spatial;
+                }
+            }
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNhwc(const uint8_t* src, size_t spatial, size_t channels, const float* scale, const float* shift, float* dst)
+        {
+            size_t channelsF = AlignLo(channels, F);
+            for (size_t s = 0; s < spatial; ++s)
+            {
+                for (size_t c = 0; c < channelsF; c += F)
+                    SynetConvert8uTo32f<nofma>(src + c, scale + c, shift + c, dst + c);
+                for (size_t c = channelsF; c < channels; ++c)
+                    dst[c] = Base::SynetConvert8uTo32f(src[c], scale[c], shift[c]);
+                src += channels;
+                dst += channels;
+            }
+        }
+
+        template <bool nofma> void SynetConvert8uTo32fNhwc3(const uint8_t* src, size_t spatial, const float* scale, const float* shift, float* dst)
+        {
+            size_t spatial3 = spatial * 3;
+            size_t spatial3F = AlignLo(spatial, F) * 3;
+
+            float _scale[F * 3], _shift[F * 3];
+            for (size_t i = 0; i < F; ++i)
+                for (size_t c = 0; c < 3; ++c)
+                    _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
+
+            __m256 _scale0 = Load<false>(_scale + 0 * F);
+            __m256 _scale1 = Load<false>(_scale + 1 * F);
+            __m256 _scale2 = Load<false>(_scale + 2 * F);
+            __m256 _shift0 = Load<false>(_shift + 0 * F);
+            __m256 _shift1 = Load<false>(_shift + 1 * F);
+            __m256 _shift2 = Load<false>(_shift + 2 * F);
+
+            size_t s = 0;
+            for (; s < spatial3F; s += 3 * F)
+            {
+                SynetConvert8uTo32f<nofma>(src + 0 * F, _scale0, _shift0, dst + 0 * F);
+                SynetConvert8uTo32f<nofma>(src + 1 * F, _scale1, _shift1, dst + 1 * F);
+                SynetConvert8uTo32f<nofma>(src + 2 * F, _scale2, _shift2, dst + 2 * F);
+                src += 3 * F;
+                dst += 3 * F;
+            }
+            for (; s < spatial3; s += 3)
+            {
+                dst[0] = Base::SynetConvert8uTo32f(src[0], scale[0], shift[0]);
+                dst[1] = Base::SynetConvert8uTo32f(src[1], scale[1], shift[1]);
+                dst[2] = Base::SynetConvert8uTo32f(src[2], scale[2], shift[2]);
+                src += 3;
+                dst += 3;
+            }
+        }
+
+        void SynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
+        {
+            bool nofma = Base::FmaAvoid(compatibility);
+            if (format == SimdTensorFormatNchw)
+            {
+                if(nofma)
+                    SynetConvert8uTo32fNchw<true>(src, batch, channels, height, width, scale, shift, dst);
+                else
+                    SynetConvert8uTo32fNchw<false>(src, batch, channels, height, width, scale, shift, dst);
+            }
+            else if (format == SimdTensorFormatNhwc)
+            {
+                size_t spatial = batch * height * width;
+                if (channels == 3)
+                {
+                    if (nofma)
+                        SynetConvert8uTo32fNhwc3<true>(src, spatial, scale, shift, dst);
+                    else
+                        SynetConvert8uTo32fNhwc3<false>(src, spatial, scale, shift, dst);
+                }
+                else
+                {
+                    if (nofma)
+                        SynetConvert8uTo32fNhwc<true>(src, spatial, channels, scale, shift, dst);
+                    else
+                        SynetConvert8uTo32fNhwc<false>(src, spatial, channels, scale, shift, dst);
+                }
+            }
+            else
+                assert(0);
+        }
+
+        //---------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void StoreScaled(float * ptr, __m256i value32, __m256 scale, __m256 shift)
         {
             Avx::Store<align>(ptr, _mm256_fmadd_ps(_mm256_cvtepi32_ps(value32), scale, shift));
