@@ -502,6 +502,16 @@ SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, si
         Base::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
 }
 
+SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+{
+    Base::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+}
+
+SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+{
+    Base::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+}
+
 SIMD_API void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
                                           uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride)
 {

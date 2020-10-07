@@ -969,6 +969,64 @@ extern "C"
     */
     SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride);
 
+    /*! @ingroup drawing
+
+        \fn void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
+        \short Performs premultiply operation.
+
+        All images must have the same width, height and format (BGRA32).
+
+        For every point:
+        \verbatim
+         dst[x, y, 0] = src[x, y, 0] * src[x, y, 3] / 255;
+         dst[x, y, 1] = src[x, y, 1] * src[x, y, 3] / 255;
+         dst[x, y, 2] = src[x, y, 2] * src[x, y, 3] / 255;
+         dst[x, y, 3] = src[x, y, 3];
+        \endverbatim
+
+        This function is used for image drawing as a part of alpha blending operation.
+
+        \note This function has a C++ wrapper Simd::AlphaPremultiply(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of input image.
+        \param [in] srcStride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] dst - a pointer to pixels data of output premultiplyed image.
+        \param [in] dstStride - a row size of the output premultiplyed image.
+    */
+    SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
+    /*! @ingroup drawing
+
+        \fn void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
+        \short Performs unpremultiply operation.
+
+        All images must have the same width, height and format (BGRA32).
+
+        For every point:
+        \verbatim
+         dst[x, y, 0] = src[x, y, 0] / src[x, y, 3] * 255;
+         dst[x, y, 1] = src[x, y, 1] / src[x, y, 3] * 255;
+         dst[x, y, 2] = src[x, y, 2] / src[x, y, 3] * 255;
+         dst[x, y, 3] = src[x, y, 3];
+        \endverbatim
+
+        This function is used for image drawing as a part of alpha blending operation.
+
+        \note This function has a C++ wrapper Simd::AlphaUnpremultiply(const View<A>& src, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of input image.
+        \param [in] srcStride - a row size of the input image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] dst - a pointer to pixels data of output unpremultiplyed image.
+        \param [in] dstStride - a row size of the output unpremultiplyed image.
+    */
+    SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
     /*! @ingroup background
 
         \fn void SimdBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height, uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);

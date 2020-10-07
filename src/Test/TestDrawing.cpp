@@ -129,6 +129,8 @@ namespace Test
         return result;
     }
 
+    //-------------------------------------------------------------------------
+
     namespace
     {
         struct FuncAF
@@ -227,6 +229,89 @@ namespace Test
     }
 
     //-----------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncAP
+        {
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+            FuncPtr func;
+            String description;
+
+            FuncAP(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, const View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+            }
+        };
+    }
+
+#define FUNC_AP(func) FuncAP(func, #func)
+
+    bool AlphaPremultiplyAutoTest(bool inv, int width, int height, const FuncAP& f1, const FuncAP& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
+
+        View s(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        FillRandom(s);
+        if (inv)
+            Simd::AlphaPremultiply(s, s);
+
+        View d1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View d2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool AlphaPremultiplyAutoTest(bool inv, const FuncAP& f1, const FuncAP& f2)
+    {
+        bool result = true;
+
+        result = result && AlphaPremultiplyAutoTest(inv, W, H, f1, f2);
+        result = result && AlphaPremultiplyAutoTest(inv, W + O, H - O, f1, f2);
+
+        return result;
+    }
+
+    bool AlphaPremultiplyAutoTest()
+    {
+        bool result = true;
+
+        result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Base::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+
+//#ifdef SIMD_SSE2_ENABLE
+//        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
+//            result = result && AlphaPremultiplyAutoTest(FUNC_AP(Simd::Sse2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+//#endif 
+
+        return result;
+    }
+
+    bool AlphaUnpremultiplyAutoTest()
+    {
+        bool result = true;
+
+        result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Base::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
+
+        //#ifdef SIMD_SSE2_ENABLE
+        //        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
+        //            result = result && AlphaPremultiplyAutoTest(FUNC_AP(Simd::Sse2::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
+        //#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
 
     bool AlphaBlendingDataTest(bool create, View::Format format, int width, int height, const FuncAB & f)
     {

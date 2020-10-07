@@ -161,6 +161,8 @@ namespace Test
 
     TEST_ADD_GROUP_AD0(AlphaBlending);
     TEST_ADD_GROUP_AD0(AlphaFilling);
+    TEST_ADD_GROUP_A00(AlphaPremultiply);
+    TEST_ADD_GROUP_A00(AlphaUnpremultiply);
     TEST_ADD_GROUP_00S(DrawLine);
     TEST_ADD_GROUP_00S(DrawRectangle);
     TEST_ADD_GROUP_00S(DrawFilledRectangle);

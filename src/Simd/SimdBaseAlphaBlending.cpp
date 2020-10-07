@@ -87,6 +87,8 @@ namespace Simd
             }
         }
 
+        //---------------------------------------------------------------------
+
         template <size_t channelCount> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, const uint8_t * alpha, size_t alphaStride)
         {
             for (size_t row = 0; row < height; ++row)
@@ -108,6 +110,50 @@ namespace Simd
             case 2: AlphaFilling<2>(dst, dstStride, width, height, channel, alpha, alphaStride); break;
             case 3: AlphaFilling<3>(dst, dstStride, width, height, channel, alpha, alphaStride); break;
             case 4: AlphaFilling<4>(dst, dstStride, width, height, channel, alpha, alphaStride); break;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst)
+        {
+            int alpha = src[3];
+            dst[0] = DivideBy255(src[0] * alpha);
+            dst[1] = DivideBy255(src[1] * alpha);
+            dst[2] = DivideBy255(src[2] * alpha);
+            dst[3] = alpha;
+        }
+
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, end = width*4; col < end; col += 4)
+                    AlphaPremultiply(src + col, dst + col);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst)
+        {
+            float alpha = 255.0f / src[3];
+            dst[0] = RestrictRange(src[0] * alpha);
+            dst[1] = RestrictRange(src[1] * alpha);
+            dst[2] = RestrictRange(src[2] * alpha);
+            dst[3] = src[3];
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, end = width * 4; col < end; col += 4)
+                    AlphaUnpremultiply(src + col, dst + col);
+                src += srcStride;
+                dst += dstStride;
             }
         }
     }
