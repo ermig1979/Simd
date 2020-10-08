@@ -163,11 +163,6 @@ namespace Simd
             return (d & m);
         }
 
-        SIMD_INLINE int DivideBy255(int value)
-        {
-            return (value + 1 + (value >> 8)) >> 8;
-        }
-
         template <bool compensation> SIMD_INLINE int DivideBy16(int value);
 
         template <> SIMD_INLINE int DivideBy16<true>(int value)
@@ -408,11 +403,6 @@ namespace Simd
             return _mm_packus_epi16(lo, hi);
         }
 
-        SIMD_INLINE __m128i DivideI16By255(__m128i value)
-        {
-            return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(value, K16_0001), _mm_srli_epi16(value, 8)), 8);
-        }
-
         SIMD_INLINE __m128i BinomialSum16(const __m128i & a, const __m128i & b, const __m128i & c)
         {
             return _mm_add_epi16(_mm_add_epi16(a, c), _mm_add_epi16(b, b));
@@ -426,11 +416,6 @@ namespace Simd
         SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
         {
             return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));
-        }
-
-        SIMD_INLINE __m128i AlphaBlendingI16(__m128i src, __m128i dst, __m128i alpha)
-        {
-            return DivideI16By255(_mm_add_epi16(_mm_mullo_epi16(src, alpha), _mm_mullo_epi16(dst, _mm_sub_epi16(K16_00FF, alpha))));
         }
 
         template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
@@ -713,11 +698,6 @@ namespace Simd
             __m256i lo = _mm256_mullo_epi16(_mm256_unpacklo_epi8(a, K_ZERO), _mm256_unpacklo_epi8(b, K_ZERO));
             __m256i hi = _mm256_mullo_epi16(_mm256_unpackhi_epi8(a, K_ZERO), _mm256_unpackhi_epi8(b, K_ZERO));
             return _mm256_packus_epi16(lo, hi);
-        }
-
-        SIMD_INLINE __m256i DivideI16By255(__m256i value)
-        {
-            return _mm256_srli_epi16(_mm256_add_epi16(_mm256_add_epi16(value, K16_0001), _mm256_srli_epi16(value, 8)), 8);
         }
 
         SIMD_INLINE __m256i BinomialSum16(const __m256i & a, const __m256i & b, const __m256i & c)

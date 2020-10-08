@@ -290,5 +290,8 @@
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

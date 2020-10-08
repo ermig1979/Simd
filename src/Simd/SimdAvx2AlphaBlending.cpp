@@ -25,23 +25,24 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdAlphaBlending.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        SIMD_INLINE __m256i AlphaBlendingI16(__m256i src, __m256i dst, __m256i alpha)
+        SIMD_INLINE __m256i AlphaBlending16i(__m256i src, __m256i dst, __m256i alpha)
         {
-            return DivideI16By255(_mm256_add_epi16(_mm256_mullo_epi16(src, alpha), _mm256_mullo_epi16(dst, _mm256_sub_epi16(K16_00FF, alpha))));
+            return Divide16uBy255(_mm256_add_epi16(_mm256_mullo_epi16(src, alpha), _mm256_mullo_epi16(dst, _mm256_sub_epi16(K16_00FF, alpha))));
         }
 
         template <bool align> SIMD_INLINE void AlphaBlending(const __m256i * src, __m256i * dst, __m256i alpha)
         {
             __m256i _src = Load<align>(src);
             __m256i _dst = Load<align>(dst);
-            __m256i lo = AlphaBlendingI16(_mm256_unpacklo_epi8(_src, K_ZERO), _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
-            __m256i hi = AlphaBlendingI16(_mm256_unpackhi_epi8(_src, K_ZERO), _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
+            __m256i lo = AlphaBlending16i(_mm256_unpacklo_epi8(_src, K_ZERO), _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
+            __m256i hi = AlphaBlending16i(_mm256_unpackhi_epi8(_src, K_ZERO), _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
             Store<align>(dst, _mm256_packus_epi16(lo, hi));
         }
 
@@ -147,11 +148,13 @@ namespace Simd
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
 
+        //---------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void AlphaFilling(__m256i * dst, __m256i channelLo, __m256i channelHi, __m256i alpha)
         {
             __m256i _dst = Load<align>(dst);
-            __m256i lo = AlphaBlendingI16(channelLo, _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
-            __m256i hi = AlphaBlendingI16(channelHi, _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
+            __m256i lo = AlphaBlending16i(channelLo, _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
+            __m256i hi = AlphaBlending16i(channelHi, _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
             Store<align>(dst, _mm256_packus_epi16(lo, hi));
         }
 
@@ -271,6 +274,44 @@ namespace Simd
                 AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
             else
                 AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+        }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE __m256i AlphaPremultiply16i(__m256i value, __m256i alpha)
+        {
+            return Divide16uBy255(_mm256_mullo_epi16(value, alpha));
+        }
+
+        const __m256i K8_SHUFFLE_BGRA_TO_A0A0 = SIMD_MM256_SETR_EPI8(
+            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1);
+
+        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst)
+        {
+            __m256i bgra = _mm256_loadu_si256((__m256i*)src);
+            __m256i a0a0 = _mm256_shuffle_epi8(bgra, K8_SHUFFLE_BGRA_TO_A0A0);
+            __m256i b0r0 = _mm256_and_si256(bgra, K16_00FF);
+            __m256i g0f0 = _mm256_or_si256(_mm256_and_si256(_mm256_srli_si256(bgra, 1), K32_000000FF), K32_00FF0000);
+            __m256i B0R0 = AlphaPremultiply16i(b0r0, a0a0);
+            __m256i G0A0 = AlphaPremultiply16i(g0f0, a0a0);
+            _mm256_storeu_si256((__m256i*)dst, _mm256_or_si256(B0R0, _mm256_slli_si256(G0A0, 1)));
+        }
+
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t i = 0;
+                for (; i < sizeA; i += A)
+                    AlphaPremultiply(src + i, dst + i);
+                for (; i < size; i += 4)
+                    Base::AlphaPremultiply(src + i, dst + i);
+                src += srcStride;
+                dst += dstStride;
+            }
         }
     }
 #endif// SIMD_AVX2_ENABLE

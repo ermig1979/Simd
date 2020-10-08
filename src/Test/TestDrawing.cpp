@@ -289,10 +289,20 @@ namespace Test
 
         result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Base::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 
-//#ifdef SIMD_SSE2_ENABLE
-//        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-//            result = result && AlphaPremultiplyAutoTest(FUNC_AP(Simd::Sse2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
-//#endif 
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::F)
+            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Sse2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+#endif 
+
+#ifdef SIMD_SSSE3_ENABLE
+        if (Simd::Ssse3::Enable && W >= Simd::Sse2::F)
+            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Ssse3::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::F)
+            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Avx2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+#endif
 
         return result;
     }

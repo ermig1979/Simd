@@ -21,7 +21,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMath.h"
+
+#include "Simd/SimdAlphaBlending.h"
 
 namespace Simd
 {
@@ -115,15 +116,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst)
-        {
-            int alpha = src[3];
-            dst[0] = DivideBy255(src[0] * alpha);
-            dst[1] = DivideBy255(src[1] * alpha);
-            dst[2] = DivideBy255(src[2] * alpha);
-            dst[3] = alpha;
-        }
-
         void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             for (size_t row = 0; row < height; ++row)
@@ -140,9 +132,9 @@ namespace Simd
         SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst)
         {
             float alpha = 255.0f / src[3];
-            dst[0] = RestrictRange(src[0] * alpha);
-            dst[1] = RestrictRange(src[1] * alpha);
-            dst[2] = RestrictRange(src[2] * alpha);
+            dst[0] = RestrictRange(int(src[0] * alpha));
+            dst[1] = RestrictRange(int(src[1] * alpha));
+            dst[2] = RestrictRange(int(src[2] * alpha));
             dst[3] = src[3];
         }
 

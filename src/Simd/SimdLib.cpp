@@ -504,7 +504,22 @@ SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, si
 
 SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
 {
-    Base::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::F)
+        Avx2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Sse2::F)
+        Ssse3::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::F)
+        Sse2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+        Base::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
 }
 
 SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)

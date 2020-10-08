@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdAlphaBlending.h"
 
 namespace Simd
 {
@@ -195,8 +196,8 @@ namespace Simd
         template <bool align> SIMD_INLINE void VectorProduct(const __m128i & vertical, const uint8_t * horizontal, uint8_t * dst)
         {
             __m128i _horizontal = Load<align>((__m128i*)horizontal);
-            __m128i lo = DivideI16By255(_mm_mullo_epi16(vertical, _mm_unpacklo_epi8(_horizontal, K_ZERO)));
-            __m128i hi = DivideI16By255(_mm_mullo_epi16(vertical, _mm_unpackhi_epi8(_horizontal, K_ZERO)));
+            __m128i lo = Divide16uBy255(_mm_mullo_epi16(vertical, _mm_unpacklo_epi8(_horizontal, K_ZERO)));
+            __m128i hi = Divide16uBy255(_mm_mullo_epi16(vertical, _mm_unpackhi_epi8(_horizontal, K_ZERO)));
             Store<align>((__m128i*)dst, _mm_packus_epi16(lo, hi));
         }
 

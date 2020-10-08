@@ -93,23 +93,6 @@ namespace Simd
             __m128i old = Load<align>(p);
             Store<align>(p, Combine(mask, value, old));
         }
-
-        template <bool align> SIMD_INLINE void AlphaBlending(const __m128i * src, __m128i * dst, __m128i alpha)
-        {
-            __m128i _src = Load<align>(src);
-            __m128i _dst = Load<align>(dst);
-            __m128i lo = AlphaBlendingI16(_mm_unpacklo_epi8(_src, K_ZERO), _mm_unpacklo_epi8(_dst, K_ZERO), _mm_unpacklo_epi8(alpha, K_ZERO));
-            __m128i hi = AlphaBlendingI16(_mm_unpackhi_epi8(_src, K_ZERO), _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
-            Store<align>(dst, _mm_packus_epi16(lo, hi));
-        }
-
-        template <bool align> SIMD_INLINE void AlphaFilling(__m128i * dst, __m128i channelLo, __m128i channelHi, __m128i alpha)
-        {
-            __m128i _dst = Load<align>(dst);
-            __m128i lo = AlphaBlendingI16(channelLo, _mm_unpacklo_epi8(_dst, K_ZERO), _mm_unpacklo_epi8(alpha, K_ZERO));
-            __m128i hi = AlphaBlendingI16(channelHi, _mm_unpackhi_epi8(_dst, K_ZERO), _mm_unpackhi_epi8(alpha, K_ZERO));
-            Store<align>(dst, _mm_packus_epi16(lo, hi));
-        }
     }
 #endif//SIMD_SSE2_ENABLE
 

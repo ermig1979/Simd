@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdStore.h"
+#include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
 
@@ -124,6 +124,8 @@ namespace Simd
             }
         }
 
+        //---------------------------------------------------------------------
+
         template <bool align, size_t channelCount> struct AlphaFiller
         {
             void operator() (__m128i * dst, __m128i channel, __m128i alpha);
@@ -216,6 +218,36 @@ namespace Simd
                     AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
                 else
                     AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst)
+        {
+            __m128i bgra = _mm_loadu_si128((__m128i*)src);
+            __m128i a000 = _mm_and_si128(_mm_srli_si128(bgra, 3), K32_000000FF);
+            __m128i a0a0 = _mm_or_si128(a000, _mm_slli_si128(a000, 2));
+            __m128i b0r0 = _mm_and_si128(bgra, K16_00FF);
+            __m128i g0f0 = _mm_or_si128(_mm_and_si128(_mm_srli_si128(bgra, 1), K32_000000FF), K32_00FF0000);
+            __m128i B0R0 = AlphaPremultiply16i(b0r0, a0a0);
+            __m128i G0A0 = AlphaPremultiply16i(g0f0, a0a0);
+            _mm_storeu_si128((__m128i*)dst, _mm_or_si128(B0R0, _mm_slli_si128(G0A0, 1)));
+        }
+
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t i = 0;
+                for (; i < sizeA; i += A)
+                    AlphaPremultiply(src + i, dst + i);
+                for (;i < size; i += 4)
+                    Base::AlphaPremultiply(src + i, dst + i);
+                src += srcStride;
+                dst += dstStride;
             }
         }
     }
