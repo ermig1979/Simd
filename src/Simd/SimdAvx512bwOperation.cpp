@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdAlphaBlending.h"
 
 namespace Simd
 {
@@ -210,8 +211,8 @@ namespace Simd
 
         SIMD_INLINE __m512i VectorProduct(const __m512i & vertical, const __m512i & horizontalLo, const __m512i & horizontalHi)
         {
-            __m512i lo = DivideI16By255(_mm512_mullo_epi16(vertical, horizontalLo));
-            __m512i hi = DivideI16By255(_mm512_mullo_epi16(vertical, horizontalHi));
+            __m512i lo = Divide16uBy255(_mm512_mullo_epi16(vertical, horizontalLo));
+            __m512i hi = Divide16uBy255(_mm512_mullo_epi16(vertical, horizontalHi));
             return _mm512_packus_epi16(lo, hi);
         }
 

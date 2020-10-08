@@ -25,23 +25,24 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdAlphaBlending.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        SIMD_INLINE __m512i AlphaBlendingI16(const __m512i &  src, const __m512i &  dst, const __m512i &  alpha)
+        SIMD_INLINE __m512i AlphaBlending16i(const __m512i &  src, const __m512i &  dst, const __m512i &  alpha)
         {
-            return DivideI16By255(_mm512_add_epi16(_mm512_mullo_epi16(src, alpha), _mm512_mullo_epi16(dst, _mm512_sub_epi16(K16_00FF, alpha))));
+            return Divide16uBy255(_mm512_add_epi16(_mm512_mullo_epi16(src, alpha), _mm512_mullo_epi16(dst, _mm512_sub_epi16(K16_00FF, alpha))));
         }
 
         template <bool align, bool mask> SIMD_INLINE void AlphaBlending(const uint8_t * src, uint8_t * dst, const __m512i & alpha, __mmask64 m)
         {
             __m512i _src = Load<align, mask>(src, m);
             __m512i _dst = Load<align, mask>(dst, m);
-            __m512i lo = AlphaBlendingI16(UnpackU8<0>(_src), UnpackU8<0>(_dst), UnpackU8<0>(alpha));
-            __m512i hi = AlphaBlendingI16(UnpackU8<1>(_src), UnpackU8<1>(_dst), UnpackU8<1>(alpha));
+            __m512i lo = AlphaBlending16i(UnpackU8<0>(_src), UnpackU8<0>(_dst), UnpackU8<0>(alpha));
+            __m512i hi = AlphaBlending16i(UnpackU8<1>(_src), UnpackU8<1>(_dst), UnpackU8<1>(alpha));
             Store<align, mask>(dst, _mm512_packus_epi16(lo, hi), m);
         }
 
@@ -151,8 +152,8 @@ namespace Simd
         template <bool align, bool mask> SIMD_INLINE void AlphaFilling(uint8_t * dst, __m512i channelLo, __m512i channelHi, __m512i alpha, __mmask64 m)
         {
             __m512i _dst = Load<align, mask>(dst, m);
-            __m512i lo = AlphaBlendingI16(channelLo, UnpackU8<0>(_dst), UnpackU8<0>(alpha));
-            __m512i hi = AlphaBlendingI16(channelHi, UnpackU8<1>(_dst), UnpackU8<1>(alpha));
+            __m512i lo = AlphaBlending16i(channelLo, UnpackU8<0>(_dst), UnpackU8<0>(alpha));
+            __m512i hi = AlphaBlending16i(channelHi, UnpackU8<1>(_dst), UnpackU8<1>(alpha));
             Store<align, mask>(dst, _mm512_packus_epi16(lo, hi), m);
         }
 
@@ -272,6 +273,47 @@ namespace Simd
                 AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
             else
                 AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+        }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE __m512i AlphaPremultiply16i(__m512i value, __m512i alpha)
+        {
+            return Divide16uBy255(_mm512_mullo_epi16(value, alpha));
+        }
+
+        const __m512i K8_SHUFFLE_BGRA_TO_A0A0 = SIMD_MM512_SETR_EPI8(
+            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1,
+            0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1);
+
+        SIMD_INLINE void AlphaPremultiply(const uint8_t* src, uint8_t* dst, __mmask64 tail = -1)
+        {
+            __m512i bgra = _mm512_maskz_loadu_epi8(tail, src);
+            __m512i a0a0 = _mm512_shuffle_epi8(bgra, K8_SHUFFLE_BGRA_TO_A0A0);
+            __m512i b0r0 = _mm512_and_si512(bgra, K16_00FF);
+            __m512i g0f0 = _mm512_or_si512(_mm512_and_si512(_mm512_srli_epi32(bgra, 8), K32_000000FF), K32_00FF0000);
+            __m512i B0R0 = AlphaPremultiply16i(b0r0, a0a0);
+            __m512i G0A0 = AlphaPremultiply16i(g0f0, a0a0);
+            _mm512_mask_storeu_epi8(dst, tail, _mm512_or_si512(B0R0, _mm512_slli_epi32(G0A0, 8)));
+        }
+
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            __mmask64 tail = TailMask64(size - sizeA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t i = 0;
+                for (; i < sizeA; i += A)
+                    AlphaPremultiply(src + i, dst + i);
+                if (i < size)
+                    AlphaPremultiply(src + i, dst + i, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

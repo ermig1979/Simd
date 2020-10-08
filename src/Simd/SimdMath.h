@@ -1067,11 +1067,6 @@ namespace Simd
             return _mm512_add_epi16(_mm512_add_epi16(a, c), _mm512_add_epi16(b, b));
         }
 
-        SIMD_INLINE __m512i DivideI16By255(__m512i value)
-        {
-            return _mm512_srli_epi16(_mm512_add_epi16(_mm512_add_epi16(value, K16_0001), _mm512_srli_epi16(value, 8)), 8);
-        }
-
         template <int part> SIMD_INLINE __m512i UnpackU8(__m512i a, __m512i b = K_ZERO);
 
         template <> SIMD_INLINE __m512i UnpackU8<0>(__m512i a, __m512i b)

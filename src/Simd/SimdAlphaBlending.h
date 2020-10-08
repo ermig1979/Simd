@@ -102,5 +102,20 @@ namespace Simd
         }
     }
 #endif //SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
+    {
+        SIMD_INLINE __m512i Divide16iBy255(__m512i value)
+        {
+            return _mm512_mulhi_epi16(_mm512_add_epi16(value, K16_0001), K16_0101);
+        }
+
+        SIMD_INLINE __m512i Divide16uBy255(__m512i value)
+        {
+            return _mm512_mulhi_epu16(_mm512_add_epi16(value, K16_0001), K16_0101);
+        }
+    }
+#endif //SIMD_AVX512BW_ENABLE
 }
 #endif//__SimdAlphaBlending_h__
