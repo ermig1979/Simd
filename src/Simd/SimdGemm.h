@@ -24,6 +24,10 @@
 #ifndef __SimdGemm_h__
 #define __SimdGemm_h__
 
+#if defined(__GNUC__) && (__GNUC__ == 10) && (__GNUC_MINOR__ == 1)
+#define SIMD_FUTURE_DISABLE
+#endif
+
 #include "Simd/SimdArray.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdParallel.hpp"
