@@ -318,9 +318,10 @@ namespace Simd
                         {
                             if (w & 1)
                                 w = Round(w * 0.25f) * 4;
-                            w = w / 2;
+                            _weight8i[q][kc * D + d] = w / 2;
                         }
-                        _weight8i[q][kc * D + d] = w;
+                        else
+                            _weight8i[q][kc * D + d] = w;
                         normB -= w * cvt.shift[c];
                     }
                 }
