@@ -1818,6 +1818,47 @@ extern "C"
         uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
         uint8_t * dst, size_t dstStride, SimdCompareType compareType);
 
+    /*! @ingroup binarization
+
+        \fn void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride);
+
+        \short Performs averaging binarization of 8-bit gray image.
+
+        All images must have 8-bit gray format and must have the same width and height.
+
+        For every point:
+        \verbatim
+        sum = 0; area = 0;
+        for(dy = -neighborhood; dy <= neighborhood; ++dy)
+        {
+            for(dx = -neighborhood; dx <= neighborhood; ++dx)
+            {
+                if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
+                {
+                    area++;
+                    sum += src[x + dx, x + dy];
+                }
+            }
+        }
+        dst[x, y] = (src[x, y] + shift)*area > sum ? positive : negative;
+        \endverbatim
+
+        \note This function has a C++ wrapper Simd::AveragingBinarizationV2(const View<A>& src, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, View<A>& dst).
+
+        \param [in] src - a pointer to pixels data of input 8-bit gray image.
+        \param [in] srcStride - a row size of the src image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] neighborhood - an averaging neighborhood.
+        \param [in] shift - a shift value for binarization. It can range from -255 to 255.
+        \param [in] positive - a destination value for positive value of condition (seen before).
+        \param [in] negative - a destination value for negative value of condition (seen before).
+        \param [out] dst - a pointer to pixels data of output 8-bit gray binarized image.
+        \param [in] dstStride - a row size of the dst image.
+    */
+    SIMD_API void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+        size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride);
+
     /*! @ingroup conditional
 
         \fn void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, SimdCompareType compareType, uint32_t * count);

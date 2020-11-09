@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
@@ -63,29 +64,6 @@ namespace Simd
             }
         }
 
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t width, size_t edge)
-                {
-                    size_t size = sizeof(uint32_t)*(width + 2 * edge);
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    sa = (uint32_t*)_p + edge;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                uint32_t * sa;
-            private:
-                void *_p;
-            };
-        }
-
         template<SimdCompareType compareType> SIMD_INLINE uint32_t GetSa(uint8_t src, uint8_t value)
         {
 #ifdef SIMD_BIG_ENDIAN
@@ -101,7 +79,9 @@ namespace Simd
         {
             assert(width > neighborhood && height > neighborhood && neighborhood < 0x80);
 
-            Buffer buffer(width, neighborhood + 1);
+            size_t edge = neighborhood + 1;
+            Array32u buffer(width + 2 * edge, true);
+            uint32_t* sa = buffer.data + edge;
 
             union SaSum
             {
@@ -114,7 +94,7 @@ namespace Simd
                 const uint8_t * s = src + row*srcStride;
                 for (size_t col = 0; col < width; ++col)
                 {
-                    buffer.sa[col] += GetSa<compareType>(s[col], value);
+                    sa[col] += GetSa<compareType>(s[col], value);
                 }
             }
 
@@ -125,7 +105,7 @@ namespace Simd
                     const uint8_t * s = src + (row + neighborhood)*srcStride;
                     for (size_t col = 0; col < width; ++col)
                     {
-                        buffer.sa[col] += GetSa<compareType>(s[col], value);
+                        sa[col] += GetSa<compareType>(s[col], value);
                     }
                 }
 
@@ -134,17 +114,17 @@ namespace Simd
                     const uint8_t * s = src + (row - neighborhood - 1)*srcStride;
                     for (size_t col = 0; col < width; ++col)
                     {
-                        buffer.sa[col] -= GetSa<compareType>(s[col], value);
+                        sa[col] -= GetSa<compareType>(s[col], value);
                     }
                 }
 
                 SaSum saSum = { 0 };
                 for (size_t col = 0; col < neighborhood; ++col)
-                    saSum.sum += buffer.sa[col];
+                    saSum.sum += sa[col];
                 for (size_t col = 0; col < width; ++col)
                 {
-                    saSum.sum += buffer.sa[col + neighborhood];
-                    saSum.sum -= buffer.sa[col - neighborhood - 1];
+                    saSum.sum += sa[col + neighborhood];
+                    saSum.sum -= sa[col - neighborhood - 1];
                     dst[col] = (saSum.sa[0] * 0xFF > threshold*saSum.sa[1]) ? positive : negative;
                 }
                 dst += dstStride;
@@ -171,6 +151,64 @@ namespace Simd
                 return AveragingBinarization<SimdCompareLesserOrEqual>(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride);
             default:
                 assert(0);
+            }
+        }
+
+        void AveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
+        {
+            assert(width > neighborhood && height > neighborhood);
+
+            size_t edge = neighborhood + 1, size = width + 2 * edge;
+            Array32i buffer(2*size, true);
+            int32_t* rs = buffer.data + edge, *ra = rs + size;
+
+            for (size_t row = 0; row < neighborhood; ++row)
+            {
+                const uint8_t* ps = src + row * srcStride;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    rs[col] += ps[col];
+                    ra[col] += 1;
+                }
+            }
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                if (row < height - neighborhood)
+                {
+                    const uint8_t* ps = src + (row + neighborhood) * srcStride;
+                    for (size_t col = 0; col < width; ++col)
+                    {
+                        rs[col] += ps[col];
+                        ra[col] += 1;
+                    }
+                }
+
+                if (row > neighborhood)
+                {
+                    const uint8_t* ps = src + (row - neighborhood - 1) * srcStride;
+                    for (size_t col = 0; col < width; ++col)
+                    {
+                        rs[col] -= ps[col];
+                        ra[col] -= 1;
+                    }
+                }
+
+                int sum = 0, area = 0;
+                for (size_t col = 0; col < neighborhood; ++col)
+                {
+                    sum += rs[col];
+                    area += ra[col];
+                }
+                const uint8_t* ps = src + row * srcStride;
+                for (size_t col = 0; col < width; ++col)
+                {
+                    sum += rs[col + neighborhood] - rs[col - neighborhood - 1];
+                    area += ra[col + neighborhood] - ra[col - neighborhood - 1];
+                    dst[col] = (ps[col] + shift)*area > sum ? positive : negative;
+                }
+                dst += dstStride;
             }
         }
     }

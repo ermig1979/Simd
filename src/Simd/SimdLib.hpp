@@ -1169,6 +1169,47 @@ namespace Simd
             neighborhood, threshold, positive, negative, dst.data, dst.stride, compareType);
     }
 
+    /*! @ingroup binarization
+
+        \fn void AveragingBinarizationV2(const View<A>& src, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, View<A>& dst)
+
+        \short Performs averaging binarization of 8-bit gray image.
+
+        All images must have 8-bit gray format and must have the same width and height.
+
+        For every point:
+        \verbatim
+        sum = 0; area = 0;
+        for(dy = -neighborhood; dy <= neighborhood; ++dy)
+        {
+            for(dx = -neighborhood; dx <= neighborhood; ++dx)
+            {
+                if(x + dx >= 0 && x + dx < width && y + dy >= 0 && y + dy < height)
+                {
+                    area++;
+                    sum += src[x + dx, x + dy];
+                }
+            }
+        }
+        dst[x, y] = (src[x, y] + shift)*area > sum ? positive : negative;
+        \endverbatim
+
+        \note This function is a C++ wrapper for function ::SimdAveragingBinarizationV2.
+
+        \param [in] src - an input 8-bit gray image (first value for compare operation).
+        \param [in] neighborhood - an averaging neighborhood.
+        \param [in] shift - a shift value for binarization. It can range from -255 to 255.
+        \param [in] positive - a destination value for positive value of condition (seen before).
+        \param [in] negative - a destination value for negative value of condition (seen before).
+        \param [out] dst - an output 8-bit gray binarized image.
+    */
+    template<template<class> class A> SIMD_INLINE void AveragingBinarizationV2(const View<A>& src, size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, View<A>& dst)
+    {
+        assert(Compatible(src, dst) && src.format == View<A>::Gray8);
+
+        SimdAveragingBinarizationV2(src.data, src.stride, src.width, src.height, neighborhood, shift, positive, negative, dst.data, dst.stride);
+    }
+
     /*! @ingroup conditional
 
         \fn void ConditionalCount8u(const View<A> & src, uint8_t value, SimdCompareType compareType, uint32_t & count)

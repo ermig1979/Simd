@@ -130,6 +130,7 @@ namespace Test
 
     TEST_ADD_GROUP_AD0(Binarization);
     TEST_ADD_GROUP_AD0(AveragingBinarization);
+    TEST_ADD_GROUP_A00(AveragingBinarizationV2);
 
     TEST_ADD_GROUP_AD0(ConditionalCount8u);
     TEST_ADD_GROUP_AD0(ConditionalCount16i);

@@ -103,6 +103,7 @@ namespace Simd
     typedef Array<int16_t> Array16i;
     typedef Array<uint16_t> Array16u;
     typedef Array<int32_t> Array32i;
+    typedef Array<uint32_t> Array32u;
     typedef Array<float> Array32f;
 
 #if defined(__GNUC__) && __GNUC__ >= 6
