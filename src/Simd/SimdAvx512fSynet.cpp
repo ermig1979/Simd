@@ -695,44 +695,98 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
         {
             Avx512f::Exp exp;
-            if (inner == 1 && count == 2)
+            size_t aligned = Simd::AlignLo(outer, F), tail = outer - aligned;
+            for (size_t o = 0; o < aligned; o += F)
             {
-                size_t aligned = Simd::AlignLo(outer, F);
-                size_t o = 0;
-                for (; o < aligned; o += F)
-                {
-                    __m512 s0 = _mm512_loadu_ps(src + 0);
-                    __m512 s1 = _mm512_loadu_ps(src + F);
-                    __m512 ss0 = _mm512_shuffle_ps(s0, s1, 0x88);
-                    __m512 ss1 = _mm512_shuffle_ps(s0, s1, 0xDD);
-                    __m512 max = _mm512_max_ps(ss0, ss1);
-                    __m512 exp0 = exp.Exponent(_mm512_sub_ps(ss0, max));
-                    __m512 exp1 = exp.Exponent(_mm512_sub_ps(ss1, max));
-                    __m512 sum = _mm512_add_ps(exp0, exp1);
-                    __m512 d0 = _mm512_div_ps(exp0, sum);
-                    __m512 d1 = _mm512_div_ps(exp1, sum);
-                    _mm512_storeu_ps(dst + 0, _mm512_unpacklo_ps(d0, d1));
-                    _mm512_storeu_ps(dst + F, _mm512_unpackhi_ps(d0, d1));
-                    src += DF;
-                    dst += DF;
-                }
-                for (; o < outer; ++o)
-                {
-                    float max = Simd::Max(src[0], src[1]);
-                    float exp0 = ::exp(src[0] - max);
-                    float exp1 = ::exp(src[1] - max);
-                    float sum = exp0 + exp1;
-                    dst[0] = exp0 / sum;
-                    dst[1] = exp1 / sum;
-                    src += 2;
-                    dst += 2;
-                }
+                __m512 s0 = _mm512_loadu_ps(src + 0);
+                __m512 s1 = _mm512_loadu_ps(src + F);
+                __m512 ss0 = _mm512_shuffle_ps(s0, s1, 0x88);
+                __m512 ss1 = _mm512_shuffle_ps(s0, s1, 0xDD);
+                __m512 max = _mm512_max_ps(ss0, ss1);
+                __m512 exp0 = exp.Exponent(_mm512_sub_ps(ss0, max));
+                __m512 exp1 = exp.Exponent(_mm512_sub_ps(ss1, max));
+                __m512 sum = _mm512_add_ps(exp0, exp1);
+                __m512 d0 = _mm512_div_ps(exp0, sum);
+                __m512 d1 = _mm512_div_ps(exp1, sum);
+                _mm512_storeu_ps(dst + 0, _mm512_unpacklo_ps(d0, d1));
+                _mm512_storeu_ps(dst + F, _mm512_unpackhi_ps(d0, d1));
+                src += DF;
+                dst += DF;
             }
+            if(tail)
+            {
+                __mmask16 mask0 = TailMask16(tail * 2 - 0 * F);
+                __mmask16 mask1 = TailMask16(tail * 2 - 1 * F);
+                __m512 s0 = _mm512_maskz_loadu_ps(mask0, src + 0 * F);
+                __m512 s1 = _mm512_maskz_loadu_ps(mask1, src + 1 * F);
+                __m512 ss0 = _mm512_shuffle_ps(s0, s1, 0x88);
+                __m512 ss1 = _mm512_shuffle_ps(s0, s1, 0xDD);
+                __m512 max = _mm512_max_ps(ss0, ss1);
+                __m512 exp0 = exp.Exponent(_mm512_sub_ps(ss0, max));
+                __m512 exp1 = exp.Exponent(_mm512_sub_ps(ss1, max));
+                __m512 sum = _mm512_add_ps(exp0, exp1);
+                __m512 d0 = _mm512_div_ps(exp0, sum);
+                __m512 d1 = _mm512_div_ps(exp1, sum);
+                _mm512_mask_storeu_ps(dst + 0 * F, mask0, _mm512_unpacklo_ps(d0, d1));
+                _mm512_mask_storeu_ps(dst + 1 * F, mask1, _mm512_unpackhi_ps(d0, d1));
+            }
+        }
+
+        SIMD_INLINE void SynetSoftmaxLayerForward31(const Avx512f::Exp& exp, __m512 buf[3])
+        {
+            __m512 max = _mm512_max_ps(buf[0], _mm512_max_ps(buf[1], buf[2]));
+            buf[0] = exp.Exponent(_mm512_sub_ps(buf[0], max));
+            buf[1] = exp.Exponent(_mm512_sub_ps(buf[1], max));
+            buf[2] = exp.Exponent(_mm512_sub_ps(buf[2], max));
+            __m512 sum = _mm512_add_ps(buf[0], _mm512_add_ps(buf[1], buf[2]));
+            buf[0] = _mm512_div_ps(buf[0], sum);
+            buf[1] = _mm512_div_ps(buf[1], sum);
+            buf[2] = _mm512_div_ps(buf[2], sum);
+        }
+
+        void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
+        {
+            static const __m512i idx = _mm512_setr_epi32(0x00, 0x03, 0x06, 0x09, 0x0C, 0x0F, 0x12, 0x15, 0x18, 0x1B, 0x1E, 0x21, 0x24, 0x27, 0x2A, 0x2D);
+            Avx512f::Exp exp;
+            __m512 buf[3];
+            size_t aligned = Simd::AlignLo(outer, F), tail = outer - aligned;
+            for (size_t o = 0; o < aligned; o += F)
+            {
+                buf[0] = _mm512_i32gather_ps(idx, src + 0, 4);
+                buf[1] = _mm512_i32gather_ps(idx, src + 1, 4);
+                buf[2] = _mm512_i32gather_ps(idx, src + 2, 4);
+                SynetSoftmaxLayerForward31(exp, buf);
+                _mm512_i32scatter_ps(dst + 0, idx, buf[0], 4);
+                _mm512_i32scatter_ps(dst + 1, idx, buf[1], 4);
+                _mm512_i32scatter_ps(dst + 2, idx, buf[2], 4);
+                src += 3 * F;
+                dst += 3 * F;
+            }
+            if (tail)
+            {
+                __mmask16 mask = TailMask16(tail);
+                buf[0] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 0, 4);
+                buf[1] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 1, 4);
+                buf[2] = _mm512_mask_i32gather_ps(_mm512_setzero_ps(), mask, idx, src + 2, 4);
+                SynetSoftmaxLayerForward31(exp, buf);
+                _mm512_mask_i32scatter_ps(dst + 0, mask, idx, buf[0], 4);
+                _mm512_mask_i32scatter_ps(dst + 1, mask, idx, buf[1], 4);
+                _mm512_mask_i32scatter_ps(dst + 2, mask, idx, buf[2], 4);
+            }
+        }
+
+        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        {
+            if (count == 2 && inner == 1)
+                SynetSoftmaxLayerForward21(src, outer, dst);
+            else if (count == 3 && inner == 1)
+                SynetSoftmaxLayerForward31(src, outer, dst);
             else
             {
+                Avx512f::Exp exp;
                 size_t aligned = Simd::AlignLo(inner, F);
                 __mmask16 tail = TailMask16(inner - aligned);
                 Array32f tmp(inner * 2);
