@@ -63,6 +63,24 @@ namespace Simd
             __m128 old = Load<align>(p);
             Store<align>(p, Combine(mask, value, old));
         }
+
+        template<int step> SIMD_INLINE void Scater(float* ptr, __m128 val)
+        {
+            SIMD_ALIGNED(16) float buf[F];
+            _mm_store_ps(buf, val);
+            ptr[0 * step] = buf[0];
+            ptr[1 * step] = buf[1];
+            ptr[2 * step] = buf[2];
+            ptr[3 * step] = buf[3];
+        }
+
+        template<int step> SIMD_INLINE void Scater(float* ptr, __m128 val, size_t size)
+        {
+            SIMD_ALIGNED(16) float buf[F];
+            _mm_store_ps(buf, val);
+            for (size_t i = 0; i < size; ++i)
+                ptr[i * step] = buf[i];
+        }
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -131,6 +149,28 @@ namespace Simd
         {
             __m256 old = Load<align>(p);
             Store<align>(p, _mm256_blendv_ps(old, value, mask));
+        }
+
+        template<int step> SIMD_INLINE void Scater(float* ptr, __m256 val)
+        {
+            SIMD_ALIGNED(32) float buf[F];
+            _mm256_store_ps(buf, val);
+            ptr[0 * step] = buf[0];
+            ptr[1 * step] = buf[1];
+            ptr[2 * step] = buf[2];
+            ptr[3 * step] = buf[3];
+            ptr[4 * step] = buf[4];
+            ptr[5 * step] = buf[5];
+            ptr[6 * step] = buf[6];
+            ptr[7 * step] = buf[7];
+        }
+
+        template<int step> SIMD_INLINE void Scater(float* ptr, __m256 val, size_t size)
+        {
+            SIMD_ALIGNED(32) float buf[F];
+            _mm256_store_ps(buf, val);
+            for (size_t i = 0; i < size; ++i)
+                ptr[i * step] = buf[i];
         }
     }
 #endif

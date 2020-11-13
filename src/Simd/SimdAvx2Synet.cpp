@@ -735,44 +735,92 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
         {
             Avx2::Exp exp;
-            if (inner == 1 && count == 2)
+            size_t aligned = Simd::AlignLo(outer, F);
+            size_t o = 0;
+            for (; o < aligned; o += F)
             {
-                size_t aligned = Simd::AlignLo(outer, F);
-                size_t o = 0;
-                for (; o < aligned; o += F)
-                {
-                    __m256 s0 = _mm256_loadu_ps(src + 0);
-                    __m256 s1 = _mm256_loadu_ps(src + F);
-                    __m256 ss0 = _mm256_shuffle_ps(s0, s1, 0x88);
-                    __m256 ss1 = _mm256_shuffle_ps(s0, s1, 0xDD);
-                    __m256 max = _mm256_max_ps(ss0, ss1);
-                    __m256 exp0 = exp.Exponent(_mm256_sub_ps(ss0, max));
-                    __m256 exp1 = exp.Exponent(_mm256_sub_ps(ss1, max));
-                    __m256 sum = _mm256_add_ps(exp0, exp1);
-                    __m256 d0 = _mm256_div_ps(exp0, sum);
-                    __m256 d1 = _mm256_div_ps(exp1, sum);
-                    _mm256_storeu_ps(dst + 0, _mm256_unpacklo_ps(d0, d1));
-                    _mm256_storeu_ps(dst + F, _mm256_unpackhi_ps(d0, d1));
-                    src += DF;
-                    dst += DF;
-                }
-                for (; o < outer; ++o)
-                {
-                    float max = Simd::Max(src[0], src[1]);
-                    float exp0 = ::exp(src[0] - max);
-                    float exp1 = ::exp(src[1] - max);
-                    float sum = exp0 + exp1;
-                    dst[0] = exp0 / sum;
-                    dst[1] = exp1 / sum;
-                    src += 2;
-                    dst += 2;
-                }
+                __m256 s0 = _mm256_loadu_ps(src + 0);
+                __m256 s1 = _mm256_loadu_ps(src + F);
+                __m256 ss0 = _mm256_shuffle_ps(s0, s1, 0x88);
+                __m256 ss1 = _mm256_shuffle_ps(s0, s1, 0xDD);
+                __m256 max = _mm256_max_ps(ss0, ss1);
+                __m256 exp0 = exp.Exponent(_mm256_sub_ps(ss0, max));
+                __m256 exp1 = exp.Exponent(_mm256_sub_ps(ss1, max));
+                __m256 sum = _mm256_add_ps(exp0, exp1);
+                __m256 d0 = _mm256_div_ps(exp0, sum);
+                __m256 d1 = _mm256_div_ps(exp1, sum);
+                _mm256_storeu_ps(dst + 0, _mm256_unpacklo_ps(d0, d1));
+                _mm256_storeu_ps(dst + F, _mm256_unpackhi_ps(d0, d1));
+                src += DF;
+                dst += DF;
             }
+            for (; o < outer; ++o)
+            {
+                float max = Simd::Max(src[0], src[1]);
+                float exp0 = ::exp(src[0] - max);
+                float exp1 = ::exp(src[1] - max);
+                float sum = exp0 + exp1;
+                dst[0] = exp0 / sum;
+                dst[1] = exp1 / sum;
+                src += 2;
+                dst += 2;
+            }
+        }
+
+        SIMD_INLINE void SynetSoftmaxLayerForward31(const Avx2::Exp& exp, __m256 buf[3])
+        {
+            __m256 max = _mm256_max_ps(buf[0], _mm256_max_ps(buf[1], buf[2]));
+            buf[0] = exp.Exponent(_mm256_sub_ps(buf[0], max));
+            buf[1] = exp.Exponent(_mm256_sub_ps(buf[1], max));
+            buf[2] = exp.Exponent(_mm256_sub_ps(buf[2], max));
+            __m256 sum = _mm256_add_ps(buf[0], _mm256_add_ps(buf[1], buf[2]));
+            buf[0] = _mm256_div_ps(buf[0], sum);
+            buf[1] = _mm256_div_ps(buf[1], sum);
+            buf[2] = _mm256_div_ps(buf[2], sum);
+        }
+
+        void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
+        {
+            Avx2::Exp exp;
+            __m256 buf[3];
+            size_t aligned = Simd::AlignLo(outer, F);
+            for (size_t o = 0; o < aligned; o += F)
+            {
+                buf[0] = Avx2::Gather<3>(src + 0);
+                buf[1] = Avx2::Gather<3>(src + 1);
+                buf[2] = Avx2::Gather<3>(src + 2);
+                SynetSoftmaxLayerForward31(exp, buf);
+                Avx::Scater<3>(dst + 0, buf[0]);
+                Avx::Scater<3>(dst + 1, buf[1]);
+                Avx::Scater<3>(dst + 2, buf[2]);
+                src += 3 * F;
+                dst += 3 * F;
+            }
+            if (aligned < outer)
+            {
+                size_t tail = outer - aligned;
+                buf[0] = Avx::Gather<3>(src + 0, tail);
+                buf[1] = Avx::Gather<3>(src + 1, tail);
+                buf[2] = Avx::Gather<3>(src + 2, tail);
+                SynetSoftmaxLayerForward31(exp, buf);
+                Avx::Scater<3>(dst + 0, buf[0], tail);
+                Avx::Scater<3>(dst + 1, buf[1], tail);
+                Avx::Scater<3>(dst + 2, buf[2], tail);
+            }
+        }
+
+        void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
+        {
+            if (count == 2 && inner == 1)
+                SynetSoftmaxLayerForward21(src, outer, dst);
+            else if(count == 3 && inner == 1)
+                SynetSoftmaxLayerForward31(src, outer, dst);
             else
             {
+                Avx2::Exp exp;
                 size_t aligned = Simd::AlignLo(inner, F);
                 Array32f tmp(inner * 2);
                 const float * s;

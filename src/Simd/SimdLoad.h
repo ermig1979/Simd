@@ -79,6 +79,24 @@ namespace Simd
             __m128 b = _mm_shuffle_ps(a, a, 0xFE);
             return _mm_and_ps(b, _mm_load_ps((float*)m));
         }
+
+        template<int step> SIMD_INLINE __m128 Gather(const float* ptr)
+        {
+            SIMD_ALIGNED(16) float buf[F];
+            buf[0] = ptr[0 * step];
+            buf[1] = ptr[1 * step];
+            buf[2] = ptr[2 * step];
+            buf[3] = ptr[3 * step];
+            return _mm_load_ps(buf);
+        }
+
+        template<int step> SIMD_INLINE __m128 Gather(const float* ptr, size_t size)
+        {
+            SIMD_ALIGNED(16) float buf[F];
+            for (size_t i = 0; i < size; ++i)
+                buf[i] = ptr[i * step];
+            return _mm_load_ps(buf);
+        }
     }
 #endif//SIMD_SSE_ENABLE
 
@@ -230,6 +248,28 @@ namespace Simd
         SIMD_INLINE __m256 Load(const float * ptr, __m256i mask)
         {
             return _mm256_maskload_ps(ptr, mask);
+        }
+
+        template<int step> SIMD_INLINE __m256 Gather(const float* ptr)
+        {
+            SIMD_ALIGNED(32) float buf[F];
+            buf[0] = ptr[0 * step];
+            buf[1] = ptr[1 * step];
+            buf[2] = ptr[2 * step];
+            buf[3] = ptr[3 * step];
+            buf[4] = ptr[4 * step];
+            buf[5] = ptr[5 * step];
+            buf[6] = ptr[6 * step];
+            buf[7] = ptr[7 * step];
+            return _mm256_load_ps(buf);
+        }
+
+        template<int step> SIMD_INLINE __m256 Gather(const float* ptr, size_t size)
+        {
+            SIMD_ALIGNED(32) float buf[F];
+            for (size_t i = 0; i < size; ++i)
+                buf[i] = ptr[i * step];
+            return _mm256_load_ps(buf);
         }
     }
 #endif//SIMD_AVX_ENABLE
@@ -417,6 +457,13 @@ namespace Simd
 #else
             return _mm256_load_ps(p);
 #endif
+        }
+
+        template<int step> SIMD_INLINE __m256 Gather(const float* ptr)
+        {
+            static const __m256i idx = _mm256_setr_epi32(0 * step, 1 * step, 
+                2 * step, 3 * step, 4 * step, 5 * step, 6 * step, 7 * step);
+            return _mm256_i32gather_ps(ptr, idx, 4);
         }
     }
 #endif//SIMD_AVX2_ENABLE

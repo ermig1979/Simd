@@ -854,7 +854,9 @@ namespace Test
 
         result = result && SynetSoftmaxLayerForwardAutoTest(13175, 2, 1, f1, f2);
         result = result && SynetSoftmaxLayerForwardAutoTest(21824, 2, 1, f1, f2);
-        result = result && SynetSoftmaxLayerForwardAutoTest(100, 10, 100, f1, f2);
+        result = result && SynetSoftmaxLayerForwardAutoTest(50, 10, 100, f1, f2);
+        result = result && SynetSoftmaxLayerForwardAutoTest(4856, 3, 1, f1, f2);
+        result = result && SynetSoftmaxLayerForwardAutoTest(6666, 3, 1, f1, f2);
 
         return result;
     }
