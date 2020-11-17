@@ -123,12 +123,12 @@ namespace Simd
 
         SIMD_INLINE size_t AlgCacheL2()
         {
-            return Cpu::L2_CACHE_SIZE;
+            return Cpu::L3_CACHE_SIZE ? Cpu::L2_CACHE_SIZE : Cpu::L2_CACHE_SIZE * Cpu::SOCKET_NUMBER / Cpu::CORE_NUMBER;
         }
 
         SIMD_INLINE size_t AlgCacheL3()
         {
-            return Cpu::L3_CACHE_SIZE ? Cpu::L3_CACHE_SIZE * Cpu::SOCKET_NUMBER / Cpu::CORE_NUMBER : Cpu::L2_CACHE_SIZE * 8;
+            return Cpu::L3_CACHE_SIZE ? Cpu::L3_CACHE_SIZE * Cpu::SOCKET_NUMBER / Cpu::CORE_NUMBER : Cpu::L2_CACHE_SIZE;
         }
     }
 }
