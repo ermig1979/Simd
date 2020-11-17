@@ -592,6 +592,10 @@ namespace Test
                 {
                     MINIMAL_TEST_EXECUTION_TIME = FromString<int>(arg.substr(4, arg.size() - 4))*0.001;
                 }
+                else if (arg.find("-lc=") == 0)
+                {
+                    LITTER_CPU_CACHE = FromString<int>(arg.substr(4, arg.size() - 4));
+                }
                 else
                 {
                     TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
@@ -746,6 +750,7 @@ namespace Test
         std::cout << "    -wt=1         a thread number used to parallelize algorithms." << std::endl << std::endl;
         std::cout << "    -fe=Abs       an exclude filter to exclude some tests." << std::endl << std::endl;
         std::cout << "    -mt=100       a minimal test execution time (in milliseconds)." << std::endl << std::endl;
+        std::cout << "    -lc=1         to litter CPU cache between test runs." << std::endl << std::endl;
         return 0;
     }
 
@@ -762,6 +767,7 @@ namespace Test
     int W = 128;
 #endif
     double MINIMAL_TEST_EXECUTION_TIME = 0.1;
+    int LITTER_CPU_CACHE = 0;
 
     void CheckCpp();
 }

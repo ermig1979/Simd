@@ -175,3 +175,4 @@ Also you can use parameters:
 * `-wt=1` a thread number used to parallelize algorithms.
 * `-fe=Abs` an exclude filter to exclude some tests.
 * `-mt=100` a minimal test execution time (in milliseconds).
+* `-lc=1` to litter CPU cache between test runs.

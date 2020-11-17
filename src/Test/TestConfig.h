@@ -113,6 +113,8 @@ namespace Test
     extern String ROOT_PATH;
     extern String SOURCE;
 
+    extern int LITTER_CPU_CACHE;
+
     enum DifferenceType
     {
         DifferenceAbsolute,
