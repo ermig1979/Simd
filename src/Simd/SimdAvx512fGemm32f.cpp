@@ -1838,7 +1838,7 @@ namespace Simd
             if (M > 0xD) AddProduct(C, _alpha, c0D, mask), C += ldc;
         }
 
-        SIMD_INLINE Simd::GemmNN<float, __mmask16>::Tail GetGemmTail(size_t M, size_t N)
+        SIMD_INLINE Simd::GemmNN<float, F, __mmask16>::Tail GetGemmTail(size_t M, size_t N)
         {
             if (N <= 16)
             {
@@ -2506,7 +2506,7 @@ namespace Simd
         {
             SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M*N*K * 2);
 
-            typedef Simd::GemmNN<float, __mmask16> GemmNN;
+            typedef Simd::GemmNN<float, F, __mmask16> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN;
@@ -2588,14 +2588,14 @@ namespace Simd
             }
 #endif
             GemmNN::PackA packA = (microM > 6 && M*N*K > 700*700*700) ? Avx::GemmPackA : NULL;
-            GemmNN gemmNN(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F,
+            GemmNN gemmNN(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx512f::GemmPackB, Avx512f::GemmScaleC, TailMask16);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
 
         //---------------------------------------------------------------------
 
-        typedef Simd::GemmNNcb<float, __mmask16> Gemm32fNNcb;
+        typedef Simd::GemmNNcb<float, F, __mmask16> Gemm32fNNcb;
 
         SIMD_INLINE Gemm32fNNcb CreateGemm32fNNcb(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
         {
@@ -2728,7 +2728,7 @@ namespace Simd
             kernelTT = Avx512f::GetGemmTail(M%microM, microN);
 #endif
             Gemm32fNNcb::PackA packA = ((M * 3 < N && N >= 512 && K >= 128 && M > 16) || (K >= 256 && M > 256)) ? Avx512f::GemmPackA : NULL;
-            return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F,
+            return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, Avx512f::GemmPackB, Avx512f::GemmScaleC, TailMask16, compatibility);
         }
 
@@ -3238,9 +3238,9 @@ namespace Simd
                 Avx2::Gemm32fNT(M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
                 return;
             }
-            typedef Simd::GemmNT<float> GemmNT;
+            typedef Simd::GemmNT<float, F> GemmNT;
 #if SIMD_ZMM_COUNT == 32
-            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, Avx::GemmScaleC,
+            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::GemmScaleC,
                 Kernel1x1x16nt, Kernel1x4x16nt, Kernel2x1x16nt, Kernel2x4x16nt, Kernel3x1x16nt, Kernel3x4x16nt, Kernel6x1x16nt, Kernel6x4x16nt);
 #elif defined(SIMD_X64_ENABLE)
             GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, Avx::GemmScaleC,

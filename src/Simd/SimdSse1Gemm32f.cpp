@@ -526,7 +526,7 @@ namespace Simd
             if (M > 5) AddProduct(C + 5 * ldc, _alpha, c05, tail);
         }
 
-        SIMD_INLINE Simd::GemmNN<float, size_t>::Tail GetGemmTail(size_t M, size_t N)
+        SIMD_INLINE Simd::GemmNN<float, F, size_t>::Tail GetGemmTail(size_t M, size_t N)
         {
             if (N <= 4)
             {
@@ -764,7 +764,7 @@ namespace Simd
 
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            typedef Simd::GemmNN<float, size_t> GemmNN;
+            typedef Simd::GemmNN<float, F, size_t> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
             GemmNN::Tail kernelTM, kernelTT;
             size_t microM, microN, L1, L2;
@@ -800,14 +800,14 @@ namespace Simd
             GemmNN::PackA packA = NULL;
             L1 = N > 4096 ? Base::AlgCacheL2() : Base::AlgCacheL1();
             L2 = N > 4096 ? Base::AlgCacheL3() : Base::AlgCacheL2();
-            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, Base::AlgCacheL3(), F,
+            GemmNN gemmNN(M, N, K, microM, microN, L1, L2, Base::AlgCacheL3(), 
                 kernelMM, kernelMT, kernelTM, kernelTT, packA, GemmPackB, GemmScaleC, NULL);
             gemmNN.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
 
         //---------------------------------------------------------------------
 
-        typedef Simd::GemmNNcb<float, size_t> Gemm32fNNcb;
+        typedef Simd::GemmNNcb<float, F, size_t> Gemm32fNNcb;
 
         SIMD_INLINE Gemm32fNNcb CreateGemm32fNNcb(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
         {
@@ -855,7 +855,7 @@ namespace Simd
             kernelTM = Sse::GetGemmTail(M%microM, microN);
             kernelTT = Sse::GetGemmTail(M%microM, microN);
 #endif
-            return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, 
+            return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(),  
                 kernelMM, kernelMT, kernelTM, kernelTT, NULL, Sse::GemmPackB, Sse::GemmScaleC, NULL, compatibility);
         }
 

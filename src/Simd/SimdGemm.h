@@ -39,7 +39,7 @@
 
 namespace Simd
 {
-    template <class T, class TM> class GemmNN
+    template <class T, size_t F, class TM> class GemmNN
     {
     public:
         typedef void(*Main)(size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, size_t sb, T * C, size_t ldc, TM tail);
@@ -49,14 +49,13 @@ namespace Simd
         typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
         typedef TM(*TailMask)(ptrdiff_t tail);
 
-        GemmNN(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3, size_t F,
+        GemmNN(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3,
             Main kernelMM, Main kernelMT, Tail kernelTM, Tail kernelTT, PackA packA, PackB packB, ScaleC scaleC, TailMask tailMask)
             : _M(M)
             , _N(N)
             , _K(K)
             , _microM(microM)
             , _microN(microN)
-            , _F(F)
             , _threadNumber(Base::GetThreadNumber())
             , _kernelMM(kernelMM)
             , _kernelMT(kernelMT)
@@ -78,7 +77,7 @@ namespace Simd
                 _pA[t].Resize(_macroM * _macroK);
                 _pB[t].Resize(_macroN * _macroK);
             }
-            size_t NF = AlignLo(_N, _F);
+            size_t NF = AlignLo(_N, F);
             if (tailMask)
             {
                 _main = TM(-1);
@@ -86,8 +85,8 @@ namespace Simd
             }
             else
             {
-                _main = TM(_F);
-                _tail = NF == _N ? TM(_F) : TM(_N - NF);
+                _main = TM(F);
+                _tail = NF == _N ? TM(F) : TM(_N - NF);
             }
         }
 
@@ -140,9 +139,9 @@ namespace Simd
                     _packB(B + j, ldb, K, _microN, _microN, pB);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMM(K, alpha, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelMM(K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _main);
                 if (i < M)
-                    _kernelTM(M - i, K, alpha, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelTM(M - i, K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _main);
             }
             if (j < N)
             {
@@ -151,16 +150,16 @@ namespace Simd
                     _packB(B + j, ldb, K, N - j, _microN, pB);
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMT(K, alpha, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelMT(K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _tail);
                 if (i < M)
-                    _kernelTT(M - i, K, alpha, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, K, alpha, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _tail);
             }
         }
 
         typedef std::vector<Simd::Array<T>> Arrays;
 
         Arrays _pA, _pB;
-        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK, _F, _threadNumber;
+        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK, _threadNumber;
         TM _main, _tail;
         Main _kernelMM, _kernelMT;
         Tail _kernelTM, _kernelTT;
@@ -169,18 +168,17 @@ namespace Simd
         PackA _packA;
     };
 
-    template <class T> class GemmNT
+    template <class T, size_t F> class GemmNT
     {
     public:
         typedef void(*Kernel)(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc);
         typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
 
-        GemmNT(size_t M, size_t N, size_t K, size_t L1, size_t L2, size_t L3, size_t F, ScaleC scaleC,
+        GemmNT(size_t M, size_t N, size_t K, size_t L1, size_t L2, size_t L3, ScaleC scaleC,
             Kernel k1x1, Kernel k1x4, Kernel k2x1, Kernel k2x4, Kernel k3x1, Kernel k3x4, Kernel k6x1, Kernel k6x4)
             : _M(M)
             , _N(N)
             , _K(K)
-            , _F(F)
             , _threadNumber(Base::GetThreadNumber())
             , _scaleC(scaleC)
             , _k1x1(k1x1)
@@ -194,7 +192,7 @@ namespace Simd
         {
             _microN = 4;
             _microM = _k6x4 ? 6 : 3;
-            _macroK = AlignLo(L1 / sizeof(T) / _microN, _F);
+            _macroK = AlignLo(L1 / sizeof(T) / _microN, F);
             _macroM = AlignLoAny(L2 / sizeof(T) / _macroK, _microM);
             _macroN = AlignLoAny(L3 / sizeof(T) / _macroK, _microN);
             if (_N * _M * _K < 256 * 256 * 256 * 2)
@@ -289,7 +287,7 @@ namespace Simd
         Kernel _k1x1, _k1x4, _k2x1, _k2x4, _k3x1, _k3x4, _k6x1, _k6x4;
     };
 
-    template <class T, class TM> class GemmNNcb
+    template <class T, size_t F, class TM> class GemmNNcb
     {
     public:
         typedef void(*Main)(size_t K, T alpha, const T * A, size_t lda, const T * B, size_t ldb, size_t sb, T * C, size_t ldc, TM tail);
@@ -299,7 +297,7 @@ namespace Simd
         typedef void(*ScaleC)(size_t M, size_t N, T beta, T * C, size_t ldc);
         typedef TM(*TailMask)(ptrdiff_t tail);
 
-        GemmNNcb(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3, size_t F,
+        GemmNNcb(size_t M, size_t N, size_t K, size_t microM, size_t microN, size_t L1, size_t L2, size_t L3, 
             Main kernelMM, Main kernelMT, Tail kernelTM, Tail kernelTT, PackA packA, PackB packB, ScaleC scaleC, TailMask tailMask, bool compatible = false)
             : _0(0)
             , _1(1)
@@ -311,7 +309,6 @@ namespace Simd
             _K = K;
             _microM = microM;
             _microN = microN;
-            _F = F;
             _kernelMM = kernelMM;
             _kernelMT = kernelMT;
             _kernelTM = kernelTM;
@@ -321,13 +318,13 @@ namespace Simd
             _packA = packA;
             _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
             _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));
-            _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _compatible ? _F : _microN));
+            _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _compatible ? F : _microN));
             if (_packA)
             {
 
                 _pA.Resize(_macroM * _macroK);
             }
-            size_t NF = AlignLo(_N, _F);
+            size_t NF = AlignLo(_N, F);
             if (tailMask)
             {
                 _main = TM(-1);
@@ -335,21 +332,21 @@ namespace Simd
             }
             else
             {
-                _main = TM(_F);
-                _tail = NF == _N ? TM(_F) : TM(_N - NF);
+                _main = TM(F);
+                _tail = NF == _N ? TM(F) : TM(_N - NF);
             }        
         }
 
         SIMD_INLINE size_t BufferSize() const 
         {
-            return AlignHiAny(_N, _compatible ? _F : _microN)*_K;
+            return AlignHiAny(_N, _compatible ? F : _microN)*_K;
         }
 
         void ReorderB(const T * B, size_t ldb, T * pB)
         {
             if (_compatible)
             {
-                _packB(B, ldb, _K, _N, _F, pB);
+                _packB(B, ldb, _K, _N, F, pB);
             }
             else
             {
@@ -386,7 +383,7 @@ namespace Simd
                         if (k == 0)
                             _scaleC(macroM, macroN, _0, C + i * ldc + j, ldc);
                         if (_compatible)
-                            MacroKernelCompatible(macroM, macroN, macroK, A + i * lda + k, lda, pB + j * _K + k * _F, C + i * ldc + j, ldc);
+                            MacroKernelCompatible(macroM, macroN, macroK, A + i * lda + k, lda, pB + j * _K + k * F, C + i * ldc + j, ldc);
                         else
                             MacroKernelSpecific(macroM, macroN, macroK, A + i * lda + k, lda, pB, C + i * ldc + j, ldc);
                     }
@@ -415,18 +412,18 @@ namespace Simd
             {
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMM(K, _1, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelMM(K, _1, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _main);
                 if (i < M)
-                    _kernelTM(M - i, K, _1, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _main);
+                    _kernelTM(M - i, K, _1, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _main);
                 pB += _microN * K;
             }
             if (j < N)
             {
                 size_t i = 0;
                 for (; i < MA; i += _microM)
-                    _kernelMT(K, _1, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelMT(K, _1, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _tail);
                 if (i < M)
-                    _kernelTT(M - i, K, _1, A + i * lda, klda, pB, _F, _microN, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, K, _1, A + i * lda, klda, pB, F, _microN, C + i * ldc + j, ldc, _tail);
             }
         }
 
@@ -451,13 +448,13 @@ namespace Simd
                 {
                     if (_packA && j == 0)
                         _packA(A + i * lda, lda, _microM, K, _microM, pA + i * plda);
-                    _kernelMM(K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _main);
+                    _kernelMM(K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _main);
                 }
                 if (i < M)
                 {
                     if (_packA && j == 0)
                         _packA(A + i * lda, lda, M - i, K, _microM, pA + i * plda);
-                    _kernelTM(M - i, K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _main);
+                    _kernelTM(M - i, K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _main);
                 }
                 pB += _microN * _K;
             }
@@ -468,20 +465,20 @@ namespace Simd
                 {
                     if (_packA && j == 0)
                         _packA(A + i * lda, lda, _microM, K, _microM, pA + i * plda);
-                    _kernelMT(K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _tail);
+                    _kernelMT(K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _tail);
                 }
                 if (i < M)
                 {
                     if (_packA && j == 0)
                         _packA(A + i * lda, lda, M - i, K, _microM, pA + i * plda);
-                    _kernelTT(M - i, K, _1, pA + i * plda, klda, pB, _F * _K, _F, C + i * ldc + j, ldc, _tail);
+                    _kernelTT(M - i, K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _tail);
                 }
             }
         }
 
         typedef Simd::Array<T> Array;
 
-        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK, _F;
+        size_t _M, _N, _K, _microM, _microN, _macroM, _macroN, _macroK;
         TM _main, _tail;
         Main _kernelMM, _kernelMT;
         Tail _kernelTM, _kernelTT;

@@ -314,9 +314,9 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            typedef Simd::GemmNT<float> GemmNT;
+            typedef Simd::GemmNT<float, F> GemmNT;
 #ifdef SIMD_X64_ENABLE
-            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, Sse::GemmScaleC,
+            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse::GemmScaleC,
                 Kernel1x1x4nt, Kernel1x4x4nt, Kernel2x1x4nt, Kernel2x4x4nt, Kernel3x1x4nt, Kernel3x4x4nt, NULL, NULL);
 #else
             GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), F, Sse::GemmScaleC,
