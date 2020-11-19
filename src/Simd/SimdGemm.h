@@ -302,7 +302,7 @@ namespace Simd
             : _0(0)
             , _1(1)
         {
-            L2 = Simd::RestrictRange(size_t(::sqrt(L1 * L3)), L2/4, L2);
+            L2 = Simd::RestrictRange(size_t(::sqrt(double(L1 * L3))), L2/4, L2);
             _compatible = compatible;
             _M = M;
             _N = N;
