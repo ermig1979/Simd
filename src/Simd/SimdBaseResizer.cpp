@@ -132,8 +132,6 @@ namespace Simd
         ResizerByteArea::ResizerByteArea(const ResParam & param)
             : Resizer(param)
         {
-            double scale = Simd::Max(float(_param.srcW) / _param.dstW, float(_param.srcH) / _param.dstH);
-
             _ay.Resize(_param.dstH + 1);
             _iy.Resize(_param.dstH + 1);
             EstimateParams(_param.srcH, _param.dstH, Base::AREA_RANGE, _ay.data, _iy.data);
