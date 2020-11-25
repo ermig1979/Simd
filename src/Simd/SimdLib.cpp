@@ -55,9 +55,10 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdLib.h"
 
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdEnable.h"
-#include "Simd/SimdConst.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdEnable.h"
+#include "Simd/SimdAlignment.h"
+#include "Simd/SimdConst.h"
 #include "Simd/SimdLog.h"
 #include "Simd/SimdPerformance.h"
 
@@ -89,6 +90,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #if !defined(SIMD_VERSION)
 #include "Simd/SimdVersion.h"
 #endif
+
+namespace Simd
+{
+    const size_t ALIGNMENT = Alignment();
+}
 
 SIMD_API const char * SimdVersion()
 {

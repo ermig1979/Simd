@@ -394,6 +394,7 @@ namespace Test
     {
         bool result = true;
 
+        //std::cout << "Specified tensor format: " << (int)SimdSynetSpecifyTensorFormat(SimdTensorFormatNchwXc) << std::endl;
         for (SimdTensorFormatType src = SimdTensorFormatNchw; src <= SimdTensorFormatNchw16c && result; src = (SimdTensorFormatType)((int)src + 1))
         {
             for (SimdTensorFormatType dst = SimdTensorFormatNchw; dst <= SimdTensorFormatNchw16c && result; dst = (SimdTensorFormatType)((int)dst + 1))

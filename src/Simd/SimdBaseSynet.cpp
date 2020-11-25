@@ -24,7 +24,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdEnable.h"
+#include "Simd/SimdAlignment.h"
 #include "Simd/SimdExp.h"
 
 namespace Simd

@@ -160,7 +160,7 @@ namespace Simd
 #elif defined(__GNUC__)
         size_t CpuSocketNumber()
         {
-            uint32_t number = 0; std::cout << " CpuSocketNumber() " << std::flush;
+            uint32_t number = 0;
             ::FILE * p = ::popen("lscpu -b -p=Socket | grep -v '^#' | sort -u | wc -l", "r");
             if (p)
             {
@@ -174,7 +174,7 @@ namespace Simd
 
         size_t CpuCoreNumber()
         {
-            uint32_t number = 0; std::cout << " CpuCoreNumber() " << std::flush;
+            uint32_t number = 0;
             ::FILE * p = ::popen("lscpu -b -p=Core | grep -v '^#' | sort -u | wc -l", "r");
             if (p)
             {
