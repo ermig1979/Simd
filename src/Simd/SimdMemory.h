@@ -275,21 +275,6 @@ namespace Simd
         }
     }
 #endif// SIMD_NEON_ENABLE
-
-#ifdef SIMD_MSA_ENABLE
-    namespace Msa
-    {
-        SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(v16u8))
-        {
-            return Simd::Aligned(size, align);
-        }
-
-        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(v16u8))
-        {
-            return Simd::Aligned(ptr, align);
-        }
-    }
-#endif// SIMD_MSA_ENABLE
 }
 
 #endif//__SimdMemory_h__

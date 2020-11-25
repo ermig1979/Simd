@@ -220,35 +220,6 @@ elseif((CMAKE_SYSTEM_PROCESSOR MATCHES "arm") OR (CMAKE_SYSTEM_PROCESSOR STREQUA
         target_link_libraries(Test Simd -lpthread)
     endif()
 
-elseif((CMAKE_SYSTEM_PROCESSOR STREQUAL "mips"))
-
-    set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -Ofast -EL")
-
-    set(CXX_MSA_FLAG "-mmsa")#"-mmsa -mhard-float -mfp64")
-
-    file(GLOB_RECURSE SIMD_BASE_SRC ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
-    set_source_files_properties(${SIMD_BASE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
-
-    file(GLOB_RECURSE SIMD_MSA_SRC ${TRUNK_DIR}/src/Simd/SimdMsa*.cpp)
-    set_source_files_properties(${SIMD_MSA_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_MSA_FLAG}")
-
-    file(GLOB_RECURSE SIMD_LIB_SRC ${TRUNK_DIR}/src/Simd/SimdLib.cpp)
-    set_source_files_properties(${SIMD_LIB_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_MSA_FLAG}")
-    add_library(Simd ${LIBRARY} ${SIMD_LIB_SRC} ${SIMD_BASE_SRC} ${SIMD_MSA_SRC})
-
-    if(SIMD_TEST)
-        file(GLOB_RECURSE TEST_SRC_C ${TRUNK_DIR}/src/Test/*.c)
-        set_source_files_properties(${TEST_SRC_C} PROPERTIES COMPILE_FLAGS "${COMMON_C_FLAGS} -EL")
-        file(GLOB_RECURSE TEST_SRC_CPP ${TRUNK_DIR}/src/Test/*.cpp)
-        if(NOT ${TARGET} STREQUAL "")
-            set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${CXX_MSA_FLAG}")# -D_GLIBCXX_USE_NANOSLEEP")
-        else()
-            set_source_files_properties(${TEST_SRC_CPP} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} ${TEST_FLAGS} -mtune=native")# -D_GLIBCXX_USE_NANOSLEEP")
-        endif()
-        add_executable(Test ${TEST_SRC_C} ${TEST_SRC_CPP})
-        target_link_libraries(Test Simd -lpthread "${CMAKE_MODULE_LINKER_FLAGS} -EL")
-    endif()
-
 else()
     message(FATAL_ERROR "Unknown value of CMAKE_SYSTEM_PROCESSOR!")
 endif()

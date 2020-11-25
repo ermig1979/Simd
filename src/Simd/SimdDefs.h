@@ -216,10 +216,6 @@
 #define SIMD_ARM64_ENABLE
 #endif
 
-#if defined __mips__
-#define SIMD_MIPS_ENABLE
-#endif
-
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
 #if !defined(SIMD_SSE_DISABLE) && defined(__SSE__)
@@ -298,14 +294,6 @@
 
 #endif//defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 
-#if defined(SIMD_MIPS_ENABLE)
-
-#if !defined(SIMD_MSA_DISABLE) && defined(__mips_msa) 
-#define SIMD_MSA_ENABLE
-#endif
-
-#endif //defined(SIMD_MIPS_ENABLE)
-
 #if __cplusplus >= 201103L
 #define SIMD_CPP_2011_ENABLE
 #endif
@@ -373,18 +361,13 @@
 #include <arm_neon.h>
 #endif
 
-#if defined(SIMD_MSA_ENABLE)
-#include <msa.h>
-#endif
-
 #if defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE)
 #define SIMD_ALIGN 64
 #elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
 #elif defined(SIMD_SSE_ENABLE) || defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE3_ENABLE)  || defined(SIMD_SSSE3_ENABLE) || defined(SIMD_SSE41_ENABLE) || defined(SIMD_SSE42_ENABLE) \
     || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \
-	|| defined(SIMD_NEON_ENABLE) \
-    || defined(SIMD_MSA_ENABLE)
+	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16
 #elif defined (SIMD_X64_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #define SIMD_ALIGN 8

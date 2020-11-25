@@ -24,6 +24,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx1.h" />
@@ -40,6 +41,8 @@
     <ClInclude Include="..\..\src\Simd\SimdDetection.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdDrawing.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExp.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdFont.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdFrame.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
@@ -48,6 +51,7 @@
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClCompile Include="..\..\src\Simd\SimdLib.cpp" />
     <ClInclude Include="..\..\src\Simd\SimdLib.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
@@ -70,7 +74,10 @@
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse42.h" />
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
@@ -102,9 +109,6 @@
     </ProjectReference>
     <ProjectReference Include="Base.vcxproj">
       <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Msa.vcxproj">
-      <Project>{af08f27a-49fe-4a7f-84cc-3dd0005863ef}</Project>
     </ProjectReference>
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>

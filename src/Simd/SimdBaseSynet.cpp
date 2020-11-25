@@ -33,9 +33,14 @@ namespace Simd
     {
         SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format)
         {
+#if defined(WIN32)
+            const size_t alignment = Alignment();
+#else
+            const size_t alignment = Simd::ALIGNMENT;
+#endif
             if (format == SimdTensorFormatNchwXc)
             {
-                switch (Simd::ALIGNMENT)
+                switch (alignment)
                 {
                 case 16: return SimdTensorFormatNchw4c;
                 case 32: return SimdTensorFormatNchw8c;
@@ -44,7 +49,7 @@ namespace Simd
             }
             if (format == SimdTensorFormatOyxiXo)
             {
-                switch (Simd::ALIGNMENT)
+                switch (alignment)
                 {
                 case 16: return SimdTensorFormatOyxi4o;
                 case 32: return SimdTensorFormatOyxi8o;

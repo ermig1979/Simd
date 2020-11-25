@@ -90,11 +90,6 @@ namespace Simd
             return sizeof(uint8x16_t);
         else
 #endif
-#ifdef SIMD_MSA_ENABLE
-        if (Msa::Enable)
-            return sizeof(v16u8);
-        else
-#endif
             return sizeof(void *);
     }
 

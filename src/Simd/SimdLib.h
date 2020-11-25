@@ -179,7 +179,6 @@ typedef enum
     SimdCpuInfoVmx, /*!< Availability of VMX or Altivec (PowerPC). */
     SimdCpuInfoVsx, /*!< Availability of VSX (PowerPC). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
-    SimdCpuInfoMsa, /*!< Availability of MSA (MIPS). */
 } SimdCpuInfoType;
 
 /*! @ingroup c_types
@@ -591,7 +590,6 @@ extern "C"
             std::cout << "PowerPC-Altivec: " << (SimdCpuInfo(SimdCpuInfoVmx) ? "Yes" : "No") << std::endl;
             std::cout << "PowerPC-VSX: " << (SimdCpuInfo(SimdCpuInfoVsx) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;
-            std::cout << "MIPS-MSA: " << (SimdCpuInfo(SimdCpuInfoMsa) ? "Yes" : "No") << std::endl;
             return 0;
         }
         \endverbatim

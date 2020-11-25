@@ -70,7 +70,6 @@
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
-#include "Simd/SimdMsa.h"
 #include "Simd/SimdLib.hpp"
 
 namespace Test

@@ -67,7 +67,6 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
         os << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
         os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
-        os << (SimdCpuInfo(SimdCpuInfoMsa) ? " MSA" : "");
         os << std::endl;
     }
 

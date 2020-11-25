@@ -1502,34 +1502,5 @@ namespace Simd
         }
     }
 #endif//SIMD_NEON_ENABLE
-
-#ifdef SIMD_MSA_ENABLE
-    namespace Msa
-    {
-        template <bool align> SIMD_INLINE v16u8 Load(const uint8_t * p);
-
-        template <> SIMD_INLINE v16u8 Load<false>(const uint8_t * p)
-        {
-            return (v16u8)__msa_ld_b((v16i8*)p, 0);
-        }
-
-        template <> SIMD_INLINE v16u8 Load<true>(const uint8_t * p)
-        {
-            return (v16u8)__msa_ld_b((v16i8*)p, 0);
-        }
-
-        template <bool align> SIMD_INLINE v8i16 Load(const int16_t * p);
-
-        template <> SIMD_INLINE v8i16 Load<false>(const int16_t * p)
-        {
-            return __msa_ld_h((v8i16*)p, 0);
-        }
-
-        template <> SIMD_INLINE v8i16 Load<true>(const int16_t * p)
-        {
-            return __msa_ld_h((v8i16*)p, 0);
-        }
-    }
-#endif//SIMD_MSA_ENABLE
 }
 #endif//__SimdLoad_h__

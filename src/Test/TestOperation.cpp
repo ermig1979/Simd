@@ -206,11 +206,6 @@ namespace Test
             result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Neon::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
-#ifdef SIMD_MSA_ENABLE
-        if (Simd::Msa::Enable)
-            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Msa::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
-#endif 
-
         return result;
     }
 
@@ -281,11 +276,6 @@ namespace Test
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
             result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Neon::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
-#endif
-
-#ifdef SIMD_MSA_ENABLE
-        if (Simd::Msa::Enable)
-            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Msa::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif
 
         return result;

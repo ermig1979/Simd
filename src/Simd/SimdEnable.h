@@ -439,23 +439,6 @@ namespace Simd
         const bool Enable = SupportedByCPU() && SupportedByOS();
     }
 #endif
-
-#ifdef SIMD_MSA_ENABLE
-    namespace Msa
-    {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return true;
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-            return true;
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
-    }
-#endif
 }
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func

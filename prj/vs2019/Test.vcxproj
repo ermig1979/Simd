@@ -42,9 +42,6 @@
     <ProjectReference Include="Base.vcxproj">
       <Project>{1622c4ef-06a4-4daa-9631-5d71b32858a2}</Project>
     </ProjectReference>
-    <ProjectReference Include="Msa.vcxproj">
-      <Project>{af08f27a-49fe-4a7f-84cc-3dd0005863ef}</Project>
-    </ProjectReference>
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>
     </ProjectReference>

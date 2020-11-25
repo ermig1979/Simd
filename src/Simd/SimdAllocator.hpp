@@ -125,8 +125,8 @@ namespace Simd
         */
         static SIMD_INLINE size_t Alignment()
         {
-#if defined(__SimdEnable_h__) && defined(WIN32)
-            return Simd::ALIGNMENT;
+#if defined(__SimdAlignment_h__) && defined(WIN32)
+            return Simd::Alignment();
 #else
             return SimdAlignment();
 #endif

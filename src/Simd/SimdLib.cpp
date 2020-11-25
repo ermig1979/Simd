@@ -85,7 +85,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
-#include "Simd/SimdMsa.h"
 
 #if !defined(SIMD_VERSION)
 #include "Simd/SimdVersion.h"
@@ -154,9 +153,6 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_NEON_ENABLE
     case SimdCpuInfoNeon: return Neon::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_MSA_ENABLE
-    case SimdCpuInfoMsa: return Msa::Enable ? 1 : 0;
 #endif
     default:
         return 0;
@@ -3920,11 +3916,6 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Neon::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_MSA_ENABLE
-    if (Msa::Enable && width*channelCount >= Msa::A)
-        Msa::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
-    else
-#endif
         Base::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
 }
 
@@ -3954,11 +3945,6 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::HA)
         Neon::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
-    else
-#endif
-#ifdef SIMD_MSA_ENABLE
-    if (Msa::Enable && width >= Msa::HA)
-        Msa::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
         Base::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);

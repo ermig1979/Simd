@@ -827,16 +827,5 @@ namespace Simd
         const int32x4_t K32_YUV_TO_BGR_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::YUV_TO_BGR_ROUND_TERM);
     }
 #endif//SIMD_NEON_ENABLE
-
-#ifdef SIMD_MSA_ENABLE    
-    namespace Msa
-    {
-        const size_t A = sizeof(v16u8);
-        const size_t DA = 2 * A;
-        const size_t QA = 4 * A;
-        const size_t OA = 8 * A;
-        const size_t HA = A / 2;
-    }
-#endif//SIMD_Msa_ENABLE
 }
 #endif//__SimdConst_h__
