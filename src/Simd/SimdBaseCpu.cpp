@@ -22,23 +22,94 @@
 * SOFTWARE.
 */
 #include "Simd/SimdCpu.h"
-#include "Simd/SimdEnable.h"
 
 #include <vector>
 #include <thread>
 #include <sstream>
 #include <iostream>
 
-#ifdef __GNUC__
+#if defined(_MSC_VER)
+
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#include <intrin.h>
+
+#elif defined(__GNUC__)
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdlib.h>
+
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+#include <cpuid.h>
+#endif
+
+#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#include <fcntl.h>
+#include <sys/auxv.h>
+#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
+#include <asm/hwcap.h>
+#endif
+#endif
+
+#else
+# error Do not know how to detect CPU info
 #endif
 
 namespace Simd
 {
     namespace Base
     {
+#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+        bool CheckBit(Cpuid::Level level, Cpuid::Register index, Cpuid::Bit bit)
+        {
+            unsigned int registers[4] = { 0, 0, 0, 0 };
+#if defined(_MSC_VER)
+            __cpuid((int*)registers, level);
+#elif (defined __GNUC__)
+            if (__get_cpuid_max(0, NULL) < level)
+                return false;
+            __cpuid_count(level, 0, 
+                registers[Cpuid::Eax], 
+                registers[Cpuid::Ebx], 
+                registers[Cpuid::Ecx], 
+                registers[Cpuid::Edx]);
+#else
+#error Do not know how to detect CPU info!
+#endif
+            return (registers[index] & bit) == bit;
+        }
+#endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
+
+#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
+        bool CheckBit(int at, int bit)
+        {
+            bool result = false;
+            int file = ::open("/proc/self/auxv", O_RDONLY);
+            if (file < 0)
+                return false;
+            const ssize_t size = 64;
+            unsigned long buffer[size];
+            for (ssize_t count = size; count == size;)
+            {
+                count = ::read(file, buffer, sizeof(buffer)) / sizeof(unsigned long);
+                for (int i = 0; i < count; i += 2)
+                {
+                    if (buffer[i] == (unsigned)at)
+                    {
+                        result = !!(buffer[i + 1] & bit);
+                        count = 0;
+                    }
+                    if (buffer[i] == AT_NULL)
+                        count = 0;
+                }
+            }
+            ::close(file);
+            return result;
+        }
+#endif//defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
+
         size_t CpuThreadNumber()
         {
             return std::thread::hardware_concurrency();
@@ -89,7 +160,7 @@ namespace Simd
 #elif defined(__GNUC__)
         size_t CpuSocketNumber()
         {
-            uint32_t number = 0;
+            uint32_t number = 0; std::cout << " CpuSocketNumber() " << std::flush;
             ::FILE * p = ::popen("lscpu -b -p=Socket | grep -v '^#' | sort -u | wc -l", "r");
             if (p)
             {
@@ -103,7 +174,7 @@ namespace Simd
 
         size_t CpuCoreNumber()
         {
-            uint32_t number = 0;
+            uint32_t number = 0; std::cout << " CpuCoreNumber() " << std::flush;
             ::FILE * p = ::popen("lscpu -b -p=Core | grep -v '^#' | sort -u | wc -l", "r");
             if (p)
             {
@@ -149,5 +220,15 @@ namespace Simd
 #else
 #error This platform is unsupported!
 #endif
+    }
+
+    namespace Cpu
+    {
+        const size_t SOCKET_NUMBER = Base::CpuSocketNumber();
+        const size_t CORE_NUMBER = Base::CpuCoreNumber();
+        const size_t THREAD_NUMBER = Base::CpuThreadNumber();
+        const size_t L1_CACHE_SIZE = Base::CpuCacheSize(1);
+        const size_t L2_CACHE_SIZE = Base::CpuCacheSize(2);
+        const size_t L3_CACHE_SIZE = Base::CpuCacheSize(3);
     }
 }

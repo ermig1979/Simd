@@ -24,140 +24,34 @@
 #ifndef __SimdEnable_h__
 #define __SimdEnable_h__
 
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdCpu.h"
 
 #if defined(_MSC_VER)
-
 #ifndef NOMINMAX
 #define NOMINMAX
 #endif
 #include <windows.h>
 #include <intrin.h>
-
-#elif defined(__GNUC__)
-
-#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-#include <cpuid.h>
 #endif
 
+#if defined(__GNUC__)
 #if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
-#include <unistd.h>
 #include <fcntl.h>
 #include <sys/auxv.h>
 #if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
 #include <asm/hwcap.h>
 #endif
 #endif
-
-#else
-# error Do not know how to detect CPU info
 #endif
 
 namespace Simd
 {
-#if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-    namespace Cpuid
-    {
-        // See http://www.sandpile.org/x86/cpuid.htm for additional information.
-        enum Level
-        {
-            Ordinary = 1,
-            Extended = 7,
-        };
-
-        enum Register
-        {
-            Eax = 0,
-            Ebx = 1,
-            Ecx = 2,
-            Edx = 3,
-        };
-
-        enum Bit
-        {
-            // Ordinary:
-            // Edx:
-            SSE = 1 << 25,
-            SSE2 = 1 << 26,
-
-            // Ecx:
-            SSE3 = 1 << 0,
-            SSSE3 = 1 << 9,
-            FMA = 1 << 12,
-            SSE41 = 1 << 19,
-            SSE42 = 1 << 20,
-            OSXSAVE = 1 << 27,
-            AVX = 1 << 28,
-            F16C = 1 << 29,
-
-            // Extended:
-            // Ebx:
-            AVX2 = 1 << 5,
-            AVX512F = 1 << 16,
-            AVX512DQ = 1 << 17,
-            AVX512CD = 1 << 28,
-            AVX512BW = 1 << 30,
-            AVX512VL = 1 << 31,
-
-            // Ecx:
-            AVX512VBMI = 1 << 1,
-            AVX512VNNI = 1 << 11,
-        };
-
-        SIMD_INLINE bool CheckBit(Level level, Register index, Bit bit)
-        {
-            unsigned int registers[4] = { 0, 0, 0, 0 };
-#if defined(_MSC_VER)
-            __cpuid((int*)registers, level);
-#elif (defined __GNUC__)
-            if (__get_cpuid_max(0, NULL) < level)
-                return false;
-            __cpuid_count(level, 0, registers[Eax], registers[Ebx], registers[Ecx], registers[Edx]);
-#else
-#error Do not know how to detect CPU info!
-#endif
-            return (registers[index] & bit) == bit;
-        }
-    }
-#endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-
-#if defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
-    namespace CpuInfo
-    {
-        SIMD_INLINE bool CheckBit(int at, int bit)
-        {
-            bool result = false;
-            int file = ::open("/proc/self/auxv", O_RDONLY);
-            if (file < 0)
-                return false;
-            const ssize_t size = 64;
-            unsigned long buffer[size];
-            for (ssize_t count = size; count == size;)
-            {
-                count = ::read(file, buffer, sizeof(buffer)) / sizeof(unsigned long);
-                for (int i = 0; i < count; i += 2)
-                {
-                    if (buffer[i] == (unsigned)at)
-                    {
-                        result = !!(buffer[i + 1] & bit);
-                        count = 0;
-                    }
-                    if (buffer[i] == AT_NULL)
-                        count = 0;
-                }
-            }
-            ::close(file);
-            return result;
-        }
-    }
-#endif//defined(__GNUC__) && (defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE))
-
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE);
+            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -186,7 +80,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE2);
+            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE2);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -215,7 +109,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE3);
+            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE3);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -244,7 +138,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSSE3);
+            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSSE3);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -273,7 +167,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE41);
+            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE41);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -302,7 +196,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE42);
+            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE42);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -332,8 +226,8 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
-                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::AVX);
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::AVX);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -363,10 +257,10 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2) &&
-                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::FMA) &&
-                Cpuid::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::F16C);
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2) &&
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::FMA) &&
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::F16C);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -396,8 +290,8 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) && 
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD);
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -427,11 +321,11 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512DQ) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW) &&
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512VL);
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD) &&
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512DQ) &&
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW) &&
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512VL);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -461,7 +355,7 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Cpuid::CheckBit(Cpuid::Extended, Cpuid::Ecx, Cpuid::AVX512VNNI);
+                Base::CheckBit(Cpuid::Extended, Cpuid::Ecx, Cpuid::AVX512VNNI);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -490,7 +384,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return CpuInfo::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_ALTIVEC);
+            return Base::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_ALTIVEC);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -507,7 +401,7 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return CpuInfo::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_VSX);
+            return Base::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_VSX);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -530,7 +424,7 @@ namespace Simd
 #if defined(SIMD_ARM64_ENABLE)
             return true;
 #else
-            return CpuInfo::CheckBit(AT_HWCAP, HWCAP_NEON);
+            return Base::CheckBit(AT_HWCAP, HWCAP_NEON);
 #endif
 #else
 #error Do not know how to detect NEON support!
