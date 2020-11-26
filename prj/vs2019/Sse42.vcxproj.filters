@@ -12,6 +12,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse42Crc32.cpp">
       <Filter>Sse42</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse42Cpu.cpp">
+      <Filter>Sse42</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
@@ -37,6 +40,12 @@
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse42.h">
       <Filter>Sse42</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
+      <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

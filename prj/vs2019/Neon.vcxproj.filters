@@ -226,6 +226,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
@@ -363,6 +366,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

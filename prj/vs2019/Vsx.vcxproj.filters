@@ -16,6 +16,9 @@
     <ClCompile Include="..\..\src\Simd\SimdVsxYuvToHue.cpp">
       <Filter>Vsx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxCpu.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdVsx.h">
@@ -64,6 +67,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

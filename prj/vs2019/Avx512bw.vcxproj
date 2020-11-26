@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwEdgeBackground.cpp" />
@@ -78,10 +79,13 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512f.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
@@ -94,6 +98,7 @@
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdIntegral.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
@@ -101,10 +106,12 @@
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />

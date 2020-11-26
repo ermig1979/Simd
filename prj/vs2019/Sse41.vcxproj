@@ -10,6 +10,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
@@ -24,6 +25,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
@@ -37,16 +39,19 @@
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdLog.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse1.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse2.h" />

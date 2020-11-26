@@ -10,12 +10,15 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse42Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse42Crc32.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClInclude Include="..\..\src\Simd\SimdMath.h" />

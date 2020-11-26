@@ -133,6 +133,9 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxYuvToBgra.cpp">
       <Filter>Vmx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp">
+      <Filter>Vmx</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Vmx">
@@ -192,6 +195,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

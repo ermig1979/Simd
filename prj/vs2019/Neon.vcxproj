@@ -39,6 +39,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonConditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp" />
@@ -98,6 +99,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />

@@ -10,6 +10,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse3Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse3Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse3Neural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse3SynetConvolution32f.cpp" />
@@ -21,6 +22,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />

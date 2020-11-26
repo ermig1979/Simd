@@ -10,6 +10,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse3SynetConvolution32f.cpp">
       <Filter>Sse3</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse3Cpu.cpp">
+      <Filter>Sse3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse3">
@@ -84,6 +87,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdTime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

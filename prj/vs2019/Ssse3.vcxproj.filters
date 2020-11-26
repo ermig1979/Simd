@@ -82,6 +82,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp">
       <Filter>Ssse3</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSsse3Cpu.cpp">
+      <Filter>Ssse3</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Ssse3">
@@ -147,6 +150,15 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

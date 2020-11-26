@@ -24,419 +24,105 @@
 #ifndef __SimdEnable_h__
 #define __SimdEnable_h__
 
-#include "Simd/SimdCpu.h"
-
-#if defined(_MSC_VER)
-#ifndef NOMINMAX
-#define NOMINMAX
-#endif
-#include <windows.h>
-#include <intrin.h>
-#endif
-
-#if defined(__GNUC__)
-#if defined(SIMD_PPC_ENABLE) || defined(SIMD_PPC64_ENABLE) || defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
-#include <fcntl.h>
-#include <sys/auxv.h>
-#if defined(SIMD_ARM_ENABLE) || defined(SIMD_ARM64_ENABLE)
-#include <asm/hwcap.h>
-#endif
-#endif
-#endif
+#include "Simd/SimdDefs.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m128 value = _mm_set1_ps(1.0f);// try to execute of SSE instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Edx, Cpuid::SSE2);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m128d value = _mm_set1_pd(1.0);// try to execute of SSE2 instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_SSE3_ENABLE
     namespace Sse3
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE3);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m128 value = _mm_hadd_ps(_mm_set1_ps(1.0f), _mm_set1_ps(2.0f)); //try to execute of SSE3 instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSSE3);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m128i value = _mm_abs_epi8(_mm_set1_epi8(-1)); //try to execute of SSSE3 instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE41);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                int value = _mm_testz_si128(_mm_set1_epi8(0), _mm_set1_epi8(-1)); // try to execute of SSE41 instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE42);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                uint32_t value = _mm_crc32_u8(0, 1); // try to execute of SSE42 instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::AVX);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m256d value = _mm256_set1_pd(1.0);// try to execute of AVX instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX2) &&
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::FMA) &&
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::F16C);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m256i value = _mm256_abs_epi8(_mm256_set1_epi8(1));// try to execute of AVX2 instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
     namespace Avx512f
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m512d value = _mm512_set1_pd(1.0);// try to execute of AVX-512F instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512DQ) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512VL);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m512i value = _mm512_abs_epi8(_mm512_set1_epi8(1));// try to execute of AVX-512BW instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE
     namespace Avx512vnni
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ecx, Cpuid::AVX512VNNI);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-#if defined(_MSC_VER)
-            __try
-            {
-                __m512i value = _mm512_dpbusd_epi32(_mm512_setzero_si512(), _mm512_set1_epi8(1), _mm512_set1_epi8(1));// try to execute of AVX-512VNNI instructions;
-                return true;
-            }
-            __except (EXCEPTION_EXECUTE_HANDLER)
-            {
-                return false;
-            }
-#else
-            return true;
-#endif
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_ALTIVEC);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-            return true;
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_VSX_ENABLE
     namespace Vsx
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-            return Base::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_VSX);
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-            return true;
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        SIMD_INLINE bool SupportedByCPU()
-        {
-#if defined(_MSC_VER)
-            return true;
-#elif defined(__GNUC__)
-#if defined(SIMD_ARM64_ENABLE)
-            return true;
-#else
-            return Base::CheckBit(AT_HWCAP, HWCAP_NEON);
-#endif
-#else
-#error Do not know how to detect NEON support!
-#endif
-        }
-
-        SIMD_INLINE bool SupportedByOS()
-        {
-            return true;
-        }
-
-        const bool Enable = SupportedByCPU() && SupportedByOS();
+        extern const bool Enable;
     }
 #endif
 }

@@ -175,6 +175,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fDc.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse2">
@@ -291,6 +294,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

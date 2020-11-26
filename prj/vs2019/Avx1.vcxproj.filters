@@ -70,6 +70,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fDc.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Cpu.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx1">
@@ -177,6 +180,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

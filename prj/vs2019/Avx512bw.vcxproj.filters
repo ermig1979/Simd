@@ -199,6 +199,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8i.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">
@@ -327,6 +330,24 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx512f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

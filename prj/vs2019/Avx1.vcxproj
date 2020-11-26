@@ -10,6 +10,7 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Gemm32f.cpp" />
@@ -43,6 +44,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />

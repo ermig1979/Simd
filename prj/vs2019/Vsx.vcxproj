@@ -21,6 +21,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVsxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp" />
@@ -33,7 +34,9 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />

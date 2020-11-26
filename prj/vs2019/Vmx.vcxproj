@@ -36,6 +36,7 @@
     <ClCompile Include="..\..\src\Simd\SimdVmxBgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxBinarization.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxConditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVmxCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxDeinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxEdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdVmxFill.cpp" />
@@ -73,7 +74,9 @@
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />

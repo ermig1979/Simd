@@ -37,6 +37,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8i.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -156,6 +159,18 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

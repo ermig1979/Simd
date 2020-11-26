@@ -27,6 +27,7 @@
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
@@ -42,12 +43,14 @@
     <ClInclude Include="..\..\src\Simd\SimdSse1.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdSse1Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Gemm32f.cpp" />

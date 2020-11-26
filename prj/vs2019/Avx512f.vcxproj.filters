@@ -64,6 +64,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fDc.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512f">
@@ -180,6 +183,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
