@@ -44,16 +44,16 @@
   </PropertyGroup>
   <PropertyGroup>
     <OutDir>$(SolutionDir)\..\..\bin\$(PlatformToolset)\$(PlatformName)\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)\..\..\obj\$(PlatformToolset)\$(PlatformName)\$(Configuration)\$(ProjectName)\</IntDir>
+    <IntDir>$(SolutionDir)\..\..\bin\$(PlatformToolset)\$(PlatformName)\$(Configuration)\obj\$(ProjectName)\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <AdditionalIncludeDirectories>;$(SolutionDir)\..\..\src;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>;$(ProjectDir)\..\..\src;%(AdditionalIncludeDirectories);</AdditionalIncludeDirectories>
 	  <AdditionalOptions>%(AdditionalOptions) -std=c++11</AdditionalOptions>
     </ClCompile>
     <BuildLog>
-      <Path>$(SolutionDir)\..\..\obj\$(PlatformToolset)\$(PlatformName)\$(Configuration)\$(ProjectName)\Build.log</Path>
+      <Path>$(SolutionDir)\..\..\bin\$(PlatformToolset)\$(PlatformName)\$(Configuration)\obj\$(ProjectName)\Build.log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
 </Project>
