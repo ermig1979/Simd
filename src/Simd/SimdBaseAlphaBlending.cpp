@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -128,15 +128,6 @@ namespace Simd
         }
 
         //---------------------------------------------------------------------
-
-        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst)
-        {
-            float alpha = 255.0f / src[3];
-            dst[0] = RestrictRange(int(src[0] * alpha));
-            dst[1] = RestrictRange(int(src[1] * alpha));
-            dst[2] = RestrictRange(int(src[2] * alpha));
-            dst[3] = src[3];
-        }
 
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {

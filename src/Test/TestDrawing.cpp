@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -258,6 +258,7 @@ namespace Test
 
         View s(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
         FillRandom(s);
+        s.data[3] = 0;
         if (inv)
             Simd::AlphaPremultiply(s, s);
 
@@ -318,10 +319,15 @@ namespace Test
 
         result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Base::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
 
-        //#ifdef SIMD_SSE2_ENABLE
-        //        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-        //            result = result && AlphaPremultiplyAutoTest(FUNC_AP(Simd::Sse2::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
-        //#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Sse41::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+            result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Avx2::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
+#endif 
 
         return result;
     }

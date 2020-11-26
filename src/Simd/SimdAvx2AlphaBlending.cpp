@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2020 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -309,6 +309,56 @@ namespace Simd
                     AlphaPremultiply(src + i, dst + i);
                 for (; i < size; i += 4)
                     Base::AlphaPremultiply(src + i, dst + i);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        const __m256i K8_SHUFFLE_BGRA_TO_B = SIMD_MM256_SETR_EPI8(
+            0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
+            0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1);
+        const __m256i K8_SHUFFLE_BGRA_TO_G = SIMD_MM256_SETR_EPI8(
+            0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+            0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
+        const __m256i K8_SHUFFLE_BGRA_TO_R = SIMD_MM256_SETR_EPI8(
+            0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
+            0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1);
+        const __m256i K8_SHUFFLE_BGRA_TO_A = SIMD_MM256_SETR_EPI8(
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1);
+
+        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, __m256 _255)
+        {
+            __m256i _src = _mm256_loadu_si256((__m256i*)src);
+            __m256i b = _mm256_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_B);
+            __m256i g = _mm256_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_G);
+            __m256i r = _mm256_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_R);
+            __m256i a = _mm256_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_A);
+            __m256 k = _mm256_cvtepi32_ps(a);
+            k = _mm256_blendv_ps(_mm256_div_ps(_255, k), k, _mm256_cmp_ps(k, _mm256_setzero_ps(), _CMP_EQ_OQ));
+            b = _mm256_cvtps_epi32(_mm256_min_ps(_mm256_floor_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(b), k)), _255));
+            g = _mm256_cvtps_epi32(_mm256_min_ps(_mm256_floor_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(g), k)), _255));
+            r = _mm256_cvtps_epi32(_mm256_min_ps(_mm256_floor_ps(_mm256_mul_ps(_mm256_cvtepi32_ps(r), k)), _255));
+            __m256i _dst = _mm256_or_si256(b, _mm256_slli_si256(g, 1));
+            _dst = _mm256_or_si256(_dst, _mm256_slli_si256(r, 2));
+            _dst = _mm256_or_si256(_dst, _mm256_slli_si256(a, 3));
+            _mm256_storeu_si256((__m256i*)dst, _dst);
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            __m256 _255 = _mm256_set1_ps(255.0f);
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < sizeA; col += A)
+                    AlphaUnpremultiply(src + col, dst + col, _255);
+                for (; col < size; col += 4)
+                    Base::AlphaUnpremultiply(src + col, dst + col);
                 src += srcStride;
                 dst += dstStride;
             }

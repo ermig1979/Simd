@@ -44,6 +44,15 @@ namespace Simd
             dst[2] = DivideBy255(src[2] * alpha);
             dst[3] = alpha;
         }
+
+        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst)
+        {
+            float alpha = src[3] ? 255.0f / src[3] : 0.0f;
+            dst[0] = RestrictRange(int(src[0] * alpha));
+            dst[1] = RestrictRange(int(src[1] * alpha));
+            dst[2] = RestrictRange(int(src[2] * alpha));
+            dst[3] = src[3];
+        }
     }
 
 #ifdef SIMD_SSE2_ENABLE
