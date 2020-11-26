@@ -531,6 +531,11 @@ SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t 
 
 SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);

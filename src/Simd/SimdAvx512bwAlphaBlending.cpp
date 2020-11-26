@@ -315,6 +315,65 @@ namespace Simd
                 dst += dstStride;
             }
         }
+
+        //---------------------------------------------------------------------
+
+        const __m512i K8_SHUFFLE_BGRA_TO_B = SIMD_MM512_SETR_EPI8(
+            0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
+            0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
+            0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
+            0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1);
+        const __m512i K8_SHUFFLE_BGRA_TO_G = SIMD_MM512_SETR_EPI8(
+            0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+            0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+            0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1,
+            0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
+        const __m512i K8_SHUFFLE_BGRA_TO_R = SIMD_MM512_SETR_EPI8(
+            0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
+            0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
+            0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1,
+            0x2, -1, -1, -1, 0x6, -1, -1, -1, 0xA, -1, -1, -1, 0xE, -1, -1, -1);
+        const __m512i K8_SHUFFLE_BGRA_TO_A = SIMD_MM512_SETR_EPI8(
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1,
+            0x3, -1, -1, -1, 0x7, -1, -1, -1, 0xB, -1, -1, -1, 0xF, -1, -1, -1);
+
+        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, __m512 _255, __mmask64 tail = -1)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
+            __m512i b = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_B);
+            __m512i g = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_G);
+            __m512i r = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_R);
+            __m512i a = _mm512_shuffle_epi8(_src, K8_SHUFFLE_BGRA_TO_A);
+            __m512 k = _mm512_cvtepi32_ps(a);
+            k = _mm512_maskz_div_ps(_mm512_cmp_ps_mask(k, _mm512_setzero_ps(), _CMP_NEQ_UQ), _255, k);
+            b = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(b), k)), _255));
+            g = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(g), k)), _255));
+            r = _mm512_cvtps_epi32(_mm512_min_ps(_mm512_floor_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(r), k)), _255));
+            __m512i _dst = _mm512_or_si512(b, _mm512_slli_epi32(g, 8));
+            _dst = _mm512_or_si512(_dst, _mm512_slli_epi32(r, 16));
+            _dst = _mm512_or_si512(_dst, _mm512_slli_epi32(a, 24));
+            _mm512_mask_storeu_epi8(dst, tail, _dst);
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            __m512 _255 = _mm512_set1_ps(255.0f);
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            __mmask64 tail = TailMask64(size - sizeA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < sizeA; col += A)
+                    AlphaUnpremultiply(src + col, dst + col, _255);
+                if(col < size)
+                    AlphaUnpremultiply(src + col, dst + col, _255, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
