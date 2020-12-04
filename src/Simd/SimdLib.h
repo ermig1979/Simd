@@ -152,6 +152,14 @@ typedef enum
         \endverbatim
     */
     SimdConvolutionActivationHswish,
+    /*!
+        Mish (https://arxiv.org/abs/1908.08681) activation function.
+        It has parameter: threshold (params[0]).
+        \verbatim
+        dst[i] = src[i] > threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+        \endverbatim
+    */
+    SimdConvolutionActivationMish,
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types

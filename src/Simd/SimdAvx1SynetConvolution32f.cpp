@@ -291,6 +291,8 @@ namespace Simd
                         }
                     }
                 }
+                else
+                    SynetHswish32f(dst, count * size, &shift, &scale, dst);
             }
             else
             {

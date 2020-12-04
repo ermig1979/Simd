@@ -788,6 +788,7 @@ namespace Simd
             case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, convolution); break;
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, convolution); break;
             case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, convolution); break;
+            case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, convolution); break;
             default: assert(0);
             }
             return true;

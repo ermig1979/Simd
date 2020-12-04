@@ -393,6 +393,55 @@ namespace Simd
                 else
                     SynetHswish32f(dst, size*count, &shift, &scale, dst);
             }
+            else if (activation == ::SimdConvolutionActivationMish)
+            {
+                float threshold = params[0];
+                if (bias)
+                {
+                    __m512 _threshold = _mm512_set1_ps(threshold);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m512 _dst = _mm512_loadu_ps(dst + i);
+                                __m512 _bias = _mm512_loadu_ps(bias + i);
+                                _mm512_storeu_ps(dst + i, Avx512f::Mish(_mm512_add_ps(_dst, _bias), _threshold));
+                            }
+                            if (i < count)
+                            {
+                                __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
+                                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
+                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::Mish(_mm512_add_ps(_dst, _bias), _threshold));
+                            }
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m512 _bias = _mm512_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
+                                _mm512_storeu_ps(dst + j, Avx512f::Mish(value, _threshold));
+                            }
+                            if (j < size)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
+                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::Mish(value, _threshold));
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetMish32f(dst, size * count, &threshold, dst);
+            }
             else
                 assert(0);
 #endif
@@ -849,6 +898,11 @@ namespace Simd
             return Avx512f::SynetHswish32f(value, params[0], params[1]);
         }
 
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationMish>(__m512 value, const __m512* params)
+        {
+            return Avx512f::Mish(value, params[0]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -995,6 +1049,7 @@ namespace Simd
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
+            case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             default:
                 assert(0);
                 return NULL;
@@ -2296,6 +2351,7 @@ namespace Simd
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
+                case ::SimdConvolutionActivationMish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationMish>(p); break;
                 }
             }
             return func ? func : Avx2::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();

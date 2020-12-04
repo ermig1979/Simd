@@ -79,6 +79,47 @@ namespace Simd
                 else
                     SynetElu32f(dst, size*count, &alpha, dst);
             }
+            else if (activation == ::SimdConvolutionActivationMish)
+            {
+                float threshold = params[0];
+                if (bias)
+                {
+                    __m256 _threshold = _mm256_set1_ps(threshold);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(Avx::Load<false>(dst + i), Avx::Load<false>(bias + i));
+                                Avx::Store<false>(dst + i, Mish(value, _threshold));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetMish32f(dst[i] + bias[i], threshold);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(Avx::Load<false>(dst + j), _bias);
+                                Avx::Store<false>(dst + j, Mish(value, _threshold));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetMish32f(dst[j] + bias[i], threshold);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetMish32f(dst, size * count, &threshold, dst);
+            }
             else
                 Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
         }
@@ -432,6 +473,11 @@ namespace Simd
             return Avx2::SynetHswish32f(value, params[0], params[1]);
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationMish>(__m256 value, const __m256* params)
+        {
+            return Avx2::Mish(value, params[0]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight,
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -566,6 +612,7 @@ namespace Simd
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
+            case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             default:
                 assert(0);
                 return NULL;
@@ -1553,6 +1600,7 @@ namespace Simd
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
+                case ::SimdConvolutionActivationMish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationMish>(p); break;
                 }
             }
             return func ? func : Avx::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();

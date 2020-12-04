@@ -113,7 +113,9 @@ Enumerations</h2></td></tr>
 <br />
 &#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0">SimdConvolutionActivationElu</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1">SimdConvolutionActivationHswish</a>
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1">SimdConvolutionActivationHswish</a>, 
+<br />
+&#160;&#160;<a class="el" href="group__synet.html#ggac0134d6cef9d64de8b89171e79ef4568ab2336466147f5146816479d9d8cf5ce6">SimdConvolutionActivationMish</a>
 <br />
  }</td></tr>
 <tr class="separator:gac0134d6cef9d64de8b89171e79ef4568"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -335,6 +337,8 @@ Functions</h2></td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a26e55e4c34b3c8e5f800165fb224a7b0"></a>SimdConvolutionActivationElu&#160;</td><td class="fielddoc"><p>Leaky ELU activation function. It has one parameter: alpha (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt;= 0 ? src[i] : alpha*(Exp(src[i]) - 1);
 </pre> </td></tr>
 <tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568a9aae386d60310b471a2eae12704d26c1"></a>SimdConvolutionActivationHswish&#160;</td><td class="fielddoc"><p>H-Swish (<a href="https://arxiv.org/pdf/1905.02244.pdf">https://arxiv.org/pdf/1905.02244.pdf</a>) activation function. It has two parameters: shift (params[0]) and scale (params[1]). </p><pre class="fragment">dst[i] = Max(Min(src[i], shift) + shift, 0)*scale*src[i];
+</pre> </td></tr>
+<tr><td class="fieldname"><a id="ggac0134d6cef9d64de8b89171e79ef4568ab2336466147f5146816479d9d8cf5ce6"></a>SimdConvolutionActivationMish&#160;</td><td class="fielddoc"><p>Mish (<a href="https://arxiv.org/abs/1908.08681">https://arxiv.org/abs/1908.08681</a>) activation function. It has parameter: threshold (params[0]). </p><pre class="fragment">dst[i] = src[i] &gt; threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
 </pre> </td></tr>
 </table>
 

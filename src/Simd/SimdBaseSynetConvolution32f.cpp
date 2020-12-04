@@ -212,6 +212,33 @@ namespace Simd
                 else
                     SynetHswish32f(dst, size*count, &shift, &scale, dst);
             }
+            else if (activation == ::SimdConvolutionActivationMish)
+            {
+                float threshold = params[0];
+                if (bias)
+                {
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            for (size_t i = 0; i < count; ++i)
+                                dst[i] = SynetMish32f(dst[i] + bias[i], threshold);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            for (size_t j = 0; j < size; ++j)
+                                dst[j] = SynetMish32f(dst[j] + bias[i], threshold);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetMish32f(dst, size * count, &threshold, dst);
+            }
             else
                 assert(0);
         }
@@ -1143,6 +1170,7 @@ namespace Simd
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
+            case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             default:
                 assert(0);
                 return NULL;
@@ -1406,6 +1434,9 @@ namespace Simd
                 case SimdConvolutionActivationHswish:
                     _rParams.data[0] = params[0];
                     _rParams.data[1] = params[1];
+                    break;
+                case SimdConvolutionActivationMish:
+                    _rParams.data[0] = params[0];
                     break;
                 default:
                     assert(0);

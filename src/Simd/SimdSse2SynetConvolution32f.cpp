@@ -292,9 +292,54 @@ namespace Simd
                         }
                     }
                 }
+                else
+                    SynetHswish32f(dst, count * size, &shift, &scale, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationMish)
+            {
+                float threshold = params[0];
+                if (bias)
+                {
+                    __m128 _threshold = _mm_set1_ps(threshold);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m128 value = _mm_add_ps(Sse::Load<false>(dst + i), Sse::Load<false>(bias + i));
+                                Sse::Store<false>(dst + i, Mish(value, _threshold));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetMish32f(dst[i] + bias[i], threshold);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m128 _bias = _mm_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m128 value = _mm_add_ps(Sse::Load<false>(dst + j), _bias);
+                                Sse::Store<false>(dst + j, Mish(value, _threshold));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetMish32f(dst[j] + bias[i], threshold);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetMish32f(dst, size* count, &threshold, dst);
             }
             else
-                assert(0);
+            {
+                Base::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+            }
         }
 
         //---------------------------------------------------------------------
@@ -549,6 +594,11 @@ namespace Simd
             return Sse::SynetHswish32f(value, params[0], params[1]);
         }
 
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const __m128* params)
+        {
+            return Sse2::Mish(value, params[0]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -693,6 +743,7 @@ namespace Simd
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
+            case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             default:
                 assert(0);
                 return NULL;
@@ -1655,6 +1706,7 @@ namespace Simd
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
+                case ::SimdConvolutionActivationMish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationMish>(p); break;
                 }
             }
             return func ? func : Base::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();

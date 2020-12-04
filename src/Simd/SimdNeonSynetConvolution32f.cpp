@@ -217,7 +217,6 @@ namespace Simd
                 float alpha = params[0];
                 if (bias)
                 {
-                    float32x4_t _0 = vdupq_n_f32(0.0f);
                     float32x4_t _alpha = vdupq_n_f32(alpha);
                     if (trans)
                     {
@@ -296,6 +295,47 @@ namespace Simd
                 }
                 else
                     Neon::SynetHswish32f(dst, size*count, &shift, &scale, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationMish)
+            {
+                float threshold = params[0];
+                if (bias)
+                {
+                    float32x4_t _threshold = vdupq_n_f32(threshold);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Neon::Mish<1>(value, _threshold));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetMish32f(dst[i] + bias[i], threshold);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float32x4_t _bias = vdupq_n_f32(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Neon::Mish<1>(value, _threshold));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetMish32f(dst[j] + bias[i], threshold);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    Neon::SynetMish32f(dst, size * count, &threshold, dst);
             }
             else
                 assert(0);
@@ -610,6 +650,11 @@ namespace Simd
             return Neon::SynetHswish32f(value, params[0], params[1]);
         }
 
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationMish>(float32x4_t value, const float32x4_t* params)
+        {
+            return Neon::Mish<1>(value, params[0]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type>
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight,
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -754,6 +799,7 @@ namespace Simd
             case ::SimdConvolutionActivationPrelu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationPrelu>;
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
+            case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
             default:
                 assert(0);
                 return NULL;
@@ -853,6 +899,11 @@ namespace Simd
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationHswish>(float32x4_t value, const float * params, size_t offset)
         {
             return Neon::SynetHswish32f(value, vld1q_dup_f32(params + 0), vld1q_dup_f32(params + 1));
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationMish>(float32x4_t value, const float* params, size_t offset)
+        {
+            return Neon::Mish<1>(value, vld1q_dup_f32(params + 0));
         }
 
         SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, float32x4_t & sum)
@@ -1754,6 +1805,7 @@ namespace Simd
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 case ::SimdConvolutionActivationElu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationElu>(p); break;
                 case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
+                case ::SimdConvolutionActivationMish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationMish>(p); break;
                 }
             }
             return func ? func : Base::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
