@@ -474,6 +474,15 @@ namespace Simd
             return _mm512_mul_ps(_mm512_set1_ps(0.693147181f), Detail::Log2(value));
         }
 
+        SIMD_INLINE __m512 Mish(__m512 value, __m512 threshold)
+        {
+            __m512 _1 = _mm512_set1_ps(1.0f);
+            __m512 mish = _mm512_add_ps(Exponent(value), _1);
+            mish = _mm512_fmadd_ps(mish, mish, _1);
+            mish = _mm512_mul_ps(value, _mm512_sub_ps(_1, _mm512_div_ps(_mm512_set1_ps(2.0f), mish)));
+            return _mm512_mask_blend_ps(_mm512_cmp_ps_mask(threshold, value, _CMP_GT_OS), value, mish);
+        }
+
         SIMD_INLINE __m512 Softplus(__m512 value, __m512 beta, __m512 threshold)
         {
             __m512 exp = Exponent(_mm512_mul_ps(value, beta));
@@ -616,6 +625,15 @@ namespace Simd
         SIMD_INLINE float32x4_t Logarithm(float32x4_t value)
         {
             return vmulq_f32(vdupq_n_f32(0.693147181f), Detail::Log2(value));
+        }
+
+        template<int iter> SIMD_INLINE float32x4_t Mish(float32x4_t value, float32x4_t threshold)
+        {
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            float32x4_t mish = vaddq_f32(Exponent(value), _1);
+            mish = vmlaq_f32(_1, mish, mish);
+            mish = vmulq_f32(value, vsubq_f32(_1, Div<iter>(vdupq_n_f32(2.0f), mish)));
+            return vbslq_f32(vcgtq_f32(threshold, value), mish, value);
         }
 
         template<int iter> SIMD_INLINE float32x4_t Softplus(float32x4_t value, float32x4_t beta, float32x4_t threshold)

@@ -272,15 +272,15 @@ namespace Test
             result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Avx2::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
 #endif 
 
-//#ifdef SIMD_AVX512F_ENABLE
-//        if (Simd::Avx512f::Enable)
-//            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Avx512f::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
-//#endif 
-//
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Neon::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
-//#endif 
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Avx512f::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Neon::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+#endif 
 
         return result;
     }
