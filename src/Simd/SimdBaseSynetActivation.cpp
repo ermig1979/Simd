@@ -66,6 +66,24 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
+        {
+            float _threshold = threshold[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetMish32f(src[i + 0], _threshold);
+                dst[i + 1] = SynetMish32f(src[i + 1], _threshold);
+                dst[i + 2] = SynetMish32f(src[i + 2], _threshold);
+                dst[i + 3] = SynetMish32f(src[i + 3], _threshold);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetMish32f(src[i], _threshold);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
         {
             size_t aligned = Simd::AlignLo(spatial, 4);

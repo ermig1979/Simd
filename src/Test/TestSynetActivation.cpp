@@ -203,6 +203,92 @@ namespace Test
 
     namespace
     {
+        struct FuncMish32f
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* threshold, float* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncMish32f(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(const Tensor32f& src, const float& threshold, Tensor32f& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), src.Size(), &threshold, dst.Data());
+            }
+        };
+    }
+
+#define FUNC_MISH32F(func) FuncMish32f(func, #func)
+
+    bool SynetMish32fAutoTest(size_t size, const FuncMish32f& f1, const FuncMish32f& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
+
+        Tensor32f src(ToShape(size));
+        Tensor32f dst1(ToShape(size));
+        Tensor32f dst2(ToShape(size));
+
+        FillRandom(src, -10.0, 10.0);
+        float threshold = 20.0f;
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, threshold, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, threshold, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetMish32fAutoTest(const FuncMish32f& f1, const FuncMish32f& f2)
+    {
+        bool result = true;
+
+        result = result && SynetMish32fAutoTest(W * H, f1, f2);
+        result = result && SynetMish32fAutoTest(W * H - O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetMish32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Base::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Sse2::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Avx2::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+#endif 
+
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Avx512f::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && SynetMish32fAutoTest(FUNC_MISH32F(Simd::Neon::SynetMish32f), FUNC_MISH32F(SimdSynetMish32f));
+//#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncPLF
         {
             typedef void(*FuncPtr)(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);

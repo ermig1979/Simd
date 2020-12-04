@@ -342,6 +342,7 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetElu32f);
     TEST_ADD_GROUP_A00(SynetHswish32f);
+    TEST_ADD_GROUP_A00(SynetMish32f);
     TEST_ADD_GROUP_A00(SynetPreluLayerForward);
     TEST_ADD_GROUP_A00(SynetRelu32f);
     TEST_ADD_GROUP_A00(SynetRestrictRange32f);

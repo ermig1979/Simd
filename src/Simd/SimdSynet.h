@@ -187,6 +187,11 @@ namespace Simd
             return Simd::Max(Simd::Min(value, shift) + shift, 0.0f)*scale*value;
         }
 
+        SIMD_INLINE float SynetMish32f(float value, float threshold)
+        {
+            return value > threshold ? value : value * (1.0f - 2.0f / (Simd::Square(::exp(value) + 1.0f) + 1.0f));
+        }
+
         SIMD_INLINE float SynetRelu32f(float value, float slope)
         {
             return Simd::Max(0.0f, value) + slope * Simd::Min(value, 0.0f);

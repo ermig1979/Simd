@@ -6476,6 +6476,27 @@ extern "C"
     */
     SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
+    /*! @ingroup synet_activation
+
+        \fn void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
+
+        Calculates Mish activation function (https://arxiv.org/abs/1908.08681) for 32-bit float array
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = src[i] > threshold ? src[i] : src[i] * tanh(log(exp(src[i]) + 1));
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] threshold - a pointer to 'threshold' parameter.
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
+
     /*! @ingroup synet
 
         \fn void SimdSynetPoolingForwardAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);

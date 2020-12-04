@@ -69,6 +69,43 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template<bool align> SIMD_INLINE void SynetMish32f(const float* src, __m256 threshold, float* dst, size_t offset)
+        {
+            Avx::Store<align>(dst + offset, Mish(Avx::Load<align>(src + offset), threshold));
+        }
+
+        template<bool align> void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            __m256 _threshold = _mm256_set1_ps(threshold[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetMish32f<align>(src, _threshold, dst, i + 0 * F);
+                SynetMish32f<align>(src, _threshold, dst, i + 1 * F);
+                SynetMish32f<align>(src, _threshold, dst, i + 2 * F);
+                SynetMish32f<align>(src, _threshold, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetMish32f<align>(src, _threshold, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetMish32f(src[i], threshold[0]);
+        }
+
+        void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetMish32f<true>(src, size, threshold, dst);
+            else
+                SynetMish32f<false>(src, size, threshold, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Avx2::Exp& exp, float* dst, size_t offset)
         {
             Avx::Store<align>(dst + offset, exp.Sigmoid(Avx::Load<align>(src + offset)));

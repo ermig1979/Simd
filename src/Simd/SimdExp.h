@@ -168,6 +168,15 @@ namespace Simd
             return _mm_mul_ps(_mm_set1_ps(0.693147181f), Detail::Log2(value));
         }
 
+        SIMD_INLINE __m128 Mish(__m128 value, __m128 threshold)
+        {
+            __m128 _1 = _mm_set1_ps(1.0f);
+            __m128 mish = _mm_add_ps(Exponent(value), _1);
+            mish = _mm_add_ps(_mm_mul_ps(mish, mish), _1);
+            mish = _mm_mul_ps(value, _mm_sub_ps(_1, _mm_div_ps(_mm_set1_ps(2.0f), mish)));
+            return Sse::Combine(_mm_cmpgt_ps(threshold, value), mish, value);
+        }
+
         SIMD_INLINE __m128 Softplus(__m128 value, __m128 beta, __m128 threshold)
         {
             __m128 exp = Exponent(_mm_mul_ps(value, beta));
@@ -310,6 +319,15 @@ namespace Simd
         SIMD_INLINE __m256 Logarithm(__m256 value)
         {
             return _mm256_mul_ps(_mm256_set1_ps(0.693147181f), Detail::Log2(value));
+        }
+
+        SIMD_INLINE __m256 Mish(__m256 value, __m256 threshold)
+        {
+            __m256 _1 = _mm256_set1_ps(1.0f);
+            __m256 mish = _mm256_add_ps(Exponent(value), _1);
+            mish = _mm256_fmadd_ps(mish, mish, _1);
+            mish = _mm256_mul_ps(value, _mm256_sub_ps(_1, _mm256_div_ps(_mm256_set1_ps(2.0f), mish)));
+            return _mm256_blendv_ps(value, mish, _mm256_cmp_ps(threshold, value, _CMP_GT_OS));
         }
 
         SIMD_INLINE __m256 Softplus(__m256 value, __m256 beta, __m256 threshold)

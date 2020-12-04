@@ -301,6 +301,8 @@ namespace Simd
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
+        void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
+
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetSoftmaxLayerForward(const float * src, size_t outer, size_t size, size_t inner, float * dst);
