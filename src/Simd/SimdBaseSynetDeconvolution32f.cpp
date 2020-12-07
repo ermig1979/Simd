@@ -397,6 +397,9 @@ namespace Simd
                     _rParams.data[0] = params[0];
                     _rParams.data[1] = params[1];
                     break;
+                case SimdConvolutionActivationMish:
+                    _rParams.data[0] = params[0];
+                    break;
                 default:
                     assert(0);
                 }

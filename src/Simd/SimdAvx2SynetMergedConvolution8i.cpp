@@ -1423,6 +1423,7 @@ namespace Simd
             case SimdConvolutionActivationPrelu: SetInput<SimdConvolutionActivationPrelu>(p, input); break;
             case SimdConvolutionActivationElu: SetInput<SimdConvolutionActivationElu>(p, input); break;
             case SimdConvolutionActivationHswish: SetInput<SimdConvolutionActivationHswish>(p, input); break;
+            case SimdConvolutionActivationMish: SetInput<SimdConvolutionActivationMish>(p, input); break;
             }
         }
 
@@ -1463,6 +1464,7 @@ namespace Simd
             case SimdConvolutionActivationPrelu: SetDepthwise<SimdConvolutionActivationPrelu>(p, depthwise); break;
             case SimdConvolutionActivationElu: SetDepthwise<SimdConvolutionActivationElu>(p, depthwise); break;
             case SimdConvolutionActivationHswish: SetDepthwise<SimdConvolutionActivationHswish>(p, depthwise); break;
+            case SimdConvolutionActivationMish: SetDepthwise<SimdConvolutionActivationMish>(p, depthwise); break;
             }
         }
 
@@ -1485,6 +1487,7 @@ namespace Simd
             case SimdConvolutionActivationPrelu: SetOutput<SimdConvolutionActivationPrelu>(p, output); break;
             case SimdConvolutionActivationElu: SetOutput<SimdConvolutionActivationElu>(p, output); break;
             case SimdConvolutionActivationHswish: SetOutput<SimdConvolutionActivationHswish>(p, output); break;
+            case SimdConvolutionActivationMish: SetOutput<SimdConvolutionActivationMish>(p, output); break;
             }
         }
 

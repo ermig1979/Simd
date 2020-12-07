@@ -94,6 +94,8 @@ namespace Test
             params.Data()[0] = 3.0f;
             params.Data()[1] = 1.0f / 6.0f;
         }
+        else if (p.conv.activation == ::SimdConvolutionActivationMish)
+            params.Data()[0] = 20.0f;
         else
         {
             params.Data()[0] = 0.1f;
@@ -152,6 +154,7 @@ namespace Test
         result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationPrelu, ::SimdTrue, f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationElu, ::SimdTrue, f1, f2);
         result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationHswish, ::SimdTrue, f1, f2);
+        result = result && SynetDeconvolution32fForwardAutoTest(eps, ::SimdConvolutionActivationMish, ::SimdTrue, f1, f2);
 
         return result;
     }
