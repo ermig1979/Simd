@@ -68,8 +68,16 @@ namespace Simd
                             }
                         }
                     }
-                    for (size_t dc = 0; dc < dstC; ++dc)
-                        Update<update>(dst + dc, Activate<type>(buf[dc], params, dc));
+                    if (update == UpdateAdd)
+                    {
+                        for (size_t dc = 0; dc < dstC; ++dc)
+                            dst[dc] = Activate<type>(dst[dc] + buf[dc], params, dc);
+                    }
+                    else
+                    {
+                        for (size_t dc = 0; dc < dstC; ++dc)
+                            dst[dc] = Activate<type>(buf[dc], params, dc);
+                    }
                     dst += p.dstC;
                 }
             }
