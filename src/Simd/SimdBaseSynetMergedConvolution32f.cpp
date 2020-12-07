@@ -137,6 +137,7 @@ namespace Simd
                 case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(_param, i, _convolution); break;
                 case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(_param, i, _convolution); break;
+                case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(_param, i, _convolution); break;
                 default: assert(0);
                 }
             }
@@ -217,6 +218,9 @@ namespace Simd
                     case SimdConvolutionActivationHswish:
                         _rParams[i].data[0] = params[i][0];
                         _rParams[i].data[1] = params[i][1];
+                        break;
+                    case SimdConvolutionActivationMish:
+                        _rParams[i].data[0] = params[i][0];
                         break;
                     default:
                         assert(0);

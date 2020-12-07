@@ -1422,6 +1422,7 @@ namespace Simd
 				case SimdConvolutionActivationPrelu: Cdc::Set<SimdConvolutionActivationPrelu>(_param, i, _convolution); break;
 				case SimdConvolutionActivationElu: Cdc::Set<SimdConvolutionActivationElu>(_param, i, _convolution); break;
 				case SimdConvolutionActivationHswish: Cdc::Set<SimdConvolutionActivationHswish>(_param, i, _convolution); break;
+				case SimdConvolutionActivationMish: Cdc::Set<SimdConvolutionActivationMish>(_param, i, _convolution); break;
 				default: assert(0);
 				}
 			}

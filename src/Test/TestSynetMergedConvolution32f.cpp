@@ -161,6 +161,8 @@ namespace Test
                 params[i].Data()[0] = 3.0f;
                 params[i].Data()[1] = 1.0f / 6.0f;
             }
+            else if (p.conv[i].activation == ::SimdConvolutionActivationMish)
+                params[i].Data()[0] = 20.0f;
             else
             {
                 params[i].Data()[0] = 0.0f + 0.1f * float(i);
@@ -206,7 +208,7 @@ namespace Test
         const SimdBool t = SimdTrue, f = SimdFalse;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationHswish, a1 = ::SimdConvolutionActivationIdentity, a2 = ::SimdConvolutionActivationPrelu;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationHswish;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationHswish, a1 = ::SimdConvolutionActivationPrelu, a2 = ::SimdConvolutionActivationRelu;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationMish, a1 = ::SimdConvolutionActivationMish, a2 = ::SimdConvolutionActivationMish;
 #ifdef NDEBUG
 #if 0
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 384, 389), Cnv(a0, 3, 2, 32), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 16), f), f1, f2);
