@@ -325,7 +325,7 @@ namespace Simd
         {
             __m256 _1 = _mm256_set1_ps(1.0f);
             __m256 mish = _mm256_add_ps(Exponent(value), _1);
-            mish = _mm256_fmadd_ps(mish, mish, _1);
+            mish = Fmadd<true>(mish, mish, _1);
             mish = _mm256_mul_ps(value, _mm256_sub_ps(_1, _mm256_div_ps(_mm256_set1_ps(2.0f), mish)));
             return _mm256_blendv_ps(value, mish, _mm256_cmp_ps(threshold, value, _CMP_GT_OS));
         }
@@ -478,7 +478,7 @@ namespace Simd
         {
             __m512 _1 = _mm512_set1_ps(1.0f);
             __m512 mish = _mm512_add_ps(Exponent(value), _1);
-            mish = _mm512_fmadd_ps(mish, mish, _1);
+            mish = Fmadd<true>(mish, mish, _1);
             mish = _mm512_mul_ps(value, _mm512_sub_ps(_1, _mm512_div_ps(_mm512_set1_ps(2.0f), mish)));
             return _mm512_mask_blend_ps(_mm512_cmp_ps_mask(threshold, value, _CMP_GT_OS), value, mish);
         }
@@ -631,7 +631,7 @@ namespace Simd
         {
             float32x4_t _1 = vdupq_n_f32(1.0f);
             float32x4_t mish = vaddq_f32(Exponent(value), _1);
-            mish = vmlaq_f32(_1, mish, mish);
+            mish = Fmadd<true>(mish, mish, _1);
             mish = vmulq_f32(value, vsubq_f32(_1, Div<iter>(vdupq_n_f32(2.0f), mish)));
             return vbslq_f32(vcgtq_f32(threshold, value), mish, value);
         }

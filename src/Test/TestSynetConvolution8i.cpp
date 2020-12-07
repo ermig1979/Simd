@@ -47,7 +47,7 @@ namespace Test
 
             void Update(const Param & p, SimdSynetCompatibilityType c)
             {
-                const char* afs[] = { "-id", "-re", "-lr", "-rr", "-pr", "-el", "-hs" };
+                const char* afs[] = { "-id", "-re", "-lr", "-rr", "-pr", "-el", "-hs", "-mi" };
                 desc = desc + p.Decription(String(afs[p.conv.activation]) + (Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p"));
             }
 
@@ -99,6 +99,8 @@ namespace Test
             params.Data()[0] = 3.0f;
             params.Data()[1] = 1.0f / 6.0f;
         }
+        else if (p.conv.activation == ::SimdConvolutionActivationMish)
+            params.Data()[0] = 20.0f;
         else
         {
             params.Data()[0] = 0.1f;
@@ -165,8 +167,9 @@ namespace Test
         const float e = EPS;
         const SimdBool t0 = SimdFalse, t1 = SimdTrue;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
-        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu, aLr = SimdConvolutionActivationLeakyRelu,
-            aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu, aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish;
+        const SimdConvolutionActivationType aId = SimdConvolutionActivationIdentity, aRe = SimdConvolutionActivationRelu, 
+            aLr = SimdConvolutionActivationLeakyRelu, aRr = SimdConvolutionActivationRestrictRange, aPr = SimdConvolutionActivationPrelu, 
+            aEl = SimdConvolutionActivationElu, aHs = SimdConvolutionActivationHswish, aMi = SimdConvolutionActivationMish;
         //SimdSynetCompatibilityType c = (SimdSynetCompatibilityType)((SimdCpuInfo(SimdCpuInfoAvx512vnni) ? SimdSynetCompatibilityFmaUse : SimdSynetCompatibility8iOverflow)  | SimdSynetCompatibilityFmaAvoid);
 
 #ifdef NDEBUG
@@ -202,12 +205,12 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 64, 70, 102, 64, _5, _1, _2, _2, _2, 64, aId, t1, u8, f32), 0, c, f1, f2);
 #endif
 #if 1
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 20, _1, _1, _1, _0, _0, 1, aHs, t1, u8, u8), 1, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _1, _1, _1, _0, _0, 1, aHs, t1, u8, u8), 1, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _3, _1, _1, _1, _1, 128, aHs, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 20, _1, _1, _1, _0, _0, 1, aMi, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _1, _1, _1, _0, _0, 1, aMi, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _3, _1, _1, _1, _1, 128, aMi, t1, u8, u8), 1, c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 99, 90, 130, 99, _3, _1, _2, _1, _1, 99, aPr, t1, f32, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 99, 90, 130, 99, _3, _1, _2, _1, _1, 99, aMi, t1, f32, u8), 1, c, f1, f2);
 #endif
 
         return result;
