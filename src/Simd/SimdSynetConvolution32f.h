@@ -364,7 +364,7 @@ namespace Simd
         public:
             SynetConvolution32fNhwcDirect(const ConvParam32f & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::NhwcDirect"; }
+            virtual String Desc() const { return Ext() + "::NhwcDirect" + (_old.enable ? "-f" : "-r"); }
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * buf, float * dst);

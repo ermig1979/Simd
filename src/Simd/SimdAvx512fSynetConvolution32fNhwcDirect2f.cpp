@@ -24,6 +24,7 @@
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdPrefetch.h"
 
 namespace Simd
 {
@@ -62,6 +63,8 @@ namespace Simd
                     {
                         for (size_t offset0 = ky * dY + kx * dX, offset6 = offset0 + 6 * dS, end0 = offset0 + srcC; offset0 < end0; ++offset0, ++offset6)
                         {
+                            PrefetchL1(weight + 0);
+                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset0]);
@@ -161,6 +164,7 @@ namespace Simd
                     {
                         for (size_t offset0 = ky * dY + kx * dX, offset6 = offset0 + 6 * dS, end0 = offset0 + srcC; offset0 < end0; ++offset0, ++offset6)
                         {
+                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset0]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -241,6 +245,8 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
+                            PrefetchL1(weight + 0);
+                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset]);
@@ -298,6 +304,7 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
+                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -348,6 +355,8 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
+                            PrefetchL1(weight + 0);
+                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset]);
@@ -384,6 +393,7 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
+                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -419,6 +429,8 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
+                            PrefetchL1(weight + 0);
+                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset]);
@@ -441,6 +453,7 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
+                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -598,6 +611,8 @@ namespace Simd
                 db0 = _mm512_setzero_ps(); db1 = _mm512_setzero_ps();
                 for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
                 {
+                    PrefetchL1(weight + 0);
+                    PrefetchL1(weight + F);
                     w0 = _mm512_loadu_ps(weight + 0);
                     w1 = _mm512_loadu_ps(weight + F);
                     s0 = _mm512_set1_ps(src0[offset0]);
@@ -690,6 +705,7 @@ namespace Simd
                 db0 = _mm512_setzero_ps();
                 for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
                 {
+                    PrefetchL1(weight + 0);
                     w0 = _mm512_loadu_ps(weight + 0);
                     s0 = _mm512_set1_ps(src0[offset0]);
                     d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -763,6 +779,8 @@ namespace Simd
                 d50 = _mm512_setzero_ps(); d51 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
+                    PrefetchL1(weight + 0);
+                    PrefetchL1(weight + F);
                     w0 = _mm512_loadu_ps(weight + 0);
                     w1 = _mm512_loadu_ps(weight + F);
                     s0 = _mm512_set1_ps(src0[offset]);
@@ -813,6 +831,7 @@ namespace Simd
                 d50 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
+                    PrefetchL1(weight + 0);
                     w0 = _mm512_loadu_ps(weight + 0);
                     s0 = _mm512_set1_ps(src0[offset]);
                     d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -862,6 +881,8 @@ namespace Simd
                 if (M > 5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
+                    PrefetchL1(weight + 0);
+                    PrefetchL1(weight + 1);
                     w0 = _mm512_loadu_ps(weight + 0);
                     w1 = _mm512_loadu_ps(weight + F);
                     if (M > 0) s0 = _mm512_set1_ps(src0[offset]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
@@ -889,6 +910,7 @@ namespace Simd
                 if (M > 5) d50 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
+                    PrefetchL1(weight + 0);
                     w0 = _mm512_loadu_ps(weight + 0);
                     if (M > 0) s0 = _mm512_set1_ps(src0[offset]), d00 = _mm512_fmadd_ps(s0, w0, d00);
                     if (M > 1) s0 = _mm512_set1_ps(src1[offset]), d10 = _mm512_fmadd_ps(s0, w0, d10);
