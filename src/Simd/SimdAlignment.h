@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-    SIMD_INLINE size_t Alignment()
+    SIMD_INLINE size_t GetAlignment()
     {
 #ifdef SIMD_AVX512VNNI_ENABLE
         if (Avx512vnni::Enable)
@@ -94,6 +94,15 @@ namespace Simd
     }
 
     extern const size_t ALIGNMENT;
+
+    SIMD_INLINE size_t Alignment()
+    {
+#if defined(WIN32)
+        return GetAlignment();
+#else
+        return ALIGNMENT;
+#endif
+    }
 }
 
 #endif//__SimdAlignment_h__

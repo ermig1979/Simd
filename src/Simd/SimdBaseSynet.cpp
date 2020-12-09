@@ -33,11 +33,7 @@ namespace Simd
     {
         SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format)
         {
-#if defined(WIN32)
             const size_t alignment = Alignment();
-#else
-            const size_t alignment = Simd::ALIGNMENT;
-#endif
             if (format == SimdTensorFormatNchwXc)
             {
                 switch (alignment)

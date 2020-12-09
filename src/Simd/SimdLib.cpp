@@ -92,7 +92,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 namespace Simd
 {
-    const size_t ALIGNMENT = Alignment();
+    const size_t ALIGNMENT = GetAlignment();
 }
 
 SIMD_API const char * SimdVersion()

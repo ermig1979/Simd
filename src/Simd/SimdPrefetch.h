@@ -27,23 +27,19 @@
 
 #include "Simd/SimdDefs.h"
 
-#ifndef SIMD_AVX512_PREFETCH_SIZE
-#define SIMD_AVX512_PREFETCH_SIZE 2560
-#endif
-
 namespace Simd
 {
 #if defined(SIMD_AVX512F_ENABLE)
     namespace Avx512f
     {
-        template<class T> SIMD_INLINE void PrefetchL1(const T* ptr)
+        const size_t PREFETCH_SIZE = 4096;
+
+        SIMD_INLINE void PrefetchL1(const void* ptr)
         {
-#if defined(SIMD_AVX512_PREFETCH_SIZE)
-            _mm_prefetch((const char*)ptr + SIMD_AVX512_PREFETCH_SIZE, _MM_HINT_T0);
-#endif
+            _mm_prefetch((const char*)ptr + PREFETCH_SIZE, _MM_HINT_T0);
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 }
 
 #endif//__SimdPrefetch_h__

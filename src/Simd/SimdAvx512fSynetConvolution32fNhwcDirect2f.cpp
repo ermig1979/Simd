@@ -57,56 +57,111 @@ namespace Simd
                 d90 = _mm512_setzero_ps(); d91 = _mm512_setzero_ps();
                 da0 = _mm512_setzero_ps(); da1 = _mm512_setzero_ps();
                 db0 = _mm512_setzero_ps(); db1 = _mm512_setzero_ps();
-                for (size_t ky = 0; ky < kernelH; ++ky)
+                if (kernelH * kernelW * srcC * 2 * F * sizeof(float) > PREFETCH_SIZE)
                 {
-                    for (size_t kx = 0; kx < kernelW; ++kx)
+                    for (size_t ky = 0; ky < kernelH; ++ky)
                     {
-                        for (size_t offset0 = ky * dY + kx * dX, offset6 = offset0 + 6 * dS, end0 = offset0 + srcC; offset0 < end0; ++offset0, ++offset6)
+                        for (size_t kx = 0; kx < kernelW; ++kx)
                         {
-                            PrefetchL1(weight + 0);
-                            PrefetchL1(weight + F);
-                            w0 = _mm512_loadu_ps(weight + 0);
-                            w1 = _mm512_loadu_ps(weight + F);
-                            s0 = _mm512_set1_ps(src0[offset0]);
-                            d00 = _mm512_fmadd_ps(s0, w0, d00);
-                            d01 = _mm512_fmadd_ps(s0, w1, d01);
-                            s0 = _mm512_set1_ps(src1[offset0]);
-                            d10 = _mm512_fmadd_ps(s0, w0, d10);
-                            d11 = _mm512_fmadd_ps(s0, w1, d11);
-                            s0 = _mm512_set1_ps(src2[offset0]);
-                            d20 = _mm512_fmadd_ps(s0, w0, d20);
-                            d21 = _mm512_fmadd_ps(s0, w1, d21);
-                            s0 = _mm512_set1_ps(src3[offset0]);
-                            d30 = _mm512_fmadd_ps(s0, w0, d30);
-                            d31 = _mm512_fmadd_ps(s0, w1, d31);
-                            s0 = _mm512_set1_ps(src4[offset0]);
-                            d40 = _mm512_fmadd_ps(s0, w0, d40);
-                            d41 = _mm512_fmadd_ps(s0, w1, d41);
-                            s0 = _mm512_set1_ps(src5[offset0]);
-                            d50 = _mm512_fmadd_ps(s0, w0, d50);
-                            d51 = _mm512_fmadd_ps(s0, w1, d51);
-                            s0 = _mm512_set1_ps(src0[offset6]);
-                            d60 = _mm512_fmadd_ps(s0, w0, d60);
-                            d61 = _mm512_fmadd_ps(s0, w1, d61);
-                            s0 = _mm512_set1_ps(src1[offset6]);
-                            d70 = _mm512_fmadd_ps(s0, w0, d70);
-                            d71 = _mm512_fmadd_ps(s0, w1, d71);
-                            s0 = _mm512_set1_ps(src2[offset6]);
-                            d80 = _mm512_fmadd_ps(s0, w0, d80);
-                            d81 = _mm512_fmadd_ps(s0, w1, d81);
-                            s0 = _mm512_set1_ps(src3[offset6]);
-                            d90 = _mm512_fmadd_ps(s0, w0, d90);
-                            d91 = _mm512_fmadd_ps(s0, w1, d91);
-                            s0 = _mm512_set1_ps(src4[offset6]);
-                            da0 = _mm512_fmadd_ps(s0, w0, da0);
-                            da1 = _mm512_fmadd_ps(s0, w1, da1);
-                            s0 = _mm512_set1_ps(src5[offset6]);
-                            db0 = _mm512_fmadd_ps(s0, w0, db0);
-                            db1 = _mm512_fmadd_ps(s0, w1, db1);
-                            weight += DF;
+                            for (size_t offset0 = ky * dY + kx * dX, offset6 = offset0 + 6 * dS, end0 = offset0 + srcC; offset0 < end0; ++offset0, ++offset6)
+                            {
+                                PrefetchL1(weight + 0);
+                                PrefetchL1(weight + F);
+                                w0 = _mm512_loadu_ps(weight + 0);
+                                w1 = _mm512_loadu_ps(weight + F);
+                                s0 = _mm512_set1_ps(src0[offset0]);
+                                d00 = _mm512_fmadd_ps(s0, w0, d00);
+                                d01 = _mm512_fmadd_ps(s0, w1, d01);
+                                s0 = _mm512_set1_ps(src1[offset0]);
+                                d10 = _mm512_fmadd_ps(s0, w0, d10);
+                                d11 = _mm512_fmadd_ps(s0, w1, d11);
+                                s0 = _mm512_set1_ps(src2[offset0]);
+                                d20 = _mm512_fmadd_ps(s0, w0, d20);
+                                d21 = _mm512_fmadd_ps(s0, w1, d21);
+                                s0 = _mm512_set1_ps(src3[offset0]);
+                                d30 = _mm512_fmadd_ps(s0, w0, d30);
+                                d31 = _mm512_fmadd_ps(s0, w1, d31);
+                                s0 = _mm512_set1_ps(src4[offset0]);
+                                d40 = _mm512_fmadd_ps(s0, w0, d40);
+                                d41 = _mm512_fmadd_ps(s0, w1, d41);
+                                s0 = _mm512_set1_ps(src5[offset0]);
+                                d50 = _mm512_fmadd_ps(s0, w0, d50);
+                                d51 = _mm512_fmadd_ps(s0, w1, d51);
+                                s0 = _mm512_set1_ps(src0[offset6]);
+                                d60 = _mm512_fmadd_ps(s0, w0, d60);
+                                d61 = _mm512_fmadd_ps(s0, w1, d61);
+                                s0 = _mm512_set1_ps(src1[offset6]);
+                                d70 = _mm512_fmadd_ps(s0, w0, d70);
+                                d71 = _mm512_fmadd_ps(s0, w1, d71);
+                                s0 = _mm512_set1_ps(src2[offset6]);
+                                d80 = _mm512_fmadd_ps(s0, w0, d80);
+                                d81 = _mm512_fmadd_ps(s0, w1, d81);
+                                s0 = _mm512_set1_ps(src3[offset6]);
+                                d90 = _mm512_fmadd_ps(s0, w0, d90);
+                                d91 = _mm512_fmadd_ps(s0, w1, d91);
+                                s0 = _mm512_set1_ps(src4[offset6]);
+                                da0 = _mm512_fmadd_ps(s0, w0, da0);
+                                da1 = _mm512_fmadd_ps(s0, w1, da1);
+                                s0 = _mm512_set1_ps(src5[offset6]);
+                                db0 = _mm512_fmadd_ps(s0, w0, db0);
+                                db1 = _mm512_fmadd_ps(s0, w1, db1);
+                                weight += DF;
+                            }
                         }
+                        weight += dW;
                     }
-                    weight += dW;
+                }
+                else
+                {
+                    for (size_t ky = 0; ky < kernelH; ++ky)
+                    {
+                        for (size_t kx = 0; kx < kernelW; ++kx)
+                        {
+                            for (size_t offset0 = ky * dY + kx * dX, offset6 = offset0 + 6 * dS, end0 = offset0 + srcC; offset0 < end0; ++offset0, ++offset6)
+                            {
+                                w0 = _mm512_loadu_ps(weight + 0);
+                                w1 = _mm512_loadu_ps(weight + F);
+                                s0 = _mm512_set1_ps(src0[offset0]);
+                                d00 = _mm512_fmadd_ps(s0, w0, d00);
+                                d01 = _mm512_fmadd_ps(s0, w1, d01);
+                                s0 = _mm512_set1_ps(src1[offset0]);
+                                d10 = _mm512_fmadd_ps(s0, w0, d10);
+                                d11 = _mm512_fmadd_ps(s0, w1, d11);
+                                s0 = _mm512_set1_ps(src2[offset0]);
+                                d20 = _mm512_fmadd_ps(s0, w0, d20);
+                                d21 = _mm512_fmadd_ps(s0, w1, d21);
+                                s0 = _mm512_set1_ps(src3[offset0]);
+                                d30 = _mm512_fmadd_ps(s0, w0, d30);
+                                d31 = _mm512_fmadd_ps(s0, w1, d31);
+                                s0 = _mm512_set1_ps(src4[offset0]);
+                                d40 = _mm512_fmadd_ps(s0, w0, d40);
+                                d41 = _mm512_fmadd_ps(s0, w1, d41);
+                                s0 = _mm512_set1_ps(src5[offset0]);
+                                d50 = _mm512_fmadd_ps(s0, w0, d50);
+                                d51 = _mm512_fmadd_ps(s0, w1, d51);
+                                s0 = _mm512_set1_ps(src0[offset6]);
+                                d60 = _mm512_fmadd_ps(s0, w0, d60);
+                                d61 = _mm512_fmadd_ps(s0, w1, d61);
+                                s0 = _mm512_set1_ps(src1[offset6]);
+                                d70 = _mm512_fmadd_ps(s0, w0, d70);
+                                d71 = _mm512_fmadd_ps(s0, w1, d71);
+                                s0 = _mm512_set1_ps(src2[offset6]);
+                                d80 = _mm512_fmadd_ps(s0, w0, d80);
+                                d81 = _mm512_fmadd_ps(s0, w1, d81);
+                                s0 = _mm512_set1_ps(src3[offset6]);
+                                d90 = _mm512_fmadd_ps(s0, w0, d90);
+                                d91 = _mm512_fmadd_ps(s0, w1, d91);
+                                s0 = _mm512_set1_ps(src4[offset6]);
+                                da0 = _mm512_fmadd_ps(s0, w0, da0);
+                                da1 = _mm512_fmadd_ps(s0, w1, da1);
+                                s0 = _mm512_set1_ps(src5[offset6]);
+                                db0 = _mm512_fmadd_ps(s0, w0, db0);
+                                db1 = _mm512_fmadd_ps(s0, w1, db1);
+                                weight += DF;
+                            }
+                        }
+                        weight += dW;
+                    }
                 }
                 Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
                 Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
@@ -164,7 +219,6 @@ namespace Simd
                     {
                         for (size_t offset0 = ky * dY + kx * dX, offset6 = offset0 + 6 * dS, end0 = offset0 + srcC; offset0 < end0; ++offset0, ++offset6)
                         {
-                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset0]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -245,8 +299,6 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
-                            PrefetchL1(weight + 0);
-                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset]);
@@ -304,7 +356,6 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
-                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -355,8 +406,6 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
-                            PrefetchL1(weight + 0);
-                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset]);
@@ -393,7 +442,6 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
-                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -429,8 +477,6 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
-                            PrefetchL1(weight + 0);
-                            PrefetchL1(weight + F);
                             w0 = _mm512_loadu_ps(weight + 0);
                             w1 = _mm512_loadu_ps(weight + F);
                             s0 = _mm512_set1_ps(src0[offset]);
@@ -453,7 +499,6 @@ namespace Simd
                     {
                         for (size_t offset = ky * dY + kx * dX, end = offset + srcC; offset < end; ++offset)
                         {
-                            PrefetchL1(weight + 0);
                             w0 = _mm512_loadu_ps(weight + 0);
                             s0 = _mm512_set1_ps(src0[offset]);
                             d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -609,49 +654,97 @@ namespace Simd
                 d90 = _mm512_setzero_ps(); d91 = _mm512_setzero_ps();
                 da0 = _mm512_setzero_ps(); da1 = _mm512_setzero_ps();
                 db0 = _mm512_setzero_ps(); db1 = _mm512_setzero_ps();
-                for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
+                if (srcC * 2 * F * sizeof(float) > PREFETCH_SIZE)
                 {
-                    PrefetchL1(weight + 0);
-                    PrefetchL1(weight + F);
-                    w0 = _mm512_loadu_ps(weight + 0);
-                    w1 = _mm512_loadu_ps(weight + F);
-                    s0 = _mm512_set1_ps(src0[offset0]);
-                    d00 = _mm512_fmadd_ps(s0, w0, d00);
-                    d01 = _mm512_fmadd_ps(s0, w1, d01);
-                    s0 = _mm512_set1_ps(src1[offset0]);
-                    d10 = _mm512_fmadd_ps(s0, w0, d10);
-                    d11 = _mm512_fmadd_ps(s0, w1, d11);
-                    s0 = _mm512_set1_ps(src2[offset0]);
-                    d20 = _mm512_fmadd_ps(s0, w0, d20);
-                    d21 = _mm512_fmadd_ps(s0, w1, d21);
-                    s0 = _mm512_set1_ps(src3[offset0]);
-                    d30 = _mm512_fmadd_ps(s0, w0, d30);
-                    d31 = _mm512_fmadd_ps(s0, w1, d31);
-                    s0 = _mm512_set1_ps(src4[offset0]);
-                    d40 = _mm512_fmadd_ps(s0, w0, d40);
-                    d41 = _mm512_fmadd_ps(s0, w1, d41);
-                    s0 = _mm512_set1_ps(src5[offset0]);
-                    d50 = _mm512_fmadd_ps(s0, w0, d50);
-                    d51 = _mm512_fmadd_ps(s0, w1, d51);
-                    s0 = _mm512_set1_ps(src0[offset6]);
-                    d60 = _mm512_fmadd_ps(s0, w0, d60);
-                    d61 = _mm512_fmadd_ps(s0, w1, d61);
-                    s0 = _mm512_set1_ps(src1[offset6]);
-                    d70 = _mm512_fmadd_ps(s0, w0, d70);
-                    d71 = _mm512_fmadd_ps(s0, w1, d71);
-                    s0 = _mm512_set1_ps(src2[offset6]);
-                    d80 = _mm512_fmadd_ps(s0, w0, d80);
-                    d81 = _mm512_fmadd_ps(s0, w1, d81);
-                    s0 = _mm512_set1_ps(src3[offset6]);
-                    d90 = _mm512_fmadd_ps(s0, w0, d90);
-                    d91 = _mm512_fmadd_ps(s0, w1, d91);
-                    s0 = _mm512_set1_ps(src4[offset6]);
-                    da0 = _mm512_fmadd_ps(s0, w0, da0);
-                    da1 = _mm512_fmadd_ps(s0, w1, da1);
-                    s0 = _mm512_set1_ps(src5[offset6]);
-                    db0 = _mm512_fmadd_ps(s0, w0, db0);
-                    db1 = _mm512_fmadd_ps(s0, w1, db1);
-                    weight += DF;
+                    for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
+                    {
+                        PrefetchL1(weight + 0);
+                        PrefetchL1(weight + F);
+                        w0 = _mm512_loadu_ps(weight + 0);
+                        w1 = _mm512_loadu_ps(weight + F);
+                        s0 = _mm512_set1_ps(src0[offset0]);
+                        d00 = _mm512_fmadd_ps(s0, w0, d00);
+                        d01 = _mm512_fmadd_ps(s0, w1, d01);
+                        s0 = _mm512_set1_ps(src1[offset0]);
+                        d10 = _mm512_fmadd_ps(s0, w0, d10);
+                        d11 = _mm512_fmadd_ps(s0, w1, d11);
+                        s0 = _mm512_set1_ps(src2[offset0]);
+                        d20 = _mm512_fmadd_ps(s0, w0, d20);
+                        d21 = _mm512_fmadd_ps(s0, w1, d21);
+                        s0 = _mm512_set1_ps(src3[offset0]);
+                        d30 = _mm512_fmadd_ps(s0, w0, d30);
+                        d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        s0 = _mm512_set1_ps(src4[offset0]);
+                        d40 = _mm512_fmadd_ps(s0, w0, d40);
+                        d41 = _mm512_fmadd_ps(s0, w1, d41);
+                        s0 = _mm512_set1_ps(src5[offset0]);
+                        d50 = _mm512_fmadd_ps(s0, w0, d50);
+                        d51 = _mm512_fmadd_ps(s0, w1, d51);
+                        s0 = _mm512_set1_ps(src0[offset6]);
+                        d60 = _mm512_fmadd_ps(s0, w0, d60);
+                        d61 = _mm512_fmadd_ps(s0, w1, d61);
+                        s0 = _mm512_set1_ps(src1[offset6]);
+                        d70 = _mm512_fmadd_ps(s0, w0, d70);
+                        d71 = _mm512_fmadd_ps(s0, w1, d71);
+                        s0 = _mm512_set1_ps(src2[offset6]);
+                        d80 = _mm512_fmadd_ps(s0, w0, d80);
+                        d81 = _mm512_fmadd_ps(s0, w1, d81);
+                        s0 = _mm512_set1_ps(src3[offset6]);
+                        d90 = _mm512_fmadd_ps(s0, w0, d90);
+                        d91 = _mm512_fmadd_ps(s0, w1, d91);
+                        s0 = _mm512_set1_ps(src4[offset6]);
+                        da0 = _mm512_fmadd_ps(s0, w0, da0);
+                        da1 = _mm512_fmadd_ps(s0, w1, da1);
+                        s0 = _mm512_set1_ps(src5[offset6]);
+                        db0 = _mm512_fmadd_ps(s0, w0, db0);
+                        db1 = _mm512_fmadd_ps(s0, w1, db1);
+                        weight += DF;
+                    }
+                }
+                else
+                {
+                    for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
+                    {
+                        w0 = _mm512_loadu_ps(weight + 0);
+                        w1 = _mm512_loadu_ps(weight + F);
+                        s0 = _mm512_set1_ps(src0[offset0]);
+                        d00 = _mm512_fmadd_ps(s0, w0, d00);
+                        d01 = _mm512_fmadd_ps(s0, w1, d01);
+                        s0 = _mm512_set1_ps(src1[offset0]);
+                        d10 = _mm512_fmadd_ps(s0, w0, d10);
+                        d11 = _mm512_fmadd_ps(s0, w1, d11);
+                        s0 = _mm512_set1_ps(src2[offset0]);
+                        d20 = _mm512_fmadd_ps(s0, w0, d20);
+                        d21 = _mm512_fmadd_ps(s0, w1, d21);
+                        s0 = _mm512_set1_ps(src3[offset0]);
+                        d30 = _mm512_fmadd_ps(s0, w0, d30);
+                        d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        s0 = _mm512_set1_ps(src4[offset0]);
+                        d40 = _mm512_fmadd_ps(s0, w0, d40);
+                        d41 = _mm512_fmadd_ps(s0, w1, d41);
+                        s0 = _mm512_set1_ps(src5[offset0]);
+                        d50 = _mm512_fmadd_ps(s0, w0, d50);
+                        d51 = _mm512_fmadd_ps(s0, w1, d51);
+                        s0 = _mm512_set1_ps(src0[offset6]);
+                        d60 = _mm512_fmadd_ps(s0, w0, d60);
+                        d61 = _mm512_fmadd_ps(s0, w1, d61);
+                        s0 = _mm512_set1_ps(src1[offset6]);
+                        d70 = _mm512_fmadd_ps(s0, w0, d70);
+                        d71 = _mm512_fmadd_ps(s0, w1, d71);
+                        s0 = _mm512_set1_ps(src2[offset6]);
+                        d80 = _mm512_fmadd_ps(s0, w0, d80);
+                        d81 = _mm512_fmadd_ps(s0, w1, d81);
+                        s0 = _mm512_set1_ps(src3[offset6]);
+                        d90 = _mm512_fmadd_ps(s0, w0, d90);
+                        d91 = _mm512_fmadd_ps(s0, w1, d91);
+                        s0 = _mm512_set1_ps(src4[offset6]);
+                        da0 = _mm512_fmadd_ps(s0, w0, da0);
+                        da1 = _mm512_fmadd_ps(s0, w1, da1);
+                        s0 = _mm512_set1_ps(src5[offset6]);
+                        db0 = _mm512_fmadd_ps(s0, w0, db0);
+                        db1 = _mm512_fmadd_ps(s0, w1, db1);
+                        weight += DF;
+                    }
                 }
                 Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
                 Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
@@ -705,7 +798,6 @@ namespace Simd
                 db0 = _mm512_setzero_ps();
                 for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
                 {
-                    PrefetchL1(weight + 0);
                     w0 = _mm512_loadu_ps(weight + 0);
                     s0 = _mm512_set1_ps(src0[offset0]);
                     d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -779,8 +871,6 @@ namespace Simd
                 d50 = _mm512_setzero_ps(); d51 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
-                    PrefetchL1(weight + 0);
-                    PrefetchL1(weight + F);
                     w0 = _mm512_loadu_ps(weight + 0);
                     w1 = _mm512_loadu_ps(weight + F);
                     s0 = _mm512_set1_ps(src0[offset]);
@@ -831,7 +921,6 @@ namespace Simd
                 d50 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
-                    PrefetchL1(weight + 0);
                     w0 = _mm512_loadu_ps(weight + 0);
                     s0 = _mm512_set1_ps(src0[offset]);
                     d00 = _mm512_fmadd_ps(s0, w0, d00);
@@ -881,8 +970,6 @@ namespace Simd
                 if (M > 5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
-                    PrefetchL1(weight + 0);
-                    PrefetchL1(weight + 1);
                     w0 = _mm512_loadu_ps(weight + 0);
                     w1 = _mm512_loadu_ps(weight + F);
                     if (M > 0) s0 = _mm512_set1_ps(src0[offset]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
@@ -910,7 +997,6 @@ namespace Simd
                 if (M > 5) d50 = _mm512_setzero_ps();
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
-                    PrefetchL1(weight + 0);
                     w0 = _mm512_loadu_ps(weight + 0);
                     if (M > 0) s0 = _mm512_set1_ps(src0[offset]), d00 = _mm512_fmadd_ps(s0, w0, d00);
                     if (M > 1) s0 = _mm512_set1_ps(src1[offset]), d10 = _mm512_fmadd_ps(s0, w0, d10);
