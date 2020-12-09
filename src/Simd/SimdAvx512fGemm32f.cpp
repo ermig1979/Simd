@@ -26,6 +26,7 @@
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdCpu.h"
+#include "Simd/SimdPrefetch.h"
 
 namespace Simd
 {
@@ -1295,55 +1296,113 @@ namespace Simd
             const size_t ob0 = ldb * 0;
             const size_t ob1 = ldb * 1;
             __m512 b0, b1, a0;
-            for (size_t k = 0; k < K; k++)
+            if (K * F * sizeof(float) > PREFETCH_SIZE)
             {
-                b0 = _mm512_loadu_ps(B + ob0);
-                b1 = _mm512_loadu_ps(B + ob1);
-                a0 = _mm512_set1_ps(A0[oa0]);
-                c00 = _mm512_fmadd_ps(a0, b0, c00);
-                c01 = _mm512_fmadd_ps(a0, b1, c01);
-                a0 = _mm512_set1_ps(A0[oa1]);
-                c10 = _mm512_fmadd_ps(a0, b0, c10);
-                c11 = _mm512_fmadd_ps(a0, b1, c11);
-                a0 = _mm512_set1_ps(A0[oa2]);
-                c20 = _mm512_fmadd_ps(a0, b0, c20);
-                c21 = _mm512_fmadd_ps(a0, b1, c21);
-                a0 = _mm512_set1_ps(A0[oa3]);
-                c30 = _mm512_fmadd_ps(a0, b0, c30);
-                c31 = _mm512_fmadd_ps(a0, b1, c31);
-                a0 = _mm512_set1_ps(A0[oa4]);
-                c40 = _mm512_fmadd_ps(a0, b0, c40);
-                c41 = _mm512_fmadd_ps(a0, b1, c41);
-                a0 = _mm512_set1_ps(A0[oa5]);
-                c50 = _mm512_fmadd_ps(a0, b0, c50);
-                c51 = _mm512_fmadd_ps(a0, b1, c51);
-                a0 = _mm512_set1_ps(A0[oa6]);
-                c60 = _mm512_fmadd_ps(a0, b0, c60);
-                c61 = _mm512_fmadd_ps(a0, b1, c61);
-                a0 = _mm512_set1_ps(A7[oa0]);
-                c70 = _mm512_fmadd_ps(a0, b0, c70);
-                c71 = _mm512_fmadd_ps(a0, b1, c71);
-                a0 = _mm512_set1_ps(A7[oa1]);
-                c80 = _mm512_fmadd_ps(a0, b0, c80);
-                c81 = _mm512_fmadd_ps(a0, b1, c81);
-                a0 = _mm512_set1_ps(A7[oa2]);
-                c90 = _mm512_fmadd_ps(a0, b0, c90);
-                c91 = _mm512_fmadd_ps(a0, b1, c91);
-                a0 = _mm512_set1_ps(A7[oa3]);
-                cA0 = _mm512_fmadd_ps(a0, b0, cA0);
-                cA1 = _mm512_fmadd_ps(a0, b1, cA1);
-                a0 = _mm512_set1_ps(A7[oa4]);
-                cB0 = _mm512_fmadd_ps(a0, b0, cB0);
-                cB1 = _mm512_fmadd_ps(a0, b1, cB1);
-                a0 = _mm512_set1_ps(A7[oa5]);
-                cC0 = _mm512_fmadd_ps(a0, b0, cC0);
-                cC1 = _mm512_fmadd_ps(a0, b1, cC1);
-                a0 = _mm512_set1_ps(A7[oa6]);
-                cD0 = _mm512_fmadd_ps(a0, b0, cD0);
-                cD1 = _mm512_fmadd_ps(a0, b1, cD1);
-                B += sb;
-                A0 += sa;
-                A7 += sa;
+                for (size_t k = 0; k < K; k++)
+                {
+                    PrefetchL1(B + ob0);
+                    PrefetchL1(B + ob1);
+                    b0 = _mm512_loadu_ps(B + ob0);
+                    b1 = _mm512_loadu_ps(B + ob1);
+                    a0 = _mm512_set1_ps(A0[oa0]);
+                    c00 = _mm512_fmadd_ps(a0, b0, c00);
+                    c01 = _mm512_fmadd_ps(a0, b1, c01);
+                    a0 = _mm512_set1_ps(A0[oa1]);
+                    c10 = _mm512_fmadd_ps(a0, b0, c10);
+                    c11 = _mm512_fmadd_ps(a0, b1, c11);
+                    a0 = _mm512_set1_ps(A0[oa2]);
+                    c20 = _mm512_fmadd_ps(a0, b0, c20);
+                    c21 = _mm512_fmadd_ps(a0, b1, c21);
+                    a0 = _mm512_set1_ps(A0[oa3]);
+                    c30 = _mm512_fmadd_ps(a0, b0, c30);
+                    c31 = _mm512_fmadd_ps(a0, b1, c31);
+                    a0 = _mm512_set1_ps(A0[oa4]);
+                    c40 = _mm512_fmadd_ps(a0, b0, c40);
+                    c41 = _mm512_fmadd_ps(a0, b1, c41);
+                    a0 = _mm512_set1_ps(A0[oa5]);
+                    c50 = _mm512_fmadd_ps(a0, b0, c50);
+                    c51 = _mm512_fmadd_ps(a0, b1, c51);
+                    a0 = _mm512_set1_ps(A0[oa6]);
+                    c60 = _mm512_fmadd_ps(a0, b0, c60);
+                    c61 = _mm512_fmadd_ps(a0, b1, c61);
+                    a0 = _mm512_set1_ps(A7[oa0]);
+                    c70 = _mm512_fmadd_ps(a0, b0, c70);
+                    c71 = _mm512_fmadd_ps(a0, b1, c71);
+                    a0 = _mm512_set1_ps(A7[oa1]);
+                    c80 = _mm512_fmadd_ps(a0, b0, c80);
+                    c81 = _mm512_fmadd_ps(a0, b1, c81);
+                    a0 = _mm512_set1_ps(A7[oa2]);
+                    c90 = _mm512_fmadd_ps(a0, b0, c90);
+                    c91 = _mm512_fmadd_ps(a0, b1, c91);
+                    a0 = _mm512_set1_ps(A7[oa3]);
+                    cA0 = _mm512_fmadd_ps(a0, b0, cA0);
+                    cA1 = _mm512_fmadd_ps(a0, b1, cA1);
+                    a0 = _mm512_set1_ps(A7[oa4]);
+                    cB0 = _mm512_fmadd_ps(a0, b0, cB0);
+                    cB1 = _mm512_fmadd_ps(a0, b1, cB1);
+                    a0 = _mm512_set1_ps(A7[oa5]);
+                    cC0 = _mm512_fmadd_ps(a0, b0, cC0);
+                    cC1 = _mm512_fmadd_ps(a0, b1, cC1);
+                    a0 = _mm512_set1_ps(A7[oa6]);
+                    cD0 = _mm512_fmadd_ps(a0, b0, cD0);
+                    cD1 = _mm512_fmadd_ps(a0, b1, cD1);
+                    B += sb;
+                    A0 += sa;
+                    A7 += sa;
+                }
+            }
+            else
+            {
+                for (size_t k = 0; k < K; k++)
+                {
+                    b0 = _mm512_loadu_ps(B + ob0);
+                    b1 = _mm512_loadu_ps(B + ob1);
+                    a0 = _mm512_set1_ps(A0[oa0]);
+                    c00 = _mm512_fmadd_ps(a0, b0, c00);
+                    c01 = _mm512_fmadd_ps(a0, b1, c01);
+                    a0 = _mm512_set1_ps(A0[oa1]);
+                    c10 = _mm512_fmadd_ps(a0, b0, c10);
+                    c11 = _mm512_fmadd_ps(a0, b1, c11);
+                    a0 = _mm512_set1_ps(A0[oa2]);
+                    c20 = _mm512_fmadd_ps(a0, b0, c20);
+                    c21 = _mm512_fmadd_ps(a0, b1, c21);
+                    a0 = _mm512_set1_ps(A0[oa3]);
+                    c30 = _mm512_fmadd_ps(a0, b0, c30);
+                    c31 = _mm512_fmadd_ps(a0, b1, c31);
+                    a0 = _mm512_set1_ps(A0[oa4]);
+                    c40 = _mm512_fmadd_ps(a0, b0, c40);
+                    c41 = _mm512_fmadd_ps(a0, b1, c41);
+                    a0 = _mm512_set1_ps(A0[oa5]);
+                    c50 = _mm512_fmadd_ps(a0, b0, c50);
+                    c51 = _mm512_fmadd_ps(a0, b1, c51);
+                    a0 = _mm512_set1_ps(A0[oa6]);
+                    c60 = _mm512_fmadd_ps(a0, b0, c60);
+                    c61 = _mm512_fmadd_ps(a0, b1, c61);
+                    a0 = _mm512_set1_ps(A7[oa0]);
+                    c70 = _mm512_fmadd_ps(a0, b0, c70);
+                    c71 = _mm512_fmadd_ps(a0, b1, c71);
+                    a0 = _mm512_set1_ps(A7[oa1]);
+                    c80 = _mm512_fmadd_ps(a0, b0, c80);
+                    c81 = _mm512_fmadd_ps(a0, b1, c81);
+                    a0 = _mm512_set1_ps(A7[oa2]);
+                    c90 = _mm512_fmadd_ps(a0, b0, c90);
+                    c91 = _mm512_fmadd_ps(a0, b1, c91);
+                    a0 = _mm512_set1_ps(A7[oa3]);
+                    cA0 = _mm512_fmadd_ps(a0, b0, cA0);
+                    cA1 = _mm512_fmadd_ps(a0, b1, cA1);
+                    a0 = _mm512_set1_ps(A7[oa4]);
+                    cB0 = _mm512_fmadd_ps(a0, b0, cB0);
+                    cB1 = _mm512_fmadd_ps(a0, b1, cB1);
+                    a0 = _mm512_set1_ps(A7[oa5]);
+                    cC0 = _mm512_fmadd_ps(a0, b0, cC0);
+                    cC1 = _mm512_fmadd_ps(a0, b1, cC1);
+                    a0 = _mm512_set1_ps(A7[oa6]);
+                    cD0 = _mm512_fmadd_ps(a0, b0, cD0);
+                    cD1 = _mm512_fmadd_ps(a0, b1, cD1);
+                    B += sb;
+                    A0 += sa;
+                    A7 += sa;
+                }
             }
             __m512 _alpha = _mm512_set1_ps(alpha);
             AddProduct(C + 0 * F, _alpha, c00);
