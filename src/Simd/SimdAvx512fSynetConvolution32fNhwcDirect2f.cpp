@@ -630,16 +630,17 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x12(const float* src0, const ConvParam32f& p,
+        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x14(const float* src0, const ConvParam32f& p,
             size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2])
         {
-            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, s0, w0, w1;
+            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, dc0, dc1, dd0, dd1, s0, w0, w1;
             size_t dS = p.srcC, dD = p.dstC;
             const float* src1 = src0 + 1 * dS;
             const float* src2 = src0 + 2 * dS;
             const float* src3 = src0 + 3 * dS;
             const float* src4 = src0 + 4 * dS;
             const float* src5 = src0 + 5 * dS;
+            const float* src6 = src0 + 6 * dS;
             if (tails[1])
             {
                 d00 = _mm512_setzero_ps(); d01 = _mm512_setzero_ps();
@@ -654,9 +655,11 @@ namespace Simd
                 d90 = _mm512_setzero_ps(); d91 = _mm512_setzero_ps();
                 da0 = _mm512_setzero_ps(); da1 = _mm512_setzero_ps();
                 db0 = _mm512_setzero_ps(); db1 = _mm512_setzero_ps();
+                dc0 = _mm512_setzero_ps(); dc1 = _mm512_setzero_ps();
+                dd0 = _mm512_setzero_ps(); dd1 = _mm512_setzero_ps();
                 if (srcC * 2 * F * sizeof(float) > PREFETCH_SIZE)
                 {
-                    for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
+                    for (size_t offset0 = 0, offset7 = 7 * dS; offset0 < srcC; ++offset0, ++offset7)
                     {
                         PrefetchL1(weight + 0);
                         PrefetchL1(weight + F);
@@ -680,30 +683,36 @@ namespace Simd
                         s0 = _mm512_set1_ps(src5[offset0]);
                         d50 = _mm512_fmadd_ps(s0, w0, d50);
                         d51 = _mm512_fmadd_ps(s0, w1, d51);
-                        s0 = _mm512_set1_ps(src0[offset6]);
+                        s0 = _mm512_set1_ps(src6[offset0]);
                         d60 = _mm512_fmadd_ps(s0, w0, d60);
                         d61 = _mm512_fmadd_ps(s0, w1, d61);
-                        s0 = _mm512_set1_ps(src1[offset6]);
+                        s0 = _mm512_set1_ps(src0[offset7]);
                         d70 = _mm512_fmadd_ps(s0, w0, d70);
                         d71 = _mm512_fmadd_ps(s0, w1, d71);
-                        s0 = _mm512_set1_ps(src2[offset6]);
+                        s0 = _mm512_set1_ps(src1[offset7]);
                         d80 = _mm512_fmadd_ps(s0, w0, d80);
                         d81 = _mm512_fmadd_ps(s0, w1, d81);
-                        s0 = _mm512_set1_ps(src3[offset6]);
+                        s0 = _mm512_set1_ps(src2[offset7]);
                         d90 = _mm512_fmadd_ps(s0, w0, d90);
                         d91 = _mm512_fmadd_ps(s0, w1, d91);
-                        s0 = _mm512_set1_ps(src4[offset6]);
+                        s0 = _mm512_set1_ps(src3[offset7]);
                         da0 = _mm512_fmadd_ps(s0, w0, da0);
                         da1 = _mm512_fmadd_ps(s0, w1, da1);
-                        s0 = _mm512_set1_ps(src5[offset6]);
+                        s0 = _mm512_set1_ps(src4[offset7]);
                         db0 = _mm512_fmadd_ps(s0, w0, db0);
                         db1 = _mm512_fmadd_ps(s0, w1, db1);
+                        s0 = _mm512_set1_ps(src5[offset7]);
+                        dc0 = _mm512_fmadd_ps(s0, w0, dc0);
+                        dc1 = _mm512_fmadd_ps(s0, w1, dc1);
+                        s0 = _mm512_set1_ps(src6[offset7]);
+                        dd0 = _mm512_fmadd_ps(s0, w0, dd0);
+                        dd1 = _mm512_fmadd_ps(s0, w1, dd1);
                         weight += DF;
                     }
                 }
                 else
                 {
-                    for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
+                    for (size_t offset0 = 0, offset7 = 7 * dS; offset0 < srcC; ++offset0, ++offset7)
                     {
                         w0 = _mm512_loadu_ps(weight + 0);
                         w1 = _mm512_loadu_ps(weight + F);
@@ -725,24 +734,30 @@ namespace Simd
                         s0 = _mm512_set1_ps(src5[offset0]);
                         d50 = _mm512_fmadd_ps(s0, w0, d50);
                         d51 = _mm512_fmadd_ps(s0, w1, d51);
-                        s0 = _mm512_set1_ps(src0[offset6]);
+                        s0 = _mm512_set1_ps(src6[offset0]);
                         d60 = _mm512_fmadd_ps(s0, w0, d60);
                         d61 = _mm512_fmadd_ps(s0, w1, d61);
-                        s0 = _mm512_set1_ps(src1[offset6]);
+                        s0 = _mm512_set1_ps(src0[offset7]);
                         d70 = _mm512_fmadd_ps(s0, w0, d70);
                         d71 = _mm512_fmadd_ps(s0, w1, d71);
-                        s0 = _mm512_set1_ps(src2[offset6]);
+                        s0 = _mm512_set1_ps(src1[offset7]);
                         d80 = _mm512_fmadd_ps(s0, w0, d80);
                         d81 = _mm512_fmadd_ps(s0, w1, d81);
-                        s0 = _mm512_set1_ps(src3[offset6]);
+                        s0 = _mm512_set1_ps(src2[offset7]);
                         d90 = _mm512_fmadd_ps(s0, w0, d90);
                         d91 = _mm512_fmadd_ps(s0, w1, d91);
-                        s0 = _mm512_set1_ps(src4[offset6]);
+                        s0 = _mm512_set1_ps(src3[offset7]);
                         da0 = _mm512_fmadd_ps(s0, w0, da0);
                         da1 = _mm512_fmadd_ps(s0, w1, da1);
-                        s0 = _mm512_set1_ps(src5[offset6]);
+                        s0 = _mm512_set1_ps(src4[offset7]);
                         db0 = _mm512_fmadd_ps(s0, w0, db0);
                         db1 = _mm512_fmadd_ps(s0, w1, db1);
+                        s0 = _mm512_set1_ps(src5[offset7]);
+                        dc0 = _mm512_fmadd_ps(s0, w0, dc0);
+                        dc1 = _mm512_fmadd_ps(s0, w1, dc1);
+                        s0 = _mm512_set1_ps(src6[offset7]);
+                        dd0 = _mm512_fmadd_ps(s0, w0, dd0);
+                        dd1 = _mm512_fmadd_ps(s0, w1, dd1);
                         weight += DF;
                     }
                 }
@@ -781,6 +796,12 @@ namespace Simd
                 dst += dD;
                 Term<term>::template Save<type, 0>(dst + 0, db0, bias, params);
                 Term<term>::template Save<type, 1>(dst + F, db1, bias, params, tails[1]);
+                dst += dD;
+                Term<term>::template Save<type, 0>(dst + 0, dc0, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, dc1, bias, params, tails[1]);
+                dst += dD;
+                Term<term>::template Save<type, 0>(dst + 0, dd0, bias, params);
+                Term<term>::template Save<type, 1>(dst + F, dd1, bias, params, tails[1]);
             }
             else
             {
@@ -796,7 +817,9 @@ namespace Simd
                 d90 = _mm512_setzero_ps();
                 da0 = _mm512_setzero_ps();
                 db0 = _mm512_setzero_ps();
-                for (size_t offset0 = 0, offset6 = 6 * dS; offset0 < srcC; ++offset0, ++offset6)
+                dc0 = _mm512_setzero_ps();
+                dd0 = _mm512_setzero_ps();
+                for (size_t offset0 = 0, offset7 = 7 * dS; offset0 < srcC; ++offset0, ++offset7)
                 {
                     w0 = _mm512_loadu_ps(weight + 0);
                     s0 = _mm512_set1_ps(src0[offset0]);
@@ -811,18 +834,22 @@ namespace Simd
                     d40 = _mm512_fmadd_ps(s0, w0, d40);
                     s0 = _mm512_set1_ps(src5[offset0]);
                     d50 = _mm512_fmadd_ps(s0, w0, d50);
-                    s0 = _mm512_set1_ps(src0[offset6]);
+                    s0 = _mm512_set1_ps(src6[offset0]);
                     d60 = _mm512_fmadd_ps(s0, w0, d60);
-                    s0 = _mm512_set1_ps(src1[offset6]);
+                    s0 = _mm512_set1_ps(src0[offset7]);
                     d70 = _mm512_fmadd_ps(s0, w0, d70);
-                    s0 = _mm512_set1_ps(src2[offset6]);
+                    s0 = _mm512_set1_ps(src1[offset7]);
                     d80 = _mm512_fmadd_ps(s0, w0, d80);
-                    s0 = _mm512_set1_ps(src3[offset6]);
+                    s0 = _mm512_set1_ps(src2[offset7]);
                     d90 = _mm512_fmadd_ps(s0, w0, d90);
-                    s0 = _mm512_set1_ps(src4[offset6]);
+                    s0 = _mm512_set1_ps(src3[offset7]);
                     da0 = _mm512_fmadd_ps(s0, w0, da0);
-                    s0 = _mm512_set1_ps(src5[offset6]);
+                    s0 = _mm512_set1_ps(src4[offset7]);
                     db0 = _mm512_fmadd_ps(s0, w0, db0);
+                    s0 = _mm512_set1_ps(src5[offset7]);
+                    dc0 = _mm512_fmadd_ps(s0, w0, dc0);
+                    s0 = _mm512_set1_ps(src6[offset7]);
+                    dd0 = _mm512_fmadd_ps(s0, w0, dd0);
                     weight += DF;
                 }
                 Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]);
@@ -848,170 +875,153 @@ namespace Simd
                 Term<term>::template Save<type, 0>(dst + 0, da0, bias, params, tails[0]);
                 dst += dD;
                 Term<term>::template Save<type, 0>(dst + 0, db0, bias, params, tails[0]);
-            }
-        }
-
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float* src0, const ConvParam32f& p,
-            size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2])
-        {
-            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
-            size_t dS = p.srcC, dD = p.dstC;
-            const float* src1 = src0 + 1 * dS;
-            const float* src2 = src0 + 2 * dS;
-            const float* src3 = src0 + 3 * dS;
-            const float* src4 = src0 + 4 * dS;
-            const float* src5 = src0 + 5 * dS;
-            if (tails[1])
-            {
-                d00 = _mm512_setzero_ps(); d01 = _mm512_setzero_ps();
-                d10 = _mm512_setzero_ps(); d11 = _mm512_setzero_ps();
-                d20 = _mm512_setzero_ps(); d21 = _mm512_setzero_ps();
-                d30 = _mm512_setzero_ps(); d31 = _mm512_setzero_ps();
-                d40 = _mm512_setzero_ps(); d41 = _mm512_setzero_ps();
-                d50 = _mm512_setzero_ps(); d51 = _mm512_setzero_ps();
-                for (size_t offset = 0; offset < srcC; ++offset)
-                {
-                    w0 = _mm512_loadu_ps(weight + 0);
-                    w1 = _mm512_loadu_ps(weight + F);
-                    s0 = _mm512_set1_ps(src0[offset]);
-                    d00 = _mm512_fmadd_ps(s0, w0, d00);
-                    d01 = _mm512_fmadd_ps(s0, w1, d01);
-                    s0 = _mm512_set1_ps(src1[offset]);
-                    d10 = _mm512_fmadd_ps(s0, w0, d10);
-                    d11 = _mm512_fmadd_ps(s0, w1, d11);
-                    s0 = _mm512_set1_ps(src2[offset]);
-                    d20 = _mm512_fmadd_ps(s0, w0, d20);
-                    d21 = _mm512_fmadd_ps(s0, w1, d21);
-                    s0 = _mm512_set1_ps(src3[offset]);
-                    d30 = _mm512_fmadd_ps(s0, w0, d30);
-                    d31 = _mm512_fmadd_ps(s0, w1, d31);
-                    s0 = _mm512_set1_ps(src4[offset]);
-                    d40 = _mm512_fmadd_ps(s0, w0, d40);
-                    d41 = _mm512_fmadd_ps(s0, w1, d41);
-                    s0 = _mm512_set1_ps(src5[offset]);
-                    d50 = _mm512_fmadd_ps(s0, w0, d50);
-                    d51 = _mm512_fmadd_ps(s0, w1, d51);
-                    weight += DF;
-                }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]);
                 dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]);
+                Term<term>::template Save<type, 0>(dst + 0, dc0, bias, params, tails[0]);
                 dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tails[1]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tails[1]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
-                Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tails[1]);
-            }
-            else
-            {
-                d00 = _mm512_setzero_ps();
-                d10 = _mm512_setzero_ps();
-                d20 = _mm512_setzero_ps();
-                d30 = _mm512_setzero_ps();
-                d40 = _mm512_setzero_ps();
-                d50 = _mm512_setzero_ps();
-                for (size_t offset = 0; offset < srcC; ++offset)
-                {
-                    w0 = _mm512_loadu_ps(weight + 0);
-                    s0 = _mm512_set1_ps(src0[offset]);
-                    d00 = _mm512_fmadd_ps(s0, w0, d00);
-                    s0 = _mm512_set1_ps(src1[offset]);
-                    d10 = _mm512_fmadd_ps(s0, w0, d10);
-                    s0 = _mm512_set1_ps(src2[offset]);
-                    d20 = _mm512_fmadd_ps(s0, w0, d20);
-                    s0 = _mm512_set1_ps(src3[offset]);
-                    d30 = _mm512_fmadd_ps(s0, w0, d30);
-                    s0 = _mm512_set1_ps(src4[offset]);
-                    d40 = _mm512_fmadd_ps(s0, w0, d40);
-                    s0 = _mm512_set1_ps(src5[offset]);
-                    d50 = _mm512_fmadd_ps(s0, w0, d50);
-                    weight += DF;
-                }
-                Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tails[0]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tails[0]);
-                dst += dD;
-                Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tails[0]);
+                Term<term>::template Save<type, 0>(dst + 0, dd0, bias, params, tails[0]);
             }
         }
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(const float* src0, const ConvParam32f& p,
             size_t srcC, const float* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2])
         {
-            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
+            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1, dc0, dc1, dd0, dd1, s0, w0, w1;
             size_t dS = p.srcC, dD = p.dstC;
             const float* src1 = src0 + 1 * dS;
             const float* src2 = src0 + 2 * dS;
             const float* src3 = src0 + 3 * dS;
             const float* src4 = src0 + 4 * dS;
             const float* src5 = src0 + 5 * dS;
+            const float* src6 = src0 + 6 * dS;
             if (tails[1])
             {
-                if (M > 0) d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
-                if (M > 1) d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
-                if (M > 2) d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
-                if (M > 3) d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
-                if (M > 4) d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
-                if (M > 5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
-                for (size_t offset = 0; offset < srcC; ++offset)
+                if (M > 0x0) d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
+                if (M > 0x1) d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
+                if (M > 0x2) d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
+                if (M > 0x3) d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
+                if (M > 0x4) d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
+                if (M > 0x5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
+                if (M > 0x6) d60 = _mm512_setzero_ps(), d61 = _mm512_setzero_ps();
+                if (M > 0x7) d70 = _mm512_setzero_ps(), d71 = _mm512_setzero_ps();
+                if (M > 0x8) d80 = _mm512_setzero_ps(), d81 = _mm512_setzero_ps();
+                if (M > 0x9) d90 = _mm512_setzero_ps(), d91 = _mm512_setzero_ps();
+                if (M > 0xa) da0 = _mm512_setzero_ps(), da1 = _mm512_setzero_ps();
+                if (M > 0xb) db0 = _mm512_setzero_ps(), db1 = _mm512_setzero_ps();
+                if (M > 0xc) dc0 = _mm512_setzero_ps(), dc1 = _mm512_setzero_ps();
+                if (M > 0xd) dd0 = _mm512_setzero_ps(), dd1 = _mm512_setzero_ps();
+                if (srcC * 2 * F * sizeof(float) > PREFETCH_SIZE)
                 {
-                    w0 = _mm512_loadu_ps(weight + 0);
-                    w1 = _mm512_loadu_ps(weight + F);
-                    if (M > 0) s0 = _mm512_set1_ps(src0[offset]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
-                    if (M > 1) s0 = _mm512_set1_ps(src1[offset]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
-                    if (M > 2) s0 = _mm512_set1_ps(src2[offset]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
-                    if (M > 3) s0 = _mm512_set1_ps(src3[offset]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
-                    if (M > 4) s0 = _mm512_set1_ps(src4[offset]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
-                    if (M > 5) s0 = _mm512_set1_ps(src5[offset]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
-                    weight += DF;
+                    for (size_t offset0 = 0, offset7 = 7 * dS; offset0 < srcC; ++offset0, ++offset7)
+                    {
+                        PrefetchL1(weight + 0);
+                        PrefetchL1(weight + F);
+                        w0 = _mm512_loadu_ps(weight + 0);
+                        w1 = _mm512_loadu_ps(weight + F);
+                        if (M > 0x0) s0 = _mm512_set1_ps(src0[offset0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+                        if (M > 0x1) s0 = _mm512_set1_ps(src1[offset0]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
+                        if (M > 0x2) s0 = _mm512_set1_ps(src2[offset0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
+                        if (M > 0x3) s0 = _mm512_set1_ps(src3[offset0]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        if (M > 0x4) s0 = _mm512_set1_ps(src4[offset0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
+                        if (M > 0x5) s0 = _mm512_set1_ps(src5[offset0]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
+                        if (M > 0x6) s0 = _mm512_set1_ps(src6[offset0]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
+                        if (M > 0x7) s0 = _mm512_set1_ps(src0[offset7]), d70 = _mm512_fmadd_ps(s0, w0, d70), d71 = _mm512_fmadd_ps(s0, w1, d71);
+                        if (M > 0x8) s0 = _mm512_set1_ps(src1[offset7]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
+                        if (M > 0x9) s0 = _mm512_set1_ps(src2[offset7]), d90 = _mm512_fmadd_ps(s0, w0, d90), d91 = _mm512_fmadd_ps(s0, w1, d91);
+                        if (M > 0xa) s0 = _mm512_set1_ps(src3[offset7]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
+                        if (M > 0xb) s0 = _mm512_set1_ps(src4[offset7]), db0 = _mm512_fmadd_ps(s0, w0, db0), db1 = _mm512_fmadd_ps(s0, w1, db1);
+                        if (M > 0xc) s0 = _mm512_set1_ps(src5[offset7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0), dc1 = _mm512_fmadd_ps(s0, w1, dc1);
+                        if (M > 0xd) s0 = _mm512_set1_ps(src6[offset7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0), dd1 = _mm512_fmadd_ps(s0, w1, dd1);
+                        weight += DF;
+                    }
                 }
-                if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]), dst += dD;
-                if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]), dst += dD;
-                if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]), dst += dD;
-                if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tails[1]), dst += dD;
-                if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tails[1]), dst += dD;
-                if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tails[1]), dst += dD;
+                else
+                {
+                    for (size_t offset0 = 0, offset7 = 7 * dS; offset0 < srcC; ++offset0, ++offset7)
+                    {
+                        w0 = _mm512_loadu_ps(weight + 0);
+                        w1 = _mm512_loadu_ps(weight + F);
+                        if (M > 0x0) s0 = _mm512_set1_ps(src0[offset0]), d00 = _mm512_fmadd_ps(s0, w0, d00), d01 = _mm512_fmadd_ps(s0, w1, d01);
+                        if (M > 0x1) s0 = _mm512_set1_ps(src1[offset0]), d10 = _mm512_fmadd_ps(s0, w0, d10), d11 = _mm512_fmadd_ps(s0, w1, d11);
+                        if (M > 0x2) s0 = _mm512_set1_ps(src2[offset0]), d20 = _mm512_fmadd_ps(s0, w0, d20), d21 = _mm512_fmadd_ps(s0, w1, d21);
+                        if (M > 0x3) s0 = _mm512_set1_ps(src3[offset0]), d30 = _mm512_fmadd_ps(s0, w0, d30), d31 = _mm512_fmadd_ps(s0, w1, d31);
+                        if (M > 0x4) s0 = _mm512_set1_ps(src4[offset0]), d40 = _mm512_fmadd_ps(s0, w0, d40), d41 = _mm512_fmadd_ps(s0, w1, d41);
+                        if (M > 0x5) s0 = _mm512_set1_ps(src5[offset0]), d50 = _mm512_fmadd_ps(s0, w0, d50), d51 = _mm512_fmadd_ps(s0, w1, d51);
+                        if (M > 0x6) s0 = _mm512_set1_ps(src6[offset0]), d60 = _mm512_fmadd_ps(s0, w0, d60), d61 = _mm512_fmadd_ps(s0, w1, d61);
+                        if (M > 0x7) s0 = _mm512_set1_ps(src0[offset7]), d70 = _mm512_fmadd_ps(s0, w0, d70), d71 = _mm512_fmadd_ps(s0, w1, d71);
+                        if (M > 0x8) s0 = _mm512_set1_ps(src1[offset7]), d80 = _mm512_fmadd_ps(s0, w0, d80), d81 = _mm512_fmadd_ps(s0, w1, d81);
+                        if (M > 0x9) s0 = _mm512_set1_ps(src2[offset7]), d90 = _mm512_fmadd_ps(s0, w0, d90), d91 = _mm512_fmadd_ps(s0, w1, d91);
+                        if (M > 0xa) s0 = _mm512_set1_ps(src3[offset7]), da0 = _mm512_fmadd_ps(s0, w0, da0), da1 = _mm512_fmadd_ps(s0, w1, da1);
+                        if (M > 0xb) s0 = _mm512_set1_ps(src4[offset7]), db0 = _mm512_fmadd_ps(s0, w0, db0), db1 = _mm512_fmadd_ps(s0, w1, db1);
+                        if (M > 0xc) s0 = _mm512_set1_ps(src5[offset7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0), dc1 = _mm512_fmadd_ps(s0, w1, dc1);
+                        if (M > 0xd) s0 = _mm512_set1_ps(src6[offset7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0), dd1 = _mm512_fmadd_ps(s0, w1, dd1);
+                        weight += DF;
+                    }
+                }
+                if (M > 0x0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params), Term<term>::template Save<type, 1>(dst + F, d01, bias, params, tails[1]), dst += dD;
+                if (M > 0x1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params), Term<term>::template Save<type, 1>(dst + F, d11, bias, params, tails[1]), dst += dD;
+                if (M > 0x2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params), Term<term>::template Save<type, 1>(dst + F, d21, bias, params, tails[1]), dst += dD;
+                if (M > 0x3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params), Term<term>::template Save<type, 1>(dst + F, d31, bias, params, tails[1]), dst += dD;
+                if (M > 0x4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params), Term<term>::template Save<type, 1>(dst + F, d41, bias, params, tails[1]), dst += dD;
+                if (M > 0x5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params), Term<term>::template Save<type, 1>(dst + F, d51, bias, params, tails[1]), dst += dD;
+                if (M > 0x6) Term<term>::template Save<type, 0>(dst + 0, d60, bias, params), Term<term>::template Save<type, 1>(dst + F, d61, bias, params, tails[1]), dst += dD;
+                if (M > 0x7) Term<term>::template Save<type, 0>(dst + 0, d70, bias, params), Term<term>::template Save<type, 1>(dst + F, d71, bias, params, tails[1]), dst += dD;
+                if (M > 0x8) Term<term>::template Save<type, 0>(dst + 0, d80, bias, params), Term<term>::template Save<type, 1>(dst + F, d81, bias, params, tails[1]), dst += dD;
+                if (M > 0x9) Term<term>::template Save<type, 0>(dst + 0, d90, bias, params), Term<term>::template Save<type, 1>(dst + F, d91, bias, params, tails[1]), dst += dD;
+                if (M > 0xa) Term<term>::template Save<type, 0>(dst + 0, da0, bias, params), Term<term>::template Save<type, 1>(dst + F, da1, bias, params, tails[1]), dst += dD;
+                if (M > 0xb) Term<term>::template Save<type, 0>(dst + 0, db0, bias, params), Term<term>::template Save<type, 1>(dst + F, db1, bias, params, tails[1]), dst += dD;
+                if (M > 0xc) Term<term>::template Save<type, 0>(dst + 0, dc0, bias, params), Term<term>::template Save<type, 1>(dst + F, dc1, bias, params, tails[1]), dst += dD;
+                if (M > 0xd) Term<term>::template Save<type, 0>(dst + 0, dd0, bias, params), Term<term>::template Save<type, 1>(dst + F, dd1, bias, params, tails[1]), dst += dD;
             }
             else
             {
-                if (M > 0) d00 = _mm512_setzero_ps();
-                if (M > 1) d10 = _mm512_setzero_ps();
-                if (M > 2) d20 = _mm512_setzero_ps();
-                if (M > 3) d30 = _mm512_setzero_ps();
-                if (M > 4) d40 = _mm512_setzero_ps();
-                if (M > 5) d50 = _mm512_setzero_ps();
-                for (size_t offset = 0; offset < srcC; ++offset)
+                if (M > 0x0) d00 = _mm512_setzero_ps();
+                if (M > 0x1) d10 = _mm512_setzero_ps();
+                if (M > 0x2) d20 = _mm512_setzero_ps();
+                if (M > 0x3) d30 = _mm512_setzero_ps();
+                if (M > 0x4) d40 = _mm512_setzero_ps();
+                if (M > 0x5) d50 = _mm512_setzero_ps();
+                if (M > 0x6) d60 = _mm512_setzero_ps();
+                if (M > 0x7) d70 = _mm512_setzero_ps();
+                if (M > 0x8) d80 = _mm512_setzero_ps();
+                if (M > 0x9) d90 = _mm512_setzero_ps();
+                if (M > 0xa) da0 = _mm512_setzero_ps();
+                if (M > 0xb) db0 = _mm512_setzero_ps();
+                if (M > 0xc) dc0 = _mm512_setzero_ps();
+                if (M > 0xd) dd0 = _mm512_setzero_ps();
+                for (size_t offset0 = 0, offset7 = 7 * dS; offset0 < srcC; ++offset0, ++offset7)
                 {
                     w0 = _mm512_loadu_ps(weight + 0);
-                    if (M > 0) s0 = _mm512_set1_ps(src0[offset]), d00 = _mm512_fmadd_ps(s0, w0, d00);
-                    if (M > 1) s0 = _mm512_set1_ps(src1[offset]), d10 = _mm512_fmadd_ps(s0, w0, d10);
-                    if (M > 2) s0 = _mm512_set1_ps(src2[offset]), d20 = _mm512_fmadd_ps(s0, w0, d20);
-                    if (M > 3) s0 = _mm512_set1_ps(src3[offset]), d30 = _mm512_fmadd_ps(s0, w0, d30);
-                    if (M > 4) s0 = _mm512_set1_ps(src4[offset]), d40 = _mm512_fmadd_ps(s0, w0, d40);
-                    if (M > 5) s0 = _mm512_set1_ps(src5[offset]), d50 = _mm512_fmadd_ps(s0, w0, d50);
+                    if (M > 0x0) s0 = _mm512_set1_ps(src0[offset0]), d00 = _mm512_fmadd_ps(s0, w0, d00);
+                    if (M > 0x1) s0 = _mm512_set1_ps(src1[offset0]), d10 = _mm512_fmadd_ps(s0, w0, d10);
+                    if (M > 0x2) s0 = _mm512_set1_ps(src2[offset0]), d20 = _mm512_fmadd_ps(s0, w0, d20);
+                    if (M > 0x3) s0 = _mm512_set1_ps(src3[offset0]), d30 = _mm512_fmadd_ps(s0, w0, d30);
+                    if (M > 0x4) s0 = _mm512_set1_ps(src4[offset0]), d40 = _mm512_fmadd_ps(s0, w0, d40);
+                    if (M > 0x5) s0 = _mm512_set1_ps(src5[offset0]), d50 = _mm512_fmadd_ps(s0, w0, d50);
+                    if (M > 0x6) s0 = _mm512_set1_ps(src6[offset0]), d60 = _mm512_fmadd_ps(s0, w0, d60);
+                    if (M > 0x7) s0 = _mm512_set1_ps(src0[offset7]), d70 = _mm512_fmadd_ps(s0, w0, d70);
+                    if (M > 0x8) s0 = _mm512_set1_ps(src1[offset7]), d80 = _mm512_fmadd_ps(s0, w0, d80);
+                    if (M > 0x9) s0 = _mm512_set1_ps(src2[offset7]), d90 = _mm512_fmadd_ps(s0, w0, d90);
+                    if (M > 0xa) s0 = _mm512_set1_ps(src3[offset7]), da0 = _mm512_fmadd_ps(s0, w0, da0);
+                    if (M > 0xb) s0 = _mm512_set1_ps(src4[offset7]), db0 = _mm512_fmadd_ps(s0, w0, db0);
+                    if (M > 0xc) s0 = _mm512_set1_ps(src5[offset7]), dc0 = _mm512_fmadd_ps(s0, w0, dc0);
+                    if (M > 0xd) s0 = _mm512_set1_ps(src6[offset7]), dd0 = _mm512_fmadd_ps(s0, w0, dd0);
                     weight += DF;
                 }
-                if (M > 0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]), dst += dD;
-                if (M > 1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]), dst += dD;
-                if (M > 2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]), dst += dD;
-                if (M > 3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tails[0]), dst += dD;
-                if (M > 4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tails[0]), dst += dD;
-                if (M > 5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tails[0]), dst += dD;
+                if (M > 0x0) Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, tails[0]), dst += dD;
+                if (M > 0x1) Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, tails[0]), dst += dD;
+                if (M > 0x2) Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, tails[0]), dst += dD;
+                if (M > 0x3) Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, tails[0]), dst += dD;
+                if (M > 0x4) Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, tails[0]), dst += dD;
+                if (M > 0x5) Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, tails[0]), dst += dD;
+                if (M > 0x6) Term<term>::template Save<type, 0>(dst + 0, d60, bias, params, tails[0]), dst += dD;
+                if (M > 0x7) Term<term>::template Save<type, 0>(dst + 0, d70, bias, params, tails[0]), dst += dD;
+                if (M > 0x8) Term<term>::template Save<type, 0>(dst + 0, d80, bias, params, tails[0]), dst += dD;
+                if (M > 0x9) Term<term>::template Save<type, 0>(dst + 0, d90, bias, params, tails[0]), dst += dD;
+                if (M > 0xa) Term<term>::template Save<type, 0>(dst + 0, da0, bias, params, tails[0]), dst += dD;
+                if (M > 0xb) Term<term>::template Save<type, 0>(dst + 0, db0, bias, params, tails[0]), dst += dD;
+                if (M > 0xc) Term<term>::template Save<type, 0>(dst + 0, dc0, bias, params, tails[0]), dst += dD;
+                if (M > 0xd) Term<term>::template Save<type, 0>(dst + 0, dd0, bias, params, tails[0]), dst += dD;
+
             }
         }
 
@@ -1021,12 +1031,20 @@ namespace Simd
         {
             switch (M)
             {
-            case 0: return ConvolutionNhwcDirect1x1_2xM<term, type, 0>;
-            case 1: return ConvolutionNhwcDirect1x1_2xM<term, type, 1>;
-            case 2: return ConvolutionNhwcDirect1x1_2xM<term, type, 2>;
-            case 3: return ConvolutionNhwcDirect1x1_2xM<term, type, 3>;
-            case 4: return ConvolutionNhwcDirect1x1_2xM<term, type, 4>;
-            case 5: return ConvolutionNhwcDirect1x1_2xM<term, type, 5>;
+            case 0x0: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x0>;
+            case 0x1: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x1>;
+            case 0x2: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x2>;
+            case 0x3: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x3>;
+            case 0x4: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x4>;
+            case 0x5: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x5>;
+            case 0x6: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x6>;
+            case 0x7: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x7>;
+            case 0x8: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x8>;
+            case 0x9: return ConvolutionNhwcDirect1x1_2xM<term, type, 0x9>;
+            case 0xa: return ConvolutionNhwcDirect1x1_2xM<term, type, 0xa>;
+            case 0xb: return ConvolutionNhwcDirect1x1_2xM<term, type, 0xb>;
+            case 0xc: return ConvolutionNhwcDirect1x1_2xM<term, type, 0xc>;
+            case 0xd: return ConvolutionNhwcDirect1x1_2xM<term, type, 0xd>;
             }
             assert(0);
             return NULL;
@@ -1035,11 +1053,12 @@ namespace Simd
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float* src, const ConvParam32f& p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
         {
+            const size_t n = 14;
             size_t n1 = (yEnd - yBeg) * p.dstW;
-            size_t n6 = AlignLoAny(n1, 6);
-            size_t n12 = AlignLoAny(n1, 12);
-            size_t nTail = n1 - n6;
-            ConvolutionNhwcDirect1x1_2xM_Ptr tailN = GetConvolutionNhwcDirect1x1_2xM<term, type>(nTail);
+            size_t nn = AlignLoAny(n1, n);
+            size_t m = n1 - nn;
+            ConvolutionNhwcDirect1x1_2xM_Ptr convN = ConvolutionNhwcDirect1x1_2x14<term, type>;
+            ConvolutionNhwcDirect1x1_2xM_Ptr convM = GetConvolutionNhwcDirect1x1_2xM<term, type>(m);
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -1060,12 +1079,10 @@ namespace Simd
                 const float* ps = src + yBeg * p.srcW * p.srcC;
                 float* pd = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
-                for (; i < n12; i += 12, ps += 12 * p.srcC, pd += 12 * p.dstC)
-                    ConvolutionNhwcDirect1x1_2x12<term, type>(ps, p, srcC, weight, _bias, _params, pd, tails);
-                for (; i < n6; i += 6, ps += 6 * p.srcC, pd += 6 * p.dstC)
-                    ConvolutionNhwcDirect1x1_2x6<term, type>(ps, p, srcC, weight, _bias, _params, pd, tails);
-                if (nTail)
-                    tailN(ps, p, srcC, weight, _bias, _params, pd, tails), ps += nTail * p.srcC, pd += nTail * p.dstC;
+                for (; i < nn; i += n, ps += n * p.srcC, pd += n * p.dstC)
+                    convN(ps, p, srcC, weight, _bias, _params, pd, tails);
+                for (; i < n1; i += m, ps += m * p.srcC, pd += m * p.dstC)
+                    convM(ps, p, srcC, weight, _bias, _params, pd, tails);
                 weight += srcC * DF;
             }
         }
