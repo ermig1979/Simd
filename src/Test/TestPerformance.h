@@ -148,9 +148,9 @@ namespace Test
 	double startTime = Test::GetTime(); \
 	do \
 	{ \
-		test; \
         if(Test::LITTER_CPU_CACHE) \
             Simd::LitterCpuCache(Test::LITTER_CPU_CACHE); \
+		test; \
 	} \
 	while(Test::GetTime() - startTime < Test::MINIMAL_TEST_EXECUTION_TIME); \
 }

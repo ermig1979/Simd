@@ -323,7 +323,7 @@ namespace Test
     static void AddToCommon(const FunctionStatistic & s, const StatisticEnable & enable, CommonStatistic & d)
     {
         Add(s.simd, d.simd);
-        Add(s.base, d.base);
+        if (enable.base) Add(Cond(s.base, s.simd), d.base);
         if (enable.sse) Add(Cond(s.sse, s.base), d.sse);
         if (enable.sse2) Add(Cond(s.sse2, Cond(s.sse, s.base)), d.sse2);
         if (enable.ssse3) Add(Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))), d.ssse3);
@@ -381,12 +381,15 @@ namespace Test
 		for (size_t i = 0; i < enable.Size(); ++i)
 			if (enable[i])
 				table.SetHeader(col++, names[i].full, i == last, Table::Right);
-		for (size_t i = 2; i < enable.Size(); ++i)
-			if (enable[i])
-				table.SetHeader(col++, String(names[1].brief) + "/" + names[i].brief, i == last, Table::Right);
-		for (size_t i = 2; i < enable.Size(); ++i)
-			if (enable[i])
-				table.SetHeader(col++, String("P/") + names[i].brief, i == last, Table::Right);
+        if (enable[1])
+        {
+            for (size_t i = 2; i < enable.Size(); ++i)
+                if (enable[i])
+                    table.SetHeader(col++, String(names[1].brief) + "/" + names[i].brief, i == last, Table::Right);
+            for (size_t i = 2; i < enable.Size(); ++i)
+                if (enable[i])
+                    table.SetHeader(col++, String("P/") + names[i].brief, i == last, Table::Right);
+        }
 		if (align)
 		{
 			for (size_t i = 0; i < enable.Size(); ++i)
@@ -403,12 +406,15 @@ namespace Test
         for (size_t i = 0; i < statistic.Size(); ++i)
             if (enable[i])
                 table.SetCell(col++, row, ToString(statistic[i].first.Average()*1000.0, V, false));
-        for (size_t i = 2; i < statistic.Size(); ++i)
-            if (enable[i])
-                table.SetCell(col++, row, ToString(Test::Relation(statistic[1].first, statistic[i].first), R, false));
-        for (size_t i = 2; i < statistic.Size(); ++i)
-            if (enable[i])
-                table.SetCell(col++, row, ToString(Test::Relation(Previous(statistic[i]).first, statistic[i].first), R, false));
+        if (enable[1])
+        {
+            for (size_t i = 2; i < statistic.Size(); ++i)
+                if (enable[i])
+                    table.SetCell(col++, row, ToString(Test::Relation(statistic[1].first, statistic[i].first), R, false));
+            for (size_t i = 2; i < statistic.Size(); ++i)
+                if (enable[i])
+                    table.SetCell(col++, row, ToString(Test::Relation(Previous(statistic[i]).first, statistic[i].first), R, false));
+        }
         if (align)
         {
             for (size_t i = 0; i < statistic.Size(); ++i)
