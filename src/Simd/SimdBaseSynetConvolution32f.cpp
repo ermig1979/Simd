@@ -921,7 +921,7 @@ namespace Simd
                 for (size_t m = 0; m < _merge; ++m)
                 {
                     _setOutput(bufD + m * _strideD, _strideD * _merge, dst + m * _sizeD, p.dstC, p.dstH, p.dstW, p.trans);
-                    _biasAndActivation(_bias, p.dstC, p.dstH*p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
+                    _biasAndActivation(_bias, p.dstC, p.dstH * p.dstW, p.activation, _params, p.trans, dst + m * _sizeD);
                 }
                 src += _sizeS * _merge;
                 dst += _sizeD * _merge;

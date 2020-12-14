@@ -39,7 +39,10 @@ namespace Simd
             return Base::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_ALTIVEC);
         }
 
-        const bool Enable = SupportedByCPU();
+        bool GetEnable()
+        {
+            return SupportedByCPU();
+        }
     }
 #endif// SIMD_VMX_ENABLE
 }

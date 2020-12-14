@@ -31,98 +31,126 @@ namespace Simd
 #ifdef SIMD_SSE_ENABLE
     namespace Sse
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_SSE3_ENABLE
     namespace Sse3
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_SSE42_ENABLE
     namespace Sse42
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_AVX512F_ENABLE
     namespace Avx512f
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE
     namespace Avx512vnni
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_VSX_ENABLE
     namespace Vsx
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
-        extern const bool Enable;
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
     }
 #endif
 }

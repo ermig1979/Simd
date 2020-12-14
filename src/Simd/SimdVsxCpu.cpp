@@ -39,7 +39,10 @@ namespace Simd
             return Base::CheckBit(AT_HWCAP, PPC_FEATURE_HAS_VSX);
         }
 
-        const bool Enable = SupportedByCPU();
+        bool GetEnable()
+        {
+            return SupportedByCPU();
+        }
     }
 #endif// SIMD_VSX_ENABLE
 }

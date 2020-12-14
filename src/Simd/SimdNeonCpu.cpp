@@ -50,7 +50,10 @@ namespace Simd
 #endif
         }
 
-        const bool Enable = SupportedByCPU();
+        bool GetEnable()
+        {
+            return SupportedByCPU();
+        }
     }
 #endif
 }
