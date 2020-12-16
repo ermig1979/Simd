@@ -26,6 +26,7 @@
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdAlphaBlending.h"
+#include "Simd/SimdAvx2.h"
 
 namespace Simd
 {
@@ -318,6 +319,12 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+#if defined(_MSC_VER) && _MSC_VER < 1927
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+        }
+#else
         const __m512i K8_SHUFFLE_BGRA_TO_B = SIMD_MM512_SETR_EPI8(
             0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
             0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1,
@@ -374,6 +381,7 @@ namespace Simd
                 dst += dstStride;
             }
         }
+#endif
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

@@ -35,8 +35,8 @@ namespace Simd
     {
         template<bool mask, bool nofma> SIMD_INLINE void SynetAdd8iNchwF(const uint8_t* a, const uint8_t* b, __m512 scale[3], __m512 shift[3], __m128i upper, uint8_t* c, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _a = Fmadd<nofma>(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Load<false, mask>(a + offset, tail))), scale[0], shift[0]);
-            __m512 _b = Fmadd<nofma>(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Load<false, mask>(b + offset, tail))), scale[1], shift[1]);
+            __m512 _a = Fmadd<nofma>(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(a + offset, tail)))), scale[0], shift[0]);
+            __m512 _b = Fmadd<nofma>(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(b + offset, tail)))), scale[1], shift[1]);
             __m512i c32 = _mm512_cvtps_epi32(Fmadd<nofma>(_mm512_add_ps(_a, _b), scale[2], shift[2]));
             __m512i c8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(c32, K_ZERO), K_ZERO));
             Store<false, mask>(c + offset, _mm_min_epu8(_mm512_extracti32x4_epi32(c8, 0), upper), tail);
@@ -74,11 +74,11 @@ namespace Simd
         template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetAdd8iNhwcF(const uint8_t* a, const float* aScale, const float* aShift,
             const uint8_t* b, const float* bScale, const float* bShift, const float* cScale, const float* cShift, __m128i upper, uint8_t* c, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _a = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Load<false, mask>(a + offset, tail)));
+            __m512 _a = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(a + offset, tail))));
             __m512 _aScale = Avx512f::Load<align, mask>(aScale + offset, tail);
             __m512 _aShift = Avx512f::Load<align, mask>(aShift + offset, tail);
             _a = Fmadd<nofma>(_a, _aScale, _aShift);
-            __m512 _b = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Load<false, mask>(b + offset, tail)));
+            __m512 _b = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(b + offset, tail))));
             __m512 _bScale = Avx512f::Load<align, mask>(bScale + offset, tail);
             __m512 _bShift = Avx512f::Load<align, mask>(bShift + offset, tail);
             _b = Fmadd<nofma>(_b, _bScale, _bShift);
