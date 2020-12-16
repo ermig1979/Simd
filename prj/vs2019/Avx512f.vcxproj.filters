@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fFill.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32f.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fNeural.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
@@ -65,6 +62,15 @@
       <Filter>Avx512f</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNN.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNT.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
   </ItemGroup>

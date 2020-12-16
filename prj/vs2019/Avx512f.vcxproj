@@ -12,7 +12,9 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fFill.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNT.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fNeural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fResizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSquaredDifferenceSum.cpp" />
