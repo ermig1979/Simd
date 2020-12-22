@@ -53,9 +53,6 @@ Functions</h2></td></tr>
 <tr class="memitem:ga173589ebbd59bf2d214c8a82cefe1487"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__filter.html#ga173589ebbd59bf2d214c8a82cefe1487">SimdAbsGradientSaturatedSum</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga173589ebbd59bf2d214c8a82cefe1487"><td class="mdescLeft">&#160;</td><td class="mdescRight">Puts to destination 8-bit gray image saturated sum of absolute gradient for every point of source 8-bit gray image.  <a href="group__other__filter.html#ga173589ebbd59bf2d214c8a82cefe1487">More...</a><br /></td></tr>
 <tr class="separator:ga173589ebbd59bf2d214c8a82cefe1487"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gaf37e85de82125071158ae2db59fb5643"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__filter.html#gaf37e85de82125071158ae2db59fb5643">SimdGaussianBlur3x3</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
-<tr class="memdesc:gaf37e85de82125071158ae2db59fb5643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs Gaussian blur filtration with window 3x3.  <a href="group__other__filter.html#gaf37e85de82125071158ae2db59fb5643">More...</a><br /></td></tr>
-<tr class="separator:gaf37e85de82125071158ae2db59fb5643"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gaaa72e337646111ae500ae87621912f2a"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__filter.html#gaaa72e337646111ae500ae87621912f2a">SimdLbpEstimate</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:gaaa72e337646111ae500ae87621912f2a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates LBP (Local Binary Patterns) for 8-bit gray image.  <a href="group__other__filter.html#gaaa72e337646111ae500ae87621912f2a">More...</a><br /></td></tr>
 <tr class="separator:gaaa72e337646111ae500ae87621912f2a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -147,83 +144,6 @@ dst[x, y] = min(dx + dy, 255);
     <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of destination 8-bit gray image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of destination image. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="gaf37e85de82125071158ae2db59fb5643"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaf37e85de82125071158ae2db59fb5643">&#9670;&nbsp;</a></span>SimdGaussianBlur3x3()</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void SimdGaussianBlur3x3 </td>
-          <td>(</td>
-          <td class="paramtype">const uint8_t *&#160;</td>
-          <td class="paramname"><em>src</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>srcStride</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>width</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>height</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>channelCount</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">uint8_t *&#160;</td>
-          <td class="paramname"><em>dst</em>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">size_t&#160;</td>
-          <td class="paramname"><em>dstStride</em>&#160;</td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>)</td>
-          <td></td><td></td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Performs Gaussian blur filtration with window 3x3. </p>
-<p>For every point: </p><pre class="fragment">dst[x, y] = (src[x-1, y-1] + 2*src[x, y-1] + src[x+1, y-1] +
-            2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
-            src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
-</pre><p>All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper <a class="el" href="group__other__filter.html#gaa29b7141aee6c148e83e27b1ff61a0e7" title="Performs Gaussian blur filtration with window 3x3.">Simd::GaussianBlur3x3(const View&lt;A&gt;&amp; src, View&lt;A&gt;&amp; dst)</a>.</dd></dl>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of source image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size of the src image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channelCount</td><td>- a channel count. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of destination image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">dstStride</td><td>- a row size of the dst image. </td></tr>
   </table>
   </dd>
 </dl>
@@ -448,7 +368,7 @@ dst[x, y] = min(dx + dy, 255);
             2*(src[x-1, y] + 2*src[x, y] + src[x+1, y]) +
             src[x-1, y+1] + 2*src[x, y+1] + src[x+1, y+1] + 8) / 16;
 </pre><p> All images must have the same width, height and format (8-bit gray, 16-bit UV, 24-bit BGR or 32-bit BGRA).</p>
-<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__filter.html#gaf37e85de82125071158ae2db59fb5643" title="Performs Gaussian blur filtration with window 3x3.">SimdGaussianBlur3x3</a>.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__gaussian__filter.html#gaf37e85de82125071158ae2db59fb5643" title="Performs Gaussian blur filtration with window 3x3.">SimdGaussianBlur3x3</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a source image. </td></tr>

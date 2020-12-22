@@ -378,6 +378,16 @@
 */
 
 /*! @ingroup filter
+    @defgroup gaussian_filter Gaussian Blur Filters
+    \short Gaussian blur image filters.
+*/
+
+/*! @ingroup filter
+    @defgroup laplace_filter Laplace Filters
+    \short Laplace image filters.
+*/
+
+/*! @ingroup filter
     @defgroup median_filter Median Filters
     \short Median image filters.
 */
@@ -385,11 +395,6 @@
 /*! @ingroup filter
     @defgroup sobel_filter Sobel Filters
     \short Sobel image filters.
-*/
-
-/*! @ingroup filter
-    @defgroup laplace_filter Laplace Filters
-    \short Laplace image filters.
 */
 
 /*! @ingroup filter

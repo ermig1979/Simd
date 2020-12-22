@@ -2850,7 +2850,7 @@ extern "C"
     */
     SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance);
 
-    /*! @ingroup other_filter
+    /*! @ingroup gaussian_filter
 
         \fn void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
 
@@ -2877,6 +2877,36 @@ extern "C"
     */
     SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         size_t channelCount, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup gaussian_filter
+
+        \fn void * SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * radius);
+
+        \short Creates Gaussian blur filter context.
+
+        \param [in] width - a width of input and output image.
+        \param [in] height - a height of input and output image.
+        \param [in] channels - a channel number of input and output image.
+        \param [in] radius - a pointer to radius of Gaussian blur.
+        \return a pointer to filter context. On error it returns NULL.
+                This pointer is used in functions ::SimdGaussianBlurRun.
+                It must be released with using of function ::SimdRelease.
+    */
+    SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * radius);
+
+    /*! @ingroup gaussian_filter
+
+        \fn void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        \short Performs image Gaussian bluring.
+
+        \param [in] filter - a filter context. It must be created by function ::SimdGaussianBlurInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to pixels data of the original input image.
+        \param [in] srcStride - a row size (in bytes) of the input image.
+        \param [out] dst - a pointer to pixels data of the filtered output image.
+        \param [in] dstStride - a row size (in bytes) of the output image.
+    */
+    SIMD_API void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
     /*! @ingroup matrix
 

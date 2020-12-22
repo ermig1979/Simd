@@ -91,9 +91,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat32.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur3x3.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseGemm32f.cpp">
       <Filter>Base</Filter>
     </ClCompile>
@@ -251,6 +248,9 @@
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseSynetMergedConvolution8i.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur.cpp">
       <Filter>Base</Filter>
     </ClCompile>
   </ItemGroup>

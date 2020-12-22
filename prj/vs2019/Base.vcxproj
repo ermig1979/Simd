@@ -99,7 +99,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseFloat32.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseGaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseGrayToBgra.cpp" />
