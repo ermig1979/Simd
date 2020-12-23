@@ -25,6 +25,8 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
+#include "Simd/SimdGaussianBlur.h"
+
 namespace Test
 {
     namespace
@@ -301,6 +303,8 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
 
     namespace
     {
@@ -692,6 +696,130 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
+    namespace
+    {
+        struct FuncGB
+        {
+            typedef void* (*FuncPtr)(size_t width, size_t height, size_t channels, const float* radius);
+
+            FuncPtr func;
+            String description;
+
+            FuncGB(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Update(size_t c, float r)
+            {
+                std::stringstream ss;
+                ss << description;
+                ss << "[" << c << "-" << ToString(r, 1, true) << "]";
+                description = ss.str();
+            }
+
+            void Call(const View& src, float radius, View& dst) const
+            {
+                void* filter = NULL;
+                filter = func(src.width, src.height, src.ChannelCount(), &radius);
+                {
+                    TEST_PERFORMANCE_TEST(description);
+                    SimdGaussianBlurRun(filter, src.data, src.stride, dst.data, dst.stride);
+                }
+                SimdRelease(filter);
+            }
+        };
+    }
+
+#define FUNC_GB(function) \
+    FuncGB(function, std::string(#function))
+
+#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
+
+    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float radius, FuncGB f1, FuncGB f2)
+    {
+        bool result = true;
+
+        f1.Update(channels, radius);
+        f2.Update(channels, radius);
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        View::Format format;
+        switch (channels)
+        {
+        case 1: format = View::Gray8; break;
+        case 2: format = View::Uv16; break;
+        case 3: format = View::Bgr24; break;
+        case 4: format = View::Bgra32; break;
+        default:
+            assert(0);
+        }
+
+        View src(width, height, format, NULL, TEST_ALIGN(width));
+#ifdef TEST_GAUSSIAN_BLUR_REAL_IMAGE
+        FillPicture(src);
+#else
+        FillRandom(src);
+#endif
+        View dst1(width, height, format, NULL, TEST_ALIGN(width));
+        View dst2(width, height, format, NULL, TEST_ALIGN(width));
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, radius, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, radius, dst2));
+
+        result = result && Compare(dst1, dst2, 0, true, 64);
+
+#ifdef TEST_GAUSSIAN_BLUR_REAL_IMAGE
+        if (format == View::Bgr24)
+        {
+            src.Save("src.ppm");
+            dst1.Save("dst.ppm");
+        }
+#endif
+
+        return result;
+    }
+
+    bool GaussianBlurAutoTest(int channels, float radius, const FuncGB& f1, const FuncGB& f2)
+    {
+        bool result = true;
+
+        result = result && GaussianBlurAutoTest(W, H, channels, radius, f1, f2);
+        result = result && GaussianBlurAutoTest(W + O, H - O, channels, radius, f1, f2);
+
+        return result;
+    }
+
+    bool GaussianBlurAutoTest(const FuncGB& f1, const FuncGB& f2)
+    {
+        bool result = true;
+
+        for (size_t channels = 0; channels < 4; channels++)
+        {
+            result = result && GaussianBlurAutoTest(channels, 1.0, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 3.0, f1, f2);
+        }
+
+        return result;
+    }
+
+    bool GaussianBlurAutoTest()
+    {
+        bool result = true;
+
+        result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Base::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable)
+//            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sse41::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+//#endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
     bool ColorFilterDataTest(bool create, int width, int height, View::Format format, const FuncC & f)
     {
         bool result = true;
@@ -796,6 +924,8 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
 
     bool GrayFilterDataTest(bool create, int width, int height, View::Format format, const FuncG & f)
     {

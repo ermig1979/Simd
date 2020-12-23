@@ -22,11 +22,34 @@
 * SOFTWARE.
 */
 #include "Simd/SimdDefs.h"
+#include "Simd/SimdGaussianBlur.h"
 
 namespace Simd
 {
+    BlurParam::BlurParam(size_t w, size_t h, size_t c, const float* r)
+        : width(w)
+        , height(h)
+        , channels(c)
+        , radius(*r)
+    {
+    }
+
+    GaussianBlur::GaussianBlur(const BlurParam& param)
+        : _param(param)
+    {
+
+    }
+
     namespace Base
     {
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius)
+        {
+            BlurParam param(width, height, channels, radius);
+
+            return NULL;
+        }
+        //---------------------------------------------------------------------
+
         SIMD_INLINE int DivideBy16(int value)
         {
             return (value + 8) >> 4;
