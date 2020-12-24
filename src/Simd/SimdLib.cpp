@@ -2408,7 +2408,7 @@ SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels
 
 SIMD_API void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
 {
-    ((GaussianBlur*)filter)->Run(src, srcStride, dst, dstStride);
+    ((Base::GaussianBlur*)filter)->Run(src, srcStride, dst, dstStride);
 }
 
 typedef void(*SimdGemm32fPtr) (size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);

@@ -35,29 +35,25 @@ namespace Simd
         size_t height;
         size_t channels;
         float radius;
+        size_t align;
 
-        BlurParam(size_t w, size_t h, size_t c, const float* r);
-    };
-
-    class GaussianBlur : Deletable
-    {
-    public:
-        GaussianBlur(const BlurParam & param);
-
-        virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride) = 0;
-
-    protected:
-        BlurParam _param;
+        BlurParam(size_t w, size_t h, size_t c, const float* r, size_t a);
     };
 
     namespace Base
     {
-        class GaussianBlur : Simd::GaussianBlur
+        class GaussianBlur : Deletable
         {
         public:
             GaussianBlur(const BlurParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        protected:
+            BlurParam _param;
+            size_t _half, _kernel, _edge, _start, _size, _stride;
+            Array8u _buf;
+            Array32f _weight, _rows;
         };
 
         void * GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
