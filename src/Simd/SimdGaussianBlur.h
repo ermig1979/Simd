@@ -38,6 +38,7 @@ namespace Simd
         size_t align;
 
         BlurParam(size_t w, size_t h, size_t c, const float* r, size_t a);
+        bool Valid() const;
     };
 
     namespace Base
@@ -51,8 +52,8 @@ namespace Simd
 
         protected:
             BlurParam _param;
-            size_t _half, _kernel, _edge, _start, _size, _stride;
-            Array8u _buf;
+            size_t _half, _kernel, _edge, _start, _size, _stride, _nose, _body;
+            Array8u _cols;
             Array32f _weight, _rows;
         };
 

@@ -731,7 +731,7 @@ namespace Test
 #define FUNC_GB(function) \
     FuncGB(function, std::string(#function))
 
-#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
+//#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
 
     bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float radius, FuncGB f1, FuncGB f2)
     {
