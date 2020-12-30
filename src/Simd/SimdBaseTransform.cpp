@@ -22,38 +22,12 @@
 * SOFTWARE.
 */
 #include "Simd/SimdDefs.h"
+#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
     namespace Base
     {
-        template<size_t N> SIMD_INLINE void CopyPixel(const uint8_t * src, uint8_t * dst)
-        {
-            for (size_t i = 0; i < N; ++i)
-                dst[i] = src[i];
-        }
-
-        template<> SIMD_INLINE void CopyPixel<1>(const uint8_t * src, uint8_t * dst)
-        {
-            dst[0] = src[0];
-        }
-
-        template<> SIMD_INLINE void CopyPixel<2>(const uint8_t * src, uint8_t * dst)
-        {
-            ((uint16_t*)dst)[0] = ((uint16_t*)src)[0];
-        }
-
-        template<> SIMD_INLINE void CopyPixel<3>(const uint8_t * src, uint8_t * dst)
-        {
-            ((uint16_t*)dst)[0] = ((uint16_t*)src)[0];
-            dst[2] = src[2];
-        }
-
-        template<> SIMD_INLINE void CopyPixel<4>(const uint8_t * src, uint8_t * dst)
-        {
-            ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
-        }
-
         template<size_t N> void TransformImageRotate0(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             size_t rowSize = width * N;

@@ -41,38 +41,56 @@ namespace Simd
         bool Valid() const;
     };
 
+    class GaussianBlur : Deletable
+    {
+    public:
+        GaussianBlur(const BlurParam& param);
+
+        virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride) = 0;
+
+    protected:
+        BlurParam _param;
+    };
+
     namespace Base
     {
-        class GaussianBlur : Deletable
+        struct AlgDefault
+        {
+            size_t half, kernel, edge, start, size, stride, nose, body;
+            Array32f weight;
+        };
+
+        typedef void (*BlurDefaultPtr)(const BlurParam& p, const AlgDefault& a, const uint8_t* src, 
+            size_t srcStride, uint8_t* cols, float* rows, uint8_t* dst, size_t dstStride);
+
+        class GaussianBlurDefault : public Simd::GaussianBlur
         {
         public:
-            GaussianBlur(const BlurParam& param);
+            GaussianBlurDefault(const BlurParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         protected:
-            BlurParam _param;
-            size_t _half, _kernel, _edge, _start, _size, _stride, _nose, _body;
+            AlgDefault _alg;
             Array8u _cols;
-            Array32f _weight, _rows;
+            Array32f _rows;
+            BlurDefaultPtr _blur;
         };
 
         void * GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
     }
 
-//#ifdef SIMD_SSE41_ENABLE    
-//    namespace Sse41
-//    {
-//        class GaussianBlur : Simd::GaussianBlur
-//        {
-//        public:
-//            GaussianBlur(const BlurParam& param);
-//
-//            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-//        };
-//
-//        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
-//    }
-//#endif //SIMD_SSE41_ENABLE
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        class GaussianBlurDefault : public Base::GaussianBlurDefault
+        {
+        public:
+            GaussianBlurDefault(const BlurParam& param);
+        };
+
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+    }
+#endif //SIMD_SSE41_ENABLE
 }
 #endif//__SimdGaussianBlur_h__

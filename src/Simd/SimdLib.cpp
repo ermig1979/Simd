@@ -2398,17 +2398,17 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
 
 SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius)
 {
-//#ifdef SIMD_SSE41_ENABLE
-//    if (Sse41::Enable)
-//        return Sse41::GaussianBlurInit(width, height, channels, radius);
-//    else
-//#endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        return Sse41::GaussianBlurInit(width, height, channels, radius);
+    else
+#endif
         return Base::GaussianBlurInit(width, height, channels, radius);
 }
 
 SIMD_API void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
 {
-    ((Base::GaussianBlur*)filter)->Run(src, srcStride, dst, dstStride);
+    ((GaussianBlur*)filter)->Run(src, srcStride, dst, dstStride);
 }
 
 typedef void(*SimdGemm32fPtr) (size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);

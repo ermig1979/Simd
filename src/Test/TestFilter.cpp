@@ -731,7 +731,7 @@ namespace Test
 #define FUNC_GB(function) \
     FuncGB(function, std::string(#function))
 
-//#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
+#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
 
     bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float radius, FuncGB f1, FuncGB f2)
     {
@@ -774,7 +774,7 @@ namespace Test
         if (format == View::Bgr24)
         {
             src.Save("src.ppm");
-            dst1.Save("dst.ppm");
+            dst1.Save(String("dst_") + ToString((double)radius, 1) + ".ppm");
         }
 #endif
 
@@ -797,6 +797,7 @@ namespace Test
 
         for (size_t channels = 1; channels <= 4; channels++)
         {
+            result = result && GaussianBlurAutoTest(channels, 0.5, f1, f2);
             result = result && GaussianBlurAutoTest(channels, 1.0, f1, f2);
             result = result && GaussianBlurAutoTest(channels, 3.0, f1, f2);
         }
@@ -810,10 +811,10 @@ namespace Test
 
         result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Base::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sse41::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sse41::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+#endif 
 
         return result;
     }

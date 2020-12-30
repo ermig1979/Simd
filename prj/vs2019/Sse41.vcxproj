@@ -13,6 +13,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
