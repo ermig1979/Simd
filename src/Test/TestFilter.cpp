@@ -816,6 +816,11 @@ namespace Test
             result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Sse41::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+#endif 
+
         return result;
     }
 

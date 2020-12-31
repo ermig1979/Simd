@@ -67,9 +67,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Float32.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur3x3.cpp">
-      <Filter>Avx2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Gemm32f.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
@@ -227,6 +224,9 @@
       <Filter>Avx2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx2Cpu.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
   </ItemGroup>

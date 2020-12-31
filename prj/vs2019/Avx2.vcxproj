@@ -34,7 +34,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Float32.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2GrayToBgra.cpp" />
