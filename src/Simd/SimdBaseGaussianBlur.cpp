@@ -57,18 +57,7 @@ namespace Simd
 
     namespace Base
     {
-        SIMD_INLINE void PadCols(const uint8_t* src, size_t half, size_t channels, size_t size, uint8_t* dst)
-        {
-            for (size_t x = 0; x < half; x += 1, dst += channels)
-                for (size_t c = 0; c < channels; ++c)
-                    dst[c] = src[c];
-            memcpy(dst, src, size), dst += size, src += size - channels;
-            for (size_t x = 0; x < half; x += 1, dst += channels)
-                for (size_t c = 0; c < channels; ++c)
-                    dst[c] = src[c];
-        }
-
-        SIMD_INLINE void BlurCols(const uint8_t* src, size_t size, size_t channels, const float* weight, size_t kernel, float* dst)
+        SIMD_INLINE void BlurColsAny(const uint8_t* src, size_t size, size_t channels, const float* weight, size_t kernel, float* dst)
         {
             for (size_t i = 0; i < size; ++i)
             {
@@ -79,31 +68,31 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void BlurRows(const float* src, size_t size, size_t stride, const float* weight, size_t kernel, uint8_t* dst)
+        SIMD_INLINE void BlurRowsAny(const float* src, size_t size, size_t stride, const float* weight, size_t kernel, uint8_t* dst)
         {
             for (size_t i = 0; i < size; ++i)
             {
                 float sum = 0;
                 for (size_t k = 0; k < kernel; ++k)
                     sum += weight[k] * src[i + k * stride];
-                dst[i] = int(sum);
+                dst[i] = Round(sum);
             }
         }
 
-        void BlurImage(const BlurParam& p, const AlgDefault& a, const uint8_t* src, size_t srcStride, uint8_t* cols, float* rows, uint8_t* dst, size_t dstStride)
+        template<int channels> void BlurImageAny(const BlurParam& p, const Base::AlgDefault& a, const uint8_t* src, size_t srcStride, uint8_t* cols, float* rows, uint8_t* dst, size_t dstStride)
         {
-            PadCols(src, a.half, p.channels, a.size, cols), src += srcStride;
-            BlurCols(cols, a.size, p.channels, a.weight.data, a.kernel, rows + a.half * a.stride);
+            PadCols<channels>(src, a.half, a.size, cols), src += srcStride;
+            BlurColsAny(cols, a.size, p.channels, a.weight.data, a.kernel, rows + a.half * a.stride);
             for (size_t row = 0; row < a.half; ++row)
                 memcpy(rows + row * a.stride, rows + a.half * a.stride, a.size * sizeof(float));
             for (size_t row = 1; row < a.nose; ++row)
             {
-                PadCols(src, a.half, p.channels, a.size, cols), src += srcStride;
-                BlurCols(cols, a.size, p.channels, a.weight.data, a.kernel, rows + (a.half + row) * a.stride);
+                PadCols<channels>(src, a.half, a.size, cols), src += srcStride;
+                BlurColsAny(cols, a.size, p.channels, a.weight.data, a.kernel, rows + (a.half + row) * a.stride);
             }
             for (size_t row = a.nose; row <= a.half; ++row)
                 memcpy(rows + (a.half + row) * a.stride, rows + (a.half + a.nose + 1) * a.stride, a.size * sizeof(float));
-            BlurRows(rows, a.size, a.stride, a.weight.data, a.kernel, dst), dst += dstStride;
+            BlurRowsAny(rows, a.size, a.stride, a.weight.data, a.kernel, dst), dst += dstStride;
 
             for (size_t row = 1, b = row % a.kernel + 2 * a.half, w = a.kernel - row % a.kernel; row < a.body; ++row, ++b, --w)
             {
@@ -111,9 +100,9 @@ namespace Simd
                     b -= a.kernel;
                 if (w == 0)
                     w += a.kernel;
-                PadCols(src, a.half, p.channels, a.size, cols), src += srcStride;
-                BlurCols(cols, a.size, p.channels, a.weight.data, a.kernel, rows + b * a.stride);
-                BlurRows(rows, a.size, a.stride, a.weight.data + w, a.kernel, dst), dst += dstStride;
+                PadCols<channels>(src, a.half, a.size, cols), src += srcStride;
+                BlurColsAny(cols, a.size, p.channels, a.weight.data, a.kernel, rows + b * a.stride);
+                BlurRowsAny(rows, a.size, a.stride, a.weight.data + w, a.kernel, dst), dst += dstStride;
             }
 
             size_t last = (a.body + 2 * a.half - 1) % a.kernel;
@@ -124,7 +113,83 @@ namespace Simd
                 if (w == 0)
                     w += a.kernel;
                 memcpy(rows + b * a.stride, rows + last * a.stride, a.size * sizeof(float));
-                BlurRows(rows, a.size, a.stride, a.weight.data + w, a.kernel, dst), dst += dstStride;
+                BlurRowsAny(rows, a.size, a.stride, a.weight.data + w, a.kernel, dst), dst += dstStride;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        template<int kernel> SIMD_INLINE void BlurCols(const uint8_t* src, size_t size, size_t channels, const float* weight, float* dst)
+        {
+            for (size_t i = 0; i < size; ++i)
+            {
+                float sum = 0;
+                for (size_t k = 0; k < kernel; ++k)
+                    sum += weight[k] * float(src[i + k * channels]);
+                dst[i] = sum;
+            }
+        }
+
+        template<int kernel> SIMD_INLINE void BlurRows(const float* src, size_t size, size_t stride, const float* weight, uint8_t* dst)
+        {
+            for (size_t i = 0; i < size; ++i)
+            {
+                float sum = 0;
+                for (size_t k = 0; k < kernel; ++k)
+                    sum += weight[k] * src[i + k * stride];
+                dst[i] = Round(sum);
+            }
+        }
+
+        template<int channels, int kernel> void BlurImage(const BlurParam& p, const Base::AlgDefault& a, const uint8_t* src, size_t srcStride, uint8_t* cols, float* rows, uint8_t* dst, size_t dstStride)
+        {
+            PadCols<channels>(src, a.half, a.size, cols), src += srcStride;
+            BlurCols<kernel>(cols, a.size, p.channels, a.weight.data, rows + a.half * a.stride);
+            for (size_t row = 0; row < a.half; ++row)
+                memcpy(rows + row * a.stride, rows + a.half * a.stride, a.size * sizeof(float));
+            for (size_t row = 1; row < a.nose; ++row)
+            {
+                PadCols<channels>(src, a.half, a.size, cols), src += srcStride;
+                BlurCols<kernel>(cols, a.size, p.channels, a.weight.data, rows + (a.half + row) * a.stride);
+            }
+            for (size_t row = a.nose; row <= a.half; ++row)
+                memcpy(rows + (a.half + row) * a.stride, rows + (a.half + a.nose + 1) * a.stride, a.size * sizeof(float));
+            BlurRows<kernel>(rows, a.size, a.stride, a.weight.data, dst), dst += dstStride;
+
+            for (size_t row = 1, b = row % a.kernel + 2 * a.half, w = kernel - row % kernel; row < a.body; ++row, ++b, --w)
+            {
+                if (b >= kernel)
+                    b -= kernel;
+                if (w == 0)
+                    w += kernel;
+                PadCols<channels>(src, a.half, a.size, cols), src += srcStride;
+                BlurCols<kernel>(cols, a.size, p.channels, a.weight.data, rows + b * a.stride);
+                BlurRows<kernel>(rows, a.size, a.stride, a.weight.data + w, dst), dst += dstStride;
+            }
+
+            size_t last = (a.body + 2 * a.half - 1) % kernel;
+            for (size_t row = a.body, b = row % kernel + 2 * a.half, w = kernel - row % kernel; row < p.height; ++row, ++b, --w)
+            {
+                if (b >= kernel)
+                    b -= kernel;
+                if (w == 0)
+                    w += kernel;
+                memcpy(rows + b * a.stride, rows + last * a.stride, a.size * sizeof(float));
+                BlurRows<kernel>(rows, a.size, a.stride, a.weight.data + w, dst), dst += dstStride;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
+        template<int channels> Base::BlurDefaultPtr GetBlurDefaultPtr(const BlurParam& p, const Base::AlgDefault& a)
+        {
+            switch (a.kernel)
+            {
+            case 3: return BlurImage<channels, 3>;
+            case 5: return BlurImage<channels, 5>;
+            case 7: return BlurImage<channels, 7>;
+            case 9: return BlurImage<channels, 9>;
+            default: return BlurImageAny<channels>;
             }
         }
 
@@ -159,7 +224,14 @@ namespace Simd
 
             _cols.Resize(_alg.size + 2 * _alg.edge, true);
             _rows.Resize(_alg.kernel * _alg.stride);
-            _blur = BlurImage;
+
+            switch (_param.channels)
+            {
+            case 1: _blur = GetBlurDefaultPtr<1>(_param, _alg); break;
+            case 2: _blur = GetBlurDefaultPtr<2>(_param, _alg); break;
+            case 3: _blur = GetBlurDefaultPtr<3>(_param, _alg); break;
+            case 4: _blur = GetBlurDefaultPtr<4>(_param, _alg); break;
+            }
         }
 
         void GaussianBlurDefault::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)

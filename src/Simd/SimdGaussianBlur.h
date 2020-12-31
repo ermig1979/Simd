@@ -26,6 +26,7 @@
 
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
@@ -54,6 +55,17 @@ namespace Simd
 
     namespace Base
     {
+        template<int channels> SIMD_INLINE void PadCols(const uint8_t* src, size_t half, size_t size, uint8_t* dst)
+        {
+            for (size_t x = 0; x < half; x += 1, dst += channels)
+                Base::CopyPixel<channels>(src, dst);
+            memcpy(dst, src, size), dst += size, src += size - channels;
+            for (size_t x = 0; x < half; x += 1, dst += channels)
+                Base::CopyPixel<channels>(src, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         struct AlgDefault
         {
             size_t half, kernel, edge, start, size, stride, nose, body;
