@@ -711,7 +711,7 @@ namespace Test
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << c << "-" << ToString(r, 1, true) << "]";
+                ss << "[" << ToString(r, 1, true) << "-" << c << "]";
                 description = ss.str();
             }
 
@@ -819,6 +819,11 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx2::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx512bw::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
 #endif 
 
         return result;

@@ -35,7 +35,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp" />

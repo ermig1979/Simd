@@ -117,5 +117,18 @@ namespace Simd
         void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
     }
 #endif //SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class GaussianBlurDefault : public Avx2::GaussianBlurDefault
+        {
+        public:
+            GaussianBlurDefault(const BlurParam& param);
+        };
+
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+    }
+#endif //SIMD_AVX512BW_ENABLE
 }
 #endif//__SimdGaussianBlur_h__

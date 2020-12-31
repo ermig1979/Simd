@@ -73,9 +73,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur3x3.cpp">
-      <Filter>Avx512bw</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
@@ -200,6 +197,9 @@
       <Filter>Avx512bw</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
   </ItemGroup>
