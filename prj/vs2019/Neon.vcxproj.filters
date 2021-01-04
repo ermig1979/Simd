@@ -76,9 +76,6 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat32.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur3x3.cpp">
-      <Filter>Neon</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonGemm32f.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
@@ -227,6 +224,9 @@
       <Filter>Neon</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
   </ItemGroup>

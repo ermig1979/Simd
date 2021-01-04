@@ -826,6 +826,11 @@ namespace Test
             result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Avx512bw::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && GaussianBlurAutoTest(FUNC_GB(Simd::Neon::GaussianBlurInit), FUNC_GB(SimdGaussianBlurInit));
+#endif
+
         return result;
     }
 

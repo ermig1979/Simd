@@ -130,5 +130,18 @@ namespace Simd
         void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
     }
 #endif //SIMD_AVX512BW_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class GaussianBlurDefault : public Base::GaussianBlurDefault
+        {
+        public:
+            GaussianBlurDefault(const BlurParam& param);
+        };
+
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+    }
+#endif //SIMD_NEON_ENABLE
 }
 #endif//__SimdGaussianBlur_h__

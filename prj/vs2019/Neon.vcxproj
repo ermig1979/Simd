@@ -46,7 +46,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat32.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp" />
