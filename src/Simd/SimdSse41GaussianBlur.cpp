@@ -120,7 +120,7 @@ namespace Simd
                 BlurColsAny(cols, a.size, p.channels, a.weight.data, a.kernel, rows + (a.half + row) * a.stride);
             }
             for (size_t row = a.nose; row <= a.half; ++row)
-                memcpy(rows + (a.half + row) * a.stride, rows + (a.half + a.nose + 1) * a.stride, a.size * sizeof(float));
+                memcpy(rows + (a.half + row) * a.stride, rows + (a.half + a.nose - 1) * a.stride, a.size * sizeof(float));
             BlurRowsAny(rows, a.size, a.stride, a.weight.data, a.kernel, dst), dst += dstStride;
 
             for (size_t row = 1, b = row % a.kernel + 2 * a.half, w = a.kernel - row % a.kernel; row < a.body; ++row, ++b, --w)
@@ -275,7 +275,7 @@ namespace Simd
                 BlurCols<kernel>(cols, a.size, p.channels, a.weight.data, rows + (a.half + row) * a.stride);
             }
             for (size_t row = a.nose; row <= a.half; ++row)
-                memcpy(rows + (a.half + row) * a.stride, rows + (a.half + a.nose + 1) * a.stride, a.size * sizeof(float));
+                memcpy(rows + (a.half + row) * a.stride, rows + (a.half + a.nose - 1) * a.stride, a.size * sizeof(float));
             BlurRows<kernel>(rows, a.size, a.stride, a.weight.data, dst), dst += dstStride;
 
             for (size_t row = 1, b = row % a.kernel + 2 * a.half, w = kernel - row % kernel; row < a.body; ++row, ++b, --w)

@@ -795,6 +795,8 @@ namespace Test
     {
         bool result = true;
 
+        result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, f1, f2);
+
         for (size_t channels = 1; channels <= 4; channels++)
         {
             result = result && GaussianBlurAutoTest(channels, 0.5, f1, f2);
