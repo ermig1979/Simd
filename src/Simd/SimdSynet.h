@@ -388,7 +388,7 @@ namespace Simd
 #endif//SIMD_AVX512BW_ENABLE
 
 #ifdef SIMD_AVX512VNNI_ENABLE
-    namespace Avx51vnni
+    namespace Avx512vnni
     {
         template<bool overflow> void Madd4(__m512i& i32, __m512i u8, __m512i i8);
 
