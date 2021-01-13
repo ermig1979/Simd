@@ -1073,4 +1073,22 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
+
+    bool GaussianBlurSpecialTest()
+    {
+        const int rows = 8, cols = 12;
+        unsigned char src[rows * cols], dst[rows * cols];
+        for (int i = 0; i < rows; i++) 
+            for (int j = 0; j < cols; j++) 
+                src[i * cols + j] = static_cast<unsigned char>(i * cols + j);
+
+        const float radius = 5.0f;
+        void * blur = SimdGaussianBlurInit(cols, rows, 1, &radius);
+        SimdGaussianBlurRun(blur, src, cols, dst, cols);
+        SimdRelease(blur);
+
+        return true;
+    }
 }

@@ -60,6 +60,12 @@ namespace Test
     bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, NULL, NULL)); return true; } \
     bool name##AtList = name##AddToList();
 
+#define TEST_ADD_GROUP_A0S(name) \
+    bool name##AutoTest(); \
+    bool name##SpecialTest(); \
+    bool name##AddToList(){ g_groups.push_back(Group(#name, name##AutoTest, NULL, name##SpecialTest)); return true; } \
+    bool name##AtList = name##AddToList();
+
 #define TEST_ADD_GROUP_AD0(name) \
     bool name##AutoTest(); \
     bool name##DataTest(bool create); \
@@ -217,7 +223,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(ContourMetrics);
     TEST_ADD_GROUP_AD0(Laplace);
     TEST_ADD_GROUP_AD0(LaplaceAbs);
-    TEST_ADD_GROUP_A00(GaussianBlur);
+    TEST_ADD_GROUP_A0S(GaussianBlur);
 
     TEST_ADD_GROUP_AD0(Histogram);
     TEST_ADD_GROUP_AD0(HistogramMasked);

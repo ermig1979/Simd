@@ -220,7 +220,7 @@ namespace Simd
             _alg.edge = AlignHi(_alg.half * _param.channels, _param.align);
             _alg.start = _alg.edge - _alg.half * _param.channels;
             _alg.nose = Simd::Min(_alg.half + 1, _param.height);
-            _alg.body = Simd::Max<ptrdiff_t>(_param.height - _alg.half - 1, 0);
+            _alg.body = Simd::Max<ptrdiff_t>(_param.height - _alg.half - 1, 1);
 
             _cols.Resize(_alg.size + 2 * _alg.edge, true);
             _rows.Resize(_alg.kernel * _alg.stride);
