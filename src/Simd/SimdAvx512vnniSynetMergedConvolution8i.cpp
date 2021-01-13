@@ -43,54 +43,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<bool nofma> SIMD_INLINE void Cvt8uTo32f(const uint8_t* src, const float* scale, const float* shift, float * dst)
-        {
-            __m512 f32 = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_mm_loadu_si128((__m128i*)src)));
-            _mm512_storeu_ps(dst, Fmadd<nofma>(f32, _mm512_loadu_ps(scale), _mm512_loadu_ps(shift)));
-        }
-
-        template<bool nofma> void Convert8uTo32f(const uint8_t* src, size_t maC, size_t yBeg, size_t yEnd, size_t width, size_t channels,
-            const float* scale, const float* shift, float* dst, size_t bufH)
-        {
-            size_t dM = bufH - 1, cD = width* bufH;
-            src += yBeg * width * channels;
-            for (size_t y = yBeg; y < yEnd; ++y)
-            {
-                float* pd = dst + (y & dM) * width * F;
-                for (size_t x = 0; x < width; ++x)
-                {
-                    for (size_t c = 0; c < maC; c += F)
-                        Cvt8uTo32f<nofma>(src + c, scale + c, shift + c, pd + c * cD);
-                    src += channels;
-                    pd += F;
-                }
-            }
-        }
-
-        void Convert8uTo32f(const uint8_t* src, size_t maC, size_t yBeg, size_t yEnd, size_t width, size_t channels,
-            const float* scale, const float* shift, float* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
-        {
-            if (Base::FmaAvoid(compatibility))
-                Convert8uTo32f<true>(src, maC, yBeg, yEnd, width, channels, scale, shift, dst, bufH);
-            else
-                Convert8uTo32f<false>(src, maC, yBeg, yEnd, width, channels, scale, shift, dst, bufH);
-        }
-
-        //---------------------------------------------------------------------
-
-        void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels,
-            const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility)
-        {
-            size_t size = width * channels, mask = bufH - 1;
-            size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
-            if (yInt > yBeg)
-                Avx512bw::SynetConvert32fTo8u(src + yBeg * size, 1, channels, yInt - yBeg, width, SimdTensorFormatNhwc, scale, shift, dst + (yBeg & mask) * size, compatibility);
-            if (yEnd > yInt)
-                Avx512bw::SynetConvert32fTo8u(src + yInt * size, 1, channels, yEnd - yInt, width, SimdTensorFormatNhwc, scale, shift, dst + (yInt & mask) * size, compatibility);
-        }
-
-        //---------------------------------------------------------------------
-
         template<SimdConvolutionActivationType type, bool nofma>
         SIMD_INLINE void SaveInput1(float* dst, __m512i sum, const __m512* norm, const __m512* bias, const __m512* params)
         {
@@ -1757,7 +1709,7 @@ namespace Simd
             : Avx512bw::SynetMergedConvolution8iCdc(p)
         {
             SetSize(Avx512f::F);
-            _cvt32fTo8u = _s8u ? NULL : Convert32fTo8u;
+            _cvt32fTo8u = _s8u ? NULL : Avx512bw::Convert32fTo8u;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
             SetOutput(_param.conv[2], _output);
@@ -1769,7 +1721,7 @@ namespace Simd
             : Avx512bw::SynetMergedConvolution8iCd(p)
         {
             SetSize(Avx512f::F);
-            _cvt32fTo8u = _s8u ? NULL : Convert32fTo8u;
+            _cvt32fTo8u = _s8u ? NULL : Avx512bw::Convert32fTo8u;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
         }
@@ -1780,7 +1732,7 @@ namespace Simd
             : Avx512bw::SynetMergedConvolution8iDc(p)
         {
             SetSize(Avx512f::F);
-            _cvt8uTo32f = _s8u ? (Convert8uTo32fPtr)Convert8uTo32f : NULL;
+            _cvt8uTo32f = _s8u ? (Convert8uTo32fPtr)Avx512bw::Convert8uTo32f : NULL;
             SetDepthwise(_param.conv[0], _depthwise);
             SetOutput(_param.conv[1], _output);
         }
@@ -1793,11 +1745,11 @@ namespace Simd
             if (!param.Valid())
                 return NULL;
             if (SynetMergedConvolution8iCdc::Preferable(param))
-                return new Avx512bw::SynetMergedConvolution8iCdc(param);
+                return new Avx512vnni::SynetMergedConvolution8iCdc(param);
             else if (SynetMergedConvolution8iCd::Preferable(param))
-                return new Avx512bw::SynetMergedConvolution8iCd(param);
+                return new Avx512vnni::SynetMergedConvolution8iCd(param);
             else if (SynetMergedConvolution8iDc::Preferable(param))
-                return new Avx512bw::SynetMergedConvolution8iDc(param);
+                return new Avx512vnni::SynetMergedConvolution8iDc(param);
             else
                 return new Base::SynetMergedConvolution8i(param);
         }

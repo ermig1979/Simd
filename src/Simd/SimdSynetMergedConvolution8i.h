@@ -315,6 +315,12 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        void Convert8uTo32f(const uint8_t* src, size_t maC, size_t yBeg, size_t yEnd, size_t width, size_t channels,
+            const float* scale, const float* shift, float* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
+
+        void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels,
+            const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
+
         class SynetMergedConvolution8iCdc : public Avx2::SynetMergedConvolution8iCdc
         {
         public:
