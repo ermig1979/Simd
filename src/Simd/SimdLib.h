@@ -2880,25 +2880,58 @@ extern "C"
 
     /*! @ingroup gaussian_filter
 
-        \fn void * SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * radius);
+        \fn void * SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * sigma, const float* epsilon);
 
         \short Creates Gaussian blur filter context.
 
+        In particular calculates Gaussian blur coefficients:
+        \verbatim
+        half = floor(sqrt(log(1/epsilon)) * sigma);
+        weight[2*half + 1];
+
+        for(x = -half; x <= half; ++x)
+            weight[x + half] = exp(-sqr(x / sigma) / 2);
+
+        sum = 0;
+        for (x = -half; x <= half; ++x)
+            sum += weight[x + half];
+
+        for (x = -half; x <= half; ++x)
+            weight[x + half] /= sum;
+        \endverbatim
+
         \param [in] width - a width of input and output image.
-        \param [in] height - a height of input and output image.
-        \param [in] channels - a channel number of input and output image.
-        \param [in] radius - a pointer to radius of Gaussian blur.
+        \param [in] height - a height of input and output image.    
+        \param [in] channels - a channel number of input and output image. Its value must be in range [1..4].
+        \param [in] sigma - a pointer to sigma parameter (blur radius). MIts value must be greater than 0.000001.
+        \param [in] epsilon - a pointer to epsilon parameter (permissible relative error). 
+                              Its value must be greater than 0.000001. Pointer can be NULL and by default value 0.001 is used.
         \return a pointer to filter context. On error it returns NULL.
                 This pointer is used in functions ::SimdGaussianBlurRun.
                 It must be released with using of function ::SimdRelease.
     */
-    SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * radius);
+    SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float * sigma, const float* epsilon);
 
     /*! @ingroup gaussian_filter
 
         \fn void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
 
         \short Performs image Gaussian bluring.
+
+        Bluring algorithm for every point:
+        \verbatim
+        sum = 0;
+        for(x = -half; x <= half; ++x)
+        {
+            sx = min(max(0, dx + x), width - 1);
+            for(y = -half; y <= half; ++y)
+            {
+                sy = min(max(0, dy + y), height - 1);
+                sum += src[sx, sy]*weight[x + half]*weight[y + half];
+            }
+        }
+        dst[dx, dy] = sum;
+        \endverbatim
 
         \param [in] filter - a filter context. It must be created by function ::SimdGaussianBlurInit and released by function ::SimdRelease.
         \param [in] src - a pointer to pixels data of the original input image.

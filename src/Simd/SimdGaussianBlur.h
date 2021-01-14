@@ -35,10 +35,11 @@ namespace Simd
         size_t width;
         size_t height;
         size_t channels;
-        float radius;
+        float sigma;
+        float epsilon;
         size_t align;
 
-        BlurParam(size_t w, size_t h, size_t c, const float* r, size_t a);
+        BlurParam(size_t w, size_t h, size_t c, const float* s, const float * e, size_t a);
         bool Valid() const;
     };
 
@@ -89,7 +90,7 @@ namespace Simd
             BlurDefaultPtr _blur;
         };
 
-        void * GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+        void * GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -101,7 +102,7 @@ namespace Simd
             GaussianBlurDefault(const BlurParam& param);
         };
 
-        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     }
 #endif //SIMD_SSE41_ENABLE
 
@@ -114,7 +115,7 @@ namespace Simd
             GaussianBlurDefault(const BlurParam& param);
         };
 
-        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     }
 #endif //SIMD_AVX2_ENABLE
 
@@ -127,7 +128,7 @@ namespace Simd
             GaussianBlurDefault(const BlurParam& param);
         };
 
-        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     }
 #endif //SIMD_AVX512BW_ENABLE
 
@@ -140,7 +141,7 @@ namespace Simd
             GaussianBlurDefault(const BlurParam& param);
         };
 
-        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius);
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     }
 #endif //SIMD_NEON_ENABLE
 }

@@ -700,25 +700,25 @@ namespace Test
     {
         struct FuncGB
         {
-            typedef void* (*FuncPtr)(size_t width, size_t height, size_t channels, const float* radius);
+            typedef void* (*FuncPtr)(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
 
             FuncPtr func;
             String description;
 
             FuncGB(const FuncPtr& f, const String& d) : func(f), description(d) {}
 
-            void Update(size_t c, float r)
+            void Update(size_t c, float s)
             {
                 std::stringstream ss;
                 ss << description;
-                ss << "[" << ToString(r, 1, true) << "-" << c << "]";
+                ss << "[" << ToString(s, 1, true) << "-" << c << "]";
                 description = ss.str();
             }
 
-            void Call(const View& src, float radius, View& dst) const
+            void Call(const View& src, float sigma, float epsilon,  View& dst) const
             {
                 void* filter = NULL;
-                filter = func(src.width, src.height, src.ChannelCount(), &radius);
+                filter = func(src.width, src.height, src.ChannelCount(), &sigma, &epsilon);
                 {
                     TEST_PERFORMANCE_TEST(description);
                     SimdGaussianBlurRun(filter, src.data, src.stride, dst.data, dst.stride);
@@ -733,12 +733,12 @@ namespace Test
 
 //#define TEST_GAUSSIAN_BLUR_REAL_IMAGE
 
-    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float radius, FuncGB f1, FuncGB f2)
+    bool GaussianBlurAutoTest(size_t width, size_t height, size_t channels, float sigma, FuncGB f1, FuncGB f2)
     {
         bool result = true;
 
-        f1.Update(channels, radius);
-        f2.Update(channels, radius);
+        f1.Update(channels, sigma);
+        f2.Update(channels, sigma);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
 
@@ -752,6 +752,7 @@ namespace Test
         default:
             assert(0);
         }
+        const float epsilon = 0.001f;
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
 #ifdef TEST_GAUSSIAN_BLUR_REAL_IMAGE
@@ -764,9 +765,9 @@ namespace Test
 
         TEST_ALIGN(SIMD_ALIGN);
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, radius, dst1));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, sigma, epsilon, dst1));
 
-        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, radius, dst2));
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, sigma, epsilon, dst2));
 
         result = result && Compare(dst1, dst2, 1, true, 64);
 
@@ -774,19 +775,19 @@ namespace Test
         if (format == View::Bgr24)
         {
             src.Save("src.ppm");
-            dst1.Save(String("dst_") + ToString((double)radius, 1) + ".ppm");
+            dst1.Save(String("dst_") + ToString((double)sigma, 1) + ".ppm");
         }
 #endif
 
         return result;
     }
 
-    bool GaussianBlurAutoTest(int channels, float radius, const FuncGB& f1, const FuncGB& f2)
+    bool GaussianBlurAutoTest(int channels, float sigma, const FuncGB& f1, const FuncGB& f2)
     {
         bool result = true;
 
-        result = result && GaussianBlurAutoTest(W, H, channels, radius, f1, f2);
-        result = result && GaussianBlurAutoTest(W + O, H - O, channels, radius, f1, f2);
+        result = result && GaussianBlurAutoTest(W, H, channels, sigma, f1, f2);
+        result = result && GaussianBlurAutoTest(W + O, H - O, channels, sigma, f1, f2);
 
         return result;
     }
@@ -795,13 +796,13 @@ namespace Test
     {
         bool result = true;
 
-        result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, f1, f2);
+        //result = result && GaussianBlurAutoTest(12, 8, 1, 5.0f, f1, f2);
 
-        for (size_t channels = 1; channels <= 4; channels++)
+        for (int channels = 1; channels <= 4; channels++)
         {
-            result = result && GaussianBlurAutoTest(channels, 0.5, f1, f2);
-            result = result && GaussianBlurAutoTest(channels, 1.0, f1, f2);
-            result = result && GaussianBlurAutoTest(channels, 3.0, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 0.5f, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 1.0f, f1, f2);
+            result = result && GaussianBlurAutoTest(channels, 3.0f, f1, f2);
         }
 
         return result;
@@ -1085,7 +1086,7 @@ namespace Test
                 src[i * cols + j] = static_cast<unsigned char>(i * cols + j);
 
         const float radius = 5.0f;
-        void * blur = SimdGaussianBlurInit(cols, rows, 1, &radius);
+        void * blur = SimdGaussianBlurInit(cols, rows, 1, &radius, NULL);
         SimdGaussianBlurRun(blur, src, cols, dst, cols);
         SimdRelease(blur);
 

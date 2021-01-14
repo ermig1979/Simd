@@ -27,11 +27,12 @@
 
 namespace Simd
 {
-    BlurParam::BlurParam(size_t w, size_t h, size_t c, const float* r, size_t a)
+    BlurParam::BlurParam(size_t w, size_t h, size_t c, const float* s, const float* e, size_t a)
         : width(w)
         , height(h)
         , channels(c)
-        , radius(*r)
+        , sigma(*s)
+        , epsilon(e ? *e : 0.001f)
         , align(a)
     {
     }
@@ -42,7 +43,8 @@ namespace Simd
             height > 0 &&
             width > 0 &&
             channels > 0 && channels <= 4 &&
-            radius > 0.0f &&
+            sigma >= 0.000001f &&
+            epsilon >= 0.000001f &&
             align >= sizeof(float);
     }
 
@@ -198,13 +200,13 @@ namespace Simd
         GaussianBlurDefault::GaussianBlurDefault(const BlurParam& param)
             : Simd::GaussianBlur(param)
         {
-            _alg.half = (int)::floor(::sqrt(::log(1000.0f)) * _param.radius);
+            _alg.half = (int)::floor(::sqrt(-::log(_param.epsilon)) * _param.sigma);
             _alg.kernel = 2 * _alg.half + 1;
             _alg.weight.Resize(2 * _alg.kernel);
             _alg.weight[_alg.half] = 1.0f;
             for (size_t i = 0; i < _alg.half; ++i)
             {
-                _alg.weight[_alg.half + 1 + i] = ::exp(-Simd::Square(float(1 + i) / _param.radius));
+                _alg.weight[_alg.half + 1 + i] = ::exp(-Simd::Square(float(1 + i) / _param.sigma) / 2.0f);
                 _alg.weight[_alg.half - 1 - i] = _alg.weight[_alg.half + 1 + i];
             }
             float sum = 0;
@@ -247,9 +249,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius)
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon)
         {
-            BlurParam param(width, height, channels, radius, sizeof(void*));
+            BlurParam param(width, height, channels, sigma, epsilon, sizeof(void*));
             if (!param.Valid())
                 return NULL;
             return new GaussianBlurDefault(param);

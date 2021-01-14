@@ -53,9 +53,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaf37e85de82125071158ae2db59fb5643"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gaussian__filter.html#gaf37e85de82125071158ae2db59fb5643">SimdGaussianBlur3x3</a> (const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:gaf37e85de82125071158ae2db59fb5643"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs Gaussian blur filtration with window 3x3.  <a href="group__gaussian__filter.html#gaf37e85de82125071158ae2db59fb5643">More...</a><br /></td></tr>
 <tr class="separator:gaf37e85de82125071158ae2db59fb5643"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ga089eb496e2cb41d3d334dfdf71de35c8"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gaussian__filter.html#ga089eb496e2cb41d3d334dfdf71de35c8">SimdGaussianBlurInit</a> (size_t width, size_t height, size_t channels, const float *radius)</td></tr>
-<tr class="memdesc:ga089eb496e2cb41d3d334dfdf71de35c8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates Gaussian blur filter context.  <a href="group__gaussian__filter.html#ga089eb496e2cb41d3d334dfdf71de35c8">More...</a><br /></td></tr>
-<tr class="separator:ga089eb496e2cb41d3d334dfdf71de35c8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga615ed4d1996638c45b1a0aff4d3ee50a"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gaussian__filter.html#ga615ed4d1996638c45b1a0aff4d3ee50a">SimdGaussianBlurInit</a> (size_t width, size_t height, size_t channels, const float *sigma, const float *epsilon)</td></tr>
+<tr class="memdesc:ga615ed4d1996638c45b1a0aff4d3ee50a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates Gaussian blur filter context.  <a href="group__gaussian__filter.html#ga615ed4d1996638c45b1a0aff4d3ee50a">More...</a><br /></td></tr>
+<tr class="separator:ga615ed4d1996638c45b1a0aff4d3ee50a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6">SimdGaussianBlurRun</a> (const void *filter, const uint8_t *src, size_t srcStride, uint8_t *dst, size_t dstStride)</td></tr>
 <tr class="memdesc:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Performs image Gaussian bluring.  <a href="group__gaussian__filter.html#ga3d8cfda122c2fa1a340e90f8226051b6">More...</a><br /></td></tr>
 <tr class="separator:ga3d8cfda122c2fa1a340e90f8226051b6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -140,8 +140,8 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="ga089eb496e2cb41d3d334dfdf71de35c8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ga089eb496e2cb41d3d334dfdf71de35c8">&#9670;&nbsp;</a></span>SimdGaussianBlurInit()</h2>
+<a id="ga615ed4d1996638c45b1a0aff4d3ee50a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga615ed4d1996638c45b1a0aff4d3ee50a">&#9670;&nbsp;</a></span>SimdGaussianBlurInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -168,7 +168,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype">const float *&#160;</td>
-          <td class="paramname"><em>radius</em>&#160;</td>
+          <td class="paramname"><em>sigma</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>epsilon</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -179,12 +185,26 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates Gaussian blur filter context. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>In particular calculates Gaussian blur coefficients: </p><pre class="fragment">half = floor(sqrt(log(1/epsilon)) * sigma);
+weight[2*half + 1];
+
+for(x = -half; x &lt;= half; ++x)
+    weight[x + half] = exp(-sqr(x / sigma) / 2);
+
+sum = 0;
+for (x = -half; x &lt;= half; ++x)
+    sum += weight[x + half];
+
+for (x = -half; x &lt;= half; ++x)
+    weight[x + half] /= sum;
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- a width of input and output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a channel number of input and output image. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">radius</td><td>- a pointer to radius of Gaussian blur. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- a height of input and output image. <br  />
+ </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- a channel number of input and output image. Its value must be in range [1..4]. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">sigma</td><td>- a pointer to sigma parameter (blur radius). MIts value must be greater than 0.000001. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">epsilon</td><td>- a pointer to epsilon parameter (permissible relative error). Its value must be greater than 0.000001. Pointer can be NULL and by default value 0.001 is used. </td></tr>
   </table>
   </dd>
 </dl>
@@ -237,9 +257,20 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Performs image Gaussian bluring. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>Bluring algorithm for every point: </p><pre class="fragment">sum = 0;
+for(x = -half; x &lt;= half; ++x)
+{
+    sx = min(max(0, dx + x), width - 1);
+    for(y = -half; y &lt;= half; ++y)
+    {
+        sy = min(max(0, dy + y), height - 1);
+        sum += src[sx, sy]*weight[x + half]*weight[y + half];
+    }
+}
+dst[dx, dy] = sum;
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">filter</td><td>- a filter context. It must be created by function <a class="el" href="group__gaussian__filter.html#ga089eb496e2cb41d3d334dfdf71de35c8" title="Creates Gaussian blur filter context.">SimdGaussianBlurInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">filter</td><td>- a filter context. It must be created by function <a class="el" href="group__gaussian__filter.html#ga615ed4d1996638c45b1a0aff4d3ee50a" title="Creates Gaussian blur filter context.">SimdGaussianBlurInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the original input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcStride</td><td>- a row size (in bytes) of the input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to pixels data of the filtered output image. </td></tr>

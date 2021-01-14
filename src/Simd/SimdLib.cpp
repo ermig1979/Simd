@@ -2396,12 +2396,12 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Base::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
 }
 
-SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius)
+SIMD_API void* SimdGaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon)
 {
-    typedef void* (*SimdGaussianBlurInitPtr) (size_t width, size_t height, size_t channels, const float* radius);
+    typedef void* (*SimdGaussianBlurInitPtr) (size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon);
     const static SimdGaussianBlurInitPtr simdGaussianBlurInit = SIMD_FUNC4(GaussianBlurInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    return simdGaussianBlurInit(width, height, channels, radius);
+    return simdGaussianBlurInit(width, height, channels, sigma, epsilon);
 }
 
 SIMD_API void SimdGaussianBlurRun(const void* filter, const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)

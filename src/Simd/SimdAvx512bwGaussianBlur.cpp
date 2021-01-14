@@ -338,9 +338,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* radius)
+        void* GaussianBlurInit(size_t width, size_t height, size_t channels, const float* sigma, const float* epsilon)
         {
-            BlurParam param(width, height, channels, radius, A);
+            BlurParam param(width, height, channels, sigma, epsilon, A);
             if (!param.Valid())
                 return NULL;
             return new GaussianBlurDefault(param);
