@@ -58,7 +58,7 @@ namespace Simd
                     {
                         if (sy + ky < p.srcH && sx + kx < p.srcW)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                            size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
                                 w0 = _mm256_loadu_si256((__m256i*)weight0);
@@ -103,7 +103,7 @@ namespace Simd
                     {
                         if (sy + ky < p.srcH && sx + kx < p.srcW)
                         {
-                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                            size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
                                 w0 = _mm256_loadu_si256((__m256i*)weight0);
@@ -169,7 +169,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                                size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
                                 for (; offs < end; offs += 4)
                                 {
                                     w0 = _mm256_loadu_si256((__m256i*)weight0);
@@ -216,7 +216,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                                size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
                                 for (; offs < end; offs += 4)
                                 {
                                     w0 = _mm256_loadu_si256((__m256i*)weight0);
@@ -309,7 +309,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                                size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
                                 for (; offs < end; offs += 4)
                                 {
                                     w0 = _mm256_loadu_si256((__m256i*)weight0);
@@ -354,7 +354,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
+                                size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
                                 for (; offs < end; offs += 4)
                                 {
                                     w0 = _mm256_loadu_si256((__m256i*)weight0);
@@ -803,7 +803,7 @@ namespace Simd
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
             : Sse41::SynetConvolution8iNhwcDirect(p)
         {
-            SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), false);
             Set(p, _alg, _convolutions);
             _convertSrc = Avx2::SynetConvert32fTo8u;
         }

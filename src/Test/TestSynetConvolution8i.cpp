@@ -210,13 +210,13 @@ namespace Test
         result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 128, 20, 12, 128, _3, _1, _1, _1, _1, 128, aMi, t1, u8, u8), 1, c, f1, f2);
 #endif
 #if 1
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 256, 24, 24, 256, _1, _1, _1, _0, _0, 1, aId, t1, u8, u8), 0, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 256, 24, 26, 256, _3, _1, _1, _0, _0, 1, aId, t1, u8, u8), 1, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 256, 20, 40, 256, _5, _1, _1, _0, _0, 1, aId, t1, u8, u8), 1, c, f1, f2);
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 256, 22, 42, 256, _7, _1, _1, _0, _0, 1, aId, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 224, 12, 12, 224, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 224, 14, 14, 224, _3, _1, _1, _0, _0, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 112, 24, 24, 112, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 112, 26, 26, 112, _3, _1, _1, _0, _0, 1, aPr, t1, u8, u8), 1, c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 99, 90, 130, 99, _3, _1, _2, _1, _1, 99, aMi, t1, f32, u8), 1, c, f1, f2);
+        result = result && SynetConvolution8iForwardAutoTest(e, Param(1, 224, 12, 12, 224, _3, _1, _1, _1, _1, 1, aPr, t1, u8, u8), 1, c, f1, f2);
 #endif
 
         return result;
@@ -226,9 +226,10 @@ namespace Test
     {
         bool result = true;
 
-        SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | SimdSynetCompatibilityFmaAvoid);
-        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | SimdSynetCompatibilityFmaAvoid);
-        SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | SimdSynetCompatibilityFmaAvoid);
+        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaUse;
+        SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
+        SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
+        SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
 
         //result = result && SynetConvolution8iForwardAutoTest(f1, f2, p);
         //result = result && SynetConvolution8iForwardAutoTest(f1, f2, o);

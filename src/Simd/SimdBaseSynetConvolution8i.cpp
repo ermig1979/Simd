@@ -391,6 +391,7 @@ namespace Simd
         size_t SynetConvolution8iNhwcDirect::InternalBufferSize() const
         {
             size_t size = SynetConvolution8i::InternalBufferSize();
+            size += _alg.buffer.size * sizeof(uint8_t);
             return size;
         }
 
@@ -409,6 +410,8 @@ namespace Simd
             ReorderWeight();
             _alg.zero = Set4(_srcCvt.zero[0]);
             _alg.upper = Set4(_dstCvt.uMax);
+            if (_alg.buffer.size)
+                memset(_alg.buffer.data, _srcCvt.zero[0], _alg.buffer.size);
         }
 
         bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
@@ -416,7 +419,7 @@ namespace Simd
             return false;
         }
 
-        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, bool pad)
         {
             const ConvParam8i& p = _param;
             _alg.F = F;
@@ -430,6 +433,18 @@ namespace Simd
             }
             _alg.macroD = Simd::Min(AlignLoAny(L3 / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
             _alg.size = (p.dstT == SimdTensorData32f ? 4 : 1);
+            _alg.mask = -1;
+            if (pad)
+            {
+                ConvParam8i & p = _alg.padded;
+                p = _param;
+                p.srcW += p.padX + p.padW;
+                p.padX = 0;
+                p.padW = 0;
+                p.srcC = _alg.macroC;
+                _alg.mask = Pow2Hi(p.kernelY * p.dilationY) - 1;
+                _alg.buffer.Resize(((size_t)_alg.mask + 1) * p.srcC * p.srcW);
+            }
         }
 
         void SynetConvolution8iNhwcDirect::ReorderWeight()
