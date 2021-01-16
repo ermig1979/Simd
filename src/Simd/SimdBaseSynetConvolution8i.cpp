@@ -441,8 +441,7 @@ namespace Simd
                 p.srcW += p.padX + p.padW;
                 p.padX = 0;
                 p.padW = 0;
-                p.srcC = _alg.macroC;
-                _alg.mask = Pow2Hi(p.kernelY * p.dilationY) - 1;
+                _alg.mask = int32_t(Pow2Hi(p.kernelY * p.dilationY) - 1);
                 _alg.buffer.Resize(((size_t)_alg.mask + 1) * p.srcC * p.srcW);
             }
         }

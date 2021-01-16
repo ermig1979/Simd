@@ -225,7 +225,7 @@ namespace Simd
                 size_t F, microD, macroH, macroC, macroD;
                 int32_t zero, size, upper, mask;
                 ConvParam8i padded;
-                Array8u buffer;
+                mutable Array8u buffer;
             };
 
             typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 

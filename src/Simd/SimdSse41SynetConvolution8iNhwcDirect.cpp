@@ -423,7 +423,6 @@ namespace Simd
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xN = GetConvolutionNhwcDirect_2xM<term, type>(n);
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<term, type>(m);
             size_t tailH = p.dstH, tailW = p.dstW;
-            size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
             __m128 _bias[2], _norm[2], _params[2], _scale[2], _shift[2];
             _params[0] = _mm_set1_ps(params[0]);
             _params[1] = _mm_set1_ps(params[1]);
