@@ -58,7 +58,7 @@ namespace Simd
                     {
                         if (sy + ky < p.srcH && sx + kx < p.srcW)
                         {
-                            size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
+                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
@@ -101,7 +101,7 @@ namespace Simd
                     {
                         if (sy + ky < p.srcH && sx + kx < p.srcW)
                         {
-                            size_t offs = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs + srcC;
+                            size_t offs = (sy + ky) * dY + (sx + kx) * dX, end = offs + srcC;
                             for (; offs < end; offs += 4)
                             {
                                 w0 = _mm512_loadu_si512((__m512i*)weight0);
@@ -173,7 +173,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs0 = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                                size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
                                 for (; offs0 < end; offs0 += 4, offs6 += 4)
                                 {
                                     w0 = _mm512_loadu_si512((__m512i*)weight0);
@@ -234,7 +234,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs0 = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                                size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
                                 for (; offs0 < end; offs0 += 4, offs6 += 4)
                                 {
                                     w0 = _mm512_loadu_si512((__m512i*)weight0);
@@ -341,7 +341,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs0 = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                                size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
                                 for (; offs0 < end; offs0 += 4, offs6 += 4)
                                 {
                                     w0 = _mm512_loadu_si512((__m512i*)weight0);
@@ -400,7 +400,7 @@ namespace Simd
                             for (size_t kx = 0; kx < kX; kx += p.dilationX)
                             {
                                 assert(sx + kx < p.srcW&& sx + kx + M <= p.srcW);
-                                size_t offs0 = ((sy + ky)&a.mask) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
+                                size_t offs0 = (sy + ky) * dY + (sx + kx) * dX, end = offs0 + srcC, offs6 = offs0 + 6 * dS;
                                 for (; offs0 < end; offs0 += 4, offs6 += 4)
                                 {
                                     w0 = _mm512_loadu_si512((__m512i*)weight0);
@@ -558,78 +558,6 @@ namespace Simd
                         convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
                     for (; dx < p.dstW; dx++, b += p.dstC, d += p.dstC * a.size)
                         convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
-                }
-                weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * DA;
-            }
-        }
-
-        //---------------------------------------------------------------------
-
-        SIMD_INLINE void PadRow(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t sy, size_t srcC)
-        {
-            if (sy < p.srcH)
-            {
-#if 0
-                const ConvParam8i& d = a.padded;
-                src += p.srcW * p.srcC * sy;
-                uint8_t* dst = a.buffer.data + (d.srcW * (sy & a.mask) + p.padX) * d.srcC;
-                for (size_t sx = 0; sx < p.srcW; ++sx)
-                {
-                    memcpy(dst, src, srcC);
-                    src += p.srcC;
-                    dst += d.srcC;
-                }
-#else
-                //src += p.srcW * p.srcC * sy;
-                //uint8_t* dst = a.buffer.data + (a.padded.srcW * (sy & a.mask) + p.padX) * p.srcC;
-
-                memcpy(a.buffer.data + (a.padded.srcW * (sy & a.mask) + p.padX) * p.srcC, src + p.srcW * p.srcC * sy, p.srcW*p.srcC);
-
-#endif
-            }
-        }
-
-        template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2p(const uint8_t* src,
-            const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
-        {
-            size_t n = 12, dstWn = AlignLoAny(p.dstW, n), m = p.dstW - dstWn, prefY = yBeg * p.strideY - p.padY + (p.kernelY -  1)*p.dilationY;
-            ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xN = GetConvolutionNhwcDirect_2xM<term, type>(n);
-            ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<term, type>(m);
-            __m512 _norm[2], _bias[2], _params[2], _scale[2], _shift[2];
-            _params[0] = _mm512_set1_ps(params[0]);
-            _params[1] = _mm512_set1_ps(params[1]);
-            for (size_t dc = 0; dc < dstC; dc += DF)
-            {
-                size_t dC = Simd::Min(DF, dstC - dc);
-                _norm[0] = _mm512_loadu_ps(norm + dc + 0);
-                _norm[1] = _mm512_loadu_ps(norm + dc + F);
-                _bias[0] = _mm512_loadu_ps(bias + dc + 0);
-                _bias[1] = _mm512_loadu_ps(bias + dc + F);
-                if (type == ::SimdConvolutionActivationPrelu)
-                {
-                    _params[0] = _mm512_loadu_ps(params + dc + 0);
-                    _params[1] = _mm512_loadu_ps(params + dc + F);
-                }
-                _scale[0] = _mm512_loadu_ps(scale + dc + 0);
-                _scale[1] = _mm512_loadu_ps(scale + dc + F);
-                _shift[0] = _mm512_loadu_ps(shift + dc + 0);
-                _shift[1] = _mm512_loadu_ps(shift + dc + F);
-                uint8_t* d = dst + (dc + yBeg * p.dstW * p.dstC) * a.size;
-                int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
-                for (size_t dy = yBeg, sy = yBeg ? prefY - p.strideY: 0; dy < yEnd; dy++)
-                {
-                    //if (dc == 0)// && (term == Term8iFirst || term == Term8iSingle8u || term == Term8iSingle8u))
-                    {
-                        for (; sy <= prefY; ++sy)
-                            PadRow(src, p, a, sy, srcC);
-                        prefY += p.strideY;
-                    }
-                    size_t dx = 0;
-                    for (; dx < dstWn; dx += n, b += p.dstC * n, d += p.dstC * a.size * n)
-                        convolutionNhwcDirect_2xN(a.buffer.data, a.padded, a, dy, dx, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
-                    for (; dx < p.dstW; dx += m, b += p.dstC * m, d += p.dstC * a.size * m)
-                        convolutionNhwcDirect_2xM(a.buffer.data, a.padded, a, dy, dx, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
                 }
                 weight += p.kernelY * p.kernelX * DivHi(p.srcC, 4) * DA;
             }
@@ -904,23 +832,11 @@ namespace Simd
             }
             else
             {
-                if (a.buffer.size)
+                switch (a.microD)
                 {
-                    switch (a.microD)
-                    {
-                    case 2 * F: d[term] = ConvolutionNhwcDirect_2p<term, activation>; break;
-                    default:
-                        assert(0);
-                    }
-                }
-                else
-                {
-                    switch (a.microD)
-                    {
-                    case 2 * F: d[term] = ConvolutionNhwcDirect_2<term, activation>; break;
-                    default:
-                        assert(0);
-                    }
+                case 2 * F: d[term] = ConvolutionNhwcDirect_2<term, activation>; break;
+                default:
+                    assert(0);
                 }
             }
         }
@@ -954,7 +870,7 @@ namespace Simd
         SynetConvolution8iNhwcDirect::SynetConvolution8iNhwcDirect(const ConvParam8i& p)
             : Avx2::SynetConvolution8iNhwcDirect(p)
         {
-            SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), false);
+            SetAlgParam(F, 2 * F, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), 12);
             Set(p, _alg, _convolutions);
             _convertSrc = Avx512bw::SynetConvert32fTo8u;
         }

@@ -391,7 +391,6 @@ namespace Simd
         size_t SynetConvolution8iNhwcDirect::InternalBufferSize() const
         {
             size_t size = SynetConvolution8i::InternalBufferSize();
-            size += _alg.buffer.size * sizeof(uint8_t);
             return size;
         }
 
@@ -401,6 +400,8 @@ namespace Simd
             size_t size = SynetConvolution8i::ExternalBufferSize();
             if (_alg.macroC < p.srcC)
                 size += AlignHi(_sizeD * sizeof(int32_t), SIMD_ALIGN);
+            if(_sizeP)
+                size += AlignHi(_sizeP * sizeof(uint8_t), SIMD_ALIGN);
             return size;
         }
 
@@ -410,8 +411,6 @@ namespace Simd
             ReorderWeight();
             _alg.zero = Set4(_srcCvt.zero[0]);
             _alg.upper = Set4(_dstCvt.uMax);
-            if (_alg.buffer.size)
-                memset(_alg.buffer.data, _srcCvt.zero[0], _alg.buffer.size);
         }
 
         bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)
@@ -419,7 +418,20 @@ namespace Simd
             return false;
         }
 
-        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, bool pad)
+        bool SynetConvolution8iNhwcDirect::PadEnable(size_t microC)
+        {
+            const ConvParam8i& p = _param;
+            if (p.padX == 0 && p.padW == 0)
+                return false;
+            if (_alg.macroH < p.dstH)
+                return false;
+            size_t nose = p.NoseW(), body = p.BodyW() - nose, tail = DivHi(p.padW, p.strideX);
+            size_t srcSteps = nose + DivHi(body, microC) + tail;
+            size_t padSteps = DivHi(nose + body + tail, microC);
+            return srcSteps >= padSteps*1.3;
+        }
+
+        void SynetConvolution8iNhwcDirect::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC)
         {
             const ConvParam8i& p = _param;
             _alg.F = F;
@@ -433,17 +445,16 @@ namespace Simd
             }
             _alg.macroD = Simd::Min(AlignLoAny(L3 / p.kernelY / p.kernelX / _alg.macroC, _alg.microD), AlignHiAny(p.dstC, _alg.microD));
             _alg.size = (p.dstT == SimdTensorData32f ? 4 : 1);
-            _alg.mask = -1;
-            if (pad)
+            if (PadEnable(microC))
             {
-                ConvParam8i & p = _alg.padded;
-                p = _param;
-                p.srcW += p.padX + p.padW;
-                p.padX = 0;
-                p.padW = 0;
-                _alg.mask = int32_t(Pow2Hi(p.kernelY * p.dilationY) - 1);
-                _alg.buffer.Resize(((size_t)_alg.mask + 1) * p.srcC * p.srcW);
+                _paramP = p;
+                _paramP.srcW = p.srcW + p.padX + p.padW;
+                _paramP.padX = 0;
+                _paramP.padW = 0;
+                _sizeP = p.srcH * _paramP.srcW * p.srcC;
             }
+            else
+                _sizeP = 0;
         }
 
         void SynetConvolution8iNhwcDirect::ReorderWeight()
@@ -481,19 +492,38 @@ namespace Simd
 
         void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst)
         {
-            const ConvParam8i& p = _param;
-            int32_t* sum = _alg.macroC < p.srcC ? Allocate<int32_t>(buf, _sizeD) : NULL;
+            int32_t * sum = _alg.macroC < _param.srcC ? Allocate<int32_t>(buf, _sizeD) : NULL;
+            uint8_t * pad = _sizeP ? Allocate<uint8_t>(buf, _sizeP) : NULL;
             for (size_t m = 0; m < _merge; ++m)
             {
-                Forward8u(src, sum, dst);
+                if (_sizeP)
+                {
+                    PadInput(src, pad);
+                    Forward8u(pad, _paramP, sum, dst);
+                }
+                else
+                    Forward8u(src, _param, sum, dst);
                 src += _sizeS;
                 dst += _sizeD * (_dst8u ? sizeof(uint8_t) : sizeof(float));
             }
         }
 
-        void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, int32_t* buf, uint8_t* dst)
+        void SynetConvolution8iNhwcDirect::PadInput(const uint8_t* src, uint8_t* dst)
         {
             const ConvParam8i& p = _param;
+            size_t nose = p.padX * p.srcC * sizeof(uint8_t);
+            size_t body = p.srcW * p.srcC * sizeof(uint8_t);
+            size_t tail = p.padW * p.srcC * sizeof(uint8_t);
+            for (size_t y = 0; y < p.srcH; ++y)
+            {
+                memset(dst, _srcCvt.zero[0], nose), dst += nose;
+                memcpy(dst, src, body), src += body, dst += body;
+                memset(dst, _srcCvt.zero[0], tail), dst += tail;
+            }
+        }
+
+        void SynetConvolution8iNhwcDirect::Forward8u(const uint8_t* src, const ConvParam8i& p, int32_t* buf, uint8_t* dst)
+        {
             const int8_t* weight = _weight.data;
             const float* norm = _norm.data;
             const float* bias = _bias.data;

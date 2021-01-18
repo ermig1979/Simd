@@ -223,22 +223,24 @@ namespace Simd
             struct AlgParam
             {
                 size_t F, microD, macroH, macroC, macroD;
-                int32_t zero, size, upper, mask;
-                ConvParam8i padded;
-                mutable Array8u buffer;
+                int32_t zero, size, upper;
             };
 
             typedef void(*ConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
                 const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, bool pad);
+            void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC);
             void ReorderWeight();
+            bool PadEnable(size_t microC);
+            void PadInput(const uint8_t* src, uint8_t* dst);
 
             virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst);
-            void Forward8u(const uint8_t* src, int32_t* buf, uint8_t* dst);
+            void Forward8u(const uint8_t* src, const ConvParam8i & p, int32_t* buf, uint8_t* dst);
 
             AlgParam _alg;
+            size_t _sizeP;
+            ConvParam8i _paramP;
             ConvolutionPtr _convolutions[6];
         };
 
