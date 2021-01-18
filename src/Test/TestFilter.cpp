@@ -1077,18 +1077,33 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
+    static void Print(const uint8_t* img, size_t rows, size_t cols, const char * desc)
+    {
+        std::cout << desc << ":" << std::endl;
+        for (size_t row = 0; row < rows; row++)
+        {
+            for (size_t col = 0; col < cols; col++)
+                std::cout << int(img[row * cols + col]) << " ";
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
     bool GaussianBlurSpecialTest()
     {
-        const int rows = 8, cols = 12;
-        unsigned char src[rows * cols], dst[rows * cols];
-        for (int i = 0; i < rows; i++) 
-            for (int j = 0; j < cols; j++) 
-                src[i * cols + j] = static_cast<unsigned char>(i * cols + j);
+        const size_t rows = 8, cols = 12;
+        uint8_t src[rows * cols], dst[rows * cols];
+        for (size_t row = 0; row < rows; row++)
+            for (size_t col = 0; col < cols; col++)
+                src[row * cols + col] = uint8_t(row * cols + col);
 
-        const float radius = 5.0f;
+        const float radius = 0.5f;
         void * blur = SimdGaussianBlurInit(cols, rows, 1, &radius, NULL);
         SimdGaussianBlurRun(blur, src, cols, dst, cols);
         SimdRelease(blur);
+
+        Print(src, rows, cols, "src");
+        Print(dst, rows, cols, "dst");
 
         return true;
     }
