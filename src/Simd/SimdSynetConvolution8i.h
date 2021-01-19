@@ -121,7 +121,8 @@ namespace Simd
             std::stringstream ss;
             ss << batch << "x" << srcC << "x" << srcH << "x" << srcW;
             ss << "-" << dstC << "x" << kernelY << "x" << kernelX;
-            ss << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group << "-" << trans;
+            ss << "-" << dilationX << "-" << strideX << "-" << Simd::Max(padX, padW) << "-" << group;
+            ss << "-" << (srcT == SimdTensorData8u ? "u" : "f") << (dstT == SimdTensorData8u ? "u" : "f");
             return ss.str();
         }
 
