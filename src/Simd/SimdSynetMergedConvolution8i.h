@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2020 Yermalayeu Ihar.
+* Copyright (c) 2011-2021 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -139,6 +139,8 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         virtual Base::PerformanceMeasurer* Perf(const char *func) = 0;
 #endif
+
+        virtual const char* Info() const = 0;
     };
 
     namespace Base
@@ -148,6 +150,7 @@ namespace Simd
         public:
             SynetMergedConvolution8i(const MergConvParam8i& p);
 
+            virtual String Desc() const { return Ext(); }
             virtual String Ext() const { return "Base"; }
             virtual const MergConvParam8i& Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
@@ -158,6 +161,12 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
             virtual Base::PerformanceMeasurer* Perf(const char* func);
 #endif
+
+            virtual const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
 
             struct AlgParam
             {
@@ -206,6 +215,7 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
             Base::PerformanceMeasurer * _perf;
 #endif        
+            mutable String _info;
         };
 
         class SynetMergedConvolution8iCdc : public SynetMergedConvolution8i

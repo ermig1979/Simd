@@ -59,6 +59,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaa12366fe5a5850160e63300e99287ca7"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__fp32.html#gaa12366fe5a5850160e63300e99287ca7">SimdSynetConvolution32fInternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:gaa12366fe5a5850160e63300e99287ca7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer used inside FP32 convolution algorithm.  <a href="group__synet__convolution__fp32.html#gaa12366fe5a5850160e63300e99287ca7">More...</a><br /></td></tr>
 <tr class="separator:gaa12366fe5a5850160e63300e99287ca7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8daf0410bdb6b45866b889cd809a2814"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__fp32.html#ga8daf0410bdb6b45866b889cd809a2814">SimdSynetConvolution32fInfo</a> (const void *context)</td></tr>
+<tr class="memdesc:ga8daf0410bdb6b45866b889cd809a2814"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of FP32 convolution algorithm.  <a href="group__synet__convolution__fp32.html#ga8daf0410bdb6b45866b889cd809a2814">More...</a><br /></td></tr>
+<tr class="separator:ga8daf0410bdb6b45866b889cd809a2814"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga0147bce67b7f215178835f0f3e710eaa"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__convolution__fp32.html#ga0147bce67b7f215178835f0f3e710eaa">SimdSynetConvolution32fSetParams</a> (void *context, const float *weight, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal, const float *bias, const float *params)</td></tr>
 <tr class="memdesc:ga0147bce67b7f215178835f0f3e710eaa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, biases and parameters of activation function required for FP32 convolution algorithm.  <a href="group__synet__convolution__fp32.html#ga0147bce67b7f215178835f0f3e710eaa">More...</a><br /></td></tr>
 <tr class="separator:ga0147bce67b7f215178835f0f3e710eaa"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,7 +113,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__convolution__fp32.html#ga47b83adc66431926e50b39761efbb2a9" title="Gets size of external temporary buffer required for FP32 convolution algorithm.">SimdSynetConvolution32fExternalBufferSize</a>, <a class="el" href="group__synet__convolution__fp32.html#gaa12366fe5a5850160e63300e99287ca7" title="Gets size of internal buffer used inside FP32 convolution algorithm.">SimdSynetConvolution32fInternalBufferSize</a>, <a class="el" href="group__synet__convolution__fp32.html#ga0147bce67b7f215178835f0f3e710eaa" title="Sets weights, biases and parameters of activation function required for FP32 convolution algorithm.">SimdSynetConvolution32fSetParams</a> and <a class="el" href="group__synet__convolution__fp32.html#gac34c3e3672c20e307137705511814dbc" title="Performs forward propagation of FP32 convolution algorithm.">SimdSynetConvolution32fForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__convolution__fp32.html#ga47b83adc66431926e50b39761efbb2a9" title="Gets size of external temporary buffer required for FP32 convolution algorithm.">SimdSynetConvolution32fExternalBufferSize</a>, <a class="el" href="group__synet__convolution__fp32.html#gaa12366fe5a5850160e63300e99287ca7" title="Gets size of internal buffer used inside FP32 convolution algorithm.">SimdSynetConvolution32fInternalBufferSize</a>, <a class="el" href="group__synet__convolution__fp32.html#ga8daf0410bdb6b45866b889cd809a2814" title="Gets description of internal implementation of FP32 convolution algorithm.">SimdSynetConvolution32fInfo</a>, <a class="el" href="group__synet__convolution__fp32.html#ga0147bce67b7f215178835f0f3e710eaa" title="Sets weights, biases and parameters of activation function required for FP32 convolution algorithm.">SimdSynetConvolution32fSetParams</a> and <a class="el" href="group__synet__convolution__fp32.html#gac34c3e3672c20e307137705511814dbc" title="Performs forward propagation of FP32 convolution algorithm.">SimdSynetConvolution32fForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -165,6 +168,33 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>size of internal buffer used inside FP32 convolution algorithm. </dd></dl>
+
+</div>
+</div>
+<a id="ga8daf0410bdb6b45866b889cd809a2814"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8daf0410bdb6b45866b889cd809a2814">&#9670;&nbsp;</a></span>SimdSynetConvolution32fInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * SimdSynetConvolution32fInfo </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets description of internal implementation of FP32 convolution algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 convolution context. It must be created by function <a class="el" href="group__synet__convolution__fp32.html#ga8f23b46b5c7456149dde27f5524ae0d2" title="Initilizes FP32 convolution algorithm.">SimdSynetConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of FP32 convolution algorithm. </dd></dl>
 
 </div>
 </div>

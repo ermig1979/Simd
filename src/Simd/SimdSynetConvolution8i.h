@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2020 Yermalayeu Ihar.
+* Copyright (c) 2011-2021 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -174,6 +174,12 @@ namespace Simd
         Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
+        const char* Info() const
+        {
+            _info = Desc();
+            return _info.c_str();
+        }
+
     protected:
         virtual void Forward8u(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
 
@@ -184,6 +190,7 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         Base::PerformanceMeasurer * _perf;
 #endif
+        mutable String _info;
         Convert32fTo8u _convertSrc;
         CvtParam _srcCvt, _dstCvt;
         Array8i _weight;

@@ -157,6 +157,8 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         virtual Base::PerformanceMeasurer* Perf(const char* func) = 0;
 #endif
+
+        virtual const char* Info() const = 0;
     };
 
     namespace Base
@@ -166,7 +168,8 @@ namespace Simd
         public:
             SynetMergedConvolution32f(const MergConvParam32f& p);
 
-            virtual String Desc() const { return "Base"; }
+            virtual String Desc() const { return Ext(); }
+            virtual String Ext() const { return "Base"; }
             virtual const MergConvParam32f & Param() const { return _param; }
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
@@ -176,6 +179,12 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
             virtual Base::PerformanceMeasurer* Perf(const char* func);
 #endif
+
+            virtual const char* Info() const
+            {
+                _info = Desc();
+                return _info.c_str();
+            }
 
             typedef void(*ConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
                 const size_t * bufH, const float* weight, const float* bias, const float* params, float* dst);
@@ -199,6 +208,7 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
             Base::PerformanceMeasurer * _perf;
 #endif        
+            mutable String _info;
         };
 
         class SynetMergedConvolution32fCdc : public SynetMergedConvolution32f
@@ -257,7 +267,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Desc() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr * c);
         };
@@ -266,7 +276,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
-            virtual String Desc() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -275,7 +285,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
-            virtual String Desc() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -291,7 +301,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Desc() const { return "Avx"; }
+            virtual String Ext() const { return "Avx"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -300,7 +310,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
-            virtual String Desc() const { return "Avx"; }
+            virtual String Ext() const { return "Avx"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -309,7 +319,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
-            virtual String Desc() const { return "Avx"; }
+            virtual String Ext() const { return "Avx"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -325,7 +335,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Desc() const { return "Avx2"; }
+            virtual String Ext() const { return "Avx2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -334,7 +344,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
-            virtual String Desc() const { return "Avx2"; }
+            virtual String Ext() const { return "Avx2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -343,7 +353,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
-            virtual String Desc() const { return "Avx2"; }
+            virtual String Ext() const { return "Avx2"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -359,7 +369,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Desc() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512f"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -368,7 +378,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
-            virtual String Desc() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512f"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -377,7 +387,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
-            virtual String Desc() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512f"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -393,7 +403,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Desc() const { return "Neon"; }
+            virtual String Ext() const { return "Neon"; }
         };
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);

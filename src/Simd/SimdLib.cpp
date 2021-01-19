@@ -5393,6 +5393,11 @@ SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context)
     return ((SynetConvolution32f*)context)->InternalBufferSize();
 }
 
+SIMD_API const char* SimdSynetConvolution32fInfo(const void* context)
+{
+    return ((SynetConvolution32f*)context)->Info();
+}
+
 SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params)
 {
     ((SynetConvolution32f*)context)->SetParams(weight, internal, bias, params);
@@ -5423,6 +5428,11 @@ SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
     return ((SynetConvolution8i*)context)->InternalBufferSize();
 }
 
+SIMD_API const char* SimdSynetConvolution8iInfo(const void* context)
+{
+    return ((SynetConvolution8i*)context)->Info();
+}
+
 SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight, const float* bias, const float* params, const float* const* stats)
 {
     ((SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
@@ -5451,6 +5461,11 @@ SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context
 SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context)
 {
     return ((SynetDeconvolution32f*)context)->InternalBufferSize();
+}
+
+SIMD_API const char* SimdSynetDeconvolution32fInfo(const void* context)
+{
+    return ((SynetDeconvolution32f*)context)->Info();
 }
 
 SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params)
@@ -5587,6 +5602,11 @@ SIMD_API size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * con
     return ((SynetMergedConvolution32f*)context)->InternalBufferSize();
 }
 
+SIMD_API const char* SimdSynetMergedConvolution32fInfo(const void* context)
+{
+    return ((SynetMergedConvolution32f*)context)->Info();
+}
+
 SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
 {
     ((SynetMergedConvolution32f*)context)->SetParams(weight, internal, bias, params);
@@ -5615,6 +5635,11 @@ SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* conte
 SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context)
 {
     return ((SynetMergedConvolution8i*)context)->InternalBufferSize();
+}
+
+SIMD_API const char* SimdSynetMergedConvolution8iInfo(const void* context)
+{
+    return ((SynetMergedConvolution8i*)context)->Info();
 }
 
 SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)

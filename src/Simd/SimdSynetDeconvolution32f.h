@@ -164,6 +164,12 @@ namespace Simd
         Base::PerformanceMeasurer* Perf(const String& func);
 #endif
 
+        const char * Info() const
+        {
+            _info = Desc();
+            return _info.c_str();
+        }
+
     protected:
         typedef void(*NhwcReorderB)(size_t M, size_t N, size_t K, const float * B, float * pB, GemmKernelType type, bool compatibility);
         typedef void(*NhwcRun)(size_t M, size_t N, size_t K, const float * A, const float * B, float * C, GemmKernelType type, bool compatibility);
@@ -182,6 +188,7 @@ namespace Simd
 #if defined(SIMD_PERFORMANCE_STATISTIC)
         Base::PerformanceMeasurer * _perf;
 #endif
+        mutable String _info;
     };
 
     namespace Base

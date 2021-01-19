@@ -59,6 +59,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga01e3e5f738288088516d58ef81463a98"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__deconvolution__fp32.html#ga01e3e5f738288088516d58ef81463a98">SimdSynetDeconvolution32fInternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:ga01e3e5f738288088516d58ef81463a98"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of internal buffer used inside FP32 deconvolution algorithm.  <a href="group__synet__deconvolution__fp32.html#ga01e3e5f738288088516d58ef81463a98">More...</a><br /></td></tr>
 <tr class="separator:ga01e3e5f738288088516d58ef81463a98"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga8a7d6429f8bb03efb89c619a49e48faa"><td class="memItemLeft" align="right" valign="top">SIMD_API const char *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__deconvolution__fp32.html#ga8a7d6429f8bb03efb89c619a49e48faa">SimdSynetDeconvolution32fInfo</a> (const void *context)</td></tr>
+<tr class="memdesc:ga8a7d6429f8bb03efb89c619a49e48faa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets description of internal implementation of FP32 deconvolution algorithm.  <a href="group__synet__deconvolution__fp32.html#ga8a7d6429f8bb03efb89c619a49e48faa">More...</a><br /></td></tr>
+<tr class="separator:ga8a7d6429f8bb03efb89c619a49e48faa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga84c49be88db5c6ca7a556e21096b6ca6"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__deconvolution__fp32.html#ga84c49be88db5c6ca7a556e21096b6ca6">SimdSynetDeconvolution32fSetParams</a> (void *context, const float *weight, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> *internal, const float *bias, const float *params)</td></tr>
 <tr class="memdesc:ga84c49be88db5c6ca7a556e21096b6ca6"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets weights, beases and parameters of activation function required for FP32 deconvolution algorithm.  <a href="group__synet__deconvolution__fp32.html#ga84c49be88db5c6ca7a556e21096b6ca6">More...</a><br /></td></tr>
 <tr class="separator:ga84c49be88db5c6ca7a556e21096b6ca6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -110,7 +113,7 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>a pointer to FP32 deconvolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__deconvolution__fp32.html#ga52f5c821b4f9539155f7e8ac1b9b3d2d" title="Gets size of external temporary buffer required for FP32 deconvolution algorithm.">SimdSynetDeconvolution32fExternalBufferSize</a>, <a class="el" href="group__synet__deconvolution__fp32.html#ga01e3e5f738288088516d58ef81463a98" title="Gets size of internal buffer used inside FP32 deconvolution algorithm.">SimdSynetDeconvolution32fInternalBufferSize</a>, <a class="el" href="group__synet__deconvolution__fp32.html#ga84c49be88db5c6ca7a556e21096b6ca6" title="Sets weights, beases and parameters of activation function required for FP32 deconvolution algorithm.">SimdSynetDeconvolution32fSetParams</a> and <a class="el" href="group__synet__deconvolution__fp32.html#gaa852d017af38ce7713739846fd0c9357" title="Performs forward propagation of FP32 deconvolution algorithm.">SimdSynetDeconvolution32fForward</a>. </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>a pointer to FP32 deconvolution context. On error it returns NULL. It must be released with using of function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. This pointer is used in functions <a class="el" href="group__synet__deconvolution__fp32.html#ga52f5c821b4f9539155f7e8ac1b9b3d2d" title="Gets size of external temporary buffer required for FP32 deconvolution algorithm.">SimdSynetDeconvolution32fExternalBufferSize</a>, <a class="el" href="group__synet__deconvolution__fp32.html#ga01e3e5f738288088516d58ef81463a98" title="Gets size of internal buffer used inside FP32 deconvolution algorithm.">SimdSynetDeconvolution32fInternalBufferSize</a>, <a class="el" href="group__synet__deconvolution__fp32.html#ga8a7d6429f8bb03efb89c619a49e48faa" title="Gets description of internal implementation of FP32 deconvolution algorithm.">SimdSynetDeconvolution32fInfo</a>, <a class="el" href="group__synet__deconvolution__fp32.html#ga84c49be88db5c6ca7a556e21096b6ca6" title="Sets weights, beases and parameters of activation function required for FP32 deconvolution algorithm.">SimdSynetDeconvolution32fSetParams</a> and <a class="el" href="group__synet__deconvolution__fp32.html#gaa852d017af38ce7713739846fd0c9357" title="Performs forward propagation of FP32 deconvolution algorithm.">SimdSynetDeconvolution32fForward</a>. </dd></dl>
 
 </div>
 </div>
@@ -165,6 +168,33 @@ Functions</h2></td></tr>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>size of internal buffer used inside FP32 deconvolution algorithm. </dd></dl>
+
+</div>
+</div>
+<a id="ga8a7d6429f8bb03efb89c619a49e48faa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga8a7d6429f8bb03efb89c619a49e48faa">&#9670;&nbsp;</a></span>SimdSynetDeconvolution32fInfo()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const char * SimdSynetDeconvolution32fInfo </td>
+          <td>(</td>
+          <td class="paramtype">const void *&#160;</td>
+          <td class="paramname"><em>context</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets description of internal implementation of FP32 deconvolution algorithm. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 deconvolution context. It must be created by function <a class="el" href="group__synet__deconvolution__fp32.html#gae02f8007bd04cf7d2b9227285c12a6c1" title="Initilizes FP32 deconvolution algorithm.">SimdSynetDeconvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>string with description of internal implementation of FP32 deconvolution algorithm. </dd></dl>
 
 </div>
 </div>
