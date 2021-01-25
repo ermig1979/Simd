@@ -49,6 +49,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Avx512bw", "Avx512bw.vcxpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Avx512vnni", "Avx512vnni.vcxproj", "{E89969DE-D5F1-44C5-81AF-A4283851090B}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Use", "Use.vcxproj", "{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -193,6 +195,14 @@ Global
 		{E89969DE-D5F1-44C5-81AF-A4283851090B}.Release|Win32.Build.0 = Release|Win32
 		{E89969DE-D5F1-44C5-81AF-A4283851090B}.Release|x64.ActiveCfg = Release|x64
 		{E89969DE-D5F1-44C5-81AF-A4283851090B}.Release|x64.Build.0 = Release|x64
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Debug|Win32.ActiveCfg = Debug|Win32
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Debug|Win32.Build.0 = Debug|Win32
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Debug|x64.ActiveCfg = Debug|x64
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Debug|x64.Build.0 = Debug|x64
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Release|Win32.ActiveCfg = Release|Win32
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Release|Win32.Build.0 = Release|Win32
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Release|x64.ActiveCfg = Release|x64
+		{46B9ADE4-1446-49A8-B7C8-AEA4D6B8D7E3}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

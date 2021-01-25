@@ -171,7 +171,8 @@ struct Simd::Detection&lt; A &gt;</h3>
 <div class="line">    <span class="keywordflow">for</span> (;;)</div>
 <div class="line">    {</div>
 <div class="line">        cv::Mat frame;</div>
-<div class="line">        capture &gt;&gt; frame;</div>
+<div class="line">        <span class="keywordflow">if</span> (!capture.read(frame))</div>
+<div class="line">            <span class="keywordflow">break</span>;</div>
 <div class="line"> </div>
 <div class="line">        <a class="code" href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">Detection::View</a> image = frame;</div>
 <div class="line"> </div>
@@ -584,11 +585,11 @@ struct Simd::Detection&lt; A &gt;</h3>
 </div>
 </div>
 </div><!-- contents -->
-<div class="ttc" id="astruct_simd_1_1_detection_html_a5a9fe5380e859581fe00c9952f4c540a"><div class="ttname"><a href="struct_simd_1_1_detection.html#a5a9fe5380e859581fe00c9952f4c540a">Simd::Detection::Detection</a></div><div class="ttdeci">Detection()</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:200</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a5a9fe5380e859581fe00c9952f4c540a"><div class="ttname"><a href="struct_simd_1_1_detection.html#a5a9fe5380e859581fe00c9952f4c540a">Simd::Detection::Detection</a></div><div class="ttdeci">Detection()</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:201</div></div>
 <div class="ttc" id="agroup__cpp__drawing_html_gae51766f0602e180dd98000b6fba0d6c7"><div class="ttname"><a href="group__cpp__drawing.html#gae51766f0602e180dd98000b6fba0d6c7">Simd::DrawRectangle</a></div><div class="ttdeci">SIMD_INLINE void DrawRectangle(View&lt; A &gt; &amp;canvas, const Rectangle&lt; ptrdiff_t &gt; &amp;rect, const Color &amp;color, size_t width=1)</div><div class="ttdoc">Draws a rectangle at the image.</div><div class="ttdef"><b>Definition:</b> SimdDrawing.hpp:201</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_acea084375a9455df1db79145391a4309"><div class="ttname"><a href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">Simd::Detection::View</a></div><div class="ttdeci">Simd::View&lt; A &gt; View</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:149</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html_a0f70ebebb0cbb98bfbbd112aabc0d724"><div class="ttname"><a href="struct_simd_1_1_detection.html#a0f70ebebb0cbb98bfbbd112aabc0d724">Simd::Detection::Objects</a></div><div class="ttdeci">std::vector&lt; Object &gt; Objects</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:195</div></div>
-<div class="ttc" id="astruct_simd_1_1_detection_html"><div class="ttname"><a href="struct_simd_1_1_detection.html">Simd::Detection</a></div><div class="ttdoc">The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:147</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_acea084375a9455df1db79145391a4309"><div class="ttname"><a href="struct_simd_1_1_detection.html#acea084375a9455df1db79145391a4309">Simd::Detection::View</a></div><div class="ttdeci">Simd::View&lt; A &gt; View</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:150</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html_a0f70ebebb0cbb98bfbbd112aabc0d724"><div class="ttname"><a href="struct_simd_1_1_detection.html#a0f70ebebb0cbb98bfbbd112aabc0d724">Simd::Detection::Objects</a></div><div class="ttdeci">std::vector&lt; Object &gt; Objects</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:196</div></div>
+<div class="ttc" id="astruct_simd_1_1_detection_html"><div class="ttname"><a href="struct_simd_1_1_detection.html">Simd::Detection</a></div><div class="ttdoc">The Detection structure provides object detection with using of HAAR and LBP cascade classifiers.</div><div class="ttdef"><b>Definition:</b> SimdDetection.hpp:148</div></div>
 <div class="ttc" id="astruct_simd_1_1_pixel_1_1_bgr24_html"><div class="ttname"><a href="struct_simd_1_1_pixel_1_1_bgr24.html">Simd::Pixel::Bgr24</a></div><div class="ttdoc">24-bit BGR pixel.</div><div class="ttdef"><b>Definition:</b> SimdPixel.hpp:54</div></div>
 <div id="nav-path" class="navpath">
   <ul>

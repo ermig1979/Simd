@@ -68,7 +68,8 @@ int main(int argc, char * argv[])
     for (;;)
     {
         cv::Mat frame;
-        capture >> frame;
+        if (!capture.read(frame))
+            break;
 
         Detection::View image = frame;
 
@@ -84,8 +85,8 @@ int main(int argc, char * argv[])
         for (size_t i = 0; i < objects.size(); ++i)
             Simd::DrawRectangle(image, objects[i].rect, Simd::Pixel::Bgr24(0, 255, 255));
 
-        cv::imshow(WINDOW_NAME, frame);
-        if (cvWaitKey(1) == 27)// "press 'Esc' to break video";
+        //cv::imshow(WINDOW_NAME, frame);
+        if (cv::waitKey(1) == 27)// "press 'Esc' to break video";
             break;
     }
     return 0;

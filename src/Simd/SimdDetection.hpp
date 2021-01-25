@@ -116,7 +116,8 @@ namespace Simd
             for (;;)
             {
                 cv::Mat frame;
-                capture >> frame;
+                if (!capture.read(frame))
+                    break;
 
                 Detection::View image = frame;
 

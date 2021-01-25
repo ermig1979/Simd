@@ -123,13 +123,24 @@ int main(int argc, char * argv[])
     Detector detector;
     Simd::Font font;
 
+    Model model;
+    model.size = Size(0.1, 0.1); // Sets minimal size of object to detect. ONVIF size is restricted by range [0, 2].
+    detector.SetModel(model);
+
+    Options options;
+    options.TrackingAdditionalLinking = 0; // Sets coefficient to boost trajectory linking. By default it is equal to 0.
+    options.ClassificationShiftMin = 0.075; // Sets minimal shift (in screen diagonals) of motion region to detect object. By default it is equal to 0.075.
+    options.ClassificationTimeMin = 1.0; // Sets minimal life time(in seconds) of motion region to detect object. By default it is equal to 1 second.
+    detector.SetOptions(options);
+
     const char * WINDOW_NAME = "MotionDetector";
     cv::namedWindow(WINDOW_NAME, 1);
     double time = 0;
     for (;;)
     {
         cv::Mat frame;
-        capture >> frame;
+        if (!capture.read(frame))
+            break;
 
         View image = frame;
         Frame input(image, false, time);
@@ -142,7 +153,7 @@ int main(int argc, char * argv[])
         Annotate(metadata, font, events, image);
 
         cv::imshow(WINDOW_NAME, frame);
-        if (cvWaitKey(1) == 27)// "press 'Esc' to break video";
+        if (cv::waitKey(1) == 27)// "press 'Esc' to break video";
             break;
         time += 0.040;
     }

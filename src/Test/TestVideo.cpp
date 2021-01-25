@@ -26,6 +26,7 @@
 #ifdef SIMD_OPENCV_ENABLE
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/videoio/videoio.hpp>
 #endif
 
 namespace Test
@@ -37,63 +38,62 @@ namespace Test
     {
         Native()
         {
-            ::cvNamedWindow(SIMD_DEBUG_WINDOW_NAME.c_str(), CV_WINDOW_AUTOSIZE);
+            cv::namedWindow(SIMD_DEBUG_WINDOW_NAME.c_str(), cv::WINDOW_AUTOSIZE);
         }
 
         ~Native()
         {
-            ::cvReleaseCapture(&capture);
-            ::cvDestroyWindow(SIMD_DEBUG_WINDOW_NAME.c_str());
+            cv::destroyWindow(SIMD_DEBUG_WINDOW_NAME.c_str());
         }
 
         bool SetSource(const String & source)
         {
-            capture = ::cvCreateFileCapture(source.c_str());
-            return capture != NULL;
+            if (source == "0")
+                _capture.open(0);
+            else
+                _capture.open(source);
+            return _capture.isOpened();
         }
 
         bool SetFilter(Filter * filter)
         {
-            this->filter = filter;
+            _filter = filter;
             return true;
         }
 
         bool Start()
         {
-            time = 0;
+            _time = 0;
             while (1)
             {
-                ::IplImage * frame = ::cvQueryFrame(capture);
-                if (!frame)
+                cv::Mat frame;
+                if (!_capture.read(frame))
                     break;
 
-                if (filter)
+                if (_filter)
                 {
-                    filter->Process(Convert(frame), Convert(frame).Ref());
+                    _filter->Process(Convert(frame), Convert(frame).Ref());
                 }
 
-                ::cvShowImage(SIMD_DEBUG_WINDOW_NAME.c_str(), frame);
+                cv::imshow(SIMD_DEBUG_WINDOW_NAME, frame);
 
-                char c = cvWaitKey(1);
+                char c = cv::waitKey(1);
                 if (c == 27) break;
 
-                time += 0.040;
+                _time += 0.040;
             }
             return true;
         }
 
     private:
-        Filter * filter;
-        ::CvCapture * capture;
-        double time;
+        Filter * _filter;
+        cv::VideoCapture _capture;
+        double _time;
 
-        Frame Convert(::IplImage * frame)
+        Frame Convert(const cv::Mat & frame)
         {
-            if (::memcmp(frame->colorModel, "RGB", 3) == 0 && ::memcmp(frame->channelSeq, "BGR", 3) == 0)
-            {
-                View view(frame->width, frame->height, frame->widthStep, View::Bgr24, frame->imageData);
-                return Frame(view, false, time);
-            }
+            if (frame.channels() == 3)
+                return Frame(View(frame), false, _time);
             return Frame();
         }
     };
