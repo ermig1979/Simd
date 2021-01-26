@@ -1,7 +1,7 @@
 /*
 * The use examples of Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2021 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,7 +21,7 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 *
-* In order to be enable of OpenCV examples for Visual Studio 2019 you have to rename file 'Ocv.prop.default' into 'Ocv.prop' and set there correct paths to OpenCV.
+* In order to be enable of OpenCV examples for Visual Studio 2015/2019 you have to rename file 'Ocv.prop.default' into 'Ocv.prop' and set there correct paths to OpenCV.
 */
 #include <iostream>
 #include <string>
