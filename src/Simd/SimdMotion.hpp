@@ -144,7 +144,7 @@ namespace Simd
             Simd::Font font;
 
             Model model;
-            model.size = Size(0.1, 0.1); // Sets minimal size of object to detect. ONVIF size is restricted by range [0, 2].
+            model.size = FSize(0.1, 0.1); // Sets minimal size of object to detect. ONVIF size is restricted by range [0, 2].
             detector.SetModel(model);
 
             Options options;
@@ -1561,16 +1561,17 @@ namespace Simd
                         Motion::Object dstObject;
                         dstObject.id = srcObject.classificationId;
                         dstObject.rect = srcObject.rect*scale;
-                        for (size_t j = 0; j < srcObject.trajectory.size(); ++j)
+                        for (size_t j = 0, n = srcObject.trajectory.size(); j < n; ++j)
                         {
-                            ptrdiff_t begin = std::max<ptrdiff_t>(0, j - _options.TrackingAveragingHalfRange);
-                            ptrdiff_t end = std::min<ptrdiff_t>(srcObject.trajectory.size(), j + _options.TrackingAveragingHalfRange);
+                            ptrdiff_t half = std::min<size_t>(_options.TrackingAveragingHalfRange, std::min(n - 1 - j, j));
+                            ptrdiff_t beg = std::max<ptrdiff_t>(0, j - half);
+                            ptrdiff_t end = std::min<ptrdiff_t>(n, j + half + 1);
                             Point sum;
-                            for (ptrdiff_t l = begin; l < end; ++l)
+                            for (ptrdiff_t l = beg; l < end; ++l)
                                 sum += srcObject.trajectory[l]->point*scale;
                             Motion::Position position;
                             position.time = srcObject.trajectory[j]->time;
-                            position.point = sum / (end - begin);
+                            position.point = sum / (end - beg);
                             dstObject.trajectory.push_back(position);
                         }
                         _scene.metadata->objects.push_back(dstObject);

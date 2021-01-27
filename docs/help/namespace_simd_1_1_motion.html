@@ -270,7 +270,7 @@ Functions</h2></td></tr>
 <div class="line">    <a class="code" href="class_simd_1_1_font.html">Simd::Font</a> font;</div>
 <div class="line"> </div>
 <div class="line">    <a class="code" href="struct_simd_1_1_motion_1_1_model.html">Model</a> model;</div>
-<div class="line">    model.<a class="code" href="struct_simd_1_1_motion_1_1_model.html#a6dc31f0f3685e7a8587bb631e2b1a0ca">size</a> = <a class="code" href="namespace_simd_1_1_motion.html#a00a95e450f2199bce5c80ed107208dcd">Size</a>(0.1, 0.1); <span class="comment">// Sets minimal size of object to detect. ONVIF size is restricted by range [0, 2].</span></div>
+<div class="line">    model.<a class="code" href="struct_simd_1_1_motion_1_1_model.html#a6dc31f0f3685e7a8587bb631e2b1a0ca">size</a> = <a class="code" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">FSize</a>(0.1, 0.1); <span class="comment">// Sets minimal size of object to detect. ONVIF size is restricted by range [0, 2].</span></div>
 <div class="line">    detector.<a class="code" href="class_simd_1_1_motion_1_1_detector.html#aa28faba0d59e847c6efa3972850e23eb">SetModel</a>(model);</div>
 <div class="line"> </div>
 <div class="line">    <a class="code" href="struct_simd_1_1_motion_1_1_options.html">Options</a> options;</div>
@@ -339,8 +339,8 @@ Functions</h2></td></tr>
 <div class="ttc" id="astruct_simd_1_1_frame_html"><div class="ttname"><a href="struct_simd_1_1_frame.html">Simd::Frame&lt; Simd::Allocator &gt;</a></div></div>
 <div class="ttc" id="astruct_simd_1_1_motion_1_1_model_html"><div class="ttname"><a href="struct_simd_1_1_motion_1_1_model.html">Simd::Motion::Model</a></div><div class="ttdoc">Model structure.</div><div class="ttdef"><b>Definition:</b> SimdMotion.hpp:403</div></div>
 <div class="ttc" id="astruct_simd_1_1_pixel_1_1_bgr24_html"><div class="ttname"><a href="struct_simd_1_1_pixel_1_1_bgr24.html">Simd::Pixel::Bgr24</a></div><div class="ttdoc">24-bit BGR pixel.</div><div class="ttdef"><b>Definition:</b> SimdPixel.hpp:54</div></div>
+<div class="ttc" id="anamespace_simd_1_1_motion_html_a69c0c1e4d63dcf2c61ea41c22a15b5f5"><div class="ttname"><a href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">Simd::Motion::FSize</a></div><div class="ttdeci">Simd::Point&lt; double &gt; FSize</div><div class="ttdoc">ONVIF 2D-size (width and height). ONVIF size is restricted by range [0, 2].</div><div class="ttdef"><b>Definition:</b> SimdMotion.hpp:193</div></div>
 <div class="ttc" id="agroup__cpp__motion_html_ga6f4d7a542f384f921aeaea7ac5f3db44"><div class="ttname"><a href="group__cpp__motion.html#ga6f4d7a542f384f921aeaea7ac5f3db44">Simd::Motion::ToString</a></div><div class="ttdeci">SIMD_INLINE String ToString(Id id)</div><div class="ttdoc">Converts ID to string.</div><div class="ttdef"><b>Definition:</b> SimdMotion.hpp:310</div></div>
-<div class="ttc" id="anamespace_simd_1_1_motion_html_a00a95e450f2199bce5c80ed107208dcd"><div class="ttname"><a href="namespace_simd_1_1_motion.html#a00a95e450f2199bce5c80ed107208dcd">Simd::Motion::Size</a></div><div class="ttdeci">Simd::Point&lt; ptrdiff_t &gt; Size</div><div class="ttdoc">screen 2D-size (width and height).</div><div class="ttdef"><b>Definition:</b> SimdMotion.hpp:189</div></div>
 <div id="nav-path" class="navpath">
   <ul>
     <li class="footer">Generated for Simd Library by
