@@ -253,7 +253,7 @@ namespace Test
     {
         bool result = true;
         const SimdTensorDataType f32 = SimdTensorData32f, u8 = SimdTensorData8u;
-        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaUse;
+        SimdSynetCompatibilityType fma = SimdSynetCompatibilityFmaAvoid;
         SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
