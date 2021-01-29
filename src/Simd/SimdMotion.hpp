@@ -53,6 +53,7 @@ namespace Simd
         #include <list>
 
         #include "opencv2/opencv.hpp"
+        #include "opencv2/core/utils/logger.hpp"
         #ifndef SIMD_OPENCV_ENABLE
         #define SIMD_OPENCV_ENABLE
         #endif
@@ -126,9 +127,10 @@ namespace Simd
                 std::cout << "You have to set video source! It can be 0 for camera or video file name." << std::endl;
                 return 1;
             }
-            std::string source = argv[1];
+            std::string source = argv[1], output = argc > 2 ? argv[2] : "";
 
             cv::VideoCapture capture;
+            cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
             if (source == "0")
                 capture.open(0);
             else
@@ -139,43 +141,57 @@ namespace Simd
                 return 1;
             }
 
+            cv::VideoWriter writer;
+            if (output.size())
+            {
+                writer.open(output, cv::VideoWriter::fourcc('F','M','P','4'), capture.get(cv::CAP_PROP_FPS),
+                    cv::Size((int)capture.get(cv::CAP_PROP_FRAME_WIDTH), (int)capture.get(cv::CAP_PROP_FRAME_HEIGHT)));
+                if (!writer.isOpened())
+                {
+                    std::cout << "Can't open output file '" << output << "' !" << std::endl;
+                    return 1;
+                }
+            }
+
             EventList events;
             Detector detector;
-            Simd::Font font;
+            Simd::Font font((int)capture.get(cv::CAP_PROP_FRAME_HEIGHT) / 32);
 
+        #if 0
+            // There is an example of change of parameters to detect shooting star in the night sky:
             Model model;
-            model.size = FSize(0.1, 0.1); // Sets minimal size of object to detect. ONVIF size is restricted by range [0, 2].
+            model.size = FSize(0.01, 0.01);
             detector.SetModel(model);
 
             Options options;
-            options.TrackingAdditionalLinking = 0; // Sets coefficient to boost trajectory linking. By default it is equal to 0.
-            options.ClassificationShiftMin = 0.075; // Sets minimal shift (in screen diagonals) of motion region to detect object. By default it is equal to 0.075.
-            options.ClassificationTimeMin = 1.0; // Sets minimal life time(in seconds) of motion region to detect object. By default it is equal to 1 second.
+            options.TrackingAdditionalLinking = 5;
+            options.ClassificationShiftMin = 0.01;
+            options.ClassificationTimeMin = 0.01;
+            options.DifferenceDxFeatureWeight = 0;
+            options.DifferenceDyFeatureWeight = 0;
             detector.SetOptions(options);
+        #endif
 
             const char * WINDOW_NAME = "MotionDetector";
             cv::namedWindow(WINDOW_NAME, 1);
-            double time = 0;
             for (;;)
             {
                 cv::Mat frame;
                 if (!capture.read(frame))
                     break;
-
                 View image = frame;
-                Frame input(image, false, time);
+                Frame input(image, false, capture.get(cv::CAP_PROP_POS_MSEC) * 0.001);
                 Metadata metadata;
 
                 detector.NextFrame(input, metadata);
 
-                font.Resize(image.height / 32);
-
                 Annotate(metadata, font, events, image);
 
                 cv::imshow(WINDOW_NAME, frame);
-                if (cvWaitKey(1) == 27)// "press 'Esc' to break video";
+                if (writer.isOpened())
+                    writer.write(frame);
+                if (cv::waitKey(1) == 27)// "press 'Esc' to break video";
                     break;
-                time += 0.040;
             }
             return 0;
         }
