@@ -576,6 +576,10 @@ namespace Test
                 {
                     SOURCE = arg.substr(3, arg.size() - 3);
                 }
+                else if (arg.find("-o=") == 0)
+                {
+                    OUTPUT = arg.substr(3, arg.size() - 3);
+                }
                 else if (arg.find("-c=") == 0)
                 {
                     C = FromString<int>(arg.substr(3, arg.size() - 3));
@@ -755,6 +759,7 @@ namespace Test
         std::cout << "    -w=1920       a width of test image for performance testing." << std::endl << std::endl;
         std::cout << "    -oh=log.html  a file name with test report (in HTML format)." << std::endl << std::endl;
         std::cout << "    -s=sample.avi a video source (Simd::Motion test)." << std::endl << std::endl;
+        std::cout << "    -o=output.avi an annotated video output (Simd::Motion test)." << std::endl << std::endl;
         std::cout << "    -wt=1         a thread number used to parallelize algorithms." << std::endl << std::endl;
         std::cout << "    -fe=Abs       an exclude filter to exclude some tests." << std::endl << std::endl;
         std::cout << "    -mt=100       a minimal test execution time (in milliseconds)." << std::endl << std::endl;
@@ -764,6 +769,7 @@ namespace Test
 
     String ROOT_PATH = "../..";
     String SOURCE = "";
+    String OUTPUT = "";
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     int C = 512;

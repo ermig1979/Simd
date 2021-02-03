@@ -70,11 +70,11 @@ Library folder's structure</h1>
 <h1><a class="anchor" id="s2"></a>
 The library building for Windows</h1>
 <p>To build the library and test application for Windows 32/64 you can use Microsoft Visual Studio 2019 (or 2013/2015/2017). These project files are in the directory: <br  />
-<code>simd/prj/vs2015/.</code> <br  />
+<code>simd/prj/vs2019/.</code> <br  />
  By default the library is built as a DLL (Dynamic Linked Library). You also may build it as a static library. To do this you must change appropriate property (Configuration Type) of <b>Simd</b> project and also define macro <code>SIMD_STATIC</code> in file: <br  />
 <code>simd/src/Simd/SimdConfig.h.</code></p>
 <p>Also in order to build the library you can use CMake and MinGW: </p><div class="fragment"><div class="line">cd .\prj\cmake</div>
-<div class="line">cmake . -DTOOLCHAIN=<span class="stringliteral">&quot;your_toolchain\bin\g++&quot;</span> -DTARGET=<span class="stringliteral">&quot;x86_64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -DLIBRARY=<span class="stringliteral">&quot;STATIC&quot;</span> -G <span class="stringliteral">&quot;MinGW Makefiles&quot;</span></div>
+<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;your_toolchain\bin\g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;x86_64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -G <span class="stringliteral">&quot;MinGW Makefiles&quot;</span></div>
 <div class="line">mingw32-make</div>
 </div><!-- fragment --><h1><a class="anchor" id="s3"></a>
 The library building for Android</h1>
@@ -82,16 +82,16 @@ The library building for Android</h1>
 <h1><a class="anchor" id="s4"></a>
 The library building for Linux</h1>
 <p>To build the library and test application for Linux 32/64 you need to use CMake build systems. Files of CMake build systems are placed in the directory: <code>simd/prj/cmake/.</code> The library can be built for x86/x64, PowerPC(64) and ARM(32/64) platforms with using of G++ or Clang compilers. With using of native compiler (g++) for current platform it is simple: </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DTOOLCHAIN=<span class="stringliteral">&quot;&quot;</span> -DTARGET=<span class="stringliteral">&quot;&quot;</span></div>
+<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;&quot;</span></div>
 <div class="line">make</div>
 </div><!-- fragment --><p> To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation. There is an example of using for PowerPC (64 bit): </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DTOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/powerpc-linux-gnu-g++&quot;</span> -DTARGET=<span class="stringliteral">&quot;ppc64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -DLIBRARY=<span class="stringliteral">&quot;STATIC&quot;</span></div>
+<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/powerpc-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;ppc64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
 </div><!-- fragment --><p> For ARM (32 bit): </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DTOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/arm-linux-gnueabihf-g++&quot;</span> -DTARGET=<span class="stringliteral">&quot;arm&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -DLIBRARY=<span class="stringliteral">&quot;STATIC&quot;</span></div>
+<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/arm-linux-gnueabihf-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;arm&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
 </div><!-- fragment --><p> And for ARM (64 bit): </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DTOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/aarch64-linux-gnu-g++&quot;</span> -DTARGET=<span class="stringliteral">&quot;aarch64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -DLIBRARY=<span class="stringliteral">&quot;STATIC&quot;</span></div>
+<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/aarch64-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;aarch64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
 </div><!-- fragment --><p> As result the library and the test application will be built in the current directory.</p>
 <h1><a class="anchor" id="s5"></a>
@@ -129,6 +129,7 @@ Test Framework</h1>
 <li><code>-w=1920</code> a width of test image for performance testing.</li>
 <li><code>-oh=log.html</code> a file name with test report (in HTML file format).</li>
 <li><code>-s=sample.avi</code> a video source (<a class="el" href="namespace_simd_1_1_motion.html" title="Contains Framework for motion detection.">Simd::Motion</a> test).</li>
+<li><code>-o=output.avi</code> an annotated video output (<a class="el" href="namespace_simd_1_1_motion.html" title="Contains Framework for motion detection.">Simd::Motion</a> test).</li>
 <li><code>-wt=1</code> a thread number used to parallelize algorithms.</li>
 <li><code>-fe=Abs</code> an exlude filter to exclude some tests.</li>
 <li><code>-mt=100</code> a minimal test execution time (in milliseconds).</li>

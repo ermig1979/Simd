@@ -80,6 +80,7 @@ namespace Simd
         #include <string>
 
         #include "opencv2/opencv.hpp"
+        #include "opencv2/core/utils/logger.hpp"
         #ifndef SIMD_OPENCV_ENABLE
         #define SIMD_OPENCV_ENABLE
         #endif
@@ -93,9 +94,10 @@ namespace Simd
                 std::cout << "You have to set video source! It can be 0 for camera or video file name." << std::endl;
                 return 1;
             }
-            std::string source = argv[1];
+            std::string source = argv[1], output = argc > 2 ? argv[2] : "";
 
             cv::VideoCapture capture;
+            cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
             if (source == "0")
                 capture.open(0);
             else
@@ -105,11 +107,24 @@ namespace Simd
                 std::cout << "Can't capture '" << source << "' !" << std::endl;
                 return 1;
             }
+            int W = (int)capture.get(cv::CAP_PROP_FRAME_WIDTH);
+            int H = (int)capture.get(cv::CAP_PROP_FRAME_HEIGHT);
+
+            cv::VideoWriter writer;
+            if (output.size())
+            {
+                writer.open(output, cv::VideoWriter::fourcc('F', 'M', 'P', '4'), capture.get(cv::CAP_PROP_FPS), cv::Size(W, H));
+                if (!writer.isOpened())
+                {
+                    std::cout << "Can't open output file '" << output << "' !" << std::endl;
+                    return 1;
+                }
+            }
 
             typedef Simd::Detection<Simd::Allocator> Detection;
             Detection detection;
             detection.Load("../../data/cascade/haar_face_0.xml");
-            bool inited = false;
+            detection.Init(Detection::Size(W, H), 1.2, Detection::Size(W, H) / 20);
 
             const char * WINDOW_NAME = "FaceDetection";
             cv::namedWindow(WINDOW_NAME, 1);
@@ -118,14 +133,7 @@ namespace Simd
                 cv::Mat frame;
                 if (!capture.read(frame))
                     break;
-
                 Detection::View image = frame;
-
-                if (!inited)
-                {
-                    detection.Init(image.Size(), 1.2, image.Size() / 20);
-                    inited = true;
-                }
 
                 Detection::Objects objects;
                 detection.Detect(image, objects);
@@ -134,7 +142,9 @@ namespace Simd
                     Simd::DrawRectangle(image, objects[i].rect, Simd::Pixel::Bgr24(0, 255, 255));
 
                 cv::imshow(WINDOW_NAME, frame);
-                if (cvWaitKey(1) == 27)// "press 'Esc' to break video";
+                if (writer.isOpened())
+                    writer.write(frame);
+                if (cv::waitKey(1) == 27)// "press 'Esc' to break video";
                     break;
             }
             return 0;

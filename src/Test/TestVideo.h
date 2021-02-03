@@ -39,10 +39,12 @@ namespace Test
             virtual bool Process(const Frame & input, Frame & output) = 0;
         };
 
-        Video();
+        Video(bool window = true);
         ~Video();
 
         bool SetSource(const String & source);
+
+        bool SetOutput(const String& output);
 
         bool SetFilter(Filter * filter);
 

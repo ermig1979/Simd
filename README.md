@@ -53,7 +53,7 @@ To do this you must change appropriate property (Configuration Type) of **Simd**
 Also in order to build the library you can use CMake and MinGW:
 
     cd .\prj\cmake
-    cmake . -DTOOLCHAIN="your_toolchain\bin\g++" -DTARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC" -G "MinGW Makefiles"
+    cmake . -DSIMD_TOOLCHAIN="your_toolchain\bin\g++" -DSIMD_TARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -G "MinGW Makefiles"
     mingw32-make
 
 The library building for Android
@@ -78,26 +78,26 @@ The library can be built for x86/x64, PowerPC(64, big-endian) and ARM(32/64) pla
 With using of native compiler (g++) for current platform it is simple:
 
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="" -DTARGET=""
+	cmake . -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
 	make
 	
 To build the library for PowerPC(64, big-endian) and ARM(32/64) platforms you can also use toolchain for cross compilation.
 There is an example of using for PowerPC (64 bit, big-endian):
 
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+	cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
 	make
 	
 For ARM (32 bit):
 
 	cd ./prj/cmake
-	cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+	cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm" -DCMAKE_BUILD_TYPE="Release"
 	make
 	
 And for ARM (64 bit):
 
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+    cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
     make
 
 As result the library and the test application will be built in the current directory.
@@ -172,6 +172,7 @@ Also you can use parameters:
 * `-w=1920` a width of test image for performance testing.
 * `-oh=log.html` - a file name with test report (in HTML file format).	
 * `-s=sample.avi` a video source (See `Simd::Motion` test).
+* `-o=output.avi` an annotated video output (See `Simd::Motion` test).
 * `-wt=1` a thread number used to parallelize algorithms.
 * `-fe=Abs` an exclude filter to exclude some tests.
 * `-mt=100` a minimal test execution time (in milliseconds).

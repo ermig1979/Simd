@@ -27,6 +27,7 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/videoio/videoio.hpp>
+#include "opencv2/core/utils/logger.hpp"
 #endif
 
 namespace Test
@@ -36,14 +37,19 @@ namespace Test
 #ifdef SIMD_OPENCV_ENABLE
     struct Video::Native
     {
-        Native()
+        Native(bool window)
+            : _window(window)
+            , _filter(NULL)
         {
-            cv::namedWindow(SIMD_DEBUG_WINDOW_NAME.c_str(), cv::WINDOW_AUTOSIZE);
+            cv::utils::logging::setLogLevel(cv::utils::logging::LOG_LEVEL_ERROR);
+            if(_window)
+                cv::namedWindow(SIMD_DEBUG_WINDOW_NAME.c_str(), cv::WINDOW_AUTOSIZE);
         }
 
         ~Native()
         {
-            cv::destroyWindow(SIMD_DEBUG_WINDOW_NAME.c_str());
+            if(_window)
+                cv::destroyWindow(SIMD_DEBUG_WINDOW_NAME.c_str());
         }
 
         bool SetSource(const String & source)
@@ -55,6 +61,15 @@ namespace Test
             return _capture.isOpened();
         }
 
+        bool SetOutput(const String& output)
+        {
+            if (!_capture.isOpened())
+                return false;
+            _writer.open(output, cv::VideoWriter::fourcc('F', 'M', 'P', '4'), _capture.get(cv::CAP_PROP_FPS),
+                cv::Size((int)_capture.get(cv::CAP_PROP_FRAME_WIDTH), (int)_capture.get(cv::CAP_PROP_FRAME_HEIGHT)));
+            return _writer.isOpened();
+        }
+
         bool SetFilter(Filter * filter)
         {
             _filter = filter;
@@ -63,52 +78,52 @@ namespace Test
 
         bool Start()
         {
-            _time = 0;
+            if (!_capture.isOpened())
+                return false;
             while (1)
             {
                 cv::Mat frame;
                 if (!_capture.read(frame))
                     break;
-
                 if (_filter)
-                {
                     _filter->Process(Convert(frame), Convert(frame).Ref());
-                }
-
-                cv::imshow(SIMD_DEBUG_WINDOW_NAME, frame);
-
-                char c = cv::waitKey(1);
-                if (c == 27) break;
-
-                _time += 0.040;
+                if (_writer.isOpened())
+                    _writer.write(frame);
+                if(_window)
+                    cv::imshow(SIMD_DEBUG_WINDOW_NAME, frame);
+                if (cv::waitKey(1) == 27)// "press 'Esc' to break video";
+                    break;
             }
             return true;
         }
 
     private:
-        Filter * _filter;
+        bool _window;
         cv::VideoCapture _capture;
-        double _time;
+        cv::VideoWriter _writer;
+        Filter * _filter;
 
         Frame Convert(const cv::Mat & frame)
         {
             if (frame.channels() == 3)
-                return Frame(View(frame), false, _time);
+                return Frame(View(frame), false, _capture.get(cv::CAP_PROP_POS_MSEC) * 0.001);
             return Frame();
         }
     };
 #else
     struct Video::Native
     {
+        Native(bool window) { }
         bool SetSource(const String & source) { return false; }
+        bool SetOutput(const String & output) { return false; }
         bool SetFilter(Filter * filter) { return false; }
         bool Start() { return false; }
     };
 #endif
 
-    Video::Video()
+    Video::Video(bool window)
     {
-        _native = new Native();
+        _native = new Native(window);
     }
 
     Video::~Video()
@@ -119,6 +134,11 @@ namespace Test
     bool Video::SetSource(const String & source)
     {
         return _native->SetSource(source);
+    }
+
+    bool Video::SetOutput(const String& output)
+    {
+        return _native->SetOutput(output);
     }
 
     bool Video::SetFilter(Filter * filter)

@@ -37,7 +37,7 @@
 
     To build the library and test application for Windows 32/64 you can use Microsoft Visual Studio 2019 (or 2013/2015/2017). 
     These project files are in the directory:
-    \n`simd/prj/vs2015/.`
+    \n`simd/prj/vs2019/.`
     \n By default the library is built as a DLL (Dynamic Linked Library).
     You also may build it as a static library. 
     To do this you must change appropriate property (Configuration Type) of <b>%Simd</b> project and also define macro `SIMD_STATIC` in file:
@@ -46,7 +46,7 @@
 	Also in order to build the library you can use CMake and MinGW:
 	\code
     cd .\prj\cmake
-    cmake . -DTOOLCHAIN="your_toolchain\bin\g++" -DTARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC" -G "MinGW Makefiles"
+    cmake . -DSIMD_TOOLCHAIN="your_toolchain\bin\g++" -DSIMD_TARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -G "MinGW Makefiles"
     mingw32-make
     \endcode	
 
@@ -66,26 +66,26 @@
     With using of native compiler (g++) for current platform it is simple:
     \code
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="" -DTARGET=""
+    cmake . -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
     make
     \endcode
     To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation.
     There is an example of using for PowerPC (64 bit):
     \code
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DTARGET="ppc64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+    cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
     make
     \endcode
     For ARM (32 bit):
     \code
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DTARGET="arm" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+    cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm" -DCMAKE_BUILD_TYPE="Release"
     make
     \endcode
     And for ARM (64 bit):
     \code
     cd ./prj/cmake
-    cmake . -DTOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DTARGET="aarch64" -DCMAKE_BUILD_TYPE="Release" -DLIBRARY="STATIC"
+    cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
     make
     \endcode
     As result the library and the test application will be built in the current directory.
@@ -159,6 +159,7 @@
      - `-w=1920` a width of test image for performance testing.
      - `-oh=log.html` a file name with test report (in HTML file format).
      - `-s=sample.avi` a video source (Simd::Motion test).
+     - `-o=output.avi` an annotated video output (Simd::Motion test).
      - `-wt=1` a thread number used to parallelize algorithms.
      - `-fe=Abs` an exlude filter to exclude some tests.
      - `-mt=100` a minimal test execution time (in milliseconds).

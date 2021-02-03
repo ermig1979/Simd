@@ -122,7 +122,7 @@ namespace Test
 
     bool MotionSpecialTest()
     {
-        Video video;
+        Video video(true);
 
         if (SOURCE.length() == 0)
         {
@@ -131,7 +131,13 @@ namespace Test
         }
         if (!video.SetSource(SOURCE))
         {
-            TEST_LOG_SS(Error, "Can't open video file '" << SOURCE << "'!");
+            TEST_LOG_SS(Error, "Can't open source video file '" << SOURCE << "'!");
+            return false;
+        }
+
+        if (OUTPUT.length() != 0 && !video.SetOutput(OUTPUT))
+        {
+            TEST_LOG_SS(Error, "Can't open output video file '" << OUTPUT << "'!");
             return false;
         }
 
