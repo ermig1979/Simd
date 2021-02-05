@@ -2981,12 +2981,13 @@ namespace Test
             else
                 Add(src, idx, dst.train);
         }
+        TEST_LOG_SS(Info, "Simd::Neural::Network uses " << dst.train.src.size() << " samples for train and " << dst.check.src.size() << " samples for check.");
     }
 
     bool NeuralTrainSpecialTest()
     {
         Network net;
-        if (!CreateNetwork(net, true, true))
+        if (!CreateNetwork(net, false, false))
         {
             TEST_LOG_SS(Error, "Can't create Simd::Neural::Network!");
             return false;
