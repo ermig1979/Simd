@@ -220,7 +220,7 @@ namespace Test
                 Color(Random(255), Random(255), Random(255)));
         }
 
-        font.Resize(16);
+        font.Resize(32);
         font.Draw(image, text, View::BottomRight, Color(0, 0, 0));
         font.Draw(image, text, View::TopLeft, Color(0, 0, 0));
 

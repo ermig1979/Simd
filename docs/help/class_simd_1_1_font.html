@@ -84,7 +84,26 @@ Public Member Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>The <a class="el" href="class_simd_1_1_font.html" title="The Font class provides text drawing.">Font</a> class provides text drawing. </p>
-</div><h2 class="groupheader">Member Typedef Documentation</h2>
+<p>Using example: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdFont.hpp&quot;</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keywordtype">int</span> main()</div>
+<div class="line">{</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code" href="struct_simd_1_1_pixel_1_1_bgra32.html">Simd::Pixel::Bgra32</a> Color;</div>
+<div class="line">    <span class="keyword">typedef</span> <a class="code" href="struct_simd_1_1_view.html">Simd::Font::View</a> <a class="code" href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a>;</div>
+<div class="line"> </div>
+<div class="line">    <a class="code" href="class_simd_1_1_font.html">Simd::Font</a> font(32);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code" href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a> image(320, 240, <a class="code" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>);</div>
+<div class="line"> </div>
+<div class="line">    <a class="code" href="group__filling.html#gacf5e8fc1887559cd669f10bb1d451563">Simd::FillPixel</a>(image, Color(128, 128, 0));</div>
+<div class="line"> </div>
+<div class="line">    font.Draw(image, <span class="stringliteral">&quot;Hello, Simd!&quot;</span>, <a class="code" href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de">View::MiddleCenter</a>, Color(0, 0, 255));</div>
+<div class="line"> </div>
+<div class="line">    image.Save(<span class="stringliteral">&quot;HelloSimd.ppm&quot;</span>);</div>
+<div class="line"> </div>
+<div class="line">    <span class="keywordflow">return</span> 0;</div>
+<div class="line">}</div>
+</div><!-- fragment --> </div><h2 class="groupheader">Member Typedef Documentation</h2>
 <a id="afbeda3fd1bdc8c37d01bdf9f5c8274ff"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#afbeda3fd1bdc8c37d01bdf9f5c8274ff">&#9670;&nbsp;</a></span>String</h2>
 
@@ -390,6 +409,13 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 </div><!-- contents -->
+<div class="ttc" id="astruct_simd_1_1_view_html_ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe"><div class="ttname"><a href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">Simd::View&lt; Simd::Allocator &gt;::Bgra32</a></div><div class="ttdeci">@ Bgra32</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:87</div></div>
+<div class="ttc" id="aclass_simd_1_1_font_html"><div class="ttname"><a href="class_simd_1_1_font.html">Simd::Font</a></div><div class="ttdoc">The Font class provides text drawing.</div><div class="ttdef"><b>Definition:</b> SimdFont.hpp:64</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html_ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de"><div class="ttname"><a href="struct_simd_1_1_view.html#ab91b34ae619fcdfcba4522b4f335bf83afbf211b2a3d6dd3dd608b736bc3f99de">Simd::View&lt; Simd::Allocator &gt;::MiddleCenter</a></div><div class="ttdeci">@ MiddleCenter</div><div class="ttdef"><b>Definition:</b> SimdView.hpp:125</div></div>
+<div class="ttc" id="astruct_simd_1_1_view_html"><div class="ttname"><a href="struct_simd_1_1_view.html">Simd::View&lt; Simd::Allocator &gt;</a></div></div>
+<div class="ttc" id="astruct_simd_1_1_pixel_1_1_bgra32_html"><div class="ttname"><a href="struct_simd_1_1_pixel_1_1_bgra32.html">Simd::Pixel::Bgra32</a></div><div class="ttdoc">32-bit BGRA pixel.</div><div class="ttdef"><b>Definition:</b> SimdPixel.hpp:128</div></div>
+<div class="ttc" id="agroup__filling_html_gacf5e8fc1887559cd669f10bb1d451563"><div class="ttname"><a href="group__filling.html#gacf5e8fc1887559cd669f10bb1d451563">Simd::FillPixel</a></div><div class="ttdeci">SIMD_INLINE void FillPixel(View&lt; A &gt; &amp;dst, const Pixel &amp;pixel)</div><div class="ttdoc">Fills image by value of given pixel.</div><div class="ttdef"><b>Definition:</b> SimdLib.hpp:1795</div></div>
+<div class="ttc" id="aclass_simd_1_1_font_html_af7e89e26f4cf80a6be93d573eb15a5cc"><div class="ttname"><a href="class_simd_1_1_font.html#af7e89e26f4cf80a6be93d573eb15a5cc">Simd::Font::View</a></div><div class="ttdeci">Simd::View&lt; Simd::Allocator &gt; View</div><div class="ttdef"><b>Definition:</b> SimdFont.hpp:68</div></div>
 <div id="nav-path" class="navpath">
   <ul>
     <li class="footer">Generated for Simd Library by

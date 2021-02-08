@@ -36,6 +36,29 @@ namespace Simd
     /*! @ingroup cpp_drawing
 
         \short The Font class provides text drawing.
+
+        Using example:
+        \code
+        #include "Simd/SimdFont.hpp"
+
+        int main()
+        {
+            typedef Simd::Pixel::Bgra32 Color;
+            typedef Simd::Font::View View;
+
+            Simd::Font font(32);
+
+            View image(320, 240, View::Bgra32);
+
+            Simd::FillPixel(image, Color(128, 128, 0));
+
+            font.Draw(image, "Hello, Simd!", View::MiddleCenter, Color(0, 0, 255));
+
+            image.Save("HelloSimd.ppm");
+
+            return 0;
+        }
+        \endcode
     */
     class Font
     {
