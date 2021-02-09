@@ -208,6 +208,23 @@ typedef enum
 } SimdDetectionInfoFlags;
 
 /*! @ingroup c_types
+    Describes formats of image file.
+*/
+typedef enum
+{
+    /*! An undefined image file format. */
+    SimdImageFormatUndefined = 0,
+    /*! A PGM (Portable Gray Map) text (P2) image file format. */
+    SimdImageFormatPgmTxt,
+    /*! A PGM (Portable Gray Map) binary (P5) image file format. */
+    SimdImageFormatPgmBin,
+    /*! A PGM (Portable Pixel Map) text (P3) image file format. */
+    SimdImageFormatPpmTxt,
+    /*! A PGM (Portable Pixel Map) binary (P6) image file format. */
+    SimdImageFormatPpmBin,
+} SimdImageFormatType;
+
+/*! @ingroup c_types
     Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
     Images must have the same format (unsigned 8-bit integer for every channel).
 */
