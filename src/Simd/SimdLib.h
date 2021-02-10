@@ -3489,6 +3489,14 @@ extern "C"
     */
     SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
 
+    SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, size_t channels, SimdImageFormatType format, int quality, size_t * size);
+    
+    SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, size_t channels, SimdImageFormatType format, int quality, const char * path);
+
+    SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, size_t* channels);
+
+    SIMD_API uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t* width, size_t* height, size_t* channels);
+
     /*! @ingroup other_conversion
 
         \fn void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride);

@@ -108,6 +108,7 @@
     <ClCompile Include="..\..\src\Test\TestHog.cpp" />
     <ClCompile Include="..\..\src\Test\TestHogLite.cpp" />
     <ClCompile Include="..\..\src\Test\TestHtml.cpp" />
+    <ClCompile Include="..\..\src\Test\TestImageIO.cpp" />
     <ClCompile Include="..\..\src\Test\TestImageMatcher.cpp" />
     <ClCompile Include="..\..\src\Test\TestIntegral.cpp" />
     <ClCompile Include="..\..\src\Test\TestInterference.cpp" />
