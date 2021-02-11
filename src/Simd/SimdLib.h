@@ -208,21 +208,21 @@ typedef enum
 } SimdDetectionInfoFlags;
 
 /*! @ingroup c_types
-    Describes formats of image file.
+    Describes formats of image file. It is used in functions ::SimdImageSaveToMemory and ::SimdImageSaveToFile.
 */
 typedef enum
 {
     /*! An undefined image file format. */
-    SimdImageFormatUndefined = 0,
+    SimdImageFileUndefined = 0,
     /*! A PGM (Portable Gray Map) text (P2) image file format. */
-    SimdImageFormatPgmTxt,
+    SimdImageFilePgmTxt,
     /*! A PGM (Portable Gray Map) binary (P5) image file format. */
-    SimdImageFormatPgmBin,
+    SimdImageFilePgmBin,
     /*! A PGM (Portable Pixel Map) text (P3) image file format. */
-    SimdImageFormatPpmTxt,
+    SimdImageFilePpmTxt,
     /*! A PGM (Portable Pixel Map) binary (P6) image file format. */
-    SimdImageFormatPpmBin,
-} SimdImageFormatType;
+    SimdImageFilePpmBin,
+} SimdImageFileType;
 
 /*! @ingroup c_types
     Describes types of binary operation between two images performed by function ::SimdOperationBinary8u.
@@ -3489,13 +3489,45 @@ extern "C"
     */
     SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
 
-    SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, size_t channels, SimdImageFormatType format, int quality, size_t * size);
-    
-    SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, size_t channels, SimdImageFormatType format, int quality, const char * path);
+    /*! @ingroup image_io
 
-    SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, size_t* channels);
+        \fn uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
 
-    SIMD_API uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t* width, size_t* height, size_t* channels);
+        \short Saves an image to memory in given image file format.
+
+        \param [in] data - a pointer to pixels data of the image. 
+        \param [in] stride - a row size of the image in bytes.
+        \param [in] width - a width of the image.
+        \param [in] height - a height of the image.
+        \param [in] format - a pixel format of the image channels. Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32.
+        \param [in] file - a format of output image file.
+        \param [in] quality - a parameter of compression quality (if file format supports it).
+        \param [out] size - a pointer to the size of output image file in bytes.
+        \return a pointer to memory buffer with output image file. It has to be deleted after use by function ::SimdFree.
+    */
+    SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
+
+    /*! @ingroup image_io
+
+        \fn SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
+
+        \short Saves an image to memory in given image file format.
+
+        \param [in] data - a pointer to pixels data of the image.
+        \param [in] stride - a row size of the image in bytes.
+        \param [in] width - a width of the image.
+        \param [in] height - a height of the image.
+        \param [in] format - a pixel format of the image channels. Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32.
+        \param [in] file - a format of output image file.
+        \param [in] quality - a parameter of compression quality (if file format supports it).
+        \param [in] path - a path to output image file.
+        \return result of the operation.
+    */
+    SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
+
+    SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
+
+    SIMD_API uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
 
     /*! @ingroup other_conversion
 

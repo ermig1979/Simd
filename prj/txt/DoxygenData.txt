@@ -587,3 +587,8 @@
     @defgroup matrix Matrix Operations
     \short Matrix operations.
 */
+
+/*! @ingroup functions
+    @defgroup image_io Image IO
+    \short Image IO (Save/Load) operations.
+*/

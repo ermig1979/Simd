@@ -2878,6 +2878,26 @@ SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t 
     simdHogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
 }
 
+SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
+{
+    return NULL;
+}
+
+SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
+{
+    return SimdFalse;
+}
+
+SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+{
+    return NULL;
+}
+
+SIMD_API uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+{
+    return NULL;
+}
+
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

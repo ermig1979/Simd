@@ -128,19 +128,19 @@ Enumerations</h2></td></tr>
 <br />
  }</td></tr>
 <tr class="separator:gabedf47370ccee15c5ef55dbe5df6479a"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gae20adf48bc8927a4bd68c406d444d92b"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#gae20adf48bc8927a4bd68c406d444d92b">SimdImageFormatType</a> { <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggae20adf48bc8927a4bd68c406d444d92baa94c92292eae0ba319cf45702e1b6d4f">SimdImageFormatUndefined</a> = 0, 
+<tr class="memitem:gaaa683fbfa281cfc06b6907b63e8d1944"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> { <br />
+&#160;&#160;<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a> = 0, 
 <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggae20adf48bc8927a4bd68c406d444d92ba057766925c8591f0146becb792695f82">SimdImageFormatPgmTxt</a>, 
+&#160;&#160;<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944a40ab7c438380148991eef43d37de4aed">SimdImageFilePgmTxt</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggae20adf48bc8927a4bd68c406d444d92ba74227c35ea8e755b93d8ebbfad711f42">SimdImageFormatPgmBin</a>, 
+&#160;&#160;<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944af196178ffd49c54cac5890a7325e3347">SimdImageFilePgmBin</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggae20adf48bc8927a4bd68c406d444d92baa4073091a35ded2977694b3ca83e48e7">SimdImageFormatPpmTxt</a>, 
+&#160;&#160;<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944a84efc74a6f2b0bebd249a28c3d0b780a">SimdImageFilePpmTxt</a>, 
 <br />
-&#160;&#160;<a class="el" href="group__c__types.html#ggae20adf48bc8927a4bd68c406d444d92ba4ca92bb2b36c30d28ed88a877c7511fc">SimdImageFormatPpmBin</a>
+&#160;&#160;<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ad64172bcc5a3ca768fa8a847a2d81722">SimdImageFilePpmBin</a>
 <br />
  }</td></tr>
-<tr class="separator:gae20adf48bc8927a4bd68c406d444d92b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="separator:gaaa683fbfa281cfc06b6907b63e8d1944"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga33480fd62ba03212ce7756df4a54ff5d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__c__types.html#ga33480fd62ba03212ce7756df4a54ff5d">SimdOperationBinary8uType</a> { <br />
 &#160;&#160;<a class="el" href="group__c__types.html#gga33480fd62ba03212ce7756df4a54ff5daae18c0c796f8d55c6d62156696e00936">SimdOperationBinary8uAverage</a>, 
 <br />
@@ -351,28 +351,28 @@ Enumerations</h2></td></tr>
 
 </div>
 </div>
-<a id="gae20adf48bc8927a4bd68c406d444d92b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gae20adf48bc8927a4bd68c406d444d92b">&#9670;&nbsp;</a></span>SimdImageFormatType</h2>
+<a id="gaaa683fbfa281cfc06b6907b63e8d1944"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaa683fbfa281cfc06b6907b63e8d1944">&#9670;&nbsp;</a></span>SimdImageFileType</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">enum <a class="el" href="group__c__types.html#gae20adf48bc8927a4bd68c406d444d92b">SimdImageFormatType</a></td>
+          <td class="memname">enum <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a></td>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Describes formats of image file. </p>
+<p>Describes formats of image file. It is used in functions <a class="el" href="group__image__io.html#ga2efb5571586cdfca0d155e58b9ab9cbd" title="Saves an image to memory in given image file format.">SimdImageSaveToMemory</a> and <a class="el" href="group__image__io.html#ga1a81593d4bfcd782b2e0b99d370e08ea" title="Saves an image to memory in given image file format.">SimdImageSaveToFile</a>. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggae20adf48bc8927a4bd68c406d444d92baa94c92292eae0ba319cf45702e1b6d4f"></a>SimdImageFormatUndefined&#160;</td><td class="fielddoc"><p>An undefined image file format. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724"></a>SimdImageFileUndefined&#160;</td><td class="fielddoc"><p>An undefined image file format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggae20adf48bc8927a4bd68c406d444d92ba057766925c8591f0146becb792695f82"></a>SimdImageFormatPgmTxt&#160;</td><td class="fielddoc"><p>A PGM (Portable Gray Map) text (P2) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a40ab7c438380148991eef43d37de4aed"></a>SimdImageFilePgmTxt&#160;</td><td class="fielddoc"><p>A PGM (Portable Gray Map) text (P2) image file format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggae20adf48bc8927a4bd68c406d444d92ba74227c35ea8e755b93d8ebbfad711f42"></a>SimdImageFormatPgmBin&#160;</td><td class="fielddoc"><p>A PGM (Portable Gray Map) binary (P5) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944af196178ffd49c54cac5890a7325e3347"></a>SimdImageFilePgmBin&#160;</td><td class="fielddoc"><p>A PGM (Portable Gray Map) binary (P5) image file format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggae20adf48bc8927a4bd68c406d444d92baa4073091a35ded2977694b3ca83e48e7"></a>SimdImageFormatPpmTxt&#160;</td><td class="fielddoc"><p>A PGM (Portable Pixel Map) text (P3) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944a84efc74a6f2b0bebd249a28c3d0b780a"></a>SimdImageFilePpmTxt&#160;</td><td class="fielddoc"><p>A PGM (Portable Pixel Map) text (P3) image file format. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggae20adf48bc8927a4bd68c406d444d92ba4ca92bb2b36c30d28ed88a877c7511fc"></a>SimdImageFormatPpmBin&#160;</td><td class="fielddoc"><p>A PGM (Portable Pixel Map) binary (P6) image file format. </p>
+<tr><td class="fieldname"><a id="ggaaa683fbfa281cfc06b6907b63e8d1944ad64172bcc5a3ca768fa8a847a2d81722"></a>SimdImageFilePpmBin&#160;</td><td class="fielddoc"><p>A PGM (Portable Pixel Map) binary (P6) image file format. </p>
 </td></tr>
 </table>
 
