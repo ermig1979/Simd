@@ -46,7 +46,9 @@
     <ClInclude Include="..\..\src\Simd\SimdFont.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdFrame.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageMatcher.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
     <ClCompile Include="..\..\src\Simd\SimdLib.cpp" />

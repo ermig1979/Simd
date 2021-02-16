@@ -25,6 +25,9 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
+#include "Simd/SimdImageLoad.h"
+#include "Simd/SimdImageSave.h"
+
 namespace Test
 {
     //-----------------------------------------------------------------------
