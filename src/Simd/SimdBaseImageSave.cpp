@@ -21,7 +21,15 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
+
+#include <stdio.h>
+
+#if defined(_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable: 4996)
+#endif
 
 namespace Simd
 {
@@ -34,7 +42,25 @@ namespace Simd
 
         SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
         {
-            return SimdFalse;
+            SimdBool result = SimdFalse;
+            size_t size;
+            uint8_t * buffer = saver(data, stride, width, height, format, file, quality, &size);
+            if (buffer)
+            {
+                ::FILE* file = ::fopen(path, "wb");
+                if (file)
+                {
+                    if (::fwrite(buffer, 1, size, file) == size)
+                        result = SimdTrue;
+                    ::fclose(file);
+                }
+                Simd::Free(buffer);
+            }
+            return result;
         }
     }
 }
+
+#if defined(_MSC_VER)
+#pragma warning (pop)
+#endif

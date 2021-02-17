@@ -22,6 +22,14 @@
 * SOFTWARE.
 */
 #include "Simd/SimdImageLoad.h"
+#include "Simd/SimdArray.h"
+
+#include <stdio.h>
+
+#if defined(_MSC_VER)
+#pragma warning (push)
+#pragma warning (disable: 4996)
+#endif
 
 namespace Simd
 {
@@ -34,7 +42,22 @@ namespace Simd
 
         uint8_t* ImageLoadFromFile(const ImageLoadFromMemoryPtr loader, const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
         {
-            return NULL;
+            uint8_t* data = NULL;
+            ::FILE* file = ::fopen(path, "wr");
+            if (file)
+            {
+                ::fseek(file, 0, SEEK_END);
+                Array8u buffer(::ftell(file));
+                ::fseek(file, 0, SEEK_SET);
+                if (::fread(buffer.data, 1, buffer.size, file) == buffer.size)
+                    data = loader(buffer.data, buffer.size, stride, width, height, format);
+                ::fclose(file);
+            }
+            return data;
         }
     }
 }
+
+#if defined(_MSC_VER)
+#pragma warning (pop)
+#endif

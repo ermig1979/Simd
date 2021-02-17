@@ -30,5 +30,45 @@
 
 namespace Test
 {
+    namespace
+    {
+        struct FuncSM
+        {
+            typedef Simd::ImageSaveToMemoryPtr FuncPtr;
+
+            FuncPtr func;
+            String desc;
+
+            FuncSM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(const View& src, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                //func(src.data, src.stride, src.width, src.height, src.PixelSize(), dst.data, dst.stride);
+            }
+        };
+    }
+
+#define FUNC_SM(function) \
+    Func(function, std::string(#function))
+
+    bool ImageLoadFromMemoryAutoTest()
+    {
+        bool result = true;
+
+        //result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
+
+    bool ImageSaveToMemoryAutoTest()
+    {
+        bool result = true;
+
+        //result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
+
+        return result;
+    }
 }
