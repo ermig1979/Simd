@@ -794,6 +794,23 @@ namespace Test
         return Compare(&a, 0, &b, 0, 1, 1, differenceMax, printError, 0, differenceType, description);
     }
 
+    bool Compare(const uint8_t* data1, size_t size1, const uint8_t* data2, size_t size2, int differenceMax,
+        bool printError, int errorCountMax, const String& description)
+    {
+        if (size1 != size2)
+        {
+            if (printError)
+            {
+                std::stringstream message;
+                message << std::endl << "Fail comparison: " << description << std::endl;
+                message << "There are different sizes: " << size1 << " != " << size2 << "." << std::endl;
+                TEST_LOG_SS(Error, message.str());
+            }
+            return false;
+        }
+        return Compare(data1, data2, size2, differenceMax, printError, errorCountMax, description);
+    }
+
     String ColorDescription(View::Format format)
     {
         std::stringstream ss;

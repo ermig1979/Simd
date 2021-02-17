@@ -41,29 +41,75 @@ namespace Test
 
             FuncSM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Call(const View& src, View& dst) const
+            void Update(View::Format format, SimdImageFileType file)
+            {
+                //const char* afs[] = { "-id", "-re", "-lr", "-rr", "-pr", "-el", "-hs", "-mi" };
+                //desc = desc + p.Decription(String(afs[p.conv.activation]) + (Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p"));
+            }
+
+            void Call(const View& src, SimdImageFileType file, int quality, uint8_t** data, size_t* size) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                //func(src.data, src.stride, src.width, src.height, src.PixelSize(), dst.data, dst.stride);
+                *data = func(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, size);
             }
         };
     }
 
-#define FUNC_SM(function) \
-    Func(function, std::string(#function))
+#define FUNC_SM(func) \
+    FuncSM(func, std::string(#func))
 
-    bool ImageLoadFromMemoryAutoTest()
+    bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
         bool result = true;
 
+        f1.Update(format, file);
+        f2.Update(format, file);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
+
+        View src(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        uint8_t* data1 = NULL, * data2 = NULL;
+        size_t size1 = 0, size2 = 0;
+
+        f1.Call(src, file, quality, &data1, &size1);
+
+        f1.Call(src, file, quality, &data1, &size1);
+
+        result = result && Compare(data1, size1, data2, size2, 0, true, 64);
+
+        return result;
+    }
+
+    bool ImageSaveToMemoryAutoTest(const FuncSM & f1, const FuncSM& f2)
+    {
+        bool result = true;
+
+        View::Format formats[3] = { View::Gray8, View::Bgr24, View::Bgra32 };
+
+        for (int format = 0; format < 3; format++)
+        {
+            //result = result && CopyAutoTest(format, W, H, f1c, f2c);
+            //result = result && CopyAutoTest(format, W + O, H - O, f1c, f2c);
+        }
         //result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
+
+        return result;
+    }
+
+    bool ImageSaveToMemoryAutoTest()
+    {
+        bool result = true;
+
+        result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Base::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
 
         return result;
     }
 
     //-----------------------------------------------------------------------
 
-    bool ImageSaveToMemoryAutoTest()
+    bool ImageLoadFromMemoryAutoTest()
     {
         bool result = true;
 

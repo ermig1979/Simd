@@ -427,7 +427,7 @@ namespace Simd
                     ::SimdRelease(hids[i].handle);
             }
         };
-        typedef std::unique_ptr<Level> LevelPtr;
+        typedef std::shared_ptr<Level> LevelPtr;
         typedef std::vector<LevelPtr> LevelPtrs;
 
         std::vector<Data> _data;

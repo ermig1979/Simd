@@ -112,6 +112,9 @@ namespace Test
     bool Compare(const float & a, const float & b, float differenceMax = EPS, bool printError = false, 
         DifferenceType differenceType = DifferenceRelative, const String & description = "");
 
+    bool Compare(const uint8_t * data1, size_t size1, const uint8_t* data2, size_t size2, int differenceMax = 0,
+        bool printError = false, int errorCountMax = 0, const String& description = "");
+
     String ColorDescription(View::Format format);
 
     String FormatDescription(View::Format format);
