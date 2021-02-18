@@ -146,7 +146,7 @@ namespace Test
         {
         case View::None:      return "None";
         case View::Gray8:     return "Gray8";
-        case View::Uv16:      return "Uv16:";
+        case View::Uv16:      return "Uv16";
         case View::Bgr24:     return "Bgr24";
         case View::Bgra32:    return "Bgra32";
         case View::Int16:     return "Int16";
@@ -161,6 +161,19 @@ namespace Test
         case View::Hsv24:     return "Hsv24";
         case View::Hsl24:     return "Hsl24";
         case View::Rgb24:     return "Rgb24";
+        default: assert(0);  return "";
+        }
+    }
+
+    template <> SIMD_INLINE String ToString<SimdImageFileType>(const SimdImageFileType& value)
+    {
+        switch (value)
+        {
+        case SimdImageFileUndefined:    return "None";
+        case SimdImageFilePgmTxt:       return "PgmT";
+        case SimdImageFilePgmBin:       return "PgmB";
+        case SimdImageFilePpmTxt:       return "PpmT";
+        case SimdImageFilePpmBin:       return "PpmB";
         default: assert(0);  return "";
         }
     }

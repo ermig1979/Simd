@@ -43,8 +43,7 @@ namespace Test
 
             void Update(View::Format format, SimdImageFileType file)
             {
-                //const char* afs[] = { "-id", "-re", "-lr", "-rr", "-pr", "-el", "-hs", "-mi" };
-                //desc = desc + p.Decription(String(afs[p.conv.activation]) + (Simd::Base::Overflow(c) ? "-o" : Simd::Base::Narrowed(c) ? "-n" : "-p"));
+                desc = desc + "[" + ToString(format) + "-" + ToString(file) + "]";
             }
 
             void Call(const View& src, SimdImageFileType file, int quality, uint8_t** data, size_t* size) const
@@ -87,13 +86,14 @@ namespace Test
         bool result = true;
 
         View::Format formats[3] = { View::Gray8, View::Bgr24, View::Bgra32 };
-
         for (int format = 0; format < 3; format++)
         {
-            //result = result && CopyAutoTest(format, W, H, f1c, f2c);
-            //result = result && CopyAutoTest(format, W + O, H - O, f1c, f2c);
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFilePpmBin; file++)
+            {
+                result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
+                result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);
+            }
         }
-        //result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
 
         return result;
     }
