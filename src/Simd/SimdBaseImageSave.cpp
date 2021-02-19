@@ -35,26 +35,26 @@ namespace Simd
 {
     namespace Base
     {
-        uint8_t* ImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
+        uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
         {
             return NULL;
         }
 
-        SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
+        SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
         {
             SimdBool result = SimdFalse;
             size_t size;
-            uint8_t * buffer = saver(data, stride, width, height, format, file, quality, &size);
-            if (buffer)
+            uint8_t * data = saver(src, stride, width, height, format, file, quality, &size);
+            if (data)
             {
                 ::FILE* file = ::fopen(path, "wb");
                 if (file)
                 {
-                    if (::fwrite(buffer, 1, size, file) == size)
+                    if (::fwrite(data, 1, size, file) == size)
                         result = SimdTrue;
                     ::fclose(file);
                 }
-                Simd::Free(buffer);
+                Simd::Free(data);
             }
             return result;
         }

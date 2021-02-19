@@ -2880,18 +2880,18 @@ SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t 
     simdHogLiteCreateMask(src, srcStride, srcWidth, srcHeight, threshold, scale, size, dst, dstStride);
 }
 
-SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
+SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
 {
     const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC0(ImageSaveToMemory);
 
-    return imageSaveToMemory(data, stride, width, height, format, file, quality, size);
+    return imageSaveToMemory(src, stride, width, height, format, file, quality, size);
 }
 
-SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
+SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
 {
     const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC0(ImageSaveToMemory);
 
-    return Base::ImageSaveToFile(imageSaveToMemory, data, stride, width, height, format, file, quality, path);
+    return Base::ImageSaveToFile(imageSaveToMemory, src, stride, width, height, format, file, quality, path);
 }
 
 SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)

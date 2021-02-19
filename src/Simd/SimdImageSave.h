@@ -24,17 +24,53 @@
 #ifndef __SimdImageSave_h__
 #define __SimdImageSave_h__
 
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdMemoryStream.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
-    typedef uint8_t* (*ImageSaveToMemoryPtr)(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
-
+    typedef uint8_t* (*ImageSaveToMemoryPtr)(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+        
     namespace Base
     {
-        uint8_t* ImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+/*
+        class ImageSaver
+        {
+        protected:
+            SimdImageFileType _fileType;
+            SimdPixelFormatType _srcFormat, _dstFormat;
+            int _quality;
+            Array8u _buffer;
+            OutputMemoryStream _stream;
+        public:
+            ImageSaver(SimdPixelFormatType format, SimdImageFileType file, int quality);
 
-        SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path);
+            virtual ~ImageSaver() {};
+
+            virtual bool ToStream(const uint8_t* src, size_t stride, size_t width, size_t height) = 0;
+            
+            SIMD_INLINE uint8_t* Release(size_t* size)
+            {
+                return _stream.Release(size);
+            }
+        };
+
+        typedef std::unique_ptr<ImageSaver> ImageSavePtr;
+
+        class ImagePpmSaver : public ImageSaver
+        {
+        public:
+            ImagePpmSaver(SimdPixelFormatType format, SimdImageFileType file, int quality);
+
+            virtual bool ToStream(const uint8_t* src, size_t stride, size_t width, size_t height) = 0;
+
+        };
+*/
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+
+        SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path);
     }
 }
 

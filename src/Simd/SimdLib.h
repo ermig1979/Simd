@@ -3491,11 +3491,11 @@ extern "C"
 
     /*! @ingroup image_io
 
-        \fn uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
+        \fn uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
 
         \short Saves an image to memory in given image file format.
 
-        \param [in] data - a pointer to pixels data of input image. 
+        \param [in] src - a pointer to pixels data of input image. 
         \param [in] stride - a row size of input image in bytes.
         \param [in] width - a width of input image.
         \param [in] height - a height of input image.
@@ -3507,15 +3507,15 @@ extern "C"
         \return a pointer to memory buffer with output image file. 
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
-    SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
+    SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t * size);
 
     /*! @ingroup image_io
 
-        \fn SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
+        \fn SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
 
         \short Saves an image to memory in given image file format.
 
-        \param [in] data - a pointer to pixels data of input image.
+        \param [in] src - a pointer to pixels data of input image.
         \param [in] stride - a row size of input image in bytes.
         \param [in] width - a width of input image.
         \param [in] height - a height of input image.
@@ -3526,7 +3526,7 @@ extern "C"
         \param [in] path - a path to output image file.
         \return result of the operation.
     */
-    SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* data, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
+    SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
 
     /*! @ingroup image_io
 
