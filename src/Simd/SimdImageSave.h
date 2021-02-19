@@ -30,47 +30,79 @@
 namespace Simd
 {
     typedef uint8_t* (*ImageSaveToMemoryPtr)(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
-        
+
+    SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path);
+
+    //---------------------------------------------------------------------
+
+    struct ImageSaverParam
+    {
+        size_t width, height;
+        SimdPixelFormatType format;
+        SimdImageFileType file;
+        int quality;
+
+        SIMD_INLINE ImageSaverParam(size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality)
+        {
+            this->width = width;
+            this->height = height;
+            this->format = format;
+            this->file = file;
+            this->quality = quality;
+        }
+
+        bool Validate()
+        {
+            if (file == SimdImageFileUndefined)
+            {
+                if (format == SimdPixelFormatGray8)
+                    file = SimdImageFilePgmBin;
+                else
+                    file = SimdImageFilePpmBin;
+            }            
+            if (!(format == SimdPixelFormatGray8 || format == SimdPixelFormatBgr24 || format == SimdPixelFormatBgra32))
+                return false;
+            return true;
+        }
+    };
+
+    class ImageSaver
+    {
+    protected:
+        ImageSaverParam _param;
+        Array8u _buffer;
+        OutputMemoryStream _stream;
+    public:
+        ImageSaver(const ImageSaverParam& param)
+            : _param(param)
+        {
+        }
+
+        virtual ~ImageSaver()
+        {
+        }
+
+        virtual bool ToStream(const uint8_t* src, size_t stride) = 0;
+
+        SIMD_INLINE uint8_t* Release(size_t* size)
+        {
+            return _stream.Release(size);
+        }
+    };
+       
     namespace Base
     {
-/*
-        class ImageSaver
-        {
-        protected:
-            SimdImageFileType _fileType;
-            SimdPixelFormatType _srcFormat, _dstFormat;
-            int _quality;
-            Array8u _buffer;
-            OutputMemoryStream _stream;
-        public:
-            ImageSaver(SimdPixelFormatType format, SimdImageFileType file, int quality);
-
-            virtual ~ImageSaver() {};
-
-            virtual bool ToStream(const uint8_t* src, size_t stride, size_t width, size_t height) = 0;
-            
-            SIMD_INLINE uint8_t* Release(size_t* size)
-            {
-                return _stream.Release(size);
-            }
-        };
-
-        typedef std::unique_ptr<ImageSaver> ImageSavePtr;
-
-        class ImagePpmSaver : public ImageSaver
+        class ImagePgmTxtSaver : public ImageSaver
         {
         public:
-            ImagePpmSaver(SimdPixelFormatType format, SimdImageFileType file, int quality);
+            ImagePgmTxtSaver(const ImageSaverParam& param);
 
-            virtual bool ToStream(const uint8_t* src, size_t stride, size_t width, size_t height) = 0;
-
+            virtual bool ToStream(const uint8_t* src, size_t stride);
         };
-*/
+
         //---------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
-
-        SimdBool ImageSaveToFile(const ImageSaveToMemoryPtr saver, const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path);
     }
 }
 

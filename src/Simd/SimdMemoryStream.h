@@ -35,16 +35,14 @@ namespace Simd
         uint8_t * _data;
         size_t _pos, _size, _capacity;
 
-        SIMD_INLINE void Reset()
+        SIMD_INLINE void Reset(bool owner)
         {
-            if (_data)
-            {
+            if (_data && owner)
                 Free(_data);
-                _data = NULL;
-                _pos = 0;
-                _size = 0;
-                _capacity = 0;
-            }
+            _data = NULL;
+            _pos = 0;
+            _size = 0;
+            _capacity = 0;
         }
 
         SIMD_INLINE void Extend(size_t size)
@@ -74,7 +72,7 @@ namespace Simd
 
         SIMD_INLINE ~OutputMemoryStream()
         {
-            Reset();
+            Reset(true);
         }
 
         SIMD_INLINE void Seek(size_t pos)
@@ -102,11 +100,12 @@ namespace Simd
             return _data;
         }
 
-        SIMD_INLINE void Write(uint8_t* data, size_t size)
+        SIMD_INLINE void Write(const void * data, size_t size)
         {
             Extend(_pos + size);
             memcpy(_data + _pos, data, size);
             _pos += size;
+            _size = Max(_size, _pos);
         }
 
         SIMD_INLINE uint8_t* Release(size_t* size = NULL)
@@ -114,7 +113,7 @@ namespace Simd
             uint8_t* data = _data;
             if(size)
                 *size = _size;
-            Reset();
+            Reset(false);
             return data;
         }
     };

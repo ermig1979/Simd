@@ -2891,7 +2891,7 @@ SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t 
 {
     const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC0(ImageSaveToMemory);
 
-    return Base::ImageSaveToFile(imageSaveToMemory, src, stride, width, height, format, file, quality, path);
+    return ImageSaveToFile(imageSaveToMemory, src, stride, width, height, format, file, quality, path);
 }
 
 SIMD_API uint8_t* SimdImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
