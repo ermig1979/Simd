@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2017 Yermalayeu Ihar.
+* Copyright (c) 2011-2021 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -55,6 +55,8 @@ namespace Simd
         }
         return result;
     }
+
+    //-------------------------------------------------------------------------
 
     namespace Base
     {
@@ -128,12 +130,45 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ImagePgmBinSaver::ImagePgmBinSaver(const ImageSaverParam& param)
+            : ImageSaver(param)
+        {
+        }
+
+        bool ImagePgmBinSaver::ToStream(const uint8_t* src, size_t stride)
+        {
+            _stream.Reserve(32 + _param.height * _param.width);
+            WritePxmHeader(5, _param.width, _param.height, 255, _stream);
+            Array8u gray;
+            if (_param.format != SimdPixelFormatGray8)
+                gray.Resize(_param.width);
+            for (size_t row = 0; row < _param.height; ++row)
+            {
+                const uint8_t* tmp = src;
+                if (_param.format != SimdPixelFormatGray8)
+                {
+                    if (_param.format == SimdPixelFormatBgr24)
+                        BgrToGray(src, _param.width, 1, stride, gray.data, _param.width);
+                    else if (_param.format == SimdPixelFormatBgra32)
+                        BgraToGray(src, _param.width, 1, stride, gray.data, _param.width);
+                    else
+                        assert(0);
+                    tmp = gray.data;
+                }
+                _stream.Write(tmp, _param.width);
+                src += stride;
+            }
+            return true;
+        }
+
+        //---------------------------------------------------------------------
+
         ImageSaver* CreateImageSaver(const ImageSaverParam& param)
         {
             switch (param.file)
             {
             case SimdImageFilePgmTxt: return new ImagePgmTxtSaver(param);
-            case SimdImageFilePgmBin: return NULL;
+            case SimdImageFilePgmBin: return new ImagePgmBinSaver(param);
             case SimdImageFilePpmTxt: return NULL;
             case SimdImageFilePpmBin: return NULL;
             default:
