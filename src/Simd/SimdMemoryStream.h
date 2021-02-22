@@ -45,22 +45,6 @@ namespace Simd
             _capacity = 0;
         }
 
-        SIMD_INLINE void Extend(size_t size)
-        {
-            if (size > _capacity)
-            {
-                size_t capacity = Max(CAPACITY_MIN, Max(_capacity * 2, AlignHi(size, CAPACITY_MIN)));
-                uint8_t* data = (uint8_t*)Allocate(capacity, SIMD_ALIGN);
-                if (_data)
-                {
-                    memcpy(data, _data, _size);
-                    Free(_data);
-                }
-                _data = data;
-                _capacity = capacity;
-            }
-        }
-
     public:
         SIMD_INLINE OutputMemoryStream()
             : _data(NULL)
@@ -78,6 +62,8 @@ namespace Simd
         SIMD_INLINE void Seek(size_t pos)
         {
             _pos = pos;
+            _size = Max(_size, _pos);
+            Reserve(_pos);
         }
 
         SIMD_INLINE size_t Pos() const
@@ -102,7 +88,7 @@ namespace Simd
 
         SIMD_INLINE void Write(const void * data, size_t size)
         {
-            Extend(_pos + size);
+            Reserve(_pos + size);
             memcpy(_data + _pos, data, size);
             _pos += size;
             _size = Max(_size, _pos);
@@ -115,6 +101,22 @@ namespace Simd
                 *size = _size;
             Reset(false);
             return data;
+        }
+
+        SIMD_INLINE void Reserve(size_t size)
+        {
+            if (size > _capacity)
+            {
+                size_t capacity = Max(CAPACITY_MIN, Max(_capacity * 2, AlignHi(size, CAPACITY_MIN)));
+                uint8_t* data = (uint8_t*)Allocate(capacity, SIMD_ALIGN);
+                if (_data)
+                {
+                    memcpy(data, _data, _size);
+                    Free(_data);
+                }
+                _data = data;
+                _capacity = capacity;
+            }
         }
     };
 }

@@ -70,7 +70,6 @@ namespace Simd
     {
     protected:
         ImageSaverParam _param;
-        Array8u _buffer;
         OutputMemoryStream _stream;
     public:
         ImageSaver(const ImageSaverParam& param)

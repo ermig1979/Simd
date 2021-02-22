@@ -58,6 +58,30 @@ namespace Simd
 
     namespace Base
     {
+        SIMD_INLINE void WritePxmHeader(size_t version, size_t width, size_t height, size_t max, OutputMemoryStream & stream)
+        {
+            std::stringstream header;
+            header << "P" << version << "\n" << width << " " << height << "\n" << max << "\n";
+            stream.Write(header.str().c_str(), header.str().size());
+        }
+
+        uint8_t g_pxmPrint[256][4];
+        bool PxmPrintInit()
+        {
+            for (int i = 0; i < 256; ++i)
+            {
+                int d0 = i / 100;
+                int d1 = (i / 10) % 10;
+                int d2 = i % 10;
+                g_pxmPrint[i][0] = d0 ? '0' + d0 : ' ';
+                g_pxmPrint[i][1] = (d1 || d0) ? '0' + d1 : ' ';
+                g_pxmPrint[i][2] = '0' + d2;
+                g_pxmPrint[i][3] = ' ';
+            }
+            return true;
+        }
+        bool g_pxmPrintInited = PxmPrintInit();
+
         //---------------------------------------------------------------------
 
         ImagePgmTxtSaver::ImagePgmTxtSaver(const ImageSaverParam& param)
@@ -67,38 +91,34 @@ namespace Simd
 
         bool ImagePgmTxtSaver::ToStream(const uint8_t* src, size_t stride)
         {
-            std::stringstream hs;
-            hs << "P5\n" << _param.width << " " << _param.height << "\n255\n";
-            _stream.Write(hs.str().c_str(), hs.str().size());
+            _stream.Reserve(32 + _param.height * (_param.width * 4 + DivHi(_param.width, 17)));
+            WritePxmHeader(2, _param.width, _param.height, 255, _stream);
+            Array8u gray;
             if (_param.format != SimdPixelFormatGray8)
-                _buffer.Resize(_param.width);
+                gray.Resize(_param.width);
             for (size_t row = 0; row < _param.height; ++row)
             {
                 const uint8_t* tmp = src;
                 if (_param.format != SimdPixelFormatGray8)
                 {
                     if (_param.format == SimdPixelFormatBgr24)
-                        BgrToGray(src, _param.width, 1, stride, _buffer.data, _param.width);
+                        BgrToGray(src, _param.width, 1, stride, gray.data, _param.width);
                     else if (_param.format == SimdPixelFormatBgra32)
-                        BgraToGray(src, _param.width, 1, stride, _buffer.data, _param.width);
+                        BgraToGray(src, _param.width, 1, stride, gray.data, _param.width);
                     else
                         assert(0);
-                    tmp = _buffer.data;
+                    tmp = gray.data;
                 }
-                std::stringstream rs;
-                for (size_t col = 0; col < _param.width; ++col)
+                uint8_t str[70];
+                for (size_t col = 0, off = 0; col < _param.width; ++col)
                 {
-                    int val = tmp[col];
-                    if (val < 100)
-                        rs << " ";
-                    if (val < 10)
-                        rs << " ";
-                    rs << val << " ";
-                    if (rs.str().size() >= 64 || col == _param.width - 1)
+                    *(uint32_t*)(str + off) = *(uint32_t*)g_pxmPrint[tmp[col]];
+                    off += 4;
+                    if (off >= 68 || col == _param.width - 1)
                     {
-                        rs << "\n";
-                        _stream.Write(rs.str().c_str(), rs.str().size());
-                        rs = std::stringstream();
+                        str[off++] = '\n';
+                        _stream.Write(str, off);
+                        off = 0;
                     }
                 }
                 src += stride;

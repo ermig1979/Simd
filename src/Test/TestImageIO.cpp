@@ -79,7 +79,7 @@ namespace Test
         result = result && Compare(data1, size1, data2, size2, 0, true, 64);
 
         if (data1)
-            SimdFree(data1);
+            Simd::Free(data1);
         if (data2)
             SimdFree(data2);
 
