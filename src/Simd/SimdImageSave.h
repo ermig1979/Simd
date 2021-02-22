@@ -60,7 +60,8 @@ namespace Simd
                 else
                     file = SimdImageFilePpmBin;
             }            
-            if (!(format == SimdPixelFormatGray8 || format == SimdPixelFormatBgr24 || format == SimdPixelFormatBgra32))
+            if (!(format == SimdPixelFormatGray8 || format == SimdPixelFormatBgr24 || 
+                format == SimdPixelFormatBgra32 || format == SimdPixelFormatRgb24))
                 return false;
             return true;
         }
@@ -91,7 +92,21 @@ namespace Simd
        
     namespace Base
     {
-        class ImagePgmTxtSaver : public ImageSaver
+        class ImagePxmSaver : public ImageSaver
+        {
+        public:
+            ImagePxmSaver(const ImageSaverParam& param);
+
+        protected:
+            typedef void (*ConvertPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+            ConvertPtr _convert;
+            Array8u _buffer;
+            size_t _block, _size;
+
+            void WriteHeader(size_t version);
+        };
+
+        class ImagePgmTxtSaver : public ImagePxmSaver
         {
         public:
             ImagePgmTxtSaver(const ImageSaverParam& param);
@@ -99,10 +114,18 @@ namespace Simd
             virtual bool ToStream(const uint8_t* src, size_t stride);
         };
 
-        class ImagePgmBinSaver : public ImageSaver
+        class ImagePgmBinSaver : public ImagePxmSaver
         {
         public:
             ImagePgmBinSaver(const ImageSaverParam& param);
+
+            virtual bool ToStream(const uint8_t* src, size_t stride);
+        };
+
+        class ImagePpmBinSaver : public ImagePxmSaver
+        {
+        public:
+            ImagePpmBinSaver(const ImageSaverParam& param);
 
             virtual bool ToStream(const uint8_t* src, size_t stride);
         };

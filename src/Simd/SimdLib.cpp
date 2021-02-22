@@ -1237,29 +1237,29 @@ SIMD_API void SimdBgrToHsv(const uint8_t * bgr, size_t width, size_t height, siz
     Base::BgrToHsv(bgr, width, height, bgrStride, hsv, hsvStride);
 }
 
-SIMD_API void SimdBgrToRgb(const uint8_t *bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride)
+SIMD_API void SimdBgrToRgb(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable)
-        Avx512bw::BgrToRgb(bgr, bgrStride, width, height, rgb, rgbStride);
+        Avx512bw::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
-        Avx2::BgrToRgb(bgr, bgrStride, width, height, rgb, rgbStride);
+        Avx2::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_SSSE3_ENABLE
     if (Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::BgrToRgb(bgr, bgrStride, width, height, rgb, rgbStride);
+        Ssse3::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
-        Neon::BgrToRgb(bgr, bgrStride, width, height, rgb, rgbStride);
+        Neon::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
-        Base::BgrToRgb(bgr, bgrStride, width, height, rgb, rgbStride);
+        Base::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
 }
 
 SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)

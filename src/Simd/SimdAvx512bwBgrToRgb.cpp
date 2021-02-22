@@ -84,7 +84,7 @@ namespace Simd
             Store<align, mask>(dst + 2 * A, _mm512_or_si512(_mm512_shuffle_epi8(s2, K8_SHFL_2S2), _mm512_shuffle_epi8(p2, K8_SHFL_2P2)), tails[2]);
         }
 
-        template <bool align> void BgrToRgb(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride)
+        template <bool align> void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
         {
             assert(width >= A);
             if (align)
@@ -109,12 +109,12 @@ namespace Simd
             }
         }
 
-        void BgrToRgb(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride)
+        void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
         {
             if (Aligned(bgr) && Aligned(bgrStride) && Aligned(rgb) && Aligned(rgbStride))
-                BgrToRgb<true>(bgr, bgrStride, width, height, rgb, rgbStride);
+                BgrToRgb<true>(bgr, width, height, bgrStride, rgb, rgbStride);
             else
-                BgrToRgb<false>(bgr, bgrStride, width, height, rgb, rgbStride);
+                BgrToRgb<false>(bgr, width, height, bgrStride, rgb, rgbStride);
         }
     }
 #endif//SIMD_AVX512BW_ENABLE

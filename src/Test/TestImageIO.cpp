@@ -83,7 +83,7 @@ namespace Test
         if (data2)
             SimdFree(data2);
 
-        //SimdImageSaveToFile(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, 100, "saved.txt");
+        SimdImageSaveToFile(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, 100, (ToString(file) + ".txt").c_str());
 
         return result;
     }
@@ -92,8 +92,8 @@ namespace Test
     {
         bool result = true;
 
-        View::Format formats[3] = { View::Gray8, View::Bgr24, View::Bgra32 };
-        for (int format = 0; format < 3; format++)
+        View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
+        for (int format = 0; format < 4; format++)
         {
             for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFilePpmBin; file++)
             {

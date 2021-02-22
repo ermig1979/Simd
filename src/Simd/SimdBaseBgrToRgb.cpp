@@ -27,7 +27,7 @@ namespace Simd
 {
     namespace Base
     {
-        void BgrToRgb(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * rgb, size_t rgbStride)
+        void BgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride)
         {
             size_t size = width * 3;
             for (size_t row = 0; row < height; ++row)

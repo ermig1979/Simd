@@ -1014,7 +1014,7 @@ namespace Simd
     {
         assert(EqualSize(bgr, rgb) && bgr.PixelSize() == 3 && rgb.PixelSize() == 3);
 
-        SimdBgrToRgb(bgr.data, bgr.stride, bgr.width, bgr.height, rgb.data, rgb.stride);
+        SimdBgrToRgb(bgr.data, bgr.width, bgr.height, bgr.stride, rgb.data, rgb.stride);
     }
 
     /*! @ingroup bgr_conversion

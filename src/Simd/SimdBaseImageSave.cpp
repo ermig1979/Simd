@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
+#include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 
 #include <stdio.h>
@@ -60,11 +61,38 @@ namespace Simd
 
     namespace Base
     {
-        SIMD_INLINE void WritePxmHeader(size_t version, size_t width, size_t height, size_t max, OutputMemoryStream & stream)
+        ImagePxmSaver::ImagePxmSaver(const ImageSaverParam& param)
+            : ImageSaver(param)
+            , _convert(NULL)
+        {
+            _block = _param.height;
+            if (_param.file == SimdImageFilePgmTxt || _param.file == SimdImageFilePgmBin)
+            {
+                _size = _param.width * 1;
+                if (_param.format != SimdPixelFormatGray8)
+                {
+                    _block = Simd::RestrictRange<size_t>(Base::AlgCacheL1() / _size, 1, _param.height);
+                    _buffer.Resize(_block * _size);
+                }
+            }
+            else if (_param.file == SimdImageFilePpmTxt || _param.file == SimdImageFilePpmBin)
+            {
+                _size = _param.width * 3;
+                if (_param.format != SimdPixelFormatRgb24)
+                {
+                    _block = Simd::RestrictRange<size_t>(Base::AlgCacheL1() / _size, 1, _param.height);
+                    _buffer.Resize(_block * _size);
+                }
+            }
+            else
+                assert(0);
+        }
+
+        void ImagePxmSaver::WriteHeader(size_t version)
         {
             std::stringstream header;
-            header << "P" << version << "\n" << width << " " << height << "\n" << max << "\n";
-            stream.Write(header.str().c_str(), header.str().size());
+            header << "P" << version << "\n" << _param.width << " " << _param.height << "\n255\n";
+            _stream.Write(header.str().c_str(), header.str().size());
         }
 
         uint8_t g_pxmPrint[256][4];
@@ -87,43 +115,48 @@ namespace Simd
         //---------------------------------------------------------------------
 
         ImagePgmTxtSaver::ImagePgmTxtSaver(const ImageSaverParam& param)
-            : ImageSaver(param)
+            : ImagePxmSaver(param)
         {
+            switch (_param.format)
+            {
+            case SimdPixelFormatBgr24: _convert = Base::BgrToGray; break;
+            case SimdPixelFormatBgra32: _convert = Base::BgraToGray; break;
+            case SimdPixelFormatRgb24: _convert = Base::RgbToGray; break;
+            }
         }
 
         bool ImagePgmTxtSaver::ToStream(const uint8_t* src, size_t stride)
         {
+            size_t grayStride = _param.format == SimdPixelFormatGray8 ? stride : _size;
             _stream.Reserve(32 + _param.height * (_param.width * 4 + DivHi(_param.width, 17)));
-            WritePxmHeader(2, _param.width, _param.height, 255, _stream);
-            Array8u gray;
-            if (_param.format != SimdPixelFormatGray8)
-                gray.Resize(_param.width);
-            for (size_t row = 0; row < _param.height; ++row)
+            WriteHeader(2);
+            for (size_t row = 0; row < _param.height;)
             {
-                const uint8_t* tmp = src;
+                size_t block = Simd::Min(row + _block, _param.height) - row;
+                const uint8_t* gray = src;
                 if (_param.format != SimdPixelFormatGray8)
                 {
-                    if (_param.format == SimdPixelFormatBgr24)
-                        BgrToGray(src, _param.width, 1, stride, gray.data, _param.width);
-                    else if (_param.format == SimdPixelFormatBgra32)
-                        BgraToGray(src, _param.width, 1, stride, gray.data, _param.width);
-                    else
-                        assert(0);
-                    tmp = gray.data;
-                }
-                uint8_t str[70];
-                for (size_t col = 0, off = 0; col < _param.width; ++col)
+                    _convert(src, _param.width, block, stride, _buffer.data, grayStride);
+                    gray = _buffer.data;
+                }                
+                for (size_t b = 0; b < block; ++b)
                 {
-                    *(uint32_t*)(str + off) = *(uint32_t*)g_pxmPrint[tmp[col]];
-                    off += 4;
-                    if (off >= 68 || col == _param.width - 1)
+                    uint8_t string[70];
+                    for (size_t col = 0, offset = 0; col < _param.width; ++col)
                     {
-                        str[off++] = '\n';
-                        _stream.Write(str, off);
-                        off = 0;
+                        *(uint32_t*)(string + offset) = *(uint32_t*)g_pxmPrint[gray[col]];
+                        offset += 4;
+                        if (offset >= 68 || col == _param.width - 1)
+                        {
+                            string[offset++] = '\n';
+                            _stream.Write(string, offset);
+                            offset = 0;
+                        }
                     }
+                    gray += grayStride;
                 }
-                src += stride;
+                src += stride * block;
+                row += block;
             }
             return true;
         }
@@ -131,32 +164,75 @@ namespace Simd
         //---------------------------------------------------------------------
 
         ImagePgmBinSaver::ImagePgmBinSaver(const ImageSaverParam& param)
-            : ImageSaver(param)
+            : ImagePxmSaver(param)
         {
+            switch (_param.format)
+            {
+            case SimdPixelFormatBgr24: _convert = Base::BgrToGray; break;
+            case SimdPixelFormatBgra32: _convert = Base::BgraToGray; break;
+            case SimdPixelFormatRgb24: _convert = Base::RgbToGray; break;
+            }
         }
 
         bool ImagePgmBinSaver::ToStream(const uint8_t* src, size_t stride)
         {
-            _stream.Reserve(32 + _param.height * _param.width);
-            WritePxmHeader(5, _param.width, _param.height, 255, _stream);
-            Array8u gray;
-            if (_param.format != SimdPixelFormatGray8)
-                gray.Resize(_param.width);
-            for (size_t row = 0; row < _param.height; ++row)
+            size_t grayStride = _param.format == SimdPixelFormatGray8 ? stride : _size;
+            _stream.Reserve(32 + _param.height * _size);
+            WriteHeader(5);
+            for (size_t row = 0; row < _param.height;)
             {
-                const uint8_t* tmp = src;
+                size_t block = Simd::Min(row + _block, _param.height) - row;
+                const uint8_t* gray = src;
                 if (_param.format != SimdPixelFormatGray8)
                 {
-                    if (_param.format == SimdPixelFormatBgr24)
-                        BgrToGray(src, _param.width, 1, stride, gray.data, _param.width);
-                    else if (_param.format == SimdPixelFormatBgra32)
-                        BgraToGray(src, _param.width, 1, stride, gray.data, _param.width);
-                    else
-                        assert(0);
-                    tmp = gray.data;
+                    _convert(src, _param.width, block, stride, _buffer.data, grayStride);
+                    gray = _buffer.data;
                 }
-                _stream.Write(tmp, _param.width);
-                src += stride;
+                for (size_t b = 0; b < block; ++b)
+                {
+                    _stream.Write(gray, _size);
+                    gray += grayStride;
+                }
+                src += stride * block;
+                row += block;
+            }
+            return true;
+        }
+
+        //---------------------------------------------------------------------
+
+        ImagePpmBinSaver::ImagePpmBinSaver(const ImageSaverParam& param)
+            : ImagePxmSaver(param)
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _convert = Base::GrayToBgr; break;
+            case SimdPixelFormatBgr24: _convert = Base::BgrToRgb; break;
+            case SimdPixelFormatBgra32: _convert = Base::BgraToRgb; break;
+            }
+        }
+
+        bool ImagePpmBinSaver::ToStream(const uint8_t* src, size_t stride)
+        {
+            size_t rgbStride = _param.format == SimdPixelFormatRgb24 ? stride : _size;
+            _stream.Reserve(32 + _param.height * _size);
+            WriteHeader(6);
+            for (size_t row = 0; row < _param.height;)
+            {
+                size_t block = Simd::Min(row + _block, _param.height) - row;
+                const uint8_t* rgb = src;
+                if (_param.format != SimdPixelFormatRgb24)
+                {
+                    _convert(src, _param.width, block, stride, _buffer.data, rgbStride);
+                    rgb = _buffer.data;
+                }
+                for (size_t b = 0; b < block; ++b)
+                {
+                    _stream.Write(rgb, _size);
+                    rgb += rgbStride;
+                }
+                src += stride * block;
+                row += block;
             }
             return true;
         }
@@ -170,7 +246,7 @@ namespace Simd
             case SimdImageFilePgmTxt: return new ImagePgmTxtSaver(param);
             case SimdImageFilePgmBin: return new ImagePgmBinSaver(param);
             case SimdImageFilePpmTxt: return NULL;
-            case SimdImageFilePpmBin: return NULL;
+            case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
             default:
                 return NULL;
             }
