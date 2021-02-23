@@ -198,8 +198,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a70dc9be2f75ebde11ad8c9eb0209cf03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a44f02f047a7f87fb7c6b322753c7b16e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a44f02f047a7f87fb7c6b322753c7b16e">Load</a> (const std::string &amp;path)</td></tr>
 <tr class="separator:a44f02f047a7f87fb7c6b322753c7b16e"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa9a86338806337e2640fc31161ab558f"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#aa9a86338806337e2640fc31161ab558f">Save</a> (const std::string &amp;path) const</td></tr>
-<tr class="separator:aa9a86338806337e2640fc31161ab558f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af67086a33d893d3b1b944ae821a61a8c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#af67086a33d893d3b1b944ae821a61a8c">Save</a> (const std::string &amp;path, <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> type=<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>, int quality=100) const</td></tr>
+<tr class="separator:af67086a33d893d3b1b944ae821a61a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e8f47f981b25b53a8911e43ea2a9156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a8e8f47f981b25b53a8911e43ea2a9156">Clear</a> ()</td></tr>
 <tr class="separator:a8e8f47f981b25b53a8911e43ea2a9156"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
@@ -1579,8 +1579,8 @@ int main()
 
 </div>
 </div>
-<a id="aa9a86338806337e2640fc31161ab558f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa9a86338806337e2640fc31161ab558f">&#9670;&nbsp;</a></span>Save()</h2>
+<a id="af67086a33d893d3b1b944ae821a61a8c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af67086a33d893d3b1b944ae821a61a8c">&#9670;&nbsp;</a></span>Save()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1589,19 +1589,33 @@ int main()
           <td class="memname">SIMD_INLINE bool Save </td>
           <td>(</td>
           <td class="paramtype">const std::string &amp;&#160;</td>
-          <td class="paramname"><em>path</em></td><td>)</td>
-          <td> const</td>
+          <td class="paramname"><em>path</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a>&#160;</td>
+          <td class="paramname"><em>type</em> = <code><a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a></code>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>quality</em> = <code>100</code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td> const</td>
         </tr>
       </table>
 </div><div class="memdoc">
 <p>Saves image to file.</p>
-<p>Supported formats:</p><ul>
-<li>PGM(Portable Gray Map) binary(P5) (this format is used in order to save 8-bit gray images).</li>
-<li>PPM(Portable Pixel Map) binary(P6) (this format is used in order to save 24-bit BGR and 32-bit BGRA images).</li>
-</ul>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to file. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">type</td><td>- a image file format. By default is equal to SimdImageFileUndefined (format auto choice). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">quality</td><td>- a parameter of compression quality (if file format supports it). </td></tr>
   </table>
   </dd>
 </dl>

@@ -201,6 +201,62 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ImagePpmTxtSaver::ImagePpmTxtSaver(const ImageSaverParam& param)
+            : ImagePxmSaver(param)
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _convert = Base::GrayToBgr; break;
+            case SimdPixelFormatBgr24: _convert = Base::BgrToRgb; break;
+            case SimdPixelFormatBgra32: _convert = Base::BgraToRgb; break;
+            }
+        }
+
+        bool ImagePpmTxtSaver::ToStream(const uint8_t* src, size_t stride)
+        {
+            size_t rgbStride = _param.format == SimdPixelFormatRgb24 ? stride : _size;
+            _stream.Reserve(32 + _param.height * (_param.width * 13 + DivHi(_param.width, 5)));
+            WriteHeader(3);
+            for (size_t row = 0; row < _param.height;)
+            {
+                size_t block = Simd::Min(row + _block, _param.height) - row;
+                const uint8_t* rgb = src;
+                if (_param.format != SimdPixelFormatRgb24)
+                {
+                    _convert(src, _param.width, block, stride, _buffer.data, rgbStride);
+                    rgb = _buffer.data;
+                }
+                for (size_t b = 0; b < block; ++b)
+                {
+                    uint8_t string[70];
+                    for (size_t col = 0, offset = 0; col < _size; col += 3)
+                    {
+                        ((uint32_t*)(string + offset))[0] = *(uint32_t*)g_pxmPrint[rgb[col + 0]];
+                        ((uint32_t*)(string + offset))[1] = *(uint32_t*)g_pxmPrint[rgb[col + 1]];
+                        ((uint32_t*)(string + offset))[2] = *(uint32_t*)g_pxmPrint[rgb[col + 2]];
+                        offset += 12;
+                        if (offset >= 68 || col == _size - 3)
+                        {
+                            string[offset++] = '\n';
+                            _stream.Write(string, offset);
+                            offset = 0;
+                        }
+                        else
+                        {
+                            string[offset++] = ' ';
+                            string[offset++] = ' ';
+                        }
+                    }
+                    rgb += rgbStride;
+                }
+                src += stride * block;
+                row += block;
+            }
+            return true;
+        }
+
+        //---------------------------------------------------------------------
+
         ImagePpmBinSaver::ImagePpmBinSaver(const ImageSaverParam& param)
             : ImagePxmSaver(param)
         {
@@ -245,7 +301,7 @@ namespace Simd
             {
             case SimdImageFilePgmTxt: return new ImagePgmTxtSaver(param);
             case SimdImageFilePgmBin: return new ImagePgmBinSaver(param);
-            case SimdImageFilePpmTxt: return NULL;
+            case SimdImageFilePpmTxt: return new ImagePpmTxtSaver(param);
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
             default:
                 return NULL;

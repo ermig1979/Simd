@@ -518,14 +518,12 @@ namespace Simd
         /*!
             Saves image to file.
  
-            Supported formats:
-             - PGM(Portable Gray Map) binary(P5) (this format is used in order to save 8-bit gray images).
-             - PPM(Portable Pixel Map) binary(P6) (this format is used in order to save 24-bit BGR and 32-bit BGRA images).
-
             \param [in] path - a path to file.
+            \param [in] type - a image file format. By default is equal to SimdImageFileUndefined (format auto choice).
+            \param [in] quality - a parameter of compression quality (if file format supports it).
             \return - a result of saving.
         */
-        bool Save(const std::string & path) const;
+        bool Save(const std::string & path, SimdImageFileType type = SimdImageFileUndefined, int quality = 100) const;
 
         /*!
             Clear View structure (reset all fields) and free memory if it's owner.
@@ -1239,58 +1237,9 @@ namespace Simd
         return false;
     }
 
-    template <template<class> class A> SIMD_INLINE bool View<A>::Save(const std::string & path) const
+    template <template<class> class A> SIMD_INLINE bool View<A>::Save(const std::string & path, SimdImageFileType type, int quality) const
     {
-        if (!(format == View<A>::Gray8 || format == View<A>::Bgr24 || format == View<A>::Bgra32))
-            return false;
-
-        std::ofstream ofs(path.c_str(), std::ofstream::binary);
-        if (ofs.is_open())
-        {
-            if (format == View<A>::Gray8)
-            {
-                ofs << "P5\n" << width << " " << height << "\n255\n";
-                for (size_t row = 0; row < height; ++row)
-                    ofs.write((const char*)(data + row*stride), width);
-            }
-            else if (format == View<A>::Bgr24)
-            {
-                ofs << "P6\n" << width << " " << height << "\n255\n";
-                View buffer(width, 1, Bgr24);
-                for (size_t row = 0; row < height; ++row)
-                {
-                    const uint8_t * bgr = data + row*stride;
-                    uint8_t * rgb = buffer.data;
-                    for (size_t col = 0; col < width; ++col, bgr += 3, rgb += 3)
-                    {
-                        rgb[0] = bgr[2];
-                        rgb[1] = bgr[1];
-                        rgb[2] = bgr[0];
-                    }
-                    ofs.write((const char*)(buffer.data), width*3);
-                }
-            }
-            else if (format == View<A>::Bgra32)
-            {
-                ofs << "P6\n" << width << " " << height << "\n255\n";
-                View buffer(width, 1, Bgr24);
-                for (size_t row = 0; row < height; ++row)
-                {
-                    const uint8_t * bgra = data + row*stride;
-                    uint8_t * rgb = buffer.data;
-                    for (size_t col = 0; col < width; ++col, bgra += 4, rgb += 3)
-                    {
-                        rgb[0] = bgra[2];
-                        rgb[1] = bgra[1];
-                        rgb[2] = bgra[0];
-                    }
-                    ofs.write((const char*)buffer.data, width * 3);
-                }
-            }
-            return true;
-        }
-        else
-            return false;
+        return SimdImageSaveToFile(data, stride, width, height, (SimdPixelFormatType)format, type, quality, path.c_str()) == SimdTrue;
     }
 
     template <template<class> class A> SIMD_INLINE void View<A>::Clear()

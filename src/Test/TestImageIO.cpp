@@ -46,10 +46,10 @@ namespace Test
                 desc = desc + "[" + ToString(format) + "-" + ToString(file) + "]";
             }
 
-            uint8_t* Call(const View& src, SimdImageFileType file, int quality, size_t* size) const
+            void Call(const View& src, SimdImageFileType file, int quality, uint8_t** data, size_t* size) const
             {
                 TEST_PERFORMANCE_TEST(desc);
-                return func(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, size);
+                *data = func(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, size);
             }
         };
     }
@@ -72,9 +72,9 @@ namespace Test
         uint8_t* data1 = NULL, * data2 = NULL;
         size_t size1 = 0, size2 = 0;
 
-        data1 = f1.Call(src, file, quality, &size1);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data1) Simd::Free(data1); f1.Call(src, file, quality, &data1, &size1));
 
-        data2 = f2.Call(src, file, quality, &size2);
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data2) SimdFree(data2); f2.Call(src, file, quality, &data2, &size2));
 
         result = result && Compare(data1, size1, data2, size2, 0, true, 64);
 
@@ -83,7 +83,7 @@ namespace Test
         if (data2)
             SimdFree(data2);
 
-        SimdImageSaveToFile(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, 100, (ToString(file) + ".txt").c_str());
+        //src.Save((ToString(file) + ".txt").c_str(), file, 100);
 
         return result;
     }
