@@ -208,6 +208,39 @@ namespace Simd
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
     }
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class ImagePgmTxtSaver : public Avx2::ImagePgmTxtSaver
+        {
+        public:
+            ImagePgmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePgmBinSaver : public Avx2::ImagePgmBinSaver
+        {
+        public:
+            ImagePgmBinSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmTxtSaver : public Avx2::ImagePpmTxtSaver
+        {
+        public:
+            ImagePpmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmBinSaver : public Avx2::ImagePpmBinSaver
+        {
+        public:
+            ImagePpmBinSaver(const ImageSaverParam& param);
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+    }
+#endif// SIMD_AVX512BW_ENABLE
 }
 
 #endif//__SimdImageSave_h__
