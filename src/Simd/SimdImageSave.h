@@ -175,6 +175,39 @@ namespace Simd
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
     }
 #endif// SIMD_SSE41_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class ImagePgmTxtSaver : public Sse41::ImagePgmTxtSaver
+        {
+        public:
+            ImagePgmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePgmBinSaver : public Sse41::ImagePgmBinSaver
+        {
+        public:
+            ImagePgmBinSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmTxtSaver : public Sse41::ImagePpmTxtSaver
+        {
+        public:
+            ImagePpmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmBinSaver : public Sse41::ImagePpmBinSaver
+        {
+        public:
+            ImagePpmBinSaver(const ImageSaverParam& param);
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+    }
+#endif// SIMD_AVX2_ENABLE
 }
 
 #endif//__SimdImageSave_h__
