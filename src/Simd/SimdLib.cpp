@@ -2882,14 +2882,14 @@ SIMD_API void SimdHogLiteCreateMask(const float * src, size_t srcStride, size_t 
 
 SIMD_API uint8_t* SimdImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size)
 {
-    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC0(ImageSaveToMemory);
+    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC1(ImageSaveToMemory, SIMD_SSE41_FUNC);
 
     return imageSaveToMemory(src, stride, width, height, format, file, quality, size);
 }
 
 SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char* path)
 {
-    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC0(ImageSaveToMemory);
+    const static Simd::ImageSaveToMemoryPtr imageSaveToMemory = SIMD_FUNC1(ImageSaveToMemory, SIMD_SSE41_FUNC);
 
     return ImageSaveToFile(imageSaveToMemory, src, stride, width, height, format, file, quality, path);
 }
