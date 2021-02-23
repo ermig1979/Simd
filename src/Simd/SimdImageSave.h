@@ -241,6 +241,39 @@ namespace Simd
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
     }
 #endif// SIMD_AVX512BW_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class ImagePgmTxtSaver : public Base::ImagePgmTxtSaver
+        {
+        public:
+            ImagePgmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePgmBinSaver : public Base::ImagePgmBinSaver
+        {
+        public:
+            ImagePgmBinSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmTxtSaver : public Base::ImagePpmTxtSaver
+        {
+        public:
+            ImagePpmTxtSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePpmBinSaver : public Base::ImagePpmBinSaver
+        {
+        public:
+            ImagePpmBinSaver(const ImageSaverParam& param);
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);
+    }
+#endif// SIMD_NEON_ENABLE
 }
 
 #endif//__SimdImageSave_h__
