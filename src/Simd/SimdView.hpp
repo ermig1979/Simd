@@ -526,9 +526,17 @@ namespace Simd
         bool Save(const std::string & path, SimdImageFileType type = SimdImageFileUndefined, int quality = 100) const;
 
         /*!
-            Clear View structure (reset all fields) and free memory if it's owner.
+            Clears View structure (reset all fields) and free memory if it's owner.
          */
         void Clear();
+
+        /*!
+            Releases pixel data and resets all fields.
+
+            \param [out] size - a pointer to the size of released pixel data. Can be NULL.
+            \return - a released pointer to pixel data. It must be deleted by function ::SimdFree.
+        */
+        uint8_t* Release(size_t* size = NULL);
 
     private:
         bool _owner;
@@ -1252,6 +1260,16 @@ namespace Simd
         *(size_t*)&height = 0;
         *(ptrdiff_t *)&stride = 0;
         *(Format*)&format = Format::None;
+    }
+
+    template <template<class> class A> SIMD_INLINE uint8_t* View<A>::Release(size_t* size = NULL)
+    {
+        uint8_t* released = data;
+        if (size)
+            *size = DataSize();
+        _owner = false;
+        Clear();
+        return released;
     }
 
     // View utilities implementation:

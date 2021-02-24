@@ -202,6 +202,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:af67086a33d893d3b1b944ae821a61a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e8f47f981b25b53a8911e43ea2a9156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a8e8f47f981b25b53a8911e43ea2a9156">Clear</a> ()</td></tr>
 <tr class="separator:a8e8f47f981b25b53a8911e43ea2a9156"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5741a1f89a39e5245f9f397bef1a6d67"><td class="memItemLeft" align="right" valign="top">uint8_t *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a5741a1f89a39e5245f9f397bef1a6d67">Release</a> (size_t *size=NULL)</td></tr>
+<tr class="separator:a5741a1f89a39e5245f9f397bef1a6d67"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-static-methods"></a>
 Static Public Member Functions</h2></td></tr>
@@ -1634,7 +1636,33 @@ int main()
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Clear <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure (reset all fields) and free memory if it's owner. </p>
+<p>Clears <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure (reset all fields) and free memory if it's owner. </p>
+
+</div>
+</div>
+<a id="a5741a1f89a39e5245f9f397bef1a6d67"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a5741a1f89a39e5245f9f397bef1a6d67">&#9670;&nbsp;</a></span>Release()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE uint8_t * Release </td>
+          <td>(</td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>size</em> = <code>NULL</code></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Releases pixel data and resets all fields.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[out]</td><td class="paramname">size</td><td>- a pointer to the size of released pixel data. Can be NULL. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a released pointer to pixel data. It must be deleted by function <a class="el" href="group__memory.html#ga58c32d1470db0a1a698abd8280aeee52" title="Frees aligned memory block.">SimdFree</a>. </dd></dl>
 
 </div>
 </div>
