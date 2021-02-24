@@ -1262,7 +1262,7 @@ namespace Simd
         *(Format*)&format = Format::None;
     }
 
-    template <template<class> class A> SIMD_INLINE uint8_t* View<A>::Release(size_t* size = NULL)
+    template <template<class> class A> SIMD_INLINE uint8_t* View<A>::Release(size_t* size)
     {
         uint8_t* released = data;
         if (size)

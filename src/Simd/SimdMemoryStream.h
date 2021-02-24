@@ -28,6 +28,64 @@
 
 namespace Simd
 {
+    class InputMemoryStream
+    {
+        const uint8_t* _data;
+        size_t _pos, _size;
+    public:
+        SIMD_INLINE InputMemoryStream(const uint8_t* data = NULL, size_t size = 0)
+        {
+            Init(data, size);
+        }
+
+        SIMD_INLINE void Init(const uint8_t* data, size_t size)
+        {
+            _pos = 0;
+            _data = data;
+            _size = size;
+        }
+
+        SIMD_INLINE bool Seek(size_t pos)
+        {
+            if (pos <= _size)
+            {
+                _pos = pos;
+                return true;
+            }
+            return false;
+        }
+
+        SIMD_INLINE size_t Size() const
+        {
+            return _size;
+        }
+
+        SIMD_INLINE const uint8_t* Data() const
+        {
+            return _data;
+        }
+
+        SIMD_INLINE size_t Pos() const
+        {
+            return _pos;
+        }
+        
+        SIMD_INLINE size_t Read(size_t size, void* data)
+        {
+            size = Min(_size - _pos, size);
+            memcpy(data, _data + _pos, size);
+            _pos += size;
+            return size;
+        }
+
+        template <class Value> SIMD_INLINE bool Read(Value & value)
+        {
+            return Read(sizeof(Value), &value) == sizeof(Value);
+        }
+    };
+
+    //-------------------------------------------------------------------------
+
     class OutputMemoryStream
     {
         const size_t CAPACITY_MIN = 4096;

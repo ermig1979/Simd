@@ -24,17 +24,81 @@
 #ifndef __SimdImageLoad_h__
 #define __SimdImageLoad_h__
 
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdMemoryStream.h"
+#include "Simd/SimdArray.h"
+
+#include "Simd/SimdView.hpp"
 
 namespace Simd
 {
     typedef uint8_t* (*ImageLoadFromMemoryPtr)(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
 
+    uint8_t* ImageLoadFromFile(const ImageLoadFromMemoryPtr loader, const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+
+    //-------------------------------------------------------------------------
+
+    struct ImageLoaderParam
+    {
+        const uint8_t* data;
+        size_t size;
+        SimdImageFileType file;
+        SimdPixelFormatType format;
+
+        ImageLoaderParam(const uint8_t* d, size_t s, SimdPixelFormatType f);
+    };
+
+    class ImageLoader
+    {
+    protected:
+        typedef Simd::View<Simd::Allocator> Image;
+
+        ImageLoaderParam _param;
+        InputMemoryStream _stream;
+        Image _image;
+        
+    public:
+        ImageLoader(const ImageLoaderParam& param)
+            : _param(param)
+            , _stream(_param.data, _param.size)
+        {
+        }
+
+        virtual ~ImageLoader()
+        {
+        }
+
+        virtual bool FromStream() = 0;
+
+        SIMD_INLINE uint8_t* Release(size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+        {
+            *stride = _image.stride;
+            *width = _image.width;
+            *height = _image.height;
+            *format = (SimdPixelFormatType)_image.format;
+            return _image.Release();
+        }
+    };
+
     namespace Base
     {
-        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+        class ImagePxmLoader : public ImageLoader
+        {
+        public:
+            ImagePxmLoader(const ImageLoaderParam& param);
 
-        uint8_t* ImageLoadFromFile(const ImageLoadFromMemoryPtr loader, const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+        protected:
+            typedef void (*ToAnyPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+            typedef void (*ToBgraPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+            ToAnyPtr _toAny;
+            ToBgraPtr _toBgra;
+            Array8u _buffer;
+            size_t _block, _size;
+
+            bool ReadHeader(size_t version);
+        };
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
 }
 

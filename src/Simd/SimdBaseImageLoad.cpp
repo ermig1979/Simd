@@ -33,27 +33,85 @@
 
 namespace Simd
 {
+    uint8_t* ImageLoadFromFile(const ImageLoadFromMemoryPtr loader, const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+    {
+        uint8_t* data = NULL;
+        ::FILE* file = ::fopen(path, "wr");
+        if (file)
+        {
+            ::fseek(file, 0, SEEK_END);
+            Array8u buffer(::ftell(file));
+            ::fseek(file, 0, SEEK_SET);
+            if (::fread(buffer.data, 1, buffer.size, file) == buffer.size)
+                data = loader(buffer.data, buffer.size, stride, width, height, format);
+            ::fclose(file);
+        }
+        return data;
+    }
+
+    //-------------------------------------------------------------------------
+
+    ImageLoaderParam::ImageLoaderParam(const uint8_t* d, size_t s, SimdPixelFormatType f)
+        : data(d)
+        , size(s)
+        , format(f)
+        , file(SimdImageFileUndefined)
+    {
+        if (size >= 2)
+        {
+            if (data[0] == 'P' && data[1] == '2')
+                file = SimdImageFilePgmTxt;
+            if (data[0] == 'P' && data[1] == '3')
+                file = SimdImageFilePpmTxt;
+            if (data[0] == 'P' && data[1] == '5')
+                file = SimdImageFilePgmBin;
+            if (data[0] == 'P' && data[1] == '6')
+                file = SimdImageFilePpmBin;
+        }
+    }
+        
     namespace Base
     {
-        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+        ImagePxmLoader::ImagePxmLoader(const ImageLoaderParam& param)
+            : ImageLoader(param)
+            , _toAny(NULL)
+            , _toBgra(NULL)
         {
-            return NULL;
         }
 
-        uint8_t* ImageLoadFromFile(const ImageLoadFromMemoryPtr loader, const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+        bool ImagePxmLoader::ReadHeader(size_t version)
         {
-            uint8_t* data = NULL;
-            ::FILE* file = ::fopen(path, "wr");
-            if (file)
+            return false;
+        }
+
+        //-------------------------------------------------------------------------
+
+        ImageLoader* CreateImageLoader(const ImageLoaderParam& param)
+        {
+            switch (param.file)
             {
-                ::fseek(file, 0, SEEK_END);
-                Array8u buffer(::ftell(file));
-                ::fseek(file, 0, SEEK_SET);
-                if (::fread(buffer.data, 1, buffer.size, file) == buffer.size)
-                    data = loader(buffer.data, buffer.size, stride, width, height, format);
-                ::fclose(file);
+            case SimdImageFilePgmTxt: return NULL;
+            case SimdImageFilePgmBin: return NULL;
+            case SimdImageFilePpmTxt: return NULL;
+            case SimdImageFilePpmBin: return NULL;
+            default:
+                return NULL;
             }
-            return data;
+        }
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
+        {
+            ImageLoaderParam param(data, size, *format);
+            if (param.file != SimdImageFileUndefined)
+            {
+                std::unique_ptr<ImageLoader> loader(CreateImageLoader(param));
+                if (loader)
+                {
+                    if (loader->FromStream())
+                        return loader->Release(stride, width, height, format);
+                }
+            }
+            return NULL;
         }
     }
 }

@@ -2905,7 +2905,7 @@ SIMD_API uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t
 {
     const static Simd::ImageLoadFromMemoryPtr imageLoadFromMemory = SIMD_FUNC0(ImageLoadFromMemory);
 
-    return Base::ImageLoadFromFile(imageLoadFromMemory, path, stride, width, height, format);
+    return ImageLoadFromFile(imageLoadFromMemory, path, stride, width, height, format);
 }
 
 SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, size_t srcStride, uint8_t * dst, size_t dstStride)
