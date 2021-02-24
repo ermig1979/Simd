@@ -136,11 +136,91 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
+    namespace
+    {
+        struct FuncLM
+        {
+            typedef Simd::ImageLoadFromMemoryPtr FuncPtr;
+
+            FuncPtr func;
+            String desc;
+
+            FuncLM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(View::Format format, SimdImageFileType file)
+            {
+                desc = desc + "[" + ToString(format) + "-" + ToString(file) + "]";
+            }
+
+            void Call(const uint8_t* data, size_t size, View::Format format, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                ((View::Format&)dst.format) = format;
+                *(uint8_t**)&dst.data = func(data, size, (size_t*)&dst.stride, (size_t*)&dst.width, (size_t*)&dst.height, (SimdPixelFormatType*)&dst.format);
+            }
+        };
+    }
+
+#define FUNC_LM(func) \
+    FuncLM(func, std::string(#func))
+
+    bool ImageLoadFromMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2)
+    {
+        bool result = true;
+
+        f1.Update(format, file);
+        f2.Update(format, file);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
+
+        View src(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        size_t size = 0;
+        uint8_t* data = SimdImageSaveToMemory(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, &size);
+
+        View dst1, dst2;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (dst1.data) Simd::Free(dst1.data); f1.Call(data, size, format, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (dst2.data) SimdFree(dst2.data); f2.Call(data, size, format, dst2));
+
+        if(dst1.data && dst2.data)
+            result = result && Compare(dst1, dst2, 0, true, 64, 0, "dst1 & dst2");
+        if(dst1.data && quality == 100)
+            result = result && Compare(dst1, src, 0, true, 64, 0, "dst1 & src");
+
+        if (dst1.data)
+            Simd::Free(dst1.data);
+        if (dst2.data)
+            SimdFree(dst2.data);
+        SimdFree(data);
+
+        return result;
+    }
+
+    bool ImageLoadFromMemoryAutoTest(const FuncLM& f1, const FuncLM& f2)
+    {
+        bool result = true;
+
+        View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
+        for (int format = 0; format < 4; format++)
+        {
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFilePpmBin; file++)
+            {
+                result = result && ImageLoadFromMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
+                result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);
+            }
+        }
+
+        return result;
+    }
+
     bool ImageLoadFromMemoryAutoTest()
     {
         bool result = true;
 
-        //result = result && CopyFrameAutoTest(FUNC_F(Simd::Base::CopyFrame), FUNC_F(SimdCopyFrame));
+        result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Base::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
 
         return result;
     }
