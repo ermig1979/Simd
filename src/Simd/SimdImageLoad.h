@@ -115,6 +115,14 @@ namespace Simd
             virtual bool FromStream();
         };
 
+        class ImagePpmTxtLoader : public ImagePxmLoader
+        {
+        public:
+            ImagePpmTxtLoader(const ImageLoaderParam& param);
+
+            virtual bool FromStream();
+        };
+
         //---------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
