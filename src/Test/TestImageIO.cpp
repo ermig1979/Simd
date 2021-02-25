@@ -164,6 +164,15 @@ namespace Test
 #define FUNC_LM(func) \
     FuncLM(func, std::string(#func))
 
+    bool SaveLoadCompatible(View::Format format, SimdImageFileType file, int quality)
+    {
+        if (file == SimdImageFilePgmTxt || file == SimdImageFilePgmBin)
+            return format == View::Gray8;
+        if (file == SimdImageFilePpmTxt || file == SimdImageFilePpmBin)
+            return format != View::Bgra32;
+        return false;
+    }
+
     bool ImageLoadFromMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2)
     {
         bool result = true;
@@ -187,7 +196,7 @@ namespace Test
 
         if(dst1.data && dst2.data)
             result = result && Compare(dst1, dst2, 0, true, 64, 0, "dst1 & dst2");
-        if(dst1.data && quality == 100)
+        if(dst1.data && SaveLoadCompatible(format, file, quality))
             result = result && Compare(dst1, src, 0, true, 64, 0, "dst1 & src");
 
         if (dst1.data)

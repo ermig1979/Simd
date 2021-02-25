@@ -45,6 +45,8 @@ namespace Simd
         SimdPixelFormatType format;
 
         ImageLoaderParam(const uint8_t* d, size_t s, SimdPixelFormatType f);
+
+        bool Validate();
     };
 
     class ImageLoader
@@ -87,8 +89,8 @@ namespace Simd
             ImagePxmLoader(const ImageLoaderParam& param);
 
         protected:
-            typedef void (*ToAnyPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
-            typedef void (*ToBgraPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+            typedef void (*ToAnyPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef void (*ToBgraPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
             ToAnyPtr _toAny;
             ToBgraPtr _toBgra;
             Array8u _buffer;
@@ -96,6 +98,15 @@ namespace Simd
 
             bool ReadHeader(size_t version);
         };
+
+        class ImagePgmTxtLoader : public ImagePxmLoader
+        {
+        public:
+            ImagePgmTxtLoader(const ImageLoaderParam& param);
+
+            virtual bool FromStream();
+        };
+
         //---------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);

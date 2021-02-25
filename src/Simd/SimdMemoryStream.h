@@ -82,6 +82,48 @@ namespace Simd
         {
             return Read(sizeof(Value), &value) == sizeof(Value);
         }
+
+        template<class Unsigned> SIMD_INLINE bool ReadUnsigned(Unsigned& value)
+        {
+            if (!SkipGap())
+                return false;
+            value = 0;
+            while (!IsGap(_data[_pos]) && _pos < _size)
+            {
+                if (_data[_pos] >= '0' && _data[_pos] <= '9')
+                    value = value * 10 + Unsigned(_data[_pos] - '0');
+                else
+                    return false;
+                _pos++;
+            }
+            return true;
+        }
+
+        SIMD_INLINE bool SkipValue(uint8_t value)
+        {
+            while (_data[_pos] == value && _pos < _size)
+                _pos++;
+            return _pos < _size;
+        }
+
+        SIMD_INLINE bool SkipNotGap()
+        {
+            while (!IsGap(_data[_pos]) && _pos < _size)
+                _pos++;
+            return _pos < _size;
+        }        
+        
+        SIMD_INLINE bool SkipGap()
+        {
+            while (IsGap(_data[_pos]) && _pos < _size)
+                _pos++;
+            return _pos < _size;
+        }
+
+        static SIMD_INLINE bool IsGap(uint8_t value)
+        {
+            return value == ' ' || value == '\t' || value == '\n' || value == '\r';
+        }
     };
 
     //-------------------------------------------------------------------------
