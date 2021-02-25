@@ -212,7 +212,7 @@ typedef enum
 */
 typedef enum
 {
-    /*! An undefined image file format. */
+    /*! An undefined image file format (format auto choice). */
     SimdImageFileUndefined = 0,
     /*! A PGM (Portable Gray Map) text (P2) image file format. */
     SimdImageFilePgmTxt,

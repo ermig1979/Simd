@@ -328,7 +328,7 @@ namespace Test
     {
         ContourDetector::View image;
 
-        String path = "../../data/image/face/lena.pgm";
+        String path = ROOT_PATH + "/data/image/face/lena.pgm";
         if (!image.Load(path))
         {
             TEST_LOG_SS(Error, "Can't load test image '" << path << "' !");

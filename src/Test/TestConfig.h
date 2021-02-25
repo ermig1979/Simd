@@ -51,6 +51,8 @@
 #include <mutex>
 
 #define SIMD_STATIC
+#include "Simd/SimdLib.hpp"
+
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdEnable.h"
@@ -70,7 +72,6 @@
 #include "Simd/SimdVmx.h"
 #include "Simd/SimdVsx.h"
 #include "Simd/SimdNeon.h"
-#include "Simd/SimdLib.hpp"
 
 namespace Test
 {

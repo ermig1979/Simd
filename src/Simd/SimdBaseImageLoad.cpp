@@ -38,7 +38,7 @@ namespace Simd
     uint8_t* ImageLoadFromFile(const ImageLoadFromMemoryPtr loader, const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format)
     {
         uint8_t* data = NULL;
-        ::FILE* file = ::fopen(path, "wr");
+        ::FILE* file = ::fopen(path, "rb");
         if (file)
         {
             ::fseek(file, 0, SEEK_END);
