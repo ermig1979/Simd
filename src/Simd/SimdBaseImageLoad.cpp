@@ -258,6 +258,45 @@ namespace Simd
 
         //-------------------------------------------------------------------------
 
+        ImagePpmBinLoader::ImagePpmBinLoader(const ImageLoaderParam& param)
+            : ImagePxmLoader(param)
+        {
+            if (_param.format == SimdPixelFormatNone)
+                _param.format = SimdPixelFormatRgb24;
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
+            case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
+            case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
+            }
+        }
+
+        bool ImagePpmBinLoader::FromStream()
+        {
+            if (!ReadHeader(6))
+                return false;
+            size_t rgbStride = _param.format == SimdPixelFormatRgb24 ? _image.stride : _size;
+            for (size_t row = 0; row < _image.height;)
+            {
+                size_t block = Simd::Min(row + _block, _image.height) - row;
+                uint8_t* rgb = _param.format == SimdPixelFormatRgb24 ? _image.Row<uint8_t>(row) : _buffer.data;
+                for (size_t b = 0; b < block; ++b)
+                {
+                    if (_stream.Read(_size, rgb) != _size)
+                        return false;
+                    rgb += rgbStride;
+                }
+                if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24)
+                    _toAny(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride);
+                if (_param.format == SimdPixelFormatBgra32)
+                    _toBgra(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride, 0xFF);
+                row += block;
+            }
+            return true;
+        }
+
+        //-------------------------------------------------------------------------
+
         ImageLoader* CreateImageLoader(const ImageLoaderParam& param)
         {
             switch (param.file)
@@ -265,7 +304,7 @@ namespace Simd
             case SimdImageFilePgmTxt: return new ImagePgmTxtLoader(param);
             case SimdImageFilePgmBin: return new ImagePgmBinLoader(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtLoader(param);
-            case SimdImageFilePpmBin: return NULL;
+            case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
             default:
                 return NULL;
             }
