@@ -193,6 +193,51 @@ namespace Simd
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
 #endif// SIMD_SSE41_ENABLE
+
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
+    {
+        class ImagePgmTxtLoader : public Sse41::ImagePgmTxtLoader
+        {
+        public:
+            ImagePgmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePgmBinLoader : public Sse41::ImagePgmBinLoader
+        {
+        public:
+            ImagePgmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmTxtLoader : public Sse41::ImagePpmTxtLoader
+        {
+        public:
+            ImagePpmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmBinLoader : public Sse41::ImagePpmBinLoader
+        {
+        public:
+            ImagePpmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+    }
+#endif// SIMD_AVX2_ENABLE
 }
 
 #endif//__SimdImageLoad_h__
