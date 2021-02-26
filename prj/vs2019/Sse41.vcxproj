@@ -16,6 +16,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />

@@ -130,6 +130,7 @@ namespace Simd
             }
             else
                 return false;
+            SetConverters();
             return true;
         }
 
@@ -140,12 +141,6 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatGray8;
-            switch (_param.format)
-            {
-            case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
-            case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
-            case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
-            }
         }
 
         bool ImagePgmTxtLoader::FromStream()
@@ -175,6 +170,16 @@ namespace Simd
             return true;
         }
 
+        void ImagePgmTxtLoader::SetConverters()
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
+            case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
+            case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
+            }
+        }
+
         //-------------------------------------------------------------------------
 
         ImagePgmBinLoader::ImagePgmBinLoader(const ImageLoaderParam& param)
@@ -182,12 +187,6 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatGray8;
-            switch (_param.format)
-            {
-            case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
-            case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
-            case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
-            }
         }
 
         bool ImagePgmBinLoader::FromStream()
@@ -214,6 +213,16 @@ namespace Simd
             return true;
         }
 
+        void ImagePgmBinLoader::SetConverters()
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
+            case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
+            case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
+            }
+        }
+
         //-------------------------------------------------------------------------
 
         ImagePpmTxtLoader::ImagePpmTxtLoader(const ImageLoaderParam& param)
@@ -221,12 +230,6 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgb24;
-            switch (_param.format)
-            {
-            case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
-            case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
-            case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
-            }
         }
 
         bool ImagePpmTxtLoader::FromStream()
@@ -256,6 +259,16 @@ namespace Simd
             return true;
         }
 
+        void ImagePpmTxtLoader::SetConverters()
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
+            case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
+            case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
+            }
+        }
+
         //-------------------------------------------------------------------------
 
         ImagePpmBinLoader::ImagePpmBinLoader(const ImageLoaderParam& param)
@@ -263,12 +276,6 @@ namespace Simd
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgb24;
-            switch (_param.format)
-            {
-            case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
-            case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
-            case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
-            }
         }
 
         bool ImagePpmBinLoader::FromStream()
@@ -293,6 +300,16 @@ namespace Simd
                 row += block;
             }
             return true;
+        }
+
+        void ImagePpmBinLoader::SetConverters()
+        {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
+            case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
+            case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
+            }
         }
 
         //-------------------------------------------------------------------------

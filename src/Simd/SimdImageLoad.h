@@ -97,6 +97,7 @@ namespace Simd
             size_t _block, _size;
 
             bool ReadHeader(size_t version);
+            virtual void SetConverters() = 0;
         };
 
         class ImagePgmTxtLoader : public ImagePxmLoader
@@ -105,6 +106,9 @@ namespace Simd
             ImagePgmTxtLoader(const ImageLoaderParam& param);
 
             virtual bool FromStream();
+
+        protected:
+            virtual void SetConverters();
         };
 
         class ImagePgmBinLoader : public ImagePxmLoader
@@ -113,6 +117,9 @@ namespace Simd
             ImagePgmBinLoader(const ImageLoaderParam& param);
 
             virtual bool FromStream();
+
+        protected:
+            virtual void SetConverters();
         };
 
         class ImagePpmTxtLoader : public ImagePxmLoader
@@ -121,6 +128,9 @@ namespace Simd
             ImagePpmTxtLoader(const ImageLoaderParam& param);
 
             virtual bool FromStream();
+
+        protected:
+            virtual void SetConverters();
         };
 
         class ImagePpmBinLoader : public ImagePxmLoader
@@ -129,12 +139,60 @@ namespace Simd
             ImagePpmBinLoader(const ImageLoaderParam& param);
 
             virtual bool FromStream();
+
+        protected:
+            virtual void SetConverters();
         };
 
         //---------------------------------------------------------------------
 
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
+
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        class ImagePgmTxtLoader : public Base::ImagePgmTxtLoader
+        {
+        public:
+            ImagePgmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePgmBinLoader : public Base::ImagePgmBinLoader
+        {
+        public:
+            ImagePgmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmTxtLoader : public Base::ImagePpmTxtLoader
+        {
+        public:
+            ImagePpmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmBinLoader : public Base::ImagePpmBinLoader
+        {
+        public:
+            ImagePpmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+    }
+#endif// SIMD_SSE41_ENABLE
 }
 
 #endif//__SimdImageLoad_h__
