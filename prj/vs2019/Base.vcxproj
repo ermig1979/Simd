@@ -113,6 +113,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseHogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseInt16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseIntegral.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseInterference.cpp" />

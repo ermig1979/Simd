@@ -138,6 +138,14 @@ namespace Simd
             virtual bool ToStream(const uint8_t* src, size_t stride);
         };
 
+        class ImagePngSaver : public ImageSaver
+        {
+        public:
+            ImagePngSaver(const ImageSaverParam& param);
+
+            virtual bool ToStream(const uint8_t* src, size_t stride);
+        };
+
         //---------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);

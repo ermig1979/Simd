@@ -83,6 +83,9 @@ namespace Test
         if (data2)
             SimdFree(data2);
 
+        if(file == SimdImageFilePng)
+            src.Save((ToString(format) + ".png").c_str(), file, 100);
+
         //src.Save((ToString(file) + ".txt").c_str(), file, 100);
 
         return result;
