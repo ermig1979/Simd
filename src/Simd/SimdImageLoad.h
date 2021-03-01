@@ -238,6 +238,51 @@ namespace Simd
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
 #endif// SIMD_AVX2_ENABLE
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class ImagePgmTxtLoader : public Avx2::ImagePgmTxtLoader
+        {
+        public:
+            ImagePgmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePgmBinLoader : public Avx2::ImagePgmBinLoader
+        {
+        public:
+            ImagePgmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmTxtLoader : public Avx2::ImagePpmTxtLoader
+        {
+        public:
+            ImagePpmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmBinLoader : public Avx2::ImagePpmBinLoader
+        {
+        public:
+            ImagePpmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+    }
+#endif// SIMD_AVX512BW_ENABLE
 }
 
 #endif//__SimdImageLoad_h__

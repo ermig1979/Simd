@@ -41,6 +41,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHogLite.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwIntegral.cpp" />
