@@ -95,7 +95,7 @@ namespace Test
         View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
         for (int format = 0; format < 4; format++)
         {
-            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFilePpmBin; file++)
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileJpeg; file++)
             {
                 result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
                 result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);
@@ -215,7 +215,7 @@ namespace Test
         View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
         for (int format = 0; format < 4; format++)
         {
-            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFilePpmBin; file++)
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileJpeg; file++)
             {
                 result = result && ImageLoadFromMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
                 result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);

@@ -222,6 +222,10 @@ typedef enum
     SimdImageFilePpmTxt,
     /*! A PGM (Portable Pixel Map) binary (P6) image file format. */
     SimdImageFilePpmBin,
+    /*! A PNG (Portable Network Graphics) image file format. */
+    SimdImageFilePng,
+    /*! A JPEG (Joint Photographic Experts Group) image file format. */
+    SimdImageFileJpeg,
 } SimdImageFileType;
 
 /*! @ingroup c_types

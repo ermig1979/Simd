@@ -174,6 +174,8 @@ namespace Test
         case SimdImageFilePgmBin:       return "PgmB";
         case SimdImageFilePpmTxt:       return "PpmT";
         case SimdImageFilePpmBin:       return "PpmB";
+        case SimdImageFilePng:          return "Png";
+        case SimdImageFileJpeg:         return "Jpeg";
         default: assert(0);  return "";
         }
     }
