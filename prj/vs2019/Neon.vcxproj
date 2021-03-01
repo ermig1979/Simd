@@ -53,6 +53,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHogLite.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonInt16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonInterference.cpp" />

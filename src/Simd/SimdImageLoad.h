@@ -283,6 +283,51 @@ namespace Simd
         uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
     }
 #endif// SIMD_AVX512BW_ENABLE
+
+#ifdef SIMD_NEON_ENABLE    
+    namespace Neon
+    {
+        class ImagePgmTxtLoader : public Base::ImagePgmTxtLoader
+        {
+        public:
+            ImagePgmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePgmBinLoader : public Base::ImagePgmBinLoader
+        {
+        public:
+            ImagePgmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmTxtLoader : public Base::ImagePpmTxtLoader
+        {
+        public:
+            ImagePpmTxtLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        class ImagePpmBinLoader : public Base::ImagePpmBinLoader
+        {
+        public:
+            ImagePpmBinLoader(const ImageLoaderParam& param);
+
+        protected:
+            virtual void SetConverters();
+        };
+
+        //---------------------------------------------------------------------
+
+        uint8_t* ImageLoadFromMemory(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
+    }
+#endif// SIMD_NEON_ENABLE
 }
 
 #endif//__SimdImageLoad_h__
