@@ -152,6 +152,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(Copy);
     TEST_ADD_GROUP_AD0(CopyFrame);
 
+    TEST_ADD_GROUP_A00(Crc32);
     TEST_ADD_GROUP_AD0(Crc32c);
 
     TEST_ADD_GROUP_AD0(DeinterleaveUv);

@@ -740,6 +740,20 @@ extern "C"
 
     /*! @ingroup hash
 
+        \fn uint32_t SimdCrc32(const void * src, size_t size);
+
+        \short Gets 32-bit cyclic redundancy check (CRC32) for current data.
+
+        Calculation is performed for polynomial 0xEDB88320.
+
+        \param [in] src - a pointer to data.
+        \param [in] size - a size of the data.
+        \return 32-bit cyclic redundancy check (CRC32).
+    */
+    SIMD_API uint32_t SimdCrc32(const void* src, size_t size);
+
+    /*! @ingroup hash
+
         \fn uint32_t SimdCrc32c(const void * src, size_t size);
 
         \short Gets 32-bit cyclic redundancy check (CRC32c) for current data.

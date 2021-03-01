@@ -36,6 +36,8 @@ namespace Simd
 
         void SetThreadNumber(size_t threadNumber);
 
+        uint32_t Crc32(const void* src, size_t size);
+
         uint32_t Crc32c(const void * src, size_t size);
 
         void AbsDifference(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, uint8_t *c, size_t cStride,

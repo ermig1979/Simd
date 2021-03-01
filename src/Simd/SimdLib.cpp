@@ -233,6 +233,11 @@ SIMD_API void SimdSetFastMode(SimdBool value)
 #endif
 }
 
+SIMD_API uint32_t SimdCrc32(const void* src, size_t size)
+{
+    return Base::Crc32(src, size);
+}
+
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 {
 #ifdef SIMD_SSE42_ENABLE

@@ -86,6 +86,15 @@ namespace Test
         return result;
     }
 
+    bool Crc32AutoTest()
+    {
+        bool result = true;
+
+        result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32), FUNC(SimdCrc32));
+
+        return result;
+    }
+
     bool Crc32cAutoTest()
     {
         bool result = true;
