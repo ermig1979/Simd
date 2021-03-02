@@ -186,12 +186,40 @@ namespace Simd
             return _data;
         }
 
+        SIMD_INLINE uint8_t* Current()
+        {
+            return _data + _pos;
+        }
+
+        SIMD_INLINE const uint8_t* Current() const
+        {
+            return _data + _pos;
+        }
+
         SIMD_INLINE void Write(const void * data, size_t size)
         {
             Reserve(_pos + size);
             memcpy(_data + _pos, data, size);
             _pos += size;
             _size = Max(_size, _pos);
+        }
+
+        template <class Value> SIMD_INLINE void Write(const Value& value)
+        {
+            Write(&value, sizeof(Value));
+        }
+
+        SIMD_INLINE void WriteBE(const uint32_t & value)
+        {
+#if defined(SIMD_BIG_ENDIAN)
+            Write<uint32_t>(value);
+#else
+            Write<uint32_t>(
+                (value & 0x000000FF) << 24 | 
+                (value & 0x0000FF00) << 8 |
+                (value & 0x00FF0000) >> 8 | 
+                (value & 0xFF000000) >> 24);
+#endif
         }
 
         SIMD_INLINE uint8_t* Release(size_t* size = NULL)

@@ -144,6 +144,13 @@ namespace Simd
             ImagePngSaver(const ImageSaverParam& param);
 
             virtual bool ToStream(const uint8_t* src, size_t stride);
+        protected:
+            typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            ConvertPtr _convert;
+
+            size_t _channels, _size;
+            Array8u _filt, _bgr;
+            Array8i _line;
         };
 
         //---------------------------------------------------------------------
@@ -176,6 +183,14 @@ namespace Simd
         {
         public:
             ImagePpmBinSaver(const ImageSaverParam& param);
+        };
+
+        class ImagePngSaver : public Base::ImagePngSaver
+        {
+        public:
+            ImagePngSaver(const ImageSaverParam& param);
+
+            virtual bool ToStream(const uint8_t* src, size_t stride);
         };
 
         //---------------------------------------------------------------------

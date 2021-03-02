@@ -52,6 +52,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

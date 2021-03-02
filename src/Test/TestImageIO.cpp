@@ -28,6 +28,9 @@
 #include "Simd/SimdImageLoad.h"
 #include "Simd/SimdImageSave.h"
 
+#include "Simd/SimdDrawing.hpp"
+#include "Simd/SimdFont.hpp"
+
 namespace Test
 {
     namespace
@@ -57,6 +60,56 @@ namespace Test
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
 
+    template<class Color> Color GetColor(uint8_t b, uint8_t g, uint8_t r)
+    {
+        return Color(b, g, r);
+    }
+
+    template<> uint8_t GetColor<uint8_t>(uint8_t b, uint8_t g, uint8_t r)
+    {
+        return uint8_t((int(b) + int(g) + int(r))/3);
+    }
+
+    template<class Color> void DrawImage(View& canvas)
+    {
+        int w = int(canvas.width), h = int(canvas.height), n = 10;
+        Color background = GetColor<Color>(255, 0, 0);
+        Simd::DrawFilledRectangle(canvas, Rect(0, 0, canvas.width, canvas.height), background);
+
+        for (int i = 0; i < n; i ++)
+        {
+            ptrdiff_t x1 = Random(w * 5 / 4) - w / 8;
+            ptrdiff_t y1 = Random(h * 5 / 4) - h / 8;
+            ptrdiff_t x2 = Random(w * 5 / 4) - w / 8;
+            ptrdiff_t y2 = Random(h * 5 / 4) - h / 8;
+            Rect rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2));
+            Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
+            Simd::DrawFilledRectangle(canvas, rect, foreground);
+        }
+
+        String text = "First_string,\nSecond-line.";
+        Simd::Font font(16);
+        for (int i = 0; i < n; i++)
+        {
+            ptrdiff_t x = Random(w) - w / 3;
+            ptrdiff_t y = Random(h) - h / 3;
+            Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
+            font.Resize(Random(h / 4) + 16);
+            font.Draw(canvas, text, Point(x, y), foreground);
+        }
+    }
+
+    void DrawImage(View & canvas)
+    {
+        switch (canvas.format)
+        {
+        case View::Gray8: DrawImage<uint8_t>(canvas); break;
+        case View::Bgr24: DrawImage<Simd::Pixel::Bgr24>(canvas); break;
+        case View::Bgra32: DrawImage<Simd::Pixel::Bgra32>(canvas); break;
+        case View::Rgb24: DrawImage<Simd::Pixel::Rgb24>(canvas); break;
+        }
+    }
+
     bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
         bool result = true;
@@ -67,7 +120,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
-        FillRandom(src);
+        DrawImage(src);
 
         uint8_t* data1 = NULL, * data2 = NULL;
         size_t size1 = 0, size2 = 0;
@@ -98,7 +151,7 @@ namespace Test
         View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
         for (int format = 0; format < 4; format++)
         {
-            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
             {
                 result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
                 result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);
