@@ -24,9 +24,10 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdPerformance.h"
 
 namespace Simd
-{        
+{
     namespace Base
     {
 #ifndef PNG_MALLOC
@@ -80,25 +81,26 @@ namespace Simd
             return data;
         }
 
-        static int png__zlib_bitrev(int code, int codebits)
+        SIMD_INLINE int ZlibBitrev(int code, int codebits)
         {
             int res = 0;
-            while (codebits--) {
+            while (codebits--)
+            {
                 res = (res << 1) | (code & 1);
                 code >>= 1;
             }
             return res;
         }
 
-        static unsigned int png__zlib_countm(unsigned char* a, unsigned char* b, int limit)
+        SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
         {
-            int i;
-            for (i = 0; i < limit && i < 258; ++i)
+            int i = 0;
+            for (; i < limit && i < 258; ++i)
                 if (a[i] != b[i]) break;
             return i;
         }
 
-        static unsigned int png__zhash(unsigned char* data)
+        SIMD_INLINE uint32_t ZlibHash(const uint8_t* data)
         {
             uint32_t hash = data[0] + (data[1] << 8) + (data[2] << 16);
             hash ^= hash << 3;
@@ -113,7 +115,7 @@ namespace Simd
 #define png__zlib_flush() (out = png__zlib_flushf(out, &bitbuf, &bitcount))
 #define png__zlib_add(code,codebits) \
       (bitbuf |= (code) << bitcount, bitcount += (codebits), png__zlib_flush())
-#define png__zlib_huffa(b,c)  png__zlib_add(png__zlib_bitrev(b,c),c)
+#define png__zlib_huffa(b,c)  png__zlib_add(ZlibBitrev(b,c),c)
         // default huffman tables
 #define png__zlib_huff1(n)  png__zlib_huffa(0x30 + (n), 8)
 #define png__zlib_huff2(n)  png__zlib_huffa(0x190 + (n)-144, 9)
@@ -122,78 +124,88 @@ namespace Simd
 #define png__zlib_huff(n)  ((n) <= 143 ? png__zlib_huff1(n) : (n) <= 255 ? png__zlib_huff2(n) : (n) <= 279 ? png__zlib_huff3(n) : png__zlib_huff4(n))
 #define png__zlib_huffb(n) ((n) <= 143 ? png__zlib_huff1(n) : png__zlib_huff2(n))
 
-#define png__ZHASH   16384
-
-        static unsigned char* png_zlib_compress(unsigned char* data, int data_len, int* out_len, int quality)
+        static uint8_t* ZlibCompress(uint8_t* data, int data_len, int* out_len, int quality)
         {
-            static unsigned short lengthc[] = { 3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258, 259 };
-            static unsigned char  lengtheb[] = { 0,0,0,0,0,0,0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
-            static unsigned short distc[] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577, 32768 };
-            static unsigned char  disteb[] = { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
-            unsigned int bitbuf = 0;
+            const int ZHASH = 16384;
+            const int basket = quality * 2;
+            typedef Array32i HashTable;
+
+            static uint16_t lengthc[] = { 3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258, 259 };
+            static uint8_t  lengtheb[] = { 0,0,0,0,0,0,0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
+            static uint16_t distc[] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577, 32768 };
+            static uint8_t  disteb[] = { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
+            uint32_t bitbuf = 0;
             int i, j, bitcount = 0;
             unsigned char* out = NULL;
-            unsigned char*** hash_table = (unsigned char***)PNG_MALLOC(png__ZHASH * sizeof(unsigned char**));
-            if (hash_table == NULL)
-                return NULL;
-            if (quality < 5) quality = 5;
+            if (quality < 5)
+                quality = 5;
+            HashTable hashTable(ZHASH * basket);
+            memset(hashTable.data, -1, hashTable.RawSize());
 
             png__sbpush(out, 0x78);   // DEFLATE 32K window
             png__sbpush(out, 0x5e);   // FLEVEL = 1
             png__zlib_add(1, 1);  // BFINAL = 1
             png__zlib_add(1, 2);  // BTYPE = 1 -- fixed huffman
 
-            for (i = 0; i < png__ZHASH; ++i)
-                hash_table[i] = NULL;
-
             i = 0;
-            while (i < data_len - 3) {
+            while (i < data_len - 3)
+            {
                 // hash next 3 bytes of data to be compressed
-                int h = png__zhash(data + i) & (png__ZHASH - 1), best = 3;
-                unsigned char* bestloc = 0;
-                unsigned char** hlist = hash_table[h];
-                int n = png__sbcount(hlist);
-                for (j = 0; j < n; ++j) {
-                    if (hlist[j] - data > i - 32768) { // if entry lies within window
-                        int d = png__zlib_countm(hlist[j], data + i, data_len - i);
-                        if (d >= best) { best = d; bestloc = hlist[j]; }
+                int h = ZlibHash(data + i) & (ZHASH - 1), best = 3;
+                uint8_t* bestLoc = 0;
+                int* hList = hashTable.data + h * basket;
+                for (j = 0; hList[j] != -1 && j < basket; ++j)
+                {
+                    if (hList[j] > i - 32768)
+                    {
+                        int d = ZlibCount(data + hList[j], data + i, data_len - i);
+                        if (d >= best)
+                        {
+                            best = d;
+                            bestLoc = data + hList[j];
+                        }
                     }
                 }
-                // when hash table entry is too long, delete half the entries
-                if (hash_table[h] && png__sbn(hash_table[h]) == 2 * quality) {
-                    PNG_MEMMOVE(hash_table[h], hash_table[h] + quality, sizeof(hash_table[h][0]) * quality);
-                    png__sbn(hash_table[h]) = quality;
+                if (j == basket)
+                {
+                    memmove(hList, hList + quality, quality * sizeof(int));
+                    memset(hList + quality, -1, quality * sizeof(int));
+                    j = quality;
                 }
-                png__sbpush(hash_table[h], data + i);
+                hList[j] = i;
 
-                if (bestloc) {
-                    // "lazy matching" - check match at *next* byte, and if it's better, do cur byte as literal
-                    h = png__zhash(data + i + 1) & (png__ZHASH - 1);
-                    hlist = hash_table[h];
-                    n = png__sbcount(hlist);
-                    for (j = 0; j < n; ++j) {
-                        if (hlist[j] - data > i - 32767) {
-                            int e = png__zlib_countm(hlist[j], data + i + 1, data_len - i - 1);
-                            if (e > best) { // if next match is better, bail on current match
-                                bestloc = NULL;
+                if (bestLoc)
+                {
+                    h = ZlibHash(data + i + 1) & (ZHASH - 1);
+                    int* hList = hashTable.data + h * basket;
+                    for (j = 0; hList[j] != -1 && j < basket; ++j)
+                    {
+                        if (hList[j] > i - 32767)
+                        {
+                            int e = ZlibCount(data + hList[j], data + i + 1, data_len - i - 1);
+                            if (e > best)
+                            {
+                                bestLoc = NULL;
                                 break;
                             }
                         }
                     }
                 }
 
-                if (bestloc) {
-                    int d = (int)(data + i - bestloc); // distance back
+                if (bestLoc)
+                {
+                    int d = (int)(data + i - bestLoc); // distance back
                     assert(d <= 32767 && best <= 258);
                     for (j = 0; best > lengthc[j + 1] - 1; ++j);
                     png__zlib_huff(j + 257);
                     if (lengtheb[j]) png__zlib_add(best - lengthc[j], lengtheb[j]);
                     for (j = 0; d > distc[j + 1] - 1; ++j);
-                    png__zlib_add(png__zlib_bitrev(j, 5), 5);
+                    png__zlib_add(ZlibBitrev(j, 5), 5);
                     if (disteb[j]) png__zlib_add(d - distc[j], disteb[j]);
                     i += best;
                 }
-                else {
+                else
+                {
                     png__zlib_huffb(data[i]);
                     ++i;
                 }
@@ -206,16 +218,13 @@ namespace Simd
             while (bitcount)
                 png__zlib_add(0, 1);
 
-            for (i = 0; i < png__ZHASH; ++i)
-                (void)png__sbfree(hash_table[i]);
-            PNG_FREE(hash_table);
-
             {
                 // compute adler32 on input
                 unsigned int s1 = 1, s2 = 0;
                 int blocklen = (int)(data_len % 5552);
                 j = 0;
-                while (j < data_len) {
+                while (j < data_len)
+                {
                     for (i = 0; i < blocklen; ++i) { s1 += data[j + i]; s2 += s1; }
                     s1 %= 65521; s2 %= 65521;
                     j += blocklen;
@@ -235,9 +244,9 @@ namespace Simd
         SIMD_INLINE uint8_t Paeth(int a, int b, int c)
         {
             int p = a + b - c, pa = abs(p - a), pb = abs(p - b), pc = abs(p - c);
-            if (pa <= pb && pa <= pc) 
+            if (pa <= pb && pa <= pc)
                 return uint8_t(a);
-            if (pb <= pc) 
+            if (pb <= pc)
                 return uint8_t(b);
             return uint8_t(c);
         }
@@ -285,17 +294,17 @@ namespace Simd
         {
             switch (_param.format)
             {
-            case SimdPixelFormatGray8: 
-                _channels = 1; 
+            case SimdPixelFormatGray8:
+                _channels = 1;
                 break;
-            case SimdPixelFormatBgr24: 
-                _channels = 3; 
+            case SimdPixelFormatBgr24:
+                _channels = 3;
                 break;
-            case SimdPixelFormatBgra32: 
-                _channels = 4; 
+            case SimdPixelFormatBgra32:
+                _channels = 4;
                 break;
             case SimdPixelFormatRgb24:
-                _channels = 3; 
+                _channels = 3;
                 break;
             }
             _size = _param.width * _channels;
@@ -335,7 +344,7 @@ namespace Simd
                 PNG_MEMMOVE(_filt.data + row * (_size + 1) + 1, _line.data + _size * bestFilter, _size);
             }
             int zlen;
-            uint8_t* zlib = png_zlib_compress(_filt.data, _filt.size, &zlen, COMPRESSION);
+            uint8_t* zlib = ZlibCompress(_filt.data, _filt.size, &zlen, COMPRESSION);
             if (zlib)
             {
                 WriteToStream(zlib, zlen);

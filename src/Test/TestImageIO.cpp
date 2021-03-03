@@ -154,7 +154,7 @@ namespace Test
         bool result = true;
 
         View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
-        for (int format = 0; format < 4; format++)
+        for (int format = 1; format < 2; format++)
         {
             for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
             {
