@@ -70,13 +70,18 @@ namespace Test
         return uint8_t((int(b) + int(g) + int(r))/3);
     }
 
-    template<class Color> void DrawImage(View& canvas)
+    template<> Simd::Pixel::Rgb24 GetColor<Simd::Pixel::Rgb24>(uint8_t b, uint8_t g, uint8_t r)
     {
-        int w = int(canvas.width), h = int(canvas.height), n = 10;
-        Color background = GetColor<Color>(255, 0, 0);
-        Simd::DrawFilledRectangle(canvas, Rect(0, 0, canvas.width, canvas.height), background);
+        return Simd::Pixel::Rgb24(r, g, b);
+    }
 
-        for (int i = 0; i < n; i ++)
+    template<class Color> void DrawTestImage(View& canvas, int rects, int labels)
+    {
+        ::srand(0);
+        int w = int(canvas.width), h = int(canvas.height);
+        Simd::Fill(canvas, 0);
+
+        for (int i = 0; i < rects; i ++)
         {
             ptrdiff_t x1 = Random(w * 5 / 4) - w / 8;
             ptrdiff_t y1 = Random(h * 5 / 4) - h / 8;
@@ -89,24 +94,24 @@ namespace Test
 
         String text = "First_string,\nSecond-line.";
         Simd::Font font(16);
-        for (int i = 0; i < n; i++)
+        for (int i = 0; i < labels; i++)
         {
             ptrdiff_t x = Random(w) - w / 3;
-            ptrdiff_t y = Random(h) - h / 3;
+            ptrdiff_t y = Random(h) - h / 6;
             Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
             font.Resize(Random(h / 4) + 16);
             font.Draw(canvas, text, Point(x, y), foreground);
         }
     }
 
-    void DrawImage(View & canvas)
+    void CreateTestImage(View & canvas, int rects, int labels)
     {
         switch (canvas.format)
         {
-        case View::Gray8: DrawImage<uint8_t>(canvas); break;
-        case View::Bgr24: DrawImage<Simd::Pixel::Bgr24>(canvas); break;
-        case View::Bgra32: DrawImage<Simd::Pixel::Bgra32>(canvas); break;
-        case View::Rgb24: DrawImage<Simd::Pixel::Rgb24>(canvas); break;
+        case View::Gray8: DrawTestImage<uint8_t>(canvas, rects, labels); break;
+        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(canvas, rects, labels); break;
+        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(canvas, rects, labels); break;
+        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(canvas, rects, labels); break;
         }
     }
 
@@ -120,7 +125,7 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
-        DrawImage(src);
+        CreateTestImage(src, 10, 10);
 
         uint8_t* data1 = NULL, * data2 = NULL;
         size_t size1 = 0, size2 = 0;

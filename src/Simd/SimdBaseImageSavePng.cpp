@@ -232,58 +232,48 @@ namespace Simd
             return (unsigned char*)png__sbraw(out);
         }
 
-        SIMD_INLINE void WriteCrc32(OutputMemoryStream & stream, size_t size)
-        {
-            stream.WriteBE(Base::Crc32(stream.Current() - size - 4, size + 4));
-        }
-
-        static unsigned char png__paeth(int a, int b, int c)
+        SIMD_INLINE uint8_t Paeth(int a, int b, int c)
         {
             int p = a + b - c, pa = abs(p - a), pb = abs(p - b), pc = abs(p - c);
-            if (pa <= pb && pa <= pc) return PNG_UCHAR(a);
-            if (pb <= pc) return PNG_UCHAR(b);
-            return PNG_UCHAR(c);
+            if (pa <= pb && pa <= pc) 
+                return uint8_t(a);
+            if (pb <= pc) 
+                return uint8_t(b);
+            return uint8_t(c);
         }
 
-        int png_write_png_compression_level = 8;
-        int png_write_force_png_filter = -1;
-        int png__flip_vertically_on_write = 0;
-
-        // @OPTIMIZE: provide an option that always forces left-predict or paeth predict
-        static void png__encode_png_line(const unsigned char* pixels, int stride_bytes, int width, int height, int y, int n, int filter_type, signed char* line_buffer)
+        static uint32_t EncodeLine(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst)
         {
-            static int mapping[] = { 0,1,2,3,4 };
-            static int firstmap[] = { 0,1,0,5,6 };
-            int* mymap = (y != 0) ? mapping : firstmap;
-            int i;
-            int type = mymap[filter_type];
-            const unsigned char* z = pixels + stride_bytes * (png__flip_vertically_on_write ? height - 1 - y : y);
-            int signed_stride = png__flip_vertically_on_write ? -stride_bytes : stride_bytes;
-
-            if (type == 0) {
-                memcpy(line_buffer, z, width * n);
-                return;
-            }
-
-            // first loop isn't optimized since it's just one pixel
-            for (i = 0; i < n; ++i) {
-                switch (type) {
-                case 1: line_buffer[i] = z[i]; break;
-                case 2: line_buffer[i] = z[i] - z[i - signed_stride]; break;
-                case 3: line_buffer[i] = z[i] - (z[i - signed_stride] >> 1); break;
-                case 4: line_buffer[i] = (signed char)(z[i] - png__paeth(0, z[i - signed_stride], 0)); break;
-                case 5: line_buffer[i] = z[i]; break;
-                case 6: line_buffer[i] = z[i]; break;
+            if (type == 0)
+                memcpy(dst, src, size);
+            else
+            {
+                for (size_t i = 0; i < n; ++i)
+                {
+                    switch (type)
+                    {
+                    case 1: dst[i] = src[i]; break;
+                    case 2: dst[i] = src[i] - src[i - stride]; break;
+                    case 3: dst[i] = src[i] - (src[i - stride] >> 1); break;
+                    case 4: dst[i] = (int8_t)(src[i] - src[i - stride]); break;
+                    case 5: dst[i] = src[i]; break;
+                    case 6: dst[i] = src[i]; break;
+                    }
+                }
+                switch (type)
+                {
+                case 1: for (size_t i = n; i < size; ++i) dst[i] = src[i] - src[i - n]; break;
+                case 2: for (size_t i = n; i < size; ++i) dst[i] = src[i] - src[i - stride]; break;
+                case 3: for (size_t i = n; i < size; ++i) dst[i] = src[i] - ((src[i - n] + src[i - stride]) >> 1); break;
+                case 4: for (size_t i = n; i < size; ++i) dst[i] = src[i] - Paeth(src[i - n], src[i - stride], src[i - stride - n]); break;
+                case 5: for (size_t i = n; i < size; ++i) dst[i] = src[i] - (src[i - n] >> 1); break;
+                case 6: for (size_t i = n; i < size; ++i) dst[i] = src[i] - src[i - n]; break;
                 }
             }
-            switch (type) {
-            case 1: for (i = n; i < width * n; ++i) line_buffer[i] = z[i] - z[i - n]; break;
-            case 2: for (i = n; i < width * n; ++i) line_buffer[i] = z[i] - z[i - signed_stride]; break;
-            case 3: for (i = n; i < width * n; ++i) line_buffer[i] = z[i] - ((z[i - n] + z[i - signed_stride]) >> 1); break;
-            case 4: for (i = n; i < width * n; ++i) line_buffer[i] = z[i] - png__paeth(z[i - n], z[i - signed_stride], z[i - signed_stride - n]); break;
-            case 5: for (i = n; i < width * n; ++i) line_buffer[i] = z[i] - (z[i - n] >> 1); break;
-            case 6: for (i = n; i < width * n; ++i) line_buffer[i] = z[i] - png__paeth(z[i - n], 0, 0); break;
-            }
+            uint32_t sum = 0;
+            for (size_t i = 0; i < size; ++i)
+                sum += ::abs(dst[i]);
+            return sum;
         }
 
         ImagePngSaver::ImagePngSaver(const ImageSaverParam& param)
@@ -291,6 +281,7 @@ namespace Simd
             , _channels(0)
             , _size(0)
             , _convert(NULL)
+            , _encode(NULL)
         {
             switch (_param.format)
             {
@@ -314,7 +305,8 @@ namespace Simd
                 _bgr.Resize(_param.height * _size);
             }
             _filt.Resize((_size + 1) * _param.height);
-            _line.Resize(_size);
+            _line.Resize(_size * FILTERS);
+            _encode = Base::EncodeLine;
         }
 
         bool ImagePngSaver::ToStream(const uint8_t* src, size_t stride)
@@ -325,76 +317,62 @@ namespace Simd
                 src = _bgr.data;
                 stride = _size;
             }
-            int force_filter = png_write_force_png_filter;
-            int ctype[5] = { -1, 0, 4, 2, 6 };
-            unsigned char sig[8] = { 137,80,78,71,13,10,26,10 };
-            int zlen;
-
-            if (force_filter >= 5)
-                force_filter = -1;
-
-            for (size_t j = 0; j < _param.height; ++j)
+            for (size_t row = 0; row < _param.height; ++row)
             {
-                int filter_type;
-                if (force_filter > -1)
+                int bestFilter = 0, bestSum = INT_MAX;
+                for (int filter = 0; filter < FILTERS; filter++)
                 {
-                    filter_type = force_filter;
-                    png__encode_png_line(src, stride, _param.width, _param.height, j, _channels, force_filter, _line.data);
-                }
-                else
-                { // Estimate the best filter by running through all of them:
-                    int best_filter = 0, best_filter_val = 0x7fffffff, est, i;
-                    for (filter_type = 0; filter_type < 5; filter_type++)
+                    static const int TYPES[] = { 0, 1, 0, 5, 6, 0, 1, 2, 3, 4 };
+                    int type = TYPES[filter + (row ? 1 : 0) * FILTERS];
+                    int sum = _encode(src + stride * row, stride, _channels, _size, type, _line.data + _size * filter);
+                    if (sum < bestSum)
                     {
-                        png__encode_png_line(src, stride, _param.width, _param.height, j, _channels, filter_type, _line.data);
-
-                        // Estimate the entropy of the line using this filter; the less, the better.
-                        est = 0;
-                        for (i = 0; i < _size; ++i)
-                            est += abs(_line[i]);
-                        if (est < best_filter_val)
-                        {
-                            best_filter_val = est;
-                            best_filter = filter_type;
-                        }
-                    }
-                    if (filter_type != best_filter)
-                    {  // If the last iteration already got us the best filter, don't redo it
-                        png__encode_png_line(src, stride, _param.width, _param.height, j, _channels, best_filter, _line.data);
-                        filter_type = best_filter;
+                        bestSum = sum;
+                        bestFilter = filter;
                     }
                 }
-                // when we get here, filter_type contains the filter type, and line_buffer contains the data
-                _filt[j * (_size + 1)] = (unsigned char)filter_type;
-                PNG_MEMMOVE(_filt.data + j * (_size + 1) + 1, _line.data, _size);
+                _filt[row * (_size + 1)] = (uint8_t)bestFilter;
+                PNG_MEMMOVE(_filt.data + row * (_size + 1) + 1, _line.data + _size * bestFilter, _size);
             }
-            uint8_t* zlib = png_zlib_compress(_filt.data, _filt.size, &zlen, png_write_png_compression_level);
-            if (!zlib)
-                return false;
+            int zlen;
+            uint8_t* zlib = png_zlib_compress(_filt.data, _filt.size, &zlen, COMPRESSION);
+            if (zlib)
+            {
+                WriteToStream(zlib, zlen);
+                PNG_FREE(zlib);
+                return true;
+            }
+            return false;
+        }
 
+        SIMD_INLINE void WriteCrc32(OutputMemoryStream& stream, size_t size)
+        {
+            stream.WriteBe32(Base::Crc32(stream.Current() - size - 4, size + 4));
+        }
+
+        void ImagePngSaver::WriteToStream(const uint8_t* zlib, size_t zlen)
+        {
+            const uint8_t SIGNATURE[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
+            const int8_t CTYPE[5] = { -1, 0, 4, 2, 6 };
             _stream.Reserve(8 + 12 + 13 + 12 + zlen + 12);
-            _stream.Write(sig, 8);
-            _stream.WriteBE(13);
+            _stream.Write(SIGNATURE, 8);
+            _stream.WriteBe32(13);
             _stream.Write("IHDR", 4);
-            _stream.WriteBE(_param.width);
-            _stream.WriteBE(_param.height);
+            _stream.WriteBe32(_param.width);
+            _stream.WriteBe32(_param.height);
             _stream.Write<uint8_t>(8);
-            _stream.Write<uint8_t>(PNG_UCHAR(ctype[_channels]));
+            _stream.Write<uint8_t>(CTYPE[_channels]);
             _stream.Write<uint8_t>(0);
             _stream.Write<uint8_t>(0);
             _stream.Write<uint8_t>(0);
             WriteCrc32(_stream, 13);
-            _stream.WriteBE(zlen);
+            _stream.WriteBe32(zlen);
             _stream.Write("IDAT", 4);
             _stream.Write(zlib, zlen);
             WriteCrc32(_stream, zlen);
-            _stream.WriteBE(0);
+            _stream.WriteBe32(0);
             _stream.Write("IEND", 4);
             WriteCrc32(_stream, 0);
-
-            PNG_FREE(zlib);
-
-            return true;
         }
     }
 }

@@ -209,7 +209,7 @@ namespace Simd
             Write(&value, sizeof(Value));
         }
 
-        SIMD_INLINE void WriteBE(const uint32_t & value)
+        SIMD_INLINE void WriteBe32(const uint32_t & value)
         {
 #if defined(SIMD_BIG_ENDIAN)
             Write<uint32_t>(value);

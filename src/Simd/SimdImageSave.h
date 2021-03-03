@@ -145,12 +145,17 @@ namespace Simd
 
             virtual bool ToStream(const uint8_t* src, size_t stride);
         protected:
+            const int COMPRESSION = 8;
+            const int FILTERS = 5;
             typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef uint32_t (*EncodePtr)(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst);
             ConvertPtr _convert;
-
+            EncodePtr _encode;
             size_t _channels, _size;
             Array8u _filt, _bgr;
             Array8i _line;
+
+            void WriteToStream(const uint8_t* zlib, size_t zlen);
         };
 
         //---------------------------------------------------------------------
