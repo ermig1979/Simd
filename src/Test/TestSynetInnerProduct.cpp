@@ -134,12 +134,24 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 192, f, a, f1, f2);
-
+#endif
+#if 1
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 96, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 192, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, f, a, f1, f2);
+#endif
+#if 1        
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 192, t, a, f1, f2);
-
+#endif
+#if 1
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 96, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 192, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, t, a, f1, f2);
 #endif
 #else
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, t, a, f1, f2);
@@ -155,10 +167,10 @@ namespace Test
 
         result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Base::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 
-//#ifdef SIMD_SSE2_ENABLE
-//        if (Simd::Sse2::Enable)
-//            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Sse2::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Sse41::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
+#endif 
 
         return result;
     }

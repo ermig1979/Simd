@@ -138,11 +138,20 @@ namespace Simd
         void * SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
+        class SynetInnerProduct32fGemm : public Base::SynetInnerProduct32fGemm
+        {
+        public:
+            SynetInnerProduct32fGemm(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
