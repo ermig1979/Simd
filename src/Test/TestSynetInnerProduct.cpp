@@ -177,6 +177,11 @@ namespace Test
             result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx2::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
+#endif 
+
         return result;
     }
 

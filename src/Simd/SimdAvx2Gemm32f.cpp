@@ -574,7 +574,7 @@ namespace Simd
 
         void Gemm32fNN(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M*N*K*2);
+            //SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M*N*K*2);
 
             typedef Simd::GemmNN<float, F, size_t> GemmNN;
             GemmNN::Main kernelMM, kernelMT;
@@ -977,7 +977,7 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc)
         {
-            SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M*N*K * 2);
+            //SIMD_PERF_BEGF(Simd::ToStr(M) + "-" + Simd::ToStr(N) + "-" + Simd::ToStr(K), M*N*K * 2);
 
             typedef Simd::GemmNT<float, F> GemmNT;
 #ifdef SIMD_X64_ENABLE

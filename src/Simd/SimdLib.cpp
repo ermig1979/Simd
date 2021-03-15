@@ -5599,7 +5599,7 @@ SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * s
 SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
 {
     typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC2(SynetInnerProduct32fInit, SIMD_AVX_FUNC, SIMD_SSE41_FUNC);
+    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC3(SynetInnerProduct32fInit, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC);
 
     return simdSynetInnerProduct32fInit(batch, input, output, transpose, activation);
 }
