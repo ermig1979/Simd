@@ -113,9 +113,9 @@ namespace Simd
             return ss.str();
         }
 
-        long long Flop() const
+        int64_t Flop() const
         {
-            long long flop = 0;
+            int64_t flop = 0;
             for (size_t i = 0; i < count; ++i)
                 flop += conv[i].Flop();
             return flop;

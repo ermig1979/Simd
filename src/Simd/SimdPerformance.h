@@ -167,14 +167,14 @@ namespace Simd
         };
     }
 }
-#define SIMD_PERF_FUNCF(flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, (long long)(flop)))
+#define SIMD_PERF_FUNCF(flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, (int64_t)(flop)))
 #define SIMD_PERF_FUNC() SIMD_PERF_FUNCF(0)
-#define SIMD_PERF_BEGF(desc, flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop)))
+#define SIMD_PERF_BEGF(desc, flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (int64_t)(flop)))
 #define SIMD_PERF_BEG(desc) SIMD_PERF_BEGF(desc, 0)
-#define SIMD_PERF_IFF(cond, desc, flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((cond) ? Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop)) : NULL)
+#define SIMD_PERF_IFF(cond, desc, flop) Simd::Base::PerformanceMeasurerHolder SIMD_CAT(__pmh, __LINE__)((cond) ? Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (int64_t)(flop)) : NULL)
 #define SIMD_PERF_IF(cond, desc) SIMD_PERF_IFF(cond, desc, 0)
 #define SIMD_PERF_END(desc) Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc)->Leave();
-#define SIMD_PERF_INITF(name, desc, flop) Simd::Base::PerformanceMeasurerHolder name(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (long long)(flop)), false);
+#define SIMD_PERF_INITF(name, desc, flop) Simd::Base::PerformanceMeasurerHolder name(Simd::Base::PerformanceMeasurerStorage::s_storage.Get(SIMD_FUNCTION, desc, (int64_t)(flop)), false);
 #define SIMD_PERF_INIT(name, desc)  SIMD_PERF_INITF(name, desc, 0);
 #define SIMD_PERF_START(name) name.Enter(); 
 #define SIMD_PERF_PAUSE(name) name.Leave(true);

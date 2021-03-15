@@ -97,9 +97,9 @@ namespace Simd
             return ss.str();
         }
 
-        long long Flop() const
+        int64_t Flop() const
         {
-            return batch * kernelY * kernelX * srcC * srcH * srcW * dstC / group * 2;
+            return int64_t(batch) * kernelY * kernelX * srcC * srcH * srcW * dstC / group * 2;
         }
 #endif
     };

@@ -155,7 +155,7 @@ namespace Test
         f1.Update(p);
         f2.Update(p);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
+        TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
         const SimdConvolutionParameters & beg = p.conv[0];
         const SimdConvolutionParameters & end = p.conv[p.count - 1];

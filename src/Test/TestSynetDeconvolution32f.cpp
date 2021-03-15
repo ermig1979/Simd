@@ -74,7 +74,7 @@ namespace Test
         f1.Update(p);
         f2.Update(p);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << "].");
+        TEST_LOG_SS(Info, "Test [" << f1.description << " & " << f2.description << "].");
 
         const SimdConvolutionParameters & c = p.conv;
         Tensor32f src({p.batch, p.trans ? c.srcH : c.srcC, p.trans ? c.srcW : c.srcH, p.trans ? c.srcC : c.srcW });

@@ -33,6 +33,7 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
+#include "Simd/SimdPerformance.h"
 
 namespace Simd
 {
@@ -394,6 +395,7 @@ namespace Simd
 
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
         {
+            //SIMD_PERF_FUNCF(count * size * 2);
             float _bias[4] = { 0, 0, 0, 0 };
             size_t count4 = AlignLo(count, 4);
             size_t i = 0;

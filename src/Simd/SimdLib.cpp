@@ -69,6 +69,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetConvolution8i.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynetDeconvolution32f.h"
+#include "Simd/SimdSynetInnerProduct32f.h"
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetMergedConvolution8i.h"
 #include "Simd/SimdSynetScale8i.h"
@@ -5593,6 +5594,31 @@ SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * s
     const static SimdSynetHswish32fPtr simdSynetHswish32f = SIMD_FUNC4(SynetHswish32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHswish32f(src, size, shift, scale, dst);
+}
+
+SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
+{
+    typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC0(SynetInnerProduct32fInit);
+
+    return simdSynetInnerProduct32fInit(batch, input, output, transpose, activation);
+}
+
+SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context)
+{
+    return ((SynetInnerProduct32f*)context)->InternalBufferSize();
+}
+
+SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params)
+{
+    ((SynetInnerProduct32f*)context)->SetParams(weight, internal, bias, params);
+}
+
+SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst)
+{
+    SynetInnerProduct32f* c = (SynetInnerProduct32f*)context;
+    SIMD_PERF_EXT(c);
+    c->Forward(src, dst);
 }
 
 SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)

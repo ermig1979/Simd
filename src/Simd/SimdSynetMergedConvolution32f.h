@@ -126,14 +126,14 @@ namespace Simd
             return ss.str();
         }
 
-        long long Flop(size_t i) const
+        int64_t Flop(size_t i) const
         {
-            return batch*conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
+            return int64_t(batch) * conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
         }
 
-        long long Flop() const
+        int64_t Flop() const
         {
-            long long flop = 0;
+            int64_t flop = 0;
             for (size_t i = 0; i < count; ++i)
                 flop += Flop(i);
             return flop;

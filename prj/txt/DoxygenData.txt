@@ -543,11 +543,6 @@
 */
 
 /*! @ingroup synet
-    @defgroup synet_fused FusedLayer functions
-    \short Functions to acceleratе FusedLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
-*/
-
-/*! @ingroup synet
     @defgroup synet_convolution_fp32 FP32 convolution framework
     \short A framework to accelerate FP32 convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
@@ -570,6 +565,16 @@
 /*! @ingroup synet
     @defgroup synet_merged_convolution_int8 INT8 merged convolution frameworks
     \short A framework to accelerate INT8 merged convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+*/
+
+/*! @ingroup synet
+    @defgroup synet_fused FusedLayer functions
+    \short Functions to acceleratе FusedLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+*/
+
+/*! @ingroup synet
+    @defgroup synet_inner_product InnerProductLayer functions
+    \short Functions to acceleratе InnerProductLayer in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 */
 
 /*! @ingroup synet

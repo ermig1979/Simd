@@ -97,7 +97,9 @@ typedef enum
 } SimdCompareType;
 
 /*! @ingroup synet
-    Describes type of activation function. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit and ::SimdSynetMergedConvolution32fInit.
+    Describes type of activation function. 
+    It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetDeconvolution32fInit, 
+    ::SimdSynetInnerProduct32fInit, ::SimdSynetMergedConvolution32fInit and ::SimdSynetMergedConvolution8iInit.
 */
 typedef enum
 {
@@ -6474,7 +6476,60 @@ extern "C"
     */
     SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_inner_product
+
+        \fn void * SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+
+        \short Initilizes FP32 inner product algorithm.
+
+        \param [in] batch - a batch size.
+        \param [in] input - a input vector size.
+        \param [in] output - a output vector size.
+        \param [in] transpose - a flag of transposing of weight matrix.
+        \param [in] activation - an activation function type used after inner product.
+        \return a pointer to FP32 inner product context. On error it returns NULL. It must be released with using of function ::SimdRelease.
+            This pointer is used in functions ::SimdSynetInnerProduct32fInternalBufferSize, :SimdSynetInnerProduct32fSetParams and ::SimdSynetInnerProduct32fForward.
+    */
+    SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
+
+    /*! @ingroup synet_inner_product
+
+        \fn size_t SimdSynetInnerProduct32fInternalBufferSize(const void * context);
+
+        \short Gets size of internal buffer used inside FP32 inner product algorithm.
+
+        \param [in] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
+        \return size of internal buffer used inside FP32 deconvolution algorithm.
+    */
+    SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context);
+
+    /*! @ingroup synet_inner_product
+
+        \fn void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params);
+
+        \short Sets weights, beases and parameters of activation function required for FP32 inner product algorithm.
+
+        \param [in, out] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
+        \param [in] weight - a pointer to inner product weights.
+        \param [out] internal - a flag signalized that weight is stored in the internal buffer. Can be NULL.
+        \param [in] bias - a pointer to bias. Can be NULL.
+        \param [in] params - a pointer to parameters of activation functions (see ::SimdConvolutionActivationType). Can be NULL.
+    */
+    SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params);
+
+    /*! @ingroup synet_inner_product
+
+        \fn void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst);
+
+        \short Performs forward propagation of FP32 inner product algorithm.
+
+        \param [in] context - a pointer to FP32 inner product context. It must be created by function ::SimdSynetInnerProduct32fInit and released by function ::SimdRelease.
+        \param [in] src - a pointer to input tensor.
+        \param [out] dst - a pointer to output tensor.
+    */
+    SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst);
+
+    /*! @ingroup synet_inner_product
 
         \fn void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
 
@@ -6501,7 +6556,7 @@ extern "C"
     */
     SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_inner_product
 
         \fn void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
 

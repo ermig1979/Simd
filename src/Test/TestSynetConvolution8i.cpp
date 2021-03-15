@@ -82,7 +82,7 @@ namespace Test
         f1.Update(p, comp);
         f2.Update(p, comp);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << "].");
+        TEST_LOG_SS(Info, "Test [" << f1.desc << " & " << f2.desc << "].");
 
         const SimdConvolutionParameters & c = p.conv;
 

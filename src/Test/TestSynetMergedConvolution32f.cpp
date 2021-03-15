@@ -138,7 +138,7 @@ namespace Test
         f1.Update(p);
         f2.Update(p);
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << "].");
+        TEST_LOG_SS(Info, "Test [" << f1.description << " & " << f2.description << "].");
 
         Tensor32f src(Shp(p.batch, p.conv[0].srcH, p.conv[0].srcW, p.conv[0].srcC));
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
