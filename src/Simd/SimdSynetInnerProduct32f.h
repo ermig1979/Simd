@@ -156,6 +156,15 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
+        class SynetInnerProduct32fGemm : public Sse41::SynetInnerProduct32fGemm
+        {
+        public:
+            SynetInnerProduct32fGemm(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Avx"; }
+        };
+
+        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     }
 #endif//SIMD_AVX_ENABLE
 

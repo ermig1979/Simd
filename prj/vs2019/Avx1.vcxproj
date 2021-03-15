@@ -28,6 +28,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect3r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetDeconvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetFused.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCdc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fDc.cpp" />
@@ -60,11 +61,14 @@
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse1.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse3.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
