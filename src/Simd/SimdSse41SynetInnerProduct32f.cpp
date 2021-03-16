@@ -44,9 +44,9 @@ namespace Simd
             {
                 _gemm = Sse3::Gemm32fNT;
                 if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
-                    _productKxNK = Sse::SynetInnerProductLayerForward;
+                    _prod = Sse::SynetInnerProductLayerForward;
                 else
-                    _productKxNK = NULL;
+                    _prod = NULL;
             }
             else
             {

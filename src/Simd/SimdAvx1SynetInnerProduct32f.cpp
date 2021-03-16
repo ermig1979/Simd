@@ -43,9 +43,9 @@ namespace Simd
                 {
                     _gemm = Avx::Gemm32fNT;
                     if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
-                        _productKxNK = Avx::SynetInnerProductLayerForward;
+                        _prod = Avx::SynetInnerProductLayerForward;
                     else
-                        _productKxNK = NULL;
+                        _prod = NULL;
                 }
             }
             else

@@ -72,13 +72,13 @@ namespace Simd
             _ldS = _K;
             _ldD = _N;
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
-            _productKxNK = NULL;
+            _prod = NULL;
             if (_param.transpose)
             {
                 _gemm = Base::Gemm32fNT;
                 _ldW = _K;
                 if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
-                    _productKxNK = Base::SynetInnerProductLayerForward;
+                    _prod = Base::SynetInnerProductLayerForward;
             }
             else
             {
@@ -87,15 +87,10 @@ namespace Simd
             }
         }
 
-        void SynetInnerProduct32fGemm::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
-        {
-            Simd::SynetInnerProduct32f::SetParams(weight, internal, bias, params);
-        }
-
         void SynetInnerProduct32fGemm::Forward(const float * src, float * dst)
         {
-            if (_productKxNK)
-                _productKxNK(src, _weight, _bias, _N, _K, dst);
+            if (_prod)
+                _prod(src, _weight, _bias, _N, _K, dst);
             else
             {
                 _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
@@ -104,6 +99,59 @@ namespace Simd
         }
 
         //---------------------------------------------------------------------
+
+        SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
+            : SynetInnerProduct32f(p)
+        {
+            _N = _param.output;
+            _K = _param.input;
+        }
+
+        void SynetInnerProduct32fProd::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
+        {
+            SynetInnerProduct32f::SetParams(weight, internal, bias, params);
+            ReorderWeight(_weight, _rWeight.data);
+        }
+
+        void SynetInnerProduct32fProd::Forward(const float* src, float* dst)
+        {
+
+        }
+
+        bool SynetInnerProduct32fProd::Preferable(const InnerProductParam32f& p)
+        {
+            return
+                p.activation == SimdConvolutionActivationIdentity &&
+                p.batch == 1;
+        }
+
+        void SynetInnerProduct32fProd::SetSize(size_t F)
+        {
+            _F = F;
+            _rWeight.Resize(AlignHi(_N, _F) * _K);
+        }
+
+        void SynetInnerProduct32fProd::ReorderWeight(const float* src, float* dst)
+        {
+            for (size_t n = 0; n < _N; n += _F)
+            {
+                size_t F = Simd::Min(_N, n + _F) - n;
+                const float* psrc = src;
+                for (size_t k = 0; k < _K; ++k)
+                {
+                    size_t f = 0;
+                    for (; f < F; ++f)
+                        *(dst++) = psrc[f];
+                    for (; f < _F; ++f)
+                        *(dst++) = 0.0f;
+                    psrc += _N;
+                }
+                src += F;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
 
         void * SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
         {

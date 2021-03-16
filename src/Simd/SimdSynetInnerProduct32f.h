@@ -122,19 +122,41 @@ namespace Simd
             SynetInnerProduct32fGemm(const InnerProductParam32f & p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::GemmN" + (_param.transpose == SimdTrue ? "T" : "N"); }
-            virtual void SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params);
             virtual void Forward(const float * src, float * dst);
 
         protected:
             typedef void(*GemmPtr)(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
             typedef void(*BiasAndActivationPtr)(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, SimdBool trans, float* dst);
-            typedef void(*ProductKxNKPtr)(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
+            typedef void(*ProdPtr)(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
 
             float _0, _1;
             GemmPtr _gemm;
             BiasAndActivationPtr _biasAndActivation;
-            ProductKxNKPtr _productKxNK;
+            ProdPtr _prod;
             size_t _M, _N, _K, _ldW, _ldS, _ldD;
+        };
+
+        class SynetInnerProduct32fProd : public SynetInnerProduct32f
+        {
+        public:
+            SynetInnerProduct32fProd(const InnerProductParam32f& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::Prod"; }
+            virtual size_t InternalBufferSize() const { return _rWeight.RawSize(); }
+            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
+            virtual void Forward(const float* src, float* dst);
+
+            static bool Preferable(const InnerProductParam32f& p);
+
+        protected:
+            typedef void(*ProdPtr)(const float* src, const float* weight, const float* bias, size_t input, size_t output, float* dst);
+
+            ProdPtr _prod;
+            Array32f _rWeight;
+            size_t _F, _N, _K;
+
+            void SetSize(size_t F);
+            void ReorderWeight(const float* src, float* dst);
         };
 
         void * SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
