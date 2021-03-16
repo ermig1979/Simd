@@ -40,7 +40,18 @@ namespace Simd
             : Base::SynetInnerProduct32fGemm(p)
         {
             _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
-            _gemm = _param.transpose ? Sse3::Gemm32fNT : Sse::Gemm32fNN;
+            if (_param.transpose)
+            {
+                _gemm = Sse3::Gemm32fNT;
+                if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
+                    _productKxNK = Sse::SynetInnerProductLayerForward;
+                else
+                    _productKxNK = NULL;
+            }
+            else
+            {
+                _gemm = Sse::Gemm32fNN;
+            }
         }
 
         //---------------------------------------------------------------------

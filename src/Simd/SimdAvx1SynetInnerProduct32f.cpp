@@ -40,7 +40,13 @@ namespace Simd
             if (_param.transpose)
             {
                 if (_param.input > Sse::F)
+                {
                     _gemm = Avx::Gemm32fNT;
+                    if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
+                        _productKxNK = Avx::SynetInnerProductLayerForward;
+                    else
+                        _productKxNK = NULL;
+                }
             }
             else
             {

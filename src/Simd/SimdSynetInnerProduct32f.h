@@ -128,10 +128,12 @@ namespace Simd
         protected:
             typedef void(*GemmPtr)(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
             typedef void(*BiasAndActivationPtr)(const float* bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float* params, SimdBool trans, float* dst);
+            typedef void(*ProductKxNKPtr)(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
 
             float _0, _1;
             GemmPtr _gemm;
             BiasAndActivationPtr _biasAndActivation;
+            ProductKxNKPtr _productKxNK;
             size_t _M, _N, _K, _ldW, _ldS, _ldD;
         };
 

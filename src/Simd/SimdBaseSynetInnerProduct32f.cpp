@@ -38,19 +38,53 @@ namespace Simd
 
     namespace Base
     {
+        void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst)
+        {
+            size_t aligned = Simd::AlignLo(size, 4);
+            for (size_t i = 0; i < count; ++i)
+            {
+                size_t j = 0;
+                float sums[4] = { 0, 0, 0, 0 };
+                for (; j < aligned; j += 4)
+                {
+                    sums[0] += src[j + 0] * weight[j + 0];
+                    sums[1] += src[j + 1] * weight[j + 1];
+                    sums[2] += src[j + 2] * weight[j + 2];
+                    sums[3] += src[j + 3] * weight[j + 3];
+                }
+                for (; j < size; ++j)
+                    sums[0] += src[j] * weight[j];
+                dst[i] = sums[0] + sums[1] + sums[2] + sums[3] + (bias ? bias[i] : 0);
+                weight += size;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         SynetInnerProduct32fGemm::SynetInnerProduct32fGemm(const InnerProductParam32f & p)
             : SynetInnerProduct32f(p)
             , _0(0.0f)
             , _1(1.0f)
         {
-            _gemm = _param.transpose ? Base::Gemm32fNT : Base::Gemm32fNN;
-            _biasAndActivation = Base::ConvolutionBiasAndActivation;
             _M = _param.batch;
             _N = _param.output;
             _K = _param.input;
-            _ldW = _param.transpose ? _K : _N;
             _ldS = _K;
             _ldD = _N;
+            _biasAndActivation = Base::ConvolutionBiasAndActivation;
+            _productKxNK = NULL;
+            if (_param.transpose)
+            {
+                _gemm = Base::Gemm32fNT;
+                _ldW = _K;
+                if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
+                    _productKxNK = Base::SynetInnerProductLayerForward;
+            }
+            else
+            {
+                _gemm = Base::Gemm32fNN;
+                _ldW = _N;
+            }
         }
 
         void SynetInnerProduct32fGemm::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
@@ -60,8 +94,13 @@ namespace Simd
 
         void SynetInnerProduct32fGemm::Forward(const float * src, float * dst)
         {
-            _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
-            _biasAndActivation(_bias, 1, _N, _param.activation, _params, SimdTrue, dst);
+            if (_productKxNK)
+                _productKxNK(src, _weight, _bias, _N, _K, dst);
+            else
+            {
+                _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
+                _biasAndActivation(_bias, 1, _N, _param.activation, _params, SimdTrue, dst);
+            }
         }
 
         //---------------------------------------------------------------------
