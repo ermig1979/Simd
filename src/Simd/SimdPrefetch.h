@@ -29,6 +29,18 @@
 
 namespace Simd
 {
+#if defined(SIMD_AVX_ENABLE)
+    namespace Avx
+    {
+        const size_t PREFETCH_SIZE = 2048;
+
+        SIMD_INLINE void PrefetchL1(const void* ptr)
+        {
+            _mm_prefetch((const char*)ptr + PREFETCH_SIZE, _MM_HINT_T0);
+        }
+    }
+#endif
+
 #if defined(SIMD_AVX512F_ENABLE)
     namespace Avx512f
     {

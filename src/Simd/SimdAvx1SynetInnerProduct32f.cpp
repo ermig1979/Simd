@@ -27,6 +27,7 @@
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx1.h"
+#include "Simd/SimdPrefetch.h"
 
 namespace Simd
 {

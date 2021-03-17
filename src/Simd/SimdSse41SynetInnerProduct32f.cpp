@@ -93,7 +93,7 @@ namespace Simd
                 w0 = _mm_loadu_ps(weight0 + off);
                 d00 = _mm_add_ps(_mm_mul_ps(w0, s0), d00);
             }
-            Store(dst + 0 * F, d00, tail);
+            Sse::Store(dst + 0 * F, d00, tail);
         }
 
         void InnerProductKxKNr1x4(size_t K, const float* src, const float* weight0, const float* bias, float* dst)
