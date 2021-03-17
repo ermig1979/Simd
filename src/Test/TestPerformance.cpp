@@ -398,14 +398,14 @@ namespace Test
 		}
 	}
 
-    template <class Value> static void AddRow(Table & table, size_t row, const String & name, const Statistic<Value> & statistic, const StatisticEnable & enable, bool align)
+    template <class Value> static void AddRow(Table & table, size_t row, const String & name, const Statistic<Value> & statistic, const StatisticEnable & enable, bool align, double timeMax)
     {
-        const int V = 3, R = 2;
+        const int V = (timeMax > 0.001 ? 3 : (timeMax > 0.0001 ? 1 : 2)), R = 2;
         size_t col = 0;
         table.SetCell(col++, row, name);
         for (size_t i = 0; i < statistic.Size(); ++i)
             if (enable[i])
-                table.SetCell(col++, row, ToString(statistic[i].first.Average()*1000.0, V, false));
+                table.SetCell(col++, row, ToString(statistic[i].first.Average()*(timeMax < 0.001 ? 1000000.0 : 1000.0), V, false));
         if (enable[1])
         {
             for (size_t i = 2; i < statistic.Size(); ++i)
@@ -443,11 +443,13 @@ namespace Test
         CommonStatistic common;
         StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false, false, false };
         StatisticNames names = { { "Simd", "S" },{ "Base", "B" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Avx5v", "A7" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "N" } };
+        double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
             const PerformanceMeasurer & pm = *it->second;
             String name = FunctionShortName(pm.Description());
             AddToFunction(pm, functions[name], enable);
+            timeMax = std::max(timeMax, pm.Average());
         }
 
         for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
@@ -461,9 +463,9 @@ namespace Test
         AddHeader(*table, names, enable, align);
         size_t row = 0;
         table->SetRowProp(row, true, true);
-        AddRow(*table, row++, "Common", common, enable, align);
+        AddRow(*table, row++, String("Common, ") + (timeMax < 0.001 ? "us" : "ms"), common, enable, align, timeMax);
         for (FunctionStatisticMap::const_iterator it = functions.begin(); it != functions.end(); ++it)
-            AddRow(*table, row++, it->first, it->second, enable, align);
+            AddRow(*table, row++, it->first, it->second, enable, align, timeMax);
         return table;
     }
 
