@@ -205,8 +205,11 @@ namespace Simd
         SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
             : Sse41::SynetInnerProduct32fProd(p)
         {
-            SetSize(Avx::F);
-            _prod = InnerProductKxKNr;
+            if (_param.output > Sse::F)
+            {
+                SetSize(Avx::F);
+                _prod = InnerProductKxKNr;
+            }
         }
 
         //---------------------------------------------------------------------

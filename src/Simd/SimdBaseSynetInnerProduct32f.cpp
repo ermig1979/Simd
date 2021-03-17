@@ -128,6 +128,7 @@ namespace Simd
             return
                 p.activation == SimdConvolutionActivationIdentity &&
                 p.batch == 1 &&
+                p.output >= 4 &&
                 Base::AlgCacheL3() > p.input * p.output * sizeof(float);
         }
 
