@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdSynetInnerProduct32f.h"
 #include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
@@ -94,7 +95,7 @@ namespace Simd
             else
             {
                 _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
-                _biasAndActivation(_bias, 1, _N, _param.activation, _params, SimdTrue, dst);
+                _biasAndActivation(_bias, _N, 1, _param.activation, _params, SimdTrue, dst);
             }
         }
 
@@ -111,42 +112,67 @@ namespace Simd
         {
             SynetInnerProduct32f::SetParams(weight, internal, bias, params);
             ReorderWeight(_weight, _rWeight.data);
+            if (internal)
+                *internal = SimdTrue;
+            if (bias)
+                memcpy(_rBias.data, bias, _param.output * sizeof(float));
         }
 
         void SynetInnerProduct32fProd::Forward(const float* src, float* dst)
         {
-
+            _prod(src, _rWeight.data, _rBias.data, _K, _N, dst);
         }
 
         bool SynetInnerProduct32fProd::Preferable(const InnerProductParam32f& p)
         {
             return
                 p.activation == SimdConvolutionActivationIdentity &&
-                p.batch == 1;
+                p.batch == 1 &&
+                Base::AlgCacheL3() > p.input * p.output * sizeof(float);
         }
 
         void SynetInnerProduct32fProd::SetSize(size_t F)
         {
             _F = F;
             _rWeight.Resize(AlignHi(_N, _F) * _K);
+            _rBias.Resize(AlignHi(_N, _F), true);
         }
 
         void SynetInnerProduct32fProd::ReorderWeight(const float* src, float* dst)
         {
-            for (size_t n = 0; n < _N; n += _F)
+            if (_param.transpose)
             {
-                size_t F = Simd::Min(_N, n + _F) - n;
-                const float* psrc = src;
-                for (size_t k = 0; k < _K; ++k)
+                for (size_t n = 0; n < _N; n += _F)
                 {
-                    size_t f = 0;
-                    for (; f < F; ++f)
-                        *(dst++) = psrc[f];
-                    for (; f < _F; ++f)
-                        *(dst++) = 0.0f;
-                    psrc += _N;
+                    size_t F = Simd::Min(_N, n + _F) - n;
+                    const float* psrc = src + n * _K;
+                    for (size_t k = 0; k < _K; ++k)
+                    {
+                        size_t f = 0;
+                        for (; f < F; ++f)
+                            *(dst++) = psrc[f * _K];
+                        for (; f < _F; ++f)
+                            *(dst++) = 0.0f;
+                        psrc++;
+                    }
+                }            
+            }
+            else
+            {
+                for (size_t n = 0; n < _N; n += _F)
+                {
+                    size_t F = Simd::Min(_N, n + _F) - n;
+                    const float* psrc = src + n;
+                    for (size_t k = 0; k < _K; ++k)
+                    {
+                        size_t f = 0;
+                        for (; f < F; ++f)
+                            *(dst++) = psrc[f];
+                        for (; f < _F; ++f)
+                            *(dst++) = 0.0f;
+                        psrc += _N;
+                    }
                 }
-                src += F;
             }
         }
 

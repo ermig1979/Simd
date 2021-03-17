@@ -46,6 +46,14 @@ namespace Simd
             _mm_store_ps(p, a);
         }
 
+        SIMD_INLINE void Store(float* ptr, __m128 val, size_t size)
+        {
+            SIMD_ALIGNED(16) float buf[F];
+            _mm_store_ps(buf, val);
+            for (size_t i = 0; i < size; ++i)
+                ptr[i] = buf[i];
+        }
+
         template <int part> SIMD_INLINE void StoreHalf(float  * p, __m128 a);
 
         template <> SIMD_INLINE void StoreHalf<0>(float  * p, __m128 a)
