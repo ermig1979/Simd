@@ -196,6 +196,14 @@ namespace Simd
             virtual String Ext() const { return "Avx"; }
         };
 
+        class SynetInnerProduct32fProd : public Sse41::SynetInnerProduct32fProd
+        {
+        public:
+            SynetInnerProduct32fProd(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Avx"; }
+        };
+
         void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     }
 #endif//SIMD_AVX_ENABLE

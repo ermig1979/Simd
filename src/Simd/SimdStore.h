@@ -147,6 +147,14 @@ namespace Simd
             _mm256_store_ps(p, a);
         }
 
+        SIMD_INLINE void Store(float* ptr, __m256 val, size_t size)
+        {
+            SIMD_ALIGNED(32) float buf[F];
+            _mm256_store_ps(buf, val);
+            for (size_t i = 0; i < size; ++i)
+                ptr[i] = buf[i];
+        }
+
         template <bool align> SIMD_INLINE void Store(float * p0, float * p1, __m256 a)
         {
             Sse::Store<align>(p0, _mm256_extractf128_ps(a, 0));
