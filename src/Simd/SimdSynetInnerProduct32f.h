@@ -142,7 +142,7 @@ namespace Simd
             SynetInnerProduct32fProd(const InnerProductParam32f& p);
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const { return Ext() + "::Prod"; }
-            virtual size_t InternalBufferSize() const { return _rWeight.RawSize() + _rBias.RawSize(); }
+            virtual size_t InternalBufferSize() const { return _rWeight.size + _rBias.size; }
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* dst);
 
