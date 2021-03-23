@@ -1411,7 +1411,7 @@ namespace Simd
 			: Sse2::SynetMergedConvolution32fCdc(p)
 		{
 			for (size_t i = 0; i < _param.count; ++i)
-				if (p.conv[i].activation == SimdConvolutionActivationElu)
+				if (p.conv[i].activation == SimdConvolutionActivationElu || p.conv[i].activation == SimdConvolutionActivationMish)
 					return;
 			for (size_t i = 0; i < _param.count; ++i)
 				Set(p, i, i, _convolution);
