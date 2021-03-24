@@ -1502,7 +1502,8 @@ namespace Simd
                 if (alg.macroC * p.srcW * (alg.macroH * p.strideY + p.kernelY * p.dilationY - 1) * sizeof(float) <= Base::AlgCacheL2())
                     break;
             }
-            alg.macroD = Simd::Min(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / alg.macroC, alg.microD), AlignHiAny(p.dstC, alg.microD));
+            alg.macroD = Simd::RestrictRange(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / alg.macroC, alg.microD), 
+                alg.microD, AlignHiAny(p.dstC, alg.microD));
             alg.stepW = p.kernelY * p.kernelX * p.srcC * alg.F;
             _rWeight.Resize(DivHi(p.dstC, alg.F)*alg.stepW);
             _rBias.Resize(AlignHiAny(p.dstC, alg.F), true);
@@ -1553,7 +1554,8 @@ namespace Simd
                 if (a.macroC * p.srcW * (a.macroH * p.strideY + p.kernelY * p.dilationY - 1) * sizeof(float) <= Base::AlgCacheL2())
                     break;
             }
-            a.macroD = Simd::Min(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / a.macroC, a.microD), AlignHiAny(p.dstC, a.microD));
+            a.macroD = Simd::RestrictRange(AlignLoAny(Base::AlgCacheL3() / sizeof(float) / p.kernelY / p.kernelX / a.macroC, a.microD), 
+                a.microD, AlignHiAny(p.dstC, a.microD));
             _old.weight.Resize(AlignHiAny(p.dstC, a.microD) * p.kernelY * p.kernelX * p.srcC);
             _rBias.Resize(AlignHiAny(p.dstC, a.microD), true);
             if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)

@@ -66,8 +66,8 @@ namespace Simd
             , _packA(packA)
         {
             _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
-            _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));
-            _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _microN));
+            _macroM = Simd::RestrictRange(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), _microM, AlignHiAny(_M, _microM));
+            _macroN = Simd::RestrictRange(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), _microN, AlignHiAny(_N, _microN));
             if (_N * _M * _K < 256 * 256 * 256 * 2)
                 _threadNumber = 1;
             _pA.resize(_threadNumber);
@@ -317,8 +317,10 @@ namespace Simd
             _packB = packB;
             _packA = packA;
             _macroK = Simd::Min(L1 / sizeof(T) / _microN, _K);
-            _macroM = Simd::Min(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), AlignHiAny(_M, _microM));
-            _macroN = Simd::Min(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), AlignHiAny(_N, _compatible ? F : _microN));
+            _macroM = Simd::RestrictRange(AlignLoAny(L2 / sizeof(T) / _macroK, _microM), 
+                _microM, AlignHiAny(_M, _microM));
+            _macroN = Simd::RestrictRange(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), 
+                compatible ? F : _microN, AlignHiAny(_N, _compatible ? F : _microN));
             if (_packA)
             {
 
