@@ -30,73 +30,23 @@ namespace Simd
 {
     namespace Base
     {
-#ifndef PNG_MALLOC
-#define PNG_MALLOC(sz)        malloc(sz)
-#define PNG_REALLOC(p,newsz)  realloc(p,newsz)
-#define PNG_FREE(p)           free(p)
-#endif
-
-#ifndef PNG_REALLOC_SIZED
-#define PNG_REALLOC_SIZED(p,oldsz,newsz) PNG_REALLOC(p,newsz)
-#endif
-
-#ifndef PNG_MEMMOVE
-#define PNG_MEMMOVE(a,b,sz) memmove(a,b,sz)
-#endif
-
-#define PNG_UCHAR(x) (unsigned char) ((x) & 0xff)
-
-#define png__sbraw(a) ((int *) (void *) (a) - 2)
-#define png__sbm(a)   png__sbraw(a)[0]
-#define png__sbn(a)   png__sbraw(a)[1]
-
-#define png__sbneedgrow(a,n)  ((a)==0 || png__sbn(a)+n >= png__sbm(a))
-#define png__sbmaybegrow(a,n) (png__sbneedgrow(a,(n)) ? png__sbgrow(a,n) : 0)
-#define png__sbgrow(a,n)  png__sbgrowf((void **) &(a), (n), sizeof(*(a)))
-
-#define png__sbpush(a, v)      (png__sbmaybegrow(a,1), (a)[png__sbn(a)++] = (v))
-#define png__sbcount(a)        ((a) ? png__sbn(a) : 0)
-#define png__sbfree(a)         ((a) ? PNG_FREE(png__sbraw(a)),0 : 0)
-
-        static void* png__sbgrowf(void** arr, int increment, int itemsize)
+        SIMD_INLINE int ZlibBitRev(int bits, int count)
         {
-            int m = *arr ? 2 * png__sbm(*arr) + increment : increment + 1;
-            void* p = PNG_REALLOC_SIZED(*arr ? png__sbraw(*arr) : 0, *arr ? (png__sbm(*arr) * itemsize + sizeof(int) * 2) : 0, itemsize * m + sizeof(int) * 2);
-            assert(p);
-            if (p) {
-                if (!*arr) ((int*)p)[1] = 0;
-                *arr = (void*)((int*)p + 2);
-                png__sbm(*arr) = m;
-            }
-            return *arr;
-        }
-
-        static unsigned char* png__zlib_flushf(unsigned char* data, unsigned int* bitbuffer, int* bitcount)
-        {
-            while (*bitcount >= 8) {
-                png__sbpush(data, PNG_UCHAR(*bitbuffer));
-                *bitbuffer >>= 8;
-                *bitcount -= 8;
-            }
-            return data;
-        }
-
-        SIMD_INLINE int ZlibBitrev(int code, int codebits)
-        {
-            int res = 0;
-            while (codebits--)
+            int rev = 0;
+            while (count--)
             {
-                res = (res << 1) | (code & 1);
-                code >>= 1;
+                rev = (rev << 1) | (bits & 1);
+                bits >>= 1;
             }
-            return res;
+            return rev;
         }
 
         SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
         {
             int i = 0;
             for (; i < limit && i < 258; ++i)
-                if (a[i] != b[i]) break;
+                if (a[i] != b[i]) 
+                    break;
             return i;
         }
 
@@ -112,19 +62,52 @@ namespace Simd
             return hash;
         }
 
-#define png__zlib_flush() (out = png__zlib_flushf(out, &bitbuf, &bitcount))
-#define png__zlib_add(code,codebits) \
-      (bitbuf |= (code) << bitcount, bitcount += (codebits), png__zlib_flush())
-#define png__zlib_huffa(b,c)  png__zlib_add(ZlibBitrev(b,c),c)
-        // default huffman tables
-#define png__zlib_huff1(n)  png__zlib_huffa(0x30 + (n), 8)
-#define png__zlib_huff2(n)  png__zlib_huffa(0x190 + (n)-144, 9)
-#define png__zlib_huff3(n)  png__zlib_huffa(0 + (n)-256,7)
-#define png__zlib_huff4(n)  png__zlib_huffa(0xc0 + (n)-280,8)
-#define png__zlib_huff(n)  ((n) <= 143 ? png__zlib_huff1(n) : (n) <= 255 ? png__zlib_huff2(n) : (n) <= 279 ? png__zlib_huff3(n) : png__zlib_huff4(n))
-#define png__zlib_huffb(n) ((n) <= 143 ? png__zlib_huff1(n) : png__zlib_huff2(n))
+        SIMD_INLINE void ZlibHuffA(int bits, int count, OutputMemoryStream& stream)
+        {
+            stream.WriteBits(ZlibBitRev(bits, count), count);
+        }
 
-        static uint8_t* ZlibCompress(uint8_t* data, int data_len, int* out_len, int quality)
+        SIMD_INLINE void ZlibHuff1(int bits, OutputMemoryStream& stream)
+        {
+            ZlibHuffA(0x30 + bits, 8, stream);
+        }
+
+        SIMD_INLINE void ZlibHuff2(int bits, OutputMemoryStream& stream)
+        {
+            ZlibHuffA(0x190 + bits - 144, 9, stream);
+        }
+
+        SIMD_INLINE void ZlibHuff3(int bits, OutputMemoryStream& stream)
+        {
+            ZlibHuffA(0 + bits - 256, 7, stream);
+        }
+
+        SIMD_INLINE void ZlibHuff4(int bits, OutputMemoryStream& stream)
+        {
+            ZlibHuffA(0xc0 + bits - 280, 8, stream);
+        }
+
+        SIMD_INLINE void ZlibHuff(int bits, OutputMemoryStream& stream)
+        {
+            if (bits <= 143)
+                ZlibHuff1(bits, stream);
+            else if(bits <= 255)
+                ZlibHuff2(bits, stream);
+            else if (bits <= 279)
+                ZlibHuff3(bits, stream);
+            else
+                ZlibHuff4(bits, stream);
+        }
+
+        SIMD_INLINE void ZlibHuffB(int bits, OutputMemoryStream& stream)
+        {
+            if (bits <= 143)
+                ZlibHuff1(bits, stream);
+            else
+                ZlibHuff2(bits, stream);
+        }
+
+        static void ZlibCompress(uint8_t* data, int size, int quality, OutputMemoryStream& stream)
         {
             const int ZHASH = 16384;
             const int basket = quality * 2;
@@ -134,23 +117,19 @@ namespace Simd
             static uint8_t  lengtheb[] = { 0,0,0,0,0,0,0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
             static uint16_t distc[] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577, 32768 };
             static uint8_t  disteb[] = { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
-            uint32_t bitbuf = 0;
-            int i, j, bitcount = 0;
-            unsigned char* out = NULL;
             if (quality < 5)
                 quality = 5;
             HashTable hashTable(ZHASH * basket);
             memset(hashTable.data, -1, hashTable.RawSize());
 
-            png__sbpush(out, 0x78);   // DEFLATE 32K window
-            png__sbpush(out, 0x5e);   // FLEVEL = 1
-            png__zlib_add(1, 1);  // BFINAL = 1
-            png__zlib_add(1, 2);  // BTYPE = 1 -- fixed huffman
+            stream.Write(uint8_t(0x78));
+            stream.Write(uint8_t(0x5e));
+            stream.WriteBits(1, 1);
+            stream.WriteBits(1, 2);
 
-            i = 0;
-            while (i < data_len - 3)
+            int i = 0, j;
+            while (i < size - 3)
             {
-                // hash next 3 bytes of data to be compressed
                 int h = ZlibHash(data + i) & (ZHASH - 1), best = 3;
                 uint8_t* bestLoc = 0;
                 int* hList = hashTable.data + h * basket;
@@ -158,7 +137,7 @@ namespace Simd
                 {
                     if (hList[j] > i - 32768)
                     {
-                        int d = ZlibCount(data + hList[j], data + i, data_len - i);
+                        int d = ZlibCount(data + hList[j], data + i, size - i);
                         if (d >= best)
                         {
                             best = d;
@@ -182,7 +161,7 @@ namespace Simd
                     {
                         if (hList[j] > i - 32767)
                         {
-                            int e = ZlibCount(data + hList[j], data + i + 1, data_len - i - 1);
+                            int e = ZlibCount(data + hList[j], data + i + 1, size - i - 1);
                             if (e > best)
                             {
                                 bestLoc = NULL;
@@ -194,51 +173,48 @@ namespace Simd
 
                 if (bestLoc)
                 {
-                    int d = (int)(data + i - bestLoc); // distance back
+                    int d = (int)(data + i - bestLoc);
                     assert(d <= 32767 && best <= 258);
                     for (j = 0; best > lengthc[j + 1] - 1; ++j);
-                    png__zlib_huff(j + 257);
-                    if (lengtheb[j]) png__zlib_add(best - lengthc[j], lengtheb[j]);
+                    ZlibHuff(j + 257, stream);
+                    if (lengtheb[j])
+                        stream.WriteBits(best - lengthc[j], lengtheb[j]);
                     for (j = 0; d > distc[j + 1] - 1; ++j);
-                    png__zlib_add(ZlibBitrev(j, 5), 5);
-                    if (disteb[j]) png__zlib_add(d - distc[j], disteb[j]);
+                    stream.WriteBits(ZlibBitRev(j, 5), 5);
+                    if (disteb[j])
+                        stream.WriteBits(d - distc[j], disteb[j]);
                     i += best;
                 }
                 else
                 {
-                    png__zlib_huffb(data[i]);
+                    ZlibHuffB(data[i], stream);
                     ++i;
                 }
             }
-            // write out final bytes
-            for (; i < data_len; ++i)
-                png__zlib_huffb(data[i]);
-            png__zlib_huff(256); // end of block
-            // pad with 0 bits to byte boundary
-            while (bitcount)
-                png__zlib_add(0, 1);
+            for (; i < size; ++i)
+                ZlibHuffB(data[i], stream);
+            ZlibHuff(256, stream);
+            stream.FlushBits(true);
 
+            unsigned int s1 = 1, s2 = 0;
+            int blockSize = (int)(size % 5552);
+            j = 0;
+            while (j < size)
             {
-                // compute adler32 on input
-                unsigned int s1 = 1, s2 = 0;
-                int blocklen = (int)(data_len % 5552);
-                j = 0;
-                while (j < data_len)
-                {
-                    for (i = 0; i < blocklen; ++i) { s1 += data[j + i]; s2 += s1; }
-                    s1 %= 65521; s2 %= 65521;
-                    j += blocklen;
-                    blocklen = 5552;
+                for (i = 0; i < blockSize; ++i)
+                { 
+                    s1 += data[j + i]; 
+                    s2 += s1; 
                 }
-                png__sbpush(out, PNG_UCHAR(s2 >> 8));
-                png__sbpush(out, PNG_UCHAR(s2));
-                png__sbpush(out, PNG_UCHAR(s1 >> 8));
-                png__sbpush(out, PNG_UCHAR(s1));
+                s1 %= 65521; 
+                s2 %= 65521;
+                j += blockSize;
+                blockSize = 5552;
             }
-            *out_len = png__sbn(out);
-            // make returned pointer freeable
-            PNG_MEMMOVE(png__sbraw(out), out, *out_len);
-            return (unsigned char*)png__sbraw(out);
+            stream.Write(uint8_t(s2 >> 8));
+            stream.Write(uint8_t(s2));
+            stream.Write(uint8_t(s1 >> 8));
+            stream.Write(uint8_t(s1));
         }
 
         SIMD_INLINE uint8_t Paeth(int a, int b, int c)
@@ -316,6 +292,7 @@ namespace Simd
             _filt.Resize((_size + 1) * _param.height);
             _line.Resize(_size * FILTERS);
             _encode = Base::EncodeLine;
+            _compress = Base::ZlibCompress;
         }
 
         bool ImagePngSaver::ToStream(const uint8_t* src, size_t stride)
@@ -341,17 +318,12 @@ namespace Simd
                     }
                 }
                 _filt[row * (_size + 1)] = (uint8_t)bestFilter;
-                PNG_MEMMOVE(_filt.data + row * (_size + 1) + 1, _line.data + _size * bestFilter, _size);
+                memcpy(_filt.data + row * (_size + 1) + 1, _line.data + _size * bestFilter, _size);
             }
-            int zlen;
-            uint8_t* zlib = ZlibCompress(_filt.data, _filt.size, &zlen, COMPRESSION);
-            if (zlib)
-            {
-                WriteToStream(zlib, zlen);
-                PNG_FREE(zlib);
-                return true;
-            }
-            return false;
+            OutputMemoryStream zlib;
+            _compress(_filt.data, (int)_filt.size, COMPRESSION, zlib);
+            WriteToStream(zlib.Data(), zlib.Size());
+            return true;
         }
 
         SIMD_INLINE void WriteCrc32(OutputMemoryStream& stream, size_t size)
@@ -367,15 +339,15 @@ namespace Simd
             _stream.Write(SIGNATURE, 8);
             _stream.WriteBe32(13);
             _stream.Write("IHDR", 4);
-            _stream.WriteBe32(_param.width);
-            _stream.WriteBe32(_param.height);
+            _stream.WriteBe32((uint32_t)_param.width);
+            _stream.WriteBe32((uint32_t)_param.height);
             _stream.Write<uint8_t>(8);
             _stream.Write<uint8_t>(CTYPE[_channels]);
             _stream.Write<uint8_t>(0);
             _stream.Write<uint8_t>(0);
             _stream.Write<uint8_t>(0);
             WriteCrc32(_stream, 13);
-            _stream.WriteBe32(zlen);
+            _stream.WriteBe32((uint32_t)zlen);
             _stream.Write("IDAT", 4);
             _stream.Write(zlib, zlen);
             WriteCrc32(_stream, zlen);

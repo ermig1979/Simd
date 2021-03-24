@@ -149,8 +149,10 @@ namespace Simd
             const int FILTERS = 5;
             typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
             typedef uint32_t (*EncodePtr)(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst);
+            typedef void (*CompressPtr)(uint8_t* data, int size, int quality, OutputMemoryStream& stream);
             ConvertPtr _convert;
             EncodePtr _encode;
+            CompressPtr _compress;
             size_t _channels, _size;
             Array8u _filt, _bgr;
             Array8i _line;

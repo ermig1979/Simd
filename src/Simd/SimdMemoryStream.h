@@ -133,7 +133,8 @@ namespace Simd
         const size_t CAPACITY_MIN = 4096;
 
         uint8_t * _data;
-        size_t _pos, _size, _capacity;
+        uint32_t _bitBuffer;
+        size_t _pos, _size, _capacity, _bitCount;
 
         SIMD_INLINE void Reset(bool owner)
         {
@@ -143,15 +144,14 @@ namespace Simd
             _pos = 0;
             _size = 0;
             _capacity = 0;
+            _bitBuffer = 0;
+            _bitCount = 0;
         }
 
     public:
         SIMD_INLINE OutputMemoryStream()
-            : _data(NULL)
-            , _pos(0)
-            , _size(0)
-            , _capacity(0)
         {
+            Reset(false);
         }
 
         SIMD_INLINE ~OutputMemoryStream()
@@ -244,6 +244,29 @@ namespace Simd
                 }
                 _data = data;
                 _capacity = capacity;
+            }
+        }
+
+        SIMD_INLINE void WriteBits(const uint32_t bits, size_t count)
+        {
+            _bitBuffer |= (bits) << _bitCount;
+            _bitCount += count;
+            FlushBits(false);
+        }
+
+        SIMD_INLINE void FlushBits(bool tail)
+        {
+            while (_bitCount >= 8)
+            {
+                Write(&_bitBuffer, 1);
+                _bitBuffer >>= 8;
+                _bitCount -= 8;
+            }
+            if (tail && _bitCount)
+            {
+                Write(&_bitBuffer, 1);
+                _bitBuffer = 0;
+                _bitCount = 0;
             }
         }
     };
