@@ -95,7 +95,7 @@ namespace Simd
             else
             {
                 _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
-                _biasAndActivation(_bias, _N, 1, _param.activation, _params, SimdTrue, dst);
+                _biasAndActivation(_bias, _N, _M, _param.activation, _params, SimdTrue, dst);
             }
         }
 
