@@ -43,8 +43,20 @@ namespace Simd
 
         SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
         {
+            limit = Min(limit, 258);
             int i = 0;
-            for (; i < limit && i < 258; ++i)
+#if defined(SIMD_X64_ENABLE)
+            int limit8 = AlignLo(limit, 8);
+            for (; i < limit8; i += 8)
+                if (*(uint64_t*)(a + i) != *(uint64_t*)(b + i))
+                    break;
+#else
+            int limit4 = AlignLo(limit, 4);
+            for (; i < limit4; i += 4)
+                if (*(uint32_t*)(a + i) != *(uint32_t*)(b + i))
+                    break;
+#endif
+            for (; i < limit; i += 1)
                 if (a[i] != b[i]) 
                     break;
             return i;
@@ -113,10 +125,10 @@ namespace Simd
             const int basket = quality * 2;
             typedef Array32i HashTable;
 
-            static uint16_t lengthc[] = { 3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258, 259 };
-            static uint8_t  lengtheb[] = { 0,0,0,0,0,0,0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
-            static uint16_t distc[] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577, 32768 };
-            static uint8_t  disteb[] = { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
+            static uint16_t LEN_C[] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 259 };
+            static uint8_t  LEN_EB[] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
+            static uint16_t DIST_C[] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 32768 };
+            static uint8_t  DIST_EB[] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
             if (quality < 5)
                 quality = 5;
             HashTable hashTable(ZHASH * basket);
@@ -175,14 +187,14 @@ namespace Simd
                 {
                     int d = (int)(data + i - bestLoc);
                     assert(d <= 32767 && best <= 258);
-                    for (j = 0; best > lengthc[j + 1] - 1; ++j);
+                    for (j = 0; best > LEN_C[j + 1] - 1; ++j);
                     ZlibHuff(j + 257, stream);
-                    if (lengtheb[j])
-                        stream.WriteBits(best - lengthc[j], lengtheb[j]);
-                    for (j = 0; d > distc[j + 1] - 1; ++j);
+                    if (LEN_EB[j])
+                        stream.WriteBits(best - LEN_C[j], LEN_EB[j]);
+                    for (j = 0; d > DIST_C[j + 1] - 1; ++j);
                     stream.WriteBits(ZlibBitRev(j, 5), 5);
-                    if (disteb[j])
-                        stream.WriteBits(d - distc[j], disteb[j]);
+                    if (DIST_EB[j])
+                        stream.WriteBits(d - DIST_C[j], DIST_EB[j]);
                     i += best;
                 }
                 else
