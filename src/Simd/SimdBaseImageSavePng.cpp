@@ -30,15 +30,27 @@ namespace Simd
 {
     namespace Base
     {
+        int BitRevTable[512];
+        static bool BitRevTableInit()
+        {
+            for (int i = 0; i < 512; i++)
+            {
+                int rev = 0, val = i;
+                for (size_t b = 0; b < 9; b++)
+                {
+                    rev = (rev << 1) | (val & 1);
+                    val >>= 1;
+                }
+                BitRevTable[i] = rev;
+            }
+            return true;
+        }
+        bool BitRevTableInited = BitRevTableInit();
+
         SIMD_INLINE int ZlibBitRev(int bits, int count)
         {
-            int rev = 0;
-            while (count--)
-            {
-                rev = (rev << 1) | (bits & 1);
-                bits >>= 1;
-            }
-            return rev;
+            assert(bits < 512 && count <= 9);
+            return BitRevTable[bits] >> (9 - count);
         }
 
         SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
@@ -46,12 +58,12 @@ namespace Simd
             limit = Min(limit, 258);
             int i = 0;
 #if defined(SIMD_X64_ENABLE)
-            int limit8 = AlignLo(limit, 8);
+            int limit8 = limit & (~7);
             for (; i < limit8; i += 8)
                 if (*(uint64_t*)(a + i) != *(uint64_t*)(b + i))
                     break;
 #else
-            int limit4 = AlignLo(limit, 4);
+            int limit4 = limit & (~3);
             for (; i < limit4; i += 4)
                 if (*(uint32_t*)(a + i) != *(uint32_t*)(b + i))
                     break;
@@ -119,19 +131,36 @@ namespace Simd
                 ZlibHuff2(bits, stream);
         }
 
+        static uint32_t ZlibAdler32(uint8_t* data, int size)
+        {
+            uint32_t a = 1, b = 0;
+            int j = 0, blockSize = (int)(size % 5552);
+            while (j < size)
+            {
+                for (int i = 0; i < blockSize; ++i)
+                {
+                    a += data[j + i];
+                    b += a;
+                }
+                a %= 65521;
+                b %= 65521;
+                j += blockSize;
+                blockSize = 5552;
+            }
+            return (b << 16) | a;
+        }
+
         static void ZlibCompress(uint8_t* data, int size, int quality, OutputMemoryStream& stream)
         {
-            const int ZHASH = 16384;
-            const int basket = quality * 2;
-            typedef Array32i HashTable;
-
             static uint16_t LEN_C[] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 259 };
             static uint8_t  LEN_EB[] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
             static uint16_t DIST_C[] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 32768 };
             static uint8_t  DIST_EB[] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
+            const int ZHASH = 16384;
             if (quality < 5)
                 quality = 5;
-            HashTable hashTable(ZHASH * basket);
+            const int basket = quality * 2;
+            Array32i hashTable(ZHASH * basket);
             memset(hashTable.data, -1, hashTable.RawSize());
 
             stream.Write(uint8_t(0x78));
@@ -159,7 +188,7 @@ namespace Simd
                 }
                 if (j == basket)
                 {
-                    memmove(hList, hList + quality, quality * sizeof(int));
+                    memcpy(hList, hList + quality, quality * sizeof(int));
                     memset(hList + quality, -1, quality * sizeof(int));
                     j = quality;
                 }
@@ -207,26 +236,7 @@ namespace Simd
                 ZlibHuffB(data[i], stream);
             ZlibHuff(256, stream);
             stream.FlushBits(true);
-
-            unsigned int s1 = 1, s2 = 0;
-            int blockSize = (int)(size % 5552);
-            j = 0;
-            while (j < size)
-            {
-                for (i = 0; i < blockSize; ++i)
-                { 
-                    s1 += data[j + i]; 
-                    s2 += s1; 
-                }
-                s1 %= 65521; 
-                s2 %= 65521;
-                j += blockSize;
-                blockSize = 5552;
-            }
-            stream.Write(uint8_t(s2 >> 8));
-            stream.Write(uint8_t(s2));
-            stream.Write(uint8_t(s1 >> 8));
-            stream.Write(uint8_t(s1));
+            stream.WriteBe32(ZlibAdler32(data, size));
         }
 
         SIMD_INLINE uint8_t Paeth(int a, int b, int c)
