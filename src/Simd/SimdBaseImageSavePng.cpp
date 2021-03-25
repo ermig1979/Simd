@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
+#include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdPerformance.h"
 
@@ -47,110 +48,25 @@ namespace Simd
         }
         bool BitRevTableInited = BitRevTableInit();
 
-        SIMD_INLINE int ZlibBitRev(int bits, int count)
-        {
-            assert(bits < 512 && count <= 9);
-            return BitRevTable[bits] >> (9 - count);
-        }
-
-        SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
-        {
-            limit = Min(limit, 258);
-            int i = 0;
-#if defined(SIMD_X64_ENABLE)
-            int limit8 = limit & (~7);
-            for (; i < limit8; i += 8)
-                if (*(uint64_t*)(a + i) != *(uint64_t*)(b + i))
-                    break;
-#else
-            int limit4 = limit & (~3);
-            for (; i < limit4; i += 4)
-                if (*(uint32_t*)(a + i) != *(uint32_t*)(b + i))
-                    break;
-#endif
-            for (; i < limit; i += 1)
-                if (a[i] != b[i]) 
-                    break;
-            return i;
-        }
-
-        SIMD_INLINE uint32_t ZlibHash(const uint8_t* data)
-        {
-            uint32_t hash = data[0] + (data[1] << 8) + (data[2] << 16);
-            hash ^= hash << 3;
-            hash += hash >> 5;
-            hash ^= hash << 4;
-            hash += hash >> 17;
-            hash ^= hash << 25;
-            hash += hash >> 6;
-            return hash;
-        }
-
-        SIMD_INLINE void ZlibHuffA(int bits, int count, OutputMemoryStream& stream)
-        {
-            stream.WriteBits(ZlibBitRev(bits, count), count);
-        }
-
-        SIMD_INLINE void ZlibHuff1(int bits, OutputMemoryStream& stream)
-        {
-            ZlibHuffA(0x30 + bits, 8, stream);
-        }
-
-        SIMD_INLINE void ZlibHuff2(int bits, OutputMemoryStream& stream)
-        {
-            ZlibHuffA(0x190 + bits - 144, 9, stream);
-        }
-
-        SIMD_INLINE void ZlibHuff3(int bits, OutputMemoryStream& stream)
-        {
-            ZlibHuffA(0 + bits - 256, 7, stream);
-        }
-
-        SIMD_INLINE void ZlibHuff4(int bits, OutputMemoryStream& stream)
-        {
-            ZlibHuffA(0xc0 + bits - 280, 8, stream);
-        }
-
-        SIMD_INLINE void ZlibHuff(int bits, OutputMemoryStream& stream)
-        {
-            if (bits <= 143)
-                ZlibHuff1(bits, stream);
-            else if(bits <= 255)
-                ZlibHuff2(bits, stream);
-            else if (bits <= 279)
-                ZlibHuff3(bits, stream);
-            else
-                ZlibHuff4(bits, stream);
-        }
-
-        SIMD_INLINE void ZlibHuffB(int bits, OutputMemoryStream& stream)
-        {
-            if (bits <= 143)
-                ZlibHuff1(bits, stream);
-            else
-                ZlibHuff2(bits, stream);
-        }
-
         static uint32_t ZlibAdler32(uint8_t* data, int size)
         {
-            uint32_t a = 1, b = 0;
-            int j = 0, blockSize = (int)(size % 5552);
-            while (j < size)
+            uint32_t lo = 1, hi = 0;
+            for (int b = 0, n = (int)(size % 5552); b < size;)
             {
-                for (int i = 0; i < blockSize; ++i)
+                for (int i = 0; i < n; ++i)
                 {
-                    a += data[j + i];
-                    b += a;
+                    lo += data[b + i];
+                    hi += lo;
                 }
-                a %= 65521;
-                b %= 65521;
-                j += blockSize;
-                blockSize = 5552;
+                lo %= 65521;
+                hi %= 65521;
+                b += n;
+                n = 5552;
             }
-            return (b << 16) | a;
+            return (hi << 16) | lo;
         }
 
-        static void ZlibCompress(uint8_t* data, int size, int quality, OutputMemoryStream& stream)
+        void ZlibCompress(uint8_t* data, int size, int quality, OutputMemoryStream& stream)
         {
             static uint16_t LEN_C[] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 259 };
             static uint8_t  LEN_EB[] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
@@ -249,7 +165,7 @@ namespace Simd
             return uint8_t(c);
         }
 
-        static uint32_t EncodeLine(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst)
+        uint32_t EncodeLine(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst)
         {
             if (type == 0)
                 memcpy(dst, src, size);

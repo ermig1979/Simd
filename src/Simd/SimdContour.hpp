@@ -193,17 +193,16 @@ namespace Simd
             Simd::Fill(e.Region(frame).Ref(), 0);
             Simd::FillFrame(e, frame, 255);
 
+            _contour.reserve(200);
             for (size_t i = 0; i < _anchors.size(); i++)
             {
                 const Anchor & anchor = _anchors[i];
                 if (anchor.val > 0)
                 {
-                    Contour & contour = _contour;
-                    contour.clear();
-                    contour.reserve(200);
-                    SmartRoute(contours, contour, anchor.p.x, anchor.p.y, minSegmentLength, gradientThreshold, Unknown);
-                    if (contour.size() > minSegmentLength)
-                        contours.push_back(contour);
+                    _contour.clear();
+                    SmartRoute(contours, _contour, anchor.p.x, anchor.p.y, minSegmentLength, gradientThreshold, Unknown);
+                    if (_contour.size() > minSegmentLength)
+                        contours.push_back(_contour);
                 }
             }
         }

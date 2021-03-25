@@ -196,8 +196,6 @@ namespace Simd
         {
         public:
             ImagePngSaver(const ImageSaverParam& param);
-
-            virtual bool ToStream(const uint8_t* src, size_t stride);
         };
 
         //---------------------------------------------------------------------

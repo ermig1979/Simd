@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSavePng.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdIntegral.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
