@@ -158,6 +158,7 @@ namespace Simd
         View _a;
         View _e;
         Anchors _anchors;
+        Contour _contour;
 
         void ContourMetrics(const View & src, const View & mask, uint8_t indexMin)
         {
@@ -197,7 +198,8 @@ namespace Simd
                 const Anchor & anchor = _anchors[i];
                 if (anchor.val > 0)
                 {
-                    Contour contour;
+                    Contour & contour = _contour;
+                    contour.clear();
                     contour.reserve(200);
                     SmartRoute(contours, contour, anchor.p.x, anchor.p.y, minSegmentLength, gradientThreshold, Unknown);
                     if (contour.size() > minSegmentLength)
