@@ -26,6 +26,7 @@
 
 #include "Simd/SimdMemoryStream.h"
 #include "Simd/SimdArray.h"
+#include "Simd/SimdPerformance.h"
 
 namespace Simd
 {

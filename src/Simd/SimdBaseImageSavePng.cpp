@@ -25,7 +25,6 @@
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdPerformance.h"
 
 namespace Simd
 {
@@ -50,6 +49,7 @@ namespace Simd
 
         static uint32_t ZlibAdler32(uint8_t* data, int size)
         {
+            //SIMD_PERF_FUNC();
             uint32_t lo = 1, hi = 0;
             for (int b = 0, n = (int)(size % 5552); b < size;)
             {

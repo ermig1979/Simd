@@ -26,6 +26,7 @@
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSsse3.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {        
@@ -34,16 +35,29 @@ namespace Simd
     {
         static uint32_t ZlibAdler32(uint8_t* data, int size)
         {
+            //SIMD_PERF_FUNC();
+            __m128i _i0 = _mm_setr_epi32(0, -1, -2, -3), _4 = _mm_set1_epi32(4);
             uint32_t lo = 1, hi = 0;
             for (int b = 0, n = (int)(size % 5552); b < size;)
             {
-                for (int i = 0; i < n; ++i)
+                int n4 = n & (~3), i = 0;
+                __m128i _i = _mm_add_epi32(_i0, _mm_set1_epi32(n));
+                __m128i _l = _mm_setzero_si128(), _h = _mm_setzero_si128();
+                for (; i < n4; i += 4)
                 {
-                    lo += data[b + i];
-                    hi += lo;
+                    __m128i d = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(data + b + i)));
+                    _l = _mm_add_epi32(_l, d);
+                    _h = _mm_add_epi32(_h, _mm_mullo_epi32(d, _i));
+                    _i = _mm_sub_epi32(_i, _4);
                 }
-                lo %= 65521;
-                hi %= 65521;
+                int l = Sse2::ExtractInt32Sum(_l), h = Sse2::ExtractInt32Sum(_h);
+                for (; i < n; ++i)
+                {
+                    l += data[b + i];
+                    h += data[b + i]*(n - i);
+                }
+                hi = (hi + h + lo*n) % 65521;
+                lo = (lo + l) % 65521;
                 b += n;
                 n = 5552;
             }
