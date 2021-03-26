@@ -227,13 +227,27 @@ namespace Simd
 
         uint32_t EncodeLine3(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
+            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
             uint32_t sum = 0;
-            for (size_t i = 0; i < n; ++i)
+            for (; i < n; ++i)
             {
                 dst[i] = src[i] - (src[i - stride] >> 1);
                 sum += ::abs(dst[i]);
             }
-            for (size_t i = n; i < size; ++i)
+            __m128i _sum = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - n));
+                __m128i _src2 = _mm_loadu_si128((__m128i*)(src + i - stride));
+                __m128i lo = _mm_srli_epi16(_mm_add_epi16(UnpackU8<0>(_src1), UnpackU8<0>(_src2)), 1);
+                __m128i hi = _mm_srli_epi16(_mm_add_epi16(UnpackU8<1>(_src1), UnpackU8<1>(_src2)), 1);
+                __m128i _dst = _mm_sub_epi8(_src0, _mm_packus_epi16(lo, hi));
+                _mm_storeu_si128((__m128i*)(dst + i), _dst);
+                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+            }
+            sum += Sse2::ExtractInt32Sum(_sum);
+            for (; i < size; ++i)
             {
                 dst[i] = src[i] - ((src[i - n] + src[i - stride]) >> 1);
                 sum += ::abs(dst[i]);
@@ -241,15 +255,41 @@ namespace Simd
             return sum;
         }
 
+        SIMD_INLINE __m128i Paeth(__m128i a, __m128i b, __m128i c)
+        {
+            __m128i p = _mm_sub_epi16(_mm_add_epi16(a, b), c);
+            __m128i pa = _mm_abs_epi16(_mm_sub_epi16(p, a));
+            __m128i pb = _mm_abs_epi16(_mm_sub_epi16(p, b));
+            __m128i pc = _mm_abs_epi16(_mm_sub_epi16(p, c));
+            __m128i mbc = _mm_or_si128(_mm_cmpgt_epi16(pa, pb), _mm_cmpgt_epi16(pa, pc));
+            __m128i mc = _mm_cmpgt_epi16(pb, pc);
+            return _mm_blendv_epi8(a, _mm_blendv_epi8(b, c, mc), mbc);
+        }
+
         uint32_t EncodeLine4(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
+            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
             uint32_t sum = 0;
-            for (size_t i = 0; i < n; ++i)
+            for (; i < n; ++i)
             {
                 dst[i] = (int8_t)(src[i] - src[i - stride]);
                 sum += ::abs(dst[i]);
             }
-            for (size_t i = n; i < size; ++i)
+            __m128i _sum = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - n));
+                __m128i _src2 = _mm_loadu_si128((__m128i*)(src + i - stride));
+                __m128i _src3 = _mm_loadu_si128((__m128i*)(src + i - stride - n));
+                __m128i lo = Paeth(UnpackU8<0>(_src1), UnpackU8<0>(_src2), UnpackU8<0>(_src3));
+                __m128i hi = Paeth(UnpackU8<1>(_src1), UnpackU8<1>(_src2), UnpackU8<1>(_src3));
+                __m128i _dst = _mm_sub_epi8(_src0, _mm_packus_epi16(lo, hi));
+                _mm_storeu_si128((__m128i*)(dst + i), _dst);
+                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+            }
+            sum += Sse2::ExtractInt32Sum(_sum);
+            for (; i < size; ++i)
             {
                 dst[i] = src[i] - Base::Paeth(src[i - n], src[i - stride], src[i - stride - n]);
                 sum += ::abs(dst[i]);
@@ -259,13 +299,26 @@ namespace Simd
 
         uint32_t EncodeLine5(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
+            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
             uint32_t sum = 0;
-            for (size_t i = 0; i < n; ++i)
+            for (; i < n; ++i)
             {
                 dst[i] = src[i];
                 sum += ::abs(dst[i]);
             }
-            for (size_t i = n; i < size; ++i)
+            __m128i _sum = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - n));
+                __m128i lo = _mm_srli_epi16(UnpackU8<0>(_src1), 1);
+                __m128i hi = _mm_srli_epi16(UnpackU8<1>(_src1), 1);
+                __m128i _dst = _mm_sub_epi8(_src0, _mm_packus_epi16(lo, hi));
+                _mm_storeu_si128((__m128i*)(dst + i), _dst);
+                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+            }
+            sum += Sse2::ExtractInt32Sum(_sum);
+            for (; i < size; ++i)
             {
                 dst[i] = src[i] - (src[i - n] >> 1);
                 sum += ::abs(dst[i]);
@@ -275,13 +328,24 @@ namespace Simd
 
         uint32_t EncodeLine6(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
+            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
             uint32_t sum = 0;
-            for (size_t i = 0; i < n; ++i)
+            for (; i < n; ++i)
             {
                 dst[i] = src[i];
                 sum += ::abs(dst[i]);
             }
-            for (size_t i = n; i < size; ++i)
+            __m128i _sum = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - n));
+                __m128i _dst = _mm_sub_epi8(_src0, _src1);
+                _mm_storeu_si128((__m128i*)(dst + i), _dst);
+                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+            }
+            sum += Sse2::ExtractInt32Sum(_sum);
+            for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - n];
                 sum += ::abs(dst[i]);

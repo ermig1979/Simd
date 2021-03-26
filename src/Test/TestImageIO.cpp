@@ -125,7 +125,11 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
+#if 0
+        FillRandom(src);
+#else
         CreateTestImage(src, 10, 10);
+#endif
 
         uint8_t* data1 = NULL, * data2 = NULL;
         size_t size1 = 0, size2 = 0;
