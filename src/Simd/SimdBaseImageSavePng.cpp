@@ -47,7 +47,7 @@ namespace Simd
         }
         bool BitRevTableInited = BitRevTableInit();
 
-        static uint32_t ZlibAdler32(uint8_t* data, int size)
+        uint32_t ZlibAdler32(uint8_t* data, int size)
         {
             uint32_t lo = 1, hi = 0;
             for (int b = 0, n = (int)(size % 5552); b < size;)

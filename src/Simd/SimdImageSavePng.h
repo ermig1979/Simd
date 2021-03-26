@@ -160,6 +160,21 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
+        {
+            limit = Min(limit, 258);
+            int i = 0;
+            for (; i < limit; i += 32)
+            {
+                uint32_t mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(a + i)), _mm256_loadu_si256((__m256i*)(b + i))));
+                if (mask != 0xFFFFFFFF)
+                {
+                    i += _tzcnt_u32(~mask);
+                    break;
+                }
+            }
+            return Min(i, limit);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 
