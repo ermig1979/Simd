@@ -49,7 +49,6 @@ namespace Simd
 
         static uint32_t ZlibAdler32(uint8_t* data, int size)
         {
-            //SIMD_PERF_FUNC();
             uint32_t lo = 1, hi = 0;
             for (int b = 0, n = (int)(size % 5552); b < size;)
             {
@@ -155,16 +154,7 @@ namespace Simd
             stream.WriteBe32(ZlibAdler32(data, size));
         }
 
-        SIMD_INLINE uint8_t Paeth(int a, int b, int c)
-        {
-            int p = a + b - c, pa = abs(p - a), pb = abs(p - b), pc = abs(p - c);
-            if (pa <= pb && pa <= pc)
-                return uint8_t(a);
-            if (pb <= pc)
-                return uint8_t(b);
-            return uint8_t(c);
-        }
-
+#if 1
         uint32_t EncodeLine(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst)
         {
             if (type == 0)
@@ -199,12 +189,154 @@ namespace Simd
             return sum;
         }
 
+        uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 0, dst);
+        }
+
+        uint32_t EncodeLine1(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 1, dst);
+        }
+
+        uint32_t EncodeLine2(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 2, dst);
+        }
+
+        uint32_t EncodeLine3(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 3, dst);
+        }
+
+        uint32_t EncodeLine4(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 4, dst);
+        }
+
+        uint32_t EncodeLine5(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 5, dst);
+        }
+
+        uint32_t EncodeLine6(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            return EncodeLine(src, stride, n, size, 6, dst);
+        }
+#else
+        uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < size; ++i)
+            {
+                dst[i] = src[i];
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+
+        uint32_t EncodeLine1(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < n; ++i)
+            {
+                dst[i] = src[i];
+                sum += ::abs(dst[i]);
+            }
+            for (size_t i = n; i < size; ++i)
+            {
+                dst[i] = src[i] - src[i - n];
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+
+        uint32_t EncodeLine2(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < n; ++i)
+            {
+                dst[i] = src[i] - src[i - stride];
+                sum += ::abs(dst[i]);
+            }
+            for (size_t i = n; i < size; ++i)
+            {
+                dst[i] = src[i] - src[i - stride];
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+
+        uint32_t EncodeLine3(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < n; ++i)
+            {
+                dst[i] = src[i] - (src[i - stride] >> 1);
+                sum += ::abs(dst[i]);
+            }
+            for (size_t i = n; i < size; ++i)
+            {
+                dst[i] = src[i] - ((src[i - n] + src[i - stride]) >> 1);
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+
+        uint32_t EncodeLine4(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < n; ++i)
+            {
+                dst[i] = (int8_t)(src[i] - src[i - stride]);
+                sum += ::abs(dst[i]);
+            }
+            for (size_t i = n; i < size; ++i)
+            {
+                dst[i] = src[i] - Paeth(src[i - n], src[i - stride], src[i - stride - n]);
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+
+        uint32_t EncodeLine5(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < n; ++i)
+            {
+                dst[i] = src[i];
+                sum += ::abs(dst[i]);
+            }
+            for (size_t i = n; i < size; ++i)
+            {
+                dst[i] = src[i] - (src[i - n] >> 1);
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+
+        uint32_t EncodeLine6(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
+        {
+            uint32_t sum = 0;
+            for (size_t i = 0; i < n; ++i)
+            {
+                dst[i] = src[i];
+                sum += ::abs(dst[i]);
+            }
+            for (size_t i = n; i < size; ++i)
+            {
+                dst[i] = src[i] - src[i - n];
+                sum += ::abs(dst[i]);
+            }
+            return sum;
+        }
+#endif
+
         ImagePngSaver::ImagePngSaver(const ImageSaverParam& param)
             : ImageSaver(param)
             , _channels(0)
             , _size(0)
             , _convert(NULL)
-            , _encode(NULL)
         {
             switch (_param.format)
             {
@@ -229,7 +361,13 @@ namespace Simd
             }
             _filt.Resize((_size + 1) * _param.height);
             _line.Resize(_size * FILTERS);
-            _encode = Base::EncodeLine;
+            _encode[0] = Base::EncodeLine0;
+            _encode[1] = Base::EncodeLine1;
+            _encode[2] = Base::EncodeLine2;
+            _encode[3] = Base::EncodeLine3;
+            _encode[4] = Base::EncodeLine4;
+            _encode[5] = Base::EncodeLine5;
+            _encode[6] = Base::EncodeLine6;
             _compress = Base::ZlibCompress;
         }
 
@@ -248,7 +386,7 @@ namespace Simd
                 {
                     static const int TYPES[] = { 0, 1, 0, 5, 6, 0, 1, 2, 3, 4 };
                     int type = TYPES[filter + (row ? 1 : 0) * FILTERS];
-                    int sum = _encode(src + stride * row, stride, _channels, _size, type, _line.data + _size * filter);
+                    int sum = _encode[type](src + stride * row, stride, _channels, _size, _line.data + _size * filter);
                     if (sum < bestSum)
                     {
                         bestSum = sum;

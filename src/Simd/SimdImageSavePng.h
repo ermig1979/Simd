@@ -116,9 +116,15 @@ namespace Simd
             return i;
         }
 
-        void ZlibCompress(uint8_t* data, int size, int quality, OutputMemoryStream& stream);
-
-        uint32_t EncodeLine(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst);
+        SIMD_INLINE uint8_t Paeth(int a, int b, int c)
+        {
+            int p = a + b - c, pa = abs(p - a), pb = abs(p - b), pc = abs(p - c);
+            if (pa <= pb && pa <= pc)
+                return uint8_t(a);
+            if (pb <= pc)
+                return uint8_t(b);
+            return uint8_t(c);
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE    
