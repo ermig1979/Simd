@@ -173,13 +173,24 @@ namespace Simd
 
         uint32_t EncodeLine1(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
+            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
             uint32_t sum = 0;
-            for (size_t i = 0; i < n; ++i)
+            for (; i < n; ++i)
             {
                 dst[i] = src[i];
                 sum += ::abs(dst[i]);
             }
-            for (size_t i = n; i < size; ++i)
+            __m128i _sum = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - n));
+                __m128i _dst = _mm_sub_epi8(_src0, _src1);
+                _mm_storeu_si128((__m128i*)(dst + i), _dst);
+                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+            }
+            sum += Sse2::ExtractInt32Sum(_sum);
+            for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - n];
                 sum += ::abs(dst[i]);
@@ -189,13 +200,24 @@ namespace Simd
 
         uint32_t EncodeLine2(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
+            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
             uint32_t sum = 0;
-            for (size_t i = 0; i < n; ++i)
+            for (; i < n; ++i)
             {
                 dst[i] = src[i] - src[i - stride];
                 sum += ::abs(dst[i]);
             }
-            for (size_t i = n; i < size; ++i)
+            __m128i _sum = _mm_setzero_si128();
+            for (; i < sizeA; i += A)
+            {
+                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
+                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - stride));
+                __m128i _dst = _mm_sub_epi8(_src0, _src1);
+                _mm_storeu_si128((__m128i*)(dst + i), _dst);
+                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+            }
+            sum += Sse2::ExtractInt32Sum(_sum);
+            for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - stride];
                 sum += ::abs(dst[i]);

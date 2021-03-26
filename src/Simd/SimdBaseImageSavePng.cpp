@@ -154,76 +154,6 @@ namespace Simd
             stream.WriteBe32(ZlibAdler32(data, size));
         }
 
-#if 1
-        uint32_t EncodeLine(const uint8_t* src, size_t stride, size_t n, size_t size, int type, int8_t* dst)
-        {
-            if (type == 0)
-                memcpy(dst, src, size);
-            else
-            {
-                for (size_t i = 0; i < n; ++i)
-                {
-                    switch (type)
-                    {
-                    case 1: dst[i] = src[i]; break;
-                    case 2: dst[i] = src[i] - src[i - stride]; break;
-                    case 3: dst[i] = src[i] - (src[i - stride] >> 1); break;
-                    case 4: dst[i] = (int8_t)(src[i] - src[i - stride]); break;
-                    case 5: dst[i] = src[i]; break;
-                    case 6: dst[i] = src[i]; break;
-                    }
-                }
-                switch (type)
-                {
-                case 1: for (size_t i = n; i < size; ++i) dst[i] = src[i] - src[i - n]; break;
-                case 2: for (size_t i = n; i < size; ++i) dst[i] = src[i] - src[i - stride]; break;
-                case 3: for (size_t i = n; i < size; ++i) dst[i] = src[i] - ((src[i - n] + src[i - stride]) >> 1); break;
-                case 4: for (size_t i = n; i < size; ++i) dst[i] = src[i] - Paeth(src[i - n], src[i - stride], src[i - stride - n]); break;
-                case 5: for (size_t i = n; i < size; ++i) dst[i] = src[i] - (src[i - n] >> 1); break;
-                case 6: for (size_t i = n; i < size; ++i) dst[i] = src[i] - src[i - n]; break;
-                }
-            }
-            uint32_t sum = 0;
-            for (size_t i = 0; i < size; ++i)
-                sum += ::abs(dst[i]);
-            return sum;
-        }
-
-        uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 0, dst);
-        }
-
-        uint32_t EncodeLine1(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 1, dst);
-        }
-
-        uint32_t EncodeLine2(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 2, dst);
-        }
-
-        uint32_t EncodeLine3(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 3, dst);
-        }
-
-        uint32_t EncodeLine4(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 4, dst);
-        }
-
-        uint32_t EncodeLine5(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 5, dst);
-        }
-
-        uint32_t EncodeLine6(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
-        {
-            return EncodeLine(src, stride, n, size, 6, dst);
-        }
-#else
         uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
             uint32_t sum = 0;
@@ -330,7 +260,6 @@ namespace Simd
             }
             return sum;
         }
-#endif
 
         ImagePngSaver::ImagePngSaver(const ImageSaverParam& param)
             : ImageSaver(param)
