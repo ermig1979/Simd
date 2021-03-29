@@ -181,6 +181,23 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        SIMD_INLINE int ZlibCount(const uint8_t* a, const uint8_t* b, int limit)
+        {
+            limit = Min(limit, 258);
+            int i = 0;
+            for (; i < limit; i += 64)
+            {
+                __m512i _a = _mm512_loadu_si512(a + i);
+                __m512i _b = _mm512_loadu_si512(b + i);
+                uint64_t mask = _mm512_cmp_epi8_mask(_a, _b, _MM_CMPINT_NE);
+                if (mask != 0)
+                {
+                    i += FirstNotZero64(mask);
+                    break;
+                }
+            }
+            return Min(i, limit);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 

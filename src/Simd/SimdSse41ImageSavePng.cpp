@@ -173,7 +173,7 @@ namespace Simd
 
         uint32_t EncodeLine1(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
@@ -200,7 +200,7 @@ namespace Simd
 
         uint32_t EncodeLine2(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
@@ -227,7 +227,7 @@ namespace Simd
 
         uint32_t EncodeLine3(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
@@ -268,7 +268,7 @@ namespace Simd
 
         uint32_t EncodeLine4(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
@@ -299,7 +299,7 @@ namespace Simd
 
         uint32_t EncodeLine5(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
@@ -328,7 +328,7 @@ namespace Simd
 
         uint32_t EncodeLine6(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) - n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
