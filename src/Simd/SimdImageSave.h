@@ -162,6 +162,19 @@ namespace Simd
             void WriteToStream(const uint8_t* zlib, size_t zlen);
         };
 
+        class ImageJpegSaver : public ImageSaver
+        {
+        public:
+            ImageJpegSaver(const ImageSaverParam& param);
+
+            virtual bool ToStream(const uint8_t* src, size_t stride);
+        protected:
+            typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+            ConvertPtr _convert;
+            size_t _channels;
+        };
+
         //---------------------------------------------------------------------
 
         uint8_t* ImageSaveToMemory(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, size_t* size);

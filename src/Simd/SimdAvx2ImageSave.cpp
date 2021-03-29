@@ -105,6 +105,7 @@ namespace Simd
             case SimdImageFilePpmTxt: return new ImagePpmTxtSaver(param);
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
             case SimdImageFilePng: return new ImagePngSaver(param);
+            case SimdImageFileJpeg: return new Base::ImageJpegSaver(param);
             default:
                 return NULL;
             }

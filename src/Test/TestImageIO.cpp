@@ -146,7 +146,9 @@ namespace Test
             SimdFree(data2);
 
         if(file == SimdImageFilePng)
-            src.Save((ToString(format) + ".png").c_str(), file, 100);
+            src.Save((ToString(format) + ".png").c_str(), file, quality);
+        if (file == SimdImageFileJpeg)
+            src.Save((ToString(format) + ".jpg").c_str(), file, quality);
 
         //src.Save((ToString(file) + ".txt").c_str(), file, 100);
 
@@ -158,12 +160,13 @@ namespace Test
         bool result = true;
 
         View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
+        int quality = 65;
         for (int format = 1; format < 2; format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
+            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
             {
-                result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
-                result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);
+                result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, quality, f1, f2);
+                result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, quality, f1, f2);
             }
         }
 
