@@ -1701,17 +1701,18 @@ extern "C"
 
         \fn void SimdBgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride);
 
-        \short Converts 24-bit BGR image to 24-bit RGB image (also it performs backward conversion).
+        \short Converts 24-bit BGR image to 24-bit RGB image. Also it can be used for 24-bit RGB to 24-bit BGR conversion.
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::BgrToRgb(const View<A> & bgr, View<A> & rgb).
+        \note This function has C++ wrappers: Simd::BgrToRgb(const View<A> & bgr, View<A> & rgb) 
+            and Simd::RgbToBgr(const View<A>& rgb, View<A>& bgr).
 
-        \param [in] bgr - a pointer to pixels data of input 24-bit BGR image.
+        \param [in] bgr - a pointer to pixels data of input 24-bit BGR image (or 24-bit RGB image).
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] bgrStride - a row size of the bgr image.
-        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image.
+        \param [out] rgb - a pointer to pixels data of output 24-bit RGB image (or 24-bit BGR image).
         \param [in] rgbStride - a row size of the rgb image.
     */
     SIMD_API void SimdBgrToRgb(const uint8_t * bgr, size_t width, size_t height, size_t bgrStride, uint8_t * rgb, size_t rgbStride);
@@ -3036,17 +3037,18 @@ extern "C"
 
         \fn void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgr, size_t bgrStride);
 
-        \short Converts 8-bit gray image to 24-bit BGR image.
+        \short Converts 8-bit gray image to 24-bit BGR image. Also it can be used for 8-bit gray to 24-bit RGB conversion.
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::GrayToBgr(const View<A>& gray, View<A>& bgr).
+        \note This function has C++ wrappers: Simd::GrayToBgr(const View<A>& gray, View<A>& bgr) 
+            and Simd::GrayToRgb(const View<A>& gray, View<A>& rgb).
 
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] grayStride - a row size of the gray image.
-        \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
+        \param [out] bgr - a pointer to pixels data of output 24-bit BGR (or 24-bit RGB) image.
         \param [in] bgrStride - a row size of the bgr image.
     */
     SIMD_API void SimdGrayToBgr(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgr, size_t bgrStride);
@@ -3055,17 +3057,18 @@ extern "C"
 
         \fn void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, size_t grayStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 8-bit gray image to 32-bit BGRA image.
+        \short Converts 8-bit gray image to 32-bit BGRA image. Also it can be used for 8-bit gray to 32-bit RGBA conversion.
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha).
+        \note This function has C++ wrappers: Simd::GrayToBgra(const View<A>& gray, View<A>& bgra, uint8_t alpha) 
+            and Simd::GrayToRgba(const View<A>& gray, View<A>& rgba, uint8_t alpha).
 
         \param [in] gray - a pointer to pixels data of input 8-bit gray image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] grayStride - a row size of the gray image.
-        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] bgraStride - a row size of the bgra image.
         \param [in] alpha - a value of alpha channel.
     */
@@ -5024,17 +5027,18 @@ extern "C"
 
         \fn void SimdRgbToBgra(const uint8_t * rgb, size_t width, size_t height, size_t rgbStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
-        \short Converts 24-bit RGB image to 32-bit BGRA image.
+        \short Converts 24-bit RGB image to 32-bit BGRA image. Also it can be used for 24-bit BGR to 32-bit RGBA conversion.
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha).
+        \note This function has C++ wrappers: Simd::RgbToBgra(const View<A>& rgb, View<A>& bgra, uint8_t alpha)
+            and Simd::BgrToRgba(const View<A>& bgr, View<A>& rgba, uint8_t alpha).
 
-        \param [in] rgb - a pointer to pixels data of input 24-bit RGB image.
+        \param [in] rgb - a pointer to pixels data of input 24-bit RGB (or 24-bit BGR) image.
         \param [in] width - an image width.
         \param [in] height - an image height.
         \param [in] rgbStride - a row size of the rgb image.
-        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA (or 32-bit RGBA) image.
         \param [in] bgraStride - a row size of the bgra image.
         \param [in] alpha - a value of alpha channel.
     */

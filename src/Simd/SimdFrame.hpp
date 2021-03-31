@@ -723,9 +723,7 @@ namespace Simd
             {
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
                 DeinterleaveUv(src.planes[1], u, v);
-                View<A> bgr(src.Size(), View<A>::Bgr24);
-                Yuv420pToBgr(src.planes[0], u, v, bgr);
-                BgrToRgb(bgr, dst.planes[0]);
+                Yuv420pToRgb(src.planes[0], u, v, dst.planes[0]);
                 break;
             }
             default:
@@ -750,12 +748,8 @@ namespace Simd
                 Copy(src.planes[0], dst.planes[0]);
                 break;
             case Frame<A>::Rgb24:
-            {
-                View<A> bgr(src.Size(), View<A>::Bgr24);
-                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr);
-                BgrToRgb(bgr, dst.planes[0]);
+                Yuv420pToRgb(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
                 break;
-            }
             default:
                 assert(0);
             }
@@ -834,7 +828,7 @@ namespace Simd
                 GrayToBgr(src.planes[0], dst.planes[0]);
                 break;
             case Frame<A>::Rgb24:
-                GrayToBgr(src.planes[0], dst.planes[0]);
+                GrayToRgb(src.planes[0], dst.planes[0]);
                 break;
             default:
                 assert(0);
@@ -847,7 +841,7 @@ namespace Simd
             case Frame<A>::Nv12:
             {
                 View<A> bgr(src.Size(), View<A>::Bgr24);
-                BgrToRgb(src.planes[0], bgr);
+                RgbToBgr(src.planes[0], bgr);
                 View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
                 BgrToYuv420p(bgr, dst.planes[0], u, v);
                 InterleaveUv(u, v, dst.planes[1]);
@@ -856,7 +850,7 @@ namespace Simd
             case Frame<A>::Yuv420p:
             {
                 View<A> bgr(src.Size(), View<A>::Bgr24);
-                BgrToRgb(src.planes[0], bgr);
+                RgbToBgr(src.planes[0], bgr);
                 BgrToYuv420p(bgr, dst.planes[0], dst.planes[1], dst.planes[2]);
                 break;
             }
@@ -866,8 +860,8 @@ namespace Simd
             case Frame<A>::Gray8:
                 RgbToGray(src.planes[0], dst.planes[0]);
                 break;
-            case Frame<A>::Rgb24:
-                BgrToRgb(src.planes[0], dst.planes[0]);
+            case Frame<A>::Bgr24:
+                RgbToBgr(src.planes[0], dst.planes[0]);
                 break;
             default:
                 assert(0);

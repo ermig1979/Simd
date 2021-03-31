@@ -192,7 +192,7 @@ namespace Simd
                 uint64_t mask = _mm512_cmp_epi8_mask(_a, _b, _MM_CMPINT_NE);
                 if (mask != 0)
                 {
-                    i += FirstNotZero64(mask);
+                    i += (int)FirstNotZero64(mask);
                     break;
                 }
             }

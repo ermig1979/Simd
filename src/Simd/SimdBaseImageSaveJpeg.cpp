@@ -473,7 +473,7 @@ namespace Simd
             //    src = _bgr.data;
             //    stride = _size;
             //}
-            jpeg_write_jpg_to_func(Base::WriteToStream, &_stream, _param.width, _param.height, _channels, src, stride, _param.quality);
+            jpeg_write_jpg_to_func(Base::WriteToStream, &_stream, (int)_param.width, (int)_param.height, (int)_channels, src, (int)stride, _param.quality);
             return true;
         }
     }
