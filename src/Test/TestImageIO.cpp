@@ -33,6 +33,74 @@
 
 namespace Test
 {
+    template<class Color> Color GetColor(uint8_t b, uint8_t g, uint8_t r)
+    {
+        return Color(b, g, r);
+    }
+
+    template<> uint8_t GetColor<uint8_t>(uint8_t b, uint8_t g, uint8_t r)
+    {
+        return uint8_t((int(b) + int(g) + int(r)) / 3);
+    }
+
+    template<> Simd::Pixel::Rgb24 GetColor<Simd::Pixel::Rgb24>(uint8_t b, uint8_t g, uint8_t r)
+    {
+        return Simd::Pixel::Rgb24(r, g, b);
+    }
+
+    template<> Simd::Pixel::Rgba32 GetColor<Simd::Pixel::Rgba32>(uint8_t b, uint8_t g, uint8_t r)
+    {
+        return Simd::Pixel::Rgba32(r, g, b);
+    }
+
+    template<class Color> void DrawTestImage(View& canvas, int rects, int labels)
+    {
+        ::srand(0);
+        int w = int(canvas.width), h = int(canvas.height);
+        Simd::Fill(canvas, 0);
+
+        for (int i = 0; i < rects; i++)
+        {
+            ptrdiff_t x1 = Random(w * 5 / 4) - w / 8;
+            ptrdiff_t y1 = Random(h * 5 / 4) - h / 8;
+            ptrdiff_t x2 = Random(w * 5 / 4) - w / 8;
+            ptrdiff_t y2 = Random(h * 5 / 4) - h / 8;
+            Rect rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2));
+            Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
+            Simd::DrawFilledRectangle(canvas, rect, foreground);
+        }
+
+        String text = "First_string,\nSecond-line.";
+        Simd::Font font(16);
+        for (int i = 0; i < labels; i++)
+        {
+            ptrdiff_t x = Random(w) - w / 3;
+            ptrdiff_t y = Random(h) - h / 6;
+            Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
+            font.Resize(Random(h / 4) + 16);
+            font.Draw(canvas, text, Point(x, y), foreground);
+        }
+
+        font.Resize(h / 5);
+        font.Draw(canvas, "B", View::BottomLeft, GetColor<Color>(255, 0, 0));
+        font.Draw(canvas, "G", View::BottomCenter, GetColor<Color>(0, 255, 0));
+        font.Draw(canvas, "R", View::BottomRight, GetColor<Color>(0, 0, 255));
+    }
+
+    void CreateTestImage(View& canvas, int rects, int labels)
+    {
+        switch (canvas.format)
+        {
+        case View::Gray8: DrawTestImage<uint8_t>(canvas, rects, labels); break;
+        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(canvas, rects, labels); break;
+        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(canvas, rects, labels); break;
+        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(canvas, rects, labels); break;
+        case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(canvas, rects, labels); break;
+        }
+    }
+
+    //-------------------------------------------------------------------------
+
     namespace
     {
         struct FuncSM
@@ -59,61 +127,6 @@ namespace Test
 
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
-
-    template<class Color> Color GetColor(uint8_t b, uint8_t g, uint8_t r)
-    {
-        return Color(b, g, r);
-    }
-
-    template<> uint8_t GetColor<uint8_t>(uint8_t b, uint8_t g, uint8_t r)
-    {
-        return uint8_t((int(b) + int(g) + int(r))/3);
-    }
-
-    template<> Simd::Pixel::Rgb24 GetColor<Simd::Pixel::Rgb24>(uint8_t b, uint8_t g, uint8_t r)
-    {
-        return Simd::Pixel::Rgb24(r, g, b);
-    }
-
-    template<class Color> void DrawTestImage(View& canvas, int rects, int labels)
-    {
-        ::srand(0);
-        int w = int(canvas.width), h = int(canvas.height);
-        Simd::Fill(canvas, 0);
-
-        for (int i = 0; i < rects; i ++)
-        {
-            ptrdiff_t x1 = Random(w * 5 / 4) - w / 8;
-            ptrdiff_t y1 = Random(h * 5 / 4) - h / 8;
-            ptrdiff_t x2 = Random(w * 5 / 4) - w / 8;
-            ptrdiff_t y2 = Random(h * 5 / 4) - h / 8;
-            Rect rect(std::min(x1, x2), std::min(y1, y2), std::max(x1, x2), std::max(y1, y2));
-            Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
-            Simd::DrawFilledRectangle(canvas, rect, foreground);
-        }
-
-        String text = "First_string,\nSecond-line.";
-        Simd::Font font(16);
-        for (int i = 0; i < labels; i++)
-        {
-            ptrdiff_t x = Random(w) - w / 3;
-            ptrdiff_t y = Random(h) - h / 6;
-            Color foreground = GetColor<Color>(Random(255), Random(255), Random(255));
-            font.Resize(Random(h / 4) + 16);
-            font.Draw(canvas, text, Point(x, y), foreground);
-        }
-    }
-
-    void CreateTestImage(View & canvas, int rects, int labels)
-    {
-        switch (canvas.format)
-        {
-        case View::Gray8: DrawTestImage<uint8_t>(canvas, rects, labels); break;
-        case View::Bgr24: DrawTestImage<Simd::Pixel::Bgr24>(canvas, rects, labels); break;
-        case View::Bgra32: DrawTestImage<Simd::Pixel::Bgra32>(canvas, rects, labels); break;
-        case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(canvas, rects, labels); break;
-        }
-    }
 
     bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
@@ -145,6 +158,8 @@ namespace Test
         if (data2)
             SimdFree(data2);
 
+        if (file == SimdImageFilePpmBin)
+            src.Save((ToString(format) + ".ppm").c_str(), file, quality);
         if(file == SimdImageFilePng)
             src.Save((ToString(format) + ".png").c_str(), file, quality);
         if (file == SimdImageFileJpeg)
@@ -161,9 +176,9 @@ namespace Test
 
         View::Format formats[4] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 };
         int quality = 65;
-        for (int format = 1; format < 2; format++)
+        for (int format = 0; format < 4; format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFilePpmBin; file <= (int)SimdImageFileJpeg; file++)
             {
                 result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, quality, f1, f2);
                 result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, quality, f1, f2);

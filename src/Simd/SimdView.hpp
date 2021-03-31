@@ -109,6 +109,8 @@ namespace Simd
             Hsl24,
             /*! A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
             Rgb24,
+            /*! A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+            Rgba32,
         };
 
         /*!
@@ -1052,6 +1054,7 @@ namespace Simd
         case Hsv24:     return 3;
         case Hsl24:     return 3;
         case Rgb24:     return 3;
+        case Rgba32:    return 4;
         default: assert(0); return 0;
         }
     }
@@ -1082,6 +1085,7 @@ namespace Simd
         case Hsv24:     return 1;
         case Hsl24:     return 1;
         case Rgb24:     return 1;
+        case Rgba32:    return 1;
         default: assert(0); return 0;
         }
     }
@@ -1112,6 +1116,7 @@ namespace Simd
         case Hsv24:     return 3;
         case Hsl24:     return 3;
         case Rgb24:     return 3;
+        case Rgba32:    return 4;
         default: assert(0); return 0;
         }
     }

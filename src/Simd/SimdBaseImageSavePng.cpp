@@ -346,11 +346,11 @@ namespace Simd
             _stream.Write("IHDR", 4);
             _stream.WriteBe32((uint32_t)_param.width);
             _stream.WriteBe32((uint32_t)_param.height);
-            _stream.Write<uint8_t>(8);
-            _stream.Write<uint8_t>(CTYPE[_channels]);
-            _stream.Write<uint8_t>(0);
-            _stream.Write<uint8_t>(0);
-            _stream.Write<uint8_t>(0);
+            _stream.Write8u(8);
+            _stream.Write8u(CTYPE[_channels]);
+            _stream.Write8u(0);
+            _stream.Write8u(0);
+            _stream.Write8u(0);
             WriteCrc32(_stream, 13);
             _stream.WriteBe32((uint32_t)zlen);
             _stream.Write("IDAT", 4);

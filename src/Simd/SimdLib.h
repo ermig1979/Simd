@@ -305,6 +305,8 @@ typedef enum
     SimdPixelFormatHsl24,
     /*! A 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
     SimdPixelFormatRgb24,
+    /*! A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+    SimdPixelFormatRgba32,
 } SimdPixelFormatType;
 
 /*! @ingroup c_types

@@ -41,6 +41,7 @@ namespace Simd
         struct Hsv24;
         struct Hsl24;
         struct Rgb24;
+        struct Rgba32;
 
         //-------------------------------------------------------------------------
 
@@ -85,6 +86,13 @@ namespace Simd
                 \param [in] p - 24-bit RGB pixel.
             */
             Bgr24(const Rgb24 & p);
+
+            /*!
+                Creates a new 24-bit BGR pixel structure on the base of 32-bit RGBA pixel.
+
+                \param [in] p - 32-bit RGBA pixel.
+            */
+            Bgr24(const Rgba32& p);
 
             /*!
                 Creates a copy of 24-bit BGR pixel structure.
@@ -164,6 +172,13 @@ namespace Simd
                 \param [in] a - initial value for alpha channel. It is equal to 255 by default.
             */
             Bgra32(const Rgb24 & p, const uint8_t & a = uint8_t(255));
+
+            /*!
+                Creates a new 32-bit BGRA pixel structure on the base of 32-bit RGBA pixel.
+
+                \param [in] p - 32-bit RGBA pixel.
+            */
+            Bgra32(const Rgba32& p);
 
             /*!
                 Creates a copy of 32-bit BGRA pixel structure.
@@ -361,6 +376,13 @@ namespace Simd
             Rgb24(const Bgr24 & p);
 
             /*!
+                Creates a new 24-bit RGB pixel structure on the base of 32-bit RGBA pixel.
+
+                \param [in] p - 32-bit RGBA pixel.
+            */
+            Rgb24(const Rgba32& p);
+
+            /*!
                 Creates a copy of 24-bit RGB pixel structure.
 
                 \param [in] p - 24-bit RGB pixel.
@@ -392,6 +414,92 @@ namespace Simd
             template <template<class> class A> static Rgb24 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
         };
 
+        /*! @ingroup cpp_pixels
+
+            \short 32-bit RGBA pixel.
+
+            Provides manipulation of 32-bit RGBA (Red, Blue, Green, Alpha) pixels of the View struct.
+        */
+        struct Rgba32
+        {
+            uint8_t red; /*!< \brief 8-bit red channel 32-bit BGRA pixel. */
+            uint8_t green; /*!< \brief 8-bit green channel 32-bit BGRA pixel. */
+            uint8_t blue; /*!< \brief 8-bit blue channel 32-bit BGRA pixel. */
+            uint8_t alpha; /*!< \brief 8-bit alpha channel 32-bit RGBA pixel. */
+
+            /*!
+                Creates a new 32-bit RGBA pixel structure with specified channel values.
+
+                \param [in] gray - initial value for all channels. It is equal to 0 by default.
+                \param [in] a - initial value for alpha channel. It is equal to 255 by default.
+            */
+            Rgba32(const uint8_t& gray = uint8_t(0), const uint8_t& a = uint8_t(255));
+
+            /*!
+                Creates a new 32-bit RGBA pixel structure with specified channel values.
+
+                \param [in] r - initial value for red channel.
+                \param [in] g - initial value for green channel.
+                \param [in] b - initial value for blue channel.
+                \param [in] a - initial value for alpha channel. It is equal to 255 by default.
+            */
+            Rgba32(const uint8_t& r, const uint8_t& g, const uint8_t& b, const uint8_t& a = uint8_t(255));
+
+            /*!
+                Creates a new 32-bit RGBA pixel structure on the base of 32-bit BGRA pixel.
+
+                \param [in] p - 32-bit BGRA pixel.
+            */
+            Rgba32(const Bgra32& p);
+
+            /*!
+                Creates a new 32-bit RGBA pixel structure on the base of 24-bit BGR pixel.
+
+                \param [in] p - 24-bit BGR pixel.
+                \param [in] a - initial value for alpha channel. It is equal to 255 by default.
+            */
+            Rgba32(const Bgr24& p, const uint8_t& a = uint8_t(255));
+
+            /*!
+                Creates a new of 32-bit RGBA pixel structure on the base of 24-bit RGB pixel.
+
+                \param [in] p - 24-bit RGB pixel.
+                \param [in] a - initial value for alpha channel. It is equal to 255 by default.
+            */
+            Rgba32(const Rgb24& p, const uint8_t& a = uint8_t(255));
+
+            /*!
+                Creates a copy of 32-bit RGBA pixel structure.
+
+                \param [in] p - 32-bit RGBA pixel.
+            */
+            Rgba32(const Rgba32& p);
+
+            /*!
+                \fn template <template<class> class A> static const Rgba32 & At(const View<A> & view, ptrdiff_t col, ptrdiff_t row);
+
+                Gets constant reference to the pixel with specific coordinates at the image view.
+
+                \param [in] view - an image view of 32-bit RGBA pixel format.
+                \param [in] col - x-coordinate of the pixel.
+                \param [in] row - y-coordinate of the pixel.
+                \return a constant reference to the pixel.
+            */
+            template <template<class> class A> static const Rgba32& At(const View<A>& view, ptrdiff_t col, ptrdiff_t row);
+
+            /*!
+                \fn template <template<class> class A> static Rgba32 & At(View<A> & view, ptrdiff_t col, ptrdiff_t row);
+
+                Gets reference to the pixel with specific coordinates at the image view.
+
+                \param [in] view - an image view of 32-bit RGBA pixel format.
+                \param [in] col - x-coordinate of the pixel.
+                \param [in] row - y-coordinate of the pixel.
+                \return a reference to the pixel.
+            */
+            template <template<class> class A> static Rgba32& At(View<A>& view, ptrdiff_t col, ptrdiff_t row);
+        };
+
         //-------------------------------------------------------------------------
 
         // struct Bgr24 implementation:
@@ -417,14 +525,21 @@ namespace Simd
         {
         }
 
-        SIMD_INLINE Bgr24::Bgr24(const Bgr24 & p)
+        SIMD_INLINE Bgr24::Bgr24(const Rgb24 & p)
             : blue(p.blue)
             , green(p.green)
             , red(p.red)
         {
         }
 
-        SIMD_INLINE Bgr24::Bgr24(const Rgb24 & p)
+        SIMD_INLINE Bgr24::Bgr24(const Rgba32& p)
+            : blue(p.blue)
+            , green(p.green)
+            , red(p.red)
+        {
+        }
+
+        SIMD_INLINE Bgr24::Bgr24(const Bgr24 & p)
             : blue(p.blue)
             , green(p.green)
             , red(p.red)
@@ -476,6 +591,14 @@ namespace Simd
             , green(p.green)
             , red(p.red)
             , alpha(a)
+        {
+        }
+
+        SIMD_INLINE Bgra32::Bgra32(const Rgba32& p)
+            : blue(p.blue)
+            , green(p.green)
+            , red(p.red)
+            , alpha(p.alpha)
         {
         }
 
@@ -605,6 +728,13 @@ namespace Simd
         {
         }
 
+        SIMD_INLINE Rgb24::Rgb24(const Rgba32& p)
+            : red(p.red)
+            , green(p.green)
+            , blue(p.blue)
+        {
+        }
+
         SIMD_INLINE Rgb24::Rgb24(const Rgb24 & p)
             : red(p.red)
             , green(p.green)
@@ -624,6 +754,70 @@ namespace Simd
             assert(view.format == View<A>::Rgb24);
 
             return Simd::At<A, Rgb24>(view, col, row);
+        }
+
+        // struct Rgba32 implementation:
+
+        SIMD_INLINE Rgba32::Rgba32(const uint8_t& gray, const uint8_t& a)
+            : red(gray)
+            , green(gray)
+            , blue(gray)
+            , alpha(a)
+        {
+        }
+
+        SIMD_INLINE Rgba32::Rgba32(const uint8_t& r, const uint8_t& g, const uint8_t& b, const uint8_t& a)
+            : red(r)
+            , green(g)
+            , blue(b)
+            , alpha(a)
+        {
+        }
+
+        SIMD_INLINE Rgba32::Rgba32(const Bgra32& p)
+            : red(p.red)
+            , green(p.green)
+            , blue(p.blue)
+            , alpha(p.alpha)
+        {
+        }        
+        
+        SIMD_INLINE Rgba32::Rgba32(const Bgr24& p, const uint8_t& a)
+            : red(p.red)
+            , green(p.green)
+            , blue(p.blue)
+            , alpha(a)
+        {
+        }
+
+        SIMD_INLINE Rgba32::Rgba32(const Rgb24& p, const uint8_t& a)
+            : red(p.red)
+            , green(p.green)
+            , blue(p.blue)
+            , alpha(a)
+        {
+        }
+
+        SIMD_INLINE Rgba32::Rgba32(const Rgba32& p)
+            : red(p.red)
+            , green(p.green)
+            , blue(p.blue)
+            , alpha(p.alpha)
+        {
+        }
+
+        template <template<class> class A> SIMD_INLINE const Rgba32& Rgba32::At(const View<A>& view, ptrdiff_t col, ptrdiff_t row)
+        {
+            assert(view.format == View<A>::Rgba32);
+
+            return Simd::At<A, Rgba32>(view, col, row);
+        }
+
+        template <template<class> class A> SIMD_INLINE Rgba32& Rgba32::At(View<A>& view, ptrdiff_t col, ptrdiff_t row)
+        {
+            assert(view.format == View<A>::Rgba32);
+
+            return Simd::At<A, Rgba32>(view, col, row);
         }
     }
 }
