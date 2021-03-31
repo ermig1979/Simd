@@ -86,7 +86,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        const __m512i K16_RED_BLUE = SIMD_MM512_SET2_EPI16(, Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
+        const __m512i K16_RED_BLUE = SIMD_MM512_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
 
         SIMD_INLINE __m512i RgbaToGray32(__m512i rgba)
         {

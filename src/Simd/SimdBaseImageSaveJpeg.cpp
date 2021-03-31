@@ -446,33 +446,31 @@ namespace Simd
             case SimdPixelFormatRgb24:
                 _channels = 3;
                 break;
+            case SimdPixelFormatRgba32:
+                _channels = 4;
+                break;
             }
-            //_size = _param.width * _channels;
-            //if (_param.format == SimdPixelFormatRgb24)
-            //{
-            //    _convert = Base::BgrToRgb;
-            //    _bgr.Resize(_param.height * _size);
-            //}
-            //_filt.Resize((_size + 1) * _param.height);
-            //_line.Resize(_size * FILTERS);
-            //_encode[0] = Base::EncodeLine0;
-            //_encode[1] = Base::EncodeLine1;
-            //_encode[2] = Base::EncodeLine2;
-            //_encode[3] = Base::EncodeLine3;
-            //_encode[4] = Base::EncodeLine4;
-            //_encode[5] = Base::EncodeLine5;
-            //_encode[6] = Base::EncodeLine6;
-            //_compress = Base::ZlibCompress;
+            _size = _param.width * _channels;
+            if (_param.format == SimdPixelFormatBgr24)
+            {
+                _buffer.Resize(_param.height * _size);
+                _convert = Base::BgrToRgb;
+            }
+            else if (_param.format == SimdPixelFormatBgra32)
+            {
+                _buffer.Resize(_param.height * _size);
+                _convert = Base::BgraToRgba;
+            }
         }
 
         bool ImageJpegSaver::ToStream(const uint8_t* src, size_t stride)
         {
-            //if (_param.format == SimdPixelFormatRgb24)
-            //{
-            //    _convert(src, _param.width, _param.height, stride, _bgr.data, _size);
-            //    src = _bgr.data;
-            //    stride = _size;
-            //}
+            if (_convert)
+            {
+                _convert(src, _param.width, _param.height, stride, _buffer.data, _size);
+                src = _buffer.data;
+                stride = _size;
+            }
             jpeg_write_jpg_to_func(Base::WriteToStream, &_stream, (int)_param.width, (int)_param.height, (int)_channels, src, (int)stride, _param.quality);
             return true;
         }

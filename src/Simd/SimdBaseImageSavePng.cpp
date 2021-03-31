@@ -281,12 +281,20 @@ namespace Simd
             case SimdPixelFormatRgb24:
                 _channels = 3;
                 break;
+            case SimdPixelFormatRgba32:
+                _channels = 4;
+                break;
             }
             _size = _param.width * _channels;
-            if (_param.format == SimdPixelFormatRgb24)
+            if (_param.format == SimdPixelFormatBgr24)
             {
                 _convert = Base::BgrToRgb;
-                _bgr.Resize(_param.height * _size);
+                _buff.Resize(_param.height * _size);
+            }
+            else if (_param.format == SimdPixelFormatBgra32)
+            {
+                _convert = Base::BgraToRgba;
+                _buff.Resize(_param.height * _size);
             }
             _filt.Resize((_size + 1) * _param.height);
             _line.Resize(_size * FILTERS);
@@ -302,10 +310,10 @@ namespace Simd
 
         bool ImagePngSaver::ToStream(const uint8_t* src, size_t stride)
         {
-            if (_param.format == SimdPixelFormatRgb24)
+            if (_convert)
             {
-                _convert(src, _param.width, _param.height, stride, _bgr.data, _size);
-                src = _bgr.data;
+                _convert(src, _param.width, _param.height, stride, _buff.data, _size);
+                src = _buff.data;
                 stride = _size;
             }
             for (size_t row = 0; row < _param.height; ++row)

@@ -3547,7 +3547,7 @@ extern "C"
         \param [in] width - a width of input image.
         \param [in] height - a height of input image.
         \param [in] format - a pixel format of input image. 
-            Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24.
+            Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
         \param [in] file - a format of output image file. To auto choise format of output file set this parameter to ::SimdImageFileUndefined.
         \param [in] quality - a parameter of compression quality (if file format supports it).
         \param [out] size - a pointer to the size of output image file in bytes.
@@ -3567,7 +3567,7 @@ extern "C"
         \param [in] width - a width of input image.
         \param [in] height - a height of input image.
         \param [in] format - a pixel format of input image. 
-            Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24.
+            Supported pixel formats: ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32.
         \param [in] file - a format of output image file. To auto choise format of output file set this parameter to ::SimdImageFileUndefined.
         \param [in] quality - a parameter of compression quality (if file format supports it).
         \param [in] path - a path to output image file.
@@ -3587,7 +3587,7 @@ extern "C"
         \param [out] width - a pointer to width of output image.
         \param [out] height - a pointer to height of output image.
         \param [in, out] format - a pointer to pixel format of output image. 
-            Here you can set desired pixel format (it can be ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24).
+            Here you can set desired pixel format (it can be ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32).
             Or set ::SimdPixelFormatNone and use pixel format of input image file.
         \return a pointer to pixels data of output image. 
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
@@ -3605,7 +3605,7 @@ extern "C"
         \param [out] width - a pointer to width of output image.
         \param [out] height - a pointer to height of output image.
         \param [in, out] format - a pointer to pixel format of output image.
-            Here you can set desired pixel format (it can be ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24).
+            Here you can set desired pixel format (it can be ::SimdPixelFormatGray8, ::SimdPixelFormatBgr24, ::SimdPixelFormatBgra32, ::SimdPixelFormatRgb24, ::SimdPixelFormatRgba32).
             Or set ::SimdPixelFormatNone and use pixel format of input image file.
         \return a pointer to pixels data of output image.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.

@@ -61,8 +61,7 @@ namespace Simd
                 else
                     file = SimdImageFilePpmBin;
             }            
-            if (!(format == SimdPixelFormatGray8 || format == SimdPixelFormatBgr24 || 
-                format == SimdPixelFormatBgra32 || format == SimdPixelFormatRgb24))
+            if (!(format >= SimdPixelFormatGray8 && format <= SimdPixelFormatRgba32))
                 return false;
             return true;
         }
@@ -156,7 +155,7 @@ namespace Simd
             EncodePtr _encode[TYPES];
             CompressPtr _compress;
             size_t _channels, _size;
-            Array8u _filt, _bgr;
+            Array8u _filt, _buff;
             Array8i _line;
 
             void WriteToStream(const uint8_t* zlib, size_t zlen);
@@ -171,8 +170,9 @@ namespace Simd
         protected:
             typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
 
+            Array8u _buffer;
             ConvertPtr _convert;
-            size_t _channels;
+            size_t _channels, _size;
         };
 
         //---------------------------------------------------------------------

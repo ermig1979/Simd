@@ -355,8 +355,10 @@ namespace Simd
         ImagePngSaver::ImagePngSaver(const ImageSaverParam& param)
             : Sse41::ImagePngSaver(param)
         {
-            if (_param.format == SimdPixelFormatRgb24)
+            if (_param.format == SimdPixelFormatBgr24)
                 _convert = Avx2::BgrToRgb;
+            else if (_param.format == SimdPixelFormatBgra32)
+                _convert = Avx2::BgraToRgba;
             _encode[0] = Avx2::EncodeLine0;
             _encode[1] = Avx2::EncodeLine1;
             _encode[2] = Avx2::EncodeLine2;

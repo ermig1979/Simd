@@ -42,6 +42,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _convert = Avx2::BgrToGray; break;
                 case SimdPixelFormatBgra32: _convert = Avx2::BgraToGray; break;
                 case SimdPixelFormatRgb24: _convert = Avx2::RgbToGray; break;
+                case SimdPixelFormatRgba32: _convert = Avx2::RgbaToGray; break;
                 }
             }
         }
@@ -58,6 +59,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _convert = Avx2::BgrToGray; break;
                 case SimdPixelFormatBgra32: _convert = Avx2::BgraToGray; break;
                 case SimdPixelFormatRgb24: _convert = Avx2::RgbToGray; break;
+                case SimdPixelFormatRgba32: _convert = Avx2::RgbaToGray; break;
                 }
             }
         }
@@ -74,6 +76,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _convert = Avx2::GrayToBgr; break;
                 case SimdPixelFormatBgr24: _convert = Avx2::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _convert = Avx2::BgraToRgb; break;
+                case SimdPixelFormatRgba32: _convert = Avx2::BgraToBgr; break;
                 }
             }
         }
@@ -90,6 +93,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _convert = Avx2::GrayToBgr; break;
                 case SimdPixelFormatBgr24: _convert = Avx2::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _convert = Avx2::BgraToRgb; break;
+                case SimdPixelFormatRgba32: _convert = Avx2::BgraToBgr; break;
                 }
             }
         }

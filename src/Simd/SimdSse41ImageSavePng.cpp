@@ -356,8 +356,10 @@ namespace Simd
         ImagePngSaver::ImagePngSaver(const ImageSaverParam& param)
             : Base::ImagePngSaver(param)
         {
-            if (_param.format == SimdPixelFormatRgb24)
+            if (_param.format == SimdPixelFormatBgr24)
                 _convert = Ssse3::BgrToRgb;
+            else if (_param.format == SimdPixelFormatBgra32)
+                _convert = Ssse3::BgraToRgba;
             _encode[0] = Sse41::EncodeLine0;
             _encode[1] = Sse41::EncodeLine1;
             _encode[2] = Sse41::EncodeLine2;
