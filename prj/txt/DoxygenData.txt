@@ -338,6 +338,11 @@
 */
 
 /*! @ingroup conversion
+    @defgroup rgba_conversion RGBA-32 
+    \short Functions for RGBA-32 image conversions.
+*/
+
+/*! @ingroup conversion
     @defgroup yuv_conversion YUV 
     \short Functions for YUV image conversions.
 */

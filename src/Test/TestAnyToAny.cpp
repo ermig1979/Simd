@@ -355,6 +355,35 @@ namespace Test
         return result;
     }
 
+    bool RgbaToGrayAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Base::RgbaToGray), FUNC_O(SimdRgbaToGray));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Sse2::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#endif 
+
+#if defined(SIMD_AVX2_ENABLE)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Avx2::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Avx512bw::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Neon::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#endif
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     template<class Func> bool AnyToAnyDataTest(bool create, int width, int height, View::Format srcType, View::Format dstType, const Func & f)
@@ -455,6 +484,47 @@ namespace Test
         bool result = true;
 
         result = result && AnyToAnyDataTest(create, DW, DH, View::Int16, View::Gray8, FUNC_O(SimdInt16ToGray));
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    bool ConvertImageSpecialTest(size_t width, size_t height, View::Format srcFormat, View::Format dstFormat)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test image conversion from " << ToString(srcFormat) << " to " << ToString(dstFormat) << " pixel format.");
+
+        View src(width, height, srcFormat, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        View dst(width, height, dstFormat, NULL, TEST_ALIGN(width));
+
+        Simd::Convert(src, dst);
+
+        if (srcFormat != dstFormat && dstFormat != View::Gray8 && 
+            (srcFormat != View::Bgra32 || dstFormat == View::Rgba32) &&
+            (srcFormat != View::Rgba32 || dstFormat == View::Bgra32))
+        {
+            View rev(width, height, srcFormat, NULL, TEST_ALIGN(width));
+
+            Simd::Convert(dst, rev);
+
+            result = result && Compare(src, rev, 0, true, 64, 0);
+        }
+
+        return result;
+    }
+
+    bool ConvertImageSpecialTest()
+    {
+        bool result = true;
+
+        View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
+        for (size_t s = 0; s < 5; ++s)
+            for (size_t d = 0; d < 5; ++d)
+                result = result && ConvertImageSpecialTest(W, H, formats[s], formats[d]);
 
         return result;
     }

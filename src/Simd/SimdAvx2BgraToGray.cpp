@@ -89,6 +89,58 @@ namespace Simd
             else
                 BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
         }
+
+        //---------------------------------------------------------------------
+
+        const __m256i K16_RED_BLUE = SIMD_MM256_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
+
+        SIMD_INLINE __m256i RgbaToGray32(__m256i rgba)
+        {
+            const __m256i g0a0 = _mm256_and_si256(_mm256_srli_si256(rgba, 1), K16_00FF);
+            const __m256i r0b0 = _mm256_and_si256(rgba, K16_00FF);
+            const __m256i weightedSum = _mm256_add_epi32(_mm256_madd_epi16(g0a0, K16_GREEN_0000), _mm256_madd_epi16(r0b0, K16_RED_BLUE));
+            return _mm256_srli_epi32(_mm256_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        }
+
+        SIMD_INLINE __m256i RgbaToGray(__m256i rgba[4])
+        {
+            const __m256i lo = PackI32ToI16(RgbaToGray32(rgba[0]), RgbaToGray32(rgba[1]));
+            const __m256i hi = PackI32ToI16(RgbaToGray32(rgba[2]), RgbaToGray32(rgba[3]));
+            return PackI16ToU8(lo, hi);
+        }
+
+        template <bool align> void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(rgba) && Aligned(rgbaStride) && Aligned(gray) && Aligned(grayStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m256i a[4];
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                {
+                    Load<align>(rgba + 4 * col, a);
+                    Store<align>((__m256i*)(gray + col), RgbaToGray(a));
+                }
+                if (alignedWidth != width)
+                {
+                    Load<false>(rgba + 4 * (width - A), a);
+                    Store<false>((__m256i*)(gray + width - A), RgbaToGray(a));
+                }
+                rgba += rgbaStride;
+                gray += grayStride;
+            }
+        }
+
+        void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        {
+            if (Aligned(rgba) && Aligned(gray) && Aligned(rgbaStride) && Aligned(grayStride))
+                RgbaToGray<true>(rgba, width, height, rgbaStride, gray, grayStride);
+            else
+                RgbaToGray<false>(rgba, width, height, rgbaStride, gray, grayStride);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }

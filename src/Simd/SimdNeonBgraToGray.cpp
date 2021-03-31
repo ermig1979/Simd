@@ -66,6 +66,45 @@ namespace Simd
             else
                 BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
         }
+
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE uint8x8_t RgbaToGray(uint8x8x4_t rgba)
+        {
+            return vmovn_u16(BgrToGray(vmovl_u8(rgba.val[2]), vmovl_u8(rgba.val[1]), vmovl_u8(rgba.val[0])));
+        }
+
+        template <bool align> void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        {
+            assert(width >= HA);
+            if (align)
+                assert(Aligned(rgba) && Aligned(rgbaStride) && Aligned(gray) && Aligned(grayStride));
+
+            size_t alignedWidth = AlignLo(width, HA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += HA)
+                {
+                    uint8x8x4_t _rgba = LoadHalf4<align>(rgba + 4 * col);
+                    Store<align>(gray + col, RgbaToGray(_rgba));
+                }
+                if (alignedWidth != width)
+                {
+                    uint8x8x4_t _rgba = LoadHalf4<false>(rgba + 4 * (width - HA));
+                    Store<false>(gray + width - HA, RgbaToGray(_rgba));
+                }
+                rgba += rgbaStride;
+                gray += grayStride;
+            }
+        }
+
+        void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        {
+            if (Aligned(rgba) && Aligned(gray) && Aligned(rgbaStride) && Aligned(grayStride))
+                RgbaToGray<true>(rgba, width, height, rgbaStride, gray, grayStride);
+            else
+                RgbaToGray<false>(rgba, width, height, rgbaStride, gray, grayStride);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

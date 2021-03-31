@@ -4456,6 +4456,31 @@ SIMD_API void SimdRgbToGray(const uint8_t* rgb, size_t width, size_t height, siz
         Base::RgbToGray(rgb, width, height, rgbStride, gray, grayStride);
 }
 
+SIMD_API void SimdRgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+    else
+#endif
+#if defined(SIMD_AVX2_ENABLE)
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+    else
+#endif
+        Base::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+}
+
 SIMD_API void SimdSegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex)
 {
 #ifdef SIMD_AVX512BW_ENABLE

@@ -1923,7 +1923,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void GrayToRgba(const View<A>& gray, View<A>& rgba, uint8_t alpha = 0xFF)
     {
-        assert(EqualSize(gray, bgra) && rgba.format == View<A>::Rgba32 && gray.format == View<A>::Gray8);
+        assert(EqualSize(gray, rgba) && rgba.format == View<A>::Rgba32 && gray.format == View<A>::Gray8);
 
         SimdGrayToBgra(gray.data, gray.width, gray.height, gray.stride, rgba.data, rgba.stride, alpha);
     }
@@ -3109,6 +3109,66 @@ namespace Simd
         assert(EqualSize(rgb, bgra) && bgra.format == View<A>::Bgra32 && rgb.format == View<A>::Rgb24);
 
         SimdRgbToBgra(rgb.data, rgb.width, rgb.height, rgb.stride, bgra.data, bgra.stride, alpha);
+    }
+
+    /*! @ingroup rgba_conversion
+
+        \fn void RgbaToBgr(const View<A>& rgba, View<A>& bgr)
+
+        \short Converts 32-bit RGBA image to 24-bit BGR image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdBgraToRgb.
+
+        \param [in] rgba - an input 32-bit RGBA image.
+        \param [out] bgr - an output 24-bit RGB image.
+    */
+    template<template<class> class A> SIMD_INLINE void RgbaToBgr(const View<A>& rgba, View<A>& bgr)
+    {
+        assert(EqualSize(rgba, bgr) && rgba.format == View<A>::Rgba32 && bgr.format == View<A>::Bgr24);
+
+        SimdBgraToRgb(rgba.data, rgba.width, rgba.height, rgba.stride, bgr.data, bgr.stride);
+    }
+
+    /*! @ingroup rgba_conversion
+
+        \fn void RgbaToGray(const View<A>& rgba, View<A>& gray)
+
+        \short Converts 32-bit RGBA image to 8-bit gray image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdRgbaToGray.
+
+        \param [in] rgba - an input 32-bit RGBA image.
+        \param [out] gray - an output 8-bit gray image.
+    */
+    template<template<class> class A> SIMD_INLINE void RgbaToGray(const View<A>& rgba, View<A>& gray)
+    {
+        assert(EqualSize(rgba, gray) && rgba.format == View<A>::Rgba32 && gray.format == View<A>::Gray8);
+
+        SimdRgbaToGray(rgba.data, rgba.width, rgba.height, rgba.stride, gray.data, gray.stride);
+    }
+
+    /*! @ingroup rgba_conversion
+
+        \fn void RgbaToRgb(const View<A>& rgba, View<A>& rgb)
+
+        \short Converts 32-bit RGBA image to 24-bit RGB image.
+
+        All images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdBgraToBgr.
+
+        \param [in] rgba - an input 32-bit RGBA image.
+        \param [out] rgb - an output 24-bit RGB image.
+    */
+    template<template<class> class A> SIMD_INLINE void RgbaToRgb(const View<A>& rgba, View<A>& rgb)
+    {
+        assert(EqualSize(rgba, rgb) && rgba.format == View<A>::Rgba32 && rgb.format == View<A>::Rgb24);
+
+        SimdBgraToBgr(rgba.data, rgba.width, rgba.height, rgba.stride, rgb.data, rgb.stride);
     }
 
     /*! @ingroup segmentation
@@ -4390,7 +4450,7 @@ namespace Simd
 
         The input and output images must have the same width and height.
 
-        \note This function supports conversion between Gray8, Bgr24, Bgra32 and Rgb24 image formats.
+        \note This function supports conversion between View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 and View::Rgba32 image formats.
 
         \param [in] src - an input image.
         \param [out] dst - an output image.
@@ -4494,13 +4554,13 @@ namespace Simd
                 assert(0);
                 break;
             case View<A>::Bgr24:
-                BgrToBgra(src, dst);
+                RgbaToBgr(src, dst);
                 break;
             case View<A>::Gray8:
-                assert(0);
+                RgbaToGray(src, dst);
                 break;
             case View<A>::Rgb24:
-                BgraToBgr(src, dst);
+                RgbaToRgb(src, dst);
                 break;
             default:
                 assert(0);

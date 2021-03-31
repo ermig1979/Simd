@@ -161,6 +161,7 @@ namespace Test
         case View::Hsv24:     return "Hsv24";
         case View::Hsl24:     return "Hsl24";
         case View::Rgb24:     return "Rgb24";
+        case View::Rgba32:    return "Rgba32";
         default: assert(0);  return "";
         }
     }

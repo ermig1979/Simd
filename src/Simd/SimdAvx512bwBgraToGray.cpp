@@ -83,6 +83,60 @@ namespace Simd
             else
                 BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
         }
+
+        //---------------------------------------------------------------------
+
+        const __m512i K16_RED_BLUE = SIMD_MM512_SET2_EPI16(, Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
+
+        SIMD_INLINE __m512i RgbaToGray32(__m512i rgba)
+        {
+            const __m512i g0a0 = _mm512_shuffle_epi8(rgba, K8_SUFFLE_BGRA_TO_G0A0);
+            const __m512i r0b0 = _mm512_and_si512(rgba, K16_00FF);
+            const __m512i weightedSum = _mm512_add_epi32(_mm512_madd_epi16(g0a0, K16_GREEN_0000), _mm512_madd_epi16(r0b0, K16_RED_BLUE));
+            return _mm512_srli_epi32(_mm512_add_epi32(weightedSum, K32_ROUND_TERM), Base::BGR_TO_GRAY_AVERAGING_SHIFT);
+        }
+
+        template <bool align, bool mask> SIMD_INLINE void RgbaToGray(const uint8_t* rgba, uint8_t* gray, __mmask64 ms[5])
+        {
+            __m512i gray0 = RgbaToGray32(Load<align, mask>(rgba + 0 * A, ms[0]));
+            __m512i gray1 = RgbaToGray32(Load<align, mask>(rgba + 1 * A, ms[1]));
+            __m512i gray2 = RgbaToGray32(Load<align, mask>(rgba + 2 * A, ms[2]));
+            __m512i gray3 = RgbaToGray32(Load<align, mask>(rgba + 3 * A, ms[3]));
+            __m512i gray01 = _mm512_packs_epi32(gray0, gray1);
+            __m512i gray23 = _mm512_packs_epi32(gray2, gray3);
+            __m512i gray0123 = _mm512_packus_epi16(gray01, gray23);
+            Store<align, mask>(gray, _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, gray0123), ms[4]);
+        }
+
+        template <bool align> void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        {
+            if (align)
+                assert(Aligned(rgba) && Aligned(rgbaStride) && Aligned(gray) && Aligned(grayStride));
+
+            size_t alignedWidth = AlignLo(width, A);
+            __mmask64 tailMasks[5];
+            for (size_t c = 0; c < 4; ++c)
+                tailMasks[c] = TailMask64((width - alignedWidth) * 4 - A * c);
+            tailMasks[4] = TailMask64(width - alignedWidth);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    RgbaToGray<align, false>(rgba + col * 4, gray + col, tailMasks);
+                if (col < width)
+                    RgbaToGray<align, true>(rgba + col * 4, gray + col, tailMasks);
+                rgba += rgbaStride;
+                gray += grayStride;
+            }
+        }
+
+        void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride)
+        {
+            if (Aligned(rgba) && Aligned(gray) && Aligned(rgbaStride) && Aligned(grayStride))
+                RgbaToGray<true>(rgba, width, height, rgbaStride, gray, grayStride);
+            else
+                RgbaToGray<false>(rgba, width, height, rgbaStride, gray, grayStride);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
