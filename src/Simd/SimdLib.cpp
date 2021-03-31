@@ -981,6 +981,31 @@ SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, si
         Base::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
 }
 
+SIMD_API void SimdBgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
+    else
+#endif
+#ifdef SIMD_SSSE3_ENABLE
+    if (Ssse3::Enable && width >= Ssse3::A)
+        Ssse3::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
+    else
+#endif
+        Base::BgraToRgba(bgra, width, height, bgraStride, rgba, rgbaStride);
+}
+
 SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

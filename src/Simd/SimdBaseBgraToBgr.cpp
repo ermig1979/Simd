@@ -68,5 +68,23 @@ namespace Simd
                 rgb += rgbGap;
             }
         }
+
+        void BgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
+        {
+            size_t bgraGap = bgraStride - width * 4;
+            size_t rgbaGap = rgbaStride - width * 4;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < width; ++col, bgra += 4, rgba += 4)
+                {
+                    rgba[2] = bgra[0];
+                    rgba[1] = bgra[1];
+                    rgba[0] = bgra[2];
+                    rgba[3] = bgra[3];
+                }
+                bgra += bgraGap;
+                rgba += rgbaGap;
+            }
+        }
     }
 }

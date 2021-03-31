@@ -146,6 +146,49 @@ namespace Simd
             else
                 BgraToRgb<false>(bgra, width, height, bgraStride, bgr, bgrStride);
         }
+
+        //---------------------------------------------------------------------
+
+        const __m512i K8_BGRA_TO_RGBA = SIMD_MM512_SETR_EPI8(
+            0x2, 0x1, 0x0, 0x3, 0x6, 0x5, 0x4, 0x7, 0xA, 0x9, 0x8, 0xB, 0xE, 0xD, 0xC, 0xF,
+            0x2, 0x1, 0x0, 0x3, 0x6, 0x5, 0x4, 0x7, 0xA, 0x9, 0x8, 0xB, 0xE, 0xD, 0xC, 0xF,
+            0x2, 0x1, 0x0, 0x3, 0x6, 0x5, 0x4, 0x7, 0xA, 0x9, 0x8, 0xB, 0xE, 0xD, 0xC, 0xF,
+            0x2, 0x1, 0x0, 0x3, 0x6, 0x5, 0x4, 0x7, 0xA, 0x9, 0x8, 0xB, 0xE, 0xD, 0xC, 0xF);
+
+        template <bool align, bool mask> SIMD_INLINE void BgraToRgba(const uint8_t* bgra, uint8_t* rgba, __mmask64 tail = -1)
+        {
+            Store<align, mask>(rgba, _mm512_shuffle_epi8(Load<align, mask>(bgra, tail), K8_BGRA_TO_RGBA), tail);
+        }
+
+        template <bool align> void BgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(rgba) && Aligned(rgbaStride));
+
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            __mmask64 tail = TailMask64(size - sizeA);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t i = 0;
+                for (; i < size; i += A)
+                    BgraToRgba<align, false>(bgra + i, rgba + i);
+                if (i < size)
+                    BgraToRgba<align, true>(bgra + i, rgba + i, tail);
+                bgra += bgraStride;
+                rgba += rgbaStride;
+            }
+        }
+
+        void BgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
+        {
+            if (Aligned(bgra) && Aligned(bgraStride) && Aligned(rgba) && Aligned(rgbaStride))
+                BgraToRgba<true>(bgra, width, height, bgraStride, rgba, rgbaStride);
+            else
+                BgraToRgba<false>(bgra, width, height, bgraStride, rgba, rgbaStride);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }
