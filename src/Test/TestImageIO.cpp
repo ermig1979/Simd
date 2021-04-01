@@ -176,9 +176,9 @@ namespace Test
 
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         int quality = 65;
-        for (int format = 0; format < 5; format++)
+        for (int format = 3; format < 4; format++)
         {
-            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
                 result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, quality, f1, f2);
                 result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, quality, f1, f2);

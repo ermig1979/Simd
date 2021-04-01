@@ -24,25 +24,51 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSsse3.h"
 
 namespace Simd
 {
-    namespace Base
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
+#define JPEG_UCHAR(x) (unsigned char) ((x) & 0xff)
+
+        int jpeg__flip_vertically_on_write = 0;
+
+        typedef void jpeg_write_func(void* context, void* data, int size);
+
+        typedef struct
+        {
+            jpeg_write_func* func;
+            void* context;
+            unsigned char buffer[64];
+            int buf_used;
+        } jpeg__write_context;
+
+        static void jpeg__start_write_callbacks(jpeg__write_context* s, jpeg_write_func* c, void* context)
+        {
+            s->func = c;
+            s->context = context;
+        }
+
+        static void jpegw__putc(jpeg__write_context* s, unsigned char c)
+        {
+            s->func(s->context, &c, 1);
+        }
+
         static const unsigned char jpegw__jpg_ZigZag[] = { 0,1,5,6,14,15,27,28,2,4,7,13,16,26,29,42,3,8,12,17,25,30,41,43,9,11,18,
       24,31,40,44,53,10,19,23,32,39,45,52,54,20,22,33,38,46,51,55,60,21,34,37,47,50,56,59,61,35,36,48,49,57,58,62,63 };
 
-        SIMD_INLINE void jpegw__jpg_writeBits(OutputMemoryStream& stream, int* bitBufP, int* bitCntP, const unsigned short* bs)
-        {
+        static void jpegw__jpg_writeBits(jpeg__write_context* s, int* bitBufP, int* bitCntP, const unsigned short* bs) {
             int bitBuf = *bitBufP, bitCnt = *bitCntP;
             bitCnt += bs[1];
             bitBuf |= bs[0] << (24 - bitCnt);
-            while (bitCnt >= 8) 
-            {
+            while (bitCnt >= 8) {
                 unsigned char c = (bitBuf >> 16) & 255;
-                stream.Write8u(c);
-                if (c == 255)
-                    stream.Write8u(0);
+                jpegw__putc(s, c);
+                if (c == 255) {
+                    jpegw__putc(s, 0);
+                }
                 bitBuf <<= 8;
                 bitCnt -= 8;
             }
@@ -50,8 +76,7 @@ namespace Simd
             *bitCntP = bitCnt;
         }
 
-        SIMD_INLINE void jpegw__jpg_DCT(float* d0p, float* d1p, float* d2p, float* d3p, float* d4p, float* d5p, float* d6p, float* d7p)
-        {
+        static void jpegw__jpg_DCT(float* d0p, float* d1p, float* d2p, float* d3p, float* d4p, float* d5p, float* d6p, float* d7p) {
             float d0 = *d0p, d1 = *d1p, d2 = *d2p, d3 = *d3p, d4 = *d4p, d5 = *d5p, d6 = *d6p, d7 = *d7p;
             float z1, z2, z3, z4, z5, z11, z13;
 
@@ -99,88 +124,88 @@ namespace Simd
             *d0p = d0;  *d2p = d2;  *d4p = d4;  *d6p = d6;
         }
 
-        SIMD_INLINE void jpegw__jpg_calcBits(int val, unsigned short bits[2]) 
-        {
+        static void jpegw__jpg_calcBits(int val, unsigned short bits[2]) {
             int tmp1 = val < 0 ? -val : val;
             val = val < 0 ? val - 1 : val;
             bits[1] = 1;
-            while (tmp1 >>= 1)
+            while (tmp1 >>= 1) {
                 ++bits[1];
+            }
             bits[0] = val & ((1 << bits[1]) - 1);
         }
 
-        static int jpegw__jpg_processDU(OutputMemoryStream& stream, int* bitBuf, int* bitCnt, float* CDU, int du_stride, float* fdtbl, int DC, const unsigned short HTDC[256][2], const unsigned short HTAC[256][2]) 
-        {
+        static int jpegw__jpg_processDU(jpeg__write_context* s, int* bitBuf, int* bitCnt, float* CDU, int du_stride, float* fdtbl, int DC, const unsigned short HTDC[256][2], const unsigned short HTAC[256][2]) {
             const unsigned short EOB[2] = { HTAC[0x00][0], HTAC[0x00][1] };
             const unsigned short M16zeroes[2] = { HTAC[0xF0][0], HTAC[0xF0][1] };
             int dataOff, i, j, n, diff, end0pos, x, y;
             int DU[64];
 
             // DCT rows
-            for (dataOff = 0, n = du_stride * 8; dataOff < n; dataOff += du_stride) 
+            for (dataOff = 0, n = du_stride * 8; dataOff < n; dataOff += du_stride) {
                 jpegw__jpg_DCT(&CDU[dataOff], &CDU[dataOff + 1], &CDU[dataOff + 2], &CDU[dataOff + 3], &CDU[dataOff + 4], &CDU[dataOff + 5], &CDU[dataOff + 6], &CDU[dataOff + 7]);
+            }
             // DCT columns
-            for (dataOff = 0; dataOff < 8; ++dataOff) 
+            for (dataOff = 0; dataOff < 8; ++dataOff) {
                 jpegw__jpg_DCT(&CDU[dataOff], &CDU[dataOff + du_stride], &CDU[dataOff + du_stride * 2], &CDU[dataOff + du_stride * 3], &CDU[dataOff + du_stride * 4],
                     &CDU[dataOff + du_stride * 5], &CDU[dataOff + du_stride * 6], &CDU[dataOff + du_stride * 7]);
+            }
             // Quantize/descale/zigzag the coefficients
-            for (y = 0, j = 0; y < 8; ++y) 
-            {
-                for (x = 0; x < 8; ++x, ++j) 
-                {
+            for (y = 0, j = 0; y < 8; ++y) {
+                for (x = 0; x < 8; ++x, ++j) {
                     float v;
                     i = y * du_stride + x;
                     v = CDU[i] * fdtbl[j];
+                    // DU[jpegw__jpg_ZigZag[j]] = (int)(v < 0 ? ceilf(v - 0.5f) : floorf(v + 0.5f));
+                    // ceilf() and floorf() are C99, not C89, but I /think/ they're not needed here anyway?
                     DU[jpegw__jpg_ZigZag[j]] = (int)(v < 0 ? v - 0.5f : v + 0.5f);
                 }
             }
 
             // Encode DC
             diff = DU[0] - DC;
-            if (diff == 0) 
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, HTDC[0]);
-            else 
-            {
+            if (diff == 0) {
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, HTDC[0]);
+            }
+            else {
                 unsigned short bits[2];
                 jpegw__jpg_calcBits(diff, bits);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, HTDC[bits[1]]);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, bits);
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, HTDC[bits[1]]);
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, bits);
             }
             // Encode ACs
             end0pos = 63;
-            for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
+            for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos) {
+            }
             // end0pos = first element in reverse order !=0
-            if (end0pos == 0) 
-            {
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, EOB);
+            if (end0pos == 0) {
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, EOB);
                 return DU[0];
             }
-            for (i = 1; i <= end0pos; ++i)
-            {
+            for (i = 1; i <= end0pos; ++i) {
                 int startpos = i;
                 int nrzeroes;
                 unsigned short bits[2];
-                for (; DU[i] == 0 && i <= end0pos; ++i);
+                for (; DU[i] == 0 && i <= end0pos; ++i) {
+                }
                 nrzeroes = i - startpos;
-                if (nrzeroes >= 16) 
-                {
+                if (nrzeroes >= 16) {
                     int lng = nrzeroes >> 4;
                     int nrmarker;
                     for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        jpegw__jpg_writeBits(stream, bitBuf, bitCnt, M16zeroes);
+                        jpegw__jpg_writeBits(s, bitBuf, bitCnt, M16zeroes);
                     nrzeroes &= 15;
                 }
                 jpegw__jpg_calcBits(DU[i], bits);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, HTAC[(nrzeroes << 4) + bits[1]]);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, bits);
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, HTAC[(nrzeroes << 4) + bits[1]]);
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, bits);
             }
-            if (end0pos != 63) 
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, EOB);
+            if (end0pos != 63) {
+                jpegw__jpg_writeBits(s, bitBuf, bitCnt, EOB);
+            }
             return DU[0];
         }
 
-        static int jpeg_write_jpg_core(OutputMemoryStream & stream, int width, int height, int comp, const void* data, int stride, int quality)
-        {
+        static int jpeg_write_jpg_core(jpeg__write_context* s, int width, int height, int comp, const void* data, int stride, int quality) {
             // Constants that don't pollute global namespace
             static const unsigned char std_dc_luminance_nrcodes[] = { 0,0,1,5,1,1,1,1,1,1,0,0,0,0,0,0,0 };
             static const unsigned char std_dc_luminance_values[] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
@@ -265,18 +290,15 @@ namespace Simd
             quality = quality < 1 ? 1 : quality > 100 ? 100 : quality;
             quality = quality < 50 ? 5000 / quality : 200 - quality * 2;
 
-            for (i = 0; i < 64; ++i) 
-            {
+            for (i = 0; i < 64; ++i) {
                 int uvti, yti = (YQT[i] * quality + 50) / 100;
                 YTable[jpegw__jpg_ZigZag[i]] = (unsigned char)(yti < 1 ? 1 : yti > 255 ? 255 : yti);
                 uvti = (UVQT[i] * quality + 50) / 100;
                 UVTable[jpegw__jpg_ZigZag[i]] = (unsigned char)(uvti < 1 ? 1 : uvti > 255 ? 255 : uvti);
             }
 
-            for (row = 0, k = 0; row < 8; ++row) 
-            {
-                for (col = 0; col < 8; ++col, ++k) 
-                {
+            for (row = 0, k = 0; row < 8; ++row) {
+                for (col = 0; col < 8; ++col, ++k) {
                     fdtbl_Y[k] = 1 / (YTable[jpegw__jpg_ZigZag[k]] * aasf[row] * aasf[col]);
                     fdtbl_UV[k] = 1 / (UVTable[jpegw__jpg_ZigZag[k]] * aasf[row] * aasf[col]);
                 }
@@ -286,25 +308,25 @@ namespace Simd
             {
                 static const unsigned char head0[] = { 0xFF,0xD8,0xFF,0xE0,0,0x10,'J','F','I','F',0,1,1,0,0,1,0,1,0,0,0xFF,0xDB,0,0x84,0 };
                 static const unsigned char head2[] = { 0xFF,0xDA,0,0xC,3,1,0,2,0x11,3,0x11,0,0x3F,0 };
-                const unsigned char head1[] = { 0xFF,0xC0,0,0x11,8, uint8_t(height >> 8), uint8_t(height), uint8_t(width >> 8), uint8_t(width),
+                const unsigned char head1[] = { 0xFF,0xC0,0,0x11,8,(unsigned char)(height >> 8),JPEG_UCHAR(height),(unsigned char)(width >> 8),JPEG_UCHAR(width),
                                                 3,1,(unsigned char)(subsample ? 0x22 : 0x11),0,2,0x11,1,3,0x11,1,0xFF,0xC4,0x01,0xA2,0 };
-                stream.Write(head0, sizeof(head0));
-                stream.Write(YTable, sizeof(YTable));
-                stream.Write8u(1);
-                stream.Write(UVTable, sizeof(UVTable));
-                stream.Write(head1, sizeof(head1));
-                stream.Write(std_dc_luminance_nrcodes + 1, sizeof(std_dc_luminance_nrcodes) - 1);
-                stream.Write(std_dc_luminance_values, sizeof(std_dc_luminance_values));
-                stream.Write8u(0x10); // HTYACinfo
-                stream.Write(std_ac_luminance_nrcodes + 1, sizeof(std_ac_luminance_nrcodes) - 1);
-                stream.Write(std_ac_luminance_values, sizeof(std_ac_luminance_values));
-                stream.Write8u(1); // HTUDCinfo
-                stream.Write(std_dc_chrominance_nrcodes + 1, sizeof(std_dc_chrominance_nrcodes) - 1);
-                stream.Write(std_dc_chrominance_values, sizeof(std_dc_chrominance_values));
-                stream.Write8u(0x11); // HTUACinfo
-                stream.Write(std_ac_chrominance_nrcodes + 1, sizeof(std_ac_chrominance_nrcodes) - 1);
-                stream.Write(std_ac_chrominance_values, sizeof(std_ac_chrominance_values));
-                stream.Write(head2, sizeof(head2));
+                s->func(s->context, (void*)head0, sizeof(head0));
+                s->func(s->context, (void*)YTable, sizeof(YTable));
+                jpegw__putc(s, 1);
+                s->func(s->context, UVTable, sizeof(UVTable));
+                s->func(s->context, (void*)head1, sizeof(head1));
+                s->func(s->context, (void*)(std_dc_luminance_nrcodes + 1), sizeof(std_dc_luminance_nrcodes) - 1);
+                s->func(s->context, (void*)std_dc_luminance_values, sizeof(std_dc_luminance_values));
+                jpegw__putc(s, 0x10); // HTYACinfo
+                s->func(s->context, (void*)(std_ac_luminance_nrcodes + 1), sizeof(std_ac_luminance_nrcodes) - 1);
+                s->func(s->context, (void*)std_ac_luminance_values, sizeof(std_ac_luminance_values));
+                jpegw__putc(s, 1); // HTUDCinfo
+                s->func(s->context, (void*)(std_dc_chrominance_nrcodes + 1), sizeof(std_dc_chrominance_nrcodes) - 1);
+                s->func(s->context, (void*)std_dc_chrominance_values, sizeof(std_dc_chrominance_values));
+                jpegw__putc(s, 0x11); // HTUACinfo
+                s->func(s->context, (void*)(std_ac_chrominance_nrcodes + 1), sizeof(std_ac_chrominance_nrcodes) - 1);
+                s->func(s->context, (void*)std_ac_chrominance_values, sizeof(std_ac_chrominance_values));
+                s->func(s->context, (void*)head2, sizeof(head2));
             }
 
             // Encode 8x8 macroblocks
@@ -318,20 +340,15 @@ namespace Simd
                 const unsigned char* dataG = dataR + ofsG;
                 const unsigned char* dataB = dataR + ofsB;
                 int x, y, pos;
-                if (subsample) 
-                {
-                    for (y = 0; y < height; y += 16) 
-                    {
-                        for (x = 0; x < width; x += 16) 
-                        {
+                if (subsample) {
+                    for (y = 0; y < height; y += 16) {
+                        for (x = 0; x < width; x += 16) {
                             float Y[256], U[256], V[256];
-                            for (row = y, pos = 0; row < y + 16; ++row) 
-                            {
+                            for (row = y, pos = 0; row < y + 16; ++row) {
                                 // row >= height => use last input row
                                 int clamped_row = (row < height) ? row : height - 1;
-                                int base_p = clamped_row * stride;
-                                for (col = x; col < x + 16; ++col, ++pos) 
-                                {
+                                int base_p = (jpeg__flip_vertically_on_write ? (height - 1 - clamped_row) : clamped_row) * stride;// width* comp;
+                                for (col = x; col < x + 16; ++col, ++pos) {
                                     // if col >= width => use pixel from last input column
                                     int p = base_p + ((col < width) ? col : (width - 1)) * comp;
                                     float r = dataR[p], g = dataG[p], b = dataB[p];
@@ -340,44 +357,37 @@ namespace Simd
                                     V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
                                 }
                             }
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 0, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 8, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 128, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 136, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, Y + 0, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, Y + 8, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, Y + 128, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, Y + 136, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
 
                             // subsample U,V
                             {
                                 float subU[64], subV[64];
                                 int yy, xx;
-                                for (yy = 0, pos = 0; yy < 8; ++yy) 
-                                {
-                                    for (xx = 0; xx < 8; ++xx, ++pos) 
-                                    {
+                                for (yy = 0, pos = 0; yy < 8; ++yy) {
+                                    for (xx = 0; xx < 8; ++xx, ++pos) {
                                         int j = yy * 32 + xx * 2;
                                         subU[pos] = (U[j + 0] + U[j + 1] + U[j + 16] + U[j + 17]) * 0.25f;
                                         subV[pos] = (V[j + 0] + V[j + 1] + V[j + 16] + V[j + 17]) * 0.25f;
                                     }
                                 }
-                                DCU = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, subU, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
-                                DCV = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, subV, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
+                                DCU = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, subU, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
+                                DCV = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, subV, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
                             }
                         }
                     }
                 }
-                else 
-                {
-                    for (y = 0; y < height; y += 8) 
-                    {
-                        for (x = 0; x < width; x += 8) 
-                        {
+                else {
+                    for (y = 0; y < height; y += 8) {
+                        for (x = 0; x < width; x += 8) {
                             float Y[64], U[64], V[64];
-                            for (row = y, pos = 0; row < y + 8; ++row) 
-                            {
+                            for (row = y, pos = 0; row < y + 8; ++row) {
                                 // row >= height => use last input row
                                 int clamped_row = (row < height) ? row : height - 1;
-                                int base_p = clamped_row * stride;
-                                for (col = x; col < x + 8; ++col, ++pos) 
-                                {
+                                int base_p = (jpeg__flip_vertically_on_write ? (height - 1 - clamped_row) : clamped_row) * stride;// width * comp;
+                                for (col = x; col < x + 8; ++col, ++pos) {
                                     // if col >= width => use pixel from last input column
                                     int p = base_p + ((col < width) ? col : (width - 1)) * comp;
                                     float r = dataR[p], g = dataG[p], b = dataB[p];
@@ -387,60 +397,41 @@ namespace Simd
                                 }
                             }
 
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y, 8, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCU = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, U, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
-                            DCV = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, V, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
+                            DCY = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, Y, 8, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCU = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, U, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
+                            DCV = jpegw__jpg_processDU(s, &bitBuf, &bitCnt, V, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
                         }
                     }
                 }
 
                 // Do the bit alignment of the EOI marker
-                jpegw__jpg_writeBits(stream, &bitBuf, &bitCnt, fillBits);
+                jpegw__jpg_writeBits(s, &bitBuf, &bitCnt, fillBits);
             }
 
             // EOI
-            stream.Write8u(0xFF);
-            stream.Write8u(0xD9);
+            jpegw__putc(s, 0xFF);
+            jpegw__putc(s, 0xD9);
 
             return 1;
+        }
+
+        static int jpeg_write_jpg_to_func(jpeg_write_func* func, void* context, int x, int y, int comp, const void* data, int stride, int quality)
+        {
+            jpeg__write_context s = { 0 };
+            jpeg__start_write_callbacks(&s, func, context);
+            return jpeg_write_jpg_core(&s, x, y, comp, (void*)data, stride, quality);
+        }
+
+        static void WriteToStream(void* context, void* data, int size)
+        {
+            ((OutputMemoryStream*)context)->Write(data, size);
         }
 
         //---------------------------------------------------------------------
 
         ImageJpegSaver::ImageJpegSaver(const ImageSaverParam& param)
-            : ImageSaver(param)
-            , _channels(0)
-            , _convert(NULL)
+            : Base::ImageJpegSaver(param)
         {
-            switch (_param.format)
-            {
-            case SimdPixelFormatGray8:
-                _channels = 1;
-                break;
-            case SimdPixelFormatBgr24:
-                _channels = 3;
-                break;
-            case SimdPixelFormatBgra32:
-                _channels = 4;
-                break;
-            case SimdPixelFormatRgb24:
-                _channels = 3;
-                break;
-            case SimdPixelFormatRgba32:
-                _channels = 4;
-                break;
-            }
-            _size = _param.width * _channels;
-            if (_param.format == SimdPixelFormatBgr24)
-            {
-                _buffer.Resize(_param.height * _size);
-                _convert = Base::BgrToRgb;
-            }
-            else if (_param.format == SimdPixelFormatBgra32)
-            {
-                _buffer.Resize(_param.height * _size);
-                _convert = Base::BgraToRgba;
-            }
         }
 
         bool ImageJpegSaver::ToStream(const uint8_t* src, size_t stride)
@@ -451,8 +442,9 @@ namespace Simd
                 src = _buffer.data;
                 stride = _size;
             }
-            jpeg_write_jpg_core(_stream, (int)_param.width, (int)_param.height, (int)_channels, src, (int)stride, _param.quality);
+            jpeg_write_jpg_to_func(WriteToStream, &_stream, (int)_param.width, (int)_param.height, (int)_channels, src, (int)stride, _param.quality);
             return true;
         }
     }
+#endif// SIMD_SSE41_ENABLE
 }
