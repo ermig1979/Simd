@@ -11,7 +11,7 @@ In particular the library supports following CPU extensions:
 SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, AVX, AVX2 and AVX-512 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC (big-endian), NEON for ARM.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
-The library supports dynamic and static linking, 32-bit and 64-bit Windows, Android and Linux, 
+The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
 MSVS, G++ and Clang compilers, MSVS project and CMake build systems.
 
 Library folder's structure
@@ -23,8 +23,7 @@ The Simd Library has next folder's structure:
 * `simd/src/Test/` - contains test framework of the library.
 * `simd/src/Use/` - contains the use examples of the library.
 * `simd/prj/vs2015/` - contains project files of Microsoft Visual Studio 2015.
-* `simd/prj/vs2017w/` - contains project files of Microsoft Visual Studio 2017 (for Windows).
-* `simd/prj/vs2017a/` - contains project files of Microsoft Visual Studio 2017 (for Android).
+* `simd/prj/vs2017/` - contains project files of Microsoft Visual Studio 2017.
 * `simd/prj/vs2019/` - contains project files of Microsoft Visual Studio 2019.
 * `simd/prj/cmd/` - contains additional scripts needed for building of the library in Windows.
 * `simd/prj/cmake/` - contains files of CMake build systems.
@@ -54,16 +53,6 @@ Also in order to build the library you can use CMake and MinGW:
     cd .\prj\cmake
     cmake . -DSIMD_TOOLCHAIN="your_toolchain\bin\g++" -DSIMD_TARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -G "MinGW Makefiles"
     mingw32-make
-
-The library building for Android
-================================
-
-To build the library and test application for Android(x86, x64, ARM, ARM64) you need to use Microsoft Visual Studio 2017. 
-The project files are in the directory: 
-
-`simd/prj/vs2017a/`
-
-By default the library is built as a SO (Dynamic Library).
 
 The library building for Linux
 ==============================
