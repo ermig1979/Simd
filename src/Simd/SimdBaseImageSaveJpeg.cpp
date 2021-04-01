@@ -32,24 +32,6 @@ namespace Simd
         static const unsigned char jpegw__jpg_ZigZag[] = { 0,1,5,6,14,15,27,28,2,4,7,13,16,26,29,42,3,8,12,17,25,30,41,43,9,11,18,
       24,31,40,44,53,10,19,23,32,39,45,52,54,20,22,33,38,46,51,55,60,21,34,37,47,50,56,59,61,35,36,48,49,57,58,62,63 };
 
-        SIMD_INLINE void jpegw__jpg_writeBits(OutputMemoryStream& stream, int* bitBufP, int* bitCntP, const unsigned short* bs)
-        {
-            int bitBuf = *bitBufP, bitCnt = *bitCntP;
-            bitCnt += bs[1];
-            bitBuf |= bs[0] << (24 - bitCnt);
-            while (bitCnt >= 8) 
-            {
-                unsigned char c = (bitBuf >> 16) & 255;
-                stream.Write8u(c);
-                if (c == 255)
-                    stream.Write8u(0);
-                bitBuf <<= 8;
-                bitCnt -= 8;
-            }
-            *bitBufP = bitBuf;
-            *bitCntP = bitCnt;
-        }
-
         SIMD_INLINE void jpegw__jpg_DCT(float* d0p, float* d1p, float* d2p, float* d3p, float* d4p, float* d5p, float* d6p, float* d7p)
         {
             float d0 = *d0p, d1 = *d1p, d2 = *d2p, d3 = *d3p, d4 = *d4p, d5 = *d5p, d6 = *d6p, d7 = *d7p;
@@ -109,7 +91,7 @@ namespace Simd
             bits[0] = val & ((1 << bits[1]) - 1);
         }
 
-        static int jpegw__jpg_processDU(OutputMemoryStream& stream, int* bitBuf, int* bitCnt, float* CDU, int du_stride, float* fdtbl, int DC, const unsigned short HTDC[256][2], const unsigned short HTAC[256][2]) 
+        static int jpegw__jpg_processDU(OutputMemoryStream& stream, float* CDU, int du_stride, float* fdtbl, int DC, const unsigned short HTDC[256][2], const unsigned short HTAC[256][2]) 
         {
             const unsigned short EOB[2] = { HTAC[0x00][0], HTAC[0x00][1] };
             const unsigned short M16zeroes[2] = { HTAC[0xF0][0], HTAC[0xF0][1] };
@@ -138,13 +120,13 @@ namespace Simd
             // Encode DC
             diff = DU[0] - DC;
             if (diff == 0) 
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, HTDC[0]);
+                stream.WriteJpegBits(HTDC[0]);
             else 
             {
                 unsigned short bits[2];
                 jpegw__jpg_calcBits(diff, bits);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, HTDC[bits[1]]);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, bits);
+                stream.WriteJpegBits(HTDC[bits[1]]);
+                stream.WriteJpegBits(bits);
             }
             // Encode ACs
             end0pos = 63;
@@ -152,7 +134,7 @@ namespace Simd
             // end0pos = first element in reverse order !=0
             if (end0pos == 0) 
             {
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, EOB);
+                stream.WriteJpegBits(EOB);
                 return DU[0];
             }
             for (i = 1; i <= end0pos; ++i)
@@ -167,15 +149,15 @@ namespace Simd
                     int lng = nrzeroes >> 4;
                     int nrmarker;
                     for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        jpegw__jpg_writeBits(stream, bitBuf, bitCnt, M16zeroes);
+                        stream.WriteJpegBits(M16zeroes);
                     nrzeroes &= 15;
                 }
                 jpegw__jpg_calcBits(DU[i], bits);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, HTAC[(nrzeroes << 4) + bits[1]]);
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, bits);
+                stream.WriteJpegBits(HTAC[(nrzeroes << 4) + bits[1]]);
+                stream.WriteJpegBits(bits);
             }
             if (end0pos != 63) 
-                jpegw__jpg_writeBits(stream, bitBuf, bitCnt, EOB);
+                stream.WriteJpegBits(EOB);
             return DU[0];
         }
 
@@ -311,7 +293,6 @@ namespace Simd
             {
                 static const unsigned short fillBits[] = { 0x7F, 7 };
                 int DCY = 0, DCU = 0, DCV = 0;
-                int bitBuf = 0, bitCnt = 0;
                 // comp == 2 is grey+alpha (alpha is ignored)
                 int ofsG = comp > 2 ? 1 : 0, ofsB = comp > 2 ? 2 : 0;
                 const unsigned char* dataR = (const unsigned char*)data;
@@ -340,10 +321,10 @@ namespace Simd
                                     V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
                                 }
                             }
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 0, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 8, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 128, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y + 136, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(stream, Y + 0, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(stream, Y + 8, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(stream, Y + 128, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCY = jpegw__jpg_processDU(stream, Y + 136, 16, fdtbl_Y, DCY, YDC_HT, YAC_HT);
 
                             // subsample U,V
                             {
@@ -358,8 +339,8 @@ namespace Simd
                                         subV[pos] = (V[j + 0] + V[j + 1] + V[j + 16] + V[j + 17]) * 0.25f;
                                     }
                                 }
-                                DCU = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, subU, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
-                                DCV = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, subV, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
+                                DCU = jpegw__jpg_processDU(stream, subU, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
+                                DCV = jpegw__jpg_processDU(stream, subV, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
                             }
                         }
                     }
@@ -387,15 +368,15 @@ namespace Simd
                                 }
                             }
 
-                            DCY = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, Y, 8, fdtbl_Y, DCY, YDC_HT, YAC_HT);
-                            DCU = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, U, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
-                            DCV = jpegw__jpg_processDU(stream, &bitBuf, &bitCnt, V, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
+                            DCY = jpegw__jpg_processDU(stream, Y, 8, fdtbl_Y, DCY, YDC_HT, YAC_HT);
+                            DCU = jpegw__jpg_processDU(stream, U, 8, fdtbl_UV, DCU, UVDC_HT, UVAC_HT);
+                            DCV = jpegw__jpg_processDU(stream, V, 8, fdtbl_UV, DCV, UVDC_HT, UVAC_HT);
                         }
                     }
                 }
 
                 // Do the bit alignment of the EOI marker
-                jpegw__jpg_writeBits(stream, &bitBuf, &bitCnt, fillBits);
+                stream.WriteJpegBits(fillBits);
             }
 
             // EOI

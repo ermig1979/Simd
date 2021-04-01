@@ -274,6 +274,21 @@ namespace Simd
                 _bitCount = 0;
             }
         }
+
+        SIMD_INLINE void WriteJpegBits(const uint16_t bits[2])
+        {
+            _bitCount += bits[1];
+            _bitBuffer |= bits[0] << (24 - _bitCount);
+            while (_bitCount >= 8)
+            {
+                uint8_t byte = (_bitBuffer >> 16) & 0xFF;
+                Write8u(byte);
+                if (byte == 255)
+                    Write8u(0);
+                _bitBuffer <<= 8;
+                _bitCount -= 8;
+            }
+        }
     };
 }
 
