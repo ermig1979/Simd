@@ -61,7 +61,11 @@ namespace Simd
                 else
                     file = SimdImageFilePpmBin;
             }            
-            if (!(format >= SimdPixelFormatGray8 && format <= SimdPixelFormatRgba32))
+            if (format < SimdPixelFormatGray8 || format > SimdPixelFormatRgba32)
+                return false;
+            if (width == 0 || height == 0)
+                return false;
+            if (file <= SimdImageFileUndefined || file > SimdImageFileJpeg)
                 return false;
             return true;
         }
@@ -173,6 +177,12 @@ namespace Simd
             Array8u _buffer;
             ConvertPtr _convert;
             size_t _channels, _size;
+            int _quality, _subSample;
+            float _fY[64], _fUv[64];
+            uint8_t _uY[64], _uUv[64];
+
+            void SetQuality();
+            void WriteHeader();
         };
 
         //---------------------------------------------------------------------
@@ -219,6 +229,7 @@ namespace Simd
             ImageJpegSaver(const ImageSaverParam& param);
 
             virtual bool ToStream(const uint8_t* src, size_t stride);
+
         };
 
         //---------------------------------------------------------------------

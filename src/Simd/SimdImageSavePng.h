@@ -30,6 +30,11 @@ namespace Simd
 {
     namespace Base
     {
+        extern const uint16_t ZlibLenC[30];
+        extern const uint8_t  ZlibLenEb[29];
+        extern const uint16_t ZlibDistC[31];
+        extern const uint8_t  ZlibDistEb[30];
+
         extern int BitRevTable[512];
 
         SIMD_INLINE int ZlibBitRev(int bits, int count)

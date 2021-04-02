@@ -65,10 +65,6 @@ namespace Simd
 
         void ZlibCompress(uint8_t* data, int size, int quality, OutputMemoryStream& stream)
         {
-            static uint16_t LEN_C[] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 259 };
-            static uint8_t  LEN_EB[] = { 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4,  4,  5,  5,  5,  5,  0 };
-            static uint16_t DIST_C[] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 32768 };
-            static uint8_t  DIST_EB[] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
             const int ZHASH = 16384;
             if (quality < 5)
                 quality = 5;
@@ -129,14 +125,14 @@ namespace Simd
                 {
                     int d = (int)(data + i - bestLoc);
                     assert(d <= 32767 && best <= 258);
-                    for (j = 0; best > LEN_C[j + 1] - 1; ++j);
+                    for (j = 0; best > Base::ZlibLenC[j + 1] - 1; ++j);
                     Base::ZlibHuff(j + 257, stream);
-                    if (LEN_EB[j])
-                        stream.WriteBits(best - LEN_C[j], LEN_EB[j]);
-                    for (j = 0; d > DIST_C[j + 1] - 1; ++j);
+                    if (Base::ZlibLenEb[j])
+                        stream.WriteBits(best - Base::ZlibLenC[j], Base::ZlibLenEb[j]);
+                    for (j = 0; d > Base::ZlibDistC[j + 1] - 1; ++j);
                     stream.WriteBits(Base::ZlibBitRev(j, 5), 5);
-                    if (DIST_EB[j])
-                        stream.WriteBits(d - DIST_C[j], DIST_EB[j]);
+                    if (Base::ZlibDistEb[j])
+                        stream.WriteBits(d - Base::ZlibDistC[j], Base::ZlibDistEb[j]);
                     i += best;
                 }
                 else

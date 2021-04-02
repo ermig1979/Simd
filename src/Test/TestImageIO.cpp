@@ -178,7 +178,7 @@ namespace Test
         int quality = 65;
         for (int format = 3; format < 4; format++)
         {
-            for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
             {
                 result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, quality, f1, f2);
                 result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, quality, f1, f2);
