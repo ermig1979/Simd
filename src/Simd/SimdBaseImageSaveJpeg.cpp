@@ -202,32 +202,22 @@ namespace Simd
             return DU[0];
         }
 
-        void JpegWriteBodyLo(OutputMemoryStream & stream, int width, int height, int comp, const uint8_t * data, int stride, const float * fY, const float* fUv)
+        void JpegWriteBlockSubs(OutputMemoryStream & stream, int width, int height, const uint8_t * red,
+            const uint8_t* green, const uint8_t* blue, int stride, const float * fY, const float* fUv, int dc[3])
         {
-            int row, col, i, k;
-
-            int DCY = 0, DCU = 0, DCV = 0;
-            // comp == 2 is grey+alpha (alpha is ignored)
-            int ofsG = comp > 2 ? 1 : 0, ofsB = comp > 2 ? 2 : 0;
-            const uint8_t* dataR = data;
-            const uint8_t* dataG = dataR + ofsG;
-            const uint8_t* dataB = dataR + ofsB;
-            int x, y, pos;
-            for (y = 0; y < height; y += 16) 
+            int & DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
+            for (int y = 0; y < height; y += 16)
             {
-                for (x = 0; x < width; x += 16) 
+                for (int x = 0; x < width; x += 16)
                 {
                     float Y[256], U[256], V[256];
-                    for (row = y, pos = 0; row < y + 16; ++row) 
+                    for (int row = y, pos = 0; row < y + 16; ++row)
                     {
-                        // row >= height => use last input row
-                        int clamped_row = (row < height) ? row : height - 1;
-                        int base_p = clamped_row * stride;
-                        for (col = x; col < x + 16; ++col, ++pos) 
+                        int rowOffs = (row < height ? row : height - 1) * stride;
+                        for (int col = x; col < x + 16; ++col, ++pos)
                         {
-                            // if col >= width => use pixel from last input column
-                            int p = base_p + ((col < width) ? col : (width - 1)) * comp;
-                            float r = dataR[p], g = dataG[p], b = dataB[p];
+                            int offs = rowOffs + (col < width ? col : width - 1);
+                            float r = red[offs], g = green[offs], b = blue[offs];
                             Y[pos] = +0.29900f * r + 0.58700f * g + 0.11400f * b - 128;
                             U[pos] = -0.16874f * r - 0.33126f * g + 0.50000f * b;
                             V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
@@ -238,52 +228,38 @@ namespace Simd
                     DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
 
-                    // subsample U,V
+                    float subU[64], subV[64];
+                    for (int yy = 0, pos = 0; yy < 8; ++yy)
                     {
-                        float subU[64], subV[64];
-                        int yy, xx;
-                        for (yy = 0, pos = 0; yy < 8; ++yy) 
+                        for (int xx = 0; xx < 8; ++xx, ++pos)
                         {
-                            for (xx = 0; xx < 8; ++xx, ++pos) 
-                            {
-                                int j = yy * 32 + xx * 2;
-                                subU[pos] = (U[j + 0] + U[j + 1] + U[j + 16] + U[j + 17]) * 0.25f;
-                                subV[pos] = (V[j + 0] + V[j + 1] + V[j + 16] + V[j + 17]) * 0.25f;
-                            }
+                            int j = yy * 32 + xx * 2;
+                            subU[pos] = (U[j + 0] + U[j + 1] + U[j + 16] + U[j + 17]) * 0.25f;
+                            subV[pos] = (V[j + 0] + V[j + 1] + V[j + 16] + V[j + 17]) * 0.25f;
                         }
-                        DCU = JpegProcessDu(stream, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        DCV = JpegProcessDu(stream, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
+                    DCU = JpegProcessDu(stream, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    DCV = JpegProcessDu(stream, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                 }
             }
         }
 
-        void JpegWriteBodyHi(OutputMemoryStream& stream, int width, int height, int comp, const uint8_t * data, int stride, const float* fY, const float* fUv)
+        void JpegWriteBlockFull(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
+            const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
-            int row, col, i, k;
-
-            int DCY = 0, DCU = 0, DCV = 0;
-            // comp == 2 is grey+alpha (alpha is ignored)
-            int ofsG = comp > 2 ? 1 : 0, ofsB = comp > 2 ? 2 : 0;
-            const uint8_t* dataR = data;
-            const uint8_t* dataG = dataR + ofsG;
-            const uint8_t* dataB = dataR + ofsB;
-            int x, y, pos;
-            for (y = 0; y < height; y += 8)
+            int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
+            for (int y = 0; y < height; y += 8)
             {
-                for (x = 0; x < width; x += 8)
+                for (int x = 0; x < width; x += 8)
                 {
                     float Y[64], U[64], V[64];
-                    for (row = y, pos = 0; row < y + 8; ++row)
+                    for (int row = y, pos = 0; row < y + 8; ++row)
                     {
-                        // row >= height => use last input row
-                        int clamped_row = (row < height) ? row : height - 1;
-                        int base_p = clamped_row * stride;
-                        for (col = x; col < x + 8; ++col, ++pos)
+                        int rowOffs = (row < height ? row : height - 1) * stride;
+                        for (int col = x; col < x + 8; ++col, ++pos)
                         {
-                            // if col >= width => use pixel from last input column
-                            int p = base_p + ((col < width) ? col : (width - 1)) * comp;
-                            float r = dataR[p], g = dataG[p], b = dataB[p];
+                            int offs = rowOffs + (col < width ? col : width - 1);
+                            float r = red[offs], g = green[offs], b = blue[offs];
                             Y[pos] = +0.29900f * r + 0.58700f * g + 0.11400f * b - 128;
                             U[pos] = -0.16874f * r - 0.33126f * g + 0.50000f * b;
                             V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
@@ -303,39 +279,26 @@ namespace Simd
             : ImageSaver(param)
             , _channels(0)
             , _convert(NULL)
+            , _deintBgra(NULL)
+            , _deintBgr(NULL)
         {
+            SetQuality();
+            _block = _subSample ? 16 : 8;
+            _width = AlignHi(_param.width, _block);
+            if (_param.format != SimdPixelFormatGray8)
+                _buffer.Resize(_width * _block * 3);
             switch (_param.format)
             {
-            case SimdPixelFormatGray8:
-                _channels = 1;
-                break;
             case SimdPixelFormatBgr24:
-                _channels = 3;
+            case SimdPixelFormatRgb24:
+                _deintBgr = Base::DeinterleaveBgr;
                 break;
             case SimdPixelFormatBgra32:
-                _channels = 4;
-                break;
-            case SimdPixelFormatRgb24:
-                _channels = 3;
-                break;
             case SimdPixelFormatRgba32:
-                _channels = 4;
+                _deintBgra = Base::DeinterleaveBgra;
                 break;
-            default:
-                return;
             }
-            _size = _param.width * _channels;
-            if (_param.format == SimdPixelFormatBgr24)
-            {
-                _buffer.Resize(_param.height * _size);
-                _convert = Base::BgrToRgb;
-            }
-            else if (_param.format == SimdPixelFormatBgra32)
-            {
-                _buffer.Resize(_param.height * _size);
-                _convert = Base::BgraToRgba;
-            }
-            SetQuality();
+            _writeBlock = _subSample ? JpegWriteBlockSubs : JpegWriteBlockFull;
         }
 
         void ImageJpegSaver::SetQuality()
@@ -422,19 +385,33 @@ namespace Simd
 
         bool ImageJpegSaver::ToStream(const uint8_t* src, size_t stride)
         {
-            if (_channels == 0)
-                return false;
-            if (_convert)
-            {
-                _convert(src, _param.width, _param.height, stride, _buffer.data, _size);
-                src = _buffer.data;
-                stride = _size;
-            }
             WriteHeader();
-            if(_subSample)
-                JpegWriteBodyLo(_stream, (int)_param.width, (int)_param.height, (int)_channels, src, (int)stride, _fY, _fUv);
-            else
-                JpegWriteBodyHi(_stream, (int)_param.width, (int)_param.height, (int)_channels, src, (int)stride, _fY, _fUv);
+            uint8_t* r = _buffer.data, * g = r + _width * _block,* b = g + _width * _block;
+            int dc[3] = { 0, 0, 0 };
+            for (int row = 0; row < (int)_param.height; row += _block)
+            {
+                int block = Simd::Min(row + _block, (int)_param.height) - row;
+                switch (_param.format)
+                {
+                case SimdPixelFormatBgr24:
+                    _deintBgr(src, stride, _param.width, block, b, _width, g, _width, r, _width);
+                    break;
+                case SimdPixelFormatBgra32:
+                    _deintBgra(src, stride, _param.width, block, b, _width, g, _width, r, _width, NULL, 0);
+                    break;
+                case SimdPixelFormatRgb24:
+                    _deintBgr(src, stride, _param.width, block, r, _width, g, _width, b, _width);
+                    break;
+                case SimdPixelFormatRgba32:
+                    _deintBgra(src, stride, _param.width, block, r, _width, g, _width, b, _width, NULL, 0);
+                    break;
+                }
+                if(_param.format == SimdPixelFormatGray8)
+                    _writeBlock(_stream, (int)_param.width, block, src, src, src, (int)stride, _fY, _fUv, dc);
+                else
+                    _writeBlock(_stream, (int)_param.width, block, r, g, b, _width, _fY, _fUv, dc);
+                src += block * stride;
+            }
             static const uint16_t FILL_BITS[] = { 0x7F, 7 };
             _stream.WriteJpegBits(FILL_BITS);
             _stream.Write8u(0xFF);

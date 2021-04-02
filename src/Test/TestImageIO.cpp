@@ -59,6 +59,11 @@ namespace Test
         int w = int(canvas.width), h = int(canvas.height);
         Simd::Fill(canvas, 0);
 
+        //for (int y = 0; y < h; y++)
+        //    for (int x = 0; x < w; x++)
+        //        canvas.At<Color>(x, y) = GetColor<Color>(Random(2), Random(2), Random(2));
+        //}
+
         for (int i = 0; i < rects; i++)
         {
             ptrdiff_t x1 = Random(w * 5 / 4) - w / 8;
@@ -112,9 +117,10 @@ namespace Test
 
             FuncSM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Update(View::Format format, SimdImageFileType file)
+            void Update(View::Format format, SimdImageFileType file, int quality)
             {
-                desc = desc + "[" + ToString(format) + "-" + ToString(file) + "]";
+                desc = desc + "[" + ToString(format) + "-" + ToString(file) + 
+                    (file == SimdImageFileJpeg ? String("-") + ToString(quality) : String("")) + "]";
             }
 
             void Call(const View& src, SimdImageFileType file, int quality, uint8_t** data, size_t* size) const
@@ -132,8 +138,8 @@ namespace Test
     {
         bool result = true;
 
-        f1.Update(format, file);
-        f2.Update(format, file);
+        f1.Update(format, file, quality);
+        f2.Update(format, file, quality);
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
@@ -163,9 +169,7 @@ namespace Test
         if(file == SimdImageFilePng)
             src.Save((ToString(format) + ".png").c_str(), file, quality);
         if (file == SimdImageFileJpeg)
-            src.Save((ToString(format) + ".jpg").c_str(), file, quality);
-
-        //src.Save((ToString(file) + ".txt").c_str(), file, 100);
+            src.Save((ToString(format) + "_" + ToString(quality) + ".jpg").c_str(), file, quality);
 
         return result;
     }
@@ -175,13 +179,17 @@ namespace Test
         bool result = true;
 
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        int quality = 65;
-        for (int format = 3; format < 4; format++)
+        for (int format = 0; format < 4; format++)
         {
             for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
             {
-                result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, quality, f1, f2);
-                result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, quality, f1, f2);
+                result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 65, f1, f2);
+                result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 65, f1, f2);
+                if (file == SimdImageFileJpeg)
+                {
+                    result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 95, f1, f2);
+                }
             }
         }
 

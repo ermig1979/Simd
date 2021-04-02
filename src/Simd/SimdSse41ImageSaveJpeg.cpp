@@ -432,6 +432,37 @@ namespace Simd
         ImageJpegSaver::ImageJpegSaver(const ImageSaverParam& param)
             : Base::ImageJpegSaver(param)
         {
+            switch (_param.format)
+            {
+            case SimdPixelFormatGray8:
+                _channels = 1;
+                break;
+            case SimdPixelFormatBgr24:
+                _channels = 3;
+                break;
+            case SimdPixelFormatBgra32:
+                _channels = 4;
+                break;
+            case SimdPixelFormatRgb24:
+                _channels = 3;
+                break;
+            case SimdPixelFormatRgba32:
+                _channels = 4;
+                break;
+            default:
+                return;
+            }
+            _size = _param.width * _channels;
+            if (_param.format == SimdPixelFormatBgr24)
+            {
+                _buffer.Resize(_param.height * _size);
+                _convert = Base::BgrToRgb;
+            }
+            else if (_param.format == SimdPixelFormatBgra32)
+            {
+                _buffer.Resize(_param.height * _size);
+                _convert = Base::BgraToRgba;
+            }
         }
 
         bool ImageJpegSaver::ToStream(const uint8_t* src, size_t stride)
