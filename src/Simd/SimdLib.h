@@ -2148,7 +2148,7 @@ extern "C"
     SIMD_API void SimdCopyFrame(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize,
         size_t frameLeft, size_t frameTop, size_t frameRight, size_t frameBottom, uint8_t * dst, size_t dstStride);
 
-    /*! @ingroup other_conversion
+    /*! @ingroup deinterleave_conversion
 
         \fn void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
@@ -2171,7 +2171,7 @@ extern "C"
     SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
         uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
-    /*! @ingroup other_conversion
+    /*! @ingroup deinterleave_conversion
 
         \fn void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
 
@@ -2179,7 +2179,9 @@ extern "C"
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r).
+        \note This function has C++ wrappers:
+            Simd::DeinterleaveBgr(const View<A>& bgr, View<A>& b, View<A>& g, View<A>& r),
+            Simd::DeinterleaveRgb(const View<A>& rgb, View<A>& r, View<A>& g, View<A>& b).
 
         \param [in] bgr - a pointer to pixels data of input 24-bit BGR interleaved image.
         \param [in] bgrStride - a row size of the bgr image.
@@ -2195,7 +2197,7 @@ extern "C"
     SIMD_API void SimdDeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
         uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride);
 
-    /*! @ingroup other_conversion
+    /*! @ingroup deinterleave_conversion
 
         \fn void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height, uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
 
@@ -2203,7 +2205,11 @@ extern "C"
 
         All images must have the same width and height.
 
-        \note This function has a C++ wrapper Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a).
+        \note This function has C++ wrappers:
+            Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r, View<A>& a),
+            Simd::DeinterleaveBgra(const View<A>& bgra, View<A>& b, View<A>& g, View<A>& r),
+            Simd::DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b, View<A>& a),
+            Simd::DeinterleaveRgba(const View<A>& rgba, View<A>& r, View<A>& g, View<A>& b).
 
         \param [in] bgra - a pointer to pixels data of input 32-bit BGRA interleaved image.
         \param [in] bgraStride - a row size of the bgra image.
@@ -2215,8 +2221,8 @@ extern "C"
         \param [in] gStride - a row size of the g image.
         \param [out] r - a pointer to pixels data of 8-bit Red planar image.
         \param [in] rStride - a row size of the r image.
-        \param [out] a - a pointer to pixels data of 8-bit Alpha planar image.
-        \param [in] aStride - a row size of the a image.
+        \param [out] a - a pointer to pixels data of 8-bit Alpha planar image. It can be NULL.
+        \param [in] aStride - a row size of the a image. 
     */
     SIMD_API void SimdDeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
         uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
@@ -3775,7 +3781,7 @@ extern "C"
     SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
         uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index);
 
-    /*! @ingroup other_conversion
+    /*! @ingroup interleave_conversion
 
         \fn void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
@@ -3797,7 +3803,7 @@ extern "C"
     */
     SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * uv, size_t uvStride);
 
-    /*! @ingroup other_conversion
+    /*! @ingroup interleave_conversion
 
         \fn void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
@@ -3821,7 +3827,7 @@ extern "C"
     SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride,
         size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
 
-    /*! @ingroup other_conversion
+    /*! @ingroup interleave_conversion
 
         \fn void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
 

@@ -216,13 +216,18 @@ namespace Test
                 uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride);
 
             FuncPtr func;
-            String description;
+            String desc;
 
-            Func4(const FuncPtr & f, const String & d) : func(f), description(d) {}
+            Func4(const FuncPtr & f, const String & d) : func(f), desc(d) {}
+
+            void Update(bool alpha)
+            {
+                desc = desc + (alpha ? "[1]" : "[0]");
+            }
 
             void Call(const View & bgra, View & b, View & g, View & r, View & a) const
             {
-                TEST_PERFORMANCE_TEST(description);
+                TEST_PERFORMANCE_TEST(desc);
                 func(bgra.data, bgra.stride, bgra.width, bgra.height, b.data, b.stride, g.data, g.stride, r.data, r.stride, a.data, a.stride);
             }
         };
@@ -230,11 +235,14 @@ namespace Test
 
 #define FUNC4(function) Func4(function, #function)
 
-    bool DeinterleaveBgraAutoTest(int width, int height, const Func4 & f1, const Func4 & f2)
+    bool DeinterleaveBgraAutoTest(bool alpha, int width, int height, Func4 f1, Func4 f2)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+        f1.Update(alpha);
+        f2.Update(alpha);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View bgra(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
         FillRandom(bgra);
@@ -242,11 +250,15 @@ namespace Test
         View b1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View g1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View r1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View a1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View b2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View g2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View r2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
-        View a2(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        View a1, a2;
+        if (alpha)
+        {
+            a1.Recreate(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+            a2.Recreate(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        }
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(bgra, b1, g1, r1, a1));
 
@@ -255,7 +267,8 @@ namespace Test
         result = result && Compare(b1, b2, 0, true, 32, 0, "b");
         result = result && Compare(g1, g2, 0, true, 32, 0, "g");
         result = result && Compare(r1, r2, 0, true, 32, 0, "r");
-        result = result && Compare(a1, a2, 0, true, 32, 0, "a");
+        if(alpha)
+            result = result && Compare(a1, a2, 0, true, 32, 0, "a");
 
         return result;
     }
@@ -264,8 +277,10 @@ namespace Test
     {
         bool result = true;
 
-        result = result && DeinterleaveBgraAutoTest(W, H, f1, f2);
-        result = result && DeinterleaveBgraAutoTest(W + O, H - O, f1, f2);
+        result = result && DeinterleaveBgraAutoTest(true, W, H, f1, f2);
+        result = result && DeinterleaveBgraAutoTest(true, W + O, H - O, f1, f2);
+        result = result && DeinterleaveBgraAutoTest(false, W, H, f1, f2);
+        result = result && DeinterleaveBgraAutoTest(false, W + O, H - O, f1, f2);
 
         return result;
     }
@@ -419,9 +434,9 @@ namespace Test
     {
         bool result = true;
 
-        Data data(f.description);
+        Data data(f.desc);
 
-        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.description << " [" << width << ", " << height << "].");
+        TEST_LOG_SS(Info, (create ? "Create" : "Verify") << " test " << f.desc << " [" << width << ", " << height << "].");
 
         View bgra(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
 

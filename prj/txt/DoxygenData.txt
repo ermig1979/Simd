@@ -340,6 +340,16 @@
 */
 
 /*! @ingroup conversion
+    @defgroup interleave_conversion Interleave
+    \short Functions to intereleave planar images.
+*/
+
+/*! @ingroup conversion
+    @defgroup deinterleave_conversion Deinterleave
+    \short Functions to deinterleave images.
+*/
+
+/*! @ingroup conversion
     @defgroup other_conversion Other 
     \short Functions for other image format conversions.
 */

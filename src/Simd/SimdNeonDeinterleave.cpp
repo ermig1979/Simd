@@ -71,6 +71,8 @@ namespace Simd
                 DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
         }
 
+        //---------------------------------------------------------------------
+
         template <bool align> void DeinterleaveBgr(const uint8_t * bgr, size_t bgrStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride)
         {
@@ -118,6 +120,8 @@ namespace Simd
                 DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
         }
 
+        //---------------------------------------------------------------------
+
         template <bool align> void DeinterleaveBgra(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
         {
@@ -125,36 +129,65 @@ namespace Simd
             if (align)
             {
                 assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride));
-                assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride));
+                assert(Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && (Aligned(aStride) || a == NULL));
             }
 
             size_t bodyWidth = AlignLo(width, A);
             size_t tail = width - bodyWidth;
-            for (size_t row = 0; row < height; ++row)
+            if (a)
             {
-                for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += QA)
+                for (size_t row = 0; row < height; ++row)
                 {
-                    uint8x16x4_t _bgra = Load4<align>(bgra + offset);
-                    Store<align>(b + col, _bgra.val[0]);
-                    Store<align>(g + col, _bgra.val[1]);
-                    Store<align>(r + col, _bgra.val[2]);
-                    Store<align>(a + col, _bgra.val[3]);
+                    for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += QA)
+                    {
+                        uint8x16x4_t _bgra = Load4<align>(bgra + offset);
+                        Store<align>(b + col, _bgra.val[0]);
+                        Store<align>(g + col, _bgra.val[1]);
+                        Store<align>(r + col, _bgra.val[2]);
+                        Store<align>(a + col, _bgra.val[3]);
+                    }
+                    if (tail)
+                    {
+                        size_t col = width - A;
+                        size_t offset = 4 * col;
+                        uint8x16x4_t _bgra = Load4<false>(bgra + offset);
+                        Store<false>(b + col, _bgra.val[0]);
+                        Store<false>(g + col, _bgra.val[1]);
+                        Store<false>(r + col, _bgra.val[2]);
+                        Store<false>(a + col, _bgra.val[3]);
+                    }
+                    bgra += bgraStride;
+                    b += bStride;
+                    g += gStride;
+                    r += rStride;
+                    a += aStride;
                 }
-                if (tail)
+            }
+            else
+            {
+                for (size_t row = 0; row < height; ++row)
                 {
-                    size_t col = width - A;
-                    size_t offset = 4 * col;
-                    uint8x16x4_t _bgra = Load4<false>(bgra + offset);
-                    Store<false>(b + col, _bgra.val[0]);
-                    Store<false>(g + col, _bgra.val[1]);
-                    Store<false>(r + col, _bgra.val[2]);
-                    Store<false>(a + col, _bgra.val[3]);
+                    for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += QA)
+                    {
+                        uint8x16x4_t _bgra = Load4<align>(bgra + offset);
+                        Store<align>(b + col, _bgra.val[0]);
+                        Store<align>(g + col, _bgra.val[1]);
+                        Store<align>(r + col, _bgra.val[2]);
+                    }
+                    if (tail)
+                    {
+                        size_t col = width - A;
+                        size_t offset = 4 * col;
+                        uint8x16x4_t _bgra = Load4<false>(bgra + offset);
+                        Store<false>(b + col, _bgra.val[0]);
+                        Store<false>(g + col, _bgra.val[1]);
+                        Store<false>(r + col, _bgra.val[2]);
+                    }
+                    bgra += bgraStride;
+                    b += bStride;
+                    g += gStride;
+                    r += rStride;
                 }
-                bgra += bgraStride;
-                b += bStride;
-                g += gStride;
-                r += rStride;
-                a += aStride;
             }
         }
 
@@ -162,7 +195,7 @@ namespace Simd
             uint8_t * b, size_t bStride, uint8_t * g, size_t gStride, uint8_t * r, size_t rStride, uint8_t * a, size_t aStride)
         {
             if (Aligned(bgra) && Aligned(bgraStride) && Aligned(b) && Aligned(bStride) &&
-                Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride))
+                Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) && Aligned(a) && (Aligned(aStride) || a == NULL))
                 DeinterleaveBgra<true>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
             else
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
