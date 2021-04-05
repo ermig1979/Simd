@@ -268,8 +268,6 @@ namespace Simd
 
         ImageJpegSaver::ImageJpegSaver(const ImageSaverParam& param)
             : ImageSaver(param)
-            , _channels(0)
-            , _convert(NULL)
             , _deintBgra(NULL)
             , _deintBgr(NULL)
         {

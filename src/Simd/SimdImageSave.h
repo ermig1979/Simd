@@ -172,7 +172,6 @@ namespace Simd
 
             virtual bool ToStream(const uint8_t* src, size_t stride);
         protected:
-            typedef void (*ConvertPtr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
             typedef void (*DeintBgrPtr)(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height,
                 uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride);
             typedef void (*DeintBgraPtr)(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
@@ -181,12 +180,11 @@ namespace Simd
                 const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3]);
 
             Array8u _buffer;
-            ConvertPtr _convert;
             DeintBgrPtr _deintBgr;
             DeintBgraPtr _deintBgra;
             WriteBlockPtr _writeBlock;
             bool _subSample;
-            int _quality, _channels, _size, _block, _width;
+            int _quality, _block, _width;
             float _fY[64], _fUv[64];
             uint8_t _uY[64], _uUv[64];
 
@@ -236,9 +234,6 @@ namespace Simd
         {
         public:
             ImageJpegSaver(const ImageSaverParam& param);
-
-            virtual bool ToStream(const uint8_t* src, size_t stride);
-
         };
 
         //---------------------------------------------------------------------
