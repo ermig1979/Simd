@@ -157,7 +157,7 @@ namespace Simd
                     v = CDU[i] * fdtbl[j];
                     // DU[jpegw__jpg_ZigZag[j]] = (int)(v < 0 ? ceilf(v - 0.5f) : floorf(v + 0.5f));
                     // ceilf() and floorf() are C99, not C89, but I /think/ they're not needed here anyway?
-                    DU[jpegw__jpg_ZigZag[j]] = (int)(v < 0 ? v - 0.5f : v + 0.5f);
+                    DU[jpegw__jpg_ZigZag[j]] = Round(v);// (int)(v < 0 ? v - 0.5f : v + 0.5f);
                 }
             }
 
@@ -452,7 +452,7 @@ namespace Simd
             default:
                 return;
             }
-            _size = _param.width * _channels;
+            _size = (int)_param.width * _channels;
             if (_param.format == SimdPixelFormatBgr24)
             {
                 _buffer.Resize(_param.height * _size);

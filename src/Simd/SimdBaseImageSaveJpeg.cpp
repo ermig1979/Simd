@@ -73,11 +73,26 @@ namespace Simd
            {1018, 10}, {32707, 15}, {65526, 16}, {65527, 16}, {65528, 16}, {65529, 16}, {65530, 16}, {65531, 16}, {65532, 16}, {65533, 16}, {65534, 16}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
         };
 
+#if defined(SIMD_JPEG_CALC_BITS_TABLE)
+        int JpegCalcBitsTable[1024];
+        bool JpegCalcBitsTableInit()
+        {
+            for (int i = 0; i < 1024; ++i)
+            {
+                int value = i, count = 1;
+                while (value >>= 1)
+                    ++count;
+                JpegCalcBitsTable[i] = count;
+            }
+            return true;
+        }
+        bool JpegCalcBitsTableInited = JpegCalcBitsTableInit();
+#endif
+
         SIMD_INLINE void JpegDct(float* d0p, float* d1p, float* d2p, float* d3p, float* d4p, float* d5p, float* d6p, float* d7p)
         {
             float d0 = *d0p, d1 = *d1p, d2 = *d2p, d3 = *d3p, d4 = *d4p, d5 = *d5p, d6 = *d6p, d7 = *d7p;
             float z1, z2, z3, z4, z5, z11, z13;
-
             float tmp0 = d0 + d7;
             float tmp7 = d0 - d7;
             float tmp1 = d1 + d6;
@@ -87,34 +102,31 @@ namespace Simd
             float tmp3 = d3 + d4;
             float tmp4 = d3 - d4;
 
-            // Even part
-            float tmp10 = tmp0 + tmp3;   // phase 2
+            float tmp10 = tmp0 + tmp3;
             float tmp13 = tmp0 - tmp3;
             float tmp11 = tmp1 + tmp2;
             float tmp12 = tmp1 - tmp2;
 
-            d0 = tmp10 + tmp11;       // phase 3
+            d0 = tmp10 + tmp11;
             d4 = tmp10 - tmp11;
 
-            z1 = (tmp12 + tmp13) * 0.707106781f; // c4
-            d2 = tmp13 + z1;       // phase 5
+            z1 = (tmp12 + tmp13) * 0.707106781f;
+            d2 = tmp13 + z1;
             d6 = tmp13 - z1;
 
-            // Odd part
-            tmp10 = tmp4 + tmp5;       // phase 2
+            tmp10 = tmp4 + tmp5;
             tmp11 = tmp5 + tmp6;
             tmp12 = tmp6 + tmp7;
 
-            // The rotator is modified from fig 4-8 to avoid extra negations.
-            z5 = (tmp10 - tmp12) * 0.382683433f; // c6
-            z2 = tmp10 * 0.541196100f + z5; // c2-c6
-            z4 = tmp12 * 1.306562965f + z5; // c2+c6
-            z3 = tmp11 * 0.707106781f; // c4
+            z5 = (tmp10 - tmp12) * 0.382683433f;
+            z2 = tmp10 * 0.541196100f + z5;
+            z4 = tmp12 * 1.306562965f + z5;
+            z3 = tmp11 * 0.707106781f;
 
-            z11 = tmp7 + z3;      // phase 5
+            z11 = tmp7 + z3;
             z13 = tmp7 - z3;
 
-            *d5p = z13 + z2;         // phase 6
+            *d5p = z13 + z2;
             *d3p = z13 - z2;
             *d1p = z11 + z4;
             *d7p = z11 - z4;
@@ -122,67 +134,46 @@ namespace Simd
             *d0p = d0;  *d2p = d2;  *d4p = d4;  *d6p = d6;
         }
 
-        SIMD_INLINE void JpegCalcBits(int val, unsigned short bits[2]) 
+        static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
-            int tmp1 = val < 0 ? -val : val;
-            val = val < 0 ? val - 1 : val;
-            bits[1] = 1;
-            while (tmp1 >>= 1)
-                ++bits[1];
-            bits[0] = val & ((1 << bits[1]) - 1);
-        }
-
-        static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int du_stride, const float* fdtbl, int DC, const unsigned short HTDC[256][2], const unsigned short HTAC[256][2]) 
-        {
-            const unsigned short EOB[2] = { HTAC[0x00][0], HTAC[0x00][1] };
-            const unsigned short M16zeroes[2] = { HTAC[0xF0][0], HTAC[0xF0][1] };
-            int dataOff, i, j, n, diff, end0pos, x, y;
+            int offs, i, j, n, diff, end0pos, x, y;
+            for (offs = 0, n = stride * 8; offs < n; offs += stride)
+                JpegDct(&CDU[offs], &CDU[offs + 1], &CDU[offs + 2], &CDU[offs + 3], &CDU[offs + 4], &CDU[offs + 5], &CDU[offs + 6], &CDU[offs + 7]);
+            for (offs = 0; offs < 8; ++offs) 
+                JpegDct(&CDU[offs], &CDU[offs + stride], &CDU[offs + stride * 2], &CDU[offs + stride * 3], &CDU[offs + stride * 4],
+                    &CDU[offs + stride * 5], &CDU[offs + stride * 6], &CDU[offs + stride * 7]);
             int DU[64];
-
-            // DCT rows
-            for (dataOff = 0, n = du_stride * 8; dataOff < n; dataOff += du_stride) 
-                JpegDct(&CDU[dataOff], &CDU[dataOff + 1], &CDU[dataOff + 2], &CDU[dataOff + 3], &CDU[dataOff + 4], &CDU[dataOff + 5], &CDU[dataOff + 6], &CDU[dataOff + 7]);
-            // DCT columns
-            for (dataOff = 0; dataOff < 8; ++dataOff) 
-                JpegDct(&CDU[dataOff], &CDU[dataOff + du_stride], &CDU[dataOff + du_stride * 2], &CDU[dataOff + du_stride * 3], &CDU[dataOff + du_stride * 4],
-                    &CDU[dataOff + du_stride * 5], &CDU[dataOff + du_stride * 6], &CDU[dataOff + du_stride * 7]);
-            // Quantize/descale/zigzag the coefficients
             for (y = 0, j = 0; y < 8; ++y) 
             {
                 for (x = 0; x < 8; ++x, ++j) 
                 {
-                    float v;
-                    i = y * du_stride + x;
-                    v = CDU[i] * fdtbl[j];
-                    DU[JpegZigZag[j]] = (int)(v < 0 ? v - 0.5f : v + 0.5f);
+                    i = y * stride + x;
+                    float v = CDU[i] * fdtbl[j];
+                    DU[JpegZigZag[j]] = Round(v);
                 }
             }
-
-            // Encode DC
             diff = DU[0] - DC;
             if (diff == 0) 
                 stream.WriteJpegBits(HTDC[0]);
             else 
             {
-                unsigned short bits[2];
+                uint16_t bits[2];
                 JpegCalcBits(diff, bits);
                 stream.WriteJpegBits(HTDC[bits[1]]);
                 stream.WriteJpegBits(bits);
             }
-            // Encode ACs
             end0pos = 63;
             for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
-            // end0pos = first element in reverse order !=0
             if (end0pos == 0) 
             {
-                stream.WriteJpegBits(EOB);
+                stream.WriteJpegBits(HTAC[0x00]);
                 return DU[0];
             }
             for (i = 1; i <= end0pos; ++i)
             {
                 int startpos = i;
                 int nrzeroes;
-                unsigned short bits[2];
+                uint16_t bits[2];
                 for (; DU[i] == 0 && i <= end0pos; ++i);
                 nrzeroes = i - startpos;
                 if (nrzeroes >= 16) 
@@ -190,7 +181,7 @@ namespace Simd
                     int lng = nrzeroes >> 4;
                     int nrmarker;
                     for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        stream.WriteJpegBits(M16zeroes);
+                        stream.WriteJpegBits(HTAC[0xF0]);
                     nrzeroes &= 15;
                 }
                 JpegCalcBits(DU[i], bits);
@@ -198,7 +189,7 @@ namespace Simd
                 stream.WriteJpegBits(bits);
             }
             if (end0pos != 63) 
-                stream.WriteJpegBits(EOB);
+                stream.WriteJpegBits(HTAC[0x00]);
             return DU[0];
         }
 
@@ -284,7 +275,7 @@ namespace Simd
         {
             SetQuality();
             _block = _subSample ? 16 : 8;
-            _width = AlignHi(_param.width, _block);
+            _width = (int)AlignHi(_param.width, _block);
             if (_param.format != SimdPixelFormatGray8)
                 _buffer.Resize(_width * _block * 3);
             switch (_param.format)

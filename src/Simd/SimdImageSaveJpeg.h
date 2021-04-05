@@ -26,6 +26,8 @@
 
 #include "Simd/SimdImageSave.h"
 
+#define SIMD_JPEG_CALC_BITS_TABLE
+
 namespace Simd
 {
     namespace Base
@@ -36,6 +38,28 @@ namespace Simd
         extern const uint16_t HuffmanUVdc[256][2];
         extern const uint16_t HuffmanYac[256][2];
         extern const uint16_t HuffmanUVac[256][2];
+
+#if defined(SIMD_JPEG_CALC_BITS_TABLE)
+        extern int JpegCalcBitsTable[1024];
+        SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
+        {
+            int tmp = val < 0 ? -val : val;
+            val = val < 0 ? val - 1 : val;
+            assert(tmp < 1024);
+            bits[1] = JpegCalcBitsTable[tmp];
+            bits[0] = val & ((1 << bits[1]) - 1);
+        }
+#else
+        SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
+        {
+            int tmp = val < 0 ? -val : val;
+            val = val < 0 ? val - 1 : val;
+            bits[1] = 1;
+            while (tmp >>= 1)
+                ++bits[1];
+            bits[0] = val & ((1 << bits[1]) - 1);
+        }
+#endif
     }
 
 #ifdef SIMD_SSE41_ENABLE    
