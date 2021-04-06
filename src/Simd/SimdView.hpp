@@ -512,11 +512,27 @@ namespace Simd
 
             \param [in] path - a path to image file.
             \param [in] format - a desired format of loaded image. 
-                Supported values are View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24 and View::None.
+                Supported values are View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 and View::None.
                 Default value is View::None (loads image in native pixel format of image file).
             \return - a result of loading.
         */
         bool Load(const std::string & path, Format format = None);
+
+        /*!
+            Loads image from memory buffer.
+
+            Supported formats are described by ::SimdImageFileType enumeration.
+
+            \note PGM and PPM files with comments are not supported.
+
+            \param [in] src - a pointer to memory buffer.
+            \param [in] size - a buffer size.
+            \param [in] format - a desired format of loaded image.
+                Supported values are View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 and View::None.
+                Default value is View::None (loads image in native pixel format of image file).
+            \return - a result of loading.
+        */
+        bool Load(const uint8_t * src, size_t size, Format format = None);
 
         /*!
             Saves image to file.
@@ -1174,7 +1190,19 @@ namespace Simd
     {
         Clear();
         (Format&)format = format_;
-        *(uint8_t**)&data = SimdImageLoadFormFile(path.c_str(), (size_t*)&stride, (size_t*)&width, (size_t*)&height, (SimdPixelFormatType*)&format);
+        *(uint8_t**)&data = SimdImageLoadFromFile(path.c_str(), (size_t*)&stride, (size_t*)&width, (size_t*)&height, (SimdPixelFormatType*)&format);
+        if (data)
+            _owner = true;
+        else
+            (Format&)format = None;
+        return _owner;
+    }
+
+    template <template<class> class A> SIMD_INLINE bool View<A>::Load(const uint8_t * src, size_t size, Format format_)
+    {
+        Clear();
+        (Format&)format = format_;
+        *(uint8_t**)&data = SimdImageLoadFromMemory(src, size, (size_t*)&stride, (size_t*)&width, (size_t*)&height, (SimdPixelFormatType*)&format);
         if (data)
             _owner = true;
         else

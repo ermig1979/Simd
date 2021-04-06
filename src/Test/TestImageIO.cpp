@@ -157,7 +157,26 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data2) SimdFree(data2); f2.Call(src, file, quality, &data2, &size2));
 
-        //result = result && Compare(data1, size1, data2, size2, 0, true, 64);
+        if (file == SimdImageFileJpeg)
+        {
+            View dst1, dst2;
+            if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
+            {
+                result = result && Compare(dst1, dst2, width == W ? 3 : 32, true, 64, 0, "dst1 & dst2");
+                if (!result)
+                {
+                     dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
+                     dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
+                }
+            }
+            else
+            {
+                TEST_LOG_SS(Error, "Can't load images from memory!");
+                result = false;
+            }
+        }
+        else
+            result = result && Compare(data1, size1, data2, size2, 0, true, 64);
 
         if (data1)
             Simd::Free(data1);
@@ -260,7 +279,7 @@ namespace Test
         if (file == SimdImageFilePgmTxt || file == SimdImageFilePgmBin)
             return format == View::Gray8;
         if (file == SimdImageFilePpmTxt || file == SimdImageFilePpmBin)
-            return format != View::Bgra32;
+            return format != View::Bgra32 && format != View::Rgba32;
         return false;
     }
 
@@ -304,9 +323,9 @@ namespace Test
         bool result = true;
 
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 0; format < 4; format++)
+        for (int format = 0; format < 5; format++)
         {
-            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
                 result = result && ImageLoadFromMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
                 result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);

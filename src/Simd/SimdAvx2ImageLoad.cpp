@@ -47,6 +47,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Avx2::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx2::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Avx2::GrayToBgr; break;
+                case SimdPixelFormatRgba32: _toBgra = Avx2::GrayToBgra; break;
                 }
             }
         }
@@ -68,6 +69,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Avx2::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx2::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Avx2::GrayToBgr; break;
+                case SimdPixelFormatRgba32: _toBgra = Avx2::GrayToBgra; break;
                 }
             }
         }
@@ -89,6 +91,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _toAny = Avx2::RgbToGray; break;
                 case SimdPixelFormatBgr24: _toAny = Avx2::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx2::RgbToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Avx2::BgrToBgra; break;
                 }
             }
         }
@@ -110,6 +113,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _toAny = Avx2::RgbToGray; break;
                 case SimdPixelFormatBgr24: _toAny = Avx2::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx2::RgbToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Avx2::BgrToBgra; break;
                 }
             }
         }
@@ -124,6 +128,8 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinLoader(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtLoader(param);
             case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
+            case SimdImageFilePng: return NULL;
+            case SimdImageFileJpeg: return new Base::ImageJpegLoader(param);
             default:
                 return NULL;
             }

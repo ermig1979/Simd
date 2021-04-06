@@ -99,6 +99,16 @@ namespace Simd
             return true;
         }
 
+        SIMD_INLINE bool Skip(size_t size)
+        {
+            if (_pos + size < _size)
+            {
+                _pos += size;
+                return true;
+            }
+            return false;
+        }
+
         SIMD_INLINE bool SkipValue(uint8_t value)
         {
             while (_data[_pos] == value && _pos < _size)

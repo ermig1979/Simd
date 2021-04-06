@@ -3602,7 +3602,7 @@ extern "C"
 
     /*! @ingroup image_io
 
-        \fn uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
+        \fn uint8_t* SimdImageLoadFromFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
 
         \short Loads an image from file.
 
@@ -3616,7 +3616,7 @@ extern "C"
         \return a pointer to pixels data of output image.
             It has to be deleted after use by function ::SimdFree. On error it returns NULL.
     */
-    SIMD_API uint8_t* SimdImageLoadFormFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
+    SIMD_API uint8_t* SimdImageLoadFromFile(const char* path, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType * format);
 
     /*! @ingroup other_conversion
 

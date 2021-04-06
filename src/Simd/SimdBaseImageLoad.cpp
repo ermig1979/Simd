@@ -77,10 +77,16 @@ namespace Simd
                     file = SimdImageFilePpmBin;
             }
         }
+        if (size >= 9)
+        {
+            if (data[6] == 'J' && data[7] == 'F' && data[8] == 'I' && data[9] == 'F')
+                file = SimdImageFileJpeg;
+        }
         return
-            file != SimdImageFileUndefined && (format == SimdPixelFormatNone ||
-                format == SimdPixelFormatGray8 || format == SimdPixelFormatBgr24 ||
-                format == SimdPixelFormatBgra32 || format == SimdPixelFormatRgb24);
+            file != SimdImageFileUndefined && 
+                (format == SimdPixelFormatNone || format == SimdPixelFormatGray8 || 
+                format == SimdPixelFormatBgr24 || format == SimdPixelFormatBgra32 || 
+                format == SimdPixelFormatRgb24 || format == SimdPixelFormatRgba32);
     }
         
     namespace Base
@@ -163,7 +169,7 @@ namespace Simd
                 }
                 if(_param.format == SimdPixelFormatBgr24 || _param.format == SimdPixelFormatRgb24)
                     _toAny(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride);
-                if (_param.format == SimdPixelFormatBgra32)
+                if (_param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgba32)
                     _toBgra(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride, 0xFF);
                 row += block;
             }
@@ -177,6 +183,7 @@ namespace Simd
             case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
             case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
             case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
+            case SimdPixelFormatRgba32: _toBgra = Base::GrayToBgra; break;
             }
         }
 
@@ -206,7 +213,7 @@ namespace Simd
                 }
                 if (_param.format == SimdPixelFormatBgr24 || _param.format == SimdPixelFormatRgb24)
                     _toAny(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride);
-                if (_param.format == SimdPixelFormatBgra32)
+                if (_param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgba32)
                     _toBgra(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride, 0xFF);
                 row += block;
             }
@@ -220,6 +227,7 @@ namespace Simd
             case SimdPixelFormatBgr24: _toAny = Base::GrayToBgr; break;
             case SimdPixelFormatBgra32: _toBgra = Base::GrayToBgra; break;
             case SimdPixelFormatRgb24: _toAny = Base::GrayToBgr; break;
+            case SimdPixelFormatRgba32: _toBgra = Base::GrayToBgra; break;
             }
         }
 
@@ -252,7 +260,7 @@ namespace Simd
                 }
                 if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24)
                     _toAny(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride);
-                if (_param.format == SimdPixelFormatBgra32)
+                if (_param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgba32)
                     _toBgra(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride, 0xFF);
                 row += block;
             }
@@ -266,6 +274,7 @@ namespace Simd
             case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
             case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
             case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
+            case SimdPixelFormatRgba32: _toBgra = Base::BgrToBgra; break;
             }
         }
 
@@ -295,7 +304,7 @@ namespace Simd
                 }
                 if (_param.format == SimdPixelFormatGray8 || _param.format == SimdPixelFormatBgr24)
                     _toAny(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride);
-                if (_param.format == SimdPixelFormatBgra32)
+                if (_param.format == SimdPixelFormatBgra32 || _param.format == SimdPixelFormatRgba32)
                     _toBgra(_buffer.data, _image.width, block, _size, _image.Row<uint8_t>(row), _image.stride, 0xFF);
                 row += block;
             }
@@ -309,6 +318,7 @@ namespace Simd
             case SimdPixelFormatGray8: _toAny = Base::RgbToGray; break;
             case SimdPixelFormatBgr24: _toAny = Base::BgrToRgb; break;
             case SimdPixelFormatBgra32: _toBgra = Base::RgbToBgra; break;
+            case SimdPixelFormatRgba32: _toBgra = Base::BgrToBgra; break;
             }
         }
 
@@ -322,6 +332,8 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinLoader(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtLoader(param);
             case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
+            case SimdImageFilePng: return NULL;
+            case SimdImageFileJpeg: return new ImageJpegLoader(param);
             default:
                 return NULL;
             }

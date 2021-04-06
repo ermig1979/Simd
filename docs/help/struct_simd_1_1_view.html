@@ -200,6 +200,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a70dc9be2f75ebde11ad8c9eb0209cf03"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ad598aa205cbea4bf98500b13a3fffb91"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#ad598aa205cbea4bf98500b13a3fffb91">Load</a> (const std::string &amp;path, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> <a class="el" href="struct_simd_1_1_view.html#a7cf7e7bed8ea97ad270803076c14f83f">format</a>=<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">None</a>)</td></tr>
 <tr class="separator:ad598aa205cbea4bf98500b13a3fffb91"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:abcaeda52ec3df5481d34cb8235952256"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#abcaeda52ec3df5481d34cb8235952256">Load</a> (const uint8_t *src, size_t size, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> <a class="el" href="struct_simd_1_1_view.html#a7cf7e7bed8ea97ad270803076c14f83f">format</a>=<a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">None</a>)</td></tr>
+<tr class="separator:abcaeda52ec3df5481d34cb8235952256"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:af67086a33d893d3b1b944ae821a61a8c"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#af67086a33d893d3b1b944ae821a61a8c">Save</a> (const std::string &amp;path, <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> type=<a class="el" href="group__c__types.html#ggaaa683fbfa281cfc06b6907b63e8d1944ae9a22652a454d664e260e90ff1238724">SimdImageFileUndefined</a>, int quality=100) const</td></tr>
 <tr class="separator:af67086a33d893d3b1b944ae821a61a8c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8e8f47f981b25b53a8911e43ea2a9156"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a8e8f47f981b25b53a8911e43ea2a9156">Clear</a> ()</td></tr>
@@ -1555,7 +1557,7 @@ int main()
 </div>
 </div>
 <a id="ad598aa205cbea4bf98500b13a3fffb91"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad598aa205cbea4bf98500b13a3fffb91">&#9670;&nbsp;</a></span>Load()</h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ad598aa205cbea4bf98500b13a3fffb91">&#9670;&nbsp;</a></span>Load() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -1585,7 +1587,53 @@ int main()
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">path</td><td>- a path to image file. </td></tr>
-    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a desired format of loaded image. Supported values are <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a> and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a>. Default value is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a> (loads image in native pixel format of image file). </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a desired format of loaded image. Supported values are <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0">View::Rgba32</a> and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a>. Default value is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a> (loads image in native pixel format of image file). </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a result of loading. </dd></dl>
+
+</div>
+</div>
+<a id="abcaeda52ec3df5481d34cb8235952256"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#abcaeda52ec3df5481d34cb8235952256">&#9670;&nbsp;</a></span>Load() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE bool Load </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a>&#160;</td>
+          <td class="paramname"><em>format</em> = <code><a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">None</a></code>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Loads image from memory buffer.</p>
+<p>Supported formats are described by <a class="el" href="group__c__types.html#gaaa683fbfa281cfc06b6907b63e8d1944">SimdImageFileType</a> enumeration.</p>
+<dl class="section note"><dt>Note</dt><dd>PGM and PPM files with comments are not supported.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to memory buffer. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a buffer size. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">format</td><td>- a desired format of loaded image. Supported values are <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a32b66f83ff9a2dedd7df8eaf49f098f9">View::Gray8</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aae04dc5334e8b6b7bdce592e8662780e">View::Bgr24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a3fc492d8d7d2eef43440f588d594f9fe">View::Bgra32</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58a8d89a1012df13a621ec5007e7ef438be">View::Rgb24</a>, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58aab8268995d02c8bcc9bf6eb2e2b38da0">View::Rgba32</a> and <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a>. Default value is <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58ac9d3e887722f2bc482bcca9d41c512af">View::None</a> (loads image in native pixel format of image file). </td></tr>
   </table>
   </dd>
 </dl>
