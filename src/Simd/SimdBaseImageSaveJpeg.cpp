@@ -202,18 +202,7 @@ namespace Simd
                 for (int x = 0; x < width; x += 16)
                 {
                     float Y[256], U[256], V[256];
-                    for (int row = y, pos = 0; row < y + 16; ++row)
-                    {
-                        int rowOffs = (row < height ? row : height - 1) * stride;
-                        for (int col = x; col < x + 16; ++col, ++pos)
-                        {
-                            int offs = rowOffs + (col < width ? col : width - 1);
-                            float r = red[offs], g = green[offs], b = blue[offs];
-                            Y[pos] = +0.29900f * r + 0.58700f * g + 0.11400f * b - 128;
-                            U[pos] = -0.16874f * r - 0.33126f * g + 0.50000f * b;
-                            V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
-                        }
-                    }
+                    Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 16);
                     DCY = JpegProcessDu(stream, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -244,19 +233,7 @@ namespace Simd
                 for (int x = 0; x < width; x += 8)
                 {
                     float Y[64], U[64], V[64];
-                    for (int row = y, pos = 0; row < y + 8; ++row)
-                    {
-                        int rowOffs = (row < height ? row : height - 1) * stride;
-                        for (int col = x; col < x + 8; ++col, ++pos)
-                        {
-                            int offs = rowOffs + (col < width ? col : width - 1);
-                            float r = red[offs], g = green[offs], b = blue[offs];
-                            Y[pos] = +0.29900f * r + 0.58700f * g + 0.11400f * b - 128;
-                            U[pos] = -0.16874f * r - 0.33126f * g + 0.50000f * b;
-                            V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
-                        }
-                    }
-
+                    Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 8);
                     DCY = JpegProcessDu(stream, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCU = JpegProcessDu(stream, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
                     DCV = JpegProcessDu(stream, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);

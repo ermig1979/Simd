@@ -60,6 +60,24 @@ namespace Simd
             bits[0] = val & ((1 << bits[1]) - 1);
         }
 #endif
+
+        SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height, int width, float* y, float* u, float* v, int size)
+        {
+            for (int row = 0; row < size; ++row)
+            {
+                for (int col = 0; col < size; col += 1)
+                {
+                    int offs = (col < width ? col : width - 1);
+                    float _r = r[offs], _g = g[offs], _b = b[offs];
+                    y[col] = +0.29900f * _r + 0.58700f * _g + 0.11400f * _b - 128.000f;
+                    u[col] = -0.16874f * _r - 0.33126f * _g + 0.50000f * _b;
+                    v[col] = +0.50000f * _r - 0.41869f * _g - 0.08131f * _b;
+                }
+                if (row < height)
+                    r += stride, g += stride, b += stride;
+                y += size, u += size, v += size;
+            }
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE    

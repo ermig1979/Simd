@@ -162,7 +162,11 @@ namespace Test
             View dst1, dst2;
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
-                result = result && Compare(dst1, dst2, width == W ? 3 : 32, true, 64, 0, "dst1 & dst2");
+                int differenceMax = 0;
+                //if (quality > 90)
+                //    differenceMax = Simd::Aligned(width, 16) ? 2 : 8;
+                //width == W ? 3 : 32
+                result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
                      dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
@@ -293,7 +297,11 @@ namespace Test
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
+#if 0
         FillRandom(src);
+#else
+        CreateTestImage(src, 10, 10);
+#endif
 
         size_t size = 0;
         uint8_t* data = SimdImageSaveToMemory(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, &size);

@@ -77,14 +77,72 @@ namespace Simd
             *d0p = d0;  *d2p = d2;  *d4p = d4;  *d6p = d6;
         }
 
+        SIMD_INLINE void JpegDctV(float* data, size_t stride)
+        {
+            for (float * end = data + 8; data < end; data += 4)
+            {
+                __m128 d0 = _mm_loadu_ps(data + 0 * stride);
+                __m128 d1 = _mm_loadu_ps(data + 1 * stride);
+                __m128 d2 = _mm_loadu_ps(data + 2 * stride);
+                __m128 d3 = _mm_loadu_ps(data + 3 * stride);
+                __m128 d4 = _mm_loadu_ps(data + 4 * stride);
+                __m128 d5 = _mm_loadu_ps(data + 5 * stride);
+                __m128 d6 = _mm_loadu_ps(data + 6 * stride);
+                __m128 d7 = _mm_loadu_ps(data + 7 * stride);
+
+                __m128 tmp0 = _mm_add_ps(d0, d7);
+                __m128 tmp7 = _mm_sub_ps(d0, d7);
+                __m128 tmp1 = _mm_add_ps(d1, d6);
+                __m128 tmp6 = _mm_sub_ps(d1, d6);
+                __m128 tmp2 = _mm_add_ps(d2, d5);
+                __m128 tmp5 = _mm_sub_ps(d2, d5);
+                __m128 tmp3 = _mm_add_ps(d3, d4);
+                __m128 tmp4 = _mm_sub_ps(d3, d4);
+
+                __m128 tmp10 = _mm_add_ps(tmp0, tmp3);
+                __m128 tmp13 = _mm_sub_ps(tmp0, tmp3);
+                __m128 tmp11 = _mm_add_ps(tmp1, tmp2);
+                __m128 tmp12 = _mm_sub_ps(tmp1, tmp2);
+
+                d0 = _mm_add_ps(tmp10, tmp11);
+                d4 = _mm_sub_ps(tmp10, tmp11);
+
+                __m128 z1 = _mm_mul_ps(_mm_add_ps(tmp12, tmp13), _mm_set1_ps(0.707106781f));
+                d2 = _mm_add_ps(tmp13, z1);
+                d6 = _mm_sub_ps(tmp13, z1);
+
+                tmp10 = _mm_add_ps(tmp4, tmp5);
+                tmp11 = _mm_add_ps(tmp5, tmp6);
+                tmp12 = _mm_add_ps(tmp6, tmp7);
+
+                __m128 z5 = _mm_mul_ps(_mm_sub_ps(tmp10, tmp12),  _mm_set1_ps(0.382683433f));
+                __m128 z2 = _mm_add_ps(_mm_mul_ps(tmp10, _mm_set1_ps(0.541196100f)), z5);
+                __m128 z4 = _mm_add_ps(_mm_mul_ps(tmp12, _mm_set1_ps(1.306562965f)), z5);
+                __m128 z3 = _mm_mul_ps(tmp11, _mm_set1_ps(0.707106781f));
+
+                __m128 z11 = _mm_add_ps(tmp7, z3);
+                __m128 z13 = _mm_sub_ps(tmp7, z3);
+
+                _mm_storeu_ps(data + 0 * stride, d0);
+                _mm_storeu_ps(data + 1 * stride, _mm_add_ps(z11, z4));
+                _mm_storeu_ps(data + 2 * stride, d2);
+                _mm_storeu_ps(data + 3 * stride, _mm_sub_ps(z13, z2));
+                _mm_storeu_ps(data + 4 * stride, d4);
+                _mm_storeu_ps(data + 5 * stride, _mm_add_ps(z13, z2));
+                _mm_storeu_ps(data + 6 * stride, d6);
+                _mm_storeu_ps(data + 7 * stride, _mm_sub_ps(z11, z4));
+            }
+        }
+
         static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             int offs, i, j, n, diff, end0pos, x, y;
             for (offs = 0, n = stride * 8; offs < n; offs += stride)
                 JpegDct(&CDU[offs], &CDU[offs + 1], &CDU[offs + 2], &CDU[offs + 3], &CDU[offs + 4], &CDU[offs + 5], &CDU[offs + 6], &CDU[offs + 7]);
-            for (offs = 0; offs < 8; ++offs)
-                JpegDct(&CDU[offs], &CDU[offs + stride], &CDU[offs + stride * 2], &CDU[offs + stride * 3], &CDU[offs + stride * 4],
-                    &CDU[offs + stride * 5], &CDU[offs + stride * 6], &CDU[offs + stride * 7]);
+            JpegDctV(CDU, stride);
+            //for (offs = 0; offs < 8; ++offs)
+            //    JpegDct(&CDU[offs], &CDU[offs + stride], &CDU[offs + stride * 2], &CDU[offs + stride * 3], &CDU[offs + stride * 4],
+            //        &CDU[offs + stride * 5], &CDU[offs + stride * 6], &CDU[offs + stride * 7]);
             int DU[64];
             for (y = 0, j = 0; y < 8; ++y)
             {
@@ -136,18 +194,23 @@ namespace Simd
             return DU[0];
         }
 
-        SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height, float* y, float* u, float* v, int size)
+        SIMD_INLINE void RgbToYuvInit(__m128 k[10])
         {
-            const __m128 _yr = _mm_set1_ps(+0.29900f);
-            const __m128 _yg = _mm_set1_ps(+0.58700f);
-            const __m128 _yb = _mm_set1_ps(+0.11400f);
-            const __m128 _yt = _mm_set1_ps(-128.000f);
-            const __m128 _ur = _mm_set1_ps(-0.16874f);
-            const __m128 _ug = _mm_set1_ps(-0.33126f);
-            const __m128 _ub = _mm_set1_ps(+0.50000f);
-            const __m128 _vr = _mm_set1_ps(+0.50000f);
-            const __m128 _vg = _mm_set1_ps(-0.41869f);
-            const __m128 _vb = _mm_set1_ps(-0.08131f);
+            k[0] = _mm_set1_ps(+0.29900f);
+            k[1] = _mm_set1_ps(+0.58700f);
+            k[2] = _mm_set1_ps(+0.11400f);
+            k[3] = _mm_set1_ps(-128.000f);
+            k[4] = _mm_set1_ps(-0.16874f);
+            k[5] = _mm_set1_ps(-0.33126f);
+            k[6] = _mm_set1_ps(+0.50000f);
+            k[7] = _mm_set1_ps(+0.50000f);
+            k[8] = _mm_set1_ps(-0.41869f);
+            k[9] = _mm_set1_ps(-0.08131f);
+        }
+
+        SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height, 
+            const __m128 k[10], float* y, float* u, float* v, int size)
+        {
             for (int row = 0; row < size; ++row)
             {
                 for (int col = 0; col < size; col += 4)
@@ -155,9 +218,10 @@ namespace Simd
                     __m128 _r = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(r + col))));
                     __m128 _g = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(g + col))));
                     __m128 _b = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(b + col))));
-                    _mm_storeu_ps(y + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, _yr), _mm_mul_ps(_g, _yg)), _mm_add_ps(_mm_mul_ps(_b, _yb), _yt)));
-                    _mm_storeu_ps(u + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, _ur), _mm_mul_ps(_g, _ug)), _mm_mul_ps(_b, _ub)));
-                    _mm_storeu_ps(v + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, _vr), _mm_mul_ps(_g, _vg)), _mm_mul_ps(_b, _vb)));
+                    _mm_storeu_ps(y + col, _mm_add_ps(_mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, k[0]), _mm_mul_ps(_g, k[1])), _mm_mul_ps(_b, k[2])), k[3]));
+                    //_mm_storeu_ps(y + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, _yr), _mm_mul_ps(_g, _yg)), _mm_add_ps(_mm_mul_ps(_b, _yb), _yt)));
+                    _mm_storeu_ps(u + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, k[4]), _mm_mul_ps(_g, k[5])), _mm_mul_ps(_b, k[6])));
+                    _mm_storeu_ps(v + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, k[7]), _mm_mul_ps(_g, k[8])), _mm_mul_ps(_b, k[9])));
                 }
                 if(row < height)
                     r += stride, g += stride, b += stride;
@@ -184,8 +248,10 @@ namespace Simd
         void JpegWriteBlockSubs(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
             const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
+            __m128 k[10];
+            RgbToYuvInit(k);
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
-            int width16 = width & (~15);
+            int width16 = width& (~15);
             for (int y = 0; y < height; y += 16)
             {
                 int x = 0;
@@ -193,7 +259,7 @@ namespace Simd
                 SIMD_ALIGNED(16) float subU[64], subV[64];
                 for (; x < width16; x += 16)
                 {
-                    RgbToYuv(red + x, green + x, blue + x, stride, height - y, Y, U, V, 16);
+                    RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V, 16);
                     DCY = JpegProcessDu(stream, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -205,18 +271,7 @@ namespace Simd
                 }
                 for (; x < width; x += 16)
                 {
-                    for (int row = y, pos = 0; row < y + 16; ++row)
-                    {
-                        int rowOffs = (row < height ? row : height - 1) * stride;
-                        for (int col = x; col < x + 16; ++col, ++pos)
-                        {
-                            int offs = rowOffs + (col < width ? col : width - 1);
-                            float r = red[offs], g = green[offs], b = blue[offs];
-                            Y[pos] = +0.29900f * r + 0.58700f * g + 0.11400f * b - 128;
-                            U[pos] = -0.16874f * r - 0.33126f * g + 0.50000f * b;
-                            V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
-                        }
-                    }
+                    Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 16);
                     DCY = JpegProcessDu(stream, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -232,6 +287,8 @@ namespace Simd
         void JpegWriteBlockFull(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
             const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
+            __m128 k[10];
+            RgbToYuvInit(k);
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width8 = width & (~7);
             for (int y = 0; y < height; y += 8)
@@ -240,26 +297,14 @@ namespace Simd
                 SIMD_ALIGNED(16) float Y[64], U[64], V[64];
                 for (; x < width8; x += 8)
                 {
-                    RgbToYuv(red + x, green + x, blue + x, stride, height - y, Y, U, V, 8);
+                    RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V, 8);
                     DCY = JpegProcessDu(stream, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCU = JpegProcessDu(stream, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
                     DCV = JpegProcessDu(stream, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                 }
                 for (; x < width; x += 8)
                 {
-                    for (int row = y, pos = 0; row < y + 8; ++row)
-                    {
-                        int rowOffs = (row < height ? row : height - 1) * stride;
-                        for (int col = x; col < x + 8; ++col, ++pos)
-                        {
-                            int offs = rowOffs + (col < width ? col : width - 1);
-                            float r = red[offs], g = green[offs], b = blue[offs];
-                            Y[pos] = +0.29900f * r + 0.58700f * g + 0.11400f * b - 128;
-                            U[pos] = -0.16874f * r - 0.33126f * g + 0.50000f * b;
-                            V[pos] = +0.50000f * r - 0.41869f * g - 0.08131f * b;
-                        }
-                    }
-
+                    Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 8);
                     DCY = JpegProcessDu(stream, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCU = JpegProcessDu(stream, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
                     DCV = JpegProcessDu(stream, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
