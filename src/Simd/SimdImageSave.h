@@ -188,7 +188,9 @@ namespace Simd
             float _fY[64], _fUv[64];
             uint8_t _uY[64], _uUv[64];
 
-            void SetQuality();
+            virtual void Init();
+
+            void InitParams(bool trans);
             void WriteHeader();
         };
 
@@ -234,6 +236,9 @@ namespace Simd
         {
         public:
             ImageJpegSaver(const ImageSaverParam& param);
+
+        private:
+            virtual void Init();
         };
 
         //---------------------------------------------------------------------

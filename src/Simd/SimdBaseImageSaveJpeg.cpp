@@ -30,9 +30,25 @@ namespace Simd
 {
     namespace Base
     {
-        const uint8_t JpegZigZag[64] = { 0, 1, 5, 6, 14, 15, 27, 28, 2, 4, 7, 13, 16, 26, 29, 42, 3, 8, 
-            12, 17, 25, 30, 41, 43, 9, 11, 18, 24, 31, 40, 44, 53, 10, 19, 23, 32, 39, 45, 52, 54, 20, 
-            22, 33, 38, 46, 51, 55, 60, 21, 34, 37, 47, 50, 56, 59, 61, 35, 36, 48, 49, 57, 58, 62, 63 };
+        const uint8_t JpegZigZagD[64] = { 
+            0, 1, 5, 6, 14, 15, 27, 28, 
+            2, 4, 7, 13, 16, 26, 29, 42, 
+            3, 8, 12, 17, 25, 30, 41, 43, 
+            9, 11, 18, 24, 31, 40, 44, 53, 
+            10, 19, 23, 32, 39, 45, 52, 54, 
+            20, 22, 33, 38, 46, 51, 55, 60, 
+            21, 34, 37, 47, 50, 56, 59, 61, 
+            35, 36, 48, 49, 57, 58, 62, 63 };
+
+        const uint8_t JpegZigZagT[64] = { 
+            0, 2, 3, 9, 10, 20, 21, 35,
+            1, 4, 8, 11, 19, 22, 34, 36,
+            5, 7, 12, 18, 23, 33, 37, 48,
+            6, 13, 17, 24, 32, 38, 47, 49,
+            14, 16, 25, 31, 39, 46, 50, 57,
+            15, 26, 30, 40, 45, 51, 56, 58,
+            27, 29, 41, 44, 52, 55, 59, 62,
+            28, 42, 43, 53, 54, 60, 61, 63 };        
 
         const uint16_t HuffmanYdc[256][2] = { {0, 2}, {2, 3}, {3, 3}, {4, 3}, {5, 3}, {6, 3}, {14, 4}, {30, 5}, {62, 6}, {126, 7}, {254, 8}, {510, 9} };
         const uint16_t HuffmanUVdc[256][2] = { {0, 2}, {1, 2}, {2, 2}, {6, 3}, {14, 4}, {30, 5}, {62, 6}, {126, 7}, {254, 8}, {510, 9}, {1022, 10}, {2046, 11} };
@@ -137,11 +153,11 @@ namespace Simd
         static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             int offs, i, j, n, diff, end0pos, x, y;
-            for (offs = 0, n = stride * 8; offs < n; offs += stride)
-                JpegDct(&CDU[offs], &CDU[offs + 1], &CDU[offs + 2], &CDU[offs + 3], &CDU[offs + 4], &CDU[offs + 5], &CDU[offs + 6], &CDU[offs + 7]);
             for (offs = 0; offs < 8; ++offs) 
                 JpegDct(&CDU[offs], &CDU[offs + stride], &CDU[offs + stride * 2], &CDU[offs + stride * 3], &CDU[offs + stride * 4],
                     &CDU[offs + stride * 5], &CDU[offs + stride * 6], &CDU[offs + stride * 7]);
+            for (offs = 0, n = stride * 8; offs < n; offs += stride)
+                JpegDct(&CDU[offs], &CDU[offs + 1], &CDU[offs + 2], &CDU[offs + 3], &CDU[offs + 4], &CDU[offs + 5], &CDU[offs + 6], &CDU[offs + 7]);
             int DU[64];
             for (y = 0, j = 0; y < 8; ++y) 
             {
@@ -149,7 +165,7 @@ namespace Simd
                 {
                     i = y * stride + x;
                     float v = CDU[i] * fdtbl[j];
-                    DU[JpegZigZag[j]] = Round(v);
+                    DU[JpegZigZagD[j]] = Round(v);
                 }
             }
             diff = DU[0] - DC;
@@ -248,11 +264,11 @@ namespace Simd
             , _deintBgra(NULL)
             , _deintBgr(NULL)
         {
-            SetQuality();
-            _block = _subSample ? 16 : 8;
-            _width = (int)AlignHi(_param.width, _block);
-            if (_param.format != SimdPixelFormatGray8)
-                _buffer.Resize(_width * _block * 3);
+        }
+
+        void ImageJpegSaver::Init()
+        {
+            InitParams(false);
             switch (_param.format)
             {
             case SimdPixelFormatBgr24:
@@ -267,7 +283,7 @@ namespace Simd
             _writeBlock = _subSample ? JpegWriteBlockSubs : JpegWriteBlockFull;
         }
 
-        void ImageJpegSaver::SetQuality()
+        void ImageJpegSaver::InitParams(bool trans)
         {
             static const int YQT[] = { 16, 11, 10, 16, 24, 40, 51, 61, 12, 12, 14, 19, 26, 58, 60, 55, 14, 13, 
                 16, 24, 40, 57, 69, 56, 14, 17, 22, 29, 51, 87, 80, 62, 18, 22, 37, 56, 68, 109, 103, 77, 24, 
@@ -283,21 +299,26 @@ namespace Simd
             _subSample = _quality <= 90 ? 1 : 0;
             _quality = _quality < 1 ? 1 : _quality > 100 ? 100 : _quality;
             _quality = _quality < 50 ? 5000 / _quality : 200 - _quality * 2;
+            const uint8_t *ZigZag = trans ? Base::JpegZigZagT : Base::JpegZigZagD;
             for (size_t i = 0; i < 64; ++i)
             {
                 int uvti, yti = (YQT[i] * _quality + 50) / 100;
-                _uY[JpegZigZag[i]] = uint8_t(yti < 1 ? 1 : yti > 255 ? 255 : yti);
+                _uY[ZigZag[i]] = uint8_t(yti < 1 ? 1 : yti > 255 ? 255 : yti);
                 uvti = (UVQT[i] * _quality + 50) / 100;
-                _uUv[JpegZigZag[i]] = uint8_t(uvti < 1 ? 1 : uvti > 255 ? 255 : uvti);
+                _uUv[ZigZag[i]] = uint8_t(uvti < 1 ? 1 : uvti > 255 ? 255 : uvti);
             }
             for (size_t y = 0, i = 0; y < 8; ++y)
             {
                 for (size_t x = 0; x < 8; ++x, ++i)
                 {
-                    _fY[i] = 1.0f / (_uY[JpegZigZag[i]] * AASF[y] * AASF[x]);
-                    _fUv[i] = 1.0f / (_uUv[JpegZigZag[i]] * AASF[y] * AASF[x]);
+                    _fY[i] = 1.0f / (_uY[ZigZag[i]] * AASF[y] * AASF[x]);
+                    _fUv[i] = 1.0f / (_uUv[ZigZag[i]] * AASF[y] * AASF[x]);
                 }
             }
+            _block = _subSample ? 16 : 8;
+            _width = (int)AlignHi(_param.width, _block);
+            if (_param.format != SimdPixelFormatGray8)
+                _buffer.Resize(_width * _block * 3);
         }
 
         void ImageJpegSaver::WriteHeader()
@@ -351,6 +372,7 @@ namespace Simd
 
         bool ImageJpegSaver::ToStream(const uint8_t* src, size_t stride)
         {
+            Init();
             WriteHeader();
             uint8_t* r = _buffer.data, * g = r + _width * _block,* b = g + _width * _block;
             int dc[3] = { 0, 0, 0 };

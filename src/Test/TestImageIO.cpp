@@ -134,6 +134,8 @@ namespace Test
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
 
+#define TEST_REAL_IMAGE "forest.jpg"
+
     bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
         bool result = true;
@@ -141,13 +143,27 @@ namespace Test
         f1.Update(format, file, quality);
         f2.Update(format, file, quality);
 
+#if defined(TEST_REAL_IMAGE)
+        String path = ROOT_PATH + "/data/image/" + TEST_REAL_IMAGE;
+        View src;
+        if (!src.Load(path, format))
+        {
+            TEST_LOG_SS(Error, "Can't load image form '" << path << "'!");
+            return false;
+        }
+        TEST_ALIGN(SIMD_ALIGN);
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " at " << TEST_REAL_IMAGE << " [" << src.width << "x" << src.height << "].");
+#else
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
 #if 0
+        ::srand(0);
         FillRandom(src);
+        //src.Load("error.ppm", format);
 #else
         CreateTestImage(src, 10, 10);
+#endif
 #endif
 
         uint8_t* data1 = NULL, * data2 = NULL;
@@ -163,14 +179,12 @@ namespace Test
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
                 int differenceMax = 0;
-                //if (quality > 90)
-                //    differenceMax = Simd::Aligned(width, 16) ? 2 : 8;
-                //width == W ? 3 : 32
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
                      dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
                      dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
+                     src.Save("error.ppm", SimdImageFilePpmTxt);
                 }
             }
             else
@@ -202,7 +216,7 @@ namespace Test
         bool result = true;
 
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 0; format < 4; format++)
+        for (int format = 0; format < 5; format++)
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
@@ -298,6 +312,7 @@ namespace Test
 
         View src(width, height, format, NULL, TEST_ALIGN(width));
 #if 0
+        ::srand(0);
         FillRandom(src);
 #else
         CreateTestImage(src, 10, 10);

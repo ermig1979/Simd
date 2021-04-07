@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdImageSaveJpeg.h"
+#include "Simd/SimdConst.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSsse3.h"
 
@@ -32,63 +33,18 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        SIMD_INLINE void JpegDct(float* d0p, float* d1p, float* d2p, float* d3p, float* d4p, float* d5p, float* d6p, float* d7p)
+        SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float *dst, size_t dstStride)
         {
-            float d0 = *d0p, d1 = *d1p, d2 = *d2p, d3 = *d3p, d4 = *d4p, d5 = *d5p, d6 = *d6p, d7 = *d7p;
-            float z1, z2, z3, z4, z5, z11, z13;
-            float tmp0 = d0 + d7;
-            float tmp7 = d0 - d7;
-            float tmp1 = d1 + d6;
-            float tmp6 = d1 - d6;
-            float tmp2 = d2 + d5;
-            float tmp5 = d2 - d5;
-            float tmp3 = d3 + d4;
-            float tmp4 = d3 - d4;
-
-            float tmp10 = tmp0 + tmp3;
-            float tmp13 = tmp0 - tmp3;
-            float tmp11 = tmp1 + tmp2;
-            float tmp12 = tmp1 - tmp2;
-
-            d0 = tmp10 + tmp11;
-            d4 = tmp10 - tmp11;
-
-            z1 = (tmp12 + tmp13) * 0.707106781f;
-            d2 = tmp13 + z1;
-            d6 = tmp13 - z1;
-
-            tmp10 = tmp4 + tmp5;
-            tmp11 = tmp5 + tmp6;
-            tmp12 = tmp6 + tmp7;
-
-            z5 = (tmp10 - tmp12) * 0.382683433f;
-            z2 = tmp10 * 0.541196100f + z5;
-            z4 = tmp12 * 1.306562965f + z5;
-            z3 = tmp11 * 0.707106781f;
-
-            z11 = tmp7 + z3;
-            z13 = tmp7 - z3;
-
-            *d5p = z13 + z2;
-            *d3p = z13 - z2;
-            *d1p = z11 + z4;
-            *d7p = z11 - z4;
-
-            *d0p = d0;  *d2p = d2;  *d4p = d4;  *d6p = d6;
-        }
-
-        SIMD_INLINE void JpegDctV(float* data, size_t stride)
-        {
-            for (float * end = data + 8; data < end; data += 4)
+            for (int i = 0; i < 2; i++, src += 4, dst += 4)
             {
-                __m128 d0 = _mm_loadu_ps(data + 0 * stride);
-                __m128 d1 = _mm_loadu_ps(data + 1 * stride);
-                __m128 d2 = _mm_loadu_ps(data + 2 * stride);
-                __m128 d3 = _mm_loadu_ps(data + 3 * stride);
-                __m128 d4 = _mm_loadu_ps(data + 4 * stride);
-                __m128 d5 = _mm_loadu_ps(data + 5 * stride);
-                __m128 d6 = _mm_loadu_ps(data + 6 * stride);
-                __m128 d7 = _mm_loadu_ps(data + 7 * stride);
+                __m128 d0 = _mm_loadu_ps(src + 0 * srcStride);
+                __m128 d1 = _mm_loadu_ps(src + 1 * srcStride);
+                __m128 d2 = _mm_loadu_ps(src + 2 * srcStride);
+                __m128 d3 = _mm_loadu_ps(src + 3 * srcStride);
+                __m128 d4 = _mm_loadu_ps(src + 4 * srcStride);
+                __m128 d5 = _mm_loadu_ps(src + 5 * srcStride);
+                __m128 d6 = _mm_loadu_ps(src + 6 * srcStride);
+                __m128 d7 = _mm_loadu_ps(src + 7 * srcStride);
 
                 __m128 tmp0 = _mm_add_ps(d0, d7);
                 __m128 tmp7 = _mm_sub_ps(d0, d7);
@@ -123,37 +79,135 @@ namespace Simd
                 __m128 z11 = _mm_add_ps(tmp7, z3);
                 __m128 z13 = _mm_sub_ps(tmp7, z3);
 
-                _mm_storeu_ps(data + 0 * stride, d0);
-                _mm_storeu_ps(data + 1 * stride, _mm_add_ps(z11, z4));
-                _mm_storeu_ps(data + 2 * stride, d2);
-                _mm_storeu_ps(data + 3 * stride, _mm_sub_ps(z13, z2));
-                _mm_storeu_ps(data + 4 * stride, d4);
-                _mm_storeu_ps(data + 5 * stride, _mm_add_ps(z13, z2));
-                _mm_storeu_ps(data + 6 * stride, d6);
-                _mm_storeu_ps(data + 7 * stride, _mm_sub_ps(z11, z4));
+                _mm_storeu_ps(dst + 0 * dstStride, d0);
+                _mm_storeu_ps(dst + 1 * dstStride, _mm_add_ps(z11, z4));
+                _mm_storeu_ps(dst + 2 * dstStride, d2);
+                _mm_storeu_ps(dst + 3 * dstStride, _mm_sub_ps(z13, z2));
+                _mm_storeu_ps(dst + 4 * dstStride, d4);
+                _mm_storeu_ps(dst + 5 * dstStride, _mm_add_ps(z13, z2));
+                _mm_storeu_ps(dst + 6 * dstStride, d6);
+                _mm_storeu_ps(dst + 7 * dstStride, _mm_sub_ps(z11, z4));
             }
+        }
+
+        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, float* dst, size_t dstStride)
+        {
+            for (int i = 0; i < 2; i++, src += 4*srcStride, dst += 4 * dstStride)
+            {
+                __m128 tmp0, tmp1, tmp2, tmp3;
+                __m128 d0 = _mm_loadu_ps(src + 0 * srcStride);
+                __m128 d1 = _mm_loadu_ps(src + 1 * srcStride);
+                __m128 d2 = _mm_loadu_ps(src + 2 * srcStride);
+                __m128 d3 = _mm_loadu_ps(src + 3 * srcStride);
+                tmp0 = _mm_unpacklo_ps(d0, d2);
+                tmp1 = _mm_unpackhi_ps(d0, d2);
+                tmp2 = _mm_unpacklo_ps(d1, d3);
+                tmp3 = _mm_unpackhi_ps(d1, d3);
+                d0 = _mm_unpacklo_ps(tmp0, tmp2);
+                d1 = _mm_unpackhi_ps(tmp0, tmp2);
+                d2 = _mm_unpacklo_ps(tmp1, tmp3);
+                d3 = _mm_unpackhi_ps(tmp1, tmp3);
+
+                __m128 d4 = _mm_loadu_ps(src + 0 * srcStride + 4);
+                __m128 d5 = _mm_loadu_ps(src + 1 * srcStride + 4);
+                __m128 d6 = _mm_loadu_ps(src + 2 * srcStride + 4);
+                __m128 d7 = _mm_loadu_ps(src + 3 * srcStride + 4);
+                tmp0 = _mm_unpacklo_ps(d4, d6);
+                tmp1 = _mm_unpackhi_ps(d4, d6);
+                tmp2 = _mm_unpacklo_ps(d5, d7);
+                tmp3 = _mm_unpackhi_ps(d5, d7);
+                d4 = _mm_unpacklo_ps(tmp0, tmp2);
+                d5 = _mm_unpackhi_ps(tmp0, tmp2);
+                d6 = _mm_unpacklo_ps(tmp1, tmp3);
+                d7 = _mm_unpackhi_ps(tmp1, tmp3);
+
+                tmp0 = _mm_add_ps(d0, d7);
+                tmp1 = _mm_add_ps(d1, d6);
+                tmp2 = _mm_add_ps(d2, d5);
+                tmp3 = _mm_add_ps(d3, d4);
+                __m128 tmp7 = _mm_sub_ps(d0, d7);
+                __m128 tmp6 = _mm_sub_ps(d1, d6);
+                __m128 tmp5 = _mm_sub_ps(d2, d5);
+                __m128 tmp4 = _mm_sub_ps(d3, d4);
+
+                __m128 tmp10 = _mm_add_ps(tmp0, tmp3);
+                __m128 tmp13 = _mm_sub_ps(tmp0, tmp3);
+                __m128 tmp11 = _mm_add_ps(tmp1, tmp2);
+                __m128 tmp12 = _mm_sub_ps(tmp1, tmp2);
+
+                d0 = _mm_add_ps(tmp10, tmp11);
+                d4 = _mm_sub_ps(tmp10, tmp11);
+
+                __m128 z1 = _mm_mul_ps(_mm_add_ps(tmp12, tmp13), _mm_set1_ps(0.707106781f));
+                d2 = _mm_add_ps(tmp13, z1);
+                d6 = _mm_sub_ps(tmp13, z1);
+
+                tmp10 = _mm_add_ps(tmp4, tmp5);
+                tmp11 = _mm_add_ps(tmp5, tmp6);
+                tmp12 = _mm_add_ps(tmp6, tmp7);
+
+                __m128 z5 = _mm_mul_ps(_mm_sub_ps(tmp10, tmp12), _mm_set1_ps(0.382683433f));
+                __m128 z2 = _mm_add_ps(_mm_mul_ps(tmp10, _mm_set1_ps(0.541196100f)), z5);
+                __m128 z4 = _mm_add_ps(_mm_mul_ps(tmp12, _mm_set1_ps(1.306562965f)), z5);
+                __m128 z3 = _mm_mul_ps(tmp11, _mm_set1_ps(0.707106781f));
+
+                __m128 z11 = _mm_add_ps(tmp7, z3);
+                __m128 z13 = _mm_sub_ps(tmp7, z3);
+
+                d1 = _mm_add_ps(z11, z4);
+                d3 = _mm_sub_ps(z13, z2);
+                d5 = _mm_add_ps(z13, z2);
+                d7 = _mm_sub_ps(z11, z4);
+
+                tmp0 = _mm_unpacklo_ps(d0, d2);
+                tmp1 = _mm_unpackhi_ps(d0, d2);
+                tmp2 = _mm_unpacklo_ps(d1, d3);
+                tmp3 = _mm_unpackhi_ps(d1, d3);
+                d0 = _mm_unpacklo_ps(tmp0, tmp2);
+                d1 = _mm_unpackhi_ps(tmp0, tmp2);
+                d2 = _mm_unpacklo_ps(tmp1, tmp3);
+                d3 = _mm_unpackhi_ps(tmp1, tmp3);
+                _mm_storeu_ps(dst + 0 * dstStride, d0);
+                _mm_storeu_ps(dst + 1 * dstStride, d1);
+                _mm_storeu_ps(dst + 2 * dstStride, d2);
+                _mm_storeu_ps(dst + 3 * dstStride, d3);
+
+                tmp0 = _mm_unpacklo_ps(d4, d6);
+                tmp1 = _mm_unpackhi_ps(d4, d6);
+                tmp2 = _mm_unpacklo_ps(d5, d7);
+                tmp3 = _mm_unpackhi_ps(d5, d7);
+                d4 = _mm_unpacklo_ps(tmp0, tmp2);
+                d5 = _mm_unpackhi_ps(tmp0, tmp2);
+                d6 = _mm_unpacklo_ps(tmp1, tmp3);
+                d7 = _mm_unpackhi_ps(tmp1, tmp3);
+                _mm_storeu_ps(dst + 0 * dstStride + 4, d4);
+                _mm_storeu_ps(dst + 1 * dstStride + 4, d5);
+                _mm_storeu_ps(dst + 2 * dstStride + 4, d6);
+                _mm_storeu_ps(dst + 3 * dstStride + 4, d7);
+            }
+        }
+
+        SIMD_INLINE void Push(uint16_t * dst, const uint16_t * src)
+        {
+            ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
         }
 
         static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
-            int offs, i, j, n, diff, end0pos, x, y;
-            for (offs = 0, n = stride * 8; offs < n; offs += stride)
-                JpegDct(&CDU[offs], &CDU[offs + 1], &CDU[offs + 2], &CDU[offs + 3], &CDU[offs + 4], &CDU[offs + 5], &CDU[offs + 6], &CDU[offs + 7]);
-            JpegDctV(CDU, stride);
-            //for (offs = 0; offs < 8; ++offs)
-            //    JpegDct(&CDU[offs], &CDU[offs + stride], &CDU[offs + stride * 2], &CDU[offs + stride * 3], &CDU[offs + stride * 4],
-            //        &CDU[offs + stride * 5], &CDU[offs + stride * 6], &CDU[offs + stride * 7]);
-            int DU[64];
-            for (y = 0, j = 0; y < 8; ++y)
+            JpegDctV(CDU, stride, CDU, stride);
+            //SIMD_ALIGNED(16) float CDUH[64];
+            JpegDctH(CDU, stride, CDU, stride);
+            SIMD_ALIGNED(16) int DU[64];
+            for (int y = 0, i = 0; y < 8; ++y)
             {
-                for (x = 0; x < 8; ++x, ++j)
+                for (int x = 0; x < 8; ++x, ++i)
                 {
-                    i = y * stride + x;
-                    float v = CDU[i] * fdtbl[j];
-                    DU[Base::JpegZigZag[j]] = Round(v);
+                    float v = CDU[y * stride + x] * fdtbl[i];
+                    DU[Base::JpegZigZagD[i]] = Round(v);
                 }
             }
-            diff = DU[0] - DC;
+#if 0
+            int diff = DU[0] - DC;
             if (diff == 0)
                 stream.WriteJpegBits(HTDC[0]);
             else
@@ -163,20 +217,20 @@ namespace Simd
                 stream.WriteJpegBits(HTDC[bits[1]]);
                 stream.WriteJpegBits(bits);
             }
-            end0pos = 63;
+            int end0pos4 = 60;
+            for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), Sse2::K_INV_ZERO); end0pos4 -= 4);
+            int end0pos = end0pos4 + 3;
             for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
             if (end0pos == 0)
             {
                 stream.WriteJpegBits(HTAC[0x00]);
                 return DU[0];
             }
-            for (i = 1; i <= end0pos; ++i)
+            for (int i = 1; i <= end0pos; ++i)
             {
                 int startpos = i;
-                int nrzeroes;
-                uint16_t bits[2];
                 for (; DU[i] == 0 && i <= end0pos; ++i);
-                nrzeroes = i - startpos;
+                int nrzeroes = i - startpos;
                 if (nrzeroes >= 16)
                 {
                     int lng = nrzeroes >> 4;
@@ -185,12 +239,58 @@ namespace Simd
                         stream.WriteJpegBits(HTAC[0xF0]);
                     nrzeroes &= 15;
                 }
+                uint16_t bits[2];
                 Base::JpegCalcBits(DU[i], bits);
                 stream.WriteJpegBits(HTAC[(nrzeroes << 4) + bits[1]]);
                 stream.WriteJpegBits(bits);
             }
             if (end0pos != 63)
                 stream.WriteJpegBits(HTAC[0x00]);
+#else
+            uint16_t buf[128][2];
+            int len = 0;
+            int diff = DU[0] - DC;
+            if (diff == 0)
+                Push(buf[len++], HTDC[0]);
+            else
+            {
+                uint16_t bits[2];
+                Base::JpegCalcBits(diff, bits);
+                Push(buf[len++], HTDC[bits[1]]);
+                Push(buf[len++], bits);
+            }
+            int end0pos4 = 60;
+            for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), Sse2::K_INV_ZERO); end0pos4 -= 4);
+            int end0pos = end0pos4 + 3;
+            for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
+            if (end0pos == 0)
+            {
+                Push(buf[len++], HTAC[0x00]);
+                stream.WriteJpegBits(buf, len);
+                return DU[0];
+            }
+            for (int i = 1; i <= end0pos; ++i)
+            {
+                int startpos = i;
+                for (; DU[i] == 0 && i <= end0pos; ++i);
+                int nrzeroes = i - startpos;
+                if (nrzeroes >= 16)
+                {
+                    int lng = nrzeroes >> 4;
+                    int nrmarker;
+                    for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
+                        Push(buf[len++], HTAC[0xF0]);
+                    nrzeroes &= 15;
+                }
+                uint16_t bits[2];
+                Base::JpegCalcBits(DU[i], bits);
+                Push(buf[len++], HTAC[(nrzeroes << 4) + bits[1]]);
+                Push(buf[len++], bits);
+            }
+            if (end0pos != 63)
+                Push(buf[len++], HTAC[0x00]);
+            stream.WriteJpegBits(buf, len);
+#endif
             return DU[0];
         }
 
@@ -211,7 +311,7 @@ namespace Simd
         SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height, 
             const __m128 k[10], float* y, float* u, float* v, int size)
         {
-            for (int row = 0; row < size; ++row)
+            for (int row = 0; row < size;)
             {
                 for (int col = 0; col < size; col += 4)
                 {
@@ -223,7 +323,7 @@ namespace Simd
                     _mm_storeu_ps(u + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, k[4]), _mm_mul_ps(_g, k[5])), _mm_mul_ps(_b, k[6])));
                     _mm_storeu_ps(v + col, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_r, k[7]), _mm_mul_ps(_g, k[8])), _mm_mul_ps(_b, k[9])));
                 }
-                if(row < height)
+                if(++row < height)
                     r += stride, g += stride, b += stride;
                 y += size, u += size, v += size;
             }
@@ -317,6 +417,11 @@ namespace Simd
         ImageJpegSaver::ImageJpegSaver(const ImageSaverParam& param)
             : Base::ImageJpegSaver(param)
         {
+        }
+
+        void ImageJpegSaver::Init()
+        {
+            InitParams(false);
             switch (_param.format)
             {
             case SimdPixelFormatBgr24:

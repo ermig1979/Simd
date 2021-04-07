@@ -32,7 +32,8 @@ namespace Simd
 {
     namespace Base
     {
-        extern const uint8_t JpegZigZag[64];
+        extern const uint8_t JpegZigZagD[64];
+        extern const uint8_t JpegZigZagT[64];
 
         extern const uint16_t HuffmanYdc[256][2];
         extern const uint16_t HuffmanUVdc[256][2];
@@ -63,7 +64,7 @@ namespace Simd
 
         SIMD_INLINE void RgbToYuv(const uint8_t* r, const uint8_t* g, const uint8_t* b, int stride, int height, int width, float* y, float* u, float* v, int size)
         {
-            for (int row = 0; row < size; ++row)
+            for (int row = 0; row < size;)
             {
                 for (int col = 0; col < size; col += 1)
                 {
@@ -73,7 +74,7 @@ namespace Simd
                     u[col] = -0.16874f * _r - 0.33126f * _g + 0.50000f * _b;
                     v[col] = +0.50000f * _r - 0.41869f * _g - 0.08131f * _b;
                 }
-                if (row < height)
+                if (++row < height)
                     r += stride, g += stride, b += stride;
                 y += size, u += size, v += size;
             }

@@ -221,7 +221,13 @@ namespace Simd
 
         SIMD_INLINE void Write8u(uint8_t value)
         {
+#if 1
+            Reserve(_pos + 1);
+            _data[_pos++] = value;
+            _size = Max(_size, _pos);
+#else
             Write(&value, 1);
+#endif
         }
 
         SIMD_INLINE void WriteBe32(const uint32_t & value)
@@ -298,6 +304,26 @@ namespace Simd
                 _bitBuffer <<= 8;
                 _bitCount -= 8;
             }
+        }
+
+        SIMD_INLINE void WriteJpegBits(const uint16_t bits[][2], size_t size)
+        {
+            Reserve(_pos + size * 2);
+            for (size_t i = 0; i < size; ++i)
+            {
+                _bitCount += bits[i][1];
+                _bitBuffer |= bits[i][0] << (24 - _bitCount);
+                while (_bitCount >= 8)
+                {
+                    uint8_t byte = (_bitBuffer >> 16) & 0xFF;
+                    _data[_pos++] = byte;
+                    if (byte == 255)
+                        _data[_pos++] = 0;
+                    _bitBuffer <<= 8;
+                    _bitCount -= 8;
+                }
+            }
+            _size = Max(_size, _pos);
         }
     };
 }
