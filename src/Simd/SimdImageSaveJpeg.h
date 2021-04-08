@@ -80,9 +80,32 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void GrayToY(const uint8_t* g, int stride, int height, int width, float* y, int size)
+        {
+            for (int row = 0; row < size;)
+            {
+                for (int col = 0; col < size; col += 1)
+                {
+                    int offs = (col < width ? col : width - 1);
+                    y[col] = g[offs] - 128.000f;
+                }
+                if (++row < height)
+                    g += stride;
+                y += size;
+            }
+        }
+
         SIMD_INLINE void PushBits(uint16_t* dst, const uint16_t* src)
         {
             ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
+        }
+
+        SIMD_INLINE void JpegProcessDuGrayUv(OutputMemoryStream& stream)
+        {
+            stream.WriteJpegBits(Base::HuffmanUVdc[0]);
+            stream.WriteJpegBits(Base::HuffmanUVac[0]);
+            stream.WriteJpegBits(Base::HuffmanUVdc[0]);
+            stream.WriteJpegBits(Base::HuffmanUVac[0]);
         }
     }
 

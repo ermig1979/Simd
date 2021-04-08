@@ -237,7 +237,7 @@ namespace Simd
         public:
             ImageJpegSaver(const ImageSaverParam& param);
 
-        private:
+        protected:
             virtual void Init();
         };
 
@@ -278,6 +278,15 @@ namespace Simd
         {
         public:
             ImagePngSaver(const ImageSaverParam& param);
+        };
+
+        class ImageJpegSaver : public Sse41::ImageJpegSaver
+        {
+        public:
+            ImageJpegSaver(const ImageSaverParam& param);
+
+        protected:
+            virtual void Init();
         };
 
         //---------------------------------------------------------------------

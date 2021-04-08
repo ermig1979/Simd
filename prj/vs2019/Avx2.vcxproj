@@ -43,6 +43,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Int16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Integral.cpp" />
@@ -113,7 +114,10 @@
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
     <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
     <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
     <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSavePng.h" />
     <ClInclude Include="..\..\src\Simd\SimdInit.h" />
     <ClInclude Include="..\..\src\Simd\SimdIntegral.h" />
     <ClInclude Include="..\..\src\Simd\SimdLib.h" />
@@ -127,6 +131,7 @@
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPow.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPrefetch.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
@@ -142,6 +147,7 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
