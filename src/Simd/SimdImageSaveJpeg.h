@@ -79,6 +79,11 @@ namespace Simd
                 y += size, u += size, v += size;
             }
         }
+
+        SIMD_INLINE void PushBits(uint16_t* dst, const uint16_t* src)
+        {
+            ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE    

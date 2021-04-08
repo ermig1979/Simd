@@ -299,14 +299,14 @@ namespace Simd
             _subSample = _quality <= 90 ? 1 : 0;
             _quality = _quality < 1 ? 1 : _quality > 100 ? 100 : _quality;
             _quality = _quality < 50 ? 5000 / _quality : 200 - _quality * 2;
-            const uint8_t *ZigZag = trans ? Base::JpegZigZagT : Base::JpegZigZagD;
             for (size_t i = 0; i < 64; ++i)
             {
                 int uvti, yti = (YQT[i] * _quality + 50) / 100;
-                _uY[ZigZag[i]] = uint8_t(yti < 1 ? 1 : yti > 255 ? 255 : yti);
+                _uY[Base::JpegZigZagD[i]] = uint8_t(yti < 1 ? 1 : yti > 255 ? 255 : yti);
                 uvti = (UVQT[i] * _quality + 50) / 100;
-                _uUv[ZigZag[i]] = uint8_t(uvti < 1 ? 1 : uvti > 255 ? 255 : uvti);
+                _uUv[Base::JpegZigZagD[i]] = uint8_t(uvti < 1 ? 1 : uvti > 255 ? 255 : uvti);
             }
+            const uint8_t *ZigZag = trans ? Base::JpegZigZagT : Base::JpegZigZagD;
             for (size_t y = 0, i = 0; y < 8; ++y)
             {
                 for (size_t x = 0; x < 8; ++x, ++i)

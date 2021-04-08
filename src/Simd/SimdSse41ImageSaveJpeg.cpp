@@ -92,7 +92,7 @@ namespace Simd
 
         SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
-            for (int i = 0; i < 2; i++, src += 4*srcStride, dst += 4 * dstStride)
+            for (int i = 0; i < 2; i++, src += 4 * srcStride, dst += 4)
             {
                 __m128 tmp0, tmp1, tmp2, tmp3;
                 __m128 d0 = _mm_loadu_ps(src + 0 * srcStride);
@@ -159,105 +159,39 @@ namespace Simd
                 d5 = _mm_add_ps(z13, z2);
                 d7 = _mm_sub_ps(z11, z4);
 
-                tmp0 = _mm_unpacklo_ps(d0, d2);
-                tmp1 = _mm_unpackhi_ps(d0, d2);
-                tmp2 = _mm_unpacklo_ps(d1, d3);
-                tmp3 = _mm_unpackhi_ps(d1, d3);
-                d0 = _mm_unpacklo_ps(tmp0, tmp2);
-                d1 = _mm_unpackhi_ps(tmp0, tmp2);
-                d2 = _mm_unpacklo_ps(tmp1, tmp3);
-                d3 = _mm_unpackhi_ps(tmp1, tmp3);
                 _mm_storeu_ps(dst + 0 * dstStride, d0);
                 _mm_storeu_ps(dst + 1 * dstStride, d1);
                 _mm_storeu_ps(dst + 2 * dstStride, d2);
                 _mm_storeu_ps(dst + 3 * dstStride, d3);
-
-                tmp0 = _mm_unpacklo_ps(d4, d6);
-                tmp1 = _mm_unpackhi_ps(d4, d6);
-                tmp2 = _mm_unpacklo_ps(d5, d7);
-                tmp3 = _mm_unpackhi_ps(d5, d7);
-                d4 = _mm_unpacklo_ps(tmp0, tmp2);
-                d5 = _mm_unpackhi_ps(tmp0, tmp2);
-                d6 = _mm_unpacklo_ps(tmp1, tmp3);
-                d7 = _mm_unpackhi_ps(tmp1, tmp3);
-                _mm_storeu_ps(dst + 0 * dstStride + 4, d4);
-                _mm_storeu_ps(dst + 1 * dstStride + 4, d5);
-                _mm_storeu_ps(dst + 2 * dstStride + 4, d6);
-                _mm_storeu_ps(dst + 3 * dstStride + 4, d7);
+                _mm_storeu_ps(dst + 4 * dstStride, d4);
+                _mm_storeu_ps(dst + 5 * dstStride, d5);
+                _mm_storeu_ps(dst + 6 * dstStride, d6);
+                _mm_storeu_ps(dst + 7 * dstStride, d7);
             }
-        }
-
-        SIMD_INLINE void Push(uint16_t * dst, const uint16_t * src)
-        {
-            ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
         }
 
         static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             JpegDctV(CDU, stride, CDU, stride);
-            //SIMD_ALIGNED(16) float CDUH[64];
-            JpegDctH(CDU, stride, CDU, stride);
+            SIMD_ALIGNED(16) float CDUT[64];
+            JpegDctH(CDU, stride, CDUT, 8);
             SIMD_ALIGNED(16) int DU[64];
-            for (int y = 0, i = 0; y < 8; ++y)
+            for (int i = 0; i < 64; ++i)
             {
-                for (int x = 0; x < 8; ++x, ++i)
-                {
-                    float v = CDU[y * stride + x] * fdtbl[i];
-                    DU[Base::JpegZigZagD[i]] = Round(v);
-                }
+                float v = CDUT[i] * fdtbl[i];
+                DU[Base::JpegZigZagT[i]] = Round(v);
             }
-#if 0
-            int diff = DU[0] - DC;
-            if (diff == 0)
-                stream.WriteJpegBits(HTDC[0]);
-            else
-            {
-                uint16_t bits[2];
-                Base::JpegCalcBits(diff, bits);
-                stream.WriteJpegBits(HTDC[bits[1]]);
-                stream.WriteJpegBits(bits);
-            }
-            int end0pos4 = 60;
-            for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), Sse2::K_INV_ZERO); end0pos4 -= 4);
-            int end0pos = end0pos4 + 3;
-            for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
-            if (end0pos == 0)
-            {
-                stream.WriteJpegBits(HTAC[0x00]);
-                return DU[0];
-            }
-            for (int i = 1; i <= end0pos; ++i)
-            {
-                int startpos = i;
-                for (; DU[i] == 0 && i <= end0pos; ++i);
-                int nrzeroes = i - startpos;
-                if (nrzeroes >= 16)
-                {
-                    int lng = nrzeroes >> 4;
-                    int nrmarker;
-                    for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        stream.WriteJpegBits(HTAC[0xF0]);
-                    nrzeroes &= 15;
-                }
-                uint16_t bits[2];
-                Base::JpegCalcBits(DU[i], bits);
-                stream.WriteJpegBits(HTAC[(nrzeroes << 4) + bits[1]]);
-                stream.WriteJpegBits(bits);
-            }
-            if (end0pos != 63)
-                stream.WriteJpegBits(HTAC[0x00]);
-#else
             uint16_t buf[128][2];
             int len = 0;
             int diff = DU[0] - DC;
             if (diff == 0)
-                Push(buf[len++], HTDC[0]);
+                Base::PushBits(buf[len++], HTDC[0]);
             else
             {
                 uint16_t bits[2];
                 Base::JpegCalcBits(diff, bits);
-                Push(buf[len++], HTDC[bits[1]]);
-                Push(buf[len++], bits);
+                Base::PushBits(buf[len++], HTDC[bits[1]]);
+                Base::PushBits(buf[len++], bits);
             }
             int end0pos4 = 60;
             for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), Sse2::K_INV_ZERO); end0pos4 -= 4);
@@ -265,7 +199,7 @@ namespace Simd
             for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
             if (end0pos == 0)
             {
-                Push(buf[len++], HTAC[0x00]);
+                Base::PushBits(buf[len++], HTAC[0x00]);
                 stream.WriteJpegBits(buf, len);
                 return DU[0];
             }
@@ -279,18 +213,17 @@ namespace Simd
                     int lng = nrzeroes >> 4;
                     int nrmarker;
                     for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        Push(buf[len++], HTAC[0xF0]);
+                        Base::PushBits(buf[len++], HTAC[0xF0]);
                     nrzeroes &= 15;
                 }
                 uint16_t bits[2];
                 Base::JpegCalcBits(DU[i], bits);
-                Push(buf[len++], HTAC[(nrzeroes << 4) + bits[1]]);
-                Push(buf[len++], bits);
+                Base::PushBits(buf[len++], HTAC[(nrzeroes << 4) + bits[1]]);
+                Base::PushBits(buf[len++], bits);
             }
             if (end0pos != 63)
-                Push(buf[len++], HTAC[0x00]);
+                Base::PushBits(buf[len++], HTAC[0x00]);
             stream.WriteJpegBits(buf, len);
-#endif
             return DU[0];
         }
 
@@ -421,7 +354,7 @@ namespace Simd
 
         void ImageJpegSaver::Init()
         {
-            InitParams(false);
+            InitParams(true);
             switch (_param.format)
             {
             case SimdPixelFormatBgr24:

@@ -134,7 +134,7 @@ namespace Test
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
 
-#define TEST_REAL_IMAGE "forest.jpg"
+#define TEST_REAL_IMAGE "city.jpg"
 
     bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
