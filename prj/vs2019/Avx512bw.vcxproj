@@ -43,6 +43,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageLoad.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwIntegral.cpp" />

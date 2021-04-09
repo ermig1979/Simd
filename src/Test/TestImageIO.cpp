@@ -148,7 +148,7 @@ namespace Test
         View src;
         if (!src.Load(path, format))
         {
-            TEST_LOG_SS(Error, "Can't load image form '" << path << "'!");
+            TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
             return false;
         }
         TEST_ALIGN(SIMD_ALIGN);
@@ -178,7 +178,11 @@ namespace Test
             View dst1, dst2;
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
-                int differenceMax = 2;
+#if defined(TEST_REAL_IMAGE)
+                int differenceMax = 4;
+#else
+                int differenceMax = 4;
+#endif
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
@@ -227,15 +231,15 @@ namespace Test
         bool result = true;
 
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 0; format < 5; format++)
+        for (int format = 1; format < 5; format++)
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
-                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
-                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
                     result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
                 }
                 result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
             }
