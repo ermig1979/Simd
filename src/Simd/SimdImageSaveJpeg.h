@@ -26,12 +26,44 @@
 
 #include "Simd/SimdImageSave.h"
 
-#define SIMD_JPEG_CALC_BITS_TABLE
+#define SIMD_JPEG_CALC_BITS_TABLE 2
 
 namespace Simd
 {
     namespace Base
     {
+        struct BitBuf
+        {
+            static const uint32_t capacity = 1024;
+            uint32_t size;
+            uint16_t data[1024][2];
+
+            SIMD_INLINE BitBuf()
+                : size(0) 
+            {
+            }
+
+            SIMD_INLINE void Push(const uint16_t* bits)
+            {
+                ((uint32_t*)data)[size++] = ((uint32_t*)bits)[0];
+            }
+
+            SIMD_INLINE bool Full(uint32_t tail = capacity / 2) const
+            {
+                return size + tail >= capacity;
+            }
+
+            SIMD_INLINE uint32_t Capacity() const 
+            {
+                return capacity;
+            }
+
+            SIMD_INLINE void Clear()
+            {
+                size = 0;
+            }
+        }; 
+
         extern const uint8_t JpegZigZagD[64];
         extern const uint8_t JpegZigZagT[64];
 
@@ -40,15 +72,24 @@ namespace Simd
         extern const uint16_t HuffmanYac[256][2];
         extern const uint16_t HuffmanUVac[256][2];
 
-#if defined(SIMD_JPEG_CALC_BITS_TABLE)
-        extern int JpegCalcBitsTable[1024];
+#if defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 1
+        const int JpegCalcBitsRange = 2048;
+        extern int JpegCalcBitsTable[JpegCalcBitsRange];
         SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
         {
             int tmp = val < 0 ? -val : val;
             val = val < 0 ? val - 1 : val;
-            assert(tmp < 1024);
+            assert(tmp < JpegCalcBitsRange);
             bits[1] = JpegCalcBitsTable[tmp];
             bits[0] = val & ((1 << bits[1]) - 1);
+        }
+#elif defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 2
+        const int JpegCalcBitsRange = 2048;
+        extern uint16_t JpegCalcBitsTable[JpegCalcBitsRange * 2][2];
+        SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
+        {
+            assert(val >= -JpegCalcBitsRange && val < JpegCalcBitsRange);
+            ((uint32_t*)bits)[0] = ((uint32_t*)JpegCalcBitsTable)[val + JpegCalcBitsRange];
         }
 #else
         SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
@@ -95,17 +136,12 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void PushBits(uint16_t* dst, const uint16_t* src)
+        SIMD_INLINE void JpegProcessDuGrayUv(BitBuf & bitBuf)
         {
-            ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
-        }
-
-        SIMD_INLINE void JpegProcessDuGrayUv(OutputMemoryStream& stream)
-        {
-            stream.WriteJpegBits(Base::HuffmanUVdc[0]);
-            stream.WriteJpegBits(Base::HuffmanUVac[0]);
-            stream.WriteJpegBits(Base::HuffmanUVdc[0]);
-            stream.WriteJpegBits(Base::HuffmanUVac[0]);
+            bitBuf.Push(Base::HuffmanUVdc[0]);
+            bitBuf.Push(Base::HuffmanUVac[0]);
+            bitBuf.Push(Base::HuffmanUVdc[0]);
+            bitBuf.Push(Base::HuffmanUVac[0]);
         }
     }
 

@@ -211,6 +211,17 @@ namespace Test
         return result;
     }
 
+    bool ImageSaveToMemoryAutoTest(View::Format format, SimdImageFileType file, int quality, const FuncSM& f1, const FuncSM& f2)
+    {
+        bool result = true;
+
+        result = result && ImageSaveToMemoryAutoTest(W, H, format, file, quality, f1, f2);
+#if !defined(TEST_REAL_IMAGE)
+        result = result && ImageSaveToMemoryAutoTest(W + O, H - O, format, file, quality, f1, f2);
+#endif
+        return result;
+    }
+
     bool ImageSaveToMemoryAutoTest(const FuncSM & f1, const FuncSM& f2)
     {
         bool result = true;
@@ -220,13 +231,13 @@ namespace Test
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
-                result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 65, f1, f2);
-                result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 65, f1, f2);
                 if (file == SimdImageFileJpeg)
                 {
-                    result = result && ImageSaveToMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 95, f1, f2);
-                    result = result && ImageSaveToMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
                 }
+                result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
             }
         }
 

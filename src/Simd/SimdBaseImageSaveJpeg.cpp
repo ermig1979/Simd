@@ -89,16 +89,34 @@ namespace Simd
            {1018, 10}, {32707, 15}, {65526, 16}, {65527, 16}, {65528, 16}, {65529, 16}, {65530, 16}, {65531, 16}, {65532, 16}, {65533, 16}, {65534, 16}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
         };
 
-#if defined(SIMD_JPEG_CALC_BITS_TABLE)
-        int JpegCalcBitsTable[1024];
+#if defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 1
+        int JpegCalcBitsTable[JpegCalcBitsRange];
         bool JpegCalcBitsTableInit()
         {
-            for (int i = 0; i < 1024; ++i)
+            for (int i = 0; i < JpegCalcBitsRange; ++i)
             {
                 int value = i, count = 1;
                 while (value >>= 1)
                     ++count;
                 JpegCalcBitsTable[i] = count;
+            }
+            return true;
+        }
+        bool JpegCalcBitsTableInited = JpegCalcBitsTableInit();
+#elif defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 2
+        uint16_t JpegCalcBitsTable[JpegCalcBitsRange * 2][2];
+        bool JpegCalcBitsTableInit()
+        {
+            for (int i = 0, n = JpegCalcBitsRange * 2; i < n; ++i)
+            {
+                int val = i - JpegCalcBitsRange;
+                int tmp = val < 0 ? -val : val;
+                val = val < 0 ? val - 1 : val;
+                int cnt = 1;
+                while (tmp >>= 1)
+                    ++cnt;
+                JpegCalcBitsTable[i][0] = val & ((1 << cnt) - 1);
+                JpegCalcBitsTable[i][1] = cnt;
             }
             return true;
         }
@@ -150,7 +168,7 @@ namespace Simd
             *d0p = d0;  *d2p = d2;  *d4p = d4;  *d6p = d6;
         }
 
-        static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
+        static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             int offs, i, j, n, diff, end0pos, x, y;
             for (offs = 0; offs < 8; ++offs) 
@@ -170,19 +188,19 @@ namespace Simd
             }
             diff = DU[0] - DC;
             if (diff == 0) 
-                stream.WriteJpegBits(HTDC[0]);
+                bitBuf.Push(HTDC[0]);
             else 
             {
                 uint16_t bits[2];
                 JpegCalcBits(diff, bits);
-                stream.WriteJpegBits(HTDC[bits[1]]);
-                stream.WriteJpegBits(bits);
+                bitBuf.Push(HTDC[bits[1]]);
+                bitBuf.Push(bits);
             }
             end0pos = 63;
             for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
             if (end0pos == 0) 
             {
-                stream.WriteJpegBits(HTAC[0x00]);
+                bitBuf.Push(HTAC[0x00]);
                 return DU[0];
             }
             for (i = 1; i <= end0pos; ++i)
@@ -197,15 +215,15 @@ namespace Simd
                     int lng = nrzeroes >> 4;
                     int nrmarker;
                     for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        stream.WriteJpegBits(HTAC[0xF0]);
+                        bitBuf.Push(HTAC[0xF0]);
                     nrzeroes &= 15;
                 }
                 JpegCalcBits(DU[i], bits);
-                stream.WriteJpegBits(HTAC[(nrzeroes << 4) + bits[1]]);
-                stream.WriteJpegBits(bits);
+                bitBuf.Push(HTAC[(nrzeroes << 4) + bits[1]]);
+                bitBuf.Push(bits);
             }
             if (end0pos != 63) 
-                stream.WriteJpegBits(HTAC[0x00]);
+                bitBuf.Push(HTAC[0x00]);
             return DU[0];
         }
 
@@ -213,48 +231,81 @@ namespace Simd
             const uint8_t* green, const uint8_t* blue, int stride, const float * fY, const float* fUv, int dc[3])
         {
             int & DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
+            float Y[256], U[256], V[256];
+            float subU[64], subV[64];
+            bool gray = red == green && red == blue;
+            Base::BitBuf bitBuf;
             for (int y = 0; y < height; y += 16)
             {
                 for (int x = 0; x < width; x += 16)
                 {
-                    float Y[256], U[256], V[256];
-                    Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 16);
-                    DCY = JpegProcessDu(stream, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-
-                    float subU[64], subV[64];
-                    for (int yy = 0, pos = 0; yy < 8; ++yy)
+                    if (gray)
+                        Base::GrayToY(red + x, stride, height - y, width - x, Y, 16);
+                    else
+                        Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 16);
+                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    if (gray)
+                        Base::JpegProcessDuGrayUv(bitBuf);
+                    else
                     {
-                        for (int xx = 0; xx < 8; ++xx, ++pos)
+                        for (int yy = 0, pos = 0; yy < 8; ++yy)
                         {
-                            int j = yy * 32 + xx * 2;
-                            subU[pos] = (U[j + 0] + U[j + 1] + U[j + 16] + U[j + 17]) * 0.25f;
-                            subV[pos] = (V[j + 0] + V[j + 1] + V[j + 16] + V[j + 17]) * 0.25f;
+                            for (int xx = 0; xx < 8; ++xx, ++pos)
+                            {
+                                int j = yy * 32 + xx * 2;
+                                subU[pos] = (U[j + 0] + U[j + 1] + U[j + 16] + U[j + 17]) * 0.25f;
+                                subV[pos] = (V[j + 0] + V[j + 1] + V[j + 16] + V[j + 17]) * 0.25f;
+                            }
                         }
+                        DCU = JpegProcessDu(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
-                    DCU = JpegProcessDu(stream, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                    DCV = JpegProcessDu(stream, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    if (bitBuf.Full())
+                    {
+                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        bitBuf.Clear();
+                    }
                 }
             }
+            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            bitBuf.Clear();
         }
 
         void JpegWriteBlockFull(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
             const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
+            float Y[64], U[64], V[64];
+            bool gray = red == green && red == blue;
+            Base::BitBuf bitBuf;
             for (int y = 0; y < height; y += 8)
             {
                 for (int x = 0; x < width; x += 8)
                 {
-                    float Y[64], U[64], V[64];
-                    Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 8);
-                    DCY = JpegProcessDu(stream, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCU = JpegProcessDu(stream, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                    DCV = JpegProcessDu(stream, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    if (gray)
+                        Base::GrayToY(red + x, stride, height - y, width - x, Y, 8);
+                    else
+                        Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 8);
+                    DCY = JpegProcessDu(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    if (gray)
+                        Base::JpegProcessDuGrayUv(bitBuf);
+                    else
+                    {
+                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    }
+                    if (bitBuf.Full())
+                    {
+                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        bitBuf.Clear();
+                    }
                 }
             }
+            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            bitBuf.Clear();
         }
 
         //---------------------------------------------------------------------

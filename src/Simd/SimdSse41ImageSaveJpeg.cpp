@@ -169,7 +169,7 @@ namespace Simd
             }
         }
 
-        static int JpegProcessDu(OutputMemoryStream& stream, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
+        static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             JpegDctV(CDU, stride, CDU, stride);
             SIMD_ALIGNED(16) float CDUT[64];
@@ -180,17 +180,15 @@ namespace Simd
                 float v = CDUT[i] * fdtbl[i];
                 DU[Base::JpegZigZagT[i]] = Round(v);
             }
-            uint16_t buf[128][2];
-            int len = 0;
             int diff = DU[0] - DC;
             if (diff == 0)
-                Base::PushBits(buf[len++], HTDC[0]);
+                bitBuf.Push(HTDC[0]);
             else
             {
                 uint16_t bits[2];
                 Base::JpegCalcBits(diff, bits);
-                Base::PushBits(buf[len++], HTDC[bits[1]]);
-                Base::PushBits(buf[len++], bits);
+                bitBuf.Push(HTDC[bits[1]]);
+                bitBuf.Push(bits);
             }
             int end0pos4 = 60;
             for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), Sse2::K_INV_ZERO); end0pos4 -= 4);
@@ -198,8 +196,7 @@ namespace Simd
             for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
             if (end0pos == 0)
             {
-                Base::PushBits(buf[len++], HTAC[0x00]);
-                stream.WriteJpegBits(buf, len);
+                bitBuf.Push(HTAC[0x00]);
                 return DU[0];
             }
             for (int i = 1; i <= end0pos; ++i)
@@ -212,17 +209,16 @@ namespace Simd
                     int lng = nrzeroes >> 4;
                     int nrmarker;
                     for (nrmarker = 1; nrmarker <= lng; ++nrmarker)
-                        Base::PushBits(buf[len++], HTAC[0xF0]);
+                        bitBuf.Push(HTAC[0xF0]);
                     nrzeroes &= 15;
                 }
                 uint16_t bits[2];
                 Base::JpegCalcBits(DU[i], bits);
-                Base::PushBits(buf[len++], HTAC[(nrzeroes << 4) + bits[1]]);
-                Base::PushBits(buf[len++], bits);
+                bitBuf.Push(HTAC[(nrzeroes << 4) + bits[1]]);
+                bitBuf.Push(bits);
             }
             if (end0pos != 63)
-                Base::PushBits(buf[len++], HTAC[0x00]);
-            stream.WriteJpegBits(buf, len);
+                bitBuf.Push(HTAC[0x00]);
             return DU[0];
         }
 
@@ -300,6 +296,7 @@ namespace Simd
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width16 = width& (~15);
             bool gray = red == green && red == blue;
+            Base::BitBuf bitBuf;
             for (int y = 0; y < height; y += 16)
             {
                 int x = 0;
@@ -311,18 +308,23 @@ namespace Simd
                         GrayToY(red + x, stride, height - y, k, Y, 16);
                     else
                         RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V, 16);
-                    DCY = JpegProcessDu(stream, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
-                        Base::JpegProcessDuGrayUv(stream);
+                        Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
                         SubUv(U, subU);
                         SubUv(V, subV);
-                        DCU = JpegProcessDu(stream, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        DCV = JpegProcessDu(stream, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    }
+                    if (bitBuf.Full())
+                    {
+                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        bitBuf.Clear();
                     }
                 }
                 for (; x < width; x += 16)
@@ -331,21 +333,23 @@ namespace Simd
                         Base::GrayToY(red + x, stride, height - y, width - x, Y, 16);
                     else
                         Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 16);
-                    DCY = JpegProcessDu(stream, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(stream, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
-                        Base::JpegProcessDuGrayUv(stream);
+                        Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
                         SubUv(U, subU);
                         SubUv(V, subV);
-                        DCU = JpegProcessDu(stream, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        DCV = JpegProcessDu(stream, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
             }
+            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            bitBuf.Clear();
         }
 
         void JpegWriteBlockFull(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
@@ -356,6 +360,7 @@ namespace Simd
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width8 = width & (~7);
             bool gray = red == green && red == blue;
+            Base::BitBuf bitBuf;
             for (int y = 0; y < height; y += 8)
             {
                 int x = 0;
@@ -366,13 +371,18 @@ namespace Simd
                         GrayToY(red + x, stride, height - y, k, Y, 8);
                     else
                         RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V, 8);
-                    DCY = JpegProcessDu(stream, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
-                        Base::JpegProcessDuGrayUv(stream);
+                        Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
-                        DCU = JpegProcessDu(stream, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        DCV = JpegProcessDu(stream, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    }
+                    if (bitBuf.Full())
+                    {
+                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        bitBuf.Clear();
                     }
                 }
                 for (; x < width; x += 8)
@@ -381,16 +391,18 @@ namespace Simd
                         Base::GrayToY(red + x, stride, height - y, width - x, Y, 8);
                     else
                         Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 8);
-                    DCY = JpegProcessDu(stream, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
-                        Base::JpegProcessDuGrayUv(stream);
+                        Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
-                        DCU = JpegProcessDu(stream, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        DCV = JpegProcessDu(stream, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
             }
+            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            bitBuf.Clear();
         }
 
         //---------------------------------------------------------------------
