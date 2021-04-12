@@ -26,7 +26,7 @@
 
 #include "Simd/SimdImageSave.h"
 
-#define SIMD_JPEG_CALC_BITS_TABLE 2
+#define SIMD_JPEG_CALC_BITS_TABLE
 
 namespace Simd
 {
@@ -72,18 +72,7 @@ namespace Simd
         extern const uint16_t HuffmanYac[256][2];
         extern const uint16_t HuffmanUVac[256][2];
 
-#if defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 1
-        const int JpegCalcBitsRange = 2048;
-        extern int JpegCalcBitsTable[JpegCalcBitsRange];
-        SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
-        {
-            int tmp = val < 0 ? -val : val;
-            val = val < 0 ? val - 1 : val;
-            assert(tmp < JpegCalcBitsRange);
-            bits[1] = JpegCalcBitsTable[tmp];
-            bits[0] = val & ((1 << bits[1]) - 1);
-        }
-#elif defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 2
+#if defined(SIMD_JPEG_CALC_BITS_TABLE)
         const int JpegCalcBitsRange = 2048;
         extern uint16_t JpegCalcBitsTable[JpegCalcBitsRange * 2][2];
         SIMD_INLINE void JpegCalcBits(int val, uint16_t bits[2])
@@ -142,6 +131,81 @@ namespace Simd
             bitBuf.Push(Base::HuffmanUVac[0]);
             bitBuf.Push(Base::HuffmanUVdc[0]);
             bitBuf.Push(Base::HuffmanUVac[0]);
+        }
+
+        SIMD_INLINE void WriteBits(OutputMemoryStream & stream, const uint16_t bits[2])
+        {
+            stream.BitCount() += bits[1];
+            stream.BitBuffer() |= bits[0] << (32 - stream.BitCount());
+            while (stream.BitCount() >= 8)
+            {
+                uint8_t byte = stream.BitBuffer() >> 24;
+                stream.Write8u(byte);
+                if (byte == 255)
+                    stream.Write8u(0);
+                stream.BitBuffer() <<= 8;
+                stream.BitCount() -= 8;
+            }
+        }
+
+        SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
+        {
+            size_t pos = stream.Pos();
+            stream.Reserve(pos + size * 2);
+            uint8_t* data = stream.Data();
+            size_t i = 0;
+#if defined(SIMD_X64_ENABLE)
+            uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
+            size_t & bitCount = stream.BitCount();
+            for (size_t size3 = AlignLoAny(size, 3); i < size3; i += 3, bits += 3)
+            {
+                bitCount += bits[0][1];
+                bitBuffer |= uint64_t(bits[0][0]) << (64 - bitCount);
+                bitCount += bits[1][1];
+                bitBuffer |= uint64_t(bits[1][0]) << (64 - bitCount);
+                bitCount += bits[2][1];
+                bitBuffer |= uint64_t(bits[2][0]) << (64 - bitCount);
+                assert(bitCount <= 64);
+                while (bitCount >= 16)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    byte = uint8_t(bitBuffer >> 48);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 16;
+                    bitCount -= 16;
+                }
+            }
+            stream.BitBuffer() = uint32_t(bitBuffer >> 32);
+            while (bitCount >= 8)
+            {
+                uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                stream.BitBuffer() <<= 8;
+                bitCount -= 8;
+            }
+#endif
+            for (; i < size; ++i, ++bits)
+            {
+                bitCount += bits[0][1];
+                stream.BitBuffer() |= bits[0][0] << (32 - bitCount);
+                while (bitCount >= 8)
+                {
+                    uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    stream.BitBuffer() <<= 8;
+                    bitCount -= 8;
+                }
+            }
+            stream.Seek(pos);
         }
     }
 

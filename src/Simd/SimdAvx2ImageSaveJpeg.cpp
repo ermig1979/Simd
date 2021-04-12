@@ -159,7 +159,7 @@ namespace Simd
             int i = 1;
             for (; dum.u64[0]; ++i, dum.u64[0] >>= 1)
             {
-                int nrzeroes = _tzcnt_u64(dum.u64[0]);
+                int nrzeroes = (int)_tzcnt_u64(dum.u64[0]);
                 i += nrzeroes;
                 dum.u64[0] >>= nrzeroes;
                 if (nrzeroes >= 16)
@@ -315,7 +315,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -340,7 +340,7 @@ namespace Simd
                     }
                 }
             }
-            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -373,7 +373,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -392,7 +392,7 @@ namespace Simd
                         DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
-                stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                 bitBuf.Clear();
             }
         }

@@ -291,102 +291,14 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void WriteJpegBits(const uint16_t bits[2])
+        SIMD_INLINE uint32_t& BitBuffer()
         {
-            _bitCount += bits[1];
-            _bitBuffer |= bits[0] << (32 - _bitCount);
-            while (_bitCount >= 8)
-            {
-                uint8_t byte = _bitBuffer >> 24;
-                Write8u(byte);
-                if (byte == 255)
-                    Write8u(0);
-                _bitBuffer <<= 8;
-                _bitCount -= 8;
-            }
+            return _bitBuffer;
         }
 
-        SIMD_INLINE void WriteJpegBits(const uint16_t bits[][2], size_t size)
+        SIMD_INLINE size_t& BitCount()
         {
-            Reserve(_pos + size * 2);
-            size_t i = 0;
-#if defined(SIMD_X64_ENABLE)
-#if 0
-            uint64_t bitBuffer = uint64_t(_bitBuffer) << 32;
-            for (size_t size4 = AlignLo(size, 4); i < size4; i += 4, bits += 4)
-            {
-                _bitCount += bits[0][1];
-                bitBuffer |= uint64_t(bits[0][0]) << (64 - _bitCount);
-                _bitCount += bits[1][1];
-                bitBuffer |= uint64_t(bits[1][0]) << (64 - _bitCount);
-                _bitCount += bits[2][1];
-                bitBuffer |= uint64_t(bits[2][0]) << (64 - _bitCount);
-                _bitCount += bits[3][1];
-                bitBuffer |= uint64_t(bits[3][0]) << (64 - _bitCount);
-                assert(_bitCount <= 64);
-                while (_bitCount >= 8)
-                {
-                    uint8_t byte = bitBuffer >> 56;
-                    _data[_pos++] = byte;
-                    if (byte == 255)
-                        _data[_pos++] = 0;
-                    bitBuffer <<= 8;
-                    _bitCount -= 8;
-                }
-            }
-            _bitBuffer = uint32_t(bitBuffer >> 32);
-#else
-            uint64_t bitBuffer = uint64_t(_bitBuffer) << 32;
-            for (size_t size3 = AlignLoAny(size, 3); i < size3; i += 3, bits += 3)
-            {
-                _bitCount += bits[0][1];
-                bitBuffer |= uint64_t(bits[0][0]) << (64 - _bitCount);
-                _bitCount += bits[1][1];
-                bitBuffer |= uint64_t(bits[1][0]) << (64 - _bitCount);
-                _bitCount += bits[2][1];
-                bitBuffer |= uint64_t(bits[2][0]) << (64 - _bitCount);
-                assert(_bitCount <= 64);
-                while (_bitCount >= 16)
-                {
-                    uint8_t byte = uint8_t(bitBuffer >> 56);
-                    _data[_pos++] = byte;
-                    if (byte == 255)
-                        _data[_pos++] = 0;
-                    byte = uint8_t(bitBuffer >> 48);
-                    _data[_pos++] = byte;
-                    if (byte == 255)
-                        _data[_pos++] = 0;
-                    bitBuffer <<= 16;
-                    _bitCount -= 16;
-                }
-            }
-            _bitBuffer = uint32_t(bitBuffer >> 32);
-            while (_bitCount >= 8)
-            {
-                uint8_t byte = uint8_t(_bitBuffer >> 24);
-                _data[_pos++] = byte;
-                if (byte == 255)
-                    _data[_pos++] = 0;
-                _bitBuffer <<= 8;
-                _bitCount -= 8;
-            }
-#endif
-#endif
-            for (; i < size; ++i, ++bits)
-            {
-                _bitCount += bits[0][1];
-                _bitBuffer |= bits[0][0] << (32 - _bitCount);
-                while (_bitCount >= 8)
-                {
-                    uint8_t byte = uint8_t(_bitBuffer >> 24);
-                    _data[_pos++] = byte;
-                    if (byte == 255)
-                        _data[_pos++] = 0;
-                    _bitBuffer <<= 8;
-                    _bitCount -= 8;
-                }
-            }
-            _size = Max(_size, _pos);
+            return _bitCount;
         }
     };
 }

@@ -319,7 +319,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -344,7 +344,7 @@ namespace Simd
                     }
                 }
             }
-            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -377,7 +377,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -397,7 +397,7 @@ namespace Simd
                     }
                 }
             }
-            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 

@@ -89,21 +89,7 @@ namespace Simd
            {1018, 10}, {32707, 15}, {65526, 16}, {65527, 16}, {65528, 16}, {65529, 16}, {65530, 16}, {65531, 16}, {65532, 16}, {65533, 16}, {65534, 16}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}
         };
 
-#if defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 1
-        int JpegCalcBitsTable[JpegCalcBitsRange];
-        bool JpegCalcBitsTableInit()
-        {
-            for (int i = 0; i < JpegCalcBitsRange; ++i)
-            {
-                int value = i, count = 1;
-                while (value >>= 1)
-                    ++count;
-                JpegCalcBitsTable[i] = count;
-            }
-            return true;
-        }
-        bool JpegCalcBitsTableInited = JpegCalcBitsTableInit();
-#elif defined(SIMD_JPEG_CALC_BITS_TABLE) && SIMD_JPEG_CALC_BITS_TABLE == 2
+#if defined(SIMD_JPEG_CALC_BITS_TABLE)
         uint16_t JpegCalcBitsTable[JpegCalcBitsRange * 2][2];
         bool JpegCalcBitsTableInit()
         {
@@ -265,12 +251,12 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
             }
-            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -299,12 +285,12 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
             }
-            stream.WriteJpegBits(bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -452,7 +438,7 @@ namespace Simd
                 src += block * stride;
             }
             static const uint16_t FILL_BITS[] = { 0x7F, 7 };
-            _stream.WriteJpegBits(FILL_BITS);
+            Base::WriteBits(_stream, FILL_BITS);
             _stream.Write8u(0xFF);
             _stream.Write8u(0xD9);
             return true;
