@@ -86,7 +86,7 @@ namespace Simd
             _mm256_storeu_ps(dst + 7 * dstStride, _mm256_sub_ps(z11, z4));
         }
 
-        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, float* dst, size_t dstStride)
+        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, const float * fdt, int* dst)
         {
             __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
             __m256 d0 = Avx::Load<false>(src + 0 * srcStride, src + 4 * srcStride);
@@ -154,27 +154,23 @@ namespace Simd
             d5 = _mm256_add_ps(z13, z2);
             d7 = _mm256_sub_ps(z11, z4);
 
-            _mm256_storeu_ps(dst + 0 * dstStride, d0);
-            _mm256_storeu_ps(dst + 1 * dstStride, d1);
-            _mm256_storeu_ps(dst + 2 * dstStride, d2);
-            _mm256_storeu_ps(dst + 3 * dstStride, d3);
-            _mm256_storeu_ps(dst + 4 * dstStride, d4);
-            _mm256_storeu_ps(dst + 5 * dstStride, d5);
-            _mm256_storeu_ps(dst + 6 * dstStride, d6);
-            _mm256_storeu_ps(dst + 7 * dstStride, d7);
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 0), d0)));
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 1), d1)));
+            _mm256_storeu_si256((__m256i*)dst + 2, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 2), d2)));
+            _mm256_storeu_si256((__m256i*)dst + 3, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 3), d3)));
+            _mm256_storeu_si256((__m256i*)dst + 4, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 4), d4)));
+            _mm256_storeu_si256((__m256i*)dst + 5, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 5), d5)));
+            _mm256_storeu_si256((__m256i*)dst + 6, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 6), d6)));
+            _mm256_storeu_si256((__m256i*)dst + 7, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 7), d7)));
         }
 
         static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             JpegDctV(CDU, stride, CDU, stride);
-            SIMD_ALIGNED(16) float CDUT[64];
-            JpegDctH(CDU, stride, CDUT, 8);
-            SIMD_ALIGNED(16) int DU[64];
+            SIMD_ALIGNED(32) int DUO[64], DU[64];
+            JpegDctH(CDU, stride, fdtbl, DUO);
             for (int i = 0; i < 64; ++i)
-            {
-                float v = CDUT[i] * fdtbl[i];
-                DU[Base::JpegZigZagT[i]] = Round(v);
-            }
+                DU[Base::JpegZigZagT[i]] = DUO[i];
             int diff = DU[0] - DC;
             if (diff == 0)
                 bitBuf.Push(HTDC[0]);

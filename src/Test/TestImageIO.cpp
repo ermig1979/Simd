@@ -231,7 +231,7 @@ namespace Test
         bool result = true;
 
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 1; format < 5; format++)
+        for (int format = 0; format < 5; format++)
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {

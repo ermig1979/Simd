@@ -89,9 +89,9 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, float* dst, size_t dstStride)
+        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, const float * fdt, int* dst)
         {
-            for (int i = 0; i < 2; i++, src += 4 * srcStride, dst += 4)
+            for (int i = 0; i < 2; i++, src += 4 * srcStride, fdt += 4, dst += 4)
             {
                 __m128 tmp0, tmp1, tmp2, tmp3;
                 __m128 d0 = _mm_loadu_ps(src + 0 * srcStride);
@@ -158,28 +158,24 @@ namespace Simd
                 d5 = _mm_add_ps(z13, z2);
                 d7 = _mm_sub_ps(z11, z4);
 
-                _mm_storeu_ps(dst + 0 * dstStride, d0);
-                _mm_storeu_ps(dst + 1 * dstStride, d1);
-                _mm_storeu_ps(dst + 2 * dstStride, d2);
-                _mm_storeu_ps(dst + 3 * dstStride, d3);
-                _mm_storeu_ps(dst + 4 * dstStride, d4);
-                _mm_storeu_ps(dst + 5 * dstStride, d5);
-                _mm_storeu_ps(dst + 6 * dstStride, d6);
-                _mm_storeu_ps(dst + 7 * dstStride, d7);
+                _mm_storeu_si128((__m128i*)dst + 0x0, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 0), d0)));
+                _mm_storeu_si128((__m128i*)dst + 0x2, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 1), d1)));
+                _mm_storeu_si128((__m128i*)dst + 0x4, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 2), d2)));
+                _mm_storeu_si128((__m128i*)dst + 0x6, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 3), d3)));
+                _mm_storeu_si128((__m128i*)dst + 0x8, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 4), d4)));
+                _mm_storeu_si128((__m128i*)dst + 0xA, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 5), d5)));
+                _mm_storeu_si128((__m128i*)dst + 0xC, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 6), d6)));
+                _mm_storeu_si128((__m128i*)dst + 0xE, _mm_cvtps_epi32(_mm_mul_ps(_mm_loadu_ps(fdt + DF * 7), d7)));
             }
         }
 
         static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
             JpegDctV(CDU, stride, CDU, stride);
-            SIMD_ALIGNED(16) float CDUT[64];
-            JpegDctH(CDU, stride, CDUT, 8);
-            SIMD_ALIGNED(16) int DU[64];
+            SIMD_ALIGNED(16) int DUO[64], DU[64];
+            JpegDctH(CDU, stride, fdtbl, DUO);
             for (int i = 0; i < 64; ++i)
-            {
-                float v = CDUT[i] * fdtbl[i];
-                DU[Base::JpegZigZagT[i]] = Round(v);
-            }
+                DU[Base::JpegZigZagT[i]] = DUO[i];
             int diff = DU[0] - DC;
             if (diff == 0)
                 bitBuf.Push(HTDC[0]);

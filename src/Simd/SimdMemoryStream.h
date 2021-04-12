@@ -308,7 +308,7 @@ namespace Simd
 
         SIMD_INLINE void WriteJpegBits(const uint16_t bits[][2], size_t size)
         {
-            Reserve(_pos + size * 2);
+            Reserve(_pos + size * 2); 
             size_t i = 0;
 #if defined(SIMD_X64_ENABLE)
 #if 0
@@ -346,17 +346,30 @@ namespace Simd
                 _bitCount += bits[2][1];
                 bitBuffer |= uint64_t(bits[2][0]) << (64 - _bitCount);
                 assert(_bitCount <= 64);
-                while (_bitCount >= 8)
+                while (_bitCount >= 16)
                 {
                     uint8_t byte = bitBuffer >> 56;
                     _data[_pos++] = byte;
                     if (byte == 255)
                         _data[_pos++] = 0;
-                    bitBuffer <<= 8;
-                    _bitCount -= 8;
+                    byte = bitBuffer >> 48;
+                    _data[_pos++] = byte;
+                    if (byte == 255)
+                        _data[_pos++] = 0;
+                    bitBuffer <<= 16;
+                    _bitCount -= 16;
                 }
             }
             _bitBuffer = uint32_t(bitBuffer >> 32);
+            while (_bitCount >= 8)
+            {
+                uint8_t byte = _bitBuffer >> 24;
+                _data[_pos++] = byte;
+                if (byte == 255)
+                    _data[_pos++] = 0;
+                _bitBuffer <<= 8;
+                _bitCount -= 8;
+            }
 #endif
 #endif
             for (; i < size; ++i, ++bits)
