@@ -155,6 +155,60 @@ namespace Simd
     namespace Avx2
     {
         extern const uint32_t JpegZigZagTi32[64];
+
+        SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float* dst, size_t dstStride)
+        {
+            __m256 d0 = _mm256_loadu_ps(src + 0 * srcStride);
+            __m256 d1 = _mm256_loadu_ps(src + 1 * srcStride);
+            __m256 d2 = _mm256_loadu_ps(src + 2 * srcStride);
+            __m256 d3 = _mm256_loadu_ps(src + 3 * srcStride);
+            __m256 d4 = _mm256_loadu_ps(src + 4 * srcStride);
+            __m256 d5 = _mm256_loadu_ps(src + 5 * srcStride);
+            __m256 d6 = _mm256_loadu_ps(src + 6 * srcStride);
+            __m256 d7 = _mm256_loadu_ps(src + 7 * srcStride);
+
+            __m256 tmp0 = _mm256_add_ps(d0, d7);
+            __m256 tmp7 = _mm256_sub_ps(d0, d7);
+            __m256 tmp1 = _mm256_add_ps(d1, d6);
+            __m256 tmp6 = _mm256_sub_ps(d1, d6);
+            __m256 tmp2 = _mm256_add_ps(d2, d5);
+            __m256 tmp5 = _mm256_sub_ps(d2, d5);
+            __m256 tmp3 = _mm256_add_ps(d3, d4);
+            __m256 tmp4 = _mm256_sub_ps(d3, d4);
+
+            __m256 tmp10 = _mm256_add_ps(tmp0, tmp3);
+            __m256 tmp13 = _mm256_sub_ps(tmp0, tmp3);
+            __m256 tmp11 = _mm256_add_ps(tmp1, tmp2);
+            __m256 tmp12 = _mm256_sub_ps(tmp1, tmp2);
+
+            d0 = _mm256_add_ps(tmp10, tmp11);
+            d4 = _mm256_sub_ps(tmp10, tmp11);
+
+            __m256 z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _mm256_set1_ps(0.707106781f));
+            d2 = _mm256_add_ps(tmp13, z1);
+            d6 = _mm256_sub_ps(tmp13, z1);
+
+            tmp10 = _mm256_add_ps(tmp4, tmp5);
+            tmp11 = _mm256_add_ps(tmp5, tmp6);
+            tmp12 = _mm256_add_ps(tmp6, tmp7);
+
+            __m256 z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _mm256_set1_ps(0.382683433f));
+            __m256 z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _mm256_set1_ps(0.541196100f)), z5);
+            __m256 z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _mm256_set1_ps(1.306562965f)), z5);
+            __m256 z3 = _mm256_mul_ps(tmp11, _mm256_set1_ps(0.707106781f));
+
+            __m256 z11 = _mm256_add_ps(tmp7, z3);
+            __m256 z13 = _mm256_sub_ps(tmp7, z3);
+
+            _mm256_storeu_ps(dst + 0 * dstStride, d0);
+            _mm256_storeu_ps(dst + 1 * dstStride, _mm256_add_ps(z11, z4));
+            _mm256_storeu_ps(dst + 2 * dstStride, d2);
+            _mm256_storeu_ps(dst + 3 * dstStride, _mm256_sub_ps(z13, z2));
+            _mm256_storeu_ps(dst + 4 * dstStride, d4);
+            _mm256_storeu_ps(dst + 5 * dstStride, _mm256_add_ps(z13, z2));
+            _mm256_storeu_ps(dst + 6 * dstStride, d6);
+            _mm256_storeu_ps(dst + 7 * dstStride, _mm256_sub_ps(z11, z4));
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 

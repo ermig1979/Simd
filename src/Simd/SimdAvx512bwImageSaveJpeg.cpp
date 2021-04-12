@@ -26,66 +26,13 @@
 #include "Simd/SimdImageSaveJpeg.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdAvx512bw.h"
+#include "Simd/SimdSet.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float* dst, size_t dstStride)
-        {
-            __m256 d0 = _mm256_loadu_ps(src + 0 * srcStride);
-            __m256 d1 = _mm256_loadu_ps(src + 1 * srcStride);
-            __m256 d2 = _mm256_loadu_ps(src + 2 * srcStride);
-            __m256 d3 = _mm256_loadu_ps(src + 3 * srcStride);
-            __m256 d4 = _mm256_loadu_ps(src + 4 * srcStride);
-            __m256 d5 = _mm256_loadu_ps(src + 5 * srcStride);
-            __m256 d6 = _mm256_loadu_ps(src + 6 * srcStride);
-            __m256 d7 = _mm256_loadu_ps(src + 7 * srcStride);
-
-            __m256 tmp0 = _mm256_add_ps(d0, d7);
-            __m256 tmp7 = _mm256_sub_ps(d0, d7);
-            __m256 tmp1 = _mm256_add_ps(d1, d6);
-            __m256 tmp6 = _mm256_sub_ps(d1, d6);
-            __m256 tmp2 = _mm256_add_ps(d2, d5);
-            __m256 tmp5 = _mm256_sub_ps(d2, d5);
-            __m256 tmp3 = _mm256_add_ps(d3, d4);
-            __m256 tmp4 = _mm256_sub_ps(d3, d4);
-
-            __m256 tmp10 = _mm256_add_ps(tmp0, tmp3);
-            __m256 tmp13 = _mm256_sub_ps(tmp0, tmp3);
-            __m256 tmp11 = _mm256_add_ps(tmp1, tmp2);
-            __m256 tmp12 = _mm256_sub_ps(tmp1, tmp2);
-
-            d0 = _mm256_add_ps(tmp10, tmp11);
-            d4 = _mm256_sub_ps(tmp10, tmp11);
-
-            __m256 z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _mm256_set1_ps(0.707106781f));
-            d2 = _mm256_add_ps(tmp13, z1);
-            d6 = _mm256_sub_ps(tmp13, z1);
-
-            tmp10 = _mm256_add_ps(tmp4, tmp5);
-            tmp11 = _mm256_add_ps(tmp5, tmp6);
-            tmp12 = _mm256_add_ps(tmp6, tmp7);
-
-            __m256 z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _mm256_set1_ps(0.382683433f));
-            __m256 z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _mm256_set1_ps(0.541196100f)), z5);
-            __m256 z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _mm256_set1_ps(1.306562965f)), z5);
-            __m256 z3 = _mm256_mul_ps(tmp11, _mm256_set1_ps(0.707106781f));
-
-            __m256 z11 = _mm256_add_ps(tmp7, z3);
-            __m256 z13 = _mm256_sub_ps(tmp7, z3);
-
-            _mm256_storeu_ps(dst + 0 * dstStride, d0);
-            _mm256_storeu_ps(dst + 1 * dstStride, _mm256_add_ps(z11, z4));
-            _mm256_storeu_ps(dst + 2 * dstStride, d2);
-            _mm256_storeu_ps(dst + 3 * dstStride, _mm256_sub_ps(z13, z2));
-            _mm256_storeu_ps(dst + 4 * dstStride, d4);
-            _mm256_storeu_ps(dst + 5 * dstStride, _mm256_add_ps(z13, z2));
-            _mm256_storeu_ps(dst + 6 * dstStride, d6);
-            _mm256_storeu_ps(dst + 7 * dstStride, _mm256_sub_ps(z11, z4));
-        }
-
         SIMD_INLINE void JpegDctVx2(const float* src, size_t srcStride, float *dst, size_t dstStride)
         {
             __m512 d0 = _mm512_loadu_ps(src + 0 * srcStride);
@@ -140,7 +87,7 @@ namespace Simd
             _mm512_storeu_ps(dst + 7 * dstStride, _mm512_sub_ps(z11, z4));
         }
 
-        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, float* dst, size_t dstStride)
+        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, const float* fdt, int* dst)
         {
             __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
             __m256 d0 = Avx::Load<false>(src + 0 * srcStride, src + 4 * srcStride);
@@ -208,26 +155,29 @@ namespace Simd
             d5 = _mm256_add_ps(z13, z2);
             d7 = _mm256_sub_ps(z11, z4);
 
-            _mm256_storeu_ps(dst + 0 * dstStride, d0);
-            _mm256_storeu_ps(dst + 1 * dstStride, d1);
-            _mm256_storeu_ps(dst + 2 * dstStride, d2);
-            _mm256_storeu_ps(dst + 3 * dstStride, d3);
-            _mm256_storeu_ps(dst + 4 * dstStride, d4);
-            _mm256_storeu_ps(dst + 5 * dstStride, d5);
-            _mm256_storeu_ps(dst + 6 * dstStride, d6);
-            _mm256_storeu_ps(dst + 7 * dstStride, d7);
+            _mm512_storeu_si512(dst + F * 0, _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_loadu_ps(fdt + F * 0), Set(d0, d1))));
+            _mm512_storeu_si512(dst + F * 1, _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_loadu_ps(fdt + F * 1), Set(d2, d3))));
+            _mm512_storeu_si512(dst + F * 2, _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_loadu_ps(fdt + F * 2), Set(d4, d5))));
+            _mm512_storeu_si512(dst + F * 3, _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_loadu_ps(fdt + F * 3), Set(d6, d7))));
         }
 
-        static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
+        template<bool vert> SIMD_INLINE int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
-            //JpegDctV(CDU, stride, CDU, stride);
-            SIMD_ALIGNED(16) float CDUT[64];
-            JpegDctH(CDU, stride, CDUT, 8);
-            SIMD_ALIGNED(16) int DU[64];
-            for (int i = 0; i < 64; ++i)
+            if(vert)
+                Avx2::JpegDctV(CDU, stride, CDU, stride);
+            SIMD_ALIGNED(32) int DUO[64], DU[64];
+            JpegDctH(CDU, stride, fdtbl, DUO);
+            union
             {
-                float v = CDUT[i] * fdtbl[i];
-                DU[Base::JpegZigZagT[i]] = Round(v);
+                uint64_t u64[1];
+                uint32_t u32[2];
+                uint16_t u16[4];
+            } dum;
+            for (int i = 0, j = 0; i < 64; i += 16, j++)
+            {
+                __m512i du = _mm512_i32gather_epi32(_mm512_loadu_si512(Avx2::JpegZigZagTi32 + i), DUO, 4);
+                dum.u16[j] = _mm512_cmp_epi32_mask(du, Avx512bw::K_ZERO, _MM_CMPINT_NE);
+                _mm512_storeu_si512(DU + i, du);
             }
             int diff = DU[0] - DC;
             if (diff == 0)
@@ -239,7 +189,33 @@ namespace Simd
                 bitBuf.Push(HTDC[bits[1]]);
                 bitBuf.Push(bits);
             }
-
+#if defined(SIMD_X64_ENABLE)
+            if (dum.u64[0] == 0)
+            {
+                bitBuf.Push(HTAC[0x00]);
+                return DU[0];
+            }
+            dum.u64[0] >>= 1;
+            int i = 1;
+            for (; dum.u64[0]; ++i, dum.u64[0] >>= 1)
+            {
+                int nrzeroes = (int)_tzcnt_u64(dum.u64[0]);
+                i += nrzeroes;
+                dum.u64[0] >>= nrzeroes;
+                if (nrzeroes >= 16)
+                {
+                    for (int nrmarker = 16; nrmarker <= nrzeroes; nrmarker += 16)
+                        bitBuf.Push(HTAC[0xF0]);
+                    nrzeroes &= 15;
+                }
+                uint16_t bits[2];
+                Base::JpegCalcBits(DU[i], bits);
+                bitBuf.Push(HTAC[(nrzeroes << 4) + bits[1]]);
+                bitBuf.Push(bits);
+            }
+            if (i < 64)
+                bitBuf.Push(HTAC[0x00]);
+#else
             int end0pos = 64;
             do
             {
@@ -250,9 +226,7 @@ namespace Simd
                     end0pos += 31 - _lzcnt_u32(mask);
                     break;
                 }
-            } 
-            while (end0pos > 0);
-
+            } while (end0pos > 0);
             if (end0pos == 0)
             {
                 bitBuf.Push(HTAC[0x00]);
@@ -278,6 +252,7 @@ namespace Simd
             }
             if (end0pos != 63)
                 bitBuf.Push(HTAC[0x00]);
+#endif
             return DU[0];
         }
 
@@ -399,21 +374,19 @@ namespace Simd
                     else
                         RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V);
                     JpegDctVx2(Y + 0, 16, Y + 0, 16);
-                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     JpegDctVx2(Y + 128, 16, Y + 128, 16);
-                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
                         Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
                         SubUv(U, subU);
                         SubUv(V, subV);
-                        JpegDctV(subU, 8, subU, 8);
-                        DCU = JpegProcessDu(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        JpegDctV(subV, 8, subV, 8);
-                        DCV = JpegProcessDu(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu<true>(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu<true>(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                     if (bitBuf.Full())
                     {
@@ -428,21 +401,19 @@ namespace Simd
                     else
                         Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 16);
                     JpegDctVx2(Y + 0, 16, Y + 0, 16);
-                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     JpegDctVx2(Y + 128, 16, Y + 128, 16);
-                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
-                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<false>(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
                         Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
                         SubUv(U, subU);
                         SubUv(V, subV);
-                        JpegDctV(subU, 8, subU, 8);
-                        DCU = JpegProcessDu(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        JpegDctV(subV, 8, subV, 8);
-                        DCV = JpegProcessDu(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu<true>(bitBuf, subU, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu<true>(bitBuf, subV, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
             }
@@ -469,16 +440,13 @@ namespace Simd
                         GrayToY(red + x, stride, height - y, k, Y);
                     else
                         RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V);
-                    JpegDctV(Y, 8, Y, 8);
-                    DCY = JpegProcessDu(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<true>(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
                         Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
-                        JpegDctV(U, 8, U, 8);
-                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        JpegDctV(V, 8, V, 8);
-                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu<true>(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu<true>(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                     if (bitBuf.Full())
                     {
@@ -492,16 +460,13 @@ namespace Simd
                         Base::GrayToY(red + x, stride, height - y, width - x, Y, 8);
                     else
                         Base::RgbToYuv(red + x, green + x, blue + x, stride, height - y, width - x, Y, U, V, 8);
-                    JpegDctV(Y, 8, Y, 8);
-                    DCY = JpegProcessDu(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu<true>(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     if (gray)
                         Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
-                        JpegDctV(U, 8, U, 8);
-                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
-                        JpegDctV(V, 8, V, 8);
-                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCU = JpegProcessDu<true>(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu<true>(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
                 stream.WriteJpegBits(bitBuf.data, bitBuf.size);
