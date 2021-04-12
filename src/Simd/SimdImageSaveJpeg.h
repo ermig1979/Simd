@@ -154,6 +154,7 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        extern const uint32_t JpegZigZagTi32[64];
     }
 #endif// SIMD_AVX2_ENABLE
 

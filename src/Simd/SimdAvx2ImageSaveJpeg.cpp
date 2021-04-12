@@ -32,6 +32,18 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        const uint32_t JpegZigZagTi32[64] = {
+            0, 8, 1, 2, 9, 16, 24, 17,
+            10, 3, 4, 11, 18, 25, 32, 40,
+            33, 26, 19, 12, 5, 6, 13, 20,
+            27, 34, 41, 48, 56, 49, 42, 35,
+            28, 21, 14, 7, 15, 22, 29, 36,
+            43, 50, 57, 58, 51, 44, 37, 30,
+            23, 31, 38, 45, 52, 59, 60, 53,
+            46, 39, 47, 54, 61, 62, 55, 63 };
+
+        //---------------------------------------------------------------------
+
         SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float *dst, size_t dstStride)
         {
             __m256 d0 = _mm256_loadu_ps(src + 0 * srcStride);
@@ -169,8 +181,18 @@ namespace Simd
             JpegDctV(CDU, stride, CDU, stride);
             SIMD_ALIGNED(32) int DUO[64], DU[64];
             JpegDctH(CDU, stride, fdtbl, DUO);
-            for (int i = 0; i < 64; ++i)
-                DU[Base::JpegZigZagT[i]] = DUO[i];
+            union
+            {
+                uint64_t u64[1];
+                uint32_t u32[2];
+                uint8_t u8[8];
+            } dum;
+            for (int i = 0, j = 0; i < 64; i += 8, j++)
+            {
+                __m256i du = _mm256_i32gather_epi32(DUO, _mm256_loadu_si256((__m256i*)(JpegZigZagTi32 + i)), 4);
+                dum.u8[j] = ~_mm256_movemask_ps(_mm256_castsi256_ps(_mm256_cmpeq_epi32(du, Avx2::K_ZERO)));
+                _mm256_storeu_si256((__m256i*)(DU + i), du);
+            }
             int diff = DU[0] - DC;
             if (diff == 0)
                 bitBuf.Push(HTDC[0]);
@@ -181,7 +203,33 @@ namespace Simd
                 bitBuf.Push(HTDC[bits[1]]);
                 bitBuf.Push(bits);
             }
-
+#if defined(SIMD_X64_ENABLE)
+            if (dum.u64[0] == 0)
+            {
+                bitBuf.Push(HTAC[0x00]);
+                return DU[0];
+            }
+            dum.u64[0] >>= 1;
+            int i = 1;
+            for (; dum.u64[0]; ++i, dum.u64[0] >>= 1)
+            {
+                int nrzeroes = _tzcnt_u64(dum.u64[0]);
+                i += nrzeroes;
+                dum.u64[0] >>= nrzeroes;
+                if (nrzeroes >= 16)
+                {
+                    for (int nrmarker = 16; nrmarker <= nrzeroes; nrmarker += 16)
+                        bitBuf.Push(HTAC[0xF0]);
+                    nrzeroes &= 15;
+                }
+                uint16_t bits[2];
+                Base::JpegCalcBits(DU[i], bits);
+                bitBuf.Push(HTAC[(nrzeroes << 4) + bits[1]]);
+                bitBuf.Push(bits);
+            }
+            if (i < 64)
+                bitBuf.Push(HTAC[0x00]);
+#else
             int end0pos = 64;
             do
             {
@@ -194,7 +242,6 @@ namespace Simd
                 }
             } 
             while (end0pos > 0);
-
             if (end0pos == 0)
             {
                 bitBuf.Push(HTAC[0x00]);
@@ -220,6 +267,7 @@ namespace Simd
             }
             if (end0pos != 63)
                 bitBuf.Push(HTAC[0x00]);
+#endif
             return DU[0];
         }
 
