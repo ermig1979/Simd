@@ -163,10 +163,11 @@ namespace Simd
 
         template<bool vert> SIMD_INLINE int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
-            if(vert)
-                Avx2::JpegDctV(CDU, stride, CDU, stride);
             SIMD_ALIGNED(32) int DUO[64], DU[64];
-            JpegDctH(CDU, stride, fdtbl, DUO);
+            if(vert)
+                Avx2::JpegDct(CDU, stride, fdtbl, DUO);
+            else
+                JpegDctH(CDU, stride, fdtbl, DUO);
             union
             {
                 uint64_t u64[1];
@@ -390,7 +391,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -417,7 +418,7 @@ namespace Simd
                     }
                 }
             }
-            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+            Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -450,7 +451,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -469,7 +470,7 @@ namespace Simd
                         DCV = JpegProcessDu<true>(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
-                Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
                 bitBuf.Clear();
             }
         }

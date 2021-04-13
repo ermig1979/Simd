@@ -423,7 +423,25 @@ namespace Simd
             0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE,
             0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
 
-        const __m128i K8_SHFL_RT_128 = SIMD_MM_SETR_EPI8(0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
+        SIMD_INLINE void WriteBits(uint8_t* data, size_t & pos, uint64_t & bitBuffer, size_t &bitCount, uint64_t shift, uint64_t value, uint64_t mask)
+        {
+            bitCount += shift;
+            assert(bitCount <= 64);
+            bitBuffer |= _pext_u64(value, mask) << (64 - bitCount);
+            while (bitCount >= 16)
+            {
+                uint8_t byte = uint8_t(bitBuffer >> 56);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                byte = uint8_t(bitBuffer >> 48);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                bitBuffer <<= 16;
+                bitCount -= 16;
+            }
+        }
 
         SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
         {
@@ -432,7 +450,7 @@ namespace Simd
             uint8_t* data = stream.Data();
             size_t& bitCount = stream.BitCount();
             size_t i = 0;
-#if defined(SIMD_X64_ENABLE) && 1
+#if defined(SIMD_X64_ENABLE)
             uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
             size_t size16 = AlignLo(size, 16);
             for (; i < size16; i += 16, bits += 16)
@@ -453,74 +471,10 @@ namespace Simd
                 __m256i ms0 = _mm256_shuffle_epi8(m0, K8_SHFL_VS);
                 __m256i ms1 = _mm256_shuffle_epi8(m1, K8_SHFL_VS);
                 _mm256_storeu_si256((__m256i*)mask, Shuffle64i<0x0>(ms0, ms1));
-
-                bitCount += shift[0];
-                assert(bitCount <= 64);
-                bitBuffer |= _pext_u64(value[0], mask[0]) << (64 - bitCount);
-                while (bitCount >= 16)
-                {
-                    uint8_t byte = uint8_t(bitBuffer >> 56);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    byte = uint8_t(bitBuffer >> 48);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    bitBuffer <<= 16;
-                    bitCount -= 16;
-                }
-
-                bitCount += shift[2];
-                assert(bitCount <= 64);
-                bitBuffer |= _pext_u64(value[2], mask[2]) << (64 - bitCount);
-                while (bitCount >= 16)
-                {
-                    uint8_t byte = uint8_t(bitBuffer >> 56);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    byte = uint8_t(bitBuffer >> 48);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    bitBuffer <<= 16;
-                    bitCount -= 16;
-                }
-
-                bitCount += shift[1];
-                assert(bitCount <= 64);
-                bitBuffer |= _pext_u64(value[1], mask[1]) << (64 - bitCount);
-                while (bitCount >= 16)
-                {
-                    uint8_t byte = uint8_t(bitBuffer >> 56);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    byte = uint8_t(bitBuffer >> 48);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    bitBuffer <<= 16;
-                    bitCount -= 16;
-                }
-
-                bitCount += shift[3];
-                assert(bitCount <= 64);
-                bitBuffer |= _pext_u64(value[3], mask[3]) << (64 - bitCount);
-                while (bitCount >= 16)
-                {
-                    uint8_t byte = uint8_t(bitBuffer >> 56);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    byte = uint8_t(bitBuffer >> 48);
-                    data[pos++] = byte;
-                    if (byte == 255)
-                        data[pos++] = 0;
-                    bitBuffer <<= 16;
-                    bitCount -= 16;
-                }
+                WriteBits(data, pos, bitBuffer, bitCount, shift[0], value[0], mask[0]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[2], value[2], mask[2]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[1], value[1], mask[1]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[3], value[3], mask[3]);
             }
             stream.BitBuffer() = uint32_t(bitBuffer >> 32);
             while (bitCount >= 8)
@@ -555,6 +509,90 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        const __m512i K8_SHFL_VS = SIMD_MM512_SETR_EPI8(
+            0xC, 0xD, 0x8, 0x9, 0x4, 0x5, 0x0, 0x1, 0xE, 0xF, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3,
+            0xC, 0xD, 0x8, 0x9, 0x4, 0x5, 0x0, 0x1, 0xE, 0xF, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3,
+            0xC, 0xD, 0x8, 0x9, 0x4, 0x5, 0x0, 0x1, 0xE, 0xF, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3,
+            0xC, 0xD, 0x8, 0x9, 0x4, 0x5, 0x0, 0x1, 0xE, 0xF, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3);
+
+        SIMD_INLINE void WriteBits(uint8_t* data, size_t& pos, uint64_t& bitBuffer, size_t& bitCount, uint64_t shift, uint64_t value, uint64_t mask)
+        {
+            bitCount += shift;
+            assert(bitCount <= 64);
+            bitBuffer |= _pext_u64(value, mask) << (64 - bitCount);
+            while (bitCount >= 16)
+            {
+                uint8_t byte = uint8_t(bitBuffer >> 56);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                byte = uint8_t(bitBuffer >> 48);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                bitBuffer <<= 16;
+                bitCount -= 16;
+            }
+        }
+
+        SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
+        {
+            size_t pos = stream.Pos();
+            stream.Reserve(pos + size * 2);
+            uint8_t* data = stream.Data();
+            size_t& bitCount = stream.BitCount();
+            size_t i = 0;
+#if defined(SIMD_X64_ENABLE) && 1
+            uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
+            size_t size32 = AlignLo(size, 32);
+            for (; i < size32; i += 32, bits += 32)
+            {
+                __m512i b0 = _mm512_loadu_si512((__m512i*)bits + 0);
+                __m512i b1 = _mm512_loadu_si512((__m512i*)bits + 1);
+                __m512i vs0 = _mm512_shuffle_epi8(b0, K8_SHFL_VS);
+                __m512i vs1 = _mm512_shuffle_epi8(b1, K8_SHFL_VS);
+                __m512i vv = Shuffle64i<0x00>(vs0, vs1);
+                __m512i ss = Shuffle64i<0xFF>(vs0, vs1);
+                SIMD_ALIGNED(64) uint64_t value[8], mask[8], shift[8];
+                _mm512_storeu_si512((__m512i*)value, vv);
+                _mm512_storeu_si512((__m512i*)shift, _mm512_sad_epu8(ss, K_ZERO));
+                _mm512_storeu_si512((__m512i*)mask, _mm512_srlv_epi16(K_INV_ZERO, _mm512_sub_epi16(K16_0010, ss)));
+                WriteBits(data, pos, bitBuffer, bitCount, shift[0], value[0], mask[0]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[2], value[2], mask[2]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[4], value[4], mask[4]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[6], value[6], mask[6]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[1], value[1], mask[1]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[3], value[3], mask[3]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[5], value[5], mask[5]);
+                WriteBits(data, pos, bitBuffer, bitCount, shift[7], value[7], mask[7]);
+            }
+            stream.BitBuffer() = uint32_t(bitBuffer >> 32);
+            while (bitCount >= 8)
+            {
+                uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                stream.BitBuffer() <<= 8;
+                bitCount -= 8;
+            }
+#endif
+            for (; i < size; ++i, ++bits)
+            {
+                bitCount += bits[0][1];
+                stream.BitBuffer() |= bits[0][0] << (32 - bitCount);
+                while (bitCount >= 8)
+                {
+                    uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    stream.BitBuffer() <<= 8;
+                    bitCount -= 8;
+                }
+            }
+            stream.Seek(pos);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 

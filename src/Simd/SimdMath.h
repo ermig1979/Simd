@@ -1189,6 +1189,11 @@ namespace Simd
             return _mm512_castps_si512(_mm512_shuffle_ps(_mm512_castsi512_ps(lo), _mm512_castsi512_ps(hi), imm));
         }
 
+        template<int imm> SIMD_INLINE __m512i Shuffle64i(__m512i lo, __m512i hi)
+        {
+            return _mm512_castpd_si512(_mm512_shuffle_pd(_mm512_castsi512_pd(lo), _mm512_castsi512_pd(hi), imm));
+        }
+
         template <int index> SIMD_INLINE __m512 Broadcast(__m512 a)
         {
             return _mm512_permute_ps(a, index * 0x55);
