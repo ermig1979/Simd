@@ -44,89 +44,10 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, const float * fdt, int* dst)
-        {
-            __m256 tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-            __m256 d0 = Avx::Load<false>(src + 0 * srcStride, src + 4 * srcStride);
-            __m256 d1 = Avx::Load<false>(src + 1 * srcStride, src + 5 * srcStride);
-            __m256 d2 = Avx::Load<false>(src + 2 * srcStride, src + 6 * srcStride);
-            __m256 d3 = Avx::Load<false>(src + 3 * srcStride, src + 7 * srcStride);
-            tmp0 = _mm256_unpacklo_ps(d0, d2);
-            tmp1 = _mm256_unpackhi_ps(d0, d2);
-            tmp2 = _mm256_unpacklo_ps(d1, d3);
-            tmp3 = _mm256_unpackhi_ps(d1, d3);
-            d0 = _mm256_unpacklo_ps(tmp0, tmp2);
-            d1 = _mm256_unpackhi_ps(tmp0, tmp2);
-            d2 = _mm256_unpacklo_ps(tmp1, tmp3);
-            d3 = _mm256_unpackhi_ps(tmp1, tmp3);
-
-            src += 4;
-            __m256 d4 = Avx::Load<false>(src + 0 * srcStride, src + 4 * srcStride);
-            __m256 d5 = Avx::Load<false>(src + 1 * srcStride, src + 5 * srcStride);
-            __m256 d6 = Avx::Load<false>(src + 2 * srcStride, src + 6 * srcStride);
-            __m256 d7 = Avx::Load<false>(src + 3 * srcStride, src + 7 * srcStride);
-            tmp0 = _mm256_unpacklo_ps(d4, d6);
-            tmp1 = _mm256_unpackhi_ps(d4, d6);
-            tmp2 = _mm256_unpacklo_ps(d5, d7);
-            tmp3 = _mm256_unpackhi_ps(d5, d7);
-            d4 = _mm256_unpacklo_ps(tmp0, tmp2);
-            d5 = _mm256_unpackhi_ps(tmp0, tmp2);
-            d6 = _mm256_unpacklo_ps(tmp1, tmp3);
-            d7 = _mm256_unpackhi_ps(tmp1, tmp3);
-
-            tmp0 = _mm256_add_ps(d0, d7);
-            tmp1 = _mm256_add_ps(d1, d6);
-            tmp2 = _mm256_add_ps(d2, d5);
-            tmp3 = _mm256_add_ps(d3, d4);
-            tmp7 = _mm256_sub_ps(d0, d7);
-            tmp6 = _mm256_sub_ps(d1, d6);
-            tmp5 = _mm256_sub_ps(d2, d5);
-            tmp4 = _mm256_sub_ps(d3, d4);
-
-            __m256 tmp10 = _mm256_add_ps(tmp0, tmp3);
-            __m256 tmp13 = _mm256_sub_ps(tmp0, tmp3);
-            __m256 tmp11 = _mm256_add_ps(tmp1, tmp2);
-            __m256 tmp12 = _mm256_sub_ps(tmp1, tmp2);
-
-            d0 = _mm256_add_ps(tmp10, tmp11);
-            d4 = _mm256_sub_ps(tmp10, tmp11);
-
-            __m256 z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _mm256_set1_ps(0.707106781f));
-            d2 = _mm256_add_ps(tmp13, z1);
-            d6 = _mm256_sub_ps(tmp13, z1);
-
-            tmp10 = _mm256_add_ps(tmp4, tmp5);
-            tmp11 = _mm256_add_ps(tmp5, tmp6);
-            tmp12 = _mm256_add_ps(tmp6, tmp7);
-
-            __m256 z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _mm256_set1_ps(0.382683433f));
-            __m256 z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _mm256_set1_ps(0.541196100f)), z5);
-            __m256 z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _mm256_set1_ps(1.306562965f)), z5);
-            __m256 z3 = _mm256_mul_ps(tmp11, _mm256_set1_ps(0.707106781f));
-
-            __m256 z11 = _mm256_add_ps(tmp7, z3);
-            __m256 z13 = _mm256_sub_ps(tmp7, z3);
-
-            d1 = _mm256_add_ps(z11, z4);
-            d3 = _mm256_sub_ps(z13, z2);
-            d5 = _mm256_add_ps(z13, z2);
-            d7 = _mm256_sub_ps(z11, z4);
-
-            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 0), d0)));
-            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 1), d1)));
-            _mm256_storeu_si256((__m256i*)dst + 2, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 2), d2)));
-            _mm256_storeu_si256((__m256i*)dst + 3, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 3), d3)));
-            _mm256_storeu_si256((__m256i*)dst + 4, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 4), d4)));
-            _mm256_storeu_si256((__m256i*)dst + 5, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 5), d5)));
-            _mm256_storeu_si256((__m256i*)dst + 6, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 6), d6)));
-            _mm256_storeu_si256((__m256i*)dst + 7, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 7), d7)));
-        }
-
         static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
-            JpegDctV(CDU, stride, CDU, stride);
             SIMD_ALIGNED(32) int DUO[64], DU[64];
-            JpegDctH(CDU, stride, fdtbl, DUO);
+            JpegDct(CDU, stride, fdtbl, DUO);
             union
             {
                 uint64_t u64[1];
@@ -315,7 +236,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -340,7 +261,7 @@ namespace Simd
                     }
                 }
             }
-            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+            Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -373,7 +294,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -392,7 +313,7 @@ namespace Simd
                         DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
-                Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
                 bitBuf.Clear();
             }
         }

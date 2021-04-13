@@ -25,6 +25,7 @@
 #define __SimdImageSaveJpeg_h__
 
 #include "Simd/SimdImageSave.h"
+#include "Simd/SimdMath.h"
 
 #define SIMD_JPEG_CALC_BITS_TABLE
 
@@ -153,10 +154,10 @@ namespace Simd
             size_t pos = stream.Pos();
             stream.Reserve(pos + size * 2);
             uint8_t* data = stream.Data();
+            size_t & bitCount = stream.BitCount();
             size_t i = 0;
 #if defined(SIMD_X64_ENABLE)
             uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
-            size_t & bitCount = stream.BitCount();
             for (size_t size3 = AlignLoAny(size, 3); i < size3; i += 3, bits += 3)
             {
                 bitCount += bits[0][1];
@@ -222,6 +223,11 @@ namespace Simd
 
         SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float* dst, size_t dstStride)
         {
+            static const __m256 _0_707106781 = _mm256_set1_ps(0.707106781f);
+            static const __m256 _0_382683433 = _mm256_set1_ps(0.382683433f);
+            static const __m256 _0_541196100 = _mm256_set1_ps(0.541196100f);
+            static const __m256 _1_306562965 = _mm256_set1_ps(1.306562965f);
+
             __m256 d0 = _mm256_loadu_ps(src + 0 * srcStride);
             __m256 d1 = _mm256_loadu_ps(src + 1 * srcStride);
             __m256 d2 = _mm256_loadu_ps(src + 2 * srcStride);
@@ -248,7 +254,7 @@ namespace Simd
             d0 = _mm256_add_ps(tmp10, tmp11);
             d4 = _mm256_sub_ps(tmp10, tmp11);
 
-            __m256 z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _mm256_set1_ps(0.707106781f));
+            __m256 z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _0_707106781);
             d2 = _mm256_add_ps(tmp13, z1);
             d6 = _mm256_sub_ps(tmp13, z1);
 
@@ -256,10 +262,10 @@ namespace Simd
             tmp11 = _mm256_add_ps(tmp5, tmp6);
             tmp12 = _mm256_add_ps(tmp6, tmp7);
 
-            __m256 z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _mm256_set1_ps(0.382683433f));
-            __m256 z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _mm256_set1_ps(0.541196100f)), z5);
-            __m256 z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _mm256_set1_ps(1.306562965f)), z5);
-            __m256 z3 = _mm256_mul_ps(tmp11, _mm256_set1_ps(0.707106781f));
+            __m256 z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _0_382683433);
+            __m256 z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _0_541196100), z5);
+            __m256 z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _1_306562965), z5);
+            __m256 z3 = _mm256_mul_ps(tmp11, _0_707106781);
 
             __m256 z11 = _mm256_add_ps(tmp7, z3);
             __m256 z13 = _mm256_sub_ps(tmp7, z3);
@@ -272,6 +278,276 @@ namespace Simd
             _mm256_storeu_ps(dst + 5 * dstStride, _mm256_add_ps(z13, z2));
             _mm256_storeu_ps(dst + 6 * dstStride, d6);
             _mm256_storeu_ps(dst + 7 * dstStride, _mm256_sub_ps(z11, z4));
+        }
+
+        SIMD_INLINE void JpegDct(const float* src, size_t stride, const float* fdt, int* dst)
+        {
+            static const __m256 _0_707106781 = _mm256_set1_ps(0.707106781f);
+            static const __m256 _0_382683433 = _mm256_set1_ps(0.382683433f);
+            static const __m256 _0_541196100 = _mm256_set1_ps(0.541196100f);
+            static const __m256 _1_306562965 = _mm256_set1_ps(1.306562965f);
+
+            __m256 d0 = _mm256_loadu_ps(src + 0 * stride);
+            __m256 d1 = _mm256_loadu_ps(src + 1 * stride);
+            __m256 d2 = _mm256_loadu_ps(src + 2 * stride);
+            __m256 d3 = _mm256_loadu_ps(src + 3 * stride);
+            __m256 d4 = _mm256_loadu_ps(src + 4 * stride);
+            __m256 d5 = _mm256_loadu_ps(src + 5 * stride);
+            __m256 d6 = _mm256_loadu_ps(src + 6 * stride);
+            __m256 d7 = _mm256_loadu_ps(src + 7 * stride);
+
+            __m256 tmp0 = _mm256_add_ps(d0, d7);
+            __m256 tmp7 = _mm256_sub_ps(d0, d7);
+            __m256 tmp1 = _mm256_add_ps(d1, d6);
+            __m256 tmp6 = _mm256_sub_ps(d1, d6);
+            __m256 tmp2 = _mm256_add_ps(d2, d5);
+            __m256 tmp5 = _mm256_sub_ps(d2, d5);
+            __m256 tmp3 = _mm256_add_ps(d3, d4);
+            __m256 tmp4 = _mm256_sub_ps(d3, d4);
+
+            __m256 tmp10 = _mm256_add_ps(tmp0, tmp3);
+            __m256 tmp13 = _mm256_sub_ps(tmp0, tmp3);
+            __m256 tmp11 = _mm256_add_ps(tmp1, tmp2);
+            __m256 tmp12 = _mm256_sub_ps(tmp1, tmp2);
+
+            d0 = _mm256_add_ps(tmp10, tmp11);
+            d4 = _mm256_sub_ps(tmp10, tmp11);
+
+            __m256 z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _0_707106781);
+            d2 = _mm256_add_ps(tmp13, z1);
+            d6 = _mm256_sub_ps(tmp13, z1);
+
+            tmp10 = _mm256_add_ps(tmp4, tmp5);
+            tmp11 = _mm256_add_ps(tmp5, tmp6);
+            tmp12 = _mm256_add_ps(tmp6, tmp7);
+
+            __m256 z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _0_382683433);
+            __m256 z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _0_541196100), z5);
+            __m256 z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _1_306562965), z5);
+            __m256 z3 = _mm256_mul_ps(tmp11, _0_707106781);
+
+            __m256 z11 = _mm256_add_ps(tmp7, z3);
+            __m256 z13 = _mm256_sub_ps(tmp7, z3);
+
+            d1 = _mm256_add_ps(z11, z4);
+            d3 = _mm256_sub_ps(z13, z2);
+            d5 = _mm256_add_ps(z13, z2);
+            d7 = _mm256_sub_ps(z11, z4);
+
+            tmp10 = _mm256_permute2f128_ps(d0, d4, 0x20);
+            tmp11 = _mm256_permute2f128_ps(d1, d5, 0x20);
+            tmp12 = _mm256_permute2f128_ps(d2, d6, 0x20);
+            tmp13 = _mm256_permute2f128_ps(d3, d7, 0x20);
+            d4 = _mm256_permute2f128_ps(d0, d4, 0x31);
+            d5 = _mm256_permute2f128_ps(d1, d5, 0x31);
+            d6 = _mm256_permute2f128_ps(d2, d6, 0x31);
+            d7 = _mm256_permute2f128_ps(d3, d7, 0x31);
+
+            tmp0 = _mm256_unpacklo_ps(tmp10, tmp12);
+            tmp1 = _mm256_unpackhi_ps(tmp10, tmp12);
+            tmp2 = _mm256_unpacklo_ps(tmp11, tmp13);
+            tmp3 = _mm256_unpackhi_ps(tmp11, tmp13);
+            d0 = _mm256_unpacklo_ps(tmp0, tmp2);
+            d1 = _mm256_unpackhi_ps(tmp0, tmp2);
+            d2 = _mm256_unpacklo_ps(tmp1, tmp3);
+            d3 = _mm256_unpackhi_ps(tmp1, tmp3);
+
+            tmp0 = _mm256_unpacklo_ps(d4, d6);
+            tmp1 = _mm256_unpackhi_ps(d4, d6);
+            tmp2 = _mm256_unpacklo_ps(d5, d7);
+            tmp3 = _mm256_unpackhi_ps(d5, d7);
+            d4 = _mm256_unpacklo_ps(tmp0, tmp2);
+            d5 = _mm256_unpackhi_ps(tmp0, tmp2);
+            d6 = _mm256_unpacklo_ps(tmp1, tmp3);
+            d7 = _mm256_unpackhi_ps(tmp1, tmp3);
+
+            tmp0 = _mm256_add_ps(d0, d7);
+            tmp1 = _mm256_add_ps(d1, d6);
+            tmp2 = _mm256_add_ps(d2, d5);
+            tmp3 = _mm256_add_ps(d3, d4);
+            tmp7 = _mm256_sub_ps(d0, d7);
+            tmp6 = _mm256_sub_ps(d1, d6);
+            tmp5 = _mm256_sub_ps(d2, d5);
+            tmp4 = _mm256_sub_ps(d3, d4);
+
+            tmp10 = _mm256_add_ps(tmp0, tmp3);
+            tmp13 = _mm256_sub_ps(tmp0, tmp3);
+            tmp11 = _mm256_add_ps(tmp1, tmp2);
+            tmp12 = _mm256_sub_ps(tmp1, tmp2);
+
+            d0 = _mm256_add_ps(tmp10, tmp11);
+            d4 = _mm256_sub_ps(tmp10, tmp11);
+
+            z1 = _mm256_mul_ps(_mm256_add_ps(tmp12, tmp13), _0_707106781);
+            d2 = _mm256_add_ps(tmp13, z1);
+            d6 = _mm256_sub_ps(tmp13, z1);
+
+            tmp10 = _mm256_add_ps(tmp4, tmp5);
+            tmp11 = _mm256_add_ps(tmp5, tmp6);
+            tmp12 = _mm256_add_ps(tmp6, tmp7);
+
+            z5 = _mm256_mul_ps(_mm256_sub_ps(tmp10, tmp12), _0_382683433);
+            z2 = _mm256_add_ps(_mm256_mul_ps(tmp10, _0_541196100), z5);
+            z4 = _mm256_add_ps(_mm256_mul_ps(tmp12, _1_306562965), z5);
+            z3 = _mm256_mul_ps(tmp11, _0_707106781);
+
+            z11 = _mm256_add_ps(tmp7, z3);
+            z13 = _mm256_sub_ps(tmp7, z3);
+
+            d1 = _mm256_add_ps(z11, z4);
+            d3 = _mm256_sub_ps(z13, z2);
+            d5 = _mm256_add_ps(z13, z2);
+            d7 = _mm256_sub_ps(z11, z4);
+
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 0), d0)));
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 1), d1)));
+            _mm256_storeu_si256((__m256i*)dst + 2, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 2), d2)));
+            _mm256_storeu_si256((__m256i*)dst + 3, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 3), d3)));
+            _mm256_storeu_si256((__m256i*)dst + 4, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 4), d4)));
+            _mm256_storeu_si256((__m256i*)dst + 5, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 5), d5)));
+            _mm256_storeu_si256((__m256i*)dst + 6, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 6), d6)));
+            _mm256_storeu_si256((__m256i*)dst + 7, _mm256_cvtps_epi32(_mm256_mul_ps(_mm256_loadu_ps(fdt + F * 7), d7)));
+        }
+
+        const __m256i K8_SHFL_VS = SIMD_MM256_SETR_EPI8(
+            0xC, 0xD, 0x8, 0x9, 0x4, 0x5, 0x0, 0x1, 0xE, 0xF, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3,
+            0xC, 0xD, 0x8, 0x9, 0x4, 0x5, 0x0, 0x1, 0xE, 0xF, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3);
+
+        const __m256i K8_SHFL_SH = SIMD_MM256_SETR_EPI8(
+            0x2, 0x3, -1, -1, 0x6, 0x7, -1, -1, 0xA, 0xB, -1, -1, 0xE, 0xF, -1, -1,
+            0x2, 0x3, -1, -1, 0x6, 0x7, -1, -1, 0xA, 0xB, -1, -1, 0xE, 0xF, -1, -1);
+
+        const __m256i K32_32 = SIMD_MM256_SET1_EPI32(32);
+
+        const __m256i K8_SHFL_RT = SIMD_MM256_SETR_EPI8(
+            0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE,
+            0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
+
+        const __m128i K8_SHFL_RT_128 = SIMD_MM_SETR_EPI8(0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
+
+        SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
+        {
+            size_t pos = stream.Pos();
+            stream.Reserve(pos + size * 2);
+            uint8_t* data = stream.Data();
+            size_t& bitCount = stream.BitCount();
+            size_t i = 0;
+#if defined(SIMD_X64_ENABLE) && 1
+            uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
+            size_t size16 = AlignLo(size, 16);
+            for (; i < size16; i += 16, bits += 16)
+            {
+                __m256i b0 = _mm256_loadu_si256((__m256i*)bits + 0);
+                __m256i b1 = _mm256_loadu_si256((__m256i*)bits + 1);
+                __m256i vs0 = _mm256_shuffle_epi8(b0, K8_SHFL_VS);
+                __m256i vs1 = _mm256_shuffle_epi8(b1, K8_SHFL_VS);
+                __m256i vv = Shuffle64i<0x0>(vs0, vs1);
+                __m256i ss = Shuffle64i<0xF>(vs0, vs1);
+                SIMD_ALIGNED(32) uint64_t value[4], mask[4], shift[4];
+                _mm256_storeu_si256((__m256i*)value, vv);
+                _mm256_storeu_si256((__m256i*)shift, _mm256_sad_epu8(ss, K_ZERO));
+                __m256i s0 = _mm256_sub_epi32(K32_32, _mm256_shuffle_epi8(b0, K8_SHFL_SH));
+                __m256i m0 = _mm256_srlv_epi32(K_INV_ZERO, s0);
+                __m256i s1 = _mm256_sub_epi32(K32_32, _mm256_shuffle_epi8(b1, K8_SHFL_SH));
+                __m256i m1 = _mm256_srlv_epi32(K_INV_ZERO, s1);
+                __m256i ms0 = _mm256_shuffle_epi8(m0, K8_SHFL_VS);
+                __m256i ms1 = _mm256_shuffle_epi8(m1, K8_SHFL_VS);
+                _mm256_storeu_si256((__m256i*)mask, Shuffle64i<0x0>(ms0, ms1));
+
+                bitCount += shift[0];
+                assert(bitCount <= 64);
+                bitBuffer |= _pext_u64(value[0], mask[0]) << (64 - bitCount);
+                while (bitCount >= 16)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    byte = uint8_t(bitBuffer >> 48);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 16;
+                    bitCount -= 16;
+                }
+
+                bitCount += shift[2];
+                assert(bitCount <= 64);
+                bitBuffer |= _pext_u64(value[2], mask[2]) << (64 - bitCount);
+                while (bitCount >= 16)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    byte = uint8_t(bitBuffer >> 48);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 16;
+                    bitCount -= 16;
+                }
+
+                bitCount += shift[1];
+                assert(bitCount <= 64);
+                bitBuffer |= _pext_u64(value[1], mask[1]) << (64 - bitCount);
+                while (bitCount >= 16)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    byte = uint8_t(bitBuffer >> 48);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 16;
+                    bitCount -= 16;
+                }
+
+                bitCount += shift[3];
+                assert(bitCount <= 64);
+                bitBuffer |= _pext_u64(value[3], mask[3]) << (64 - bitCount);
+                while (bitCount >= 16)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    byte = uint8_t(bitBuffer >> 48);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 16;
+                    bitCount -= 16;
+                }
+            }
+            stream.BitBuffer() = uint32_t(bitBuffer >> 32);
+            while (bitCount >= 8)
+            {
+                uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                data[pos++] = byte;
+                if (byte == 255)
+                    data[pos++] = 0;
+                stream.BitBuffer() <<= 8;
+                bitCount -= 8;
+            }
+#endif
+            for (; i < size; ++i, ++bits)
+            {
+                bitCount += bits[0][1];
+                stream.BitBuffer() |= bits[0][0] << (32 - bitCount);
+                while (bitCount >= 8)
+                {
+                    uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    stream.BitBuffer() <<= 8;
+                    bitCount -= 8;
+                }
+            }
+            stream.Seek(pos);
         }
     }
 #endif// SIMD_AVX2_ENABLE

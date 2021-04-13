@@ -768,6 +768,11 @@ namespace Simd
             return _mm256_castps_si256(_mm256_shuffle_ps(_mm256_castsi256_ps(lo), _mm256_castsi256_ps(hi), imm));
         }
 
+        template<int imm> SIMD_INLINE __m256i Shuffle64i(__m256i lo, __m256i hi)
+        {
+            return _mm256_castpd_si256(_mm256_shuffle_pd(_mm256_castsi256_pd(lo), _mm256_castsi256_pd(hi), imm));
+        }
+
         template<int imm> SIMD_INLINE __m256 Permute4x64(__m256 a)
         {
             return _mm256_castsi256_ps(_mm256_permute4x64_epi64(_mm256_castps_si256(a), imm));
