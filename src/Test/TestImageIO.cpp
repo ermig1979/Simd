@@ -136,6 +136,32 @@ namespace Test
 
 #define TEST_REAL_IMAGE "city.jpg"
 
+    bool GetTestImage(View& image, size_t width, size_t height, View::Format format, const String& desc1, const String& desc2)
+    {
+#if defined(TEST_REAL_IMAGE)
+        String path = ROOT_PATH + "/data/image/" + TEST_REAL_IMAGE;
+        if (!image.Load(path, format))
+        {
+            TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
+            return false;
+        }
+        TEST_ALIGN(SIMD_ALIGN);
+        TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << TEST_REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
+#else
+        TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
+
+        image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
+#if 0
+        ::srand(0);
+        FillRandom(image);
+        //src.Load("error.ppm", format);
+#else
+        CreateTestImage(image, 10, 10);
+#endif
+#endif
+        return true;
+    }
+
     bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
         bool result = true;
@@ -143,28 +169,9 @@ namespace Test
         f1.Update(format, file, quality);
         f2.Update(format, file, quality);
 
-#if defined(TEST_REAL_IMAGE)
-        String path = ROOT_PATH + "/data/image/" + TEST_REAL_IMAGE;
         View src;
-        if (!src.Load(path, format))
-        {
-            TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
+        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc))
             return false;
-        }
-        TEST_ALIGN(SIMD_ALIGN);
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " at " << TEST_REAL_IMAGE << " [" << src.width << "x" << src.height << "].");
-#else
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
-
-        View src(width, height, format, NULL, TEST_ALIGN(width));
-#if 0
-        ::srand(0);
-        FillRandom(src);
-        //src.Load("error.ppm", format);
-#else
-        CreateTestImage(src, 10, 10);
-#endif
-#endif
 
         uint8_t* data1 = NULL, * data2 = NULL;
         size_t size1 = 0, size2 = 0;
@@ -290,9 +297,10 @@ namespace Test
 
             FuncLM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
 
-            void Update(View::Format format, SimdImageFileType file)
+            void Update(View::Format format, SimdImageFileType file, int quality)
             {
-                desc = desc + "[" + ToString(format) + "-" + ToString(file) + "]";
+                desc = desc + "[" + ToString(format) + "-" + ToString(file) +
+                    (file == SimdImageFileJpeg ? String("-") + ToString(quality) : String("")) + "]";
             }
 
             void Call(const uint8_t* data, size_t size, View::Format format, View& dst) const
@@ -320,18 +328,12 @@ namespace Test
     {
         bool result = true;
 
-        f1.Update(format, file);
-        f2.Update(format, file);
+        f1.Update(format, file, quality);
+        f2.Update(format, file, quality);
 
-        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
-
-        View src(width, height, format, NULL, TEST_ALIGN(width));
-#if 0
-        ::srand(0);
-        FillRandom(src);
-#else
-        CreateTestImage(src, 10, 10);
-#endif
+        View src;
+        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc))
+            return false;
 
         size_t size = 0;
         uint8_t* data = SimdImageSaveToMemory(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, &size);
@@ -342,16 +344,45 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(if (dst2.data) SimdFree(dst2.data); f2.Call(data, size, format, dst2));
 
-        if(dst1.data && dst2.data)
-            result = result && Compare(dst1, dst2, 0, true, 64, 0, "dst1 & dst2");
-        if(dst1.data && SaveLoadCompatible(format, file, quality))
-            result = result && Compare(dst1, src, 0, true, 64, 0, "dst1 & src");
+        if (file == SimdImageFileJpeg)
+        {
+
+#if defined(TEST_REAL_IMAGE)
+                int differenceMax = 4;
+#else
+                int differenceMax = 4;
+#endif
+            result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
+            if (!result)
+            {
+                dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
+                dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
+                src.Save("error.ppm", SimdImageFilePpmTxt);
+            }
+        }
+        else
+        {
+            if (dst1.data && dst2.data)
+                result = result && Compare(dst1, dst2, 0, true, 64, 0, "dst1 & dst2");
+            if (dst1.data && SaveLoadCompatible(format, file, quality))
+                result = result && Compare(dst1, src, 0, true, 64, 0, "dst1 & src");
+        }
 
         if (dst1.data)
             Simd::Free(dst1.data);
         if (dst2.data)
             SimdFree(dst2.data);
         SimdFree(data);
+
+        return result;
+    }
+
+    bool ImageLoadFromMemoryAutoTest(View::Format format, SimdImageFileType file, int quality, FuncLM f1, FuncLM f2)
+    {
+        bool result = true;
+
+        result = result && ImageLoadFromMemoryAutoTest(W, H, format, file, quality, f1, f2);
+        result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, format, file, quality, f1, f2);
 
         return result;
     }
@@ -365,8 +396,13 @@ namespace Test
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
-                result = result && ImageLoadFromMemoryAutoTest(W, H, formats[format], (SimdImageFileType)file, 100, f1, f2);
-                result = result && ImageLoadFromMemoryAutoTest(W + O, H - O, formats[format], (SimdImageFileType)file, 100, f1, f2);
+                if (file == SimdImageFileJpeg)
+                {
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
+                }
+                result = result && ImageLoadFromMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
             }
         }
 
