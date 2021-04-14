@@ -236,7 +236,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -261,7 +261,7 @@ namespace Simd
                     }
                 }
             }
-            Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -294,7 +294,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -313,7 +313,7 @@ namespace Simd
                         DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
-                Avx2::WriteBits(stream, bitBuf.data, bitBuf.size);
+                Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                 bitBuf.Clear();
             }
         }

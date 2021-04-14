@@ -134,31 +134,31 @@ namespace Test
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
 
-#define TEST_REAL_IMAGE "city.jpg"
-
     bool GetTestImage(View& image, size_t width, size_t height, View::Format format, const String& desc1, const String& desc2)
     {
-#if defined(TEST_REAL_IMAGE)
-        String path = ROOT_PATH + "/data/image/" + TEST_REAL_IMAGE;
-        if (!image.Load(path, format))
+        if (REAL_IMAGE.empty())
         {
-            TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
-            return false;
-        }
-        TEST_ALIGN(SIMD_ALIGN);
-        TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << TEST_REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
-#else
-        TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
-
-        image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
+            image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
 #if 0
-        ::srand(0);
-        FillRandom(image);
-        //src.Load("error.ppm", format);
+            ::srand(0);
+            FillRandom(image);
+            //src.Load("error.ppm", format);
 #else
-        CreateTestImage(image, 10, 10);
-#endif
-#endif
+            CreateTestImage(image, 10, 10);
+#endif        
+        }
+        else
+        {
+            String path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
+            if (!image.Load(path, format))
+            {
+                TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
+                return false;
+            }
+            TEST_ALIGN(SIMD_ALIGN);
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
+        }
         return true;
     }
 
@@ -185,11 +185,7 @@ namespace Test
             View dst1, dst2;
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
-#if defined(TEST_REAL_IMAGE)
-                int differenceMax = 4;
-#else
-                int differenceMax = 4;
-#endif
+                int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
@@ -346,12 +342,7 @@ namespace Test
 
         if (file == SimdImageFileJpeg)
         {
-
-#if defined(TEST_REAL_IMAGE)
-                int differenceMax = 4;
-#else
-                int differenceMax = 4;
-#endif
+            int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {

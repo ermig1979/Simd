@@ -617,6 +617,10 @@ namespace Test
                 {
                     LITTER_CPU_CACHE = FromString<int>(arg.substr(4, arg.size() - 4));
                 }
+                else if (arg.find("-ri=") == 0)
+                {
+                    REAL_IMAGE = arg.substr(4, arg.size() - 4);
+                }
                 else
                 {
                     TEST_LOG_SS(Error, "Unknown command line options: '" << arg << "'!" << std::endl);
@@ -773,12 +777,15 @@ namespace Test
         std::cout << "    -fe=Abs       an exclude filter to exclude some tests." << std::endl << std::endl;
         std::cout << "    -mt=100       a minimal test execution time (in milliseconds)." << std::endl << std::endl;
         std::cout << "    -lc=1         to litter CPU cache between test runs." << std::endl << std::endl;
+        std::cout << "    -ri=city.jpg  a name of real image used in some tests." << std::endl << std::endl;
+        std::cout << "                  The image have to be placed in ./data/image directory." << std::endl << std::endl;
         return 0;
     }
 
     String ROOT_PATH = "../..";
     String SOURCE = "";
     String OUTPUT = "";
+    String REAL_IMAGE = "";
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
     int C = 512;

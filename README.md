@@ -165,3 +165,5 @@ Also you can use parameters:
 * `-fe=Abs` an exclude filter to exclude some tests.
 * `-mt=100` a minimal test execution time (in milliseconds).
 * `-lc=1` to litter CPU cache between test runs.
+* `-ri=city.jpg` a name of real image used in some tests. The image have to be placed in `./data/image` directory.
+

@@ -391,7 +391,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -418,7 +418,7 @@ namespace Simd
                     }
                 }
             }
-            Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
 
@@ -451,7 +451,7 @@ namespace Simd
                     }
                     if (bitBuf.Full())
                     {
-                        Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                         bitBuf.Clear();
                     }
                 }
@@ -470,7 +470,7 @@ namespace Simd
                         DCV = JpegProcessDu<true>(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
                 }
-                Avx512bw::WriteBits(stream, bitBuf.data, bitBuf.size);
+                Base::WriteBits(stream, bitBuf.data, bitBuf.size);
                 bitBuf.Clear();
             }
         }

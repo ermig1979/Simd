@@ -114,7 +114,7 @@ namespace Test
     extern String ROOT_PATH;
     extern String SOURCE;
     extern String OUTPUT;
-
+    extern String REAL_IMAGE;
 
     extern int LITTER_CPU_CACHE;
 
