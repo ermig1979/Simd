@@ -77,9 +77,15 @@ namespace Simd
                     file = SimdImageFilePpmBin;
             }
         }
-        if (size >= 9)
+        if (size >= 8)
         {
-            if (data[6] == 'J' && data[7] == 'F' && data[8] == 'I' && data[9] == 'F')
+            const uint8_t SIGNATURE[8] = { 137, 80, 78, 71, 13, 10, 26, 10 };
+            if(memcmp(data, SIGNATURE, 8) == 0)
+                file = SimdImageFilePng;
+        }
+        if (size >= 2)
+        {
+            if (data[0] == 0xFF && data[1] == 0xD8)
                 file = SimdImageFileJpeg;
         }
         return
@@ -332,7 +338,7 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinLoader(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtLoader(param);
             case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
-            case SimdImageFilePng: return NULL;
+            case SimdImageFilePng: return new ImagePngLoader(param);
             case SimdImageFileJpeg: return new ImageJpegLoader(param);
             default:
                 return NULL;

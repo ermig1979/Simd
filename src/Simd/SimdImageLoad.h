@@ -144,6 +144,14 @@ namespace Simd
             virtual void SetConverters();
         };
 
+        class ImagePngLoader : public ImageLoader
+        {
+        public:
+            ImagePngLoader(const ImageLoaderParam& param);
+
+            virtual bool FromStream();
+        };
+
         class ImageJpegLoader : public ImageLoader
         {
         public:
