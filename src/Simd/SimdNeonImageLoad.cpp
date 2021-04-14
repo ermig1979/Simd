@@ -47,6 +47,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Neon::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Neon::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Neon::GrayToBgr; break;
+                case SimdPixelFormatRgba32: _toBgra = Neon::GrayToBgra; break;
                 }
             }
         }
@@ -68,6 +69,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Neon::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Neon::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Neon::GrayToBgr; break;
+                case SimdPixelFormatRgba32: _toBgra = Neon::GrayToBgra; break;
                 }
             }
         }
@@ -89,6 +91,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _toAny = Neon::RgbToGray; break;
                 case SimdPixelFormatBgr24: _toAny = Neon::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _toBgra = Neon::RgbToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Neon::BgrToBgra; break;
                 }
             }
         }
@@ -110,6 +113,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _toAny = Neon::RgbToGray; break;
                 case SimdPixelFormatBgr24: _toAny = Neon::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _toBgra = Neon::RgbToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Neon::BgrToBgra; break;
                 }
             }
         }
@@ -124,7 +128,7 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinLoader(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtLoader(param);
             case SimdImageFilePpmBin: return new ImagePpmBinLoader(param);
-            case SimdImageFilePng: return NULL;
+            case SimdImageFilePng: return new Base::ImagePngLoader(param);
             case SimdImageFileJpeg: return new Base::ImageJpegLoader(param);
             default:
                 return NULL;

@@ -385,7 +385,7 @@ namespace Test
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (int format = 0; format < 5; format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
+            for (int file = (int)SimdImageFilePgmTxt; file <= (int)SimdImageFileJpeg; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {

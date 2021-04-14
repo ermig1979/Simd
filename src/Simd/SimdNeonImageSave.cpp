@@ -42,6 +42,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _convert = Neon::BgrToGray; break;
                 case SimdPixelFormatBgra32: _convert = Neon::BgraToGray; break;
                 case SimdPixelFormatRgb24: _convert = Neon::RgbToGray; break;
+                case SimdPixelFormatRgba32: _convert = Neon::RgbaToGray; break;
                 }
             }
         }
@@ -58,6 +59,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _convert = Neon::BgrToGray; break;
                 case SimdPixelFormatBgra32: _convert = Neon::BgraToGray; break;
                 case SimdPixelFormatRgb24: _convert = Neon::RgbToGray; break;
+                case SimdPixelFormatRgba32: _convert = Neon::RgbaToGray; break;
                 }
             }
         }
@@ -74,6 +76,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _convert = Neon::GrayToBgr; break;
                 case SimdPixelFormatBgr24: _convert = Neon::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _convert = Neon::BgraToRgb; break;
+                case SimdPixelFormatRgba32: _convert = Neon::BgraToBgr; break;
                 }
             }
         }
@@ -90,6 +93,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _convert = Neon::GrayToBgr; break;
                 case SimdPixelFormatBgr24: _convert = Neon::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _convert = Neon::BgraToRgb; break;
+                case SimdPixelFormatRgba32: _convert = Neon::BgraToBgr; break;
                 }
             }
         }
@@ -104,7 +108,7 @@ namespace Simd
             case SimdImageFilePgmBin: return new ImagePgmBinSaver(param);
             case SimdImageFilePpmTxt: return new ImagePpmTxtSaver(param);
             case SimdImageFilePpmBin: return new ImagePpmBinSaver(param);
-            case SimdImageFilePng: return new Base::ImagePngSaver(param);
+            case SimdImageFilePng: return new ImagePngSaver(param);
             case SimdImageFileJpeg: return new Base::ImageJpegSaver(param);
             default:
                 return NULL;

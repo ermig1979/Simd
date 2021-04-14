@@ -38,6 +38,10 @@ namespace Simd
         }
 #endif
 
+#if defined(SIMD_ARM64_ENABLE) && 1
+#define JPEG_NEON
+#endif
+
         typedef unsigned char jpeg_uc;
         typedef unsigned short jpeg_us;
         typedef unsigned short jpeg__uint16;
