@@ -26,31 +26,38 @@
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdNeon.h"
+#include "Simd/SimdSet.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {        
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
-#if 0
         uint32_t ZlibAdler32(uint8_t* data, int size)
         {
-            __m128i _i0 = _mm_setr_epi32(0, -1, -2, -3), _4 = _mm_set1_epi32(4);
+            int32x4_t _i0 = SetI32(0, -1, -2, -3), _4 = vdupq_n_s32(4);
             uint32_t lo = 1, hi = 0;
             for (int b = 0, n = (int)(size % 5552); b < size;)
             {
-                int n4 = n & (~3), i = 0;
-                __m128i _i = _mm_add_epi32(_i0, _mm_set1_epi32(n));
-                __m128i _l = _mm_setzero_si128(), _h = _mm_setzero_si128();
-                for (; i < n4; i += 4)
+                int n8 = n & (~7), i = 0;
+                int32x4_t _i = vaddq_s32(_i0, vdupq_n_s32(n));
+                int32x4_t _l = vdupq_n_s32(0), _h = vdupq_n_s32(0);
+                for (; i < n8; i += 8)
                 {
-                    __m128i d = _mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(data + b + i)));
-                    _l = _mm_add_epi32(_l, d);
-                    _h = _mm_add_epi32(_h, _mm_mullo_epi32(d, _i));
-                    _i = _mm_sub_epi32(_i, _4);
+                    uint8x8_t d8 = LoadHalf<false>(data + b + i);
+                    int16x8_t d16 = (int16x8_t)vmovl_u8(d8);
+                    int32x4_t d0 = vmovl_s16(Half<0>(d16));
+                    _l = vaddq_s32(_l, d0);
+                    _h = vmlaq_s32(_h, d0, _i);
+                    _i = vsubq_s32(_i, _4);
+                    int32x4_t d1 = vmovl_s16((int16x4_t)Half<1>(d16));
+                    _l = vaddq_s32(_l, d1);
+                    _h = vmlaq_s32(_h, d1, _i);
+                    _i = vsubq_s32(_i, _4);
                 }
-                int l = Sse2::ExtractInt32Sum(_l), h = Sse2::ExtractInt32Sum(_h);
+                int l = ExtractSum32s(_l), h = ExtractSum32s(_h);
                 for (; i < n; ++i)
                 {
                     l += data[b + i];
@@ -58,27 +65,6 @@ namespace Simd
                 }
                 hi = (hi + h + lo*n) % 65521;
                 lo = (lo + l) % 65521;
-                b += n;
-                n = 5552;
-            }
-            return (hi << 16) | lo;
-        }
-#endif
-
-        uint32_t ZlibAdler32(uint8_t* data, int size)
-        {
-            //uint32x4_t a;
-            //uint32_t b = vmaxvq_u32(a);
-            uint32_t lo = 1, hi = 0;
-            for (int b = 0, n = (int)(size % 5552); b < size;)
-            {
-                for (int i = 0; i < n; ++i)
-                {
-                    lo += data[b + i];
-                    hi += lo;
-                }
-                lo %= 65521;
-                hi %= 65521;
                 b += n;
                 n = 5552;
             }
@@ -169,18 +155,23 @@ namespace Simd
             stream.FlushBits(true);
             stream.WriteBe32(ZlibAdler32(data, size));
         }
-#if 0
+
         uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size, A);
-            __m128i _sum = _mm_setzero_si128();
-            for (; i < sizeA; i += A)
+            size_t i = 0, sizeA = AlignLo(size, A), bS = A << 7, bC = (sizeA >> 7) + 1;
+            uint32x4_t _sum = vdupq_n_u32(0);
+            for (size_t b = 0; b < bC; ++b)
             {
-                __m128i _src = _mm_loadu_si128((__m128i*)(src + i));
-                _mm_storeu_si128((__m128i*)(dst + i), _src);
-                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_src)));
+                uint16x8_t bSum = vdupq_n_u16(0);
+                for (size_t end = Min(i + bS, sizeA); i < end; i += A)
+                {
+                    int8x16_t _src = (int8x16_t)Load<false>(src + i);
+                    Store<false>(dst + i, _src);
+                    bSum = vaddq_u16(bSum, vpaddlq_u8((uint8x16_t)vabsq_s8(_src)));
+                }
+                _sum = vaddq_u32(_sum, vpaddlq_u16(bSum));
             }
-            uint32_t sum = Sse2::ExtractInt32Sum(_sum);
+            uint32_t sum = ExtractSum32u(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i];
@@ -191,23 +182,28 @@ namespace Simd
 
         uint32_t EncodeLine1(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
-            size_t i = 0, sizeA = AlignLo(size - n, A) + n;
+            size_t i = 0, sizeA = AlignLo(size - n, A) + n, bS = A << 7, bC = (sizeA >> 7) + 1;;
             uint32_t sum = 0;
             for (; i < n; ++i)
             {
                 dst[i] = src[i];
                 sum += ::abs(dst[i]);
             }
-            __m128i _sum = _mm_setzero_si128();
-            for (; i < sizeA; i += A)
+            uint32x4_t _sum = vdupq_n_u32(0);
+            for (size_t b = 0; b < bC; ++b)
             {
-                __m128i _src0 = _mm_loadu_si128((__m128i*)(src + i));
-                __m128i _src1 = _mm_loadu_si128((__m128i*)(src + i - n));
-                __m128i _dst = _mm_sub_epi8(_src0, _src1);
-                _mm_storeu_si128((__m128i*)(dst + i), _dst);
-                _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
+                uint16x8_t bSum = vdupq_n_u16(0);
+                for (size_t end = Min(i + bS, sizeA); i < end; i += A)
+                {
+                    int8x16_t _src0 = (int8x16_t)Load<false>(src + i);
+                    int8x16_t _src1 = (int8x16_t)Load<false>(src + i - n);
+                    int8x16_t _dst = vsubq_s8(_src0, _src1);
+                    Store<false>(dst + i, _dst);
+                    bSum = vaddq_u16(bSum, vpaddlq_u8((uint8x16_t)vabsq_s8(_dst)));
+                }
+                _sum = vaddq_u32(_sum, vpaddlq_u16(bSum));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractSum32u(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - n];
@@ -215,7 +211,7 @@ namespace Simd
             }
             return sum;
         }
-
+#if 0
         uint32_t EncodeLine2(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
         {
             size_t i = 0, sizeA = AlignLo(size - n, A) + n;
@@ -378,8 +374,8 @@ namespace Simd
                 _convert = Neon::BgrToRgb;
             else if (_param.format == SimdPixelFormatBgra32)
                 _convert = Neon::BgraToRgba;
-            //_encode[0] = Sse41::EncodeLine0;
-            //_encode[1] = Sse41::EncodeLine1;
+            _encode[0] = Neon::EncodeLine0;
+            _encode[1] = Neon::EncodeLine1;
             //_encode[2] = Sse41::EncodeLine2;
             //_encode[3] = Sse41::EncodeLine3;
             //_encode[4] = Sse41::EncodeLine4;

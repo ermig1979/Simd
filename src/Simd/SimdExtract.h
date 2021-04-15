@@ -285,6 +285,11 @@ namespace Simd
             return vgetq_lane_u32(a, 0) + vgetq_lane_u32(a, 1) + vgetq_lane_u32(a, 2) + vgetq_lane_u32(a, 3);
         }
 
+        SIMD_INLINE int32_t ExtractSum32s(const int32x4_t& a)
+        {
+            return vgetq_lane_s32(a, 0) + vgetq_lane_s32(a, 1) + vgetq_lane_s32(a, 2) + vgetq_lane_s32(a, 3);
+        }
+
         SIMD_INLINE uint64_t ExtractSum64u(const uint64x2_t & a)
         {
             return vgetq_lane_u64(a, 0) + vgetq_lane_u64(a, 1);

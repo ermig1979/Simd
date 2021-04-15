@@ -189,6 +189,12 @@ namespace Simd
             const float a[4] = { a0, a1, a2, a3 };
             return vld1q_f32(a);
         }
+
+        SIMD_INLINE int32x4_t SetI32(int32_t a0, int32_t a1, int32_t a2, int32_t a3)
+        {
+            const int32_t a[4] = { a0, a1, a2, a3 };
+            return vld1q_s32(a);
+        }
     }
 #endif// SIMD_NEON_ENABLE
 }

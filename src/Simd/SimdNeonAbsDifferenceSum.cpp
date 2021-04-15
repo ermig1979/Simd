@@ -38,8 +38,8 @@ namespace Simd
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            size_t blockSize = A << 8;
-            size_t blockCount = (alignedWidth >> 8) + 1;
+            size_t blockSize = A << 7;
+            size_t blockCount = (alignedWidth >> 7) + 1;
 
             uint64x2_t _sum = K64_0000000000000000;
             for (size_t row = 0; row < height; ++row)
@@ -87,8 +87,8 @@ namespace Simd
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            size_t blockSize = A << 8;
-            size_t blockCount = (alignedWidth >> 8) + 1;
+            size_t blockSize = A << 7;
+            size_t blockCount = (alignedWidth >> 7) + 1;
 
             uint8x16_t _index = vdupq_n_u8(index);
             uint64x2_t _sum = K64_0000000000000000;
@@ -173,8 +173,8 @@ namespace Simd
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            size_t blockSize = A << 8;
-            size_t blockCount = (alignedWidth >> 8) + 1;
+            size_t blockSize = A << 7;
+            size_t blockCount = (alignedWidth >> 7) + 1;
 
             uint64x2_t _sums[9];
             for (size_t i = 0; i < 9; ++i)
@@ -257,8 +257,8 @@ namespace Simd
 
             size_t alignedWidth = Simd::AlignLo(width, A);
             uint8x16_t tailMask = ShiftLeft(K8_FF, A - width + alignedWidth);
-            size_t blockSize = A << 8;
-            size_t blockCount = (alignedWidth >> 8) + 1;
+            size_t blockSize = A << 7;
+            size_t blockCount = (alignedWidth >> 7) + 1;
 
             uint8x16_t _index = vdupq_n_u8(index);
 
