@@ -137,7 +137,19 @@ namespace Simd
         SIMD_INLINE void WriteBits(OutputMemoryStream & stream, const uint16_t bits[2])
         {
             stream.BitCount() += bits[1];
-            stream.BitBuffer() |= bits[0] << (32 - stream.BitCount());
+#if defined(SIMD_X64_ENABLE)
+            stream.BitBuffer() |= uint64_t(bits[0]) << (64 - stream.BitCount());
+            while (stream.BitCount() >= 8)
+            {
+                uint8_t byte = stream.BitBuffer() >> 56;
+                stream.Write8u(byte);
+                if (byte == 255)
+                    stream.Write8u(0);
+                stream.BitBuffer() <<= 8;
+                stream.BitCount() -= 8;
+            }
+#else
+            stream.BitBuffer() |= uint32_t(bits[0]) << (32 - stream.BitCount());
             while (stream.BitCount() >= 8)
             {
                 uint8_t byte = stream.BitBuffer() >> 24;
@@ -147,6 +159,7 @@ namespace Simd
                 stream.BitBuffer() <<= 8;
                 stream.BitCount() -= 8;
             }
+#endif
         }
 
         SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
@@ -157,7 +170,7 @@ namespace Simd
             size_t & bitCount = stream.BitCount();
             size_t i = 0;
 #if defined(SIMD_X64_ENABLE)
-            uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
+            uint64_t &bitBuffer = stream.BitBuffer();
             for (size_t size3 = AlignLoAny(size, 3); i < size3; i += 3, bits += 3)
             {
                 bitCount += bits[0][1];
@@ -181,31 +194,47 @@ namespace Simd
                     bitCount -= 16;
                 }
             }
-            stream.BitBuffer() = uint32_t(bitBuffer >> 32);
-            while (bitCount >= 8)
+            if(bitCount >= 8)
             {
-                uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                assert(bitCount < 16);
+                uint8_t byte = uint8_t(bitBuffer >> 56);
                 data[pos++] = byte;
                 if (byte == 255)
                     data[pos++] = 0;
-                stream.BitBuffer() <<= 8;
+                bitBuffer <<= 8;
                 bitCount -= 8;
             }
-#endif
             for (; i < size; ++i, ++bits)
             {
                 bitCount += bits[0][1];
-                stream.BitBuffer() |= bits[0][0] << (32 - bitCount);
+                bitBuffer |= uint64_t(bits[0][0]) << (64 - bitCount);
                 while (bitCount >= 8)
                 {
-                    uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
                     data[pos++] = byte;
                     if (byte == 255)
                         data[pos++] = 0;
-                    stream.BitBuffer() <<= 8;
+                    bitBuffer <<= 8;
                     bitCount -= 8;
                 }
             }
+#else
+            uint32_t &bitBuffer = stream.BitBuffer();
+            for (; i < size; ++i, ++bits)
+            {
+                bitCount += bits[0][1];
+                bitBuffer |= uint32_t(bits[0][0]) << (32 - bitCount);
+                while (bitCount >= 8)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 24);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 8;
+                    bitCount -= 8;
+                }
+            }
+#endif
             stream.Seek(pos);
         }
     }
@@ -421,6 +450,7 @@ namespace Simd
 
         const __m256i K32_32 = SIMD_MM256_SET1_EPI32(32);
 
+#if defined(SIMD_X64_ENABLE)
         SIMD_INLINE void WriteBits(uint8_t* data, size_t & pos, uint64_t & bitBuffer, size_t &bitCount, uint64_t shift, uint64_t value, uint64_t mask)
         {
             bitCount += shift;
@@ -440,6 +470,7 @@ namespace Simd
                 bitCount -= 16;
             }
         }
+#endif
 
         SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
         {
@@ -449,7 +480,7 @@ namespace Simd
             size_t& bitCount = stream.BitCount();
             size_t i = 0;
 #if defined(SIMD_X64_ENABLE)
-            uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
+            uint64_t &bitBuffer = stream.BitBuffer();
             size_t size12 = AlignLoAny(size, 12);
             for (; i < size12; i += 12, bits += 12)
             {
@@ -474,31 +505,47 @@ namespace Simd
                 WriteBits(data, pos, bitBuffer, bitCount, shift[1], value[1], mask[1]);
                 WriteBits(data, pos, bitBuffer, bitCount, shift[3], value[3], mask[3]);
             }
-            stream.BitBuffer() = uint32_t(bitBuffer >> 32);
-            while (bitCount >= 8)
+            if (bitCount >= 8)
             {
-                uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                assert(bitCount < 16);
+                uint8_t byte = uint8_t(bitBuffer >> 56);
                 data[pos++] = byte;
                 if (byte == 255)
                     data[pos++] = 0;
-                stream.BitBuffer() <<= 8;
+                bitBuffer <<= 8;
                 bitCount -= 8;
             }
-#endif
             for (; i < size; ++i, ++bits)
             {
                 bitCount += bits[0][1];
-                stream.BitBuffer() |= bits[0][0] << (32 - bitCount);
+                bitBuffer |= uint64_t(bits[0][0]) << (64 - bitCount);
                 while (bitCount >= 8)
                 {
-                    uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
                     data[pos++] = byte;
                     if (byte == 255)
                         data[pos++] = 0;
-                    stream.BitBuffer() <<= 8;
+                    bitBuffer <<= 8;
                     bitCount -= 8;
                 }
             }
+#else
+            uint32_t& bitBuffer = stream.BitBuffer();
+            for (; i < size; ++i, ++bits)
+            {
+                bitCount += bits[0][1];
+                bitBuffer |= uint32_t(bits[0][0]) << (32 - bitCount);
+                while (bitCount >= 8)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 24);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 8;
+                    bitCount -= 8;
+                }
+            }
+#endif
             stream.Seek(pos);
         }
     }
@@ -515,26 +562,6 @@ namespace Simd
             0x8, 0x9, 0x4, 0x5, 0x0, 0x1, -1, -1, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3, -1, -1,
             0x8, 0x9, 0x4, 0x5, 0x0, 0x1, -1, -1, 0xA, 0xB, 0x6, 0x7, 0x2, 0x3, -1, -1);
 
-        SIMD_INLINE void WriteBits(uint8_t* data, size_t& pos, uint64_t& bitBuffer, size_t& bitCount, uint64_t shift, uint64_t value, uint64_t mask)
-        {
-            bitCount += shift;
-            assert(bitCount <= 64);
-            bitBuffer |= _pext_u64(value, mask) << (64 - bitCount);
-            while (bitCount >= 16)
-            {
-                uint8_t byte = uint8_t(bitBuffer >> 56);
-                data[pos++] = byte;
-                if (byte == 255)
-                    data[pos++] = 0;
-                byte = uint8_t(bitBuffer >> 48);
-                data[pos++] = byte;
-                if (byte == 255)
-                    data[pos++] = 0;
-                bitBuffer <<= 16;
-                bitCount -= 16;
-            }
-        }
-
         SIMD_INLINE void WriteBits(OutputMemoryStream& stream, const uint16_t bits[][2], size_t size)
         {
             size_t pos = stream.Pos();
@@ -543,7 +570,7 @@ namespace Simd
             size_t& bitCount = stream.BitCount();
             size_t i = 0;
 #if defined(SIMD_X64_ENABLE)
-            uint64_t bitBuffer = uint64_t(stream.BitBuffer()) << 32;
+            uint64_t &bitBuffer = stream.BitBuffer();
             size_t size24 = AlignLoAny(size, 24);
             for (; i < size24; i += 24, bits += 24)
             {
@@ -557,40 +584,56 @@ namespace Simd
                 _mm512_storeu_si512((__m512i*)value, vv);
                 _mm512_storeu_si512((__m512i*)shift, _mm512_sad_epu8(ss, K_ZERO));
                 _mm512_storeu_si512((__m512i*)mask, _mm512_srlv_epi16(K_INV_ZERO, _mm512_sub_epi16(K16_0010, ss)));
-                WriteBits(data, pos, bitBuffer, bitCount, shift[0], value[0], mask[0]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[2], value[2], mask[2]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[4], value[4], mask[4]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[6], value[6], mask[6]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[1], value[1], mask[1]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[3], value[3], mask[3]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[5], value[5], mask[5]);
-                WriteBits(data, pos, bitBuffer, bitCount, shift[7], value[7], mask[7]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[0], value[0], mask[0]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[2], value[2], mask[2]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[4], value[4], mask[4]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[6], value[6], mask[6]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[1], value[1], mask[1]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[3], value[3], mask[3]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[5], value[5], mask[5]);
+                Avx2::WriteBits(data, pos, bitBuffer, bitCount, shift[7], value[7], mask[7]);
             }
-            stream.BitBuffer() = uint32_t(bitBuffer >> 32);
-            while (bitCount >= 8)
+            if (bitCount >= 8)
             {
-                uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                assert(bitCount < 16);
+                uint8_t byte = uint8_t(bitBuffer >> 56);
                 data[pos++] = byte;
                 if (byte == 255)
                     data[pos++] = 0;
-                stream.BitBuffer() <<= 8;
+                bitBuffer <<= 8;
                 bitCount -= 8;
             }
-#endif
             for (; i < size; ++i, ++bits)
             {
                 bitCount += bits[0][1];
-                stream.BitBuffer() |= bits[0][0] << (32 - bitCount);
+                bitBuffer |= uint64_t(bits[0][0]) << (64 - bitCount);
                 while (bitCount >= 8)
                 {
-                    uint8_t byte = uint8_t(stream.BitBuffer() >> 24);
+                    uint8_t byte = uint8_t(bitBuffer >> 56);
                     data[pos++] = byte;
                     if (byte == 255)
                         data[pos++] = 0;
-                    stream.BitBuffer() <<= 8;
+                    bitBuffer <<= 8;
                     bitCount -= 8;
                 }
             }
+#else
+            uint32_t& bitBuffer = stream.BitBuffer();
+            for (; i < size; ++i, ++bits)
+            {
+                bitCount += bits[0][1];
+                bitBuffer |= uint32_t(bits[0][0]) << (32 - bitCount);
+                while (bitCount >= 8)
+                {
+                    uint8_t byte = uint8_t(bitBuffer >> 24);
+                    data[pos++] = byte;
+                    if (byte == 255)
+                        data[pos++] = 0;
+                    bitBuffer <<= 8;
+                    bitCount -= 8;
+                }
+            }
+#endif
             stream.Seek(pos);
         }
     }

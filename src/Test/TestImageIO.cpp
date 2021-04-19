@@ -156,9 +156,9 @@ namespace Test
                 TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
                 return false;
             }
-            TEST_ALIGN(SIMD_ALIGN);
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
         }
+        TEST_ALIGN(SIMD_ALIGN);
         return true;
     }
 
@@ -236,7 +236,7 @@ namespace Test
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (int format = 0; format < 5; format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
+            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {

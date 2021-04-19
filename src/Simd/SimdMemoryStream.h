@@ -143,8 +143,7 @@ namespace Simd
         const size_t CAPACITY_MIN = 4096;
 
         uint8_t * _data;
-        uint32_t _bitBuffer;
-        size_t _pos, _size, _capacity, _bitCount;
+        size_t _pos, _size, _capacity, _bitCount, _bitBuffer;
 
         SIMD_INLINE void Reset(bool owner)
         {
@@ -268,7 +267,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void WriteBits(const uint32_t bits, size_t count)
+        SIMD_INLINE void WriteBits(const size_t bits, size_t count)
         {
             _bitBuffer |= (bits) << _bitCount;
             _bitCount += count;
@@ -291,7 +290,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE uint32_t& BitBuffer()
+        SIMD_INLINE size_t& BitBuffer()
         {
             return _bitBuffer;
         }
