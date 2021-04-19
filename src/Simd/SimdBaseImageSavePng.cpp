@@ -35,8 +35,9 @@ namespace Simd
         const uint16_t ZlibDistC[31] = { 1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 32768 };
         const uint8_t  ZlibDistEb[30] = { 0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
 
-        int BitRevTable[512];
-        static bool BitRevTableInit()
+#if defined(SIMD_PNG_ZLIB_BIT_REV_TABLE)
+        int ZlibBitRevTable[512];
+        static bool ZlibBitRevTableInit()
         {
             for (int i = 0; i < 512; i++)
             {
@@ -46,11 +47,13 @@ namespace Simd
                     rev = (rev << 1) | (val & 1);
                     val >>= 1;
                 }
-                BitRevTable[i] = rev;
+                ZlibBitRevTable[i] = rev;
             }
             return true;
         }
-        bool BitRevTableInited = BitRevTableInit();
+        bool ZlibBitRevTableInited = ZlibBitRevTableInit();
+
+#endif
 
         uint32_t ZlibAdler32(uint8_t* data, int size)
         {
@@ -151,7 +154,7 @@ namespace Simd
             for (; i < size; ++i)
                 ZlibHuffB(data[i], stream);
             ZlibHuff(256, stream);
-            stream.FlushBits(true);
+            stream.FlushBits();
             stream.WriteBe32(ZlibAdler32(data, size));
         }
 

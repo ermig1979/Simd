@@ -27,6 +27,8 @@
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdLoad.h"
 
+#define SIMD_PNG_ZLIB_BIT_REV_TABLE
+
 namespace Simd
 {
     namespace Base
@@ -36,13 +38,27 @@ namespace Simd
         extern const uint16_t ZlibDistC[31];
         extern const uint8_t  ZlibDistEb[30];
 
-        extern int BitRevTable[512];
-
+#if defined(SIMD_PNG_ZLIB_BIT_REV_TABLE)
+        const int ZlibBitRevShift = 9;
+        const int ZlibBitRevSize = 1 << ZlibBitRevShift;
+        extern int ZlibBitRevTable[ZlibBitRevSize];
         SIMD_INLINE int ZlibBitRev(int bits, int count)
         {
-            assert(bits < 512 && count <= 9);
-            return BitRevTable[bits] >> (9 - count);
+            assert(bits < ZlibBitRevSize&& count <= ZlibBitRevShift);
+            return ZlibBitRevTable[bits] >> (ZlibBitRevShift - count);
         }
+#else
+        SIMD_INLINE int ZlibBitRev(int bits, int count)
+        {
+            int rev = 0;
+            for (size_t b = 0; b < count; b++)
+            {
+                rev = (rev << 1) | (bits & 1);
+                bits >>= 1;
+            }
+            return rev;
+        }
+#endif
 
         SIMD_INLINE uint32_t ZlibHash(const uint8_t* data)
         {
@@ -172,7 +188,9 @@ namespace Simd
             int i = 0;
             for (; i < limit; i += 32)
             {
-                uint32_t mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(_mm256_loadu_si256((__m256i*)(a + i)), _mm256_loadu_si256((__m256i*)(b + i))));
+                __m256i _a = _mm256_loadu_si256((__m256i*)(a + i));
+                __m256i _b = _mm256_loadu_si256((__m256i*)(b + i));
+                uint32_t mask = _mm256_movemask_epi8(_mm256_cmpeq_epi8(_a, _b));
                 if (mask != 0xFFFFFFFF)
                 {
                     i += _tzcnt_u32(~mask);

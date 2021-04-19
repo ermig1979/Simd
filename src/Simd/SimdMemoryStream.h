@@ -271,20 +271,25 @@ namespace Simd
         {
             _bitBuffer |= (bits) << _bitCount;
             _bitCount += count;
-            FlushBits(false);
-        }
-
-        SIMD_INLINE void FlushBits(bool tail)
-        {
             while (_bitCount >= 8)
             {
-                Write(&_bitBuffer, 1);
+                Write8u((uint8_t)_bitBuffer);
                 _bitBuffer >>= 8;
                 _bitCount -= 8;
             }
-            if (tail && _bitCount)
+        }
+
+        SIMD_INLINE void FlushBits()
+        {
+            while (_bitCount >= 8)
             {
-                Write(&_bitBuffer, 1);
+                Write8u((uint8_t)_bitBuffer);
+                _bitBuffer >>= 8;
+                _bitCount -= 8;
+            }
+            if (_bitCount)
+            {
+                Write8u((uint8_t)_bitBuffer);
                 _bitBuffer = 0;
                 _bitCount = 0;
             }

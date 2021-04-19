@@ -189,9 +189,9 @@ namespace Test
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
-                     dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
-                     dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
-                     src.Save("error.ppm", SimdImageFilePpmTxt);
+                    dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
+                    dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
+                    src.Save("error.ppm", SimdImageFilePpmTxt);
                 }
             }
             else
@@ -236,7 +236,7 @@ namespace Test
         View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
         for (int format = 0; format < 5; format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
