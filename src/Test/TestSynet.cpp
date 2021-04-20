@@ -29,6 +29,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace
     {
         struct FuncAB
@@ -860,4 +861,5 @@ namespace Test
        
         return result;
     }
+#endif
 }

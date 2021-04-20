@@ -27,6 +27,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst)
@@ -249,4 +250,5 @@ namespace Simd
                 dst[i] = SynetTanh32f(src[i], _slope);
         }
     }
+#endif
 }

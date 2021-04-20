@@ -152,7 +152,7 @@ namespace Simd
             for (; i < size; ++i)
                 Base::ZlibHuffB(data[i], stream);
             Base::ZlibHuff(256, stream);
-            stream.FlushBits(true);
+            stream.FlushBits();
             stream.WriteBe32(ZlibAdler32(data, size));
         }
 

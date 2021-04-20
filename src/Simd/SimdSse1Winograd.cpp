@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
+#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Sse
     {
         SIMD_INLINE void Load4(const float * src, size_t step, __m128 * dst)

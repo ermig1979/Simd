@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
+#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512f
     {
         template<bool align> void SynetReorderImage_Chw_Hwc(size_t channels, size_t spatial, const float * src, float * dst)

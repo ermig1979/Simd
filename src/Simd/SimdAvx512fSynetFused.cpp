@@ -36,7 +36,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
+#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx512f
     {
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, __m512 sign, float * dst, size_t offset, __mmask16 tail = -1)

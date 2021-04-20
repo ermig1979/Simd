@@ -33,7 +33,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx2
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)

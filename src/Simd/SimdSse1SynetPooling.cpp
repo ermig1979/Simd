@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
+#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse
     {
         SIMD_INLINE void PoolingAverageNhwc1(const float* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128 & norm, float* dst)

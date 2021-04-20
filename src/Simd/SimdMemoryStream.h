@@ -220,13 +220,9 @@ namespace Simd
 
         SIMD_INLINE void Write8u(uint8_t value)
         {
-#if 1
             Reserve(_pos + 1);
             _data[_pos++] = value;
             _size = Max(_size, _pos);
-#else
-            Write(&value, 1);
-#endif
         }
 
         SIMD_INLINE void WriteBe32(const uint32_t & value)

@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx2
     {
         template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Avx2::Exp & exp, __m256 alpha, float * dst, size_t offset)

@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
+#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512f
     {
         SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter(const __m512* t, float* dst, size_t stride, __mmask16 tail)

@@ -28,6 +28,8 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
+
 #if defined(SIMD_PERFORMANCE_STATISTIC)
     Base::PerformanceMeasurer * SynetInnerProduct32f::Perf(const String& func)
     {
@@ -188,4 +190,5 @@ namespace Simd
             return new SynetInnerProduct32fGemm(param);
         }
     }
+#endif
 }

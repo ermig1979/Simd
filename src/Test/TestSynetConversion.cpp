@@ -28,6 +28,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     template<class S, class D> struct FuncCvt
     {
         typedef void(*FuncPtr)(const S * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, D * dst, SimdSynetCompatibilityType compatibility);
@@ -486,4 +487,5 @@ namespace Test
 
         return result;
     }
+#endif
 }

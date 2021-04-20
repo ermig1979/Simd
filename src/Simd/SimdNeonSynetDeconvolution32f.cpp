@@ -33,7 +33,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE    
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Neon
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)

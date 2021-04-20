@@ -32,6 +32,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         SIMD_INLINE void ExtendSize(size_t value, size_t& size)
@@ -785,4 +786,5 @@ namespace Simd
             return new Base::SynetMergedConvolution8i(param);
         }
     }
+#endif
 }

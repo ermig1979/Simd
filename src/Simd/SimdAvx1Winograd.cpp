@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE    
+#if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx
     {
         SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter(const __m256* t, float* dst, size_t stride)

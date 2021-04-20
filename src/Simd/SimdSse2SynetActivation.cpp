@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Sse2
     {
         template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Sse2::Exp & exp, __m128 alpha, float * dst, size_t offset)

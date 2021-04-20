@@ -137,7 +137,7 @@ namespace Simd
         SIMD_INLINE void WriteBits(OutputMemoryStream & stream, const uint16_t bits[2])
         {
             stream.BitCount() += bits[1];
-#if defined(SIMD_X64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
             stream.BitBuffer() |= uint64_t(bits[0]) << (64 - stream.BitCount());
             while (stream.BitCount() >= 8)
             {
@@ -169,7 +169,7 @@ namespace Simd
             uint8_t* data = stream.Data();
             size_t & bitCount = stream.BitCount();
             size_t i = 0;
-#if defined(SIMD_X64_ENABLE)
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
             uint64_t &bitBuffer = stream.BitBuffer();
             for (size_t size3 = AlignLoAny(size, 3); i < size3; i += 3, bits += 3)
             {

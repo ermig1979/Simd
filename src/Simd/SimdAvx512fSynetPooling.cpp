@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
+#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx512f
     {
         SIMD_INLINE void PoolingAverageNhwc1(const float* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m512 & norm, float * dst, __mmask16 tail = -1)

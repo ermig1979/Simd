@@ -32,7 +32,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE  
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Neon
     {
         template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, float * dst)

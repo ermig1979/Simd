@@ -31,6 +31,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace
     {
         struct Cnv
@@ -335,4 +336,5 @@ namespace Test
 
         return result;
     }
+#endif
 }

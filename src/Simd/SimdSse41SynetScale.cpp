@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)      
     namespace Sse41
     {
         SynetScale8i::SynetScale8i(const Base::Scale8iParam& p)

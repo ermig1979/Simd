@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse41
     {
         template<int part> SIMD_INLINE __m128 Cvt8uTo32f(__m128i src)

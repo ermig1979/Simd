@@ -29,6 +29,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format)
@@ -573,4 +574,5 @@ namespace Simd
             }
         }
     }
+#endif
 }

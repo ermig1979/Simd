@@ -27,7 +27,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE  
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Neon
     {
         SIMD_INLINE void PoolingAverageNhwc1(const float* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const float32x4_t& norm, float* dst)

@@ -30,6 +30,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace
     {
         struct FuncScLF
@@ -328,4 +329,5 @@ namespace Test
 
         return result;
     }
+#endif
 }

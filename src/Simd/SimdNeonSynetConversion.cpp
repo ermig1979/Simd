@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE    
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Neon
     {
         template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, float32x4_t scale, float32x4_t shift, uint8x8_t upper, uint8_t* dst)

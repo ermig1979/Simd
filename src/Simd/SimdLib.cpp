@@ -5429,454 +5429,739 @@ SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float *
 
 SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetAddBiasPtr) (const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetAddBiasPtr simdSynetAddBias = SIMD_FUNC4(SynetAddBias, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetAddBias(bias, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetAdd8i(const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
     uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetAdd8iPtr) (const uint8_t* aData, const float* aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
     const static SimdSynetAdd8iPtr simdSynetAdd8i = SIMD_FUNC3(SynetAdd8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetAdd8i(aData, aScale, aShift, bData, bScale, bShift, cData, cScale, cShift, batch, channels, spatial, format, compatibility);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetConvert32fTo8uPtr) (const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
     const static SimdSynetConvert32fTo8uPtr simdSynetConvert32fTo8u = SIMD_FUNC4(SynetConvert32fTo8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetConvert32fTo8u(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetConvert8uTo32fPtr) (const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
     const static SimdSynetConvert8uTo32fPtr simdSynetConvert8uTo32f = SIMD_FUNC3(SynetConvert8uTo32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);//, SIMD_NEON_FUNC);
 
     simdSynetConvert8uTo32f(src, batch, channels, height, width, format, scale, shift, dst, compatibility);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
     const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC6(SynetConvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution32fInit(batch, params, gemm);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetConvolution32fExternalBufferSize(const void * context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetConvolution32f*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetConvolution32fInternalBufferSize(const void * context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetConvolution32f*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API const char* SimdSynetConvolution32fInfo(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetConvolution32f*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetConvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((SynetConvolution32f*)context)->SetParams(weight, internal, bias, params);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetConvolution32fForward(void * context, const float * src, float * buf, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     SynetConvolution32f * c = (SynetConvolution32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void* SimdSynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     const static SimdSynetConvolution8iInitPtr simdSynetConvolution8iInit = SIMD_FUNC5(SynetConvolution8iInit, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetConvolution8iInit(batch, conv, compatibility);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetConvolution8iExternalBufferSize(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetConvolution8i*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetConvolution8iInternalBufferSize(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetConvolution8i*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API const char* SimdSynetConvolution8iInfo(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetConvolution8i*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetConvolution8iSetParams(void* context, const float* weight, const float* bias, const float* params, const float* const* stats)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((SynetConvolution8i*)context)->SetParams(weight, bias, params, stats);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     SynetConvolution8i* c = (SynetConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
     const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetDeconvolution32fInit(batch, params, gemm);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetDeconvolution32fExternalBufferSize(const void * context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetDeconvolution32f*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetDeconvolution32fInternalBufferSize(const void * context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetDeconvolution32f*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API const char* SimdSynetDeconvolution32fInfo(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetDeconvolution32f*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetDeconvolution32fSetParams(void * context, const float * weight, SimdBool * internal, const float * bias, const float * params)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((SynetDeconvolution32f*)context)->SetParams(weight, internal, bias, params);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetDeconvolution32fForward(void * context, const float * src, float * buf, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     SynetDeconvolution32f * d = (SynetDeconvolution32f*)context;
     SIMD_PERF_EXT(d);
     d->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetEltwiseLayerForwardPtr) (float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);
     const static SimdSynetEltwiseLayerForwardPtr simdSynetEltwiseLayerForward = SIMD_FUNC5(SynetEltwiseLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetEltwiseLayerForward(src, weight, count, size, type, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alpha, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetElu32fPtr) (const float * src, size_t size, const float * alpha, float * dst);
     const static SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC4(SynetElu32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetElu32f(src, size, alpha, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward0(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward0Ptr) (const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward0Ptr simdSynetFusedLayerForward0 = SIMD_FUNC4(SynetFusedLayerForward0, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward0(src, bias, scale, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward1Ptr) (const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward1Ptr simdSynetFusedLayerForward1 = SIMD_FUNC4(SynetFusedLayerForward1, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward1(src, bias0, scale1, bias1, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward2(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward2Ptr) (const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward2Ptr simdSynetFusedLayerForward2 = SIMD_FUNC4(SynetFusedLayerForward2, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward3(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward3Ptr) (const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward3Ptr simdSynetFusedLayerForward3 = SIMD_FUNC4(SynetFusedLayerForward3, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward4(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward4Ptr) (const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward4Ptr simdSynetFusedLayerForward4 = SIMD_FUNC4(SynetFusedLayerForward4, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward8Ptr) (const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward8Ptr simdSynetFusedLayerForward8 = SIMD_FUNC4(SynetFusedLayerForward8, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetFusedLayerForward9Ptr) (const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
     const static SimdSynetFusedLayerForward9Ptr simdSynetFusedLayerForward9 = SIMD_FUNC4(SynetFusedLayerForward9, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetHswish32fPtr) (const float * src, size_t size, const float * shift, const float * scale, float * dst);
     const static SimdSynetHswish32fPtr simdSynetHswish32f = SIMD_FUNC4(SynetHswish32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHswish32f(src, size, shift, scale, dst);
+#else
+assert(0);
+#endif
 }
 
 SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC4(SynetInnerProduct32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC);
 
     return simdSynetInnerProduct32fInit(batch, input, output, transpose, activation);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetInnerProduct32fInternalBufferSize(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetInnerProduct32f*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetInnerProduct32fSetParams(void* context, const float* weight, SimdBool* internal, const float* bias, const float* params)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((SynetInnerProduct32f*)context)->SetParams(weight, internal, bias, params);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetInnerProduct32fForward(void* context, const float* src, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     SynetInnerProduct32f* c = (SynetInnerProduct32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetInnerProductLayerForwardPtr) (const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
     const static SimdSynetInnerProductLayerForwardPtr simdSynetInnerProductLayerForward = SIMD_FUNC5(SynetInnerProductLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetInnerProductLayerForward(src, weight, bias, count, size, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetInnerProduct8iPtr) (size_t M, size_t N, size_t K, const uint8_t* src, const int8_t* weight, int32_t* dst, SimdSynetCompatibilityType compatibility);
     const static SimdSynetInnerProduct8iPtr simdSynetInnerProduct8i = SIMD_FUNC3(SynetInnerProduct8i, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     simdSynetInnerProduct8i(M, N, K, src, weight, dst, compatibility);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetLrnLayerCrossChannelsPtr) (const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
     const static SimdSynetLrnLayerCrossChannelsPtr simdSynetLrnLayerCrossChannels = SIMD_FUNC4(SynetLrnLayerCrossChannels, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
     const static SimdSynetMergedConvolution32fInitPtr simdSynetMergedConvolution32fInit = SIMD_FUNC5(SynetMergedConvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetMergedConvolution32fInit(batch, convs, count, add);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetMergedConvolution32fExternalBufferSize(const void * context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetMergedConvolution32f*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetMergedConvolution32fInternalBufferSize(const void * context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetMergedConvolution32f*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API const char* SimdSynetMergedConvolution32fInfo(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetMergedConvolution32f*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetMergedConvolution32fSetParams(void * context, const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((SynetMergedConvolution32f*)context)->SetParams(weight, internal, bias, params);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetMergedConvolution32fForward(void * context, const float * src, float * buf, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     SynetMergedConvolution32f * c = (SynetMergedConvolution32f*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void* SimdSynetMergedConvolution8iInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetMergedConvolution8iInitPtr) (size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdSynetCompatibilityType compatibility);
     const static SimdSynetMergedConvolution8iInitPtr simdSynetMergedConvolution8iInit = SIMD_FUNC4(SynetMergedConvolution8iInit, SIMD_AVX512VNNI_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     return simdSynetMergedConvolution8iInit(batch, convs, count, compatibility);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetMergedConvolution8iExternalBufferSize(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetMergedConvolution8i*)context)->ExternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetMergedConvolution8iInternalBufferSize(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetMergedConvolution8i*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API const char* SimdSynetMergedConvolution8iInfo(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((SynetMergedConvolution8i*)context)->Info();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetMergedConvolution8iSetParams(void* context, const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params, const float* const* stats)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((SynetMergedConvolution8i*)context)->SetParams(weight, internal, bias, params, stats);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetMergedConvolution8iForward(void* context, const uint8_t* src, uint8_t* buf, uint8_t* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     SynetMergedConvolution8i* c = (SynetMergedConvolution8i*)context;
     SIMD_PERF_EXT(c);
     c->Forward(src, buf, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetMish32fPtr) (const float* src, size_t size, const float* threshold, float* dst);
     const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC4(SynetMish32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetMish32f(src, size, threshold, dst);
+#else
+    assert(0);
+#endif
 }
 
 void SimdSynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingForwardAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
     const static SimdSynetPoolingForwardAveragePtr simdSynetPoolingForwardAverage = SIMD_FUNC4(SynetPoolingForwardAverage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingForwardAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingForwardMax32fPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
     const static SimdSynetPoolingForwardMax32fPtr simdSynetPoolingForwardMax32f = SIMD_FUNC5(SynetPoolingForwardMax32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingForwardMax32f(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetPoolingForwardMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
     size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingForwardMax8uPtr) (const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
     const static SimdSynetPoolingForwardMax8uPtr simdSynetPoolingForwardMax8u = SIMD_FUNC4(SynetPoolingForwardMax8u, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingForwardMax8u(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
     const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRelu32fPtr) (const float* src, size_t size, const float* slope, float* dst);
     const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRelu32f(src, size, slope, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetReorderImagePtr) (size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
     const static SimdSynetReorderImagePtr simdSynetReorderImage = SIMD_FUNC4(SynetReorderImage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetReorderFilterPtr) (size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
     const static SimdSynetReorderFilterPtr simdSynetReorderFilter = SIMD_FUNC4(SynetReorderFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const float * lower, const float * upper, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
     const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRestrictRange32f(src, size, lower, upper, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetScaleLayerForwardPtr) (const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
     const static SimdSynetScaleLayerForwardPtr simdSynetScaleLayerForward = SIMD_FUNC5(SynetScaleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void* SimdSynetScale8iInit(size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetScale8iInitPtr) (size_t batch, size_t channels, size_t spatial, SimdTensorDataType srcType, SimdTensorDataType dstType, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
     const static SimdSynetScale8iInitPtr simdSynetScale8iInit = SIMD_FUNC3(SynetScale8iInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);
 
     return simdSynetScale8iInit(batch, channels, spatial, srcType, dstType, format, compatibility);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API size_t SimdSynetScale8iInternalBufferSize(const void* context)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return ((Base::SynetScale8i*)context)->InternalBufferSize();
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetScale8iSetParams(void* context, const float* weight, const float* bias, const float* const* stats)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((Base::SynetScale8i*)context)->SetParams(weight, bias, stats);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetScale8iForward(void* context, const uint8_t* src, uint8_t* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     ((Base::SynetScale8i*)context)->Forward(src, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height, size_t stride, SimdPixelFormatType srcFormat,
     const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType dstFormat)
 {
+#if defined(SIMD_SYNET_ENABLE)
 #ifdef SIMD_AVX512BW_ENABLE
     if (Avx512bw::Enable && width >= Avx512bw::A)
         Avx512bw::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
@@ -5898,65 +6183,102 @@ SIMD_API void SimdSynetSetInput(const uint8_t * src, size_t width, size_t height
     else
 #endif
         Base::SynetSetInput(src, width, height, stride, srcFormat, lower, upper, dst, channels, dstFormat);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetShuffleLayerForwardPtr) (const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
     const static SimdSynetShuffleLayerForwardPtr simdSynetShuffleLayerForward = SIMD_FUNC4(SynetShuffleLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdSynetShuffleLayerForward(src0, src1, channels0, channels1, spatial, dst0, dst1, format, type);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSigmoid32fPtr) (const float* src, size_t size, const float* slope, float* dst);
     const static SimdSynetSigmoid32fPtr simdSynetSigmoid32f = SIMD_FUNC4(SynetSigmoid32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSigmoid32f(src, size, slope, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetSoftmaxLayerForward(const float * src, size_t outer, size_t count, size_t inner, float * dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftmaxLayerForwardPtr) (const float * src, size_t outer, size_t count, size_t inner, float * dst);
     const static SimdSynetSoftmaxLayerForwardPtr simdSynetSoftmaxLayerForward = SIMD_FUNC4(SynetSoftmaxLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftmaxLayerForward(src, outer, count, inner, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftplus32fPtr) (const float* src, size_t size, const float* beta, const float* threshold, float* dst);
     const static SimdSynetSoftplus32fPtr simdSynetSoftplus32f = SIMD_FUNC4(SynetSoftplus32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftplus32f(src, size, beta, threshold, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return Base::SynetSpecifyTensorFormat(format);
+#else
+    assert(0);
+    return SimdTensorFormatUnknown;
+#endif
 }
 
 SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetTanh32fPtr) (const float* src, size_t size, const float* slope, float* dst);
     const static SimdSynetTanh32fPtr simdSynetTanh32f = SIMD_FUNC4(SynetTanh32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetTanh32f(src, size, slope, dst);
+#else
+    assert(0);
+#endif
 }
 
 
 SIMD_API size_t SimdSynetTensorAlignment(SimdTensorFormatType format)
 {
+#if defined(SIMD_SYNET_ENABLE)
     return Base::SynetTensorAlignment(format);
+#else
+    assert(0);
+    return 0;
+#endif
 }
 
 SIMD_API void SimdSynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst)
 {
+#if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetUnaryOperation32fLayerForwardPtr) (const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
     const static SimdSynetUnaryOperation32fLayerForwardPtr simdSynetUnaryOperation32fLayerForward = SIMD_FUNC4(SynetUnaryOperation32fLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetUnaryOperation32fLayerForward(src, size, type, dst);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -6109,156 +6431,240 @@ typedef void(*SimdWinogradSetOutputPtr) (const float * src, size_t srcStride, fl
 
 SIMD_API void SimdWinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel1x3Block1x4SetFilter = SIMD_FUNC4(WinogradKernel1x3Block1x4SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel1x3Block1x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel1x3Block1x4SetInput = SIMD_FUNC4(WinogradKernel1x3Block1x4SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel1x3Block1x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel1x3Block1x4SetOutput = SIMD_FUNC4(WinogradKernel1x3Block1x4SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x3Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel1x5Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel1x5Block1x4SetFilter = SIMD_FUNC4(WinogradKernel1x5Block1x4SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x5Block1x4SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel1x5Block1x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel1x5Block1x4SetInput = SIMD_FUNC4(WinogradKernel1x5Block1x4SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x5Block1x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel1x5Block1x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel1x5Block1x4SetOutput = SIMD_FUNC4(WinogradKernel1x5Block1x4SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel1x5Block1x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel2x2Block2x2SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel2x2Block2x2SetFilter = SIMD_FUNC4(WinogradKernel2x2Block2x2SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel2x2Block2x2SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel2x2Block2x2SetInput = SIMD_FUNC4(WinogradKernel2x2Block2x2SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel2x2Block2x2SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel2x2Block2x2SetOutput = SIMD_FUNC4(WinogradKernel2x2Block2x2SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel2x2Block4x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel2x2Block4x4SetFilter = SIMD_FUNC4(WinogradKernel2x2Block4x4SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block4x4SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel2x2Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel2x2Block4x4SetInput = SIMD_FUNC4(WinogradKernel2x2Block4x4SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel2x2Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel2x2Block4x4SetOutput = SIMD_FUNC4(WinogradKernel2x2Block4x4SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel2x2Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block2x2SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block2x2SetFilter = SIMD_FUNC4(WinogradKernel3x3Block2x2SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block2x2SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block2x2SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block2x2SetInput = SIMD_FUNC4(WinogradKernel3x3Block2x2SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block2x2SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block2x2SetOutput = SIMD_FUNC4(WinogradKernel3x3Block2x2SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block3x3SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block3x3SetFilter = SIMD_FUNC4(WinogradKernel3x3Block3x3SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block3x3SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block3x3SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block3x3SetInput = SIMD_FUNC4(WinogradKernel3x3Block3x3SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC); 
 
     simdWinogradKernel3x3Block3x3SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block3x3SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block3x3SetOutput = SIMD_FUNC4(WinogradKernel3x3Block3x3SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block3x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block4x4SetFilter(const float * src, size_t size, float * dst, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetFilterPtr simdWinogradKernel3x3Block4x4SetFilter = SIMD_FUNC4(WinogradKernel3x3Block4x4SetFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block4x4SetFilter(src, size, dst, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block4x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
     size_t padY, size_t padX, size_t padH, size_t padW, float* dst, size_t dstStride, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetInputPtr simdWinogradKernel3x3Block4x4SetInput = SIMD_FUNC4(WinogradKernel3x3Block4x4SetInput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdWinogradKernel3x3Block4x4SetOutput(const float * src, size_t srcStride, float * dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans)
 {
+#if defined(SIMD_SYNET_ENABLE)
     const static SimdWinogradSetOutputPtr simdWinogradKernel3x3Block4x4SetOutput = SIMD_FUNC4(WinogradKernel3x3Block4x4SetOutput, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
 
     simdWinogradKernel3x3Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+#else
+    assert(0);
+#endif
 }
 
 SIMD_API void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,

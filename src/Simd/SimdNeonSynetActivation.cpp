@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE    
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Neon
     {
         template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Neon::Exp & exp, float32x4_t alpha, float * dst, size_t offset)

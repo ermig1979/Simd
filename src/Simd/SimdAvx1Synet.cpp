@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE    
+#if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)     
     namespace Avx
     {
         template <bool align> SIMD_INLINE void SynetAddBias(const float * bias, float * dst)

@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx2
     {
         SynetInnerProduct32fGemm::SynetInnerProduct32fGemm(const InnerProductParam32f& p)

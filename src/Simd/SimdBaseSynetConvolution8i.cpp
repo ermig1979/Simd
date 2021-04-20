@@ -31,6 +31,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     void CvtParam::Init(const float* min, const float* max, size_t size, SimdSynetCompatibilityType compatibility)
     {
         zero.Resize(size);
@@ -636,4 +637,5 @@ namespace Simd
                 return new SynetConvolution8iGemmNN(param);
         }
     }
+#endif
 }

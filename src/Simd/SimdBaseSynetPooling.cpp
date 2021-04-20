@@ -27,6 +27,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         void SynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
@@ -170,4 +171,5 @@ namespace Simd
             SynetPoolingForwardMax(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
         }
     }
+#endif
 }

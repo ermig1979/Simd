@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX_ENABLE)
+#if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)  
 	namespace Avx
 	{
 		namespace Dc

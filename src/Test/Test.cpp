@@ -344,6 +344,7 @@ namespace Test
 
     TEST_ADD_GROUP_AD0(SvmSumLinear);
 
+#if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A00(SynetAddBias);
     TEST_ADD_GROUP_A00(SynetAdd8i);
     TEST_ADD_GROUP_AD0(SynetEltwiseLayerForward);
@@ -396,6 +397,7 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
     TEST_ADD_GROUP_A00(SynetScale8iForward);
+#endif
 
     TEST_ADD_GROUP_AD0(TextureBoostedSaturatedGradient);
     TEST_ADD_GROUP_AD0(TextureBoostedUv);
@@ -404,6 +406,7 @@ namespace Test
 
     TEST_ADD_GROUP_A00(TransformImage);
 
+#if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A00(WinogradKernel1x3Block1x4SetFilter);
     TEST_ADD_GROUP_A00(WinogradKernel1x3Block1x4SetInput);
     TEST_ADD_GROUP_A00(WinogradKernel1x3Block1x4SetOutput);
@@ -433,6 +436,7 @@ namespace Test
     TEST_ADD_GROUP_00S(WinogradKernel3x3Block2x2);
     TEST_ADD_GROUP_00S(WinogradKernel3x3Block3x3);
     TEST_ADD_GROUP_00S(WinogradKernel3x3Block4x4);
+#endif
 
     TEST_ADD_GROUP_AD0(Yuv444pToBgr);
     TEST_ADD_GROUP_AD0(Yuv422pToBgr);

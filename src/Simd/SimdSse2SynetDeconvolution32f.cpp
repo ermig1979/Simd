@@ -34,7 +34,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Sse2
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)

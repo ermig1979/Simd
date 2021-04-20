@@ -27,7 +27,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx2
     {
         using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;

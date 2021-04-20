@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Sse2
     {
         template <bool align> SIMD_INLINE void SynetConvert32fTo8u(const float * src, __m128 scale, __m128 shift, __m128i upper, uint8_t* dst)

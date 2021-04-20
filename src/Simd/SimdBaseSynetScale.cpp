@@ -26,6 +26,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         void SynetScaleLayerForwardNchw(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, float * dst)
@@ -331,4 +332,5 @@ namespace Simd
             return new Base::SynetScale8i(param);
         }
     }
+#endif
 }

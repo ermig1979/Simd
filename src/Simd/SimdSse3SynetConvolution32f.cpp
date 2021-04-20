@@ -27,7 +27,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE3_ENABLE    
+#if defined(SIMD_SSE3_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Sse3
     {
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)

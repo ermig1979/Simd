@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX_ENABLE    
+#if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx
     {
         template<bool align> SIMD_INLINE void SynetHswish32f(const float * src, __m256 shift, __m256 scale, float * dst, size_t offset)

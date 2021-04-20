@@ -29,6 +29,8 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
+
 #if defined(SIMD_PERFORMANCE_STATISTIC)
     Base::PerformanceMeasurer * SynetConvolution32f::Perf(const char* func)
     {
@@ -1631,4 +1633,5 @@ namespace Simd
                 return new SynetConvolution32fGemmNN(param);
         }
     }
+#endif
 }

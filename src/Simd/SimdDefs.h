@@ -86,6 +86,10 @@
 #define SIMD_VSX_DISABLE
 #endif
 
+#if !defined(SIMD_SYNET_DISABLE)
+#define SIMD_SYNET_ENABLE
+#endif
+
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
 #define SIMD_ALIGNED(x) __declspec(align(x))

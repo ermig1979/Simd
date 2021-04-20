@@ -28,6 +28,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace
     {
         struct FuncWF
@@ -1313,4 +1314,5 @@ namespace Test
     {
         return WinogradKernel3x3SpecialTest(4, FUNC_WF(SimdWinogradKernel3x3Block4x4SetFilter), FUNC_WI(SimdWinogradKernel3x3Block4x4SetInput), FUNC_WO(SimdWinogradKernel3x3Block4x4SetOutput));
     }
+#endif
 }

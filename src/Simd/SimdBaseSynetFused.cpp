@@ -26,6 +26,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         void SynetFusedLayerForward0Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -757,4 +758,5 @@ namespace Simd
                 assert(0);
         }
     }
+#endif
 }

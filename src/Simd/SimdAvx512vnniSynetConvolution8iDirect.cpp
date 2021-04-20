@@ -32,7 +32,7 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX512VNNI_ENABLE)
+#if defined(SIMD_AVX512VNNI_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx512vnni
     {
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;

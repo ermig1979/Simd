@@ -32,6 +32,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace
     {
         typedef Test::SynetConvolutionParam<false> Param;
@@ -272,4 +273,5 @@ namespace Test
 
         return result;
     }
+#endif
 }

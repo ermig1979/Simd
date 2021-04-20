@@ -32,7 +32,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Sse2
     {
         void ConvolutionBiasAndActivation(const float * bias, size_t count, size_t size, ::SimdConvolutionActivationType activation, const float * params, ::SimdBool trans, float * dst)

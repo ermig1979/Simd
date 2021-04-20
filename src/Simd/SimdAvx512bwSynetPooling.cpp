@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512BW_ENABLE    
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512bw
     {
         SIMD_INLINE void PoolingMaxNhwc1(const uint8_t* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m512i& min, uint8_t* dst, __mmask64 tail = -1)

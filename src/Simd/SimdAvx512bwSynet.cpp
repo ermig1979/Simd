@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512BW_ENABLE    
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)     
     namespace Avx512bw
     {
         template<bool mask, bool nofma> SIMD_INLINE void SynetAdd8iNchwF(const uint8_t* a, const uint8_t* b, __m512 scale[3], __m512 shift[3], __m128i upper, uint8_t* c, size_t offset, __mmask16 tail = -1)

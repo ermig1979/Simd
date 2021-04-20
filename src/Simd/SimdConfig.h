@@ -80,4 +80,6 @@
 
 //#define SIMD_FUTURE_DISABLE
 
+//#define SIMD_SYNET_DISABLE
+
 #endif//__SimdConfig_h__

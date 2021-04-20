@@ -30,6 +30,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         template<SimdConvolutionActivationType type, UpdateType update> void DirectConvolution(const float* src, const SimdConvolutionParameters& p,
@@ -673,4 +674,5 @@ namespace Simd
             return new Base::SynetMergedConvolution32f(param);
         }
     }
+#endif
 }

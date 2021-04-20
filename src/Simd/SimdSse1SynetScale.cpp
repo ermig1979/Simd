@@ -32,7 +32,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
+#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Sse
     {
         template <bool align> SIMD_INLINE void SynetScaleLayerForward(const float * src, const float * scale, const float * bias, float * dst, size_t offset)

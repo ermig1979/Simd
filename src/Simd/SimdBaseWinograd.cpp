@@ -26,6 +26,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         void WinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans)
@@ -2389,4 +2390,5 @@ namespace Simd
             }
         }
     }
+#endif
 }

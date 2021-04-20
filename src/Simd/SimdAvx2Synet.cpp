@@ -37,7 +37,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx2
     {
         template<int part> SIMD_INLINE __m256 Cvt8uTo32f(__m128i src)

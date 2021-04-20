@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX512BW_ENABLE)
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Avx512bw
     {
         using AlgParam = SynetConvolution8iNhwcDirect::AlgParam;

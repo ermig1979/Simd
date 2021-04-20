@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
+#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Sse
     {
         template<bool align> SIMD_INLINE void SynetHswish32f(const float * src, __m128 shift, __m128 scale, float * dst, size_t offset)

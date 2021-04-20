@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX2_ENABLE    
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx2
     {
         template <bool align, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst)

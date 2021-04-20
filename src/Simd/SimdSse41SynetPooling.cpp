@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)     
     namespace Sse41
     {
         SIMD_INLINE void PoolingMaxNhwc1(const uint8_t * src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128i & min, uint8_t* dst)

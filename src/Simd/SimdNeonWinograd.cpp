@@ -29,7 +29,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_NEON_ENABLE  
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE) 
     namespace Neon
     {
         SIMD_INLINE void Load4(const float * src, size_t step, float32x4_t * dst)

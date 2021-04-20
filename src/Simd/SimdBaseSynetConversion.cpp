@@ -28,6 +28,7 @@
 
 namespace Simd
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility)
@@ -555,4 +556,5 @@ namespace Simd
             filterConverter(output, input, kernel, src, dst);
         }
     }
+#endif
 }

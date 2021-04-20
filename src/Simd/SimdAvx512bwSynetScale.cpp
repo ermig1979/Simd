@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512BW_ENABLE    
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx512bw
     {
         SynetScale8i::SynetScale8i(const Base::Scale8iParam& p)

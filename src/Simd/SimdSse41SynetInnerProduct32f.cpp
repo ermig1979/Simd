@@ -33,7 +33,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)      
     namespace Sse41
     {
         SynetInnerProduct32fGemm::SynetInnerProduct32fGemm(const InnerProductParam32f& p)

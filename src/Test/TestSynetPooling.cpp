@@ -28,6 +28,7 @@
 
 namespace Test
 {
+#if defined(SIMD_SYNET_ENABLE)
     namespace
     {
         struct ParamP
@@ -372,4 +373,5 @@ namespace Test
 
         return result;
     }
+#endif
 }
