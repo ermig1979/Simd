@@ -155,7 +155,7 @@ namespace Simd
                 ZlibHuffB(data[i], stream);
             ZlibHuff(256, stream);
             stream.FlushBits();
-            stream.WriteBe32(ZlibAdler32(data, size));
+            stream.WriteBe32u(ZlibAdler32(data, size));
         }
 
         uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)
@@ -345,7 +345,7 @@ namespace Simd
 
         SIMD_INLINE void WriteCrc32(OutputMemoryStream& stream, size_t size)
         {
-            stream.WriteBe32(Base::Crc32(stream.Current() - size - 4, size + 4));
+            stream.WriteBe32u(Base::Crc32(stream.Current() - size - 4, size + 4));
         }
 
         void ImagePngSaver::WriteToStream(const uint8_t* zlib, size_t zlen)
@@ -354,21 +354,21 @@ namespace Simd
             const int8_t CTYPE[5] = { -1, 0, 4, 2, 6 };
             _stream.Reserve(8 + 12 + 13 + 12 + zlen + 12);
             _stream.Write(SIGNATURE, 8);
-            _stream.WriteBe32(13);
+            _stream.WriteBe32u(13);
             _stream.Write("IHDR", 4);
-            _stream.WriteBe32((uint32_t)_param.width);
-            _stream.WriteBe32((uint32_t)_param.height);
+            _stream.WriteBe32u((uint32_t)_param.width);
+            _stream.WriteBe32u((uint32_t)_param.height);
             _stream.Write8u(8);
             _stream.Write8u(CTYPE[_channels]);
             _stream.Write8u(0);
             _stream.Write8u(0);
             _stream.Write8u(0);
             WriteCrc32(_stream, 13);
-            _stream.WriteBe32((uint32_t)zlen);
+            _stream.WriteBe32u((uint32_t)zlen);
             _stream.Write("IDAT", 4);
             _stream.Write(zlib, zlen);
             WriteCrc32(_stream, zlen);
-            _stream.WriteBe32(0);
+            _stream.WriteBe32u(0);
             _stream.Write("IEND", 4);
             WriteCrc32(_stream, 0);
         }

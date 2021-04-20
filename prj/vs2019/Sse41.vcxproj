@@ -17,6 +17,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoadPng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp" />

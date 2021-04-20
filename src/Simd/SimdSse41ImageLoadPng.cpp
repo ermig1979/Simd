@@ -25,10 +25,13 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdSse2.h"
+#include "Simd/SimdSsse3.h"
 
 namespace Simd
 {
-    namespace Base
+#if defined(SIMD_SSE41_ENABLE) 
+    namespace Sse41
     {
         typedef unsigned char png_uc;
         typedef unsigned short png_us;
@@ -67,18 +70,18 @@ namespace Simd
 
         typedef struct
         {
-            int      (*read)  (InputMemoryStream* stream, char* data, int size);   // fill 'data' with 'size' bytes.  return number of bytes actually read
-            void     (*skip)  (InputMemoryStream* stream, int n);                 // skip the next 'n' bytes, or 'unget' the last -n bytes if negative
-            int      (*eof)   (InputMemoryStream* stream);                       // returns nonzero if we are at end of file/data
+            int      (*read)  (void* user, char* data, int size);   // fill 'data' with 'size' bytes.  return number of bytes actually read
+            void     (*skip)  (void* user, int n);                 // skip the next 'n' bytes, or 'unget' the last -n bytes if negative
+            int      (*eof)   (void* user);                       // returns nonzero if we are at end of file/data
         } png_io_callbacks;
 
-        struct PngContext
+        typedef struct
         {
             png__uint32 img_x, img_y;
             int img_n, img_out_n;
 
             png_io_callbacks io;
-            InputMemoryStream * stream;
+            void* io_user_data;
 
             int read_from_callbacks;
             int buflen;
@@ -87,7 +90,7 @@ namespace Simd
 
             png_uc* img_buffer, * img_buffer_end;
             png_uc* img_buffer_original, * img_buffer_original_end;
-        };
+        } png__context;
 
         typedef struct
         {
@@ -109,22 +112,18 @@ namespace Simd
             PNG_ORDER_BGR
         };
 
-        static void png__rewind(PngContext* s)
+        static void png__rewind(png__context* s)
         {
             // conceptually rewind SHOULD rewind to the beginning of the stream,
             // but we just rewind to the beginning of the initial buffer, because
             // we only use it after doing 'test', which only ever looks at at most 92 bytes
-#if 1
             s->img_buffer = s->img_buffer_original;
             s->img_buffer_end = s->img_buffer_original_end;
-#else
-            s->stream->Seek(0);
-#endif
         }
 
-        static void png__refill_buffer(PngContext* s)
+        static void png__refill_buffer(png__context* s)
         {
-            int n = (s->io.read)(s->stream, (char*)s->buffer_start, s->buflen);
+            int n = (s->io.read)(s->io_user_data, (char*)s->buffer_start, s->buflen);
             s->callback_already_read += (int)(s->img_buffer - s->img_buffer_original);
             if (n == 0) {
                 // at end of file, treat same as if from memory, but need to handle case
@@ -140,9 +139,8 @@ namespace Simd
             }
         }
 
-        png_inline static png_uc png__get8(PngContext* s)
+        png_inline static png_uc png__get8(png__context* s)
         {
-#if 1
             if (s->img_buffer < s->img_buffer_end)
                 return *s->img_buffer++;
             if (s->read_from_callbacks) {
@@ -150,29 +148,24 @@ namespace Simd
                 return *s->img_buffer++;
             }
             return 0;
-#else
-            uint8_t value = 0;
-            s->stream->Read8u(value);
-            return value;
-#endif
         }
 
-        static int png__get16be(PngContext* s)
+        static int png__get16be(png__context* s)
         {
             int z = png__get8(s);
             return (z << 8) + png__get8(s);
         }
 
-        static png__uint32 png__get32be(PngContext* s)
+        static png__uint32 png__get32be(png__context* s)
         {
             png__uint32 z = png__get16be(s);
             return (z << 16) + png__get16be(s);
         }
 
-        png_inline static int png__at_eof(PngContext* s)
+        png_inline static int png__at_eof(png__context* s)
         {
             if (s->io.read) {
-                if (!(s->io.eof)(s->stream)) return 0;
+                if (!(s->io.eof)(s->io_user_data)) return 0;
                 // if feof() is true, check if buffer = end
                 // special case: we've only got the special 0 character at the end
                 if (s->read_from_callbacks == 0) return 1;
@@ -181,7 +174,7 @@ namespace Simd
             return s->img_buffer >= s->img_buffer_end;
         }
 
-        static void png__skip(PngContext* s, int n)
+        static void png__skip(png__context* s, int n)
         {
             if (n == 0) return;  // already there!
             if (n < 0) {
@@ -192,14 +185,14 @@ namespace Simd
                 int blen = (int)(s->img_buffer_end - s->img_buffer);
                 if (blen < n) {
                     s->img_buffer = s->img_buffer_end;
-                    (s->io.skip)(s->stream, n - blen);
+                    (s->io.skip)(s->io_user_data, n - blen);
                     return;
                 }
             }
             s->img_buffer += n;
         }
 
-        static int png__getn(PngContext* s, png_uc* buffer, int n)
+        static int png__getn(png__context* s, png_uc* buffer, int n)
         {
             if (s->io.read) {
                 int blen = (int)(s->img_buffer_end - s->img_buffer);
@@ -208,7 +201,7 @@ namespace Simd
 
                     memcpy(buffer, s->img_buffer, blen);
 
-                    count = (s->io.read)(s->stream, (char*)buffer + blen, n - blen);
+                    count = (s->io.read)(s->io_user_data, (char*)buffer + blen, n - blen);
                     res = (count == (n - blen));
                     s->img_buffer = s->img_buffer_end;
                     return res;
@@ -892,7 +885,7 @@ namespace Simd
             png__uint32 type;
         } png__pngchunk;
 
-        static png__pngchunk png__get_chunk_header(PngContext* s)
+        static png__pngchunk png__get_chunk_header(png__context* s)
         {
             png__pngchunk c;
             c.length = png__get32be(s);
@@ -900,7 +893,7 @@ namespace Simd
             return c;
         }
 
-        static int png__check_png_header(PngContext* s)
+        static int png__check_png_header(png__context* s)
         {
             static const png_uc png_sig[8] = { 137,80,78,71,13,10,26,10 };
             int i;
@@ -911,7 +904,7 @@ namespace Simd
 
         typedef struct
         {
-            PngContext* s;
+            png__context* s;
             png_uc* idata, * expanded, * out;
             int depth;
         } png__png;
@@ -954,7 +947,7 @@ namespace Simd
         static int png__create_png_image_raw(png__png* a, png_uc* raw, png__uint32 raw_len, int out_n, png__uint32 x, png__uint32 y, int depth, int color)
         {
             int bytes = (depth == 16 ? 2 : 1);
-            PngContext* s = a->s;
+            png__context* s = a->s;
             png__uint32 i, j, stride = x * out_n * bytes;
             png__uint32 img_len, img_width_bytes;
             int k;
@@ -1216,7 +1209,7 @@ namespace Simd
 
         static int png__compute_transparency(png__png* z, png_uc tc[3], int out_n)
         {
-            PngContext* s = z->s;
+            png__context* s = z->s;
             png__uint32 i, pixel_count = s->img_x * s->img_y;
             png_uc* p = z->out;
 
@@ -1242,7 +1235,7 @@ namespace Simd
 
         static int png__compute_transparency16(png__png* z, png__uint16 tc[3], int out_n)
         {
-            PngContext* s = z->s;
+            png__context* s = z->s;
             png__uint32 i, pixel_count = s->img_x * s->img_y;
             png__uint16* p = (png__uint16*)z->out;
 
@@ -1319,7 +1312,7 @@ namespace Simd
 
         static void png__de_iphone(png__png* z)
         {
-            PngContext* s = z->s;
+            png__context* s = z->s;
             png__uint32 i, pixel_count = s->img_x * s->img_y;
             png_uc* p = z->out;
 
@@ -1372,7 +1365,7 @@ namespace Simd
             png__uint16 tc16[3];
             png__uint32 ioff = 0, idata_limit = 0, i, pal_len = 0;
             int first = 1, k, interlace = 0, color = 0, is_iphone = 0;
-            PngContext* s = z->s;
+            png__context* s = z->s;
 
             z->expanded = NULL;
             z->idata = NULL;
@@ -1578,14 +1571,14 @@ namespace Simd
             return result;
         }
 
-        static void* png__png_load(PngContext* s, int* x, int* y, int* comp, int req_comp, png__result_info* ri)
+        static void* png__png_load(png__context* s, int* x, int* y, int* comp, int req_comp, png__result_info* ri)
         {
             png__png p;
             p.s = s;
             return png__do_png(&p, x, y, comp, req_comp, ri);
         }
 
-        static int png__png_test(PngContext* s)
+        static int png__png_test(png__context* s)
         {
             int r;
             r = png__check_png_header(s);
@@ -1605,14 +1598,14 @@ namespace Simd
             return 1;
         }
 
-        static int png__png_info(PngContext* s, int* x, int* y, int* comp)
+        static int png__png_info(png__context* s, int* x, int* y, int* comp)
         {
             png__png p;
             p.s = s;
             return png__png_info_raw(&p, x, y, comp);
         }
 
-        static int png__png_is16(PngContext* s)
+        static int png__png_is16(png__context* s)
         {
             png__png p;
             p.s = s;
@@ -1625,7 +1618,7 @@ namespace Simd
             return 1;
         }
 
-        static void* png__load_main(PngContext* s, int* x, int* y, int* comp, int req_comp, png__result_info* ri, int bpc)
+        static void* png__load_main(png__context* s, int* x, int* y, int* comp, int req_comp, png__result_info* ri, int bpc)
         {
             memset(ri, 0, sizeof(*ri)); // make sure it's initialized if we add new fields
             ri->bits_per_channel = 8; // default is 8 so most paths don't have to be changed
@@ -1653,7 +1646,7 @@ namespace Simd
             return reduced;
         }
 
-        static unsigned char* png__load_and_postprocess_8bit(PngContext* s, int* x, int* y, int* comp, int req_comp)
+        static unsigned char* png__load_and_postprocess_8bit(png__context* s, int* x, int* y, int* comp, int req_comp)
         {
             png__result_info ri;
             void* result = png__load_main(s, x, y, comp, req_comp, &ri, 8);
@@ -1679,7 +1672,7 @@ namespace Simd
             return (unsigned char*)result;
         }
 
-        static void png__start_mem(PngContext* s, png_uc const* buffer, int len)
+        static void png__start_mem(png__context* s, png_uc const* buffer, int len)
         {
             s->io.read = NULL;
             s->read_from_callbacks = 0;
@@ -1690,33 +1683,36 @@ namespace Simd
 
         STBIDEF png_uc* png_load_from_memory(png_uc const* buffer, int len, int* x, int* y, int* comp, int req_comp)
         {
-            PngContext s;
+            png__context s;
             png__start_mem(&s, buffer, len);
             return png__load_and_postprocess_8bit(&s, x, y, comp, req_comp);
         }
 
         //------------------------------------------------------------------------
 
-        static int png__stdio_read(InputMemoryStream * stream, char* data, int size)
+        static int png__stdio_read(void* user, char* data, int size)
         {
+            InputMemoryStream* stream = (InputMemoryStream*)user;
             return (int)stream->Read(size, data);
         }
 
-        static void png__stdio_skip(InputMemoryStream* stream, int n)
+        static void png__stdio_skip(void* user, int n)
         {
+            InputMemoryStream* stream = (InputMemoryStream*)user;
             stream->Skip(n);
         }
 
-        static int png__stdio_eof(InputMemoryStream* stream)
+        static int png__stdio_eof(void* user)
         {
-            return stream->Eof() ? 1 : 0;
+            InputMemoryStream* stream = (InputMemoryStream*)user;
+            return stream->Pos() == stream->Size() ? 1 : 0;
         }
 
 
         //---------------------------------------------------------------------
 
         ImagePngLoader::ImagePngLoader(const ImageLoaderParam& param)
-            : ImageLoader(param)
+            : Base::ImagePngLoader(param)
         {
             if (_param.format == SimdPixelFormatNone)
                 _param.format = SimdPixelFormatRgb24;
@@ -1725,11 +1721,11 @@ namespace Simd
         bool ImagePngLoader::FromStream()
         {
             int x, y, comp;
-            PngContext s;
+            png__context s;
             s.io.eof = png__stdio_eof;
             s.io.read = png__stdio_read;
             s.io.skip = png__stdio_skip;
-            s.stream = &_stream;
+            s.io_user_data = &_stream;
             s.buflen = sizeof(s.buffer_start);
             s.read_from_callbacks = 1;
             s.callback_already_read = 0;
@@ -1745,16 +1741,16 @@ namespace Simd
                 switch (_param.format)
                 {
                 case SimdPixelFormatGray8:
-                    Base::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
+                    Sse2::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgr24:
-                    Base::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
+                    Ssse3::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgra32:
-                    Base::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
+                    Ssse3::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgb24:
-                    Base::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
+                    Ssse3::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgba32:
                     Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);
@@ -1766,4 +1762,5 @@ namespace Simd
             return false;
         }
     }
+#endif
 }

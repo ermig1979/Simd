@@ -145,7 +145,7 @@ namespace Simd
                 Base::ZlibHuffB(data[i], stream);
             Base::ZlibHuff(256, stream);
             stream.FlushBits();
-            stream.WriteBe32(ZlibAdler32(data, size));
+            stream.WriteBe32u(ZlibAdler32(data, size));
         }
 
         uint32_t EncodeLine0(const uint8_t* src, size_t stride, size_t n, size_t size, int8_t* dst)

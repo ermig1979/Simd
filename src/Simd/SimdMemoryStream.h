@@ -69,6 +69,11 @@ namespace Simd
         {
             return _pos;
         }
+
+        SIMD_INLINE bool Eof() const
+        {
+            return _pos >= _size;
+        }
         
         SIMD_INLINE size_t Read(size_t size, void* data)
         {
@@ -81,6 +86,73 @@ namespace Simd
         template <class Value> SIMD_INLINE bool Read(Value & value)
         {
             return Read(sizeof(Value), &value) == sizeof(Value);
+        }
+
+        SIMD_INLINE bool Read8u(uint8_t & value)
+        {
+            if (_pos < _size)
+            {
+                value = _data[_pos++];
+                return true;
+            }
+            else
+                return false;
+        }
+
+        SIMD_INLINE bool Read16u(uint16_t& value)
+        {
+            if (_pos + 2 <= _size)
+            {
+                value = *(uint16_t*)(_data + _pos);
+                _pos += 2;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        SIMD_INLINE bool Read32u(uint32_t& value)
+        {
+            if (_pos + 4 <= _size)
+            {
+                value = *(uint32_t*)(_data + _pos);
+                _pos += 4;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        SIMD_INLINE bool ReadBe16u(uint16_t& value)
+        {
+            if (Read16u(value))
+            {
+#if !defined(SIMD_BIG_ENDIAN)
+                value =
+                    (value & 0x00FF) << 8 |
+                    (value & 0xFF00) >> 8;
+#endif
+                return true;
+            }
+            else
+                return false;
+        }
+
+        SIMD_INLINE bool ReadBe32u(uint32_t& value)
+        {
+            if (Read32u(value))
+            {
+#if !defined(SIMD_BIG_ENDIAN)
+                value =
+                    (value & 0x000000FF) << 24 |
+                    (value & 0x0000FF00) << 8 |
+                    (value & 0x00FF0000) >> 8 |
+                    (value & 0xFF000000) >> 24;
+#endif
+                return true;
+            }
+            else
+                return false;
         }
 
         template<class Unsigned> SIMD_INLINE bool ReadUnsigned(Unsigned& value)
@@ -225,7 +297,7 @@ namespace Simd
             _size = Max(_size, _pos);
         }
 
-        SIMD_INLINE void WriteBe32(const uint32_t & value)
+        SIMD_INLINE void WriteBe32u(const uint32_t & value)
         {
 #if defined(SIMD_BIG_ENDIAN)
             Write<uint32_t>(value);
