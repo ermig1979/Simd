@@ -220,11 +220,6 @@ namespace Test
             << ToString(tm->tm_sec, 2);
         return ss.str();
     }
-
-    bool DirectoryExists(const String & path);
-    String DirectoryByPath(const String & path);
-    bool CreatePath(const String & path);
-    bool CreatePathIfNotExist(const String & path);
 }
 
 #define TEST_CHECK_VALUE(name) \

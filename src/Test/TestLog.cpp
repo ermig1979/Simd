@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestLog.h"
-#include "Test/TestUtils.h"
+#include "Test/TestFile.h"
 
 namespace Test
 {

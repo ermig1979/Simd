@@ -98,6 +98,7 @@
     <ClCompile Include="..\..\src\Test\TestDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Test\TestDrawing.cpp" />
     <ClCompile Include="..\..\src\Test\TestEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestFile.cpp" />
     <ClCompile Include="..\..\src\Test\TestFill.cpp" />
     <ClCompile Include="..\..\src\Test\TestFilter.cpp" />
     <ClCompile Include="..\..\src\Test\TestFloat16.cpp" />
@@ -150,6 +151,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
     <ClInclude Include="..\..\src\Test\TestData.h" />
+    <ClInclude Include="..\..\src\Test\TestFile.h" />
     <ClInclude Include="..\..\src\Test\TestHtml.h" />
     <ClInclude Include="..\..\src\Test\TestLog.h" />
     <ClInclude Include="..\..\src\Test\TestPerformance.h" />

@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Test/TestUtils.h"
+#include "Test/TestFile.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
@@ -58,11 +59,6 @@ namespace Test
         ::srand(0);
         int w = int(canvas.width), h = int(canvas.height);
         Simd::Fill(canvas, 0);
-
-        //for (int y = 0; y < h; y++)
-        //    for (int x = 0; x < w; x++)
-        //        canvas.At<Color>(x, y) = GetColor<Color>(Random(2), Random(2), Random(2));
-        //}
 
         for (int i = 0; i < rects; i++)
         {
@@ -102,6 +98,23 @@ namespace Test
         case View::Rgb24: DrawTestImage<Simd::Pixel::Rgb24>(canvas, rects, labels); break;
         case View::Rgba32: DrawTestImage<Simd::Pixel::Rgba32>(canvas, rects, labels); break;
         }
+    }
+
+    bool SaveTestImage(const View& image, SimdImageFileType file, int quality, const String & suffix = "")
+    {
+        if (file < SimdImageFilePpmBin)
+            return true;
+        std::stringstream ss;
+        ss << ToString(image.format);
+        if (file == SimdImageFilePpmBin)
+            ss << suffix << ".ppm";
+        else if (file == SimdImageFilePng)
+            ss << suffix << ".png";
+        if (file == SimdImageFileJpeg)
+            ss << "_" << ToString(quality) << suffix << ".jpg";
+        const String dir = "_out";
+        String path = MakePath(dir, ss.str());
+        return CreatePathIfNotExist(dir) && image.Save(path, file, quality);
     }
 
     //-------------------------------------------------------------------------
@@ -189,9 +202,9 @@ namespace Test
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
-                    dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
-                    dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
-                    src.Save("error.ppm", SimdImageFilePpmTxt);
+                    SaveTestImage(dst1, file, quality, "_1");
+                    SaveTestImage(dst2, file, quality, "_2");
+                    SaveTestImage(src, SimdImageFilePpmBin, 100, "_error");
                 }
             }
             else
@@ -208,12 +221,7 @@ namespace Test
         if (data2)
             SimdFree(data2);
 
-        if (file == SimdImageFilePpmBin)
-            src.Save((ToString(format) + ".ppm").c_str(), file, quality);
-        if(file == SimdImageFilePng)
-            src.Save((ToString(format) + ".png").c_str(), file, quality);
-        if (file == SimdImageFileJpeg)
-            src.Save((ToString(format) + "_" + ToString(quality) + ".jpg").c_str(), file, quality);
+        SaveTestImage(src, file, quality);
 
         return result;
     }
@@ -346,9 +354,9 @@ namespace Test
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
-                dst1.Save((ToString(format) + "_" + ToString(quality) + "_1.jpg").c_str(), file, quality);
-                dst2.Save((ToString(format) + "_" + ToString(quality) + "_2.jpg").c_str(), file, quality);
-                src.Save("error.ppm", SimdImageFilePpmTxt);
+                SaveTestImage(dst1, file, quality, "_1");
+                SaveTestImage(dst2, file, quality, "_2");
+                SaveTestImage(src, SimdImageFilePpmBin, 100, "_error");
             }
         }
         else
