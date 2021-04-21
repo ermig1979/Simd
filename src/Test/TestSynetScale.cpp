@@ -25,6 +25,8 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 #include "Test/TestTensor.h"
+#include "Test/TestString.h"
+
 #include "Simd/SimdSynetScale8i.h"
 #include "Simd/SimdSynet.h"
 

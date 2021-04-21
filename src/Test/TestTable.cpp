@@ -24,6 +24,7 @@
 #include "Test/TestTable.h"
 #include "Test/TestHtml.h"
 #include "Test/TestUtils.h"
+#include "Test/TestString.h"
 
 namespace Test
 {

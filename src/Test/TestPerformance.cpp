@@ -25,6 +25,7 @@
 #include "Test/TestUtils.h"
 #include "Test/TestFile.h"
 #include "Test/TestTable.h"
+#include "Test/TestString.h"
 #include "Test/TestHtml.h"
 
 #if defined(_MSC_VER)

@@ -26,6 +26,7 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestUtils.h"
 #include "Test/TestLog.h"
+#include "Test/TestString.h"
 
 namespace Test
 {

@@ -29,6 +29,15 @@
 
 namespace Test
 {
+    SIMD_INLINE String ExtensionByPath(const String& path)
+    {
+        size_t pos = path.find_last_of(".");
+        if (pos == std::string::npos)
+            return String();
+        else
+            return path.substr(pos + 1);
+    }
+
     SIMD_INLINE String FolderSeparator()
     {
 #ifdef WIN32

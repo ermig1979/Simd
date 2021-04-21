@@ -25,6 +25,7 @@
 #include "Test/TestFile.h"
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
+#include "Test/TestString.h"
 
 #include "Simd/SimdImageLoad.h"
 #include "Simd/SimdImageSave.h"
@@ -100,6 +101,62 @@ namespace Test
         }
     }
 
+    bool FileLoad(const char* path, uint8_t** data, size_t* size)
+    {
+        bool result = false;
+        ::FILE* file = ::fopen(path, "rb");
+        if (file)
+        {
+            ::fseek(file, 0, SEEK_END);
+            *size = ::ftell(file);
+            *data = (uint8_t*)SimdAllocate(*size, SimdAlignment());
+            ::fseek(file, 0, SEEK_SET);
+            result = ::fread(*data, 1, *size, file) == *size;
+            ::fclose(file);
+        }
+        return result;
+    }
+
+    bool GetTestImage(View& image, size_t width, size_t height, View::Format format, 
+        const String& desc1, const String& desc2, SimdImageFileType file, int quality, uint8_t ** data, size_t *size)
+    {
+        bool result = true;
+        String path;
+        if (REAL_IMAGE.empty())
+        {
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
+            image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
+#if 0
+            ::srand(0);
+            FillRandom(image);
+#else
+            CreateTestImage(image, 10, 10);
+#endif
+        }
+        else
+        {
+            path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
+            if (!image.Load(path, format))
+            {
+                TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
+                return false;
+            }
+            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
+        }
+        if (data && size)
+        {
+            if(ToLower(ExtensionByPath(path)) == ToExtension(file))
+                result = FileLoad(path.c_str(), data, size);
+            else
+            {
+                *data = SimdImageSaveToMemory(image.data, image.stride, image.width, image.height, (SimdPixelFormatType)image.format, file, quality, size);
+                result = *data && *size;
+            }
+        }        
+        TEST_ALIGN(SIMD_ALIGN);
+        return result;
+    }
+
     bool SaveTestImage(const View& image, SimdImageFileType file, int quality, const String & suffix = "")
     {
         if (file < SimdImageFilePpmBin)
@@ -147,34 +204,6 @@ namespace Test
 #define FUNC_SM(func) \
     FuncSM(func, std::string(#func))
 
-    bool GetTestImage(View& image, size_t width, size_t height, View::Format format, const String& desc1, const String& desc2)
-    {
-        if (REAL_IMAGE.empty())
-        {
-            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
-            image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
-#if 0
-            ::srand(0);
-            FillRandom(image);
-            //src.Load("error.ppm", format);
-#else
-            CreateTestImage(image, 10, 10);
-#endif        
-        }
-        else
-        {
-            String path = ROOT_PATH + "/data/image/" + REAL_IMAGE;
-            if (!image.Load(path, format))
-            {
-                TEST_LOG_SS(Error, "Can't load image from '" << path << "'!");
-                return false;
-            }
-            TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " at " << REAL_IMAGE << " [" << image.width << "x" << image.height << "].");
-        }
-        TEST_ALIGN(SIMD_ALIGN);
-        return true;
-    }
-
     bool ImageSaveToMemoryAutoTest(size_t width, size_t height, View::Format format, SimdImageFileType file, int quality, FuncSM f1, FuncSM f2)
     {
         bool result = true;
@@ -183,7 +212,7 @@ namespace Test
         f2.Update(format, file, quality);
 
         View src;
-        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc))
+        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc, file, quality, NULL, NULL))
             return false;
 
         uint8_t* data1 = NULL, * data2 = NULL;
@@ -336,11 +365,10 @@ namespace Test
         f2.Update(format, file, quality);
 
         View src;
-        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc))
-            return false;
-
         size_t size = 0;
-        uint8_t* data = SimdImageSaveToMemory(src.data, src.stride, src.width, src.height, (SimdPixelFormatType)src.format, file, quality, &size);
+        uint8_t* data = NULL;
+        if (!GetTestImage(src, width, height, format, f1.desc, f2.desc, file, quality, &data, &size))
+            return false;
 
         View dst1, dst2;
 
@@ -366,6 +394,8 @@ namespace Test
             if (dst1.data && SaveLoadCompatible(format, file, quality))
                 result = result && Compare(dst1, src, 0, true, 64, 0, "dst1 & src");
         }
+
+        SaveTestImage(dst1, file, quality);
 
         if (dst1.data)
             Simd::Free(dst1.data);

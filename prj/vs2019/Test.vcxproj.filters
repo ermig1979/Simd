@@ -220,6 +220,9 @@
     <ClCompile Include="..\..\src\Test\TestFile.cpp">
       <Filter>Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestString.cpp">
+      <Filter>Utils</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">
@@ -253,6 +256,9 @@
       <Filter>Utils</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Test\TestFile.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestString.h">
       <Filter>Utils</Filter>
     </ClInclude>
   </ItemGroup>

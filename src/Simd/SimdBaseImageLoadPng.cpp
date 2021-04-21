@@ -45,12 +45,16 @@ namespace Simd
 #define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
 #define PNG_MAX_DIMENSIONS (1 << 24)
 
-        static int png__err(const char* str, const char* stub)
+        SIMD_INLINE int PngError(const char* str, const char* stub)
         {
+            std::cout << "PNG load error: " << str << ", " << stub << "!" << std::endl;
             return 0;
         }
 
-#define png__errpuc(x,y)  ((unsigned char *)(size_t) (png__err(x,y)?NULL:NULL))
+        SIMD_INLINE uint8_t * PngErrorPtr(const char* str, const char* stub)
+        {
+            return (uint8_t*)(size_t)(PngError(str, stub) ? NULL : NULL);
+        }
 
         static void* png__malloc(size_t size)
         {
@@ -78,7 +82,7 @@ namespace Simd
             PNG__SCAN_header
         };
 
-        SIMD_INLINE static uint8_t png__get8(PngContext* s)
+        SIMD_INLINE uint8_t png__get8(PngContext* s)
         {
             uint8_t value = 0;
             s->stream->Read8u(value);
@@ -190,7 +194,7 @@ namespace Simd
             good = (unsigned char*)png__malloc_mad3(req_comp, x, y, 0);
             if (good == NULL) {
                 PNG_FREE(data);
-                return png__errpuc("outofmem", "Out of memory");
+                return PngErrorPtr("outofmem", "Out of memory");
             }
 
             for (j = 0; j < (int)y; ++j) {
@@ -214,7 +218,7 @@ namespace Simd
                     PNG__CASE(4, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
                     PNG__CASE(4, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = src[3]; } break;
                     PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
-                default: assert(0); PNG_FREE(data); PNG_FREE(good); return png__errpuc("unsupported", "Unsupported format conversion");
+                default: assert(0); PNG_FREE(data); PNG_FREE(good); return PngErrorPtr("unsupported", "Unsupported format conversion");
                 }
 #undef PNG__CASE
             }
@@ -239,7 +243,7 @@ namespace Simd
             good = (uint16_t*)png__malloc(req_comp * x * y * 2);
             if (good == NULL) {
                 PNG_FREE(data);
-                return (uint16_t*)png__errpuc("outofmem", "Out of memory");
+                return (uint16_t*)PngErrorPtr("outofmem", "Out of memory");
             }
 
             for (j = 0; j < (int)y; ++j) {
@@ -263,7 +267,7 @@ namespace Simd
                     PNG__CASE(4, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
                     PNG__CASE(4, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = src[3]; } break;
                     PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
-                default: assert(0); PNG_FREE(data); PNG_FREE(good); return (uint16_t*)png__errpuc("unsupported", "Unsupported format conversion");
+                default: assert(0); PNG_FREE(data); PNG_FREE(good); return (uint16_t*)PngErrorPtr("unsupported", "Unsupported format conversion");
                 }
 #undef PNG__CASE
             }
@@ -318,7 +322,7 @@ namespace Simd
             sizes[0] = 0;
             for (i = 1; i < 16; ++i)
                 if (sizes[i] > (1 << i))
-                    return png__err("bad sizes", "Corrupt PNG");
+                    return PngError("bad sizes", "Corrupt PNG");
             code = 0;
             for (i = 1; i < 16; ++i) {
                 next_code[i] = code;
@@ -326,7 +330,7 @@ namespace Simd
                 z->firstsymbol[i] = (uint16_t)k;
                 code = (code + sizes[i]);
                 if (sizes[i])
-                    if (code - 1 >= (1 << i)) return png__err("bad codelengths", "Corrupt PNG");
+                    if (code - 1 >= (1 << i)) return PngError("bad codelengths", "Corrupt PNG");
                 z->maxcode[i] = code << (16 - i); // preshift for inner loop
                 code <<= 1;
                 k += sizes[i];
@@ -447,17 +451,17 @@ namespace Simd
             char* q;
             unsigned int cur, limit, old_limit;
             z->zout = zout;
-            if (!z->z_expandable) return png__err("output buffer limit", "Corrupt PNG");
+            if (!z->z_expandable) return PngError("output buffer limit", "Corrupt PNG");
             cur = (unsigned int)(z->zout - z->zout_start);
             limit = old_limit = (unsigned)(z->zout_end - z->zout_start);
-            if (UINT_MAX - cur < (unsigned)n) return png__err("outofmem", "Out of memory");
+            if (UINT_MAX - cur < (unsigned)n) return PngError("outofmem", "Out of memory");
             while (cur + n > limit) {
-                if (limit > UINT_MAX / 2) return png__err("outofmem", "Out of memory");
+                if (limit > UINT_MAX / 2) return PngError("outofmem", "Out of memory");
                 limit *= 2;
             }
             q = (char*)PNG_REALLOC_SIZED(z->zout_start, old_limit, limit);
             PNG_NOTUSED(old_limit);
-            if (q == NULL) return png__err("outofmem", "Out of memory");
+            if (q == NULL) return PngError("outofmem", "Out of memory");
             z->zout_start = q;
             z->zout = q + cur;
             z->zout_end = q + limit;
@@ -484,7 +488,7 @@ namespace Simd
             for (;;) {
                 int z = png__zhuffman_decode(a, &a->z_length);
                 if (z < 256) {
-                    if (z < 0) return png__err("bad huffman code", "Corrupt PNG"); // error in huffman codes
+                    if (z < 0) return PngError("bad huffman code", "Corrupt PNG"); // error in huffman codes
                     if (zout >= a->zout_end) {
                         if (!png__zexpand(a, zout, 1)) return 0;
                         zout = a->zout;
@@ -502,10 +506,10 @@ namespace Simd
                     len = png__zlength_base[z];
                     if (png__zlength_extra[z]) len += png__zreceive(a, png__zlength_extra[z]);
                     z = png__zhuffman_decode(a, &a->z_distance);
-                    if (z < 0) return png__err("bad huffman code", "Corrupt PNG");
+                    if (z < 0) return PngError("bad huffman code", "Corrupt PNG");
                     dist = png__zdist_base[z];
                     if (png__zdist_extra[z]) dist += png__zreceive(a, png__zdist_extra[z]);
-                    if (zout - a->zout_start < dist) return png__err("bad dist", "Corrupt PNG");
+                    if (zout - a->zout_start < dist) return PngError("bad dist", "Corrupt PNG");
                     if (zout + len > a->zout_end) {
                         if (!png__zexpand(a, zout, len)) return 0;
                         zout = a->zout;
@@ -545,14 +549,14 @@ namespace Simd
             n = 0;
             while (n < ntot) {
                 int c = png__zhuffman_decode(a, &z_codelength);
-                if (c < 0 || c >= 19) return png__err("bad codelengths", "Corrupt PNG");
+                if (c < 0 || c >= 19) return PngError("bad codelengths", "Corrupt PNG");
                 if (c < 16)
                     lencodes[n++] = (uint8_t)c;
                 else {
                     uint8_t fill = 0;
                     if (c == 16) {
                         c = png__zreceive(a, 2) + 3;
-                        if (n == 0) return png__err("bad codelengths", "Corrupt PNG");
+                        if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
                         fill = lencodes[n - 1];
                     }
                     else if (c == 17) {
@@ -562,14 +566,14 @@ namespace Simd
                         c = png__zreceive(a, 7) + 11;
                     }
                     else {
-                        return png__err("bad codelengths", "Corrupt PNG");
+                        return PngError("bad codelengths", "Corrupt PNG");
                     }
-                    if (ntot - n < c) return png__err("bad codelengths", "Corrupt PNG");
+                    if (ntot - n < c) return PngError("bad codelengths", "Corrupt PNG");
                     memset(lencodes + n, fill, c);
                     n += c;
                 }
             }
-            if (n != ntot) return png__err("bad codelengths", "Corrupt PNG");
+            if (n != ntot) return PngError("bad codelengths", "Corrupt PNG");
             if (!png__zbuild_huffman(&a->z_length, lencodes, hlit)) return 0;
             if (!png__zbuild_huffman(&a->z_distance, lencodes + hlit, hdist)) return 0;
             return 1;
@@ -588,14 +592,14 @@ namespace Simd
                 a->code_buffer >>= 8;
                 a->num_bits -= 8;
             }
-            if (a->num_bits < 0) return png__err("zlib corrupt", "Corrupt PNG");
+            if (a->num_bits < 0) return PngError("zlib corrupt", "Corrupt PNG");
             // now fill header the normal way
             while (k < 4)
                 header[k++] = png__zget8(a);
             len = header[1] * 256 + header[0];
             nlen = header[3] * 256 + header[2];
-            if (nlen != (len ^ 0xffff)) return png__err("zlib corrupt", "Corrupt PNG");
-            if (a->zbuffer + len > a->zbuffer_end) return png__err("read past buffer", "Corrupt PNG");
+            if (nlen != (len ^ 0xffff)) return PngError("zlib corrupt", "Corrupt PNG");
+            if (a->zbuffer + len > a->zbuffer_end) return PngError("read past buffer", "Corrupt PNG");
             if (a->zout + len > a->zout_end)
                 if (!png__zexpand(a, a->zout, len)) return 0;
             memcpy(a->zout, a->zbuffer, len);
@@ -610,10 +614,10 @@ namespace Simd
             int cm = cmf & 15;
             /* int cinfo = cmf >> 4; */
             int flg = png__zget8(a);
-            if (png__zeof(a)) return png__err("bad zlib header", "Corrupt PNG"); // zlib spec
-            if ((cmf * 256 + flg) % 31 != 0) return png__err("bad zlib header", "Corrupt PNG"); // zlib spec
-            if (flg & 32) return png__err("no preset dict", "Corrupt PNG"); // preset dictionary not allowed in png
-            if (cm != 8) return png__err("bad compression", "Corrupt PNG"); // DEFLATE required for png
+            if (png__zeof(a)) return PngError("bad zlib header", "Corrupt PNG"); // zlib spec
+            if ((cmf * 256 + flg) % 31 != 0) return PngError("bad zlib header", "Corrupt PNG"); // zlib spec
+            if (flg & 32) return PngError("no preset dict", "Corrupt PNG"); // preset dictionary not allowed in png
+            if (cm != 8) return PngError("bad compression", "Corrupt PNG"); // DEFLATE required for png
             // window = 1 << (8 + cinfo)... but who cares, we fully buffer output
             return 1;
         }
@@ -854,16 +858,16 @@ namespace Simd
 
             assert(out_n == s->img_n || out_n == s->img_n + 1);
             a->out = (uint8_t*)png__malloc_mad3(x, y, output_bytes, 0); // extra bytes to write off the end into
-            if (!a->out) return png__err("outofmem", "Out of memory");
+            if (!a->out) return PngError("outofmem", "Out of memory");
 
-            if (!png__mad3sizes_valid(img_n, x, depth, 7)) return png__err("too large", "Corrupt PNG");
+            if (!png__mad3sizes_valid(img_n, x, depth, 7)) return PngError("too large", "Corrupt PNG");
             img_width_bytes = (((img_n * x * depth) + 7) >> 3);
             img_len = (img_width_bytes + 1) * y;
 
             // we used to check for exact match between raw_len and img_len on non-interlaced PNGs,
             // but issue #276 reported a PNG in the wild that had extra data at the end (all zeros),
             // so just check for raw_len < img_len always.
-            if (raw_len < img_len) return png__err("not enough pixels", "Corrupt PNG");
+            if (raw_len < img_len) return PngError("not enough pixels", "Corrupt PNG");
 
             for (j = 0; j < y; ++j) {
                 uint8_t* cur = a->out + stride * j;
@@ -871,10 +875,10 @@ namespace Simd
                 int filter = *raw++;
 
                 if (filter > 4)
-                    return png__err("invalid filter", "Corrupt PNG");
+                    return PngError("invalid filter", "Corrupt PNG");
 
                 if (depth < 8) {
-                    if (img_width_bytes > x) return png__err("invalid width", "Corrupt PNG");
+                    if (img_width_bytes > x) return PngError("invalid width", "Corrupt PNG");
                     cur += x * out_n - img_width_bytes; // store output to the rightmost img_len bytes, so we can decode in place
                     filter_bytes = 1;
                     width = img_width_bytes;
@@ -1042,7 +1046,8 @@ namespace Simd
                     }
                 }
             }
-            else if (depth == 16) {
+            else if (depth == 16) 
+            {
                 // force the image data from big-endian to platform-native.
                 // this is done in a separate pass due to the decoding relying
                 // on the data being untouched, but could probably be done
@@ -1050,9 +1055,8 @@ namespace Simd
                 uint8_t* cur = a->out;
                 uint16_t* cur16 = (uint16_t*)cur;
 
-                for (i = 0; i < x * y * out_n; ++i, cur16++, cur += 2) {
+                for (i = 0; i < x * y * out_n; ++i, cur16++, cur += 2)
                     *cur16 = (cur[0] << 8) | cur[1];
-                }
             }
 
             return 1;
@@ -1160,7 +1164,7 @@ namespace Simd
             uint8_t* p, * temp_out, * orig = a->out;
 
             p = (uint8_t*)png__malloc_mad2(pixel_count, pal_img_n, 0);
-            if (p == NULL) return png__err("outofmem", "Out of memory");
+            if (p == NULL) return PngError("outofmem", "Out of memory");
 
             // between here and free(out) below, exitting would leak
             temp_out = p;
@@ -1192,7 +1196,7 @@ namespace Simd
             return 1;
         }
 
-        static int png__parse_png_file(png__png* z, int scan, int req_comp)
+        static int PngParse(png__png* z, int scan, int req_comp)
         {
             uint8_t palette[1024], pal_img_n = 0;
             uint8_t tc[3] = { 0 }, has_trans = 0;
@@ -1223,41 +1227,41 @@ namespace Simd
                 {
                     int comp, filter;
                     if (!first) 
-                        return png__err("multiple IHDR", "Corrupt PNG");
+                        return PngError("multiple IHDR", "Corrupt PNG");
                     first = 0;
                     if (chunk.size != 13) 
-                        return png__err("bad IHDR len", "Corrupt PNG");
+                        return PngError("bad IHDR len", "Corrupt PNG");
                     s->img_x = png__get32be(s);
                     s->img_y = png__get32be(s);
-                    if (s->img_y > PNG_MAX_DIMENSIONS) return png__err("too large", "Very large image (corrupt?)");
-                    if (s->img_x > PNG_MAX_DIMENSIONS) return png__err("too large", "Very large image (corrupt?)");
-                    z->depth = png__get8(s);  if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16)  return png__err("1/2/4/8/16-bit only", "PNG not supported: 1/2/4/8/16-bit only");
-                    color = png__get8(s);  if (color > 6)         return png__err("bad ctype", "Corrupt PNG");
-                    if (color == 3 && z->depth == 16)                  return png__err("bad ctype", "Corrupt PNG");
-                    if (color == 3) pal_img_n = 3; else if (color & 1) return png__err("bad ctype", "Corrupt PNG");
-                    comp = png__get8(s);  if (comp) return png__err("bad comp method", "Corrupt PNG");
-                    filter = png__get8(s);  if (filter) return png__err("bad filter method", "Corrupt PNG");
-                    interlace = png__get8(s); if (interlace > 1) return png__err("bad interlace method", "Corrupt PNG");
-                    if (!s->img_x || !s->img_y) return png__err("0-pixel image", "Corrupt PNG");
+                    if (s->img_y > PNG_MAX_DIMENSIONS) return PngError("too large", "Very large image (corrupt?)");
+                    if (s->img_x > PNG_MAX_DIMENSIONS) return PngError("too large", "Very large image (corrupt?)");
+                    z->depth = png__get8(s);  if (z->depth != 1 && z->depth != 2 && z->depth != 4 && z->depth != 8 && z->depth != 16)  return PngError("1/2/4/8/16-bit only", "PNG not supported: 1/2/4/8/16-bit only");
+                    color = png__get8(s);  if (color > 6)         return PngError("bad ctype", "Corrupt PNG");
+                    if (color == 3 && z->depth == 16)                  return PngError("bad ctype", "Corrupt PNG");
+                    if (color == 3) pal_img_n = 3; else if (color & 1) return PngError("bad ctype", "Corrupt PNG");
+                    comp = png__get8(s);  if (comp) return PngError("bad comp method", "Corrupt PNG");
+                    filter = png__get8(s);  if (filter) return PngError("bad filter method", "Corrupt PNG");
+                    interlace = png__get8(s); if (interlace > 1) return PngError("bad interlace method", "Corrupt PNG");
+                    if (!s->img_x || !s->img_y) return PngError("0-pixel image", "Corrupt PNG");
                     if (!pal_img_n) {
                         s->img_n = (color & 2 ? 3 : 1) + (color & 4 ? 1 : 0);
-                        if ((1 << 30) / s->img_x / s->img_n < s->img_y) return png__err("too large", "Image too large to decode");
+                        if ((1 << 30) / s->img_x / s->img_n < s->img_y) return PngError("too large", "Image too large to decode");
                         if (scan == PNG__SCAN_header) return 1;
                     }
                     else {
                         // if paletted, then pal_n is our final components, and
                         // img_n is # components to decompress/filter.
                         s->img_n = 1;
-                        if ((1 << 30) / s->img_x / 4 < s->img_y) return png__err("too large", "Corrupt PNG");
+                        if ((1 << 30) / s->img_x / 4 < s->img_y) return PngError("too large", "Corrupt PNG");
                         // if SCAN_header, have to scan to see if we have a tRNS
                     }
                 }
                 else if (chunk.IsType('P', 'L', 'T', 'E'))
                 {
-                    if (first) return png__err("first not IHDR", "Corrupt PNG");
-                    if (chunk.size > 256 * 3) return png__err("invalid PLTE", "Corrupt PNG");
+                    if (first) return PngError("first not IHDR", "Corrupt PNG");
+                    if (chunk.size > 256 * 3) return PngError("invalid PLTE", "Corrupt PNG");
                     pal_len = chunk.size / 3;
-                    if (pal_len * 3 != chunk.size) return png__err("invalid PLTE", "Corrupt PNG");
+                    if (pal_len * 3 != chunk.size) return PngError("invalid PLTE", "Corrupt PNG");
                     for (i = 0; i < pal_len; ++i) 
                     {
                         palette[i * 4 + 0] = png__get8(s);
@@ -1268,20 +1272,21 @@ namespace Simd
                 }
                 else if (chunk.IsType('t', 'R', 'N', 'S'))
                 {
-                    if (first) return png__err("first not IHDR", "Corrupt PNG");
-                    if (z->idata) return png__err("tRNS after IDAT", "Corrupt PNG");
-                    if (pal_img_n) {
+                    if (first) return PngError("first not IHDR", "Corrupt PNG");
+                    if (z->idata) return PngError("tRNS after IDAT", "Corrupt PNG");
+                    if (pal_img_n) 
+                    {
                         if (scan == PNG__SCAN_header) { s->img_n = 4; return 1; }
-                        if (pal_len == 0) return png__err("tRNS before PLTE", "Corrupt PNG");
-                        if (chunk.size > pal_len) return png__err("bad tRNS len", "Corrupt PNG");
+                        if (pal_len == 0) return PngError("tRNS before PLTE", "Corrupt PNG");
+                        if (chunk.size > pal_len) return PngError("bad tRNS len", "Corrupt PNG");
                         pal_img_n = 4;
                         for (i = 0; i < chunk.size; ++i)
                             palette[i * 4 + 3] = png__get8(s);
                     }
                     else 
                     {
-                        if (!(s->img_n & 1)) return png__err("tRNS with alpha", "Corrupt PNG");
-                        if (chunk.size != (uint32_t)s->img_n * 2) return png__err("bad tRNS len", "Corrupt PNG");
+                        if (!(s->img_n & 1)) return PngError("tRNS with alpha", "Corrupt PNG");
+                        if (chunk.size != (uint32_t)s->img_n * 2) return PngError("bad tRNS len", "Corrupt PNG");
                         has_trans = 1;
                         if (z->depth == 16) 
                         {
@@ -1300,8 +1305,8 @@ namespace Simd
                 }
                 else if (chunk.IsType('I', 'D', 'A', 'T'))
                 {
-                    if (first) return png__err("first not IHDR", "Corrupt PNG");
-                    if (pal_img_n && !pal_len) return png__err("no PLTE", "Corrupt PNG");
+                    if (first) return PngError("first not IHDR", "Corrupt PNG");
+                    if (pal_img_n && !pal_len) return PngError("no PLTE", "Corrupt PNG");
                     if (scan == PNG__SCAN_header) { s->img_n = pal_img_n; return 1; }
                     if ((int)(ioff + chunk.size) < (int)ioff) return 0;
                     if (ioff + chunk.size > idata_limit) {
@@ -1311,18 +1316,18 @@ namespace Simd
                         while (ioff + chunk.size > idata_limit)
                             idata_limit *= 2;
                         PNG_NOTUSED(idata_limit_old);
-                        p = (uint8_t*)PNG_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit); if (p == NULL) return png__err("outofmem", "Out of memory");
+                        p = (uint8_t*)PNG_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit); if (p == NULL) return PngError("outofmem", "Out of memory");
                         z->idata = p;
                     }
-                    if (!png__getn(s, z->idata + ioff, chunk.size)) return png__err("outofdata", "Corrupt PNG");
+                    if (!png__getn(s, z->idata + ioff, chunk.size)) return PngError("outofdata", "Corrupt PNG");
                     ioff += chunk.size;
                 }
                 else if (chunk.IsType('I', 'E', 'N', 'D'))
                 {
                     uint32_t raw_len, bpl;
-                    if (first) return png__err("first not IHDR", "Corrupt PNG");
+                    if (first) return PngError("first not IHDR", "Corrupt PNG");
                     if (scan != PNG__SCAN_load) return 1;
-                    if (z->idata == NULL) return png__err("no IDAT", "Corrupt PNG");
+                    if (z->idata == NULL) return PngError("no IDAT", "Corrupt PNG");
                     // initial guess for decoded data size to avoid unnecessary reallocs
                     bpl = (s->img_x * z->depth + 7) / 8; // bytes per line, per component
                     raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
@@ -1362,7 +1367,7 @@ namespace Simd
                 else
                 {
                     // if critical, fail
-                    if (first) return png__err("first not IHDR", "Corrupt PNG");
+                    if (first) return PngError("first not IHDR", "Corrupt PNG");
                     if ((chunk.type & (1 << 29)) == 0) {
 #ifndef PNG_NO_FAILURE_STRINGS
                         // not threadsafe
@@ -1372,7 +1377,7 @@ namespace Simd
                         invalid_chunk[2] = PNG__BYTECAST(chunk.type >> 8);
                         invalid_chunk[3] = PNG__BYTECAST(chunk.type >> 0);
 #endif
-                        return png__err(invalid_chunk, "PNG not supported: unknown PNG chunk type");
+                        return PngError(invalid_chunk, "PNG not supported: unknown PNG chunk type");
                     }
                     png__skip(s, chunk.size);
                 }
@@ -1381,20 +1386,23 @@ namespace Simd
             }
         }
 
-        static void* png__do_png(png__png* p, int* x, int* y, int* n, int req_comp, ResultInfo* ri)
+        static void* PngLoad(png__png* p, int* x, int* y, int* n, int req_comp, ResultInfo* ri)
         {
             void* result = NULL;
-            if (req_comp < 0 || req_comp > 4) return png__errpuc("bad req_comp", "Internal error");
-            if (png__parse_png_file(p, PNG__SCAN_load, req_comp)) {
+            if (req_comp < 0 || req_comp > 4) 
+                return PngErrorPtr("bad req_comp", "Internal error");
+            if (PngParse(p, PNG__SCAN_load, req_comp))
+            {
                 if (p->depth <= 8)
                     ri->bits_per_channel = 8;
                 else if (p->depth == 16)
                     ri->bits_per_channel = 16;
                 else
-                    return png__errpuc("bad bits_per_channel", "PNG not supported: unsupported color depth");
+                    return PngErrorPtr("bad bits_per_channel", "PNG not supported: unsupported color depth");
                 result = p->out;
                 p->out = NULL;
-                if (req_comp && req_comp != p->s->img_out_n) {
+                if (req_comp && req_comp != p->s->img_out_n) 
+                {
                     if (ri->bits_per_channel == 8)
                         result = png__convert_format((unsigned char*)result, p->s->img_out_n, req_comp, p->s->img_x, p->s->img_y);
                     else
@@ -1404,7 +1412,8 @@ namespace Simd
                 }
                 *x = p->s->img_x;
                 *y = p->s->img_y;
-                if (n) *n = p->s->img_n;
+                if (n) 
+                    *n = p->s->img_n;
             }
             PNG_FREE(p->out);      p->out = NULL;
             PNG_FREE(p->expanded); p->expanded = NULL;
@@ -1430,7 +1439,7 @@ namespace Simd
             s.stream = &_stream;
             png__png p;
             p.s = &s;
-            uint8_t* data = (uint8_t*)png__do_png(&p, &x, &y, &comp, 4, &ri);
+            uint8_t* data = (uint8_t*)PngLoad(&p, &x, &y, &comp, 4, &ri);
             if (data)
             {
                 size_t stride = 4 * x;
