@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2018 Yermalayeu Ihar,
+* Copyright (c) 2011-2021 Yermalayeu Ihar,
 *               2014-2016 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy

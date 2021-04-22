@@ -1736,6 +1736,15 @@ namespace Simd
             uint8_t* data = (uint8_t*)png__png_load(&s, &x, &y, &comp, 4, &ri);
             if (data)
             {
+                if (ri.bits_per_channel == 16)
+                {
+                    const uint16_t* src = (uint16_t*)data;
+                    uint8_t* dst = (uint8_t*)PNG_MALLOC(x * y * comp);
+                    for (size_t i = 0, n = x * y * comp; i < n; ++i)
+                        dst[i] = uint8_t(src[i] >> 8);
+                    PNG_FREE(data);
+                    data = dst;
+                }
                 size_t stride = 4 * x;
                 _image.Recreate(x, y, (Image::Format)_param.format);
                 switch (_param.format)
