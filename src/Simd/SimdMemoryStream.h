@@ -70,9 +70,19 @@ namespace Simd
             return _pos;
         }
 
+        SIMD_INLINE const uint8_t* Current() const
+        {
+            return _data + _pos;
+        }
+
         SIMD_INLINE bool Eof() const
         {
             return _pos >= _size;
+        }
+
+        SIMD_INLINE bool CanRead(size_t size) const
+        {
+            return _pos + size <= _size;
         }
         
         SIMD_INLINE size_t Read(size_t size, void* data)

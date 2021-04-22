@@ -150,6 +150,29 @@ namespace Simd
             ImagePngLoader(const ImageLoaderParam& param);
 
             virtual bool FromStream();
+
+        protected:
+            typedef void (*ToAny8Ptr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef void (*ToBgra8Ptr)(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+            typedef void (*ToAny16Ptr)(const uint16_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+            typedef void (*ToBgra16Ptr)(const uint16_t* src, size_t width, size_t height, size_t srcStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+            ToAny8Ptr _toAny8;
+            ToBgra8Ptr _toBgra8, _bgrToBgra;
+            ToAny16Ptr _toAny16;
+            ToBgra16Ptr _toBgra16;
+
+            virtual void SetConverters();
+        private:
+            bool _first, _hasTrans;
+            uint32_t _width, _height, _channels;
+            uint16_t _tc16[3];
+            uint8_t _depth, _color, _interlace, _paletteChannels, _tc[3];
+            Array8u _palette;
+
+            bool ReadHeader(size_t size);
+            bool ReadPalette(size_t size);
+            bool ReadTransparency(size_t size);
+            bool ReadData(size_t size);
         };
 
         class ImageJpegLoader : public ImageLoader
