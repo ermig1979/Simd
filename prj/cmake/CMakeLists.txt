@@ -115,7 +115,11 @@ endif()
     set_source_files_properties(${SIMD_SSE42_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2")
 
     file(GLOB_RECURSE SIMD_AVX1_SRC ${TRUNK_DIR}/src/Simd/SimdAvx1*.cpp)
-    set_source_files_properties(${SIMD_AVX1_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store")
+    if ((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
+        set_source_files_properties(${SIMD_AVX1_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx")
+    else()
+        set_source_files_properties(${SIMD_AVX1_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mavx -mno-avx256-split-unaligned-load -mno-avx256-split-unaligned-store")
+    endif()
 
     file(GLOB_RECURSE SIMD_AVX2_SRC ${TRUNK_DIR}/src/Simd/SimdAvx2*.cpp)
     if ((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
