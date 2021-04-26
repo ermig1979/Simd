@@ -106,6 +106,9 @@ namespace Simd
     typedef Array<uint32_t> Array32u;
     typedef Array<float> Array32f;
 
+    typedef Array<uint16_t*> Array16up;
+    typedef Array<const uint16_t*> Array16ucp;
+
 #if defined(__GNUC__) && __GNUC__ >= 6
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-attributes"

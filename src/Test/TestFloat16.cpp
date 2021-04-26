@@ -294,6 +294,8 @@ namespace Test
         return result;
     }
 
+//#define TEST_COS_DIST_LONG_TEST
+
     typedef std::vector<uint16_t*> F16Ptrs;
 
     struct FuncCDA
@@ -328,9 +330,10 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
 
+        const int scattering = 1;
         View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Af, -1.0, 1.0);
-        View Ai(K*2, M, View::Int16, NULL, TEST_ALIGN(K));
+        View Ai(K * scattering, M, View::Int16, NULL, TEST_ALIGN(K));
         F16Ptrs A(M);
         for (size_t i = 0; i < M; i++)
         {
@@ -340,7 +343,7 @@ namespace Test
 
         View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Bf, -1.0, 1.0);
-        View Bi(K * 2, N, View::Int16, NULL, TEST_ALIGN(K));
+        View Bi(K * scattering, N, View::Int16, NULL, TEST_ALIGN(K));
         F16Ptrs B(N);
         for (size_t j = 0; j < N; j++)
         {
@@ -371,7 +374,7 @@ namespace Test
         result = result && CosineDistancesMxNa16fAutoTest(1023, 128, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNa16fAutoTest(1023, 129, 1023, eps, f1, f2);
 
-#if !defined(SIMD_NEON_ENABLE) && 0
+#if !defined(SIMD_NEON_ENABLE) && defined(TEST_COS_DIST_LONG_TEST)
         result = result && CosineDistancesMxNa16fAutoTest(10*1024, 128, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNa16fAutoTest(1024, 10*128, 1024, eps, f1, f2);
 #endif
@@ -399,6 +402,103 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
 #endif
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    struct FuncCDP
+    {
+        typedef void(*FuncPtr)(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
+
+        FuncPtr func;
+        String desc;
+
+        FuncCDP(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+        void Update(size_t M, size_t N, size_t K)
+        {
+            desc = desc + "[" + ToString(M) + "-" + ToString(N) + "-" + ToString(K) + "]";
+        }
+
+        void Call(const View& A, const View& B, Tensor32f& D) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(A.height, B.height, A.width, (uint16_t*)A.data, (uint16_t*)B.data, D.Data());
+        }
+    };
+
+#define FUNC_CDP(function) FuncCDP(function, #function)
+
+    bool CosineDistancesMxNp16fAutoTest(size_t M, size_t N, size_t K, float eps, FuncCDP f1, FuncCDP f2)
+    {
+        bool result = true;
+
+        f1.Update(M, N, K);
+        f2.Update(M, N, K);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
+        FillRandom32f(Af, -1.0, 1.0);
+        View Ai(K, M, View::Int16, NULL, TEST_ALIGN(K));
+
+        View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
+        FillRandom32f(Bf, -1.0, 1.0);
+        View Bi(K, N, View::Int16, NULL, TEST_ALIGN(K));
+
+        Tensor32f D1({ M, N, });
+        Tensor32f D2({ M, N, });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(Ai, Bi, D1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(Ai, Bi, D2));
+
+        result = Compare(D1, D2, eps, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool CosineDistancesMxNp16fAutoTest(float eps, const FuncCDP& f1, const FuncCDP& f2)
+    {
+        bool result = true;
+
+        result = result && CosineDistancesMxNp16fAutoTest(1024, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNp16fAutoTest(1024, 129, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNp16fAutoTest(1023, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNp16fAutoTest(1023, 129, 1023, eps, f1, f2);
+
+#if !defined(SIMD_NEON_ENABLE) && defined(TEST_COS_DIST_LONG_TEST)
+        result = result && CosineDistancesMxNp16fAutoTest(10 * 1024, 128, 1024, eps, f1, f2);
+        result = result && CosineDistancesMxNp16fAutoTest(1024, 10 * 128, 1024, eps, f1, f2);
+#endif
+
+        return result;
+    }
+
+    bool CosineDistancesMxNp16fAutoTest()
+    {
+        bool result = true;
+
+        result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Base::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+#endif
+
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+//#endif
+//
+//#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+//        if (Simd::Neon::Enable)
+//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+//#endif
 
         return result;
     }

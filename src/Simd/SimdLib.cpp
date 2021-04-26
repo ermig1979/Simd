@@ -1449,27 +1449,7 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
 SIMD_API void SimdAveragingBinarizationV2(const uint8_t* src, size_t srcStride, size_t width, size_t height,
     size_t neighborhood, int32_t shift, uint8_t positive, uint8_t negative, uint8_t* dst, size_t dstStride)
 {
-//#ifdef SIMD_AVX512BW_ENABLE
-//    if (Avx512bw::Enable)
-//        Avx512bw::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-//    else
-//#endif
-//#ifdef SIMD_AVX2_ENABLE
-//    if (Avx2::Enable && width >= Avx2::A)
-//        Avx2::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-//    else
-//#endif
-//#ifdef SIMD_SSE2_ENABLE
-//    if (Sse2::Enable && width >= Sse2::A)
-//        Sse2::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-//    else
-//#endif
-//#ifdef SIMD_NEON_ENABLE
-//    if (Neon::Enable && width >= Neon::A)
-//        Neon::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
-//    else
-//#endif
-        Base::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
+    Base::AveragingBinarizationV2(src, srcStride, width, height, neighborhood, shift, positive, negative, dst, dstStride);
 }
 
 SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
@@ -2333,6 +2313,26 @@ SIMD_API void SimdCosineDistancesMxNa16f(size_t M, size_t N, size_t K, const uin
     else
 #endif
         Base::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+}
+
+SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
+{
+//#ifdef SIMD_AVX512BW_ENABLE
+//    if (Avx512bw::Enable && K >= Avx512bw::F)
+//        Avx512bw::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+//    else
+//#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && K >= Avx2::F)
+        Avx2::CosineDistancesMxNp16f(M, N, K, A, B, distances);
+    else
+#endif
+//#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+//    if (Neon::Enable && K >= Neon::F)
+//        Neon::CosineDistancesMxNa16f(M, N, K, A, B, distances);
+//    else
+//#endif
+        Base::CosineDistancesMxNp16f(M, N, K, A, B, distances);
 }
 
 SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)

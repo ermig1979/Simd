@@ -167,5 +167,12 @@ namespace Simd
                 for (size_t j = 0; j < N; ++j)
                     CosineDistance16f(A[i], B[j], K, distances + i * N + j);
         }
+
+        void CosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances)
+        {
+            for (size_t i = 0; i < M; ++i)
+                for (size_t j = 0; j < N; ++j)
+                    CosineDistance16f(A + i * K, B + j * K, K, distances + i * N + j);
+        }
     }
 }
