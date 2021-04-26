@@ -490,15 +490,15 @@ namespace Test
             result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-//#endif
-//
-//#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
-//        if (Simd::Neon::Enable)
-//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-//#endif
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx512bw::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+#endif
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+        if (Simd::Neon::Enable)
+            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Neon::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+#endif
 
         return result;
     }
