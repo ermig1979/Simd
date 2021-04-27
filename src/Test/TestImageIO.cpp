@@ -171,7 +171,7 @@ namespace Test
             ss << "_" << ToString(quality) << suffix << ".jpg";
         const String dir = "_out";
         String path = MakePath(dir, ss.str());
-        return CreatePathIfNotExist(dir) && image.Save(path, file, quality);
+        return CreatePathIfNotExist(dir, false) && image.Save(path, file, quality);
     }
 
     //-------------------------------------------------------------------------

@@ -64,7 +64,7 @@ namespace Test
 
     bool CreatePath(const String & path);
 
-    bool CreatePathIfNotExist(const String & path);
+    bool CreatePathIfNotExist(const String & path, bool file);
 }
 
 #endif//__TestFile_h__

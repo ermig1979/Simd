@@ -44,7 +44,7 @@ namespace Test
 
     void Log::SetLogFile(String name)
     {
-        CreatePathIfNotExist(name);
+        CreatePathIfNotExist(name, true);
         _file.open(name);
     }
 

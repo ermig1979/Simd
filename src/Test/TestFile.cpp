@@ -74,14 +74,26 @@ namespace Test
 #endif
     }
 
-    bool CreatePathIfNotExist(const String & path)
+    bool CreatePathIfNotExist(const String & path, bool file)
     {
-        String directory = DirectoryByPath(path);
-        if (!DirectoryExists(directory))
+        String dir;
+        if (file)
         {
-            if (!CreatePath(directory))
+            dir = DirectoryByPath(path);
+            if (dir == path)
+                return true;
+        }
+        else
+        {
+            dir = path;
+            if (dir.empty())
+                return true;
+        }
+        if (!DirectoryExists(dir))
+        {
+            if (!CreatePath(dir))
             {
-                TEST_LOG_SS(Info, "Can't create directory '" << directory << "' !");
+                TEST_LOG_SS(Info, "Can't create directory '" << dir << "' !");
                 return false;
             }
         }
