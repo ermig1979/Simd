@@ -29,6 +29,8 @@
 
 #include "Simd/SimdView.hpp"
 
+#include <vector>
+
 namespace Simd
 {
     typedef uint8_t* (*ImageLoadFromMemoryPtr)(const uint8_t* data, size_t size, size_t* stride, size_t* width, size_t* height, SimdPixelFormatType* format);
@@ -163,16 +165,29 @@ namespace Simd
 
             virtual void SetConverters();
         private:
-            bool _first, _hasTrans;
+            bool _first, _hasTrans, _iPhone;
             uint32_t _width, _height, _channels;
             uint16_t _tc16[3];
             uint8_t _depth, _color, _interlace, _paletteChannels, _tc[3];
-            Array8u _palette;
+            Array8u _palette, _idat;
 
-            bool ReadHeader(size_t size);
-            bool ReadPalette(size_t size);
-            bool ReadTransparency(size_t size);
-            bool ReadData(size_t size);
+            struct Chunk
+            {
+                uint32_t size;
+                uint32_t type;
+                uint32_t offs;
+            };
+            typedef std::vector<Chunk> Chunks;
+            Chunks _idats;
+
+            bool ParseFile();
+            bool CheckHeader();
+            bool ReadChunk(Chunk& chunk);
+            bool ReadHeader(const Chunk & chunk);
+            bool ReadPalette(const Chunk& chunk);
+            bool ReadTransparency(const Chunk& chunk);
+            bool ReadData(const Chunk& chunk);
+            uint8_t* MergedData(uint32_t &size);
         };
 
         class ImageJpegLoader : public ImageLoader

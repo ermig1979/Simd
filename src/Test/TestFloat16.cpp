@@ -369,6 +369,7 @@ namespace Test
     {
         bool result = true;
 
+        result = result && CosineDistancesMxNa16fAutoTest(128, 1024, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNa16fAutoTest(1024, 128, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNa16fAutoTest(1024, 129, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNa16fAutoTest(1023, 128, 1024, eps, f1, f2);
@@ -466,6 +467,7 @@ namespace Test
     {
         bool result = true;
 
+        result = result && CosineDistancesMxNp16fAutoTest(128, 1024, 512, eps, f1, f2);
         result = result && CosineDistancesMxNp16fAutoTest(1024, 128, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNp16fAutoTest(1024, 129, 1024, eps, f1, f2);
         result = result && CosineDistancesMxNp16fAutoTest(1023, 128, 1024, eps, f1, f2);

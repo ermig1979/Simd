@@ -758,27 +758,6 @@ namespace Simd
         //    performance
         //      - uses stb_zlib, a PD zlib implementation with fast huffman decoding
 
-
-
-        SIMD_INLINE bool CheckPngHeader(InputMemoryStream& stream)
-        {
-            const size_t size = 8;
-            const uint8_t control[size] = { 137, 80, 78, 71, 13, 10, 26, 10 };
-            uint8_t buffer[size];
-            return stream.Read(size, buffer) == size && memcmp(buffer, control, size) == 0;
-        }
-
-        struct PngChunk
-        {
-            uint32_t size;
-            uint32_t type;
-
-            SIMD_INLINE bool IsType(char a, char b, char c, char d) const
-            {
-                return type == ((uint32_t(a) << 24) + (uint32_t(b) << 16) + (uint32_t(c) << 8) + uint32_t(d));
-            }
-        };
-
         typedef struct
         {
             PngContext* s;
@@ -1192,9 +1171,13 @@ namespace Simd
             _bgrToBgra = Base::BgrToBgra;
         }
 
+        SIMD_INLINE constexpr uint32_t ChunkType(char a, char b, char c, char d)
+        {
+            return ((uint32_t(a) << 24) + (uint32_t(b) << 16) + (uint32_t(c) << 8) + uint32_t(d));
+        }
+
         bool ImagePngLoader::FromStream()
         {
-            _hasTrans = false;
             const int req_comp = 4;
             PngContext context;
             context.stream = &_stream;
@@ -1202,11 +1185,8 @@ namespace Simd
             p.s = &context;
             png__png* z = &p;
 
-            //uint8_t has_trans = 0, tc[16] = { 0 };
-            //uint16_t tc16[3];
             uint32_t ioff = 0, idata_limit = 0, i;
             int k;
-            bool iPhone = false;
             PngContext* s = z->s;
             InputMemoryStream& stream = *s->stream;
 
@@ -1214,116 +1194,48 @@ namespace Simd
             z->idata = NULL;
             z->out = NULL;
 
-            if (!CheckPngHeader(_stream))
+            if (!ParseFile())
                 return false;
 
-            _first = true;
-            for (;;)
-            {
-                PngChunk chunk;
-                if (!(stream.ReadBe32u(chunk.size) && stream.ReadBe32u(chunk.type)))
-                    return 0;
-                if (chunk.IsType('C', 'g', 'B', 'I'))
-                {
-                    iPhone = true;
-                    stream.Skip(chunk.size);
+            uint32_t raw_len, bpl;
+            s->img_x = _width;
+            s->img_y = _height;
+            z->depth = _depth;
+            s->img_n = _channels;
+
+            z->idata = MergedData(ioff);
+            if (z->idata == NULL) 
+                return PngError("no IDAT", "Corrupt PNG");
+            // initial guess for decoded data size to avoid unnecessary reallocs
+            bpl = (s->img_x * z->depth + 7) / 8; // bytes per line, per component
+            raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
+            z->expanded = (uint8_t*)png_zlib_decode_malloc_guesssize_headerflag((char*)z->idata, ioff, raw_len, (int*)&raw_len, _iPhone ? 0 : 1);
+            if (z->expanded == NULL) 
+                return 0; // zlib should set error
+            if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
+                s->img_out_n = s->img_n + 1;
+            else
+                s->img_out_n = s->img_n;
+            if (!png__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, _color, _interlace)) return 0;
+            if (_hasTrans) {
+                if (z->depth == 16) {
+                    if (!png__compute_transparency16(z, _tc16, s->img_out_n)) return 0;
                 }
-                else if (chunk.IsType('I', 'H', 'D', 'R'))
-                {
-                    if (!ReadHeader(chunk.size))
-                        return false;
-                    SetConverters();
-                    s->img_x = _width;
-                    s->img_y = _height;
-                    z->depth = _depth;
-                    s->img_n = _channels;
+                else {
+                    if (!png__compute_transparency(z, _tc, s->img_out_n)) return 0;
                 }
-                else if (chunk.IsType('P', 'L', 'T', 'E'))
-                {
-                    if (!ReadPalette(chunk.size))
-                        return false;
-                }
-                else if (chunk.IsType('t', 'R', 'N', 'S'))
-                {
-                    if (!ReadTransparency(chunk.size))
-                        return false;
-                }
-                else if (chunk.IsType('I', 'D', 'A', 'T'))
-                {
-                    if (_first)
-                        return PngError("first not IHDR", "Corrupt PNG");
-                    if (_paletteChannels && !_palette.size)
-                        return PngError("no PLTE", "Corrupt PNG");
-                    if ((int)(ioff + chunk.size) < (int)ioff)
-                        return 0;
-                    if (ioff + chunk.size > idata_limit)
-                    {
-                        uint32_t idata_limit_old = idata_limit;
-                        uint8_t* p;
-                        if (idata_limit == 0)
-                            idata_limit = chunk.size > 4096 ? chunk.size : 4096;
-                        while (ioff + chunk.size > idata_limit)
-                            idata_limit *= 2;
-                        PNG_NOTUSED(idata_limit_old);
-                        p = (uint8_t*)PNG_REALLOC_SIZED(z->idata, idata_limit_old, idata_limit);
-                        if (p == NULL)
-                            return PngError("outofmem", "Out of memory");
-                        z->idata = p;
-                    }
-                    if (!png__getn(s, z->idata + ioff, chunk.size))
-                        return PngError("outofdata", "Corrupt PNG");
-                    ioff += chunk.size;
-                }
-                else if (chunk.IsType('I', 'E', 'N', 'D'))
-                {
-                    uint32_t raw_len, bpl;
-                    if (_first)
-                        return PngError("first not IHDR", "Corrupt PNG");
-                    if (z->idata == NULL) return PngError("no IDAT", "Corrupt PNG");
-                    // initial guess for decoded data size to avoid unnecessary reallocs
-                    bpl = (s->img_x * z->depth + 7) / 8; // bytes per line, per component
-                    raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
-                    z->expanded = (uint8_t*)png_zlib_decode_malloc_guesssize_headerflag((char*)z->idata, ioff, raw_len, (int*)&raw_len, iPhone ? 0 : 1);
-                    if (z->expanded == NULL) return 0; // zlib should set error
-                    PNG_FREE(z->idata); z->idata = NULL;
-                    if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
-                        s->img_out_n = s->img_n + 1;
-                    else
-                        s->img_out_n = s->img_n;
-                    if (!png__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, _color, _interlace)) return 0;
-                    if (_hasTrans) {
-                        if (z->depth == 16) {
-                            if (!png__compute_transparency16(z, _tc16, s->img_out_n)) return 0;
-                        }
-                        else {
-                            if (!png__compute_transparency(z, _tc, s->img_out_n)) return 0;
-                        }
-                    }
-                    if (_paletteChannels)
-                    {
-                        s->img_n = _paletteChannels; // record the actual colors we had
-                        s->img_out_n = _paletteChannels;
-                        if (req_comp >= 3) s->img_out_n = req_comp;
-                        if (!png__expand_png_palette(z, _palette.data, (int)_palette.size, s->img_out_n))
-                            return 0;
-                    }
-                    else if (_hasTrans)
-                        ++s->img_n;
-                    PNG_FREE(z->expanded); z->expanded = NULL;
-                    // end of PNG chunk, read and skip CRC
-                    png__get32be(s);
-                    break;
-                }
-                else
-                {
-                    if (_first || (chunk.type & (1 << 29)) == 0)
-                        return false;
-                    stream.Skip(chunk.size);
-                }
-                uint32_t crc32;
-                if (!_stream.ReadBe32u(crc32))
-                    return false;
             }
+            if (_paletteChannels)
+            {
+                s->img_n = _paletteChannels; // record the actual colors we had
+                s->img_out_n = _paletteChannels;
+                if (req_comp >= 3) s->img_out_n = req_comp;
+                if (!png__expand_png_palette(z, _palette.data, (int)_palette.size, s->img_out_n))
+                    return 0;
+            }
+            else if (_hasTrans)
+                ++s->img_n;
+            PNG_FREE(z->expanded); z->expanded = NULL;
 
             if (!(p.depth <= 8 || p.depth == 16))
                 return PngErrorPtr("bad bits_per_channel", "PNG not supported: unsupported color depth");
@@ -1351,7 +1263,6 @@ namespace Simd
             }
             PNG_FREE(p.out);
             PNG_FREE(p.expanded);
-            PNG_FREE(p.idata);
             if (data)
             {
                 size_t stride = 4 * context.img_x;
@@ -1380,13 +1291,86 @@ namespace Simd
             return false;
         }
 
-        bool ImagePngLoader::ReadHeader(size_t size)
+        bool ImagePngLoader::ParseFile()
+        {
+            _first = true, _iPhone = false, _hasTrans = false;
+            if (!CheckHeader())
+                return false;
+            for (bool run = true; run;)
+            {
+                Chunk chunk;
+                if (!ReadChunk(chunk))
+                    return 0;
+                if (chunk.type == ChunkType('C', 'g', 'B', 'I'))
+                {
+                    _iPhone = true;
+                    _stream.Skip(chunk.size);
+                }
+                else if (chunk.type == ChunkType('I', 'H', 'D', 'R'))
+                {
+                    if (!ReadHeader(chunk))
+                        return false;
+                    SetConverters();
+                }
+                else if (chunk.type == ChunkType('P', 'L', 'T', 'E'))
+                {
+                    if (!ReadPalette(chunk))
+                        return false;
+                }
+                else if (chunk.type == ChunkType('t', 'R', 'N', 'S'))
+                {
+                    if (!ReadTransparency(chunk))
+                        return false;
+                }
+                else if (chunk.type == ChunkType('I', 'D', 'A', 'T'))
+                {
+                    if (!ReadData(chunk))
+                        return false;
+                }
+                else if (chunk.type == ChunkType('I', 'E', 'N', 'D'))
+                {
+                    if (_first)
+                        return false;
+                    run = false;
+                }
+                else
+                {
+                    if (_first || (chunk.type & (1 << 29)) == 0)
+                        return false;
+                    _stream.Skip(chunk.size);
+                }
+                uint32_t crc32;
+                if (!_stream.ReadBe32u(crc32))
+                    return false;
+            }
+            return true;
+        }
+
+        bool ImagePngLoader::CheckHeader()
+        {
+            const size_t size = 8;
+            const uint8_t control[size] = { 137, 80, 78, 71, 13, 10, 26, 10 };
+            uint8_t buffer[size];
+            return _stream.Read(size, buffer) == size && memcmp(buffer, control, size) == 0;
+        }
+
+        SIMD_INLINE bool ImagePngLoader::ReadChunk(Chunk& chunk)
+        {
+            if (_stream.ReadBe32u(chunk.size) && _stream.ReadBe32u(chunk.type))
+            {
+                chunk.offs = _stream.Pos();
+                return true;
+            }
+            return false;
+        }
+
+        bool ImagePngLoader::ReadHeader(const Chunk& chunk)
         {
             const int MAX_SIZE = 1 << 24;
             if (!_first)
                 return false;
             _first = false;
-            if (!(size == 13 && _stream.CanRead(13)))
+            if (!(chunk.size == 13 && _stream.CanRead(13)))
                 return false;
             uint8_t comp, filter;
             if (!(_stream.ReadBe32u(_width) && _stream.ReadBe32u(_height) &&
@@ -1421,42 +1405,42 @@ namespace Simd
             return true;
         }
 
-        bool ImagePngLoader::ReadPalette(size_t size)
+        bool ImagePngLoader::ReadPalette(const Chunk& chunk)
         {
-            if (_first || size > 256 * 3)
+            if (_first || chunk.size > 256 * 3)
                 return false;
-            size_t length = size / 3;
-            if (length * 3 != size)
+            size_t length = chunk.size / 3;
+            if (length * 3 != chunk.size)
                 return false;
-            if (_stream.CanRead(size))
+            if (_stream.CanRead(chunk.size))
             {
                 _palette.Resize(length * 4);
                 _bgrToBgra(_stream.Current(), length, 1, length, _palette.data, _palette.size, 0xFF);
-                _stream.Skip(size);
+                _stream.Skip(chunk.size);
                 return true;
             }
             else
                 return false;
         }
 
-        bool ImagePngLoader::ReadTransparency(size_t size)
+        bool ImagePngLoader::ReadTransparency(const Chunk& chunk)
         {
             if (_first)
                 return false;
-            //if (z->idata)
-            //    return false;
+            if (_idats.empty())
+                return false;
             if (_paletteChannels)
             {
-                if (_palette.size == 0 || size > _palette.size || !_stream.CanRead(size))
+                if (_palette.size == 0 || chunk.size > _palette.size || !_stream.CanRead(chunk.size))
                     return false;
                 _paletteChannels = 4;
-                for (size_t i = 0; i < size; ++i)
+                for (size_t i = 0; i < chunk.size; ++i)
                     _palette.data[i * 4 + 3] = _stream.Current()[i];
-                _stream.Skip(size);
+                _stream.Skip(chunk.size);
             }
             else
             {
-                if (!(_channels & 1) || size != _channels * 2)
+                if (!(_channels & 1) || chunk.size != _channels * 2)
                     return false;
                 _hasTrans = true;
                 for (size_t k = 0; k < _channels; ++k)
@@ -1471,9 +1455,44 @@ namespace Simd
             return true;
         }
 
-        bool ImagePngLoader::ReadData(size_t size)
+        bool ImagePngLoader::ReadData(const Chunk& chunk)
         {
-            return false;
+            if (_first)
+                return false;
+            if (_paletteChannels && !_palette.size)
+                return false;
+            if (!_stream.CanRead(chunk.size))
+                return false;
+            _idats.push_back(chunk);
+            _stream.Skip(chunk.size);
+            return true;
+        }
+
+        uint8_t* ImagePngLoader::MergedData(uint32_t& size)
+        {
+            if (_idats.empty())
+            {
+                size = 0;
+                return NULL;
+            }
+            else if (_idats.size() == 1)
+            {
+                size = _idats[0].size;
+                return (uint8_t*)_stream.Data() + _idats[0].offs;
+            }
+            else
+            {
+                size = 0;
+                for (size_t i = 0; i < _idats.size(); ++i)
+                    size += _idats[i].size;
+                _idat.Resize(size);
+                for (size_t i = 0, offset = 0; i < _idats.size(); ++i)
+                {
+                    memcpy(_idat.data + offset, _stream.Data() + _idats[i].offs, _idats[i].size);
+                    offset += _idats[i].size;
+                }
+                return _idat.data;
+            }
         }
     }
 }
