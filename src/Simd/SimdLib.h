@@ -566,12 +566,14 @@ typedef struct SimdConvolutionParameters
 #if defined(WIN32) && !defined(SIMD_STATIC)
 #  ifdef SIMD_EXPORTS
 #    define SIMD_API __declspec(dllexport)
-#  else//SIMD_EXPORTS
+#  else
 #    define SIMD_API __declspec(dllimport)
-#  endif//SIMD_EXPORTS
-#else //WIN32
+#  endif
+#elif defined(__GNUC__) && defined(SIMD_HIDE_INTERNAL)
+#    define SIMD_API __attribute__ ((visibility ("default")))
+#else
 #    define SIMD_API
-#endif//WIN32
+#endif
 
 #ifdef __cplusplus
 extern "C"
