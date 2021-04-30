@@ -466,4 +466,66 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
+
+    bool ImageLoadFromMemorySpecialTest(const String & name, View::Format format, const FuncLM& f1, const FuncLM& f2)
+    {
+        bool result = true;
+
+        String path = ROOT_PATH + "/data/image/" + name;
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " at " << path << " for " << ToString(format) << ".");
+
+        size_t size = 0;
+        uint8_t* data = NULL;
+        if (!FileLoad(path.c_str(), &data, &size))
+            return false;
+
+        View dst1, dst2;
+
+        f1.Call(data, size, format, dst1);
+
+        f2.Call(data, size, format, dst2);
+
+        int differenceMax = ToLower(ExtensionByPath(path)) == "png" ? 0 : 4;
+        result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
+
+        SimdFree(data);
+
+        return result;
+    }
+
+    bool ImageLoadFromMemorySpecialTest(const String& name, const FuncLM& f1, const FuncLM& f2)
+    {
+        bool result = true;
+
+        View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
+        for (int format = 0; format < 5; format++)
+            result = result && ImageLoadFromMemorySpecialTest(name, formats[format], f1, f2);
+
+        return result;
+    }
+
+    bool ImageLoadFromMemorySpecialTest(const FuncLM& f1, const FuncLM& f2)
+    {
+        bool result = true;
+
+#if 1
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p04.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn6a08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn6a16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/tbbn0g04.png", f1, f2);
+#endif
+
+        return result;
+    }
+
+    bool ImageLoadFromMemorySpecialTest()
+    {
+        bool result = true;
+
+        result = result && ImageLoadFromMemorySpecialTest(FUNC_LM(Simd::Base::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+
+        return result;
+    }
 }

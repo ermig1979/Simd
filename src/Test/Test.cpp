@@ -214,7 +214,7 @@ namespace Test
     TEST_ADD_GROUP_A00(Gemm32fNT);
 
     TEST_ADD_GROUP_A00(ImageSaveToMemory);
-    TEST_ADD_GROUP_A00(ImageLoadFromMemory);
+    TEST_ADD_GROUP_A0S(ImageLoadFromMemory);
 
     TEST_ADD_GROUP_AD0(MeanFilter3x3);
     TEST_ADD_GROUP_AD0(MedianFilterRhomb3x3);
