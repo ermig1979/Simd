@@ -67,32 +67,6 @@ namespace Simd
             InputMemoryStream * stream;
         };
 
-        SIMD_INLINE uint8_t png__get8(PngContext* s)
-        {
-            uint8_t value = 0;
-            s->stream->Read8u(value);
-            return value;
-        }
-
-        static int png__get16be(PngContext* s)
-        {
-            uint16_t value = 0;
-            s->stream->ReadBe16u(value);
-            return value;
-        }
-
-        static uint32_t png__get32be(PngContext* s)
-        {
-            uint32_t value = 0;
-            s->stream->ReadBe32u(value);
-            return value;
-        }
-
-        static int png__getn(PngContext* s, uint8_t* buffer, int n)
-        {
-            return s->stream->Read(n, buffer) == n ? 1 : 0;
-        }
-
         static int png__addsizes_valid(int a, int b)
         {
             if (b < 0) return 0;
@@ -670,82 +644,25 @@ namespace Simd
             return png__parse_zlib(a, parse_header);
         }
 
-        static char* png_zlib_decode_malloc_guesssize(const char* buffer, int len, int initial_size, int* outlen)
-        {
-            png__zbuf a;
-            char* p = (char*)png__malloc(initial_size);
-            if (p == NULL) return NULL;
-            a.zbuffer = (uint8_t*)buffer;
-            a.zbuffer_end = (uint8_t*)buffer + len;
-            if (png__do_zlib(&a, p, initial_size, 1, 1)) {
-                if (outlen) *outlen = (int)(a.zout - a.zout_start);
-                return a.zout_start;
-            }
-            else {
-                PNG_FREE(a.zout_start);
-                return NULL;
-            }
-        }
-
-        static char* png_zlib_decode_malloc(char const* buffer, int len, int* outlen)
-        {
-            return png_zlib_decode_malloc_guesssize(buffer, len, 16384, outlen);
-        }
-
         static char* png_zlib_decode_malloc_guesssize_headerflag(const char* buffer, int len, int initial_size, int* outlen, int parse_header)
         {
             png__zbuf a;
             char* p = (char*)png__malloc(initial_size);
-            if (p == NULL) return NULL;
+            if (p == NULL) 
+                return NULL;
             a.zbuffer = (uint8_t*)buffer;
             a.zbuffer_end = (uint8_t*)buffer + len;
-            if (png__do_zlib(&a, p, initial_size, 1, parse_header)) {
-                if (outlen) *outlen = (int)(a.zout - a.zout_start);
+            if (png__do_zlib(&a, p, initial_size, 1, parse_header)) 
+            {
+                if (outlen) 
+                    *outlen = (int)(a.zout - a.zout_start);
                 return a.zout_start;
             }
-            else {
+            else 
+            {
                 PNG_FREE(a.zout_start);
                 return NULL;
             }
-        }
-
-        static int png_zlib_decode_buffer(char* obuffer, int olen, char const* ibuffer, int ilen)
-        {
-            png__zbuf a;
-            a.zbuffer = (uint8_t*)ibuffer;
-            a.zbuffer_end = (uint8_t*)ibuffer + ilen;
-            if (png__do_zlib(&a, obuffer, olen, 0, 1))
-                return (int)(a.zout - a.zout_start);
-            else
-                return -1;
-        }
-
-        static char* png_zlib_decode_noheader_malloc(char const* buffer, int len, int* outlen)
-        {
-            png__zbuf a;
-            char* p = (char*)png__malloc(16384);
-            if (p == NULL) return NULL;
-            a.zbuffer = (uint8_t*)buffer;
-            a.zbuffer_end = (uint8_t*)buffer + len;
-            if (png__do_zlib(&a, p, 16384, 1, 0)) {
-                if (outlen) *outlen = (int)(a.zout - a.zout_start);
-                return a.zout_start;
-            }
-            else {
-                PNG_FREE(a.zout_start);
-                return NULL;
-            }
-        }
-
-        static int png_zlib_decode_noheader_buffer(char* obuffer, int olen, const char* ibuffer, int ilen)
-        {
-            png__zbuf a;
-            a.zbuffer = (uint8_t*)ibuffer;
-            a.zbuffer_end = (uint8_t*)ibuffer + ilen;
-            if (png__do_zlib(&a, obuffer, olen, 0, 0))
-                return (int)(a.zout - a.zout_start);
-            else
-                return -1;
         }
 
         // public domain "baseline" PNG decoder   v0.10  Sean Barrett 2006-11-18
@@ -761,7 +678,7 @@ namespace Simd
         typedef struct
         {
             PngContext* s;
-            uint8_t* idata, * expanded, * out;
+            uint8_t * expanded, * out;
             uint8_t depth;
         } png__png;
 
@@ -1185,44 +1102,46 @@ namespace Simd
             p.s = &context;
             png__png* z = &p;
 
-            uint32_t ioff = 0, idata_limit = 0, i;
-            int k;
             PngContext* s = z->s;
-            InputMemoryStream& stream = *s->stream;
 
             z->expanded = NULL;
-            z->idata = NULL;
             z->out = NULL;
 
             if (!ParseFile())
                 return false;
 
-            uint32_t raw_len, bpl;
             s->img_x = _width;
             s->img_y = _height;
             z->depth = _depth;
             s->img_n = _channels;
 
-            z->idata = MergedData(ioff);
-            if (z->idata == NULL) 
-                return PngError("no IDAT", "Corrupt PNG");
-            // initial guess for decoded data size to avoid unnecessary reallocs
-            bpl = (s->img_x * z->depth + 7) / 8; // bytes per line, per component
-            raw_len = bpl * s->img_y * s->img_n /* pixels */ + s->img_y /* filter mode per row */;
-            z->expanded = (uint8_t*)png_zlib_decode_malloc_guesssize_headerflag((char*)z->idata, ioff, raw_len, (int*)&raw_len, _iPhone ? 0 : 1);
+            uint32_t isize = 0;
+            char * idata = (char*)MergedData(isize);
+            if (idata == NULL) 
+                return false;
+
+            uint32_t bpl = (s->img_x * z->depth + 7) / 8;
+            uint32_t raw_len = bpl * s->img_y * s->img_n + s->img_y;
+            z->expanded = (uint8_t*)png_zlib_decode_malloc_guesssize_headerflag(idata, isize, raw_len, (int*)&raw_len, _iPhone ? 0 : 1);
             if (z->expanded == NULL) 
-                return 0; // zlib should set error
+                return false;
             if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
                 s->img_out_n = s->img_n + 1;
             else
                 s->img_out_n = s->img_n;
-            if (!png__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, _color, _interlace)) return 0;
-            if (_hasTrans) {
-                if (z->depth == 16) {
-                    if (!png__compute_transparency16(z, _tc16, s->img_out_n)) return 0;
+            if (!png__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, _color, _interlace)) 
+                return 0;
+            if (_hasTrans) 
+            {
+                if (z->depth == 16)
+                {
+                    if (!png__compute_transparency16(z, _tc16, s->img_out_n))
+                        return false;
                 }
-                else {
-                    if (!png__compute_transparency(z, _tc, s->img_out_n)) return 0;
+                else
+                {
+                    if (!png__compute_transparency(z, _tc, s->img_out_n))
+                        return false;
                 }
             }
             if (_paletteChannels)
@@ -1231,14 +1150,14 @@ namespace Simd
                 s->img_out_n = _paletteChannels;
                 if (req_comp >= 3) s->img_out_n = req_comp;
                 if (!png__expand_png_palette(z, _palette.data, (int)_palette.size, s->img_out_n))
-                    return 0;
+                    return false;
             }
             else if (_hasTrans)
                 ++s->img_n;
             PNG_FREE(z->expanded); z->expanded = NULL;
 
             if (!(p.depth <= 8 || p.depth == 16))
-                return PngErrorPtr("bad bits_per_channel", "PNG not supported: unsupported color depth");
+                return false;
             uint8_t* data = p.out;
             p.out = NULL;
             if (req_comp && req_comp != p.s->img_out_n)
@@ -1358,7 +1277,7 @@ namespace Simd
         {
             if (_stream.ReadBe32u(chunk.size) && _stream.ReadBe32u(chunk.type))
             {
-                chunk.offs = _stream.Pos();
+                chunk.offs = (uint32_t)_stream.Pos();
                 return true;
             }
             return false;
