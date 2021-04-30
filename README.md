@@ -50,9 +50,10 @@ To do this you must change appropriate property (Configuration Type) of **Simd**
 
 Also in order to build the library you can use CMake and MinGW:
 
-    cd .\prj\cmake
-    cmake . -DSIMD_TOOLCHAIN="your_toolchain\bin\g++" -DSIMD_TARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -G "MinGW Makefiles"
-    mingw32-make
+	mkdir build
+	cd build
+	cmake ..\prj\cmake -DSIMD_TOOLCHAIN="your_toolchain\bin\g++" -DSIMD_TARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -G "MinGW Makefiles"
+	mingw32-make
 
 The library building for Linux
 ==============================
@@ -65,30 +66,47 @@ Files of CMake build systems are placed in the directory:
 The library can be built for x86/x64, PowerPC(64, big-endian) and ARM(32/64) platforms with using of G++ or Clang compilers.
 With using of native compiler (g++) for current platform it is simple:
 
-	cd ./prj/cmake
-	cmake . -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
+	mkdir build
+	cd build
+	cmake ../prj/cmake -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
 	make
 	
 To build the library for PowerPC(64, big-endian) and ARM(32/64) platforms you can also use toolchain for cross compilation.
 There is an example of using for PowerPC (64 bit, big-endian):
 
-	cd ./prj/cmake
-	cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
+	mkdir build
+	cd build
+	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/powerpc-linux-gnu-g++" -DSIMD_TARGET="ppc64" -DCMAKE_BUILD_TYPE="Release"
 	make
-	
+
 For ARM (32 bit):
 
-	cd ./prj/cmake
-	cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm" -DCMAKE_BUILD_TYPE="Release"
+	mkdir build
+	cd build
+	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/arm-linux-gnueabihf-g++" -DSIMD_TARGET="arm" -DCMAKE_BUILD_TYPE="Release"
 	make
-	
+
 And for ARM (64 bit):
 
-    cd ./prj/cmake
-    cmake . -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
-    make
+	mkdir build
+	cd build
+	cmake ../prj/cmake -DSIMD_TOOLCHAIN="/your_toolchain/usr/bin/aarch64-linux-gnu-g++" -DSIMD_TARGET="aarch64" -DCMAKE_BUILD_TYPE="Release"
+	make
 
 As result the library and the test application will be built in the current directory.
+
+There are addition build parameters:
+
+* `SIMD_AVX512` - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.
+* `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
+* `SIMD_TEST` - Build test framework. It is switched on by default.
+* `SIMD_INFO` - Print build information. It is switched on by default.
+* `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.
+* `SIMD_SHARED` - Build as SHARED library. It is switched off by default.
+* `SIMD_GET_VERSION` - Call scipt to get Simd Library version. It is switched on by default.
+* `SIMD_SYNET` - Enable optimizations for Synet framework. It is switched on by default.
+* `SIMD_HIDE` - Hide internal functions of Simd Library. It is switched off by default.
+* `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
 
 The library using
 =================

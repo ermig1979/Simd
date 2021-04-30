@@ -71,24 +71,42 @@ The library building for Windows</h1>
 <code>simd/prj/vs2019/.</code> <br  />
  By default the library is built as a DLL (Dynamic Linked Library). You also may build it as a static library. To do this you must change appropriate property (Configuration Type) of <b>Simd</b> project and also define macro <code>SIMD_STATIC</code> in file: <br  />
 <code>simd/src/Simd/SimdConfig.h.</code></p>
-<p>Also in order to build the library you can use CMake and MinGW: </p><div class="fragment"><div class="line">cd .\prj\cmake</div>
-<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;your_toolchain\bin\g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;x86_64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -G <span class="stringliteral">&quot;MinGW Makefiles&quot;</span></div>
+<p>Also in order to build the library you can use CMake and MinGW: </p><div class="fragment"><div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ..\prj\cmake -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;your_toolchain\bin\g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;x86_64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span> -G <span class="stringliteral">&quot;MinGW Makefiles&quot;</span></div>
 <div class="line">mingw32-make</div>
 </div><!-- fragment --><h1><a class="anchor" id="s3"></a>
 The library building for Linux</h1>
-<p>To build the library and test application for Linux 32/64 you need to use CMake build systems. Files of CMake build systems are placed in the directory: <code>simd/prj/cmake/.</code> The library can be built for x86/x64, PowerPC(64) and ARM(32/64) platforms with using of G++ or Clang compilers. With using of native compiler (g++) for current platform it is simple: </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;&quot;</span></div>
+<p>To build the library and test application for Linux 32/64 you need to use CMake build systems. Files of CMake build systems are placed in the directory: <code>simd/prj/cmake/.</code> The library can be built for x86/x64, PowerPC(64) and ARM(32/64) platforms with using of G++ or Clang compilers. With using of native compiler (g++) for current platform it is simple: </p><div class="fragment"><div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ../prj/cmake -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;&quot;</span></div>
 <div class="line">make</div>
-</div><!-- fragment --><p> To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation. There is an example of using for PowerPC (64 bit): </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/powerpc-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;ppc64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
+</div><!-- fragment --><p> To build the library for PowePC(64) and ARM(32/64) platforms you can also use toolchain for cross compilation. There is an example of using for PowerPC (64 bit): </p><div class="fragment"><div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ../prj/cmake -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/powerpc-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;ppc64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
-</div><!-- fragment --><p> For ARM (32 bit): </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/arm-linux-gnueabihf-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;arm&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
+</div><!-- fragment --><p> For ARM (32 bit): </p><div class="fragment"><div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ../prj/cmake -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/arm-linux-gnueabihf-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;arm&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
-</div><!-- fragment --><p> And for ARM (64 bit): </p><div class="fragment"><div class="line">cd ./prj/cmake</div>
-<div class="line">cmake . -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/aarch64-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;aarch64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
+</div><!-- fragment --><p> And for ARM (64 bit): </p><div class="fragment"><div class="line">mkdir build</div>
+<div class="line">cd build</div>
+<div class="line">cmake ../prj/cmake -DSIMD_TOOLCHAIN=<span class="stringliteral">&quot;/your_toolchain/usr/bin/aarch64-linux-gnu-g++&quot;</span> -DSIMD_TARGET=<span class="stringliteral">&quot;aarch64&quot;</span> -DCMAKE_BUILD_TYPE=<span class="stringliteral">&quot;Release&quot;</span></div>
 <div class="line">make</div>
 </div><!-- fragment --><p> As result the library and the test application will be built in the current directory.</p>
+<p>There are addition build parameters:</p>
+<ul>
+<li><code>SIMD_AVX512</code> - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.</li>
+<li><code>SIMD_AVX512VNNI</code> - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.</li>
+<li><code>SIMD_TEST</code> - Build test framework. It is switched on by default.</li>
+<li><code>SIMD_INFO</code> - Print build information. It is switched on by default.</li>
+<li><code>SIMD_PERF</code> - Enable of internal performance statistic. It is switched off by default.</li>
+<li><code>SIMD_SHARED</code> - Build as SHARED library. It is switched off by default.</li>
+<li><code>SIMD_GET_VERSION</code> - Call scipt to get Simd Library version. It is switched on by default.</li>
+<li><code>SIMD_SYNET</code> - Enable optimizations for Synet framework. It is switched on by default.</li>
+<li><code>SIMD_HIDE</code> - Hide internal functions of Simd Library. It is switched off by default.</li>
+<li><code>SIMD_TEST_FLAGS</code> - Addition compiler flags to build test framework.</li>
+</ul>
 <h1><a class="anchor" id="s4"></a>
 The library using</h1>
 <p>If you use the library from C code you must include: </p><div class="fragment"><div class="line"><span class="preprocessor">#include &quot;Simd/SimdLib.h&quot;</span></div>
