@@ -642,7 +642,7 @@ namespace Simd
                     for (size_t yBeg0 = 0; yBeg0 < p.conv[0].dstH;)
                     {
                         size_t yEnd0 = Simd::Min(yBeg0 + _yStep[0], p.conv[0].dstH);
-                        _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
+                        _convolution[0](src + c, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
                         if (maC == C)
                             _convolution[1](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst);
                         else if (c == 0)
