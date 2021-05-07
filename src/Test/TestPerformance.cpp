@@ -388,9 +388,9 @@ namespace Test
             for (size_t i = 2; i < enable.Size(); ++i)
                 if (enable[i])
                     table.SetHeader(col++, String(names[1].brief) + "/" + names[i].brief, i == last, Table::Right);
-            for (size_t i = 2; i < enable.Size(); ++i)
+            for (size_t i = 2, p = 1; i < enable.Size(); ++i)
                 if (enable[i])
-                    table.SetHeader(col++, String("P/") + names[i].brief, i == last, Table::Right);
+                    table.SetHeader(col++, names[p].brief + String("/") + names[i].brief, i == last, Table::Right), p = i;
         }
 		if (align)
 		{
@@ -444,7 +444,7 @@ namespace Test
         FunctionStatisticMap functions;
         CommonStatistic common;
         StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-        StatisticNames names = { { "Simd", "S" },{ "Base", "B" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Avx5v", "A7" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "N" } };
+        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Avx5v", "A7" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
         double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
