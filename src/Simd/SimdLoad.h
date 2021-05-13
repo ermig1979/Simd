@@ -1023,12 +1023,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE int32x4_t Load(const int32_t * p)
         {
-            return (int32x4_t)Load<align>((const uint8_t*)p);
+            return vreinterpretq_s32_u8(Load<align>((const uint8_t*)p));
         }
 
         template <bool align> SIMD_INLINE uint32x4_t Load(const uint32_t * p)
         {
-            return (uint32x4_t)Load<align>((const uint8_t*)p);
+            return vreinterpretq_u32_u8(Load<align>((const uint8_t*)p));
         }
 
         template <bool align> SIMD_INLINE float32x4_t Load(const float * p);
