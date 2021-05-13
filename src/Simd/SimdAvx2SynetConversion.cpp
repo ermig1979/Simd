@@ -40,7 +40,7 @@ namespace Simd
             *((int64_t*)dst) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO), upper));
         }
 
-        template <bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst, __m256i tail)
+        template <bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m256 scale, __m256 shift, __m256i upper, uint8_t* dst, const __m256i & tail)
         {
             __m256i i32 = _mm256_cvtps_epi32(Fmadd<nofma>(Avx::Load(src, tail), scale, shift));
             *((int64_t*)dst) = Extract64i<0>(_mm256_min_epu8(_mm256_packus_epi16(PackI32ToI16(i32, K_ZERO), K_ZERO), upper));
