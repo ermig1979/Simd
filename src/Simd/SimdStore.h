@@ -596,7 +596,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(int8_t* p, int8x16_t a)
         {
-            Store<align>((uint8_t*)p, (uint8x16_t)a);
+            Store<align>((uint8_t*)p, vreinterpretq_u8_s8(a));
         }
 
         template <bool align> SIMD_INLINE void Store(uint8_t * p, uint8x8_t a);
@@ -620,27 +620,27 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(uint16_t * p, uint16x8_t a)
         {
-            Store<align>((uint8_t*)p, (uint8x16_t)a);
+            Store<align>((uint8_t*)p, vreinterpretq_u8_u16(a));
         }
 
         template <bool align> SIMD_INLINE void Store(uint16_t * p, uint16x4_t a)
         {
-            Store<align>((uint8_t*)p, (uint8x8_t)a);
+            Store<align>((uint8_t*)p, vreinterpret_u8_u16(a));
         }
 
         template <bool align> SIMD_INLINE void Store(int16_t * p, int16x8_t a)
         {
-            Store<align>((uint8_t*)p, (uint8x16_t)a);
+            Store<align>((uint8_t*)p, vreinterpretq_u8_s16(a));
         }
 
         template <bool align> SIMD_INLINE void Store(uint32_t * p, uint32x4_t a)
         {
-            Store<align>((uint8_t*)p, (uint8x16_t)a);
+            Store<align>((uint8_t*)p, vreinterpretq_u8_u32(a));
         }
 
         template <bool align> SIMD_INLINE void Store(int32_t * p, int32x4_t a)
         {
-            Store<align>((uint8_t*)p, (uint8x16_t)a);
+            Store<align>((uint8_t*)p, vreinterpretq_u8_s32(a));
         }
 
         template <bool align> SIMD_INLINE void Store2(uint8_t * p, uint8x16x2_t a);
