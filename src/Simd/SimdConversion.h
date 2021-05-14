@@ -1060,8 +1060,8 @@ namespace Simd
 
         template <int part> SIMD_INLINE int32x4_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
         {
-            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_Y_WEIGHT),
-                (int16x4_t)Half<part>(green), K16_GREEN_TO_Y_WEIGHT), (int16x4_t)Half<part>(red), K16_RED_TO_Y_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, vreinterpret_s16_u16(Half<part>(blue)), K16_BLUE_TO_Y_WEIGHT),
+                vreinterpret_s16_u16(Half<part>(green)), K16_GREEN_TO_Y_WEIGHT), vreinterpret_s16_u16(Half<part>(red)), K16_RED_TO_Y_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
         }
 
         SIMD_INLINE int16x8_t BgrToY(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
@@ -1078,8 +1078,8 @@ namespace Simd
 
         template <int part> SIMD_INLINE int32x4_t BgrToU(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
         {
-            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_U_WEIGHT),
-                (int16x4_t)Half<part>(green), K16_GREEN_TO_U_WEIGHT), (int16x4_t)Half<part>(red), K16_RED_TO_U_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, vreinterpret_s16_u16(Half<part>(blue)), K16_BLUE_TO_U_WEIGHT),
+                vreinterpret_s16_u16(Half<part>(green)), K16_GREEN_TO_U_WEIGHT), vreinterpret_s16_u16(Half<part>(red)), K16_RED_TO_U_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
         }
 
         SIMD_INLINE int16x8_t BgrToU(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
@@ -1096,8 +1096,8 @@ namespace Simd
 
         template <int part> SIMD_INLINE int32x4_t BgrToV(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
         {
-            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, (int16x4_t)Half<part>(blue), K16_BLUE_TO_V_WEIGHT),
-                (int16x4_t)Half<part>(green), K16_GREEN_TO_V_WEIGHT), (int16x4_t)Half<part>(red), K16_RED_TO_V_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(K32_BGR_TO_YUV_ROUND_TERM, vreinterpret_s16_u16(Half<part>(blue)), K16_BLUE_TO_V_WEIGHT),
+                vreinterpret_s16_u16(Half<part>(green)), K16_GREEN_TO_V_WEIGHT), vreinterpret_s16_u16(Half<part>(red)), K16_RED_TO_V_WEIGHT), Base::BGR_TO_YUV_AVERAGING_SHIFT);
         }
 
         SIMD_INLINE int16x8_t BgrToV(uint16x8_t blue, uint16x8_t green, uint16x8_t red)
@@ -1114,12 +1114,12 @@ namespace Simd
 
         template <int part> SIMD_INLINE int16x8_t AdjustY(uint8x16_t y)
         {
-            return vsubq_s16((int16x8_t)UnpackU8<part>(y), K16_Y_ADJUST);
+            return vsubq_s16(vreinterpretq_s16_u16(UnpackU8<part>(y)), K16_Y_ADJUST);
         }
 
         template <int part> SIMD_INLINE int16x8_t AdjustUV(uint8x16_t uv)
         {
-            return vsubq_s16((int16x8_t)UnpackU8<part>(uv), K16_UV_ADJUST);
+            return vsubq_s16(vreinterpretq_s16_u16(UnpackU8<part>(uv)), K16_UV_ADJUST);
         }
 
         template <int part> SIMD_INLINE int32x4_t YuvToRed(int16x8_t y, int16x8_t v)
