@@ -321,11 +321,8 @@ namespace Simd
                 _microM, AlignHiAny(_M, _microM));
             _macroN = Simd::RestrictRange(AlignLoAny(L3 / sizeof(T) / _macroK, _microN), 
                 compatible ? F : _microN, AlignHiAny(_N, _compatible ? F : _microN));
-            if (_packA)
-            {
-
+            if (_packA && NeedPackA())
                 _pA.Resize(_macroM * _macroK);
-            }
             size_t NF = AlignLo(_N, F);
             if (tailMask)
             {
@@ -400,7 +397,7 @@ namespace Simd
         void MacroKernelSpecific(size_t M, size_t N, size_t K, const T * A, size_t lda, const T * pB, T * C, size_t ldc)
         {
             size_t klda = lda;
-            if (_packA)
+            if (_pA.data)
             {
                 _packA(A, lda, M, K, _microM, _pA.data);
                 A = _pA.data;
@@ -433,9 +430,8 @@ namespace Simd
         {
             size_t klda = lda, plda = lda;
             T * pA = (T*)A;
-            if (_packA)
+            if (_pA.data)
             {
-                //_packA(A, lda, M, K, _microM, _pA.data);
                 pA = _pA.data;
                 plda = K;
                 klda = 1;
@@ -448,13 +444,13 @@ namespace Simd
                 size_t i = 0;
                 for (; i < MA; i += _microM)
                 {
-                    if (_packA && j == 0)
+                    if (_pA.data && j == 0)
                         _packA(A + i * lda, lda, _microM, K, _microM, pA + i * plda);
                     _kernelMM(K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _main);
                 }
                 if (i < M)
                 {
-                    if (_packA && j == 0)
+                    if (_pA.data && j == 0)
                         _packA(A + i * lda, lda, M - i, K, _microM, pA + i * plda);
                     _kernelTM(M - i, K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _main);
                 }
@@ -465,17 +461,26 @@ namespace Simd
                 size_t i = 0;
                 for (; i < MA; i += _microM)
                 {
-                    if (_packA && j == 0)
+                    if (_pA.data && j == 0)
                         _packA(A + i * lda, lda, _microM, K, _microM, pA + i * plda);
                     _kernelMT(K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _tail);
                 }
                 if (i < M)
                 {
-                    if (_packA && j == 0)
+                    if (_pA.data && j == 0)
                         _packA(A + i * lda, lda, M - i, K, _microM, pA + i * plda);
                     _kernelTT(M - i, K, _1, pA + i * plda, klda, pB, F * _K, F, C + i * ldc + j, ldc, _tail);
                 }
             }
+        }
+
+        bool NeedPackA() const
+        {
+            if (_K >= 256 && _M > 256 && _N > _microN * 4)
+                return true;
+            if (_M * 3 < _N && _N >= 512 && _K >= 128 && _M > 16 && _microN >= 32)
+                return true;
+            return false;
         }
 
         typedef Simd::Array<T> Array;
