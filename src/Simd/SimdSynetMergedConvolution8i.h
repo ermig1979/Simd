@@ -343,6 +343,12 @@ namespace Simd
         void Convert32fTo8u(const float* src, size_t yBeg, size_t yEnd, size_t width, size_t channels,
             const float* scale, const float* shift, uint8_t* dst, size_t bufH, SimdSynetCompatibilityType compatibility);
 
+        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam8i& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+
         class SynetMergedConvolution8iCdc : public Avx2::SynetMergedConvolution8iCdc
         {
         public:
@@ -374,6 +380,12 @@ namespace Simd
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
+        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam8i& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+
         class SynetMergedConvolution8iCdc : public Avx512bw::SynetMergedConvolution8iCdc
         {
         public:

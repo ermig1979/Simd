@@ -350,6 +350,10 @@ namespace Simd
             virtual String Ext() const { return "Avx512bw"; }
         };
 
+        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+
+        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+
         class SynetConvolution8iNhwcDepthwise : public Avx2::SynetConvolution8iNhwcDepthwise
         {
         public:
@@ -372,6 +376,10 @@ namespace Simd
 
             virtual String Ext() const { return "Avx512vnni"; }
         };
+
+        void SetDirectAny(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
+
+        void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
         class SynetConvolution8iNhwcDepthwise : public Avx512bw::SynetConvolution8iNhwcDepthwise
         {
