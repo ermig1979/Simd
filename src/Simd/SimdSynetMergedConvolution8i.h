@@ -300,6 +300,12 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        void SetInput(const ConvParam8i& p, Base::SynetMergedConvolution8i::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam8i& p, Base::SynetMergedConvolution8i::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam8i& p, Base::SynetMergedConvolution8i::OutputConvolutionPtr* output);
+
         class SynetMergedConvolution8iCdc : public Sse41::SynetMergedConvolution8iCdc
         {
         public:
