@@ -130,7 +130,7 @@ namespace Test
         SimdConvolutionActivationType a = SimdConvolutionActivationIdentity;
 
 #ifdef NDEBUG
-#if 1
+#if 0
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, f, a, f1, f2);
@@ -142,7 +142,7 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, f, a, f1, f2);
 #endif
-#if 1        
+#if 0        
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, t, a, f1, f2);
@@ -153,6 +153,9 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 192, 192, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, t, a, f1, f2);
+#endif
+#if 1
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 388, 96, f, a, f1, f2);
 #endif
 #else
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 195, 99, f, a, f1, f2);

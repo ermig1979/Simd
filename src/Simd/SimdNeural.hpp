@@ -1204,6 +1204,10 @@ namespace Simd
                 SetThreadNumber(1, false);
             }
 
+            virtual ~FullyConnectedLayer()
+            {
+            }
+
             void Forward(const Vector & src, size_t thread, Method method) override
             {
                 Vector & sum = _common[thread].sum;
@@ -1221,11 +1225,17 @@ namespace Simd
                                 for (ptrdiff_t j = 0; j < _src.width; ++j)
                                     buffer[i*_src.width + j] = _weight[j*_dst.width + i];
                             _weight.swap(buffer);
-                            _reordered = true;                        
+                            _reordered = true;  
                         }
                     }
+#if !defined(SIMD_SYNET_DISABLE)
+                    SimdSynetInnerProductLayerForward(src.data(), _weight.data(), _bias.size() ? _bias.data() : NULL, _dst.width, _src.width, sum.data());
+#else
                     for (size_t i = 0; i < sum.size(); ++i)
-                        ::SimdNeuralProductSum(src.data(), &_weight[i*_src.width], src.size(), &sum[i]);
+                        ::SimdNeuralProductSum(src.data(), &_weight[i * _src.width], src.size(), &sum[i]);
+                    if (_bias.size())
+                        ::SimdNeuralAddVector(_bias.data(), sum.size(), sum.data());
+#endif                
                 }
                 else
                 {
@@ -1233,9 +1243,9 @@ namespace Simd
                     Detail::SetZero(sum);
                     for (size_t i = 0; i < src.size(); i++)
                         ::SimdNeuralAddVectorMultipliedByValue(&_weight[i*_dst.width], sum.size(), &src[i], sum.data());
+                    if (_bias.size())
+                        ::SimdNeuralAddVector(_bias.data(), sum.size(), sum.data());
                 }
-                if (_bias.size())
-                    ::SimdNeuralAddVector(_bias.data(), sum.size(), sum.data());
 
                 _function.function(sum.data(), sum.size(), dst.data());
             }

@@ -26,7 +26,7 @@
 #include "Test/TestData.h"
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-#define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(__FUNCTION__)
+#define SIMD_CHECK_PERFORMANCE() TEST_PERFORMANCE_TEST_(SIMD_FUNCTION)
 #endif
 
 #include "Simd/SimdNeural.hpp"
@@ -1812,10 +1812,10 @@ namespace Test
 
 #ifdef NDEBUG
 #if 1
-        result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 1), 8, _3, _0, _1, _1, 0, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(14, 14, 8), 12, _3, _0, _1, _1, 0, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 1), 8, _3, _0, _1, _1, 0, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(14, 14, 8), 12, _3, _0, _1, _1, 0, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(6, 6, 12), 24, _3, _0, _1, _1, 0, eps, f1, f2);
-        result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 24), 32, _1, _0, _1, _1, 0, eps, f1, f2);
+        //result = result && NeuralConvolutionForwardAutoTest(Index(4, 4, 24), 32, _1, _0, _1, _1, 0, eps, f1, f2);
         result = result && NeuralConvolutionForwardAutoTest(Index(16, 16, 1), 12, _5, _0, _1, _1, 0, eps, f1, f2);
 #endif
 #if 0
@@ -2941,7 +2941,9 @@ namespace Test
         if (!LoadDigits(net, true, sample))
             return false;
 
-        Error error = Check(net, sample, 0.5, false);
+        Error error;
+        for(size_t i = 0; i < 100; i++)
+            error = Check(net, sample, 0.5, false);
         TEST_LOG_SS(Info, std::setprecision(6) << "Predict error : (value = " << error.first << " ; count = " << error.second << ")." << std::endl);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
