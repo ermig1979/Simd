@@ -171,8 +171,8 @@ namespace Simd
 
         template<> void TransformImageTransposeRotate0<3>(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            size_t width4 = AlignLo(width - 2, 4);
-            size_t height4 = AlignLo(height, 4);
+            size_t width4 = AlignLo(width - 5, 4);
+            size_t height4 = AlignLo(height - 5, 4);
             size_t row = 0;
             for (; row < height4; row += 4)
             {
