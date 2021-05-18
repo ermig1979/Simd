@@ -837,6 +837,100 @@ namespace Test
 
     namespace
     {
+        struct FuncVSSs
+        {
+            typedef void(*FuncPtr)(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSum);
+
+            FuncPtr func;
+            String desc;
+
+            FuncVSSs(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(View::Format f)
+            {
+                desc = desc + "[" + ToString(f) + "]";
+            }
+
+            void Call(const View& src, uint64_t* valueSums, uint64_t* squareSums) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.data, src.stride, src.width, src.height, src.ChannelCount(), valueSums, squareSums);
+            }
+        };
+    }
+
+#define FUNC_VSSs(function) FuncVSSs(function, #function)
+
+    bool ValueSquareSumsAutoTest(int width, int height, View::Format format, FuncVSSs f1, FuncVSSs f2)
+    {
+        bool result = true;
+
+        f1.Update(format);
+        f2.Update(format);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << width << ", " << height << "].");
+
+        View src(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(src);
+
+        size_t c = src.ChannelCount();
+        Sums64 valueSums1(c), valueSums2(c), squareSums1(c), squareSums2(c);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, valueSums1.data(), squareSums1.data()));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, valueSums2.data(), squareSums2.data()));
+
+        result = result && Compare(valueSums1, valueSums2, 0, true, 64, "valueSums");
+        result = result && Compare(squareSums1, squareSums2, 0, true, 64, "squareSums");
+
+        return result;
+    }
+
+    bool ValueSquareSumsAutoTest(const FuncVSSs& f1, const FuncVSSs& f2)
+    {
+        bool result = true;
+
+        View::Format formats[4] = { View::Gray8, View::Uv16, View::Bgr24, View::Bgra32 };
+        for (int f = 0; f < 4; ++f)
+        {
+            result = result && ValueSquareSumsAutoTest(W, H, formats[f], f1, f2);
+            result = result && ValueSquareSumsAutoTest(W + O, H - O, formats[f], f1, f2);
+        }
+
+        return result;
+    }
+
+    bool ValueSquareSumsAutoTest()
+    {
+        bool result = true;
+
+        result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Base::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+
+//#ifdef SIMD_SSE2_ENABLE
+//        if (Simd::Sse2::Enable)
+//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sse2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+//#endif 
+//
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Avx2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Avx512bw::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+//#endif
+
+        return result;
+    }
+
+    namespace
+    {
         struct Func5
         {
             typedef void(*FuncPtr)(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum);

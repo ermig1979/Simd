@@ -71,6 +71,9 @@ Functions</h2></td></tr>
 <tr class="memitem:ga81a212c048fdb44521a84b80c8fa7f00"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga81a212c048fdb44521a84b80c8fa7f00">SimdValueSquareSum</a> (const uint8_t *src, size_t stride, size_t width, size_t height, uint64_t *valueSum, uint64_t *squareSum)</td></tr>
 <tr class="memdesc:ga81a212c048fdb44521a84b80c8fa7f00"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum and squared sum of value of pixels for gray 8-bit image.  <a href="group__other__statistic.html#ga81a212c048fdb44521a84b80c8fa7f00">More...</a><br /></td></tr>
 <tr class="separator:ga81a212c048fdb44521a84b80c8fa7f00"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaaa9caa6a6d9d7a4d9625225a579f1a46"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gaaa9caa6a6d9d7a4d9625225a579f1a46">SimdValueSquareSums</a> (const uint8_t *src, size_t stride, size_t width, size_t height, size_t channels, uint64_t *valueSums, uint64_t *squareSums)</td></tr>
+<tr class="memdesc:gaaa9caa6a6d9d7a4d9625225a579f1a46"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.  <a href="group__other__statistic.html#gaaa9caa6a6d9d7a4d9625225a579f1a46">More...</a><br /></td></tr>
+<tr class="separator:gaaa9caa6a6d9d7a4d9625225a579f1a46"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gab40431fe7f7142929d6d761547db72ac"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gab40431fe7f7142929d6d761547db72ac">SimdCorrelationSum</a> (const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t *sum)</td></tr>
 <tr class="memdesc:gab40431fe7f7142929d6d761547db72ac"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of pixel correlation for two gray 8-bit images.  <a href="group__other__statistic.html#gab40431fe7f7142929d6d761547db72ac">More...</a><br /></td></tr>
 <tr class="separator:gab40431fe7f7142929d6d761547db72ac"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -102,6 +105,10 @@ Functions</h2></td></tr>
 <tr class="memitem:gac0b8f2da839461f48e31e14d01570881"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#gac0b8f2da839461f48e31e14d01570881">ValueSquareSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t &amp;valueSum, uint64_t &amp;squareSum)</td></tr>
 <tr class="memdesc:gac0b8f2da839461f48e31e14d01570881"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum and sum of squared value of pixels for gray 8-bit image.  <a href="group__other__statistic.html#gac0b8f2da839461f48e31e14d01570881">More...</a><br /></td></tr>
 <tr class="separator:gac0b8f2da839461f48e31e14d01570881"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9876338bc4188f199531e9e8cb627c3a"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
+<tr class="memitem:ga9876338bc4188f199531e9e8cb627c3a"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga9876338bc4188f199531e9e8cb627c3a">ValueSquareSums</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;src, uint64_t *valueSums, uint64_t *squareSums)</td></tr>
+<tr class="memdesc:ga9876338bc4188f199531e9e8cb627c3a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.  <a href="group__other__statistic.html#ga9876338bc4188f199531e9e8cb627c3a">More...</a><br /></td></tr>
+<tr class="separator:ga9876338bc4188f199531e9e8cb627c3a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga042126ee7cc332e144a2480741491ab1"><td class="memTemplParams" colspan="2">template&lt;template&lt; class &gt; class A&gt; </td></tr>
 <tr class="memitem:ga042126ee7cc332e144a2480741491ab1"><td class="memTemplItemLeft" align="right" valign="top">SIMD_INLINE void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="group__other__statistic.html#ga042126ee7cc332e144a2480741491ab1">CorrelationSum</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;a, const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;b, uint64_t &amp;sum)</td></tr>
 <tr class="memdesc:ga042126ee7cc332e144a2480741491ab1"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets sum of pixel correlation for two gray 8-bit images.  <a href="group__other__statistic.html#ga042126ee7cc332e144a2480741491ab1">More...</a><br /></td></tr>
@@ -677,6 +684,92 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a id="gaaa9caa6a6d9d7a4d9625225a579f1a46"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaaa9caa6a6d9d7a4d9625225a579f1a46">&#9670;&nbsp;</a></span>SimdValueSquareSums()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdValueSquareSums </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>stride</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>width</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>height</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>channels</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>valueSums</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>squareSums</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel. </p>
+<pre class="fragment">for(c = 0; c &lt; channels; c++)
+{
+    valueSums[c] = 0;
+    squareSums[c] = 0;
+}
+for(y = 0; y &lt; height; y++) 
+    for(x = 0; x &lt; width; x++)
+        for(c = 0; c &lt; channels; c++)
+        {
+            value = src[y * stride + x * channels + c];
+            valueSums[c] += value;
+            squareSums[c] += value * value;
+        }
+</pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__other__statistic.html#ga9876338bc4188f199531e9e8cb627c3a" title="Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per ...">Simd::ValueSquareSums(const View&lt;A&gt;&amp; src, uint64_t * valueSums, uint64_t * squareSums)</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to pixels data of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">stride</td><td>- a row size of the image. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">width</td><td>- an image width. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">height</td><td>- an image height. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">channels</td><td>- an image channels count. It my be equal to 1, 2, 3 or 4. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">valueSums</td><td>- the pointer to output buffer with value sums. Size of the buffer must be at least channels count. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">squareSums</td><td>- the pointer to output buffer with square sums. Size of the buffer must be at least channels count. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gab40431fe7f7142929d6d761547db72ac"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gab40431fe7f7142929d6d761547db72ac">&#9670;&nbsp;</a></span>SimdCorrelationSum()</h2>
 
@@ -1159,6 +1252,51 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">valueSum</td><td>- a result value sum. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">squareSum</td><td>- a result square sum. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga9876338bc4188f199531e9e8cb627c3a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9876338bc4188f199531e9e8cb627c3a">&#9670;&nbsp;</a></span>ValueSquareSums()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void ValueSquareSums </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>valueSums</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint64_t *&#160;</td>
+          <td class="paramname"><em>squareSums</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__other__statistic.html#gaaa9caa6a6d9d7a4d9625225a579f1a46" title="Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per ...">SimdValueSquareSums</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input image. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">valueSums</td><td>- the pointer to output buffer with value sums. Size of the buffer must be equal to count of image channels. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">squareSums</td><td>- the pointer to output buffer with square sums. Size of the buffer must be equal to count of image channels. </td></tr>
   </table>
   </dd>
 </dl>

@@ -340,6 +340,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(SobelDyAbsSum);
     TEST_ADD_GROUP_AD0(LaplaceAbsSum);
     TEST_ADD_GROUP_AD0(ValueSquareSum);
+    TEST_ADD_GROUP_A00(ValueSquareSums);
     TEST_ADD_GROUP_AD0(CorrelationSum);
 
     TEST_ADD_GROUP_AD0(StretchGray2x2);

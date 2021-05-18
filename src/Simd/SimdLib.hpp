@@ -3990,7 +3990,7 @@ namespace Simd
         SimdSquareSum(src.data, src.stride, src.width, src.height, &sum);
     }
     
-        /*! @ingroup other_statistic
+    /*! @ingroup other_statistic
 
         \fn void ValueSquareSum(const View<A>& src, uint64_t & valueSum, uint64_t & squareSum)
 
@@ -4007,6 +4007,25 @@ namespace Simd
         assert(src.format == View<A>::Gray8);
 
         SimdValueSquareSum(src.data, src.stride, src.width, src.height, &valueSum, &squareSum);
+    }
+
+    /*! @ingroup other_statistic
+
+        \fn void ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums)
+
+        \short Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.
+
+        \note This function is a C++ wrapper for function ::SimdValueSquareSums.
+
+        \param [in] src - an input image.
+        \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be equal to count of image channels.
+        \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be equal to count of image channels.
+    */
+    template<template<class> class A> SIMD_INLINE void ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums)
+    {
+        assert(src.ChannelSize() == 1);
+
+        SimdValueSquareSums(src.data, src.stride, src.width, src.height, src.ChannelCount(), valueSums, squareSums);
     }
 
     /*! @ingroup other_statistic

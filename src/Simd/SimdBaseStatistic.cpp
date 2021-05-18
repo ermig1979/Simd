@@ -158,6 +158,55 @@ namespace Simd
             }
         }
 
+        template<size_t channels> void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            assert(width < 0x10000);
+
+            for (size_t c = 0; c < channels; ++c)
+            {
+                valueSums[c] = 0;
+                squareSums[c] = 0;
+            }
+            for (size_t y = 0; y < height; ++y)
+            {
+                uint32_t rowValueSums[channels], rowSquareSums[channels];
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    rowValueSums[c] = 0;
+                    rowSquareSums[c] = 0;
+                }
+                for (size_t x = 0; x < width; ++x)
+                {
+                    for (size_t c = 0; c < channels; ++c)
+                    {
+                        int value = src[c];
+                        rowValueSums[c] += value;
+                        rowSquareSums[c] += Square(value);
+                    }
+                    src += channels;
+                }
+                for (size_t c = 0; c < channels; ++c)
+                {
+                    valueSums[c] += rowValueSums[c];
+                    squareSums[c] += rowSquareSums[c];
+                }                
+                src += stride - width*channels;
+            }
+        }
+
+        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            switch (channels)
+            {
+            case 1: ValueSquareSums<1>(src, stride, width, height, valueSums, squareSums); break;
+            case 2: ValueSquareSums<2>(src, stride, width, height, valueSums, squareSums); break;
+            case 3: ValueSquareSums<3>(src, stride, width, height, valueSums, squareSums); break;
+            case 4: ValueSquareSums<4>(src, stride, width, height, valueSums, squareSums); break;
+            default:
+                assert(0);
+            }
+        }
+
         void CorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width < 0x10000);

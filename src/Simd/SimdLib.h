@@ -5820,7 +5820,7 @@ extern "C"
     
     SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
     
-        /*! @ingroup other_statistic
+    /*! @ingroup other_statistic
 
         \fn void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
 
@@ -5836,6 +5836,40 @@ extern "C"
         \param [out] squareSum - the result square sum.
     */
     SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum);
+
+    /*! @ingroup other_statistic
+
+        \fn void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
+
+        \short Gets image channels value sums and squared value sums for image. The image must have 8-bit depth per channel.
+
+        \verbatim
+        for(c = 0; c < channels; c++)
+        {
+            valueSums[c] = 0;
+            squareSums[c] = 0;
+        }
+        for(y = 0; y < height; y++) 
+            for(x = 0; x < width; x++)
+                for(c = 0; c < channels; c++)
+                {
+                    value = src[y * stride + x * channels + c];
+                    valueSums[c] += value;
+                    squareSums[c] += value * value;
+                }
+        \endverbatim
+
+        \note This function has a C++ wrappers: Simd::ValueSquareSums(const View<A>& src, uint64_t * valueSums, uint64_t * squareSums).
+
+        \param [in] src - a pointer to pixels data of the image.
+        \param [in] stride - a row size of the image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channels - an image channels count. It my be equal to 1, 2, 3 or 4.
+        \param [out] valueSums - the pointer to output buffer with value sums. Size of the buffer must be at least channels count.
+        \param [out] squareSums - the pointer to output buffer with square sums. Size of the buffer must be at least channels count.
+    */
+    SIMD_API void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
     
     /*! @ingroup other_statistic
 
