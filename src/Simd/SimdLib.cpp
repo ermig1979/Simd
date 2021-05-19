@@ -5338,7 +5338,12 @@ SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t widt
 
 SIMD_API void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
 {
-    Base::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse2::A)
+        Sse41::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
+    else
+#endif
+        Base::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
 }
 
 SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride, size_t width, size_t height, uint64_t * sum)

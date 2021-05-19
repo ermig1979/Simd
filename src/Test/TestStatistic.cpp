@@ -906,11 +906,11 @@ namespace Test
 
         result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Base::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 
-//#ifdef SIMD_SSE2_ENABLE
-//        if (Simd::Sse2::Enable)
-//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sse2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Sse41::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Avx2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));

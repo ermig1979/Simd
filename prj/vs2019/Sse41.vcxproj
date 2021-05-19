@@ -23,6 +23,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp" />
