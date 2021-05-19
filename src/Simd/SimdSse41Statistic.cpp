@@ -108,6 +108,61 @@ namespace Simd
             squareSums[1] = ExtractInt64Sum(sSum1);
         }
 
+        const __m128i K8_SHFL_4_01 = SIMD_MM_SETR_EPI8(0x0, -1, 0x4, -1, 0x8, -1, 0xC, -1, 0x1, -1, 0x5, -1, 0x9, -1, 0xD, -1);
+        const __m128i K8_SHFL_4_23 = SIMD_MM_SETR_EPI8(0x2, -1, 0x6, -1, 0xA, -1, 0xE, -1, 0x3, -1, 0x7, -1, 0xB, -1, 0xF, -1);
+
+        SIMD_INLINE __m128i PairSum32(__m128i a)
+        {
+            return _mm_add_epi64(_mm_and_si128(a, K64_00000000FFFFFFFF), _mm_and_si128(_mm_srli_si128(a, 4), K64_00000000FFFFFFFF));
+        }
+
+        void ValueSquareSums4(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            __m128i tail = ShiftLeft(K_INV_ZERO, A - size + sizeA);
+            __m128i vSum01 = _mm_setzero_si128();
+            __m128i vSum23 = _mm_setzero_si128();
+            __m128i sSum01 = _mm_setzero_si128();
+            __m128i sSum23 = _mm_setzero_si128();
+            for (size_t y = 0; y < height; ++y)
+            {
+                __m128i rSum01 = _mm_setzero_si128();
+                __m128i rSum23 = _mm_setzero_si128();
+                for (size_t x = 0; x < sizeA; x += A)
+                {
+                    const __m128i val = _mm_loadu_si128((__m128i*)(src + x));
+                    const __m128i v01 = _mm_shuffle_epi8(val, K8_SHFL_4_01);
+                    const __m128i v23 = _mm_shuffle_epi8(val, K8_SHFL_4_23);
+                    vSum01 = _mm_add_epi64(_mm_sad_epu8(v01, K_ZERO), vSum01);
+                    rSum01 = _mm_add_epi32(rSum01, _mm_madd_epi16(v01, v01));
+                    vSum23 = _mm_add_epi64(_mm_sad_epu8(v23, K_ZERO), vSum23);
+                    rSum23 = _mm_add_epi32(rSum23, _mm_madd_epi16(v23, v23));
+                }
+                if (size - sizeA)
+                {
+                    const __m128i val = _mm_and_si128(tail, _mm_loadu_si128((__m128i*)(src + size - A)));
+                    const __m128i v01 = _mm_shuffle_epi8(val, K8_SHFL_4_01);
+                    const __m128i v23 = _mm_shuffle_epi8(val, K8_SHFL_4_23);
+                    vSum01 = _mm_add_epi64(_mm_sad_epu8(v01, K_ZERO), vSum01);
+                    rSum01 = _mm_add_epi32(rSum01, _mm_madd_epi16(v01, v01));
+                    vSum23 = _mm_add_epi64(_mm_sad_epu8(v23, K_ZERO), vSum23);
+                    rSum23 = _mm_add_epi32(rSum23, _mm_madd_epi16(v23, v23));
+                }
+                sSum01 = _mm_add_epi64(sSum01, PairSum32(rSum01));
+                sSum23 = _mm_add_epi64(sSum23, PairSum32(rSum23));
+                src += stride;
+            }
+            valueSums[0] = ExtractInt64<0>(vSum01);
+            valueSums[1] = ExtractInt64<1>(vSum01);
+            valueSums[2] = ExtractInt64<0>(vSum23);
+            valueSums[3] = ExtractInt64<1>(vSum23);
+            squareSums[0] = ExtractInt64<0>(sSum01);
+            squareSums[1] = ExtractInt64<1>(sSum01);
+            squareSums[2] = ExtractInt64<0>(sSum23);
+            squareSums[3] = ExtractInt64<1>(sSum23);
+        }
+
         template<size_t channels> void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
         {
             for (size_t c = 0; c < channels; ++c)
@@ -151,7 +206,7 @@ namespace Simd
             case 1: ValueSquareSums1(src, stride, width, height, valueSums, squareSums); break;
             case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
             case 3: ValueSquareSums<3>(src, stride, width, height, valueSums, squareSums); break;
-            case 4: ValueSquareSums<4>(src, stride, width, height, valueSums, squareSums); break;
+            case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
             default:
                 assert(0);
             }
