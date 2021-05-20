@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
@@ -108,6 +109,67 @@ namespace Simd
             squareSums[1] = ExtractInt64Sum(sSum1);
         }
 
+        void ValueSquareSums3(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t widthA = AlignLo(width, A);
+            __m128i tail = ShiftLeft(K_INV_ZERO, A - width + widthA);
+            __m128i vSum0 = _mm_setzero_si128();
+            __m128i vSum1 = _mm_setzero_si128();
+            __m128i vSum2 = _mm_setzero_si128();
+            __m128i sSum0 = _mm_setzero_si128();
+            __m128i sSum1 = _mm_setzero_si128();
+            __m128i sSum2 = _mm_setzero_si128();
+            __m128i bgr[3];
+            for (size_t y = 0; y < height; ++y)
+            {
+                __m128i rSum0 = _mm_setzero_si128();
+                __m128i rSum1 = _mm_setzero_si128();
+                __m128i rSum2 = _mm_setzero_si128();
+                for (size_t x = 0; x < widthA; x += A)
+                {
+                    const uint8_t* psrc = src + x * 3;
+                    bgr[0] = _mm_loadu_si128((__m128i*)psrc + 0);
+                    bgr[1] = _mm_loadu_si128((__m128i*)psrc + 1);
+                    bgr[2] = _mm_loadu_si128((__m128i*)psrc + 2);
+                    __m128i v0 = BgrToBlue(bgr);
+                    vSum0 = _mm_add_epi64(_mm_sad_epu8(v0, K_ZERO), vSum0);
+                    rSum0 = _mm_add_epi32(rSum0, Square8u(v0));
+                    __m128i v1 = BgrToGreen(bgr);
+                    vSum1 = _mm_add_epi64(_mm_sad_epu8(v1, K_ZERO), vSum1);
+                    rSum1 = _mm_add_epi32(rSum1, Square8u(v1));
+                    __m128i v2 = BgrToRed(bgr);
+                    vSum2 = _mm_add_epi64(_mm_sad_epu8(v2, K_ZERO), vSum2);
+                    rSum2 = _mm_add_epi32(rSum2, Square8u(v2));
+                }
+                if (width - widthA)
+                {
+                    const uint8_t* psrc = src + (width - A) * 3;
+                    bgr[0] = _mm_loadu_si128((__m128i*)psrc + 0);
+                    bgr[1] = _mm_loadu_si128((__m128i*)psrc + 1);
+                    bgr[2] = _mm_loadu_si128((__m128i*)psrc + 2);
+                    __m128i v0 = _mm_and_si128(tail, BgrToBlue(bgr));
+                    vSum0 = _mm_add_epi64(_mm_sad_epu8(v0, K_ZERO), vSum0);
+                    rSum0 = _mm_add_epi32(rSum0, Square8u(v0));
+                    __m128i v1 = _mm_and_si128(tail, BgrToGreen(bgr));
+                    vSum1 = _mm_add_epi64(_mm_sad_epu8(v1, K_ZERO), vSum1);
+                    rSum1 = _mm_add_epi32(rSum1, Square8u(v1));
+                    __m128i v2 = _mm_and_si128(tail, BgrToRed(bgr));
+                    vSum2 = _mm_add_epi64(_mm_sad_epu8(v2, K_ZERO), vSum2);
+                    rSum2 = _mm_add_epi32(rSum2, Square8u(v2));
+                }
+                sSum0 = _mm_add_epi64(sSum0, HorizontalSum32(rSum0));
+                sSum1 = _mm_add_epi64(sSum1, HorizontalSum32(rSum1));
+                sSum2 = _mm_add_epi64(sSum2, HorizontalSum32(rSum2));
+                src += stride;
+            }
+            valueSums[0] = ExtractInt64Sum(vSum0);
+            valueSums[1] = ExtractInt64Sum(vSum1);
+            valueSums[2] = ExtractInt64Sum(vSum2);
+            squareSums[0] = ExtractInt64Sum(sSum0);
+            squareSums[1] = ExtractInt64Sum(sSum1);
+            squareSums[2] = ExtractInt64Sum(sSum2);
+        }
+
         const __m128i K8_SHFL_4_01 = SIMD_MM_SETR_EPI8(0x0, -1, 0x4, -1, 0x8, -1, 0xC, -1, 0x1, -1, 0x5, -1, 0x9, -1, 0xD, -1);
         const __m128i K8_SHFL_4_23 = SIMD_MM_SETR_EPI8(0x2, -1, 0x6, -1, 0xA, -1, 0xE, -1, 0x3, -1, 0x7, -1, 0xB, -1, 0xF, -1);
 
@@ -163,40 +225,6 @@ namespace Simd
             squareSums[3] = ExtractInt64<1>(sSum23);
         }
 
-        template<size_t channels> void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
-        {
-            for (size_t c = 0; c < channels; ++c)
-            {
-                valueSums[c] = 0;
-                squareSums[c] = 0;
-            }
-            for (size_t y = 0; y < height; ++y)
-            {
-                uint32_t rowValueSums[channels], rowSquareSums[channels];
-                for (size_t c = 0; c < channels; ++c)
-                {
-                    rowValueSums[c] = 0;
-                    rowSquareSums[c] = 0;
-                }
-                for (size_t x = 0; x < width; ++x)
-                {
-                    for (size_t c = 0; c < channels; ++c)
-                    {
-                        int value = src[c];
-                        rowValueSums[c] += value;
-                        rowSquareSums[c] += Base::Square(value);
-                    }
-                    src += channels;
-                }
-                for (size_t c = 0; c < channels; ++c)
-                {
-                    valueSums[c] += rowValueSums[c];
-                    squareSums[c] += rowSquareSums[c];
-                }
-                src += stride - width * channels;
-            }
-        }
-
         void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
         {
             assert(width >= A && width < 0x10000);
@@ -205,7 +233,7 @@ namespace Simd
             {
             case 1: ValueSquareSums1(src, stride, width, height, valueSums, squareSums); break;
             case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
-            case 3: ValueSquareSums<3>(src, stride, width, height, valueSums, squareSums); break;
+            case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
             case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
             default:
                 assert(0);
