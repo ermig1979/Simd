@@ -259,6 +259,12 @@ namespace Simd
             return _mm_extract_epi64(c, 0) + _mm_extract_epi64(c, 1);
         }
 #endif
+
+        template <> SIMD_INLINE __m128i ExtractSum<__m128i>(__m512i a)
+        {
+            __m256i b = _mm256_add_epi64(_mm512_extracti64x4_epi64(a, 0), _mm512_extracti64x4_epi64(a, 1));
+            return _mm_add_epi64(_mm256_extractf128_si256(b, 0), _mm256_extractf128_si256(b, 1));
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 

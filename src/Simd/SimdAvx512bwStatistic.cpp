@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdConversion.h"
 
 namespace Simd
 {
@@ -441,6 +442,201 @@ namespace Simd
             else
                 ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
         }
+
+        void ValueSquareSums2(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t size = width * 2;
+            size_t sizeA = AlignLo(size, A);
+            __mmask64 tail = TailMask64(size - sizeA);
+            __m512i vSum0 = _mm512_setzero_si512();
+            __m512i vSum1 = _mm512_setzero_si512();
+            __m512i sSum0 = _mm512_setzero_si512();
+            __m512i sSum1 = _mm512_setzero_si512();
+            for (size_t y = 0; y < height; ++y)
+            {
+                __m512i rSum0 = _mm512_setzero_si512();
+                __m512i rSum1 = _mm512_setzero_si512();
+                for (size_t x = 0; x < sizeA; x += A)
+                {
+                    const __m512i val = _mm512_loadu_si512(src + x);
+                    const __m512i v0 = _mm512_and_si512(val, K16_00FF);
+                    const __m512i v1 = _mm512_srli_epi16(val, 8);
+                    vSum0 = _mm512_add_epi64(_mm512_sad_epu8(v0, K_ZERO), vSum0);
+                    vSum1 = _mm512_add_epi64(_mm512_sad_epu8(v1, K_ZERO), vSum1);
+                    rSum0 = _mm512_add_epi32(rSum0, _mm512_madd_epi16(v0, v0));
+                    rSum1 = _mm512_add_epi32(rSum1, _mm512_madd_epi16(v1, v1));
+                }
+                if (size > sizeA)
+                {
+                    const __m512i val = _mm512_maskz_loadu_epi8(tail, src + sizeA);
+                    const __m512i v0 = _mm512_and_si512(val, K16_00FF);
+                    const __m512i v1 = _mm512_srli_epi16(val, 8);
+                    vSum0 = _mm512_add_epi64(_mm512_sad_epu8(v0, K_ZERO), vSum0);
+                    vSum1 = _mm512_add_epi64(_mm512_sad_epu8(v1, K_ZERO), vSum1);
+                    rSum0 = _mm512_add_epi32(rSum0, _mm512_madd_epi16(v0, v0));
+                    rSum1 = _mm512_add_epi32(rSum1, _mm512_madd_epi16(v1, v1));
+                }
+                sSum0 = _mm512_add_epi64(sSum0, HorizontalSum32(rSum0));
+                sSum1 = _mm512_add_epi64(sSum1, HorizontalSum32(rSum1));
+                src += stride;
+            }
+            valueSums[0] = ExtractSum<uint64_t>(vSum0);
+            valueSums[1] = ExtractSum<uint64_t>(vSum1);
+            squareSums[0] = ExtractSum<uint64_t>(sSum0);
+            squareSums[1] = ExtractSum<uint64_t>(sSum1);
+        }
+
+        SIMD_INLINE __m256i Square8u(__m256i src)
+        {
+            const __m256i lo = _mm256_unpacklo_epi8(src, _mm256_setzero_si256());
+            const __m256i hi = _mm256_unpackhi_epi8(src, _mm256_setzero_si256());
+            return _mm256_add_epi32(_mm256_madd_epi16(lo, lo), _mm256_madd_epi16(hi, hi));
+        }
+
+        void ValueSquareSums3(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t widthA = AlignLo(width, Avx2::A);
+            __m256i tail = Avx2::SetMask<uint8_t>(0, Avx2::A - width + widthA, 0xFF);
+            __m256i vSum0 = _mm256_setzero_si256();
+            __m256i vSum1 = _mm256_setzero_si256();
+            __m256i vSum2 = _mm256_setzero_si256();
+            __m256i sSum0 = _mm256_setzero_si256();
+            __m256i sSum1 = _mm256_setzero_si256();
+            __m256i sSum2 = _mm256_setzero_si256();
+            __m256i bgr[3];
+            for (size_t y = 0; y < height; ++y)
+            {
+                __m256i rSum0 = _mm256_setzero_si256();
+                __m256i rSum1 = _mm256_setzero_si256();
+                __m256i rSum2 = _mm256_setzero_si256();
+                for (size_t x = 0; x < widthA; x += Avx2::A)
+                {
+                    const uint8_t* psrc = src + x * 3;
+                    bgr[0] = _mm256_loadu_si256((__m256i*)psrc + 0);
+                    bgr[1] = _mm256_loadu_si256((__m256i*)psrc + 1);
+                    bgr[2] = _mm256_loadu_si256((__m256i*)psrc + 2);
+                    __m256i v0 = Avx2::BgrToBlue(bgr);
+                    vSum0 = _mm256_add_epi64(_mm256_sad_epu8(v0, Avx2::K_ZERO), vSum0);
+                    rSum0 = _mm256_add_epi32(rSum0, Square8u(v0));
+                    __m256i v1 = Avx2::BgrToGreen(bgr);
+                    vSum1 = _mm256_add_epi64(_mm256_sad_epu8(v1, Avx2::K_ZERO), vSum1);
+                    rSum1 = _mm256_add_epi32(rSum1, Square8u(v1));
+                    __m256i v2 = Avx2::BgrToRed(bgr);
+                    vSum2 = _mm256_add_epi64(_mm256_sad_epu8(v2, Avx2::K_ZERO), vSum2);
+                    rSum2 = _mm256_add_epi32(rSum2, Square8u(v2));
+                }
+                if (width - widthA)
+                {
+                    const uint8_t* psrc = src + (width - Avx2::A) * 3;
+                    bgr[0] = _mm256_loadu_si256((__m256i*)psrc + 0);
+                    bgr[1] = _mm256_loadu_si256((__m256i*)psrc + 1);
+                    bgr[2] = _mm256_loadu_si256((__m256i*)psrc + 2);
+                    __m256i v0 = _mm256_and_si256(tail, Avx2::BgrToBlue(bgr));
+                    vSum0 = _mm256_add_epi64(_mm256_sad_epu8(v0, Avx2::K_ZERO), vSum0);
+                    rSum0 = _mm256_add_epi32(rSum0, Square8u(v0));
+                    __m256i v1 = _mm256_and_si256(tail, Avx2::BgrToGreen(bgr));
+                    vSum1 = _mm256_add_epi64(_mm256_sad_epu8(v1, Avx2::K_ZERO), vSum1);
+                    rSum1 = _mm256_add_epi32(rSum1, Square8u(v1));
+                    __m256i v2 = _mm256_and_si256(tail, Avx2::BgrToRed(bgr));
+                    vSum2 = _mm256_add_epi64(_mm256_sad_epu8(v2, Avx2::K_ZERO), vSum2);
+                    rSum2 = _mm256_add_epi32(rSum2, Square8u(v2));
+                }
+                sSum0 = _mm256_add_epi64(sSum0, Avx2::HorizontalSum32(rSum0));
+                sSum1 = _mm256_add_epi64(sSum1, Avx2::HorizontalSum32(rSum1));
+                sSum2 = _mm256_add_epi64(sSum2, Avx2::HorizontalSum32(rSum2));
+                src += stride;
+            }
+            valueSums[0] = Avx2::ExtractSum<uint64_t>(vSum0);
+            valueSums[1] = Avx2::ExtractSum<uint64_t>(vSum1);
+            valueSums[2] = Avx2::ExtractSum<uint64_t>(vSum2);
+            squareSums[0] = Avx2::ExtractSum<uint64_t>(sSum0);
+            squareSums[1] = Avx2::ExtractSum<uint64_t>(sSum1);
+            squareSums[2] = Avx2::ExtractSum<uint64_t>(sSum2);
+        }
+
+        const __m512i K8_SHFL_4_01 = SIMD_MM512_SETR_EPI8(
+            0x0, -1, 0x4, -1, 0x8, -1, 0xC, -1, 0x1, -1, 0x5, -1, 0x9, -1, 0xD, -1,
+            0x0, -1, 0x4, -1, 0x8, -1, 0xC, -1, 0x1, -1, 0x5, -1, 0x9, -1, 0xD, -1,
+            0x0, -1, 0x4, -1, 0x8, -1, 0xC, -1, 0x1, -1, 0x5, -1, 0x9, -1, 0xD, -1,
+            0x0, -1, 0x4, -1, 0x8, -1, 0xC, -1, 0x1, -1, 0x5, -1, 0x9, -1, 0xD, -1);
+        const __m512i K8_SHFL_4_23 = SIMD_MM512_SETR_EPI8(
+            0x2, -1, 0x6, -1, 0xA, -1, 0xE, -1, 0x3, -1, 0x7, -1, 0xB, -1, 0xF, -1,
+            0x2, -1, 0x6, -1, 0xA, -1, 0xE, -1, 0x3, -1, 0x7, -1, 0xB, -1, 0xF, -1,
+            0x2, -1, 0x6, -1, 0xA, -1, 0xE, -1, 0x3, -1, 0x7, -1, 0xB, -1, 0xF, -1,
+            0x2, -1, 0x6, -1, 0xA, -1, 0xE, -1, 0x3, -1, 0x7, -1, 0xB, -1, 0xF, -1);
+
+        SIMD_INLINE __m512i PairSum32(__m512i a)
+        {
+            return _mm512_add_epi64(_mm512_and_si512(a, K64_00000000FFFFFFFF), _mm512_srli_epi64(a, 32));
+        }
+
+        void ValueSquareSums4(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            __mmask64 tail = TailMask64(size - sizeA);
+            __m512i vSum01 = _mm512_setzero_si512();
+            __m512i vSum23 = _mm512_setzero_si512();
+            __m512i sSum01 = _mm512_setzero_si512();
+            __m512i sSum23 = _mm512_setzero_si512();
+            for (size_t y = 0; y < height; ++y)
+            {
+                __m512i rSum01 = _mm512_setzero_si512();
+                __m512i rSum23 = _mm512_setzero_si512();
+                for (size_t x = 0; x < sizeA; x += A)
+                {
+                    const __m512i val = _mm512_loadu_si512((__m512i*)(src + x));
+                    const __m512i v01 = _mm512_shuffle_epi8(val, K8_SHFL_4_01);
+                    const __m512i v23 = _mm512_shuffle_epi8(val, K8_SHFL_4_23);
+                    vSum01 = _mm512_add_epi64(_mm512_sad_epu8(v01, K_ZERO), vSum01);
+                    rSum01 = _mm512_add_epi32(rSum01, _mm512_madd_epi16(v01, v01));
+                    vSum23 = _mm512_add_epi64(_mm512_sad_epu8(v23, K_ZERO), vSum23);
+                    rSum23 = _mm512_add_epi32(rSum23, _mm512_madd_epi16(v23, v23));
+                }
+                if (size > sizeA)
+                {
+                    const __m512i val = _mm512_maskz_loadu_epi8(tail, src + sizeA);
+                    const __m512i v01 = _mm512_shuffle_epi8(val, K8_SHFL_4_01);
+                    const __m512i v23 = _mm512_shuffle_epi8(val, K8_SHFL_4_23);
+                    vSum01 = _mm512_add_epi64(_mm512_sad_epu8(v01, K_ZERO), vSum01);
+                    rSum01 = _mm512_add_epi32(rSum01, _mm512_madd_epi16(v01, v01));
+                    vSum23 = _mm512_add_epi64(_mm512_sad_epu8(v23, K_ZERO), vSum23);
+                    rSum23 = _mm512_add_epi32(rSum23, _mm512_madd_epi16(v23, v23));
+                }
+                sSum01 = _mm512_add_epi64(sSum01, PairSum32(rSum01));
+                sSum23 = _mm512_add_epi64(sSum23, PairSum32(rSum23));
+                src += stride;
+            }
+            __m128i vSum01s = ExtractSum<__m128i>(vSum01);
+            __m128i vSum23s = ExtractSum<__m128i>(vSum23);
+            __m128i sSum01s = ExtractSum<__m128i>(sSum01);
+            __m128i sSum23s = ExtractSum<__m128i>(sSum23);
+            valueSums[0] = Sse2::ExtractInt64<0>(vSum01s);
+            valueSums[1] = Sse2::ExtractInt64<1>(vSum01s);
+            valueSums[2] = Sse2::ExtractInt64<0>(vSum23s);
+            valueSums[3] = Sse2::ExtractInt64<1>(vSum23s);
+            squareSums[0] = Sse2::ExtractInt64<0>(sSum01s);
+            squareSums[1] = Sse2::ExtractInt64<1>(sSum01s);
+            squareSums[2] = Sse2::ExtractInt64<0>(sSum23s);
+            squareSums[3] = Sse2::ExtractInt64<1>(sSum23s);
+        }
+
+        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            assert(width >= Avx2::A && width < 0x10000);
+
+            switch (channels)
+            {
+            case 1: ValueSquareSum<false>(src, stride, width, height, valueSums, squareSums); break;
+            case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
+            case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
+            case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------
 
         SIMD_INLINE __m512i CorrelationSum(__m512i a, __m512i b)
         {

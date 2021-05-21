@@ -916,11 +916,11 @@ namespace Test
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Avx2::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 #endif 
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Avx512bw::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
-//#endif 
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Avx512bw::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+#endif 
+
 //#ifdef SIMD_NEON_ENABLE
 //        if (Simd::Neon::Enable)
 //            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));

@@ -450,13 +450,6 @@ namespace Simd
             squareSums[1] = ExtractSum<uint64_t>(sSum1);
         }
 
-        SIMD_INLINE __m128i Square8u(__m128i src)
-        {
-            const __m128i lo = _mm_unpacklo_epi8(src, _mm_setzero_si128());
-            const __m128i hi = _mm_unpackhi_epi8(src, _mm_setzero_si128());
-            return _mm_add_epi32(_mm_madd_epi16(lo, lo), _mm_madd_epi16(hi, hi));
-        }
-
         void ValueSquareSums3(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
         {
             size_t widthA = AlignLo(width, A);
@@ -533,7 +526,7 @@ namespace Simd
         void ValueSquareSums4(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
         {
             size_t size = width * 4;
-            size_t sizeA = AlignLo(size, Sse2::A);
+            size_t sizeA = AlignLo(size, A);
             __m256i tail = SetMask<uint8_t>(0, A - size + sizeA, 0xFF);
             __m256i vSum01 = _mm256_setzero_si256();
             __m256i vSum23 = _mm256_setzero_si256();

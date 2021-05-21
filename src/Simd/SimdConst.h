@@ -485,6 +485,8 @@ namespace Simd
 
         const __m512i K16_DIVISION_BY_9_FACTOR = SIMD_MM512_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
 
+        const __m512i K64_00000000FFFFFFFF = SIMD_MM512_SET2_EPI32(0xFFFFFFFF, 0);
+
         const __m512i K8_SUFFLE_BGRA_TO_G0A0 = SIMD_MM512_SETR_EPI8(
             0x1, -1, 0x3, -1, 0x5, -1, 0x7, -1, 0x9, -1, 0xB, -1, 0xD, -1, 0xF, -1,
             0x1, -1, 0x3, -1, 0x5, -1, 0x7, -1, 0x9, -1, 0xB, -1, 0xD, -1, 0xF, -1,
