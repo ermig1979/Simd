@@ -225,7 +225,12 @@ namespace Simd
         const size_t CAPACITY_MIN = 4096;
 
         uint8_t * _data;
-        size_t _pos, _size, _capacity, _bitCount, _bitBuffer;
+        size_t _pos, _size, _capacity, _bitCount;
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+        uint64_t _bitBuffer;
+#else
+        uint32_t _bitBuffer;
+#endif
 
         SIMD_INLINE void Reset(bool owner)
         {
@@ -373,10 +378,17 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE size_t& BitBuffer()
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+        SIMD_INLINE uint64_t & BitBuffer()
         {
             return _bitBuffer;
         }
+#else
+        SIMD_INLINE uint32_t& BitBuffer()
+        {
+            return _bitBuffer;
+        }
+#endif
 
         SIMD_INLINE size_t& BitCount()
         {
