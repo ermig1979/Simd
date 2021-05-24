@@ -47,6 +47,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Avx512bw::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx512bw::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Avx512bw::GrayToBgr; break;
+                default: break;
                 }
             }
         }
@@ -68,6 +69,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Avx512bw::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx512bw::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Avx512bw::GrayToBgr; break;
+                default: break;
                 }
             }
         }
@@ -89,6 +91,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _toAny = Avx512bw::RgbToGray; break;
                 case SimdPixelFormatBgr24: _toAny = Avx512bw::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx512bw::RgbToBgra; break;
+                default: break;
                 }
             }
         }
@@ -110,6 +113,7 @@ namespace Simd
                 case SimdPixelFormatGray8: _toAny = Avx512bw::RgbToGray; break;
                 case SimdPixelFormatBgr24: _toAny = Avx512bw::BgrToRgb; break;
                 case SimdPixelFormatBgra32: _toBgra = Avx512bw::RgbToBgra; break;
+                default: break;
                 }
             }
         }

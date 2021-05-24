@@ -497,6 +497,8 @@ namespace Simd
                 case SimdPixelFormatRgba32:
                     _deintBgra = Avx512bw::DeinterleaveBgra;
                     break;
+                default: 
+                    break;
                 }
             }
             _writeBlock = _subSample ? JpegWriteBlockSubs : JpegWriteBlockFull;

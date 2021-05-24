@@ -2444,6 +2444,8 @@ namespace Simd
                 case SimdPixelFormatRgba32:
                     Base::BgrToBgra(data, x, y, stride, _image.data, _image.stride, 0xFF);
                     break;
+                default: 
+                    break;
                 }
                 JPEG_FREE(data);
                 return true;

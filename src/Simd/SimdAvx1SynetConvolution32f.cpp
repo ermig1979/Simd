@@ -1968,6 +1968,7 @@ namespace Simd
                 case ::SimdConvolutionActivationRestrictRange: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRestrictRange>(p); break;
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
+                default: break;
                 }
             }
             return func ? func : Sse2::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();

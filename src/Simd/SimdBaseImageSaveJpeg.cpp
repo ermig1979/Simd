@@ -316,6 +316,8 @@ namespace Simd
             case SimdPixelFormatRgba32:
                 _deintBgra = Base::DeinterleaveBgra;
                 break;
+            default: 
+                break;
             }
             _writeBlock = _subSample ? JpegWriteBlockSubs : JpegWriteBlockFull;
         }
@@ -429,6 +431,8 @@ namespace Simd
                     break;
                 case SimdPixelFormatRgba32:
                     _deintBgra(src, stride, _param.width, block, r, _width, g, _width, b, _width, NULL, 0);
+                    break;
+                default: 
                     break;
                 }
                 if(_param.format == SimdPixelFormatGray8)

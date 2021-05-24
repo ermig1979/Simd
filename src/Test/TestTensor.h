@@ -519,9 +519,8 @@ namespace Test
         case SimdTensorFormatOyxi4o: return "Oyxi4o";
         case SimdTensorFormatOyxi8o: return "Oyxi8o";
         case SimdTensorFormatOyxi16o: return "Oyxi16o";
+        default: assert(0); return "Assert";
         }
-        assert(0);
-        return "Assert";
     }
 
     inline Shape ToShape(size_t batchOrOutput, size_t channelsOrInput, size_t height, size_t width, SimdTensorFormatType format)
@@ -538,9 +537,8 @@ namespace Test
         case SimdTensorFormatOyxi4o: return Shp((batchOrOutput + 3) / 4, height, width, channelsOrInput, 4);
         case SimdTensorFormatOyxi8o: return Shp((batchOrOutput + 7) / 8, height, width, channelsOrInput, 8);
         case SimdTensorFormatOyxi16o: return Shp((batchOrOutput + 15) / 16, height, width, channelsOrInput, 16);
+        default: assert(0); return Shape(0);
         }
-        assert(0);
-        return Shape();
     }
 
     inline Shape ToShape(size_t channels, size_t height, size_t width, SimdTensorFormatType format)
@@ -552,9 +550,8 @@ namespace Test
         case SimdTensorFormatNchw4c: return Shp((channels + 3) / 4, height, width, 4);
         case SimdTensorFormatNchw8c: return Shp((channels + 7) / 8, height, width, 8);
         case SimdTensorFormatNchw16c: return Shp((channels + 15) / 16, height, width, 16);
+        default: assert(0); return Shape(0);
         }
-        assert(0);
-        return Shape();
     }
 
     inline Shape ToShape(size_t channels, size_t spatial, SimdTensorFormatType format)
@@ -566,9 +563,8 @@ namespace Test
         case SimdTensorFormatNchw4c: return Shp((channels + 3) / 4, spatial, 4);
         case SimdTensorFormatNchw8c: return Shp((channels + 7) / 8, spatial, 8);
         case SimdTensorFormatNchw16c: return Shp((channels + 15) / 16, spatial, 16);
+        default: assert(0); return Shape(0);
         }
-        assert(0);
-        return Shape();
     }
 
     inline Shape ToShape(size_t value)

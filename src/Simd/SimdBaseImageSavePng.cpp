@@ -288,6 +288,8 @@ namespace Simd
             case SimdPixelFormatRgba32:
                 _channels = 4;
                 break;
+            default: 
+                break;
             }
             _size = _param.width * _channels;
             if (_param.format == SimdPixelFormatBgr24)

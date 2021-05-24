@@ -553,6 +553,10 @@ namespace Test
             return "_Hsv24";
         case View::Hsl24:
             return "_Hsl24";
+        case View::Rgb24:
+            return "_Rgb24";
+        case View::Rgba32:
+            return "_Rgba32";
         }
         assert(0);
         return "_Unknown";

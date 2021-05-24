@@ -70,9 +70,10 @@ namespace Simd
             case SimdTensorFormatOyxi4o: return 4;
             case SimdTensorFormatOyxi8o: return 8;
             case SimdTensorFormatOyxi16o: return 16;
+            default: 
+                assert(0); 
+                return 0;
             }
-            assert(0);
-            return 0;
         }
 
         void SynetAddBiasNchw(const float * bias, size_t channels, size_t spatial, float * dst)

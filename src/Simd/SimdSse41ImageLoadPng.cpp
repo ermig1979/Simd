@@ -1764,6 +1764,8 @@ namespace Simd
                 case SimdPixelFormatRgba32:
                     Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);
                     break;
+                default: 
+                    break;
                 }
                 PNG_FREE(data);
                 return true;
