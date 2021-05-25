@@ -42,11 +42,11 @@ namespace Test
     {
 #ifdef WIN32
         return String("\\");
-#elif defined(__unix__)
+#elif defined(__unix__) || defined(__APPLE__)
         return String("/");
 #else
         TEST_LOG_SS(Error, "FolderSeparator: Is not implemented yet!");
-        return return String("");
+        return String("");
 #endif
     }
 
