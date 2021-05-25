@@ -489,7 +489,15 @@ namespace Test
         f2.Call(data, size, format, dst2);
 
         int differenceMax = ToLower(ExtensionByPath(path)) == "png" ? 0 : 4;
+
         result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
+
+        if (!result)
+        {
+            SimdImageFileType file = SimdImageFilePng;
+            SaveTestImage(dst1, file, 100, "_1");
+            SaveTestImage(dst2, file, 100, "_2");
+        }
 
         SimdFree(data);
 
@@ -516,7 +524,7 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g02.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g04.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g08.png", f1, f2);
-        //result = result && ImageLoadFromMemorySpecialTest("png/basn0g16.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn0g16.png", f1, f2);
 
         result = result && ImageLoadFromMemorySpecialTest("png/basn3p04.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn6a08.png", f1, f2);

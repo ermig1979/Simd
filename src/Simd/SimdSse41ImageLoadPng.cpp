@@ -1720,6 +1720,7 @@ namespace Simd
 
         bool ImagePngLoader::FromStream()
         {
+            const int req_comp = 4;
             int x, y, comp;
             png__context s;
             s.io.eof = png__stdio_eof;
@@ -1733,14 +1734,15 @@ namespace Simd
             png__refill_buffer(&s);
             s.img_buffer_original_end = s.img_buffer_end;
             png__result_info ri;
-            uint8_t* data = (uint8_t*)png__png_load(&s, &x, &y, &comp, 4, &ri);
+            uint8_t* data = (uint8_t*)png__png_load(&s, &x, &y, &comp, req_comp, &ri);
             if (data)
             {
                 if (ri.bits_per_channel == 16)
                 {
                     const uint16_t* src = (uint16_t*)data;
-                    uint8_t* dst = (uint8_t*)PNG_MALLOC(x * y * comp);
-                    for (size_t i = 0, n = x * y * comp; i < n; ++i)
+                    size_t size = x * y * req_comp;
+                    uint8_t* dst = (uint8_t*)PNG_MALLOC(size);
+                    for (size_t i = 0; i < size; ++i)
                         dst[i] = uint8_t(src[i] >> 8);
                     PNG_FREE(data);
                     data = dst;

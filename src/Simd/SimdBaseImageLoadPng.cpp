@@ -1172,7 +1172,7 @@ namespace Simd
             }
             if (p.depth == 16)
             {
-                size_t size = context.img_x * context.img_y * context.img_n;
+                size_t size = context.img_x * context.img_y * req_comp;
                 const uint16_t* src = (uint16_t*)data;
                 uint8_t* dst = (uint8_t*)PNG_MALLOC(size);
                 for (size_t i = 0; i < size; ++i)
