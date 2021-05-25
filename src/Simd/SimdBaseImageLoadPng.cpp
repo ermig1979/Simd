@@ -1348,7 +1348,7 @@ namespace Simd
         {
             if (_first)
                 return false;
-            if (_idats.empty())
+            if (_idats.size())
                 return false;
             if (_paletteChannels)
             {
