@@ -526,9 +526,21 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn0g16.png", f1, f2);
 
+        result = result && ImageLoadFromMemorySpecialTest("png/basn2c08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn2c16.png", f1, f2);
+
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p02.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn3p04.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn3p08.png", f1, f2);
+
+        result = result && ImageLoadFromMemorySpecialTest("png/basn4a08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basn4a16.png", f1, f2);
+
         result = result && ImageLoadFromMemorySpecialTest("png/basn6a08.png", f1, f2);
         result = result && ImageLoadFromMemorySpecialTest("png/basn6a16.png", f1, f2);
+#endif
+#if 1
         result = result && ImageLoadFromMemorySpecialTest("png/tbbn0g04.png", f1, f2);
 #endif
 
