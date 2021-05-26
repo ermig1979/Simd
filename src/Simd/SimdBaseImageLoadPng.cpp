@@ -899,8 +899,10 @@ namespace Simd
             // we make a separate pass to expand bits to pixels; for performance,
             // this could run two scanlines behind the above code, so it won't
             // intefere with filtering but will still be in the cache.
-            if (depth < 8) {
-                for (j = 0; j < y; ++j) {
+            if (depth < 8)
+            {
+                for (j = 0; j < y; ++j)
+                {
                     uint8_t* cur = a->out + stride * j;
                     uint8_t* in = a->out + stride * j + x * out_n - img_width_bytes;
                     // unpack 1/2/4-bit into a 8-bit buffer. allows us to keep the common 8-bit path optimal at minimal cost for 1/2/4-bit
@@ -913,26 +915,36 @@ namespace Simd
                     // on the next scanline? yes, consider 1-pixel-wide scanlines with 1-bit-per-pixel.
                     // so we need to explicitly clamp the final ones
 
-                    if (depth == 4) {
-                        for (k = x * img_n; k >= 2; k -= 2, ++in) {
+                    if (depth == 4) 
+                    {
+                        for (k = x * img_n; k >= 2; k -= 2, ++in) 
+                        {
                             *cur++ = scale * ((*in >> 4));
                             *cur++ = scale * ((*in) & 0x0f);
                         }
-                        if (k > 0) *cur++ = scale * ((*in >> 4));
+                        if (k > 0) 
+                            *cur++ = scale * ((*in >> 4));
                     }
-                    else if (depth == 2) {
-                        for (k = x * img_n; k >= 4; k -= 4, ++in) {
+                    else if (depth == 2) 
+                    {
+                        for (k = x * img_n; k >= 4; k -= 4, ++in) 
+                        {
                             *cur++ = scale * ((*in >> 6));
                             *cur++ = scale * ((*in >> 4) & 0x03);
                             *cur++ = scale * ((*in >> 2) & 0x03);
                             *cur++ = scale * ((*in) & 0x03);
                         }
-                        if (k > 0) *cur++ = scale * ((*in >> 6));
-                        if (k > 1) *cur++ = scale * ((*in >> 4) & 0x03);
-                        if (k > 2) *cur++ = scale * ((*in >> 2) & 0x03);
+                        if (k > 0) 
+                            *cur++ = scale * ((*in >> 6));
+                        if (k > 1) 
+                            *cur++ = scale * ((*in >> 4) & 0x03);
+                        if (k > 2) 
+                            *cur++ = scale * ((*in >> 2) & 0x03);
                     }
-                    else if (depth == 1) {
-                        for (k = x * img_n; k >= 8; k -= 8, ++in) {
+                    else if (depth == 1)
+                    {
+                        for (k = x * img_n; k >= 8; k -= 8, ++in) 
+                        {
                             *cur++ = scale * ((*in >> 7));
                             *cur++ = scale * ((*in >> 6) & 0x01);
                             *cur++ = scale * ((*in >> 5) & 0x01);
@@ -950,19 +962,24 @@ namespace Simd
                         if (k > 5) *cur++ = scale * ((*in >> 2) & 0x01);
                         if (k > 6) *cur++ = scale * ((*in >> 1) & 0x01);
                     }
-                    if (img_n != out_n) {
+                    if (img_n != out_n) 
+                    {
                         int q;
                         // insert alpha = 255
                         cur = a->out + stride * j;
-                        if (img_n == 1) {
-                            for (q = x - 1; q >= 0; --q) {
+                        if (img_n == 1) 
+                        {
+                            for (q = x - 1; q >= 0; --q)
+                            {
                                 cur[q * 2 + 1] = 255;
                                 cur[q * 2 + 0] = cur[q];
                             }
                         }
-                        else {
+                        else
+                        {
                             assert(img_n == 3);
-                            for (q = x - 1; q >= 0; --q) {
+                            for (q = x - 1; q >= 0; --q) 
+                            {
                                 cur[q * 4 + 3] = 255;
                                 cur[q * 4 + 2] = cur[q * 3 + 2];
                                 cur[q * 4 + 1] = cur[q * 3 + 1];
@@ -999,7 +1016,8 @@ namespace Simd
 
             // de-interlacing
             final = (uint8_t*)png__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
-            for (p = 0; p < 7; ++p) {
+            for (p = 0; p < 7; ++p) 
+            {
                 int xorig[] = { 0,4,0,2,0,1,0 };
                 int yorig[] = { 0,0,4,0,2,0,1 };
                 int xspc[] = { 8,8,4,4,2,2,1 };
@@ -1008,14 +1026,18 @@ namespace Simd
                 // pass1_x[4] = 0, pass1_x[5] = 1, pass1_x[12] = 1
                 x = (a->s->img_x - xorig[p] + xspc[p] - 1) / xspc[p];
                 y = (a->s->img_y - yorig[p] + yspc[p] - 1) / yspc[p];
-                if (x && y) {
+                if (x && y) 
+                {
                     uint32_t img_len = ((((a->s->img_n * x * depth) + 7) >> 3) + 1) * y;
-                    if (!png__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color)) {
+                    if (!png__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color))
+                    {
                         PNG_FREE(final);
                         return 0;
                     }
-                    for (j = 0; j < y; ++j) {
-                        for (i = 0; i < x; ++i) {
+                    for (j = 0; j < y; ++j) 
+                    {
+                        for (i = 0; i < x; ++i) 
+                        {
                             int out_y = j * yspc[p] + yorig[p];
                             int out_x = i * xspc[p] + xorig[p];
                             memcpy(final + out_y * a->s->img_x * out_bytes + out_x * out_bytes,
@@ -1042,14 +1064,18 @@ namespace Simd
             // already got 255 as the alpha value in the output
             assert(out_n == 2 || out_n == 4);
 
-            if (out_n == 2) {
-                for (i = 0; i < pixel_count; ++i) {
+            if (out_n == 2) 
+            {
+                for (i = 0; i < pixel_count; ++i) 
+                {
                     p[1] = (p[0] == tc[0] ? 0 : 255);
                     p += 2;
                 }
             }
-            else {
-                for (i = 0; i < pixel_count; ++i) {
+            else 
+            {
+                for (i = 0; i < pixel_count; ++i) 
+                {
                     if (p[0] == tc[0] && p[1] == tc[1] && p[2] == tc[2])
                         p[3] = 0;
                     p += 4;
@@ -1068,14 +1094,18 @@ namespace Simd
             // already got 65535 as the alpha value in the output
             assert(out_n == 2 || out_n == 4);
 
-            if (out_n == 2) {
-                for (i = 0; i < pixel_count; ++i) {
+            if (out_n == 2) 
+            {
+                for (i = 0; i < pixel_count; ++i)
+                {
                     p[1] = (p[0] == tc[0] ? 0 : 65535);
                     p += 2;
                 }
             }
-            else {
-                for (i = 0; i < pixel_count; ++i) {
+            else 
+            {
+                for (i = 0; i < pixel_count; ++i)
+                {
                     if (p[0] == tc[0] && p[1] == tc[1] && p[2] == tc[2])
                         p[3] = 0;
                     p += 4;
@@ -1090,7 +1120,8 @@ namespace Simd
             uint8_t* p, * temp_out, * orig = a->out;
 
             p = (uint8_t*)png__malloc_mad2(pixel_count, pal_img_n, 0);
-            if (p == NULL) return PngError("outofmem", "Out of memory");
+            if (p == NULL) 
+                return PngError("outofmem", "Out of memory");
 
             // between here and free(out) below, exitting would leak
             temp_out = p;
@@ -1204,7 +1235,8 @@ namespace Simd
             {
                 s->img_n = _paletteChannels; // record the actual colors we had
                 s->img_out_n = _paletteChannels;
-                if (req_comp >= 3) s->img_out_n = req_comp;
+                if (req_comp >= 3) 
+                    s->img_out_n = req_comp;
                 if (!png__expand_png_palette(z, _palette.data, (int)_palette.size, s->img_out_n))
                     return false;
             }

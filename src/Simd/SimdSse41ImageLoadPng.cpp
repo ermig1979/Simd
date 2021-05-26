@@ -1749,25 +1749,51 @@ namespace Simd
                 }
                 size_t stride = 4 * x;
                 _image.Recreate(x, y, (Image::Format)_param.format);
-                switch (_param.format)
+                if (x < A)
                 {
-                case SimdPixelFormatGray8:
-                    Sse2::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatBgr24:
-                    Ssse3::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatBgra32:
-                    Ssse3::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatRgb24:
-                    Ssse3::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
-                    break;
-                case SimdPixelFormatRgba32:
-                    Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);
-                    break;
-                default: 
-                    break;
+                    switch (_param.format)
+                    {
+                    case SimdPixelFormatGray8:
+                        Base::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatBgr24:
+                        Base::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatBgra32:
+                        Base::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatRgb24:
+                        Base::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatRgba32:
+                        Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);
+                        break;
+                    default:
+                        break;
+                    }
+                }
+                else
+                {
+                    switch (_param.format)
+                    {
+                    case SimdPixelFormatGray8:
+                        Sse2::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatBgr24:
+                        Ssse3::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatBgra32:
+                        Ssse3::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatRgb24:
+                        Ssse3::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
+                        break;
+                    case SimdPixelFormatRgba32:
+                        Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);
+                        break;
+                    default:
+                        break;
+                    }
                 }
                 PNG_FREE(data);
                 return true;

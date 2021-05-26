@@ -541,6 +541,48 @@ namespace Test
         result = result && ImageLoadFromMemorySpecialTest("png/basn6a16.png", f1, f2);
 #endif
 #if 1
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g04.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi0g16.png", f1, f2);
+
+        result = result && ImageLoadFromMemorySpecialTest("png/basi2c08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi2c16.png", f1, f2);
+
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p04.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi3p08.png", f1, f2);
+
+        result = result && ImageLoadFromMemorySpecialTest("png/basi4a08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi4a16.png", f1, f2);
+
+        result = result && ImageLoadFromMemorySpecialTest("png/basi6a08.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/basi6a16.png", f1, f2);
+#endif
+#if 1
+        result = result && ImageLoadFromMemorySpecialTest("png/s01i3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s01n3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s02i3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s02n3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s03i3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s03n3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s04i3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s04n3p01.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s05i3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s05n3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s06i3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s06n3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s07i3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s07n3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s08i3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s08n3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s09i3p02.png", f1, f2);
+        result = result && ImageLoadFromMemorySpecialTest("png/s09n3p02.png", f1, f2);
+
+#endif
+#if 1
         result = result && ImageLoadFromMemorySpecialTest("png/tbbn0g04.png", f1, f2);
 #endif
 
