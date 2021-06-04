@@ -157,6 +157,7 @@ namespace Test
         switch (type)
         {
         case SimdResizeChannelByte:  return "b";
+        case SimdResizeChannelShort:  return "s";
         case SimdResizeChannelFloat:  return "f";
         default: assert(0); return "";
         }
@@ -184,15 +185,18 @@ namespace Test
             void Call(const View & src, View & dst, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method) const
             {
                 void * resizer = NULL;
-                if(src.format == View::Float)
+                if(src.format == View::Float || src.format == View::Int16)
                     resizer = func(src.width / channels, src.height, dst.width / channels, dst.height, channels, type, method);
                 else
                     resizer = func(src.width, src.height, dst.width, dst.height, channels, type, method);
+                if (resizer)
                 {
-                    TEST_PERFORMANCE_TEST(description);
-                    SimdResizerRun(resizer, src.data, src.stride, dst.data, dst.stride);
+                    {
+                        TEST_PERFORMANCE_TEST(description);
+                        SimdResizerRun(resizer, src.data, src.stride, dst.data, dst.stride);
+                    }
+                    SimdRelease(resizer);
                 }
-                SimdRelease(resizer);
             }
         };
     }
@@ -218,6 +222,12 @@ namespace Test
             srcW *= channels;
             dstW *= channels;
         }
+        else if (type == SimdResizeChannelShort)
+        {
+            format = View::Int16;
+            srcW *= channels;
+            dstW *= channels;
+        }
         else if (type == SimdResizeChannelByte)
         {
             switch (channels)
@@ -236,6 +246,8 @@ namespace Test
         View src(srcW, srcH, format, NULL, TEST_ALIGN(srcW));
         if (format == View::Float)
             FillRandom32f(src);
+        else if (format == View::Int16)
+            FillRandom16u(src);
         else
         {
 #ifdef TEST_RESIZE_REAL_IMAGE
@@ -247,6 +259,11 @@ namespace Test
 
         View dst1(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
+        if (format == View::Int16)
+        {
+            Simd::Fill(dst1, 0);
+            Simd::Fill(dst2, 0);
+        }
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -281,7 +298,8 @@ namespace Test
 
 #if 1
         //result = result && ResizerAutoTest(method, type, channels, 234, 232, 300, 300, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 64, 48, 11, 17, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 399, 277, 301, 201, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 64, 48, 11, 17, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
 #else
         result = result && ResizerAutoTest(method, type, channels, W, H, 0.9, f1, f2);
@@ -299,6 +317,7 @@ namespace Test
 #ifndef __aarch64__         
         for (SimdResizeMethodType method = SimdResizeMethodBilinear; method <= SimdResizeMethodBilinear; method = SimdResizeMethodType(method + 1))
         {
+            result = result && ResizerAutoTest(method, SimdResizeChannelShort, 4, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 3, f1, f2);

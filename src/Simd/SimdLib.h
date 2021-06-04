@@ -327,6 +327,8 @@ typedef enum
 {
     /*! 8-bit integer channel type.  */
     SimdResizeChannelByte,
+    /*! 16-bit integer channel type.  */
+    SimdResizeChannelShort,
     /*! 32-bit float channel type.  */
     SimdResizeChannelFloat,
 } SimdResizeChannelType;

@@ -55,6 +55,8 @@ namespace Test
 
     void FillRhombMask(View & mask, const Rect & rect, uint8_t index);
 
+    void FillRandom16u(View& view, uint16_t lo = 0, uint16_t hi = UINT16_MAX);
+
     void FillRandom32f(View & view, float lo = 0, float hi = 4096.0f);
 
     void FillRandom(Buffer32f & buffer, float lo = 0, float hi = 4096.0f);

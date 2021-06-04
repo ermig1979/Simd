@@ -123,6 +123,19 @@ namespace Test
         return g_rand16i + (::rand() & INT16_MAX);
     }
 
+    uint16_t g_rand16u[UINT16_MAX];
+    bool InitRand16u()
+    {
+        for (size_t i = 0, n = UINT16_MAX; i < n; ++i)
+            g_rand16u[i] = (::rand() & UINT16_MAX);
+        return true;
+    }
+    bool g_rand16u_inited = InitRand16u();
+    SIMD_INLINE const uint16_t* Rand16u()
+    {
+        return g_rand16u + (::rand() & INT16_MAX);
+    }
+
     void FillRandom(View & view, uint8_t lo, uint8_t hi)
     {
         assert(view.data);
@@ -258,6 +271,26 @@ namespace Test
             {
                 for (size_t col = 0; col < view.width; ++col)
                     view.At<float>(col, row) = lo + (hi - lo)*(float)Random();
+            }
+        }
+    }
+
+    void FillRandom16u(View& view, uint16_t lo, uint16_t hi)
+    {
+        assert(view.format == View::Int16);
+
+        bool fast = view.Area() > 100000;
+        for (size_t row = 0; row < view.height; ++row)
+        {
+            if (fast)
+            {
+                for (size_t col = 0; col < view.width; col += INT16_MAX)
+                    memcpy(view.Row<uint16_t>(row) + col, Rand16u(), 2*std::min<size_t>(INT16_MAX, view.width - col));
+            }
+            else
+            {
+                for (size_t col = 0; col < view.width; ++col)
+                    view.At<uint16_t>(col, row) = uint16_t(lo + Random(1 + hi - lo));
             }
         }
     }
