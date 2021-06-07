@@ -42,6 +42,15 @@ namespace Simd
         const int FRACTION_RANGE = 1 << LINEAR_SHIFT;
         const double FRACTION_ROUND_TERM = 0.5 / FRACTION_RANGE;
 
+        const int LINEAR_SHIFT_16 = 7;
+        const int LINEAR_ROUND_TERM_16 = 1 << (LINEAR_SHIFT - 1);
+
+        const int BILINEAR_SHIFT_16 = LINEAR_SHIFT_16 * 2;
+        const int BILINEAR_ROUND_TERM_16 = 1 << (BILINEAR_SHIFT_16 - 1);
+
+        const int FRACTION_RANGE_16 = 1 << LINEAR_SHIFT_16;
+        const double FRACTION_ROUND_TERM_16 = 0.5 / FRACTION_RANGE_16;
+
         const float KF_255_DIV_6 = 255.0f / 6.0f;
 
         const int BGR_TO_GRAY_AVERAGING_SHIFT = 14;

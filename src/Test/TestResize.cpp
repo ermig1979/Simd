@@ -273,6 +273,8 @@ namespace Test
 
         if (format == View::Float)
             result = result && Compare(dst1, dst2, EPS, true, 64, DifferenceAbsolute);
+        else if(format == View::Int16)
+            result = result && Compare(dst1, dst2, 1, true, 64);
         else
             result = result && Compare(dst1, dst2, 0, true, 64);
 
@@ -298,7 +300,7 @@ namespace Test
 
 #if 1
         //result = result && ResizerAutoTest(method, type, channels, 234, 232, 300, 300, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 399, 277, 301, 201, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1023, 767, 319, 239, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, 64, 48, 11, 17, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
 #else

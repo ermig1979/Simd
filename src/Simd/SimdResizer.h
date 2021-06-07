@@ -57,6 +57,11 @@ namespace Simd
             return type == SimdResizeChannelByte && method == SimdResizeMethodArea;
         }
 
+        bool IsShortBilinear() const
+        {
+            return type == SimdResizeChannelShort && method == SimdResizeMethodBilinear;
+        }
+
         bool IsFloatBilinear() const
         {
             return type == SimdResizeChannelFloat && 
@@ -108,6 +113,29 @@ namespace Simd
             void EstimateParams(size_t srcSize, size_t dstSize, size_t range, int32_t * alpha, int32_t * index);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
+#define SIMD_RESIZER_SHORT_USE_FLOAT
+
+        class ResizerShortBilinear : public Resizer
+        {
+        protected:
+#ifdef SIMD_RESIZER_SHORT_USE_FLOAT
+            Array32i _ix, _iy;
+            Array32f _ax, _ay, _bx[2];
+
+            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, float* alphas);
+
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+#else
+            Array32i _ax, _ix, _ay, _iy, _bx[2];
+
+            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int32_t* alphas);
+#endif
+        public:
+            ResizerShortBilinear(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
 
         class ResizerFloatBilinear : public Resizer
