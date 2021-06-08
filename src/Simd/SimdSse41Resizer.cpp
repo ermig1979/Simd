@@ -197,7 +197,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-#ifdef SIMD_RESIZER_SHORT_USE_FLOAT 
         ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
             : Base::ResizerShortBilinear(param)
         {
@@ -205,6 +204,14 @@ namespace Simd
 
         const __m128i RSB_4_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1);
         const __m128i RSB_4_1 = SIMD_MM_SETR_EPI8(0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
+
+        SIMD_INLINE __m128 BilColS4(const uint16_t* src, __m128 fx0, __m128 fx1)
+        {
+            __m128i s = _mm_loadu_si128((__m128i*)src);
+            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_4_0)));
+            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_4_1)));
+            return _mm_add_ps(m0, m1);
+        }
 
         template<size_t N> void ResizerShortBilinear::RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
@@ -240,12 +247,9 @@ namespace Simd
                         __m128 _1 = _mm_set1_ps(1.0f);
                         for (; dx < rs4; dx += 4)
                         {
-                            __m128i s0 = _mm_loadu_si128((__m128i*)(ps + _ix[dx]));
                             __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
                             __m128 fx0 = _mm_sub_ps(_1, fx1);
-                            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s0, RSB_4_0)));
-                            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s0, RSB_4_1)));
-                            _mm_store_ps(pb + dx, _mm_add_ps(m0, m1));
+                            _mm_store_ps(pb + dx, BilColS4(ps + _ix[dx], fx0, fx1));
                         }
                     }
                     for (; dx < rs; dx++)
@@ -281,14 +285,6 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE __m128 BilColS4(const uint16_t * src, __m128 fx0, __m128 fx1, __m128 fy)
-        {
-            __m128i s = _mm_loadu_si128((__m128i*)src);
-            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_4_0)));
-            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_4_1)));
-            return _mm_mul_ps(_mm_add_ps(m0, m1), fy);
-        }
-
         template<size_t N> void ResizerShortBilinear::RunS(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
             size_t rs = _param.dstW * N;
@@ -311,13 +307,13 @@ namespace Simd
                     {
                         __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
                         __m128 fx00 = _mm_sub_ps(_1, fx01);
-                        __m128 m00 = BilColS4(ps0 + _ix[dx + 0], fx00, fx01, _fy0);
-                        __m128 m01 = BilColS4(ps1 + _ix[dx + 0], fx00, fx01, _fy1);
+                        __m128 m00 = _mm_mul_ps(BilColS4(ps0 + _ix[dx + 0], fx00, fx01), _fy0);
+                        __m128 m01 = _mm_mul_ps(BilColS4(ps1 + _ix[dx + 0], fx00, fx01), _fy1);
                         __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
                         __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 4);
                         __m128 fx10 = _mm_sub_ps(_1, fx11);
-                        __m128 m10 = BilColS4(ps0 + _ix[dx + 4], fx10, fx11, _fy0);
-                        __m128 m11 = BilColS4(ps1 + _ix[dx + 4], fx10, fx11, _fy1);
+                        __m128 m10 = _mm_mul_ps(BilColS4(ps0 + _ix[dx + 4], fx10, fx11), _fy0);
+                        __m128 m11 = _mm_mul_ps(BilColS4(ps1 + _ix[dx + 4], fx10, fx11), _fy1);
                         __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
                         _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(i0, i1));
                     }
@@ -325,8 +321,8 @@ namespace Simd
                     {
                         __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
                         __m128 fx0 = _mm_sub_ps(_1, fx1);
-                        __m128 m0 = BilColS4(ps0 + _ix[dx], fx0, fx1, _fy0);
-                        __m128 m1 = BilColS4(ps1 + _ix[dx], fx0, fx1, _fy1);
+                        __m128 m0 = _mm_mul_ps(BilColS4(ps0 + _ix[dx], fx0, fx1), _fy0);
+                        __m128 m1 = _mm_mul_ps(BilColS4(ps1 + _ix[dx], fx0, fx1), _fy1);
                         __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
                         _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
                     }
@@ -356,7 +352,6 @@ namespace Simd
                 assert(0);
             }
         }
-#endif
 
         //---------------------------------------------------------------------
 
@@ -365,10 +360,8 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m128i));
             if (param.IsByteArea())
                 return new ResizerByteArea(param);
-#ifdef SIMD_RESIZER_SHORT_USE_FLOAT  
             else if (param.IsShortBilinear() && channels == 4)
                 return new ResizerShortBilinear(param);
-#endif
             else
                 return Ssse3::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }

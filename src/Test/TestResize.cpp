@@ -174,11 +174,11 @@ namespace Test
 
             FuncRS(const FuncPtr & f, const String & d) : func(f), description(d) {}
 
-            void Update(SimdResizeMethodType m, SimdResizeChannelType t, size_t c)
+            void Update(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH)
             {
                 std::stringstream ss;
-                ss << description;
-                ss << "[" << ToString(m) << "-" << ToString(t) << "-" << c << "]";
+                ss << description <<  "[" << ToString(method) << "-" << ToString(type) << "-" << channels;
+                ss << ":" << srcW << "x" << srcH << "->" << dstW << "x" << dstH << "]";
                 description = ss.str();
             }
 
@@ -210,8 +210,8 @@ namespace Test
     {
         bool result = true;
 
-        f1.Update(method, type, channels);
-        f2.Update(method, type, channels);
+        f1.Update(method, type, channels, srcW, srcH, dstW, dstH);
+        f2.Update(method, type, channels, srcW, srcH, dstW, dstH);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << srcW << ", " << srcH << "] -> [" << dstW << ", " << dstH << "].");
 
@@ -299,8 +299,8 @@ namespace Test
         bool result = true;
 
 #if 1
-        //result = result && ResizerAutoTest(method, type, channels, 234, 232, 300, 300, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 1023, 767, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, 64, 48, 11, 17, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
 #else
@@ -319,6 +319,9 @@ namespace Test
 #ifndef __aarch64__         
         for (SimdResizeMethodType method = SimdResizeMethodBilinear; method <= SimdResizeMethodBilinear; method = SimdResizeMethodType(method + 1))
         {
+            result = result && ResizerAutoTest(method, SimdResizeChannelShort, 1, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelShort, 2, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelShort, 3, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelShort, 4, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);

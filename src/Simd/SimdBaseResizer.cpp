@@ -232,7 +232,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-#ifdef SIMD_RESIZER_SHORT_USE_FLOAT
         ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
             : Resizer(param)
         {
@@ -279,10 +278,9 @@ namespace Simd
             Run((const uint16_t*)src, srcStride / sizeof(uint16_t), (uint16_t*)dst, dstStride / sizeof(uint16_t));
         }
 
-        void ResizerShortBilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        template<size_t N> void ResizerShortBilinear::RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
-            size_t cn = _param.channels;
-            size_t rs = _param.dstW * cn;
+            size_t rs = _param.dstW * N;
             float* pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
@@ -291,7 +289,6 @@ namespace Simd
                 float fy0 = 1.0f - fy1;
                 int32_t sy = _iy[dy];
                 int32_t k = 0;
-
                 if (sy == prev)
                     k = 2;
                 else if (sy == prev + 1)
@@ -299,9 +296,7 @@ namespace Simd
                     Swap(pbx[0], pbx[1]);
                     k = 1;
                 }
-
                 prev = sy;
-
                 for (; k < 2; k++)
                 {
                     float* pb = pbx[k];
@@ -310,114 +305,49 @@ namespace Simd
                     {
                         int32_t sx = _ix[dx];
                         float fx = _ax[dx];
-                        pb[dx] = ps[sx] * (1.0f - fx) + ps[sx + cn] * fx;
+                        pb[dx] = ps[sx] * (1.0f - fx) + ps[sx + N] * fx;
                     }
                 }
-
                 for (size_t dx = 0; dx < rs; dx++)
                     dst[dx] = Round(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
             }
         }
-#else
-        ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
-            : Resizer(param)
+
+        template<size_t N> void ResizerShortBilinear::RunS(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
-            _ay.Resize(_param.dstH);
-            _iy.Resize(_param.dstH);
-            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
-        }
-
-        void ResizerShortBilinear::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int32_t* alphas)
-        {
-            float scale = (float)srcSize / dstSize;
-
-            for (size_t i = 0; i < dstSize; ++i)
-            {
-                float alpha = (float)((i + 0.5f) * scale - 0.5f);
-                ptrdiff_t index = (ptrdiff_t)::floor(alpha);
-                alpha -= index;
-
-                if (index < 0)
-                {
-                    index = 0;
-                    alpha = 0;
-                }
-
-                if (index > (ptrdiff_t)srcSize - 2)
-                {
-                    index = srcSize - 2;
-                    alpha = 1;
-                }
-
-                for (size_t c = 0; c < channels; c++)
-                {
-                    size_t offset = i * channels + c;
-                    indices[offset] = (int32_t)(channels * index + c);
-                    alphas[offset] = (int32_t)(alpha * FRACTION_RANGE_16 + 0.5f);
-                }
-            }
-        }
-
-        void ResizerShortBilinear::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
-        {
-            size_t cn = _param.channels;
-            size_t rs = _param.dstW * cn;
-            if (_ax.data == 0)
-            {
-                _ax.Resize(rs);
-                _ix.Resize(rs);
-                EstimateIndexAlpha(_param.srcW, _param.dstW, cn, _ix.data, _ax.data);
-                _bx[0].Resize(rs);
-                _bx[1].Resize(rs);
-            }
-            int32_t* pbx[2] = { _bx[0].data, _bx[1].data };
-            int32_t prev = -2;
+            size_t rs = _param.dstW * N;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
-                int32_t fy = _ay[dy];
+                float fy1 = _ay[dy];
+                float fy0 = 1.0f - fy1;
                 int32_t sy = _iy[dy];
-                int32_t k = 0;
-
-                if (sy == prev)
-                    k = 2;
-                else if (sy == prev + 1)
+                const uint16_t* ps0 = src + (sy + 0) * srcStride;
+                const uint16_t* ps1 = src + (sy + 1) * srcStride;
+                for (size_t dx = 0; dx < rs; dx++)
                 {
-                    Swap(pbx[0], pbx[1]);
-                    k = 1;
-                }
-
-                prev = sy;
-
-                for (; k < 2; k++)
-                {
-                    int32_t* pb = pbx[k];
-                    const uint8_t* ps = src + (sy + k) * srcStride;
-                    for (size_t dx = 0; dx < rs; dx++)
-                    {
-                        int32_t sx = _ix[dx];
-                        int32_t fx = _ax[dx];
-                        int32_t t = ps[sx];
-                        pb[dx] = (t << LINEAR_SHIFT_16) + (ps[sx + cn] - t) * fx;
-                    }
-                }
-
-                if (fy == 0)
-                    for (size_t dx = 0; dx < rs; dx++)
-                        dst[dx] = ((pbx[0][dx] << LINEAR_SHIFT_16) + BILINEAR_ROUND_TERM_16) >> BILINEAR_SHIFT_16;
-                else if (fy == FRACTION_RANGE_16)
-                    for (size_t dx = 0; dx < rs; dx++)
-                        dst[dx] = ((pbx[1][dx] << LINEAR_SHIFT_16) + BILINEAR_ROUND_TERM_16) >> BILINEAR_SHIFT_16;
-                else
-                {
-                    for (size_t dx = 0; dx < rs; dx++)
-                    {
-                        int32_t t = pbx[0][dx];
-                        dst[dx] = ((t << LINEAR_SHIFT_16) + (pbx[1][dx] - t) * fy + BILINEAR_ROUND_TERM_16) >> BILINEAR_SHIFT_16;
-                    }
+                    int32_t sx = _ix[dx];
+                    float fx1 = _ax[dx];
+                    float fx0 = 1.0f - fx1;
+                    float r0 = ps0[sx] * fx0 + ps0[sx + N] * fx1;
+                    float r1 = ps1[sx] * fx0 + ps1[sx + N] * fx1;
+                    dst[dx] = Round(r0 * fy0 + r1 * fy1);
                 }
             }
         }
-#endif
+
+        void ResizerShortBilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        {
+            bool sparse = _param.dstH * 2.0 <= _param.srcH;
+            switch (_param.channels)
+            {
+            case 1: sparse ? RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
+            case 2: sparse ? RunS<2>(src, srcStride, dst, dstStride) : RunB<2>(src, srcStride, dst, dstStride); return;
+            case 3: sparse ? RunS<3>(src, srcStride, dst, dstStride) : RunB<3>(src, srcStride, dst, dstStride); return;
+            case 4: sparse ? RunS<4>(src, srcStride, dst, dstStride) : RunB<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
+            }
+        }
 
         //---------------------------------------------------------------------
 

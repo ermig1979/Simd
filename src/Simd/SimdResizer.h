@@ -115,23 +115,19 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
-#define SIMD_RESIZER_SHORT_USE_FLOAT
-
         class ResizerShortBilinear : public Resizer
         {
         protected:
-#ifdef SIMD_RESIZER_SHORT_USE_FLOAT
             Array32i _ix, _iy;
             Array32f _ax, _ay, _bx[2];
 
             void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, float* alphas);
 
-            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
-#else
-            Array32i _ax, _ix, _ay, _iy, _bx[2];
+            template<size_t N> void RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+            template<size_t N> void RunS(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
 
-            void EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t* indices, int32_t* alphas);
-#endif
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+
         public:
             ResizerShortBilinear(const ResParam& param);
 
@@ -246,7 +242,6 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
-#ifdef SIMD_RESIZER_SHORT_USE_FLOAT        
         class ResizerShortBilinear : public Base::ResizerShortBilinear
         {
         protected:
@@ -257,7 +252,6 @@ namespace Simd
         public:
             ResizerShortBilinear(const ResParam& param);
         };
-#endif
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
