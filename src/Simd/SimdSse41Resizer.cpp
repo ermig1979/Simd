@@ -215,6 +215,17 @@ namespace Simd
             return _mm_add_ps(m0, m1);
         }
 
+        const __m128i RSB_2_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1);
+        const __m128i RSB_2_1 = SIMD_MM_SETR_EPI8(0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
+
+        SIMD_INLINE __m128 BilColS2(const uint16_t* src, const int32_t* idx, __m128 fx0, __m128 fx1)
+        {
+            __m128i s = Sse2::Load((__m128i*)(src + idx[0]), (__m128i*)(src + idx[2]));
+            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_2_0)));
+            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_2_1)));
+            return _mm_add_ps(m0, m1);
+        }
+
         const __m128i RSB_4_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1);
         const __m128i RSB_4_1 = SIMD_MM_SETR_EPI8(0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
 
@@ -263,6 +274,15 @@ namespace Simd
                             __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
                             __m128 fx0 = _mm_sub_ps(_1, fx1);
                             _mm_store_ps(pb + dx, BilColS1(ps, _ix.data + dx, fx0, fx1));
+                        }
+                    }
+                    if (N == 2)
+                    {
+                        for (; dx < rs4; dx += 4)
+                        {
+                            __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                            __m128 fx0 = _mm_sub_ps(_1, fx1);
+                            _mm_store_ps(pb + dx, BilColS2(ps, _ix.data + dx, fx0, fx1));
                         }
                     }
                     if (N == 4)
@@ -345,6 +365,32 @@ namespace Simd
                         __m128 fx0 = _mm_sub_ps(_1, fx1);
                         __m128 m0 = _mm_mul_ps(BilColS1(ps0, _ix.data + dx, fx0, fx1), _fy0);
                         __m128 m1 = _mm_mul_ps(BilColS1(ps1, _ix.data + dx, fx0, fx1), _fy1);
+                        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
+                        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
+                    }
+                }
+                if (N == 2)
+                {
+                    for (; dx < rs8; dx += 8)
+                    {
+                        __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
+                        __m128 fx00 = _mm_sub_ps(_1, fx01);
+                        __m128 m00 = _mm_mul_ps(BilColS2(ps0, _ix.data + dx + 0, fx00, fx01), _fy0);
+                        __m128 m01 = _mm_mul_ps(BilColS2(ps1, _ix.data + dx + 0, fx00, fx01), _fy1);
+                        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
+                        __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 4);
+                        __m128 fx10 = _mm_sub_ps(_1, fx11);
+                        __m128 m10 = _mm_mul_ps(BilColS2(ps0, _ix.data + dx + 4, fx10, fx11), _fy0);
+                        __m128 m11 = _mm_mul_ps(BilColS2(ps1, _ix.data + dx + 4, fx10, fx11), _fy1);
+                        __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
+                        _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(i0, i1));
+                    }
+                    for (; dx < rs4; dx += 4)
+                    {
+                        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                        __m128 m0 = _mm_mul_ps(BilColS2(ps0, _ix.data + dx, fx0, fx1), _fy0);
+                        __m128 m1 = _mm_mul_ps(BilColS2(ps1, _ix.data + dx, fx0, fx1), _fy1);
                         __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
                         _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
                     }

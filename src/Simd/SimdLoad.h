@@ -117,6 +117,11 @@ namespace Simd
             return _mm_load_si128(p);
         }
 
+        SIMD_INLINE __m128i Load(const __m128i* p0, const __m128i* p1)
+        {
+            return _mm_castps_si128(_mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1));
+        }
+
         template <bool align> SIMD_INLINE __m128i LoadMaskI8(const __m128i * p, __m128i index)
         {
             return _mm_cmpeq_epi8(Load<align>(p), index);
