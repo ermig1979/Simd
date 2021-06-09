@@ -274,14 +274,6 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        template <class Idx> SIMD_INLINE void ResizerByteBilinearLoadGrayInterpolated(const uint8_t * src, const Idx & index, const uint8_t * alpha, uint8_t * dst)
-        {
-            __m256i _src = _mm256_loadu_si256((__m256i*)(src + index.src));
-            __m256i _shuffle = _mm256_loadu_si256((__m256i*)&index.shuffle);
-            __m256i _alpha = _mm256_loadu_si256((__m256i*)(alpha + index.dst));
-            _mm256_storeu_si256((__m256i*)(dst + index.dst), _mm256_maddubs_epi16(Avx2::Shuffle(_src, _shuffle), _alpha));
-        }
-
         class ResizerByteBilinear : public Ssse3::ResizerByteBilinear
         {
         protected:
@@ -309,6 +301,17 @@ namespace Simd
             ResizerByteArea(const ResParam & param);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
+        class ResizerShortBilinear : public Sse41::ResizerShortBilinear
+        {
+        protected:
+            template<size_t N> void RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+            template<size_t N> void RunS(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+
+            virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
+        public:
+            ResizerShortBilinear(const ResParam& param);
         };
 
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear

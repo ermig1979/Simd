@@ -296,6 +296,11 @@ namespace Simd
             return _mm256_load_si256(p);
         }
 
+        template<bool align> SIMD_INLINE __m256i Load(const __m128i* p0, const __m128i* p1)
+        {
+            return _mm256_inserti128_si256(_mm256_castsi128_si256(Sse2::Load<align>(p0)), Sse2::Load<align>(p1), 1);
+        }
+
         template <bool align> SIMD_INLINE __m128i LoadHalf(const __m128i * p);
 
         template <> SIMD_INLINE __m128i LoadHalf<false>(const __m128i * p)

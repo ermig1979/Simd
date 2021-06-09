@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
 
@@ -202,52 +203,6 @@ namespace Simd
         {
         }
 
-        const __m128i RSB_1_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x4, 0x5, -1, -1, 0x8, 0x9, -1, -1, 0xC, 0xD, -1, -1);
-        const __m128i RSB_1_1 = SIMD_MM_SETR_EPI8(0x2, 0x3, -1, -1, 0x6, 0x7, -1, -1, 0xA, 0xB, -1, -1, 0xE, 0xF, -1, -1);
-
-        SIMD_INLINE __m128 BilColS1(const uint16_t* src, const int32_t* idx, __m128 fx0, __m128 fx1)
-        {
-            __m128i s = _mm_setr_epi32(
-                *(uint32_t*)(src + idx[0]), *(uint32_t*)(src + idx[1]),
-                *(uint32_t*)(src + idx[2]), *(uint32_t*)(src + idx[3]));
-            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_1_0)));
-            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_1_1)));
-            return _mm_add_ps(m0, m1);
-        }
-
-        const __m128i RSB_2_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1);
-        const __m128i RSB_2_1 = SIMD_MM_SETR_EPI8(0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
-
-        SIMD_INLINE __m128 BilColS2(const uint16_t* src, const int32_t* idx, __m128 fx0, __m128 fx1)
-        {
-            __m128i s = Sse2::Load((__m128i*)(src + idx[0]), (__m128i*)(src + idx[2]));
-            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_2_0)));
-            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_2_1)));
-            return _mm_add_ps(m0, m1);
-        }
-
-        const __m128i RSB_3_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, -1, -1, -1, -1);
-        const __m128i RSB_3_1 = SIMD_MM_SETR_EPI8(0x6, 0x7, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, -1, -1, -1, -1);
-
-        SIMD_INLINE __m128 BilColS3(const uint16_t* src, __m128 fx0, __m128 fx1)
-        {
-            __m128i s = _mm_loadu_si128((__m128i*)src);
-            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_3_0)));
-            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_3_1)));
-            return _mm_add_ps(m0, m1);
-        }
-
-        const __m128i RSB_4_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1);
-        const __m128i RSB_4_1 = SIMD_MM_SETR_EPI8(0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
-
-        SIMD_INLINE __m128 BilColS4(const uint16_t* src, __m128 fx0, __m128 fx1)
-        {
-            __m128i s = _mm_loadu_si128((__m128i*)src);
-            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_4_0)));
-            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_4_1)));
-            return _mm_add_ps(m0, m1);
-        }
-
         template<size_t N> void ResizerShortBilinear::RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
             size_t rs = _param.dstW * N;
@@ -347,8 +302,6 @@ namespace Simd
                     dst[dx] = Round(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
             }
         }
-
-        const __m128i RSB_3_P = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, -1, -1, -1, -1);
 
         template<size_t N> void ResizerShortBilinear::RunS(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
