@@ -202,6 +202,19 @@ namespace Simd
         {
         }
 
+        const __m128i RSB_1_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x4, 0x5, -1, -1, 0x8, 0x9, -1, -1, 0xC, 0xD, -1, -1);
+        const __m128i RSB_1_1 = SIMD_MM_SETR_EPI8(0x2, 0x3, -1, -1, 0x6, 0x7, -1, -1, 0xA, 0xB, -1, -1, 0xE, 0xF, -1, -1);
+
+        SIMD_INLINE __m128 BilColS1(const uint16_t* src, const int32_t* idx, __m128 fx0, __m128 fx1)
+        {
+            __m128i s = _mm_setr_epi32(
+                *(uint32_t*)(src + idx[0]), *(uint32_t*)(src + idx[1]),
+                *(uint32_t*)(src + idx[2]), *(uint32_t*)(src + idx[3]));
+            __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_1_0)));
+            __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_1_1)));
+            return _mm_add_ps(m0, m1);
+        }
+
         const __m128i RSB_4_0 = SIMD_MM_SETR_EPI8(0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1);
         const __m128i RSB_4_1 = SIMD_MM_SETR_EPI8(0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
 
@@ -220,6 +233,7 @@ namespace Simd
             int32_t prev = -2;
             size_t rs4 = AlignLo(rs, 4);
             size_t rs8 = AlignLo(rs, 8);
+            __m128 _1 = _mm_set1_ps(1.0f);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 float fy1 = _ay[dy];
@@ -242,9 +256,17 @@ namespace Simd
                     float* pb = pbx[k];
                     const uint16_t* ps = src + (sy + k) * srcStride;
                     size_t dx = 0;
+                    if (N == 1)
+                    {
+                        for (; dx < rs4; dx += 4)
+                        {
+                            __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                            __m128 fx0 = _mm_sub_ps(_1, fx1);
+                            _mm_store_ps(pb + dx, BilColS1(ps, _ix.data + dx, fx0, fx1));
+                        }
+                    }
                     if (N == 4)
                     {
-                        __m128 _1 = _mm_set1_ps(1.0f);
                         for (; dx < rs4; dx += 4)
                         {
                             __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
@@ -301,6 +323,32 @@ namespace Simd
                 size_t dx = 0;
                 __m128 _fy0 = _mm_set1_ps(fy0);
                 __m128 _fy1 = _mm_set1_ps(fy1);
+                if (N == 1)
+                {
+                    for (; dx < rs8; dx += 8)
+                    {
+                        __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
+                        __m128 fx00 = _mm_sub_ps(_1, fx01);
+                        __m128 m00 = _mm_mul_ps(BilColS1(ps0, _ix.data + dx + 0, fx00, fx01), _fy0);
+                        __m128 m01 = _mm_mul_ps(BilColS1(ps1, _ix.data + dx + 0, fx00, fx01), _fy1);
+                        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
+                        __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 4);
+                        __m128 fx10 = _mm_sub_ps(_1, fx11);
+                        __m128 m10 = _mm_mul_ps(BilColS1(ps0, _ix.data + dx + 4, fx10, fx11), _fy0);
+                        __m128 m11 = _mm_mul_ps(BilColS1(ps1, _ix.data + dx + 4, fx10, fx11), _fy1);
+                        __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
+                        _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(i0, i1));
+                    }
+                    for (; dx < rs4; dx += 4)
+                    {
+                        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                        __m128 m0 = _mm_mul_ps(BilColS1(ps0, _ix.data + dx, fx0, fx1), _fy0);
+                        __m128 m1 = _mm_mul_ps(BilColS1(ps1, _ix.data + dx, fx0, fx1), _fy1);
+                        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
+                        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
+                    }
+                }
                 if (N == 4)
                 {
                     for (; dx < rs8; dx += 8)
@@ -344,9 +392,9 @@ namespace Simd
             bool sparse = _param.dstH * 2.0 <= _param.srcH;
             switch (_param.channels)
             {
-            //case 1: Run<1>(src, srcStride, dst, dstStride); return;
-            //case 2: Run<2>(src, srcStride, dst, dstStride); return;
-            //case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 1: sparse ? RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
+            case 2: sparse ? RunS<2>(src, srcStride, dst, dstStride) : RunB<2>(src, srcStride, dst, dstStride); return;
+            case 3: sparse ? RunS<3>(src, srcStride, dst, dstStride) : RunB<3>(src, srcStride, dst, dstStride); return;
             case 4: sparse ? RunS<4>(src, srcStride, dst, dstStride) : RunB<4>(src, srcStride, dst, dstStride); return;
             default:
                 assert(0);
@@ -360,7 +408,7 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m128i));
             if (param.IsByteArea())
                 return new ResizerByteArea(param);
-            else if (param.IsShortBilinear() && channels == 4)
+            else if (param.IsShortBilinear())
                 return new ResizerShortBilinear(param);
             else
                 return Ssse3::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
