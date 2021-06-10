@@ -403,6 +403,11 @@ namespace Simd
         {
             return _mm_mask_storeu_epi8(p, m, a);
         }
+
+        SIMD_INLINE __m512i PackU32ToI16(__m512i lo, __m512i hi = K_ZERO)
+        {
+            return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(lo, hi));
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 
