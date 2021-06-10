@@ -532,6 +532,24 @@ namespace Simd
             return _mm256_add_ps(m0, m1);
         }
 
+        const __m256i RSB_2_0 = SIMD_MM256_SETR_EPI8(
+            0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1,
+            0x0, 0x1, -1, -1, 0x2, 0x3, -1, -1, 0x8, 0x9, -1, -1, 0xA, 0xB, -1, -1);
+        const __m256i RSB_2_1 = SIMD_MM256_SETR_EPI8(
+            0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1,
+            0x4, 0x5, -1, -1, 0x6, 0x7, -1, -1, 0xC, 0xD, -1, -1, 0xE, 0xF, -1, -1);
+
+        SIMD_INLINE __m256 BilColS2(const uint16_t* src, const int32_t* idx, __m256 fx0, __m256 fx1)
+        {
+            __m256i s = _mm256_setr_epi64x(
+                *(uint64_t*)(src + idx[0]), *(uint64_t*)(src + idx[2]),
+                *(uint64_t*)(src + idx[4]), *(uint64_t*)(src + idx[6]));
+            //__m256i s = _mm256_i64gather_epi64((long long*)src, _mm256_and_si256(_mm256_loadu_si256((__m256i*)idx), K64_00000000FFFFFFFF), 2);
+            __m256 m0 = _mm256_mul_ps(fx0, _mm256_cvtepi32_ps(_mm256_shuffle_epi8(s, RSB_2_0)));
+            __m256 m1 = _mm256_mul_ps(fx1, _mm256_cvtepi32_ps(_mm256_shuffle_epi8(s, RSB_2_1)));
+            return _mm256_add_ps(m0, m1);
+        }
+
         template<size_t N> void ResizerShortBilinear::RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
         {
             size_t rs = _param.dstW * N;
@@ -581,6 +599,12 @@ namespace Simd
                     }
                     if (N == 2)
                     {
+                        for (; dx < rs8; dx += 8)
+                        {
+                            __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                            __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                            _mm256_storeu_ps(pb + dx, BilColS2(ps, _ix.data + dx, fx0, fx1));
+                        }
                         for (; dx < rs4; dx += 4)
                         {
                             __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
@@ -702,19 +726,28 @@ namespace Simd
                 }
                 if (N == 2)
                 {
+                    for (; dx < rs16; dx += 16)
+                    {
+                        __m256 fx01 = _mm256_loadu_ps(_ax.data + dx + 0);
+                        __m256 fx00 = _mm256_sub_ps(_1, fx01);
+                        __m256 m00 = _mm256_mul_ps(BilColS2(ps0, _ix.data + dx + 0, fx00, fx01), _fy0);
+                        __m256 m01 = _mm256_mul_ps(BilColS2(ps1, _ix.data + dx + 0, fx00, fx01), _fy1);
+                        __m256i i0 = _mm256_cvttps_epi32(_mm256_add_ps(m00, m01));
+                        __m256 fx11 = _mm256_loadu_ps(_ax.data + dx + 8);
+                        __m256 fx10 = _mm256_sub_ps(_1, fx11);
+                        __m256 m10 = _mm256_mul_ps(BilColS2(ps0, _ix.data + dx + 8, fx10, fx11), _fy0);
+                        __m256 m11 = _mm256_mul_ps(BilColS2(ps1, _ix.data + dx + 8, fx10, fx11), _fy1);
+                        __m256i i1 = _mm256_cvttps_epi32(_mm256_add_ps(m10, m11));
+                        _mm256_storeu_si256((__m256i*)(dst + dx), PackU32ToI16(i0, i1));
+                    }
                     for (; dx < rs8; dx += 8)
                     {
-                        __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
-                        __m128 fx00 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx01);
-                        __m128 m00 = _mm_mul_ps(Sse41::BilColS2(ps0, _ix.data + dx + 0, fx00, fx01), _mm256_castps256_ps128(_fy0));
-                        __m128 m01 = _mm_mul_ps(Sse41::BilColS2(ps1, _ix.data + dx + 0, fx00, fx01), _mm256_castps256_ps128(_fy1));
-                        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
-                        __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 4);
-                        __m128 fx10 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx11);
-                        __m128 m10 = _mm_mul_ps(Sse41::BilColS2(ps0, _ix.data + dx + 4, fx10, fx11), _mm256_castps256_ps128(_fy0));
-                        __m128 m11 = _mm_mul_ps(Sse41::BilColS2(ps1, _ix.data + dx + 4, fx10, fx11), _mm256_castps256_ps128(_fy1));
-                        __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
-                        _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(i0, i1));
+                        __m256 fx1 = _mm256_loadu_ps(_ax.data + dx);
+                        __m256 fx0 = _mm256_sub_ps(_1, fx1);
+                        __m256 m0 = _mm256_mul_ps(BilColS2(ps0, _ix.data + dx, fx0, fx1), _fy0);
+                        __m256 m1 = _mm256_mul_ps(BilColS2(ps1, _ix.data + dx, fx0, fx1), _fy1);
+                        __m256i i0 = _mm256_cvttps_epi32(_mm256_add_ps(m0, m1));
+                        _mm_storeu_si128((__m128i*)(dst + dx), _mm256_castsi256_si128(PackU32ToI16(i0, K_ZERO)));
                     }
                     for (; dx < rs4; dx += 4)
                     {
