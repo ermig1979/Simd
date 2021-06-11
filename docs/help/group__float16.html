@@ -65,9 +65,15 @@ Functions</h2></td></tr>
 <tr class="memitem:ga2a95eb77c9139ab7808576deffe97d91"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#ga2a95eb77c9139ab7808576deffe97d91">SimdCosineDistancesMxNa16f</a> (size_t M, size_t N, size_t K, const uint16_t *const *A, const uint16_t *const *B, float *distances)</td></tr>
 <tr class="memdesc:ga2a95eb77c9139ab7808576deffe97d91"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates mutual cosine distance of two arrays of 16-bit float arrays.  <a href="group__float16.html#ga2a95eb77c9139ab7808576deffe97d91">More...</a><br /></td></tr>
 <tr class="separator:ga2a95eb77c9139ab7808576deffe97d91"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:gad7725fe003d0878bc4deedff18a7cb59"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#gad7725fe003d0878bc4deedff18a7cb59">SimdCosineDistancesMxNp16f</a> (size_t M, size_t N, size_t K, const uint16_t *A, const uint16_t *B, float *distances)</td></tr>
-<tr class="memdesc:gad7725fe003d0878bc4deedff18a7cb59"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates mutual cosine distance of two arrays of 16-bit float arrays.  <a href="group__float16.html#gad7725fe003d0878bc4deedff18a7cb59">More...</a><br /></td></tr>
-<tr class="separator:gad7725fe003d0878bc4deedff18a7cb59"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga52723b1949f3ab2aec3f02bf3ab2ef2d"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#ga52723b1949f3ab2aec3f02bf3ab2ef2d">SimdCosineDistancesMxNp16f</a> (size_t M, size_t N, size_t K, const uint16_t *A, const uint16_t *B, float *distances)</td></tr>
+<tr class="memdesc:ga52723b1949f3ab2aec3f02bf3ab2ef2d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates mutual cosine distance of two arrays of 16-bit float arrays.  <a href="group__float16.html#ga52723b1949f3ab2aec3f02bf3ab2ef2d">More...</a><br /></td></tr>
+<tr class="separator:ga52723b1949f3ab2aec3f02bf3ab2ef2d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gad5941da775aa75e618889a4a1b03d6cd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#gad5941da775aa75e618889a4a1b03d6cd">SimdVectorNormNa16f</a> (size_t N, size_t K, const uint16_t *const *A, float *norms)</td></tr>
+<tr class="memdesc:gad5941da775aa75e618889a4a1b03d6cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates vector norms for array of 16-bit float arrays.  <a href="group__float16.html#gad5941da775aa75e618889a4a1b03d6cd">More...</a><br /></td></tr>
+<tr class="separator:gad5941da775aa75e618889a4a1b03d6cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaa190375c97aee1e0019a032dc5fa32af"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__float16.html#gaa190375c97aee1e0019a032dc5fa32af">SimdVectorNormNp16f</a> (size_t N, size_t K, const uint16_t *A, float *norms)</td></tr>
+<tr class="memdesc:gaa190375c97aee1e0019a032dc5fa32af"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates vector norms for array of 16-bit float arrays.  <a href="group__float16.html#gaa190375c97aee1e0019a032dc5fa32af">More...</a><br /></td></tr>
+<tr class="separator:gaa190375c97aee1e0019a032dc5fa32af"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p>Functions for conversion between 16-bit and 32-bit float numbers and other. </p>
@@ -332,14 +338,14 @@ Functions</h2></td></tr>
 
 </div>
 </div>
-<a id="gad7725fe003d0878bc4deedff18a7cb59"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gad7725fe003d0878bc4deedff18a7cb59">&#9670;&nbsp;</a></span>SimdCosineDistancesMxNp16f()</h2>
+<a id="ga52723b1949f3ab2aec3f02bf3ab2ef2d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga52723b1949f3ab2aec3f02bf3ab2ef2d">&#9670;&nbsp;</a></span>SimdCosineDistancesMxNp16f()</h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">void SimdCosineDistancesMxNp16f </td>
+          <td class="memname">SIMD_API void SimdCosineDistancesMxNp16f </td>
           <td>(</td>
           <td class="paramtype">size_t&#160;</td>
           <td class="paramname"><em>M</em>, </td>
@@ -392,6 +398,110 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to 16-bit float arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">B</td><td>- a pointer to 16-bit float arrays. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">distances</td><td>- a pointer to result 32-bit float array with cosine distances. It size must be M*N. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gad5941da775aa75e618889a4a1b03d6cd"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad5941da775aa75e618889a4a1b03d6cd">&#9670;&nbsp;</a></span>SimdVectorNormNa16f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdVectorNormNa16f </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>K</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint16_t *const *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>norms</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates vector norms for array of 16-bit float arrays. </p>
+<p>Algorithm description: </p><pre class="fragment">norms[j] = Sqrt(Sum(A[j][k]*A[j][k]));
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a number of A arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- a size of A arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to the array with pointers to 16-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">norms</td><td>- a pointer to result 32-bit float array with vector norms. It size must be N. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="gaa190375c97aee1e0019a032dc5fa32af"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaa190375c97aee1e0019a032dc5fa32af">&#9670;&nbsp;</a></span>SimdVectorNormNp16f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdVectorNormNp16f </td>
+          <td>(</td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>N</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>K</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const uint16_t *&#160;</td>
+          <td class="paramname"><em>A</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>norms</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates vector norms for array of 16-bit float arrays. </p>
+<p>Algorithm description: </p><pre class="fragment">norms[j] = Sqrt(Sum(A[j*K + k]*A[j*K + k]));
+</pre><dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">N</td><td>- a number of A arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">K</td><td>- a size of A arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">A</td><td>- a pointer to 16-bit float arrays. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">norms</td><td>- a pointer to result 32-bit float array with vector norms. It size must be N. </td></tr>
   </table>
   </dd>
 </dl>

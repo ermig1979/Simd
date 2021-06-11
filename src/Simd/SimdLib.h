@@ -2884,6 +2884,62 @@ extern "C"
     */
     SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
 
+    /*! @ingroup float16
+
+        \fn void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
+
+        \short Calculates vector norms for array of 16-bit float arrays.
+
+        Algorithm description:
+        \verbatim
+        norms[j] = Sqrt(Sum(A[j][k]*A[j][k]));
+        \endverbatim
+
+        \param [in] N - a number of A arrays.
+        \param [in] K - a size of A arrays.
+        \param [in] A - a pointer to the array with pointers to 16-bit float arrays.
+        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
+    */
+    SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms);
+
+    /*! @ingroup float16
+
+        \fn void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
+
+        \short Calculates vector norms for array of 16-bit float arrays.
+
+        Algorithm description:
+        \verbatim
+        norms[j] = Sqrt(Sum(A[j*K + k]*A[j*K + k]));
+        \endverbatim
+
+        \param [in] N - a number of A arrays.
+        \param [in] K - a size of A arrays.
+        \param [in] A - a pointer to 16-bit float arrays.
+        \param [out] norms - a pointer to result 32-bit float array with vector norms. It size must be N.
+    */
+    SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms);
+
+    /*! @ingroup float16
+
+        \fn void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
+
+        \short Calculates mutual cosine distance of two arrays of 16-bit float arrays.
+
+        Algorithm description:
+        \verbatim
+        distances[i, j] = 1 - Sum(A[i*K + k]*B[j*K + k])/Sqrt(Sum(A[i*K + k]*A[i*K + k])*Sum(B[j*K + k]*B[j*K + k]));
+        \endverbatim
+
+        \param [in] M - a number of A arrays.
+        \param [in] N - a number of B arrays.
+        \param [in] K - a size of A and B arrays.
+        \param [in] A - a pointer to 16-bit float arrays.
+        \param [in] B - a pointer to 16-bit float arrays.
+        \param [out] distances - a pointer to result 32-bit float array with cosine distances. It size must be M*N.
+    */
+    SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);
+
     /*! @ingroup other_conversion
 
         \fn void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
@@ -5047,6 +5103,16 @@ extern "C"
         \fn void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
 
         \short Creates resize context.
+
+        An using example (resize of RGBA64 image):
+        \verbatim
+        void * resizer = SimdResizerInit(srcX, srcY, dstX, dstY, 4, SimdResizeChannelShort, SimdResizeMethodBilinear);
+        if (resizer)
+        {
+             SimdResizerRun(resizer, (uint8_t*)src, srcStride, (uint8_t*)dst, dstStride);
+             SimdRelease(resizer);
+        }
+        \endverbatim
 
         \param [in] srcX - a width of the input image.
         \param [in] srcY - a height of the input image.

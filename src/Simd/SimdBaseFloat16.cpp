@@ -174,5 +174,28 @@ namespace Simd
                 for (size_t j = 0; j < N; ++j)
                     CosineDistance16f(A + i * K, B + j * K, K, distances + i * N + j);
         }
+
+        void VectorNorm16f(const uint16_t* data, size_t size, float* norm)
+        {
+            float sum = 0;
+            for (size_t i = 0; i < size; ++i)
+            {
+                float val = Float16ToFloat32(data[i]);
+                sum += val * val;
+            }
+            *norm = ::sqrt(sum);
+        }
+
+        void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
+        {
+            for (size_t j = 0; j < N; ++j)
+                VectorNorm16f(A[j], K, norms + j);
+        }
+
+        void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
+        {
+            for (size_t j = 0; j < N; ++j)
+                VectorNorm16f(A + j * K, K, norms + j);
+        }
     }
 }

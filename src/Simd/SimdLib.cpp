@@ -2335,6 +2335,16 @@ SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uin
         Base::CosineDistancesMxNp16f(M, N, K, A, B, distances);
 }
 
+SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
+{
+    return Base::VectorNormNa16f(N, K, A, norms);
+}
+
+SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
+{
+    return Base::VectorNormNp16f(N, K, A, norms);
+}
+
 SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst)
 {
 #ifdef SIMD_AVX512BW_ENABLE

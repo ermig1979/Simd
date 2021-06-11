@@ -409,6 +409,187 @@ namespace Test
 
     //-----------------------------------------------------------------------
 
+    struct FuncVNP
+    {
+        typedef void(*FuncPtr)(size_t N, size_t K, const uint16_t* A, float* norms);
+
+        FuncPtr func;
+        String desc;
+
+        FuncVNP(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+        void Update(size_t N, size_t K)
+        {
+            desc = desc + "[" + ToString(N) + "-" + ToString(K) + "]";
+        }
+
+        void Call(const View& A, Tensor32f& norms) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(A.height, A.width, (uint16_t*)A.data, norms.Data());
+        }
+    };
+
+#define FUNC_VNP(function) FuncVNP(function, #function)
+
+    bool VectorNormNp16fAutoTest(size_t N, size_t K, float eps, FuncVNP f1, FuncVNP f2)
+    {
+        bool result = true;
+
+        f1.Update(N, K);
+        f2.Update(N, K);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        View Af(K, N, View::Float, NULL, TEST_ALIGN(K));
+        FillRandom32f(Af, -1.0, 1.0);
+        View Ai(K, N, View::Int16, NULL, TEST_ALIGN(K));
+
+        Tensor32f norms1({ N });
+        Tensor32f norms2({ N });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(Ai, norms1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(Ai, norms2));
+
+        result = Compare(norms1, norms2, eps, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool VectorNormNp16fAutoTest(float eps, const FuncVNP& f1, const FuncVNP& f2)
+    {
+        bool result = true;
+
+        result = result && VectorNormNp16fAutoTest(1, 1024, eps, f1, f2);
+        result = result && VectorNormNp16fAutoTest(128, 512, eps, f1, f2);
+        result = result && VectorNormNp16fAutoTest(129, 513, eps, f1, f2);
+
+        return result;
+    }
+
+    bool VectorNormNp16fAutoTest()
+    {
+        bool result = true;
+
+        result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Base::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+//#endif
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx512bw::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+//#endif
+//
+//#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+//        if (Simd::Neon::Enable)
+//            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Neon::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+//#endif
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    struct FuncVNA
+    {
+        typedef void(*FuncPtr)(size_t N, size_t K, const uint16_t* const* A, float* norms);
+
+        FuncPtr func;
+        String desc;
+
+        FuncVNA(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+        void Update(size_t N, size_t K)
+        {
+            desc = desc + "[" + ToString(N) + "-" + ToString(K) + "]";
+        }
+
+        void Call(size_t K, const F16Ptrs& A, Tensor32f& norms) const
+        {
+            TEST_PERFORMANCE_TEST(desc);
+            func(A.size(), K, A.data(), norms.Data());
+        }
+    };
+
+#define FUNC_VNA(function) FuncVNA(function, #function)
+
+    bool VectorNormNa16fAutoTest(size_t N, size_t K, float eps, FuncVNA f1, FuncVNA f2)
+    {
+        bool result = true;
+
+        f1.Update(N, K);
+        f2.Update(N, K);
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
+
+        const int scattering = 1;
+        View Af(K, N, View::Float, NULL, TEST_ALIGN(K));
+        FillRandom32f(Af, -1.0, 1.0);
+        View Ai(K * scattering, N, View::Int16, NULL, TEST_ALIGN(K));
+        F16Ptrs A(N);
+        for (size_t i = 0; i < N; i++)
+        {
+            ::SimdFloat32ToFloat16(Af.Row<float>(i), K, Ai.Row<uint16_t>(i));
+            A[i] = Ai.Row<uint16_t>(i);
+        }
+
+        Tensor32f norms1({ N, });
+        Tensor32f norms2({ N, });
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(K, A, norms1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(K, A, norms2));
+
+        result = Compare(norms1, norms2, eps, true, 32, DifferenceAbsolute);
+
+        return result;
+    }
+
+    bool VectorNormNa16fAutoTest(float eps, const FuncVNA& f1, const FuncVNA& f2)
+    {
+        bool result = true;
+
+        result = result && VectorNormNa16fAutoTest(1, 1024, eps, f1, f2);
+        result = result && VectorNormNa16fAutoTest(128, 512, eps, f1, f2);
+        result = result && VectorNormNa16fAutoTest(129, 513, eps, f1, f2);
+
+        return result;
+    }
+
+    bool VectorNormNa16fAutoTest()
+    {
+        bool result = true;
+
+        result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Base::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx2::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+//#endif
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+//#endif
+//
+//#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+//        if (Simd::Neon::Enable)
+//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
+//#endif
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
     struct FuncCDP
     {
         typedef void(*FuncPtr)(size_t M, size_t N, size_t K, const uint16_t* A, const uint16_t* B, float* distances);

@@ -788,7 +788,13 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Creates resize context. </p>
-<dl class="params"><dt>Parameters</dt><dd>
+<p>An using example (resize of RGBA64 image): </p><pre class="fragment">void * resizer = SimdResizerInit(srcX, srcY, dstX, dstY, 4, SimdResizeChannelShort, SimdResizeMethodBilinear);
+if (resizer)
+{
+     SimdResizerRun(resizer, (uint8_t*)src, srcStride, (uint8_t*)dst, dstStride);
+     SimdRelease(resizer);
+}
+</pre><dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">srcX</td><td>- a width of the input image. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">srcY</td><td>- a height of the input image. </td></tr>
