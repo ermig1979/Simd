@@ -481,11 +481,11 @@ namespace Test
             result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx2::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx512bw::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
-//#endif
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && VectorNormNp16fAutoTest(EPS, FUNC_VNP(Simd::Avx512bw::VectorNormNp16f), FUNC_VNP(SimdVectorNormNp16f));
+#endif
+
 //#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
 //        if (Simd::Neon::Enable)
 //            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Neon::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
@@ -575,11 +575,11 @@ namespace Test
             result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx2::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
 #endif
 
-//#ifdef SIMD_AVX512BW_ENABLE
-//        if (Simd::Avx512bw::Enable)
-//            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Avx512bw::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));
-//#endif
-//
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && VectorNormNa16fAutoTest(EPS, FUNC_VNA(Simd::Avx512bw::VectorNormNa16f), FUNC_VNA(SimdVectorNormNa16f));
+#endif
+
 //#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
 //        if (Simd::Neon::Enable)
 //            result = result && CosineDistancesMxNa16fAutoTest(EPS, FUNC_CDA(Simd::Neon::CosineDistancesMxNa16f), FUNC_CDA(SimdCosineDistancesMxNa16f));

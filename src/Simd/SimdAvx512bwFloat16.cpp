@@ -713,6 +713,31 @@ namespace Simd
                 A += dM * K;
             }
         }
+
+        void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
+        {
+            Squares(N, K, A, norms);
+            size_t N16 = AlignLo(N, 16);
+            for (size_t j = 0; j < N16; j += 16)
+            {
+                __m512 sum = _mm512_loadu_ps(norms + j);
+                _mm512_storeu_ps(norms + j, _mm512_sqrt_ps(sum));
+            }
+            if (N16 < N)
+            {
+                __mmask16 tail = TailMask16(N - N16);
+                __m512 sum = _mm512_maskz_loadu_ps(tail, norms + N16);
+                _mm512_mask_storeu_ps(norms + N16, tail, _mm512_sqrt_ps(sum));
+            }
+        }
+
+        void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
+        {
+            Array16ucp a(N);
+            for (size_t j = 0; j < N; ++j)
+                a[j] = A + j * K;
+            VectorNormNa16f(N, K, a.data, norms);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

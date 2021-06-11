@@ -2337,6 +2337,11 @@ SIMD_API void SimdCosineDistancesMxNp16f(size_t M, size_t N, size_t K, const uin
 
 SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && K >= Avx512bw::F)
+        Avx512bw::VectorNormNa16f(N, K, A, norms);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && K >= Avx2::F)
         Avx2::VectorNormNa16f(N, K, A, norms);
@@ -2347,6 +2352,11 @@ SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, 
 
 SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && K >= Avx512bw::F)
+        Avx512bw::VectorNormNp16f(N, K, A, norms);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && K >= Avx2::F)
         Avx2::VectorNormNp16f(N, K, A, norms);
