@@ -485,6 +485,49 @@ namespace Simd
                 A += dM * K;
             }
         }
+
+        void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
+        {
+            Squares(N, K, A, norms);
+            size_t N4 = AlignLo(N, 4);
+            size_t N8 = AlignLo(N, 8);
+            size_t j = 0;
+            for (; j < N8; j += 8)
+            {
+                __m256 sum = _mm256_loadu_ps(norms + j);
+                _mm256_storeu_ps(norms + j, _mm256_sqrt_ps(sum));
+            }
+            for (; j < N4; j += 4)
+            {
+                __m128 sum = _mm_loadu_ps(norms + j);
+                _mm_storeu_ps(norms + j, _mm_sqrt_ps(sum));
+            }
+            for (; j < N; ++j)
+                norms[j] = sqrt(norms[j]);
+        }
+
+        void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
+        {
+            Array16ucp a(N);
+            for (size_t j = 0; j < N; ++j)
+                a[j] = A + j * K;
+            Squares(N, K, a.data, norms);
+            size_t N4 = AlignLo(N, 4);
+            size_t N8 = AlignLo(N, 8);
+            size_t j = 0;
+            for (; j < N8; j += 8)
+            {
+                __m256 sum = _mm256_loadu_ps(norms + j);
+                _mm256_storeu_ps(norms + j, _mm256_sqrt_ps(sum));
+            }
+            for (; j < N4; j += 4)
+            {
+                __m128 sum = _mm_loadu_ps(norms + j);
+                _mm_storeu_ps(norms + j, _mm_sqrt_ps(sum));
+            }
+            for (; j < N; ++j)
+                norms[j] = sqrt(norms[j]);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }
