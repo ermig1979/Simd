@@ -2347,6 +2347,11 @@ SIMD_API void SimdVectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, 
         Avx2::VectorNormNa16f(N, K, A, norms);
     else
 #endif
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Neon::Enable && K >= Neon::F)
+        Neon::VectorNormNa16f(N, K, A, norms);
+    else
+#endif
         return Base::VectorNormNa16f(N, K, A, norms);
 }
 
@@ -2360,6 +2365,11 @@ SIMD_API void SimdVectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* 
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && K >= Avx2::F)
         Avx2::VectorNormNp16f(N, K, A, norms);
+    else
+#endif
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
+    if (Neon::Enable && K >= Neon::F)
+        Neon::VectorNormNp16f(N, K, A, norms);
     else
 #endif
         return Base::VectorNormNp16f(N, K, A, norms);

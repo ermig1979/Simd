@@ -701,6 +701,21 @@ namespace Simd
                 A += dM * K;
             }
         }
+
+        void VectorNormNa16f(size_t N, size_t K, const uint16_t* const* A, float* norms)
+        {
+            Squares(N, K, A, norms);
+            for (size_t j = 0; j < N; ++j)
+                norms[j] = sqrt(norms[j]);
+        }
+
+        void VectorNormNp16f(size_t N, size_t K, const uint16_t* A, float* norms)
+        {
+            Array16ucp a(N);
+            for (size_t j = 0; j < N; ++j)
+                a[j] = A + j * K;
+            VectorNormNa16f(N, K, a.data, norms);
+        }
     }
 #endif // defined(SIMD_NEON_ENABLE) && defined(SIMD_NEON_FP16_ENABLE)
 }
