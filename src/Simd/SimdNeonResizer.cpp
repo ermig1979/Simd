@@ -495,6 +495,272 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ResizerShortBilinear::ResizerShortBilinear(const ResParam& param)
+            : Base::ResizerShortBilinear(param)
+        {
+        }
+
+        SIMD_INLINE float32x4_t BilColS1(const uint16_t* src, const int32_t* idx, float32x4_t fx0, float32x4_t fx1)
+        {
+            const uint32_t buf[4] = { 
+                *(uint32_t*)(src + idx[0]), *(uint32_t*)(src + idx[1]),
+                *(uint32_t*)(src + idx[2]), *(uint32_t*)(src + idx[3]) };
+            uint16x4x2_t _buf =  LoadHalf2<false>((uint16_t*)buf);
+            float32x4_t m0 = vmulq_f32(fx0, vcvtq_f32_u32(vmovl_u16(_buf.val[0])));
+            float32x4_t m1 = vmulq_f32(fx1, vcvtq_f32_u32(vmovl_u16(_buf.val[1])));
+            return vaddq_f32(m0, m1);
+        }
+
+        template<size_t N> void ResizerShortBilinear::RunB(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        {
+            size_t rs = _param.dstW * N;
+            float* pbx[2] = { _bx[0].data, _bx[1].data };
+            int32_t prev = -2;
+            size_t rs3 = AlignLoAny(rs - 1, 3);
+            size_t rs4 = AlignLo(rs, 4);
+            size_t rs8 = AlignLo(rs, 8);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                float fy1 = _ay[dy];
+                float fy0 = 1.0f - fy1;
+                int32_t sy = _iy[dy];
+                int32_t k = 0;
+
+                if (sy == prev)
+                    k = 2;
+                else if (sy == prev + 1)
+                {
+                    Swap(pbx[0], pbx[1]);
+                    k = 1;
+                }
+
+                prev = sy;
+
+                for (; k < 2; k++)
+                {
+                    float* pb = pbx[k];
+                    const uint16_t* ps = src + (sy + k) * srcStride;
+                    size_t dx = 0;
+                    if (N == 1)
+                    {
+                        for (; dx < rs4; dx += 4)
+                        {
+                            float32x4_t fx1 = Load<false>(_ax.data + dx);
+                            float32x4_t fx0 = vsubq_f32(_1, fx1);
+                            Store<false>(pb + dx, BilColS1(ps, _ix.data + dx, fx0, fx1));
+                        }
+                    }
+                    //if (N == 2)
+                    //{
+                    //    for (; dx < rs4; dx += 4)
+                    //    {
+                    //        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                    //        _mm_storeu_ps(pb + dx, BilColS2(ps, _ix.data + dx, fx0, fx1));
+                    //    }
+                    //}
+                    //if (N == 3)
+                    //{
+                    //    for (; dx < rs3; dx += 3)
+                    //    {
+                    //        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                    //        _mm_storeu_ps(pb + dx, BilColS3(ps + _ix[dx], fx0, fx1));
+                    //    }
+                    //}
+                    //if (N == 4)
+                    //{
+                    //    for (; dx < rs4; dx += 4)
+                    //    {
+                    //        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                    //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                    //        _mm_storeu_ps(pb + dx, BilColS4(ps + _ix[dx], fx0, fx1));
+                    //    }
+                    //}
+                    for (; dx < rs; dx++)
+                    {
+                        int32_t sx = _ix[dx];
+                        float fx = _ax[dx];
+                        pb[dx] = ps[sx] * (1.0f - fx) + ps[sx + N] * fx;
+                    }
+                }
+
+                size_t dx = 0;
+                float32x4_t _fy0 = vdupq_n_f32(fy0);
+                float32x4_t _fy1 = vdupq_n_f32(fy1);
+                for (; dx < rs8; dx += 8)
+                {
+                    float32x4_t m00 = vmulq_f32(Load<false>(pbx[0] + dx + 0), _fy0);
+                    float32x4_t m01 = vmulq_f32(Load<false>(pbx[1] + dx + 0), _fy1);
+                    uint32x4_t i0 = (uint32x4_t)Round(vaddq_f32(m00, m01));
+                    float32x4_t m10 = vmulq_f32(Load<false>(pbx[0] + dx + 4), _fy0);
+                    float32x4_t m11 = vmulq_f32(Load<false>(pbx[1] + dx + 4), _fy1);
+                    uint32x4_t i1 = (uint32x4_t)Round(vaddq_f32(m10, m11));
+                    Store<false>(dst + dx, PackU32(i0, i1));
+                }
+                for (; dx < rs4; dx += 4)
+                {
+                    float32x4_t m0 = vmulq_f32(Load<false>(pbx[0] + dx), _fy0);
+                    float32x4_t m1 = vmulq_f32(Load<false>(pbx[1] + dx), _fy1);
+                    uint32x4_t i0 = (uint32x4_t)Round(vaddq_f32(m0, m1));
+                    Store<false>(dst + dx, vmovn_u32(i0));
+                }
+                for (; dx < rs; dx++)
+                    dst[dx] = Simd::Round(pbx[0][dx] * fy0 + pbx[1][dx] * fy1);
+            }
+        }
+
+        template<size_t N> void ResizerShortBilinear::RunS(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        {
+            size_t rs = _param.dstW * N;
+            size_t rs3 = AlignLoAny(rs - 1, 3);
+            size_t rs6 = AlignLoAny(rs - 1, 6);
+            size_t rs4 = AlignLo(rs, 4);
+            size_t rs8 = AlignLo(rs, 8);
+            float32x4_t _1 = vdupq_n_f32(1.0f);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                float fy1 = _ay[dy];
+                float fy0 = 1.0f - fy1;
+                int32_t sy = _iy[dy];
+                const uint16_t* ps0 = src + (sy + 0) * srcStride;
+                const uint16_t* ps1 = src + (sy + 1) * srcStride;
+                size_t dx = 0;
+                float32x4_t _fy0 = vdupq_n_f32(fy0);
+                float32x4_t _fy1 = vdupq_n_f32(fy1);
+                if (N == 1)
+                {
+                    for (; dx < rs8; dx += 8)
+                    {
+                        float32x4_t fx01 = Load<false>(_ax.data + dx + 0);
+                        float32x4_t fx00 = vsubq_f32(_1, fx01);
+                        float32x4_t m00 = vmulq_f32(BilColS1(ps0, _ix.data + dx + 0, fx00, fx01), _fy0);
+                        float32x4_t m01 = vmulq_f32(BilColS1(ps1, _ix.data + dx + 0, fx00, fx01), _fy1);
+                        uint32x4_t i0 = (uint32x4_t)Round(vaddq_f32(m00, m01));
+                        float32x4_t fx11 = Load<false>(_ax.data + dx + 4);
+                        float32x4_t fx10 = vsubq_f32(_1, fx11);
+                        float32x4_t m10 = vmulq_f32(BilColS1(ps0, _ix.data + dx + 4, fx10, fx11), _fy0);
+                        float32x4_t m11 = vmulq_f32(BilColS1(ps1, _ix.data + dx + 4, fx10, fx11), _fy1);
+                        uint32x4_t i1 = (uint32x4_t)Round(vaddq_f32(m10, m11));
+                        Store<false>(dst + dx, PackU32(i0, i1));
+                    }
+                    for (; dx < rs4; dx += 4)
+                    {
+                        float32x4_t fx1 = Load<false>(_ax.data + dx);
+                        float32x4_t fx0 = vsubq_f32(_1, fx1);
+                        float32x4_t m0 = vmulq_f32(BilColS1(ps0, _ix.data + dx, fx0, fx1), _fy0);
+                        float32x4_t m1 = vmulq_f32(BilColS1(ps1, _ix.data + dx, fx0, fx1), _fy1);
+                        uint32x4_t i0 = (uint32x4_t)Round(vaddq_f32(m0, m1));
+                        Store<false>(dst + dx, vmovn_u32(i0));
+                    }
+                }
+                //if (N == 2)
+                //{
+                //    for (; dx < rs8; dx += 8)
+                //    {
+                //        __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
+                //        __m128 fx00 = _mm_sub_ps(_1, fx01);
+                //        __m128 m00 = _mm_mul_ps(BilColS2(ps0, _ix.data + dx + 0, fx00, fx01), _fy0);
+                //        __m128 m01 = _mm_mul_ps(BilColS2(ps1, _ix.data + dx + 0, fx00, fx01), _fy1);
+                //        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
+                //        __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 4);
+                //        __m128 fx10 = _mm_sub_ps(_1, fx11);
+                //        __m128 m10 = _mm_mul_ps(BilColS2(ps0, _ix.data + dx + 4, fx10, fx11), _fy0);
+                //        __m128 m11 = _mm_mul_ps(BilColS2(ps1, _ix.data + dx + 4, fx10, fx11), _fy1);
+                //        __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
+                //        _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(i0, i1));
+                //    }
+                //    for (; dx < rs4; dx += 4)
+                //    {
+                //        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                //        __m128 m0 = _mm_mul_ps(BilColS2(ps0, _ix.data + dx, fx0, fx1), _fy0);
+                //        __m128 m1 = _mm_mul_ps(BilColS2(ps1, _ix.data + dx, fx0, fx1), _fy1);
+                //        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
+                //        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
+                //    }
+                //}
+                //if (N == 3)
+                //{
+                //    for (; dx < rs6; dx += 6)
+                //    {
+                //        __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
+                //        __m128 fx00 = _mm_sub_ps(_1, fx01);
+                //        __m128 m00 = _mm_mul_ps(BilColS3(ps0 + _ix[dx + 0], fx00, fx01), _fy0);
+                //        __m128 m01 = _mm_mul_ps(BilColS3(ps1 + _ix[dx + 0], fx00, fx01), _fy1);
+                //        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
+                //        __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 3);
+                //        __m128 fx10 = _mm_sub_ps(_1, fx11);
+                //        __m128 m10 = _mm_mul_ps(BilColS3(ps0 + _ix[dx + 3], fx10, fx11), _fy0);
+                //        __m128 m11 = _mm_mul_ps(BilColS3(ps1 + _ix[dx + 3], fx10, fx11), _fy1);
+                //        __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
+                //        _mm_storeu_si128((__m128i*)(dst + dx), _mm_shuffle_epi8(_mm_packus_epi32(i0, i1), RSB_3_P));
+                //    }
+                //    for (; dx < rs3; dx += 3)
+                //    {
+                //        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                //        __m128 m0 = _mm_mul_ps(BilColS3(ps0 + _ix[dx], fx0, fx1), _fy0);
+                //        __m128 m1 = _mm_mul_ps(BilColS3(ps1 + _ix[dx], fx0, fx1), _fy1);
+                //        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
+                //        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
+                //    }
+                //}
+                //if (N == 4)
+                //{
+                //    for (; dx < rs8; dx += 8)
+                //    {
+                //        __m128 fx01 = _mm_loadu_ps(_ax.data + dx + 0);
+                //        __m128 fx00 = _mm_sub_ps(_1, fx01);
+                //        __m128 m00 = _mm_mul_ps(BilColS4(ps0 + _ix[dx + 0], fx00, fx01), _fy0);
+                //        __m128 m01 = _mm_mul_ps(BilColS4(ps1 + _ix[dx + 0], fx00, fx01), _fy1);
+                //        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m00, m01));
+                //        __m128 fx11 = _mm_loadu_ps(_ax.data + dx + 4);
+                //        __m128 fx10 = _mm_sub_ps(_1, fx11);
+                //        __m128 m10 = _mm_mul_ps(BilColS4(ps0 + _ix[dx + 4], fx10, fx11), _fy0);
+                //        __m128 m11 = _mm_mul_ps(BilColS4(ps1 + _ix[dx + 4], fx10, fx11), _fy1);
+                //        __m128i i1 = _mm_cvttps_epi32(_mm_add_ps(m10, m11));
+                //        _mm_storeu_si128((__m128i*)(dst + dx), _mm_packus_epi32(i0, i1));
+                //    }
+                //    for (; dx < rs4; dx += 4)
+                //    {
+                //        __m128 fx1 = _mm_loadu_ps(_ax.data + dx);
+                //        __m128 fx0 = _mm_sub_ps(_1, fx1);
+                //        __m128 m0 = _mm_mul_ps(BilColS4(ps0 + _ix[dx], fx0, fx1), _fy0);
+                //        __m128 m1 = _mm_mul_ps(BilColS4(ps1 + _ix[dx], fx0, fx1), _fy1);
+                //        __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
+                //        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, K_ZERO));
+                //    }
+                //}
+                for (; dx < rs; dx++)
+                {
+                    int32_t sx = _ix[dx];
+                    float fx1 = _ax[dx];
+                    float fx0 = 1.0f - fx1;
+                    float r0 = ps0[sx] * fx0 + ps0[sx + N] * fx1;
+                    float r1 = ps1[sx] * fx0 + ps1[sx + N] * fx1;
+                    dst[dx] = Simd::Round(r0 * fy0 + r1 * fy1);
+                }
+            }
+        }
+
+        void ResizerShortBilinear::Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride)
+        {
+            bool sparse = _param.dstH * 2.0 <= _param.srcH;
+            switch (_param.channels)
+            {
+            case 1: sparse ? RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
+            case 2: sparse ? RunS<2>(src, srcStride, dst, dstStride) : RunB<2>(src, srcStride, dst, dstStride); return;
+            case 3: sparse ? RunS<3>(src, srcStride, dst, dstStride) : RunB<3>(src, srcStride, dst, dstStride); return;
+            case 4: sparse ? RunS<4>(src, srcStride, dst, dstStride) : RunB<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         ResizerFloatBilinear::ResizerFloatBilinear(const ResParam & param)
             : Base::ResizerFloatBilinear(param)
         {
@@ -582,6 +848,8 @@ namespace Simd
                 return new ResizerByteBilinear(param);
             else if (param.IsByteArea())
                 return new ResizerByteArea(param);
+            else if (param.IsShortBilinear() && channels == 1)
+                return new ResizerShortBilinear(param);
             else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
             else
