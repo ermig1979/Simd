@@ -417,8 +417,12 @@ namespace Simd
         */
         struct Model
         {
+            static const uint8_t EMPTY = 0;
+            static const uint8_t ROI = 255;
+
             FSize size; /*!< \brief A minimal size of object to detect. ONVIF size is restricted by range [0, 2]. */ 
             FPoints roi; /*!< \brief A ROI (region of interest). ONVIF coordinates is restricted by range [-1, 1]. */ 
+            View mask; /*!< \brief A ROI (region of interest) mask. It must be 8-bit gray image. */
 
             /*!
                 Copy constructor of Model.
@@ -429,10 +433,15 @@ namespace Simd
                 : size(model.size)
                 , roi(model.roi)
             {
+                if (model.mask.format == View::Gray8)
+                {
+                    mask.Recreate(model.mask.Size(), View::Gray8);
+                    Copy(model.mask, mask);
+                }
             }
 
             /*!
-                Constructs Event structure.
+                Constructs Model structure on the base of detected object size and ROI polygon.
 
                 \param [in] size_ - a minimal size of detected object. It is default value is (0.1, 0.1) ~ 0.25% of screen area. 
                 \param [in] roi_ - a ROI (region of interest). It is empty by default (all screen).
@@ -449,6 +458,46 @@ namespace Simd
                     roi.push_back(FPoint(1.0, -1.0));
                     roi.push_back(FPoint(-1.0, -1.0));
                 }
+            }
+
+            /*!
+                Constructs Model structure on the base of detected object size and ROI mask.
+
+                \param [in] size_ - a minimal size of detected object.
+                \param [in] mask_ - a ROI (region of interest) mask. It must be 8-bit gray image.
+            */
+            Model(const FSize& size_, const View & mask_)
+                : size(size_)
+            {
+                if (mask_.format == View::Gray8)
+                {
+                    mask.Recreate(mask_.Size(), View::Gray8);
+                    Copy(mask_, mask);
+                }
+                else
+                {
+                    roi.push_back(FPoint(-1.0, 1.0));
+                    roi.push_back(FPoint(1.0, 1.0));
+                    roi.push_back(FPoint(1.0, -1.0));
+                    roi.push_back(FPoint(-1.0, -1.0));
+                }
+            }
+
+            /*!
+                Copy operator.
+
+                \param [in] model - other model.
+            */
+            Model& operator=(const Model& model)
+            {
+                size = model.size;
+                roi = model.roi;
+                if (model.mask.format == View::Gray8)
+                {
+                    mask.Recreate(model.mask.Size(), View::Gray8);
+                    Copy(model.mask, mask);
+                }
+                return *this;
             }
         };
 
@@ -1007,12 +1056,14 @@ namespace Simd
 
             void GenerateSearchRegionScanlines(Model & model)
             {
-                static const uint8_t ROI_EMPTY = 0;
-                static const uint8_t ROI_NON_EMPTY = 255;
-
                 model.roiMask.Recreate(model.frameSize, model.levelCount);
-                Simd::Fill(model.roiMask, ROI_EMPTY);
-                DrawFilledPolygon(model.roiMask[0], model.roi, ROI_NON_EMPTY);
+                if (_model.mask.format == View::Gray8)
+                    Simd::ResizeBilinear(_model.mask, model.roiMask[0]);
+                else
+                {
+                    Simd::Fill(model.roiMask, Motion::Model::EMPTY);
+                    DrawFilledPolygon(model.roiMask[0], model.roi, Motion::Model::ROI);
+                }
                 Simd::Build(model.roiMask, SimdReduce4x4);
 
                 for (size_t i = 0; i < model.searchRegions.size(); ++i)

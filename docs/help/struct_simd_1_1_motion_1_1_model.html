@@ -59,6 +59,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a51fc2206cd0bf179eb00715aa0298905"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a291ec3d9feb72d38fb3f148d602cda27"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_motion_1_1_model.html#a291ec3d9feb72d38fb3f148d602cda27">Model</a> (const <a class="el" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">FSize</a> &amp;size_=<a class="el" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">FSize</a>(0.1, 0.1), const <a class="el" href="namespace_simd_1_1_motion.html#a2b1e26591356843d0bed77fecae072b0">FPoints</a> &amp;roi_=<a class="el" href="namespace_simd_1_1_motion.html#a2b1e26591356843d0bed77fecae072b0">FPoints</a>())</td></tr>
 <tr class="separator:a291ec3d9feb72d38fb3f148d602cda27"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7929fc9755c518d3e52eb8b012f48e1e"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_motion_1_1_model.html#a7929fc9755c518d3e52eb8b012f48e1e">Model</a> (const <a class="el" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">FSize</a> &amp;size_, const <a class="el" href="namespace_simd_1_1_motion.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a> &amp;mask_)</td></tr>
+<tr class="separator:a7929fc9755c518d3e52eb8b012f48e1e"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae567b73a4c849f03f7c1fc3fe9ce6bd5"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_motion_1_1_model.html">Model</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_motion_1_1_model.html#ae567b73a4c849f03f7c1fc3fe9ce6bd5">operator=</a> (const <a class="el" href="struct_simd_1_1_motion_1_1_model.html">Model</a> &amp;model)</td></tr>
+<tr class="separator:ae567b73a4c849f03f7c1fc3fe9ce6bd5"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-attribs"></a>
 Data Fields</h2></td></tr>
@@ -70,13 +74,17 @@ Data Fields</h2></td></tr>
 <a class="el" href="namespace_simd_1_1_motion.html#a2b1e26591356843d0bed77fecae072b0">FPoints</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_motion_1_1_model.html#a437c586204cccc6b1d47d68dd12b5356">roi</a></td></tr>
 <tr class="memdesc:a437c586204cccc6b1d47d68dd12b5356"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ROI (region of interest). ONVIF coordinates is restricted by range [-1, 1]. <br /></td></tr>
 <tr class="separator:a437c586204cccc6b1d47d68dd12b5356"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab1a9629feb882ff11b6ab0e21627f455"><td class="memItemLeft" align="right" valign="top"><a id="ab1a9629feb882ff11b6ab0e21627f455"></a>
+<a class="el" href="namespace_simd_1_1_motion.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_motion_1_1_model.html#ab1a9629feb882ff11b6ab0e21627f455">mask</a></td></tr>
+<tr class="memdesc:ab1a9629feb882ff11b6ab0e21627f455"><td class="mdescLeft">&#160;</td><td class="mdescRight">A ROI (region of interest) mask. It must be 8-bit gray image. <br /></td></tr>
+<tr class="separator:ab1a9629feb882ff11b6ab0e21627f455"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p><a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure. </p>
 <p>Describes screen scene. It is used by <a class="el" href="class_simd_1_1_motion_1_1_detector.html" title="Class Detector.">Simd::Motion::Detector</a> for algorithm calibration. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a51fc2206cd0bf179eb00715aa0298905"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a51fc2206cd0bf179eb00715aa0298905">&#9670;&nbsp;</a></span>Model() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a51fc2206cd0bf179eb00715aa0298905">&#9670;&nbsp;</a></span>Model() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -101,7 +109,7 @@ Data Fields</h2></td></tr>
 </div>
 </div>
 <a id="a291ec3d9feb72d38fb3f148d602cda27"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a291ec3d9feb72d38fb3f148d602cda27">&#9670;&nbsp;</a></span>Model() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a291ec3d9feb72d38fb3f148d602cda27">&#9670;&nbsp;</a></span>Model() <span class="overload">[2/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -125,11 +133,73 @@ Data Fields</h2></td></tr>
         </tr>
       </table>
 </div><div class="memdoc">
-<p>Constructs <a class="el" href="struct_simd_1_1_motion_1_1_event.html" title="Event structure.">Event</a> structure.</p>
+<p>Constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure on the base of detected object size and ROI polygon.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">size_</td><td>- a minimal size of detected object. It is default value is (0.1, 0.1) ~ 0.25% of screen area. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">roi_</td><td>- a ROI (region of interest). It is empty by default (all screen). </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="a7929fc9755c518d3e52eb8b012f48e1e"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a7929fc9755c518d3e52eb8b012f48e1e">&#9670;&nbsp;</a></span>Model() <span class="overload">[3/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_motion_1_1_model.html">Model</a> </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="namespace_simd_1_1_motion.html#a69c0c1e4d63dcf2c61ea41c22a15b5f5">FSize</a> &amp;&#160;</td>
+          <td class="paramname"><em>size_</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const <a class="el" href="namespace_simd_1_1_motion.html#af7e89e26f4cf80a6be93d573eb15a5cc">View</a> &amp;&#160;</td>
+          <td class="paramname"><em>mask_</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Constructs <a class="el" href="struct_simd_1_1_motion_1_1_model.html" title="Model structure.">Model</a> structure on the base of detected object size and ROI mask.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">size_</td><td>- a minimal size of detected object. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">mask_</td><td>- a ROI (region of interest) mask. It must be 8-bit gray image. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<h2 class="groupheader">Member Function Documentation</h2>
+<a id="ae567b73a4c849f03f7c1fc3fe9ce6bd5"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae567b73a4c849f03f7c1fc3fe9ce6bd5">&#9670;&nbsp;</a></span>operator=()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_motion_1_1_model.html">Model</a>&amp; operator= </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_motion_1_1_model.html">Model</a> &amp;&#160;</td>
+          <td class="paramname"><em>model</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Copy operator.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">model</td><td>- other model. </td></tr>
   </table>
   </dd>
 </dl>

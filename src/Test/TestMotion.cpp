@@ -44,6 +44,14 @@ namespace Test
     {
         Filter()
         {
+#if 1 
+            Simd::Motion::Model model;
+            model.mask.Recreate(20, 20, View::Gray8);
+            for (size_t y = 0; y < model.mask.height; ++y)
+                for (size_t x = 0; x < model.mask.width; ++x)
+                    model.mask.At<uint8_t>(x, y) = ((x < model.mask.width / 2) ? 255 : 0);
+            _detector.SetModel(model);
+#endif
         }
 
         virtual bool Process(const Frame & input, Frame & output)
