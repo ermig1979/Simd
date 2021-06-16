@@ -301,7 +301,7 @@ namespace Test
 #if 1
         result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 64, 48, 11, 17, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 128, 96, 60, 40, f1, f2);
         //result = result && ResizerAutoTest(method, type, channels, W / 3, H / 3, 3.3, f1, f2);
 #else
         result = result && ResizerAutoTest(method, type, channels, W, H, 0.9, f1, f2);
@@ -323,17 +323,17 @@ namespace Test
             result = result && ResizerAutoTest(method, SimdResizeChannelShort, 2, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelShort, 3, f1, f2);
             result = result && ResizerAutoTest(method, SimdResizeChannelShort, 4, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 3, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelByte, 4, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 1, f1, f2);
-            //result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 3, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 1, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 2, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 3, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelByte, 4, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 1, f1, f2);
+            result = result && ResizerAutoTest(method, SimdResizeChannelFloat, 3, f1, f2);
         }
-        //result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 1, f1, f2);
-        //result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 2, f1, f2);
-        //result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 3, f1, f2);
-        //result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 4, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 1, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 2, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 3, f1, f2);
+        result = result && ResizerAutoTest(SimdResizeMethodArea, SimdResizeChannelByte, 4, f1, f2);
 #endif
 
         return result;

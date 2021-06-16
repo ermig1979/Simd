@@ -1551,7 +1551,12 @@ namespace Simd
             return vext_u8(last, vext_u8(last, last, 8 - count), count);
         }
 
-        SIMD_INLINE float32x4_t Load(const  float * p0, const  float * p1)
+        SIMD_INLINE uint16x8_t Load(const uint16_t* p0, const uint16_t* p1)
+        {
+            return vcombine_u16(vld1_u16(p0), vld1_u16(p1));
+        }
+
+        SIMD_INLINE float32x4_t Load(const float* p0, const float* p1)
         {
             return vcombine_f32(vld1_f32(p0), vld1_f32(p1));
         }
