@@ -23,12 +23,73 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdExtract.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+        template<bool align> void CosineDistance32f(const float* a, const float* b, size_t size, float* distance)
+        {
+            if (align)
+                assert(Aligned(a) && Aligned(b));
+
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, DF);
+            size_t i = 0;
+            __m128 _aa[2] = { _mm_setzero_ps(), _mm_setzero_ps() };
+            __m128 _ab[2] = { _mm_setzero_ps(), _mm_setzero_ps() };
+            __m128 _bb[2] = { _mm_setzero_ps(), _mm_setzero_ps() };
+            if (fullAlignedSize)
+            {
+                for (; i < fullAlignedSize; i += DF)
+                {
+                    __m128 a0 = Sse::Load<align>(a + i + 0 * F);
+                    __m128 b0 = Sse::Load<align>(b + i + 0 * F);
+                    _aa[0] = _mm_add_ps(_aa[0], _mm_mul_ps(a0, a0));
+                    _ab[0] = _mm_add_ps(_ab[0], _mm_mul_ps(a0, b0));
+                    _bb[0] = _mm_add_ps(_bb[0], _mm_mul_ps(b0, b0));
+                    __m128 a1 = Sse::Load<align>(a + i + 1 * F);
+                    __m128 b1 = Sse::Load<align>(b + i + 1 * F);
+                    _aa[1] = _mm_add_ps(_aa[1], _mm_mul_ps(a1, a1));
+                    _ab[1] = _mm_add_ps(_ab[1], _mm_mul_ps(a1, b1));
+                    _bb[1] = _mm_add_ps(_bb[1], _mm_mul_ps(b1, b1));
+                }
+                _aa[0] = _mm_add_ps(_aa[0], _aa[1]);
+                _ab[0] = _mm_add_ps(_ab[0], _ab[1]);
+                _bb[0] = _mm_add_ps(_bb[0], _bb[1]);
+            }
+            for (; i < partialAlignedSize; i += F)
+            {
+                __m128 a0 = Sse::Load<align>(a + i);
+                __m128 b0 = Sse::Load<align>(b + i);
+                _aa[0] = _mm_add_ps(_aa[0], _mm_mul_ps(a0, a0));
+                _ab[0] = _mm_add_ps(_ab[0], _mm_mul_ps(a0, b0));
+                _bb[0] = _mm_add_ps(_bb[0], _mm_mul_ps(b0, b0));
+            }
+            float aa = Sse::ExtractSum(_aa[0]), ab = Sse::ExtractSum(_ab[0]), bb = Sse::ExtractSum(_bb[0]);
+            for (; i < size; ++i)
+            {
+                float _a = a[i];
+                float _b = b[i];
+                aa += _a * _a;
+                ab += _a * _b;
+                bb += _b * _b;
+            }
+            *distance = 1.0f - ab / ::sqrt(aa * bb);
+        }
+
+        void CosineDistance32f(const float* a, const float* b, size_t size, float* distance)
+        {
+            if (Aligned(a) && Aligned(b))
+                CosineDistance32f<true>(a, b, size, distance);
+            else
+                CosineDistance32f<false>(a, b, size, distance);
+        }
+
+        //-------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE __m128i Float32ToUint8(const float * src, const __m128 & lower, const __m128 & upper, const __m128 & boost)
         {
             return _mm_cvtps_epi32(_mm_mul_ps(_mm_sub_ps(_mm_min_ps(_mm_max_ps(Sse::Load<align>(src), lower), upper), lower), boost));
@@ -67,6 +128,8 @@ namespace Simd
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
         }
+
+        //-------------------------------------------------------------------------
 
         SIMD_INLINE __m128 Uint8ToFloat32(const __m128i & value, const __m128 & lower, const __m128 & boost)
         {

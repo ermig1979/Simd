@@ -252,12 +252,17 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t *c, size_t cStride,
     size_t width, size_t height)
 {
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
-    Base::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+        Base::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
 }
 
 SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride,
@@ -2428,7 +2433,7 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
 SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance)
 {
     typedef void(*SimdCosineDistance32fPtr) (const float * a, const float * b, size_t size, float * distance);
-    const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC5(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+    const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC5(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdCosineDistance32f(a, b, size, distance);
 }

@@ -35,9 +35,7 @@ namespace Simd
 			{
 				int rowSum = 0;
 				for (size_t col = 0; col < width; ++col)
-				{
 					c[col] = AbsDifferenceU8(a[col], b[col]);
-				}
 				a += aStride;
 				b += bStride;
 				c += cStride;

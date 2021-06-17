@@ -90,12 +90,12 @@ namespace Test
 		bool result = true;
 
 		result = result && AbsDifferenceAutoTest(FUNC1(Simd::Base::AbsDifference), FUNC1(SimdAbsDifference), 1);
-		/*
-		#ifdef SIMD_SSE2_ENABLE
-				if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-					result = result && AbsDifferenceAutoTest(FUNC1(Simd::Sse2::AbsDifference), FUNC1(SimdAbsDifference), 1);
-		#endif
-		*/
+
+#ifdef SIMD_SSE2_ENABLE
+		if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
+			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Sse2::AbsDifference), FUNC1(SimdAbsDifference), 1);
+#endif
+
 #ifdef SIMD_AVX2_ENABLE
 		if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Avx2::AbsDifference), FUNC1(SimdAbsDifference), 1);

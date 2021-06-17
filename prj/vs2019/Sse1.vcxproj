@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse1Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse1Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Neural.cpp" />
