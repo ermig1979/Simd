@@ -22,9 +22,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse1SquaredDifferenceSum.cpp">
       <Filter>Sse1</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse1Svm.cpp">
-      <Filter>Sse1</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse1Synet.cpp">
       <Filter>Sse1</Filter>
     </ClCompile>

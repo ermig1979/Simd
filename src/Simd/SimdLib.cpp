@@ -5469,9 +5469,9 @@ SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float *
         Avx::SvmSumLinear(x, svs, weights, length, count, sum);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if(Sse::Enable)
-        Sse::SvmSumLinear(x, svs, weights, length, count, sum);
+#ifdef SIMD_SSE2_ENABLE
+    if(Sse2::Enable)
+        Sse2::SvmSumLinear(x, svs, weights, length, count, sum);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE

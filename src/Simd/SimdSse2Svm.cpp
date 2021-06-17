@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         namespace
         {
@@ -65,9 +65,9 @@ namespace Simd
                 __m128 _v = _mm_set1_ps(v);
                 for (; i < alignedCount; i += F)
                 {
-                    __m128 sums = Load<true>(buffer.sums + i);
-                    __m128 _svs = Load<false>(svs + i);
-                    Store<true>(buffer.sums + i, _mm_add_ps(sums, _mm_mul_ps(_v, _svs)));
+                    __m128 sums = Sse::Load<true>(buffer.sums + i);
+                    __m128 _svs = Sse::Load<false>(svs + i);
+                    Sse::Store<true>(buffer.sums + i, _mm_add_ps(sums, _mm_mul_ps(_v, _svs)));
                 }
                 for (; i < count; ++i)
                     buffer.sums[i] += v*svs[i];
@@ -78,8 +78,8 @@ namespace Simd
             __m128 _sum = _mm_setzero_ps();
             for (; i < alignedCount; i += F)
             {
-                __m128 sums = Load<true>(buffer.sums + i);
-                __m128 _weights = Load<false>(weights + i);
+                __m128 sums = Sse::Load<true>(buffer.sums + i);
+                __m128 _weights = Sse::Load<false>(weights + i);
                 _sum = _mm_add_ps(_sum, _mm_mul_ps(sums, _weights));
             }
             *sum = ExtractSum(_sum);
@@ -87,5 +87,5 @@ namespace Simd
                 *sum += buffer.sums[i] * weights[i];
         }
     }
-#endif// SIMD_SSE_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

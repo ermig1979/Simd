@@ -297,6 +297,8 @@ namespace Simd
         void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+        void SvmSumLinear(const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
+
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
         void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
