@@ -21,6 +21,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp" />

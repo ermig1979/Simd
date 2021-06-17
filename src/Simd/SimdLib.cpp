@@ -252,14 +252,24 @@ SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t * b, size_t bStride, uint8_t *c, size_t cStride,
     size_t width, size_t height)
 {
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+    else
+#endif 
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
         Base::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);

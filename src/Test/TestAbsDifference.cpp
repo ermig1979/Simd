@@ -100,22 +100,17 @@ namespace Test
 		if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
 			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Avx2::AbsDifference), FUNC1(SimdAbsDifference), 1);
 #endif 
-		/*
-		#ifdef SIMD_AVX512BW_ENABLE
-				if (Simd::Avx512bw::Enable)
-					result = result && AbsDifferenceAutoTest(FUNC1(Simd::Avx512bw::AbsDifference), FUNC1(SimdAbsDifference), 1);
-		#endif
 
-		#ifdef SIMD_VMX_ENABLE
-				if (Simd::Vmx::Enable && W >= Simd::Vmx::A)
-					result = result && AbsDifferenceAutoTest(FUNC1(Simd::Vmx::AbsDifference), FUNC1(SimdAbsDifference), 1);
-		#endif
+#ifdef SIMD_AVX512BW_ENABLE
+		if (Simd::Avx512bw::Enable)
+			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Avx512bw::AbsDifference), FUNC1(SimdAbsDifference), 1);
+#endif
 
-		#ifdef SIMD_NEON_ENABLE
-				if (Simd::Neon::Enable && W >= Simd::Neon::A)
-					result = result && AbsDifferenceAutoTest(FUNC1(Simd::Neon::AbsDifference), FUNC1(SimdAbsDifference), 1);
-		#endif
-		*/
+#ifdef SIMD_NEON_ENABLE
+		if (Simd::Neon::Enable && W >= Simd::Neon::A)
+			result = result && AbsDifferenceAutoTest(FUNC1(Simd::Neon::AbsDifference), FUNC1(SimdAbsDifference), 1);
+#endif
+
 		return result;
 	}
 

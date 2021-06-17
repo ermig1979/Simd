@@ -40,7 +40,7 @@
  <li>Base implementation, AVX2, AVX-512BW and NEON optimizations of function VectorNormNa16f.</li>
  <li>Base implementation, AVX2, AVX-512BW and NEON optimizations of function VectorNormNp16f.</li>
  <li>Parameter of ROI mask in Motion::Model.</li>
- <li>SSE2 optimizations of function AbsDifference.</li>
+ <li>SSE2, AVX-512BW and NEON optimizations of function AbsDifference.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -48,9 +48,9 @@
 </ul>
 <h5>Replacing</h5>
 <ul>
- <li>Replace SSE optimizations to SSE2 of function SvmSumLinear.</li>
- <li>Replace SSE optimizations to SSE2 of function Fill32f.</li>
- <li>Replace SSE optimizations to SSE2 of function CosineDistance32f.</li>
+ <li>Replace SSE optimizations to SSE2 for function SvmSumLinear.</li>
+ <li>Replace SSE optimizations to SSE2 for function Fill32f.</li>
+ <li>Replace SSE optimizations to SSE2 for function CosineDistance32f.</li>
 </ul>
 
 <h4>Tests</h4>

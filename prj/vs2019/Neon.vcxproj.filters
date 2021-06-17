@@ -238,6 +238,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSavePng.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifference.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
