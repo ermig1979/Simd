@@ -41,9 +41,14 @@
  <li>Base implementation, AVX2, AVX-512BW and NEON optimizations of function VectorNormNp16f.</li>
  <li>Parameter of ROI mask in Motion::Model.</li>
 </ul>
+<h5>Bug fixing</h5>
+<ul>
+ <li>Linker warning in file SimdImageLoad.h (MSVS).</li>
+</ul>
 <h5>Replacing</h5>
 <ul>
- <li>Replace SSE to SSE2 optimizations of function SvmSumLinear.</li>
+ <li>Replace SSE optimizations to SSE2 of function SvmSumLinear.</li>
+ <li>Replace SSE optimizations to SSE2 of function Fill32f.</li>
 </ul>
 
 <h4>Tests</h4>

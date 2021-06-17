@@ -29,6 +29,35 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
+        void Fill32f(float* dst, size_t size, const float* value)
+        {
+            if (value == 0 || value[0] == 0)
+                memset(dst, 0, size * sizeof(float));
+            else
+            {
+                float v = value[0];
+                const float* nose = (float*)AlignHi(dst, F * sizeof(float));
+                for (; dst < nose && size; --size)
+                    *dst++ = v;
+                const float* end = dst + size;
+                const float* endF = dst + AlignLo(size, F);
+                const float* endQF = dst + AlignLo(size, QF);
+                size_t i = 0;
+                __m128 _v = _mm_set1_ps(v);
+                for (; dst < endQF; dst += QF)
+                {
+                    _mm_storeu_ps(dst + 0 * F, _v);
+                    _mm_storeu_ps(dst + 1 * F, _v);
+                    _mm_storeu_ps(dst + 2 * F, _v);
+                    _mm_storeu_ps(dst + 3 * F, _v);
+                }
+                for (; dst < endF; dst += F)
+                    _mm_storeu_ps(dst, _v);
+                for (; dst < end;)
+                    *dst++ = v;
+            }
+        }
+
         template <bool align> void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
             assert(width >= A);

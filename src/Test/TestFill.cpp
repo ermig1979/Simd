@@ -496,9 +496,9 @@ namespace Test
 
         result = result && Fill32fAutoTest(FUNC_32F(Simd::Base::Fill32f), FUNC_32F(SimdFill32f));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse::Fill32f), FUNC_32F(SimdFill32f));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse2::Fill32f), FUNC_32F(SimdFill32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

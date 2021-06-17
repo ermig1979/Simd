@@ -26,6 +26,7 @@
 
 #include "Simd/SimdMemoryStream.h"
 #include "Simd/SimdArray.h"
+#include "Simd/SimdAlignment.h"
 
 #include "Simd/SimdView.hpp"
 
