@@ -536,18 +536,23 @@ SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t 
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::F)
+    if (Avx2::Enable)
         Avx2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Sse2::F)
+    if (Ssse3::Enable)
         Ssse3::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::F)
+    if (Sse2::Enable)
         Sse2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        Neon::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
         Base::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);

@@ -295,6 +295,40 @@ namespace Simd
                 AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
         }
 
+        //---------------------------------------------------------------------
+
+        SIMD_INLINE uint16x8_t AlphaPremultiply(uint16x8_t value, uint16x8_t alpha)
+        {
+            uint16x8_t prem = vmulq_u16(value, alpha);
+            return vshrq_n_u16(vaddq_u16(vaddq_u16(prem, K16_0001), vshrq_n_u16(prem, 8)), 8);
+        }
+
+        SIMD_INLINE void AlphaPremultiply2(const uint8_t* src, uint8_t* dst)
+        {
+            uint8x8x4_t bgra = LoadHalf4<false>(src);
+            uint16x8_t alpha = vmovl_u8(bgra.val[3]);
+            bgra.val[0] = vmovn_u16(AlphaPremultiply(vmovl_u8(bgra.val[0]), alpha));
+            bgra.val[1] = vmovn_u16(AlphaPremultiply(vmovl_u8(bgra.val[1]), alpha));
+            bgra.val[2] = vmovn_u16(AlphaPremultiply(vmovl_u8(bgra.val[2]), alpha));
+            Store4<false>(dst, bgra);
+        }
+
+        void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t size = width * 4;
+            size_t sizeA2 = AlignLo(size, A * 2);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t i = 0;
+                for (; i < sizeA2; i += A * 2)
+                    AlphaPremultiply2(src + i, dst + i);
+                for (; i < size; i += 4)
+                    Base::AlphaPremultiply(src + i, dst + i);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
         //-----------------------------------------------------------------------
 
         SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, float32x4_t _0, float32x4_t _255)

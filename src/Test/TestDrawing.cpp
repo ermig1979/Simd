@@ -292,23 +292,28 @@ namespace Test
         result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Base::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 
 #ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::F)
+        if (Simd::Sse2::Enable)
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Sse2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif 
 
 #ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Sse2::F)
+        if (Simd::Ssse3::Enable)
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Ssse3::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::F)
+        if (Simd::Avx2::Enable)
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Avx2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Avx512bw::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Neon::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif
 
         return result;
