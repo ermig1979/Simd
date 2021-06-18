@@ -321,18 +321,23 @@ namespace Test
         result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Base::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+        if (Simd::Sse41::Enable)
             result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Sse41::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+        if (Simd::Avx2::Enable)
             result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Avx2::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Avx512bw::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && AlphaPremultiplyAutoTest(true, FUNC_AP(Simd::Neon::AlphaUnpremultiply), FUNC_AP(SimdAlphaUnpremultiply));
 #endif 
 
         return result;

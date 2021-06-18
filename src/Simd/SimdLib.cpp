@@ -561,13 +561,18 @@ SIMD_API void SimdAlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
+    if (Avx2::Enable)
         Avx2::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse41::A)
+    if (Sse41::Enable)
         Sse41::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable)
+        Neon::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
         Base::AlphaUnpremultiply(src, srcStride, width, height, dst, dstStride);

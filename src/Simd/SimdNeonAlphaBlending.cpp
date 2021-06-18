@@ -21,9 +21,11 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
+#include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdLog.h"
 
 namespace Simd
 {
@@ -151,6 +153,8 @@ namespace Simd
             else
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
+
+        //-----------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AlphaFilling(uint8_t * dst, const uint8x16_t & channel, const uint8x16_t & alpha)
         {
@@ -289,6 +293,44 @@ namespace Simd
                 AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
             else
                 AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+        }
+
+        //-----------------------------------------------------------------------
+
+        SIMD_INLINE void AlphaUnpremultiply(const uint8_t* src, uint8_t* dst, float32x4_t _0, float32x4_t _255)
+        {
+            uint32x4_t _src = Load<false>((uint32_t*)src);
+            uint32x4_t b = vandq_u32(_src, K32_000000FF);
+            uint32x4_t g = vandq_u32(vshrq_n_u32(_src, 8), K32_000000FF);
+            uint32x4_t r = vandq_u32(vshrq_n_u32(_src, 16), K32_000000FF);
+            uint32x4_t a = vshrq_n_u32(_src, 24);
+            float32x4_t k = vcvtq_f32_u32(a);
+            k = vbslq_f32(vceqq_f32(k, _0), k, Div<-1>(_255, k));
+            b = vcvtq_u32_f32(vminq_f32(vmulq_f32(vcvtq_f32_u32(b), k), _255));
+            g = vcvtq_u32_f32(vminq_f32(vmulq_f32(vcvtq_f32_u32(g), k), _255));
+            r = vcvtq_u32_f32(vminq_f32(vmulq_f32(vcvtq_f32_u32(r), k), _255));
+            uint32x4_t _dst = vorrq_u32(b, vshlq_n_u32(g, 8));
+            _dst = vorrq_u32(_dst, vshlq_n_u32(r, 16));
+            _dst = vorrq_u32(_dst, vshlq_n_u32(a, 24));
+            Store<false>((uint32_t*)dst, _dst);
+        }
+
+        void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            float32x4_t _0 = vdupq_n_f32(0.0f);
+            float32x4_t _255 = vdupq_n_f32(255.0f);
+            size_t size = width * 4;
+            size_t sizeA = AlignLo(size, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < sizeA; col += A)
+                    AlphaUnpremultiply(src + col, dst + col, _0, _255);
+                for (; col < size; col += 4)
+                    Base::AlphaUnpremultiply(src + col, dst + col);
+                src += srcStride;
+                dst += dstStride;
+            }
         }
     }
 #endif// SIMD_NEON_ENABLE
