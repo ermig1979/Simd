@@ -91,10 +91,6 @@ namespace Simd
 
         void NeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride);
 
-        void SquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum);
-
-        void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
-
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetReorderImage(size_t batch, size_t channels, size_t spatial, const float * src, SimdTensorFormatType srcFormat, float * dst, SimdTensorFormatType dstFormat);
