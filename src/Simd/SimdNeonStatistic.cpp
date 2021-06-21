@@ -25,6 +25,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdBase.h"
 
 namespace Simd
 {
@@ -93,6 +94,8 @@ namespace Simd
                 GetStatistic<false>(src, stride, width, height, min, max, average);
         }
 
+        //-----------------------------------------------------------------------
+
         template <bool align> void GetRowSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             size_t alignedWidth = AlignLo(width, A);
@@ -131,6 +134,8 @@ namespace Simd
             else
                 GetRowSums<false>(src, stride, width, height, sums);
         }
+
+        //-----------------------------------------------------------------------
 
         namespace
         {
@@ -257,6 +262,8 @@ namespace Simd
                 GetAbsDyRowSums<false>(src, stride, width, height, sums);
         }
 
+        //-----------------------------------------------------------------------
+
         template <bool align> void GetAbsDxColSums(const uint8_t * src, size_t stride, size_t width, size_t height, uint32_t * sums)
         {
             width--;
@@ -306,6 +313,8 @@ namespace Simd
                 GetAbsDxColSums<false>(src, stride, width, height, sums);
         }
 
+        //-----------------------------------------------------------------------
+
         template <bool align> void ValueSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
@@ -348,6 +357,8 @@ namespace Simd
             else
                 ValueSum<false>(src, stride, width, height, sum);
         }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE uint16x8_t Square(uint8x8_t value)
         {
@@ -392,6 +403,8 @@ namespace Simd
                 SquareSum<false>(src, stride, width, height, sum);
         }
 
+        //-----------------------------------------------------------------------
+
         template <bool align> void ValueSquareSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * valueSum, uint64_t * squareSum)
         {
             assert(width >= A);
@@ -433,6 +446,74 @@ namespace Simd
             else
                 ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
         }
+
+        //-----------------------------------------------------------------------
+
+        template <bool align> void ValueSquareSums2(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t widthA = Simd::AlignLo(width, A);
+            uint8x16_t tail = ShiftLeft(K8_FF, A - width + widthA);
+            uint64x2_t fullValueSums[2] = { K64_0000000000000000, K64_0000000000000000 };
+            uint64x2_t fullSquareSums[2] = { K64_0000000000000000, K64_0000000000000000 };
+            for (size_t row = 0; row < height; ++row)
+            {
+                uint32x4_t rowValueSums[2] = { K32_00000000, K32_00000000 };
+                uint32x4_t rowSquareSums[2] = { K32_00000000, K32_00000000 };
+                for (size_t col = 0, offs = 0; col < widthA; col += A, offs += A * 2)
+                {
+                    uint8x16x2_t _src = Load2<align>(src + offs);
+                    rowValueSums[0] = vpadalq_u16(rowValueSums[0], vpaddlq_u8(_src.val[0]));
+                    rowValueSums[1] = vpadalq_u16(rowValueSums[1], vpaddlq_u8(_src.val[1]));
+                    rowSquareSums[0] = vaddq_u32(rowSquareSums[0], Square(_src.val[0]));
+                    rowSquareSums[1] = vaddq_u32(rowSquareSums[1], Square(_src.val[1]));
+                }
+                if (widthA != width)
+                {
+                    size_t offs = (width - A) * 2;
+                    uint8x16x2_t _src = Load2<align>(src + offs);
+                    _src.val[0] = vandq_u8(_src.val[0], tail);
+                    _src.val[1] = vandq_u8(_src.val[1], tail);
+                    rowValueSums[0] = vpadalq_u16(rowValueSums[0], vpaddlq_u8(_src.val[0]));
+                    rowValueSums[1] = vpadalq_u16(rowValueSums[1], vpaddlq_u8(_src.val[1]));
+                    rowSquareSums[0] = vaddq_u32(rowSquareSums[0], Square(_src.val[0]));
+                    rowSquareSums[1] = vaddq_u32(rowSquareSums[1], Square(_src.val[1]));
+                }
+                fullValueSums[0] = vaddq_u64(fullValueSums[0], vpaddlq_u32(rowValueSums[0]));
+                fullValueSums[1] = vaddq_u64(fullValueSums[1], vpaddlq_u32(rowValueSums[1]));
+                fullSquareSums[0] = vaddq_u64(fullSquareSums[0], vpaddlq_u32(rowSquareSums[0]));
+                fullSquareSums[1] = vaddq_u64(fullSquareSums[1], vpaddlq_u32(rowSquareSums[1]));
+                src += stride;
+            }
+            valueSums[0] = ExtractSum64u(fullValueSums[0]);
+            valueSums[1] = ExtractSum64u(fullValueSums[1]);
+            squareSums[0] = ExtractSum64u(fullSquareSums[0]);
+            squareSums[1] = ExtractSum64u(fullSquareSums[1]);
+        }
+
+        void ValueSquareSums2(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            if (Aligned(src) && Aligned(stride))
+                ValueSquareSums2<true>(src, stride, width, height, valueSums, squareSums);
+            else
+                ValueSquareSums2<false>(src, stride, width, height, valueSums, squareSums);
+        }
+
+        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            switch (channels)
+            {
+            case 1: ValueSquareSum(src, stride, width, height, valueSums, squareSums); break;
+            case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
+            default:
+                Base::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums); break;
+            }
+        }
+
+        //-----------------------------------------------------------------------
 
         SIMD_INLINE uint32x4_t Correlation(const uint8x16_t & a, const uint8x16_t & b)
         {

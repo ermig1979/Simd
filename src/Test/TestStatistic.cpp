@@ -118,6 +118,8 @@ namespace Test
         return result;
     }
 
+    //-----------------------------------------------------------------------
+
     namespace
     {
         struct FuncM
@@ -230,6 +232,8 @@ namespace Test
         return result;
     }
 
+    //-----------------------------------------------------------------------
+
     namespace
     {
         struct FuncGOM
@@ -339,6 +343,8 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
 
     namespace
     {
@@ -529,6 +535,8 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
 
     namespace
     {
@@ -753,6 +761,8 @@ namespace Test
         return result;
     }
 
+    //-----------------------------------------------------------------------
+
     namespace
     {
         struct FuncVSS
@@ -834,6 +844,8 @@ namespace Test
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
 
     namespace
     {
@@ -921,13 +933,15 @@ namespace Test
             result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Avx512bw::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
 #endif 
 
-//#ifdef SIMD_NEON_ENABLE
-//        if (Simd::Neon::Enable)
-//            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Neon::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
-//#endif
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && ValueSquareSumsAutoTest(FUNC_VSSs(Simd::Neon::ValueSquareSums), FUNC_VSSs(SimdValueSquareSums));
+#endif
 
         return result;
     }
+
+    //-----------------------------------------------------------------------
 
     namespace
     {
