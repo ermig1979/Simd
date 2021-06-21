@@ -276,9 +276,9 @@ namespace Test
 
         result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Base::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Sse::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Sse2::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -374,9 +374,9 @@ namespace Test
 
         result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Base::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Sse::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Sse2::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

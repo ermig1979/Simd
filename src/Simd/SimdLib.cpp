@@ -2764,18 +2764,18 @@ SIMD_API void SimdHogExtractFeatures(const uint8_t * src, size_t stride, size_t 
 SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::F && count >= Sse::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F && count >= Sse2::F)
         Avx512bw::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::F && count >= Sse::F)
+    if (Avx2::Enable && width >= Avx2::F && count >= Sse2::F)
         Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::F && count >= Sse::F)
-        Sse::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::F && count >= Sse2::F)
+        Sse2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2799,9 +2799,9 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
         Avx2::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::F + colSize - 1)
-        Sse::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::F + colSize - 1)
+        Sse2::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
