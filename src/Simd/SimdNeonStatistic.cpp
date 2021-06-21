@@ -564,6 +564,77 @@ namespace Simd
                 ValueSquareSums3<false>(src, stride, width, height, valueSums, squareSums);
         }
 
+        template <bool align> void ValueSquareSums4(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            assert(width >= A);
+            if (align)
+                assert(Aligned(src) && Aligned(stride));
+
+            size_t widthA = Simd::AlignLo(width, A);
+            uint8x16_t tail = ShiftLeft(K8_FF, A - width + widthA);
+            uint64x2_t fullValueSums[4] = { K64_0000000000000000, K64_0000000000000000, K64_0000000000000000, K64_0000000000000000 };
+            uint64x2_t fullSquareSums[4] = { K64_0000000000000000, K64_0000000000000000, K64_0000000000000000, K64_0000000000000000 };
+            for (size_t row = 0; row < height; ++row)
+            {
+                uint32x4_t rowValueSums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                uint32x4_t rowSquareSums[4] = { K32_00000000, K32_00000000, K32_00000000, K32_00000000 };
+                for (size_t col = 0, offs = 0; col < widthA; col += A, offs += A * 4)
+                {
+                    uint8x16x4_t _src = Load4<align>(src + offs);
+                    rowValueSums[0] = vpadalq_u16(rowValueSums[0], vpaddlq_u8(_src.val[0]));
+                    rowValueSums[1] = vpadalq_u16(rowValueSums[1], vpaddlq_u8(_src.val[1]));
+                    rowValueSums[2] = vpadalq_u16(rowValueSums[2], vpaddlq_u8(_src.val[2]));
+                    rowValueSums[3] = vpadalq_u16(rowValueSums[3], vpaddlq_u8(_src.val[3]));
+                    rowSquareSums[0] = vaddq_u32(rowSquareSums[0], Square(_src.val[0]));
+                    rowSquareSums[1] = vaddq_u32(rowSquareSums[1], Square(_src.val[1]));
+                    rowSquareSums[2] = vaddq_u32(rowSquareSums[2], Square(_src.val[2]));
+                    rowSquareSums[3] = vaddq_u32(rowSquareSums[3], Square(_src.val[3]));
+                }
+                if (widthA != width)
+                {
+                    size_t offs = (width - A) * 4;
+                    uint8x16x4_t _src = Load4<align>(src + offs);
+                    _src.val[0] = vandq_u8(_src.val[0], tail);
+                    _src.val[1] = vandq_u8(_src.val[1], tail);
+                    _src.val[2] = vandq_u8(_src.val[2], tail);
+                    _src.val[3] = vandq_u8(_src.val[3], tail);
+                    rowValueSums[0] = vpadalq_u16(rowValueSums[0], vpaddlq_u8(_src.val[0]));
+                    rowValueSums[1] = vpadalq_u16(rowValueSums[1], vpaddlq_u8(_src.val[1]));
+                    rowValueSums[2] = vpadalq_u16(rowValueSums[2], vpaddlq_u8(_src.val[2]));
+                    rowValueSums[3] = vpadalq_u16(rowValueSums[3], vpaddlq_u8(_src.val[3]));
+                    rowSquareSums[0] = vaddq_u32(rowSquareSums[0], Square(_src.val[0]));
+                    rowSquareSums[1] = vaddq_u32(rowSquareSums[1], Square(_src.val[1]));
+                    rowSquareSums[2] = vaddq_u32(rowSquareSums[2], Square(_src.val[2]));
+                    rowSquareSums[3] = vaddq_u32(rowSquareSums[3], Square(_src.val[3]));
+                }
+                fullValueSums[0] = vaddq_u64(fullValueSums[0], vpaddlq_u32(rowValueSums[0]));
+                fullValueSums[1] = vaddq_u64(fullValueSums[1], vpaddlq_u32(rowValueSums[1]));
+                fullValueSums[2] = vaddq_u64(fullValueSums[2], vpaddlq_u32(rowValueSums[2]));
+                fullValueSums[3] = vaddq_u64(fullValueSums[3], vpaddlq_u32(rowValueSums[3]));
+                fullSquareSums[0] = vaddq_u64(fullSquareSums[0], vpaddlq_u32(rowSquareSums[0]));
+                fullSquareSums[1] = vaddq_u64(fullSquareSums[1], vpaddlq_u32(rowSquareSums[1]));
+                fullSquareSums[2] = vaddq_u64(fullSquareSums[2], vpaddlq_u32(rowSquareSums[2]));
+                fullSquareSums[3] = vaddq_u64(fullSquareSums[3], vpaddlq_u32(rowSquareSums[3]));
+                src += stride;
+            }
+            valueSums[0] = ExtractSum64u(fullValueSums[0]);
+            valueSums[1] = ExtractSum64u(fullValueSums[1]);
+            valueSums[2] = ExtractSum64u(fullValueSums[2]);
+            valueSums[3] = ExtractSum64u(fullValueSums[3]);
+            squareSums[0] = ExtractSum64u(fullSquareSums[0]);
+            squareSums[1] = ExtractSum64u(fullSquareSums[1]);
+            squareSums[2] = ExtractSum64u(fullSquareSums[2]);
+            squareSums[3] = ExtractSum64u(fullSquareSums[3]);
+        }
+
+        void ValueSquareSums4(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSums, uint64_t* squareSums)
+        {
+            if (Aligned(src) && Aligned(stride))
+                ValueSquareSums4<true>(src, stride, width, height, valueSums, squareSums);
+            else
+                ValueSquareSums4<false>(src, stride, width, height, valueSums, squareSums);
+        }
+
         void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)
         {
             switch (channels)
@@ -571,8 +642,9 @@ namespace Simd
             case 1: ValueSquareSum(src, stride, width, height, valueSums, squareSums); break;
             case 2: ValueSquareSums2(src, stride, width, height, valueSums, squareSums); break;
             case 3: ValueSquareSums3(src, stride, width, height, valueSums, squareSums); break;
+            case 4: ValueSquareSums4(src, stride, width, height, valueSums, squareSums); break;
             default:
-                Base::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums); break;
+                assert(0);
             }
         }
 
