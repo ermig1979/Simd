@@ -27,12 +27,12 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse1.h"
+#include "Simd/SimdSse2.h"
 
 namespace Simd
 {
-#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Sse2
     {
         SIMD_INLINE void PoolingAverageNhwc1(const float* src, size_t srcS, size_t srcC, size_t kH, size_t kW, const __m128 & norm, float* dst)
         {
@@ -349,19 +349,19 @@ namespace Simd
                 if (strideY == 1 && strideX == 1 && kernelY == 3 && kernelX == 3 && srcH == dstH && srcW == dstW && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Sse::NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        Sse2::NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 2 && kernelX == 2 && padY == 0 && padX == 0 && dstW >= F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Sse::NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
+                        Sse2::NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 3 && kernelX == 3 && padY == 0 && padX == 0 && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Sse::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        Sse2::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 Base::SynetPoolingForwardMax32f(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
@@ -370,5 +370,5 @@ namespace Simd
                 assert(0);
         }
     }
-#endif// SIMD_SSE_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

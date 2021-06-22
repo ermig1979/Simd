@@ -148,9 +148,9 @@ namespace Test
 
         result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Base::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Sse::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetPoolingForwardAverageAutoTest(FUNC_PA(Simd::Sse2::SynetPoolingForwardAverage), FUNC_PA(SimdSynetPoolingForwardAverage));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -261,9 +261,9 @@ namespace Test
 
         result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Base::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Sse::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetPoolingForwardMax32fAutoTest(FUNC_PM32F(Simd::Sse2::SynetPoolingForwardMax32f), FUNC_PM32F(SimdSynetPoolingForwardMax32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

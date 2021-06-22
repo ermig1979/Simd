@@ -233,6 +233,12 @@ namespace Simd
 
         void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst);
 
+        void NeuralPooling1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
+
+        void NeuralPooling2x2Max2x2(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
+
+        void NeuralPooling2x2Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride);
+
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
         void NeuralProductSum(const float* a, const float* b, size_t size, float* sum);
@@ -242,6 +248,8 @@ namespace Simd
         void NeuralRoughSigmoid2(const float* src, size_t size, const float* slope, float* dst);
 
         void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst);
+
+        void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w);
 
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
@@ -343,6 +351,12 @@ namespace Simd
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
+
+        void SynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
+
+        void SynetPoolingForwardMax32f(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+            size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
 

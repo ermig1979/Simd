@@ -3651,7 +3651,7 @@ SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * expone
 SIMD_API void SimdNeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w)
 {
     typedef void(*SimdNeuralUpdateWeightsPtr) (const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-    const static SimdNeuralUpdateWeightsPtr simdNeuralUpdateWeights = SIMD_FUNC4(NeuralUpdateWeights, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralUpdateWeightsPtr simdNeuralUpdateWeights = SIMD_FUNC4(NeuralUpdateWeights, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralUpdateWeights(x, size, a, b, d, w);
 }
@@ -3968,9 +3968,9 @@ SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, si
         Avx2::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width > Sse::F)
-        Sse::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width > Sse2::F)
+        Sse2::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3993,9 +3993,9 @@ SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, si
         Avx::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width >= Sse::DF)
-        Sse::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::DF)
+        Sse2::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -4018,9 +4018,9 @@ SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, si
         Avx2::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable && width > Sse::DF)
-        Sse::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width > Sse2::DF)
+        Sse2::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -6094,7 +6094,7 @@ void SimdSynetPoolingForwardAverage(const float* src, size_t srcC, size_t srcH, 
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingForwardAveragePtr) (const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdBool exludePad, SimdTensorFormatType format);
-    const static SimdSynetPoolingForwardAveragePtr simdSynetPoolingForwardAverage = SIMD_FUNC4(SynetPoolingForwardAverage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingForwardAveragePtr simdSynetPoolingForwardAverage = SIMD_FUNC4(SynetPoolingForwardAverage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingForwardAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
 #else
@@ -6108,7 +6108,7 @@ SIMD_API void SimdSynetPoolingForwardMax32f(const float * src, size_t srcC, size
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPoolingForwardMax32fPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingForwardMax32fPtr simdSynetPoolingForwardMax32f = SIMD_FUNC5(SynetPoolingForwardMax32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPoolingForwardMax32fPtr simdSynetPoolingForwardMax32f = SIMD_FUNC5(SynetPoolingForwardMax32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPoolingForwardMax32f(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
 #else

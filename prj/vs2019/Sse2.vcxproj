@@ -68,6 +68,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCdc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fDc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2YuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2YuvToHue.cpp" />

@@ -895,9 +895,9 @@ namespace Test
 
         result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Base::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Sse::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && NeuralUpdateWeightsAutoTest(EPS, false, FUNC_UW(Simd::Sse2::NeuralUpdateWeights), FUNC_UW(SimdNeuralUpdateWeights));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -1634,9 +1634,9 @@ namespace Test
 
         result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse2::NeuralPooling1x1Max3x3), FUNC_M(SimdNeuralPooling1x1Max3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -1664,9 +1664,9 @@ namespace Test
 
         result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable && W >= Simd::Sse::DF)
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::DF)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse2::NeuralPooling2x2Max2x2), FUNC_M(SimdNeuralPooling2x2Max2x2));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -1694,9 +1694,9 @@ namespace Test
 
         result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Base::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && NeuralPoolingMaxAutoTest(stride, pooling, pad, EPS, FUNC_M(Simd::Sse2::NeuralPooling2x2Max3x3), FUNC_M(SimdNeuralPooling2x2Max3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
