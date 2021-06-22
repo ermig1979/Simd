@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         SIMD_INLINE void AddProduct(float * ptr, __m128 value, __m128 alpha)
         {
@@ -820,10 +820,10 @@ namespace Simd
                 microM = 4;
                 microN = 12;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Sse::GemmKernel4x12nn;
-                kernelMT = tail > DF ? Sse::GemmKernel4x12nn : (tail > F ? Sse::GemmKernel4x8nn : Sse::GemmKernel4x4nn);
-                kernelTM = Sse::GetGemmTail(M%microM, microN);
-                kernelTT = Sse::GetGemmTail(M%microM, tail);
+                kernelMM = Sse2::GemmKernel4x12nn;
+                kernelMT = tail > DF ? Sse2::GemmKernel4x12nn : (tail > F ? Sse2::GemmKernel4x8nn : Sse2::GemmKernel4x4nn);
+                kernelTM = Sse2::GetGemmTail(M%microM, microN);
+                kernelTT = Sse2::GetGemmTail(M%microM, tail);
                 type = GemmKernelF3;
             }
             if (type == GemmKernelF2 || (type == GemmKernelF3 && N <= 8) || (type == GemmKernelAny && N > 4))
@@ -831,32 +831,32 @@ namespace Simd
                 microM = 6;
                 microN = 8;
                 size_t tail = N - AlignLoAny(N, microN);
-                kernelMM = Sse::GemmKernel6x8nn;
-                kernelMT = tail > F ? Sse::GemmKernel6x8nn : Sse::GemmKernel6x4nn;
-                kernelTM = Sse::GetGemmTail(M%microM, microN);
-                kernelTT = Sse::GetGemmTail(M%microM, tail);
+                kernelMM = Sse2::GemmKernel6x8nn;
+                kernelMT = tail > F ? Sse2::GemmKernel6x8nn : Sse2::GemmKernel6x4nn;
+                kernelTM = Sse2::GetGemmTail(M%microM, microN);
+                kernelTT = Sse2::GetGemmTail(M%microM, tail);
                 type = GemmKernelF2;
             }
             if (type == GemmKernelF1 || (type == GemmKernelF2 && N <= 4) || type == GemmKernelAny)
             {
                 microM = 6;
                 microN = 4;
-                kernelMM = Sse::GemmKernel6x4nn;
-                kernelMT = Sse::GemmKernel6x4nn;
-                kernelTM = Sse::GetGemmTail(M%microM, microN);
-                kernelTT = Sse::GetGemmTail(M%microM, microN);
+                kernelMM = Sse2::GemmKernel6x4nn;
+                kernelMT = Sse2::GemmKernel6x4nn;
+                kernelTM = Sse2::GetGemmTail(M%microM, microN);
+                kernelTT = Sse2::GetGemmTail(M%microM, microN);
                 type = GemmKernelF1;
             }
 #else
             microM = 4;
             microN = 4;
-            kernelMM = Sse::GemmKernel4x4nn;
-            kernelMT = Sse::GemmKernel4x4nn;
-            kernelTM = Sse::GetGemmTail(M%microM, microN);
-            kernelTT = Sse::GetGemmTail(M%microM, microN);
+            kernelMM = Sse2::GemmKernel4x4nn;
+            kernelMT = Sse2::GemmKernel4x4nn;
+            kernelTM = Sse2::GetGemmTail(M%microM, microN);
+            kernelTT = Sse2::GetGemmTail(M%microM, microN);
 #endif
             return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(),  
-                kernelMM, kernelMT, kernelTM, kernelTT, NULL, Sse::GemmPackB, Sse::GemmScaleC, NULL, compatibility);
+                kernelMM, kernelMT, kernelTM, kernelTT, NULL, Sse2::GemmPackB, Sse2::GemmScaleC, NULL, compatibility);
         }
 
         size_t Gemm32fNNcbBufferSize(size_t M, size_t N, size_t K, GemmKernelType type, bool compatibility)
@@ -877,5 +877,5 @@ namespace Simd
             gemm.Run(A, K, pB, C, N);
         }
     }
-#endif// SIMD_SSE_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

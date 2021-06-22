@@ -51,11 +51,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse1Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse1Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1SynetConversion.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse1SynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse1Winograd.cpp" />
   </ItemGroup>

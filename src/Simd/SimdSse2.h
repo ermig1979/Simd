@@ -167,6 +167,8 @@ namespace Simd
         void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
+        void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
+
         void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);
 
         void AbsSecondDerivativeHistogram(const uint8_t *src, size_t width, size_t height, size_t stride,
@@ -371,6 +373,20 @@ namespace Simd
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
         void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
+
+        void SynetFusedLayerForward0(const float* src, const float* bias, const float* scale, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetFusedLayerForward1(const float* src, const float* bias0, const float* scale1, const float* bias1, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetFusedLayerForward2(const float* src, const float* scale, const float* bias, size_t channels, size_t spatial, const float* slope, float* dst, SimdTensorFormatType format);
+
+        void SynetFusedLayerForward3(const float* src, const float* bias, const float* scale, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetFusedLayerForward4(const float* src, const float* bias0, const float* scale1, const float* bias1, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetFusedLayerForward8(const float* src0, const float* src1, const float* src2, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetFusedLayerForward9(const float* src0, const float* src1, const float* scale, const float* bias, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format);
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 

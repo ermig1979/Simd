@@ -29,6 +29,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2GaussianBlur3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Hog.cpp" />
@@ -65,6 +66,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect3r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2SynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCdc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fDc.cpp" />

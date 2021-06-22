@@ -107,9 +107,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward0AutoTest(TFM_ANY, FUNC_FLF0(Simd::Base::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward0AutoTest(TFM_128, FUNC_FLF0(Simd::Sse::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward0AutoTest(TFM_128, FUNC_FLF0(Simd::Sse2::SynetFusedLayerForward0), FUNC_FLF0(SimdSynetFusedLayerForward0));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
@@ -209,9 +209,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward1AutoTest(TFM_ANY, FUNC_FLF1(Simd::Base::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward1AutoTest(TFM_128, FUNC_FLF1(Simd::Sse::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward1AutoTest(TFM_128, FUNC_FLF1(Simd::Sse2::SynetFusedLayerForward1), FUNC_FLF1(SimdSynetFusedLayerForward1));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
@@ -311,9 +311,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward2AutoTest(TFM_ANY, FUNC_FLF2(Simd::Base::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward2AutoTest(TFM_128, FUNC_FLF2(Simd::Sse::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward2AutoTest(TFM_128, FUNC_FLF2(Simd::Sse2::SynetFusedLayerForward2), FUNC_FLF2(SimdSynetFusedLayerForward2));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
@@ -412,9 +412,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward3AutoTest(TFM_ANY, FUNC_FLF3(Simd::Base::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward3AutoTest(TFM_128, FUNC_FLF3(Simd::Sse::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward3AutoTest(TFM_128, FUNC_FLF3(Simd::Sse2::SynetFusedLayerForward3), FUNC_FLF3(SimdSynetFusedLayerForward3));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
@@ -515,9 +515,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward4AutoTest(TFM_ANY, FUNC_FLF4(Simd::Base::SynetFusedLayerForward4), FUNC_FLF4(SimdSynetFusedLayerForward4));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward4AutoTest(TFM_128, FUNC_FLF4(Simd::Sse::SynetFusedLayerForward4), FUNC_FLF4(SimdSynetFusedLayerForward4));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward4AutoTest(TFM_128, FUNC_FLF4(Simd::Sse2::SynetFusedLayerForward4), FUNC_FLF4(SimdSynetFusedLayerForward4));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
@@ -616,9 +616,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward8AutoTest(TFM_ANY, FUNC_FLF8(Simd::Base::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward8AutoTest(TFM_128, FUNC_FLF8(Simd::Sse::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward8AutoTest(TFM_128, FUNC_FLF8(Simd::Sse2::SynetFusedLayerForward8), FUNC_FLF8(SimdSynetFusedLayerForward8));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
@@ -731,9 +731,9 @@ namespace Test
 
         result = result && SynetFusedLayerForward9AutoTest(TFM_ANY, FUNC_FLF9(Simd::Base::SynetFusedLayerForward9), FUNC_FLF9(SimdSynetFusedLayerForward9));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetFusedLayerForward9AutoTest(TFM_128, FUNC_FLF9(Simd::Sse::SynetFusedLayerForward9), FUNC_FLF9(SimdSynetFusedLayerForward9));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetFusedLayerForward9AutoTest(TFM_128, FUNC_FLF9(Simd::Sse2::SynetFusedLayerForward9), FUNC_FLF9(SimdSynetFusedLayerForward9));
 #endif
 
 #ifdef SIMD_AVX_ENABLE

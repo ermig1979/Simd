@@ -28,6 +28,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse1.h"
+#include "Simd/SimdSse2.h"
 #include "Simd/SimdSse3.h"
 #include "Simd/SimdSse41.h"
 
@@ -50,7 +51,7 @@ namespace Simd
             }
             else
             {
-                _gemm = Sse::Gemm32fNN;
+                _gemm = Sse2::Gemm32fNN;
             }
         }
 

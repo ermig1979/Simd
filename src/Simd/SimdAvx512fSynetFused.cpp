@@ -28,7 +28,7 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse1.h"
+#include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"
@@ -169,7 +169,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward0Nhwc(src, bias, scale, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward0(src, bias, scale, channels, spatial, dst, format);
+                Sse2::SynetFusedLayerForward0(src, bias, scale, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward0(src, bias, scale, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c)
@@ -310,7 +310,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward1Nhwc(src, bias0, scale1, bias1, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward1(src, bias0, scale1, bias1, channels, spatial, dst, format);
+                Sse2::SynetFusedLayerForward1(src, bias0, scale1, bias1, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward1(src, bias0, scale1, bias1, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c)
@@ -455,7 +455,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward2Nhwc(src, scale, bias, channels, spatial, slope, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
+                Sse2::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
             else if (format == SimdTensorFormatNchw16c)
@@ -597,7 +597,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward3Nhwc(src, bias, scale, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
+                Sse2::SynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c)
@@ -746,7 +746,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward4Nhwc(src, bias0, scale1, bias1, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
+                Sse2::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c && Aligned(channels, F))
@@ -883,7 +883,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetFusedLayerForward8Nhwc(src0, src1, src2, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
+                Sse2::SynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c)
@@ -1221,7 +1221,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels0 + channels1, spatial, format))
                 SynetFusedLayerForward9Nhwc(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else if (format == SimdTensorFormatNchw4c)
-                Sse::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
+                Sse2::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
             else if (format == SimdTensorFormatNchw16c && Aligned(channels0, F))

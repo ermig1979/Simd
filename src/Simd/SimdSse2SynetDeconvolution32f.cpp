@@ -40,18 +40,18 @@ namespace Simd
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
             : Base::SynetDeconvolution32fGemmNN(p)
         {
-            _gemm.Init(InitGemmFuncs(Sse::Gemm32fNN, "Sse", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2", p.gemm, "Ext"));
             if (_param.trans && _param.group == 1)
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Sse::Gemm32fNNcbBufferSize, Sse::Gemm32fNNcbReorderB, Sse::Gemm32fNNcbRun, "Sse", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Sse2::Gemm32fNNcbBufferSize, Sse2::Gemm32fNNcbReorderB, Sse2::Gemm32fNNcbRun, "Sse2", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
                 }
                 else
-                    _nhwcWeight.Resize(Sse::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
-                _nhwcRun = Sse::Gemm32fNNcbRun;
-                _nhwcReorderB = Sse::Gemm32fNNcbReorderB;
+                    _nhwcWeight.Resize(Sse2::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Sse2::Gemm32fNNcbRun;
+                _nhwcReorderB = Sse2::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
         }
