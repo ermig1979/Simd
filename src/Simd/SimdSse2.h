@@ -217,9 +217,31 @@ namespace Simd
         void MedianFilterSquare5x5(const uint8_t * src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t * dst, size_t dstStride);
 
+        void NeuralAdaptiveGradientUpdate(const float* delta, size_t size, size_t batch, const float* alpha, const float* epsilon, float* gradient, float* weight);
+
+        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
+
+        void NeuralAddVector(const float* src, size_t size, float* dst);
+
+        void NeuralAddValue(const float* value, float* dst, size_t size);
+
         void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
+        void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst);
+
+        void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst);
+
+        void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst);
+
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
+
+        void NeuralProductSum(const float* a, const float* b, size_t size, float* sum);
+
+        void NeuralRoughSigmoid(const float* src, size_t size, const float* slope, float* dst);
+
+        void NeuralRoughSigmoid2(const float* src, size_t size, const float* slope, float* dst);
+
+        void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst);
 
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
