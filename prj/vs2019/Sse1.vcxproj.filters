@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse1Gemm32f.cpp">
       <Filter>Sse1</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse1Neural.cpp">
-      <Filter>Sse1</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse1Synet.cpp">
       <Filter>Sse1</Filter>
     </ClCompile>
