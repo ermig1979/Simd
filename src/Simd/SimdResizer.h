@@ -153,20 +153,6 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
-    {
-        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
-        {
-            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
-        public:
-            ResizerFloatBilinear(const ResParam & param);
-        };
-
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    }
-#endif //SIMD_SSE_ENABLE 
-
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
@@ -194,6 +180,13 @@ namespace Simd
             ResizerByteArea(const ResParam & param);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
+        };
+
+        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
+        {
+            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
+        public:
+            ResizerFloatBilinear(const ResParam & param);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);

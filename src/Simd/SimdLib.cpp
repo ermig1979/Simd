@@ -4478,11 +4478,6 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
         return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
     else
 #endif
-#ifdef SIMD_SSE_ENABLE
-    if (Sse::Enable)
-        return Sse::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable)
         return Neon::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
