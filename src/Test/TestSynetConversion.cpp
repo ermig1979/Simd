@@ -418,9 +418,9 @@ namespace Test
 
         result = result && SynetReorderImageAutoTest(TFM_ANY, FUNC_RT(Simd::Base::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetReorderImageAutoTest(TFM_128, FUNC_RT(Simd::Sse::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetReorderImageAutoTest(TFM_128, FUNC_RT(Simd::Sse2::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -466,9 +466,9 @@ namespace Test
 
         result = result && SynetReorderFilterAutoTest(TFM_ANY, FUNC_RT(Simd::Base::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_128, FUNC_RT(Simd::Sse::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetReorderFilterAutoTest(TFM_128, FUNC_RT(Simd::Sse2::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 #endif 
         
 #ifdef SIMD_AVX_ENABLE
