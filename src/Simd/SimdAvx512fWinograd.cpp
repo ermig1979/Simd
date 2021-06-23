@@ -614,7 +614,7 @@ namespace Simd
             }
             else
             {
-                Sse::WinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
+                Sse2::WinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
             }
         }
 
@@ -939,7 +939,7 @@ namespace Simd
             }
             else
             {
-                Sse::WinogradKernel2x2Block4x4SetFilter(src, size, dst, trans);
+                Sse2::WinogradKernel2x2Block4x4SetFilter(src, size, dst, trans);
             }
         }
 
