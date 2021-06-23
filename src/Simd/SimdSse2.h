@@ -370,9 +370,13 @@ namespace Simd
 
         void SvmSumLinear(const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
 
+        void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
         void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst);
+
+        void SynetEltwiseLayerForward(float const* const* src, const float* weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float* dst);
 
         void SynetFusedLayerForward0(const float* src, const float* bias, const float* scale, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
@@ -388,6 +392,10 @@ namespace Simd
 
         void SynetFusedLayerForward9(const float* src0, const float* src1, const float* scale, const float* bias, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format);
 
+        void SynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst);
+
+        void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
+
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format);
 
         void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
@@ -398,9 +406,19 @@ namespace Simd
         void SynetPoolingForwardMax32f(const float* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, float* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
+        void SynetPreluLayerForward(const float* src, const float* slope, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
+
+        void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst);
+
         void SynetReorderImage(size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
 
         void SynetReorderFilter(size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
+
+        void SynetRestrictRange32f(const float* src, size_t size, const float* lower, const float* upper, float* dst);
+
+        void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
+
+        void SynetShuffleLayerForward(const float* src0, const float* src1, size_t channels0, size_t channels1, size_t spatial, float* dst0, float* dst1, SimdTensorFormatType format, int type);
 
         void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst);
 

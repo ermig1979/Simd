@@ -41,7 +41,7 @@ namespace Simd
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    Sse::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
+                    Sse2::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {
@@ -84,7 +84,7 @@ namespace Simd
                 else
                 {
                     float slope = 0;
-                    Sse::SynetRelu32f(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
                 }
             }
             else if (activation == ::SimdConvolutionActivationLeakyRelu)
@@ -126,7 +126,7 @@ namespace Simd
                     }
                 }
                 else
-                    Sse::SynetRelu32f(dst, size*count, &slope, dst);
+                    SynetRelu32f(dst, size*count, &slope, dst);
             }
             else if (activation == ::SimdConvolutionActivationRestrictRange)
             {
@@ -169,7 +169,7 @@ namespace Simd
                     }
                 }
                 else
-                    Sse::SynetRestrictRange32f(dst, size*count, &lower, &upper, dst);
+                    SynetRestrictRange32f(dst, size*count, &lower, &upper, dst);
             }
             else if (activation == ::SimdConvolutionActivationPrelu)
             {
@@ -209,7 +209,7 @@ namespace Simd
                     }
                 }
                 else
-                    Sse::SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
+                    SynetPreluLayerForward(dst, params, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationElu)
             {
@@ -268,7 +268,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(Sse::Load<false>(dst + i), Sse::Load<false>(bias + i));
-                                Sse::Store<false>(dst + i, Sse::SynetHswish32f(value, _shift, _scale));
+                                Sse::Store<false>(dst + i, SynetHswish32f(value, _shift, _scale));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetHswish32f(dst[i] + bias[i], shift, scale);
@@ -284,7 +284,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(Sse::Load<false>(dst + j), _bias);
-                                Sse::Store<false>(dst + j, Sse::SynetHswish32f(value, _shift, _scale));
+                                Sse::Store<false>(dst + j, SynetHswish32f(value, _shift, _scale));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetHswish32f(dst[j] + bias[i], shift, scale);
@@ -591,7 +591,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const __m128 * params)
         {
-            return Sse::SynetHswish32f(value, params[0], params[1]);
+            return SynetHswish32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const __m128* params)

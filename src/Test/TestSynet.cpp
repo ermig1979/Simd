@@ -108,9 +108,9 @@ namespace Test
 
         result = result && SynetAddBiasAutoTest(TFM_ANY, FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetAddBiasAutoTest(TFM_128, FUNC_AB(Simd::Sse::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetAddBiasAutoTest(TFM_128, FUNC_AB(Simd::Sse2::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -345,9 +345,9 @@ namespace Test
 
         result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Base::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sse::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sse2::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -563,9 +563,9 @@ namespace Test
 
         result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Base::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Sse::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Sse2::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

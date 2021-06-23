@@ -26,7 +26,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdSse1.h"
+#include "Simd/SimdSse2.h"
 #include "Simd/SimdSynetScale8i.h"
 
 namespace Simd
@@ -547,7 +547,7 @@ namespace Simd
             const Base::Scale8iParam& p = _param;
             for (size_t b = 0; b < p.batch; ++b)
             {
-                Sse::SynetScaleLayerForward(src, _scale.data, _shift.data, p.channels, 1, p.spatial, dst, p.format, p.compatibility);
+                Sse2::SynetScaleLayerForward(src, _scale.data, _shift.data, p.channels, 1, p.spatial, dst, p.format, p.compatibility);
                 src += p.channels * p.spatial;
                 dst += p.channels * p.spatial;
             }

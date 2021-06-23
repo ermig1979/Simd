@@ -159,7 +159,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const float* params, size_t offset)
         {
-            return Sse::SynetHswish32f(value, _mm_set1_ps(params[0]), _mm_set1_ps(params[1]));
+            return SynetHswish32f(value, _mm_set1_ps(params[0]), _mm_set1_ps(params[1]));
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const float* params, size_t offset)
@@ -203,7 +203,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const __m128 * params, size_t index)
         {
-            return Sse::SynetHswish32f(value, params[0], params[1]);
+            return SynetHswish32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const __m128* params, size_t index)

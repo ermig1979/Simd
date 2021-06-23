@@ -177,9 +177,9 @@ namespace Test
 
         result = result && SynetHswish32fAutoTest(FUNC_HSWISH32F(Simd::Base::SynetHswish32f), FUNC_HSWISH32F(SimdSynetHswish32f));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetHswish32fAutoTest(FUNC_HSWISH32F(Simd::Sse::SynetHswish32f), FUNC_HSWISH32F(SimdSynetHswish32f));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetHswish32fAutoTest(FUNC_HSWISH32F(Simd::Sse2::SynetHswish32f), FUNC_HSWISH32F(SimdSynetHswish32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -363,9 +363,9 @@ namespace Test
 
         result = result && SynetPreluLayerForwardAutoTest(TFM_ANY, FUNC_PLF(Simd::Base::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetPreluLayerForwardAutoTest(TFM_128, FUNC_PLF(Simd::Sse::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetPreluLayerForwardAutoTest(TFM_128, FUNC_PLF(Simd::Sse2::SynetPreluLayerForward), FUNC_PLF(SimdSynetPreluLayerForward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -446,9 +446,9 @@ namespace Test
 
         result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Base::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Sse::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetRelu32fAutoTest(FUNC_RE(Simd::Sse2::SynetRelu32f), FUNC_RE(SimdSynetRelu32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -530,9 +530,9 @@ namespace Test
 
         result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Base::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Sse::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetRestrictRange32fAutoTest(FUNC_RR(Simd::Sse2::SynetRestrictRange32f), FUNC_RR(SimdSynetRestrictRange32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

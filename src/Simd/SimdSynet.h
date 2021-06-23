@@ -264,8 +264,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         SIMD_INLINE __m128 SynetHswish32f(__m128 value, __m128 shift, __m128 scale)
         {
@@ -279,7 +279,7 @@ namespace Simd
             return _mm_add_ps(positive, _mm_mul_ps(slope, negative));
         }
     }
-#endif//SIMD_SSE_ENABLE
+#endif//SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
