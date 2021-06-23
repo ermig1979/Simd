@@ -409,21 +409,21 @@ namespace Simd
             {
                 if (_blockY == 4 && _blockX == 4)
                 {
-                    _setFilter = Sse::WinogradKernel3x3Block4x4SetFilter;
-                    _setInput = Sse::WinogradKernel3x3Block4x4SetInput;
-                    _setOutput = Sse::WinogradKernel3x3Block4x4SetOutput;
+                    _setFilter = Sse2::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Sse2::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Sse2::WinogradKernel3x3Block4x4SetOutput;
                 }
                 else if (_blockY == 3 && _blockX == 3)
                 {
-                    _setFilter = Sse::WinogradKernel3x3Block3x3SetFilter;
-                    _setInput = Sse::WinogradKernel3x3Block3x3SetInput;
-                    _setOutput = Sse::WinogradKernel3x3Block3x3SetOutput;
+                    _setFilter = Sse2::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Sse2::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Sse2::WinogradKernel3x3Block3x3SetOutput;
                 }
                 else if (_blockY == 2 && _blockX == 2)
                 {
-                    _setFilter = Sse::WinogradKernel3x3Block2x2SetFilter;
-                    _setInput = Sse::WinogradKernel3x3Block2x2SetInput;
-                    _setOutput = Sse::WinogradKernel3x3Block2x2SetOutput;
+                    _setFilter = Sse2::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Sse2::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Sse2::WinogradKernel3x3Block2x2SetOutput;
                 }
                 else
                     assert(0);

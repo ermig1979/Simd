@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse1Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse1Winograd.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

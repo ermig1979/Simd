@@ -202,6 +202,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd2.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2Winograd3.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse2">

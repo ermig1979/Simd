@@ -1341,7 +1341,7 @@ namespace Simd
             }
             else
             {
-                Sse::WinogradKernel3x3Block2x2SetFilter(src, size, dst, trans);
+                Sse2::WinogradKernel3x3Block2x2SetFilter(src, size, dst, trans);
             }
         }
 
@@ -1517,7 +1517,7 @@ namespace Simd
             SimdBool pad = padY > 0 ? SimdTrue : SimdFalse;
             if (trans ? (srcChannels < 8) : (srcHeight < 4 || srcWidth < 18))
             {
-                Sse::WinogradKernel3x3Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Sse2::WinogradKernel3x3Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
@@ -1757,7 +1757,7 @@ namespace Simd
         {
             if (trans ? (dstChannels < 8) : (dstHeight < 2 || dstWidth < 16))
             {
-                Sse::WinogradKernel3x3Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Sse2::WinogradKernel3x3Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 1) / 2;
@@ -1893,7 +1893,7 @@ namespace Simd
             }
             else
             {
-                Sse::WinogradKernel3x3Block3x3SetFilter(src, size, dst, trans);
+                Sse2::WinogradKernel3x3Block3x3SetFilter(src, size, dst, trans);
             }
         }
 
@@ -2059,7 +2059,7 @@ namespace Simd
             SimdBool pad = padY > 0 ? SimdTrue : SimdFalse;
             if (trans ? (srcChannels < 8) : (srcHeight < 5 || srcWidth < 15))
             {
-                Sse::WinogradKernel3x3Block3x3SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Sse2::WinogradKernel3x3Block3x3SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             size_t dstH = pad ? srcHeight : srcHeight - 2;
@@ -2238,7 +2238,7 @@ namespace Simd
         {
             if (trans ? (dstChannels < 8) : (dstHeight < 3 || dstWidth < 15))
             {
-                Sse::WinogradKernel3x3Block3x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Sse2::WinogradKernel3x3Block3x3SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 2) / 3;
@@ -2353,7 +2353,7 @@ namespace Simd
             }
             else
             {
-                Sse::WinogradKernel3x3Block4x4SetFilter(src, size, dst, trans);
+                Sse2::WinogradKernel3x3Block4x4SetFilter(src, size, dst, trans);
             }
         }
 
@@ -2555,7 +2555,7 @@ namespace Simd
         {
             if (trans ? (srcChannels < 8) : (srcHeight < 6 || srcWidth < 14))
             {
-                Sse::WinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Sse2::WinogradKernel3x3Block4x4SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             if (trans)
@@ -2768,7 +2768,7 @@ namespace Simd
         {
             if (trans ? (dstChannels < 8) : (dstHeight < 4 || dstWidth < 16))
             {
-                Sse::WinogradKernel3x3Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Sse2::WinogradKernel3x3Block4x4SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 3) / 4;

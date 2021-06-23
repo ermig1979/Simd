@@ -28,27 +28,9 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)    
-    namespace Sse
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Sse2
     {
-        SIMD_INLINE void Load4(const float * src, size_t step, __m128 * dst)
-        {
-            __m128 a0 = _mm_loadu_ps(src + 0 * step);
-            __m128 a1 = _mm_loadu_ps(src + 1 * step);
-            __m128 a2 = _mm_loadu_ps(src + 2 * step);
-            __m128 a3 = _mm_loadu_ps(src + 3 * step);
-            __m128 b0 = _mm_unpacklo_ps(a0, a2);
-            __m128 b1 = _mm_unpackhi_ps(a0, a2);
-            __m128 b2 = _mm_unpacklo_ps(a1, a3);
-            __m128 b3 = _mm_unpackhi_ps(a1, a3);
-            dst[0] = _mm_unpacklo_ps(b0, b2);
-            dst[1] = _mm_unpackhi_ps(b0, b2);
-            dst[2] = _mm_unpacklo_ps(b1, b3);
-            dst[3] = _mm_unpackhi_ps(b1, b3);
-        }
-
-        //-----------------------------------------------------------------------
-
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter(const __m128 src[9], float* dst, size_t stride)
         {
             const __m128 r2 = _mm_set1_ps(1.0f / 2.0f);
@@ -442,7 +424,7 @@ namespace Simd
             if(lastCol)
                 _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]));
             else
-                StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]), mask);
+                Sse::StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]), mask);
             if (lastRow)
             {
                 dst += dstStride;
@@ -450,7 +432,7 @@ namespace Simd
                 if (lastCol)
                     _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]));
                 else
-                    StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]), mask);
+                    Sse::StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]), mask);
             }
         }
 
@@ -1532,5 +1514,5 @@ namespace Simd
             }
         }
     }
-#endif// SIMD_SSE_ENABLE
+#endif// SIMD_SSE2_ENABLE
 }

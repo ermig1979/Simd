@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse1Cpu.cpp">
       <Filter>Sse1</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse1Winograd.cpp">
-      <Filter>Sse1</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse1">
