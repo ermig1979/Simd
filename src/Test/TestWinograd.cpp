@@ -100,9 +100,9 @@ namespace Test
 
         result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Base::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Sse::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x3, FUNC_WF(Simd::Sse2::WinogradKernel1x3Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x3Block1x4SetFilter));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -131,9 +131,9 @@ namespace Test
 
         result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Base::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Sse::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && WinogradSetFilterAutoTest(_1x4, _1x5, FUNC_WF(Simd::Sse2::WinogradKernel1x5Block1x4SetFilter), FUNC_WF(SimdWinogradKernel1x5Block1x4SetFilter));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -400,9 +400,9 @@ namespace Test
 
         result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Base::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Sse::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && WinogradKernel1x3SetInputAutoTest(4, FUNC_WI(Simd::Sse2::WinogradKernel1x3Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x3Block1x4SetInput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -452,9 +452,9 @@ namespace Test
 
         result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Base::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Sse::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && WinogradKernel1x5SetInputAutoTest(4, FUNC_WI(Simd::Sse2::WinogradKernel1x5Block1x4SetInput), FUNC_WI(SimdWinogradKernel1x5Block1x4SetInput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -760,9 +760,9 @@ namespace Test
 
         result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Base::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Sse::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && WinogradKernel1x3SetOutputAutoTest(4, FUNC_WO(Simd::Sse2::WinogradKernel1x3Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x3Block1x4SetOutput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -810,9 +810,9 @@ namespace Test
 
         result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Base::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
 
-#ifdef SIMD_SSE_ENABLE
-        if (Simd::Sse::Enable)
-            result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Sse::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && WinogradKernel1x5SetOutputAutoTest(4, FUNC_WO(Simd::Sse2::WinogradKernel1x5Block1x4SetOutput), FUNC_WO(SimdWinogradKernel1x5Block1x4SetOutput));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

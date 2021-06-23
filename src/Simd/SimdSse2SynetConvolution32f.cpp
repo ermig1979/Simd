@@ -372,18 +372,18 @@ namespace Simd
             {
                 {
                     SetBlock(1, 4);
-                    _setFilter = Sse::WinogradKernel1x3Block1x4SetFilter;
-                    _setInput = Sse::WinogradKernel1x3Block1x4SetInput;
-                    _setOutput = Sse::WinogradKernel1x3Block1x4SetOutput;
+                    _setFilter = Sse2::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Sse2::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Sse2::WinogradKernel1x3Block1x4SetOutput;
                 }
             }
             else if (p.kernelY == 1 && p.kernelX == 5)
             {
                 {
                     SetBlock(1, 4);
-                    _setFilter = Sse::WinogradKernel1x5Block1x4SetFilter;
-                    _setInput = Sse::WinogradKernel1x5Block1x4SetInput;
-                    _setOutput = Sse::WinogradKernel1x5Block1x4SetOutput;
+                    _setFilter = Sse2::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Sse2::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Sse2::WinogradKernel1x5Block1x4SetOutput;
                 }
             }
             else if (p.kernelY == 2 && p.kernelX == 2)
