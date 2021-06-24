@@ -33,6 +33,7 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdPerformance.h"
+#include "Simd/SimdGather.h"
 
 namespace Simd
 {

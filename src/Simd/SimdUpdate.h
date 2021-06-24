@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2019 Yermalayeu Ihar.
+* Copyright (c) 2011-2021 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -63,7 +63,9 @@ namespace Simd
         template <> SIMD_INLINE void Update<UpdateAdd, true>(float  * p, __m128 a)
         {
             Store<true>(p, _mm_add_ps(Load<true>(p), a));
-        }        
+        }   
+
+        //-----------------------------------------------------------------------------------------
         
         template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t  * p, __m128i a)
         {

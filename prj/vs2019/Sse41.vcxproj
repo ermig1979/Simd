@@ -73,6 +73,7 @@
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse2.h" />

@@ -29,6 +29,14 @@
 
 namespace Simd
 {
+    enum PadType
+    {
+        PadNose1,
+        PadNone,
+        PadTail1,
+        PadTail2,
+    };
+
     namespace Base
     {
         SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter1n(const float* src, float* dst, size_t stride)

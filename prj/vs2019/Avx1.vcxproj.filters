@@ -194,5 +194,11 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPrefetch.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

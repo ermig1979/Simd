@@ -28,14 +28,6 @@
 
 namespace Simd
 {
-    enum PadType
-    {
-        PadNose1,
-        PadNone,
-        PadTail1,
-        PadTail2,
-    };
-
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
@@ -78,24 +70,6 @@ namespace Simd
             __m128 a = _mm_loadu_ps(p - 2);
             __m128 b = _mm_shuffle_ps(a, a, 0xFE);
             return _mm_and_ps(b, _mm_load_ps((float*)m));
-        }
-
-        template<int step> SIMD_INLINE __m128 Gather(const float* ptr)
-        {
-            SIMD_ALIGNED(16) float buf[F];
-            buf[0] = ptr[0 * step];
-            buf[1] = ptr[1 * step];
-            buf[2] = ptr[2 * step];
-            buf[3] = ptr[3 * step];
-            return _mm_load_ps(buf);
-        }
-
-        template<int step> SIMD_INLINE __m128 Gather(const float* ptr, size_t size)
-        {
-            SIMD_ALIGNED(16) float buf[F];
-            for (size_t i = 0; i < size; ++i)
-                buf[i] = ptr[i * step];
-            return _mm_load_ps(buf);
         }
 
         //---------------------------------------------------------------------
@@ -246,28 +220,6 @@ namespace Simd
         SIMD_INLINE __m256 Load(const float * ptr, __m256i mask)
         {
             return _mm256_maskload_ps(ptr, mask);
-        }
-
-        template<int step> SIMD_INLINE __m256 Gather(const float* ptr)
-        {
-            SIMD_ALIGNED(32) float buf[F];
-            buf[0] = ptr[0 * step];
-            buf[1] = ptr[1 * step];
-            buf[2] = ptr[2 * step];
-            buf[3] = ptr[3 * step];
-            buf[4] = ptr[4 * step];
-            buf[5] = ptr[5 * step];
-            buf[6] = ptr[6 * step];
-            buf[7] = ptr[7 * step];
-            return _mm256_load_ps(buf);
-        }
-
-        template<int step> SIMD_INLINE __m256 Gather(const float* ptr, size_t size)
-        {
-            SIMD_ALIGNED(32) float buf[F];
-            for (size_t i = 0; i < size; ++i)
-                buf[i] = ptr[i * step];
-            return _mm256_load_ps(buf);
         }
     }
 #endif//SIMD_AVX_ENABLE
@@ -461,13 +413,6 @@ namespace Simd
             return _mm256_load_ps(p);
 #endif
         }
-
-        template<int step> SIMD_INLINE __m256 Gather(const float* ptr)
-        {
-            static const __m256i idx = _mm256_setr_epi32(0 * step, 1 * step, 
-                2 * step, 3 * step, 4 * step, 5 * step, 6 * step, 7 * step);
-            return _mm256_i32gather_ps(ptr, idx, 4);
-        }
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -513,23 +458,6 @@ namespace Simd
         template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
         {
             return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Load<align>(p0)), Load<align>(p1), 1), Load<align>(p2), 2), Load<align>(p3), 3);
-        }
-
-        const __m512i K32_GATHER_ANY = SIMD_MM512_SET1_EPI32(1);
-        const __m512i K32_GATHER_3A = SIMD_MM512_SETR_EPI32(0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0, 0, 0, 0, 0);
-        const __m512i K32_GATHER_3B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 7, 10, 13);
-
-        template<int period> SIMD_INLINE __m512 Gather(const float * ptr)
-        {
-            return _mm512_i32gather_ps(K32_GATHER_ANY, ptr, sizeof(float)*period);
-        }
-
-        template<> SIMD_INLINE __m512 Gather<3>(const float * ptr)
-        {
-            __m512 s0 = _mm512_loadu_ps(ptr + 0 * F);
-            __m512 s1 = _mm512_loadu_ps(ptr + 1 * F);
-            __m512 s2 = _mm512_loadu_ps(ptr + 2 * F);
-            return _mm512_mask_permutexvar_ps(_mm512_maskz_permutex2var_ps(0xFFFF, s0, K32_GATHER_3A, s1), 0xF800, K32_GATHER_3B, s2);
         }
     }
 #endif//SIMD_AVX512F_ENABLE

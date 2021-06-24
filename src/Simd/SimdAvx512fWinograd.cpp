@@ -28,6 +28,7 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx1.h"
+#include "Simd/SimdWinograd.h"
 
 namespace Simd
 {
