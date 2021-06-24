@@ -146,8 +146,8 @@ namespace Simd
         virtual ~Deletable() {}
     };
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m128))
         {
@@ -157,35 +157,28 @@ namespace Simd
         SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m128))
         {
             return Simd::Aligned(ptr, align);
-        }
-    }
-#endif// SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
-        using Sse::Aligned;
+        }        
     }
 #endif// SIMD_SSE2_ENABLE
 
 #ifdef SIMD_SSE3_ENABLE
     namespace Sse3
     {
-        using Sse::Aligned;
+        using Sse2::Aligned;
     }
 #endif// SIMD_SSE3_ENABLE
 
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
-        using Sse::Aligned;
+        using Sse2::Aligned;
     }
 #endif// SIMD_SSSE3_ENABLE
 
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        using Sse::Aligned;
+        using Sse2::Aligned;
     }
 #endif// SIMD_SSE41_ENABLE
 

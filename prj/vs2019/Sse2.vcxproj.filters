@@ -287,9 +287,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSse1.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse2.h">
       <Filter>Sse2</Filter>
     </ClInclude>

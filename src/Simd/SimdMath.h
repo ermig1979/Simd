@@ -258,8 +258,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         SIMD_INLINE __m128 Square(__m128 value)
         {
@@ -283,19 +283,19 @@ namespace Simd
             return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
         }
 
-        template <bool condition> SIMD_INLINE __m128 Masked(const __m128 & value, const __m128 & mask);
+        template <bool condition> SIMD_INLINE __m128 Masked(const __m128& value, const __m128& mask);
 
-        template <> SIMD_INLINE __m128 Masked<false>(const __m128 & value, const __m128 & mask)
+        template <> SIMD_INLINE __m128 Masked<false>(const __m128& value, const __m128& mask)
         {
             return value;
         }
 
-        template <> SIMD_INLINE __m128 Masked<true>(const __m128 & value, const __m128 & mask)
+        template <> SIMD_INLINE __m128 Masked<true>(const __m128& value, const __m128& mask)
         {
             return _mm_and_ps(value, mask);
         }
 
-        SIMD_INLINE void Max2x3s(const float * src, size_t stride, float * dst)
+        SIMD_INLINE void Max2x3s(const float* src, size_t stride, float* dst)
         {
             __m128 z = _mm_setzero_ps();
             __m128 s0 = _mm_loadl_pi(z, (__m64*)src);
@@ -305,7 +305,7 @@ namespace Simd
             return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
         }
 
-        SIMD_INLINE void Max2x2s(const float * src, size_t stride, float * dst)
+        SIMD_INLINE void Max2x2s(const float* src, size_t stride, float* dst)
         {
             __m128 z = _mm_setzero_ps();
             __m128 s0 = _mm_loadl_pi(z, (__m64*)src);
@@ -313,12 +313,7 @@ namespace Simd
             __m128 m = _mm_max_ps(s0, s1);
             return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
         }
-    }
-#endif//SIMD_SSE_ENABLE
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
         SIMD_INLINE __m128 RightNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
@@ -502,7 +497,7 @@ namespace Simd
     namespace Sse3
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse::RightNotZero32f;
+        using Sse2::RightNotZero32f;
 #endif
     }
 #endif//SIMD_SSE3_ENABLE
@@ -535,7 +530,7 @@ namespace Simd
     namespace Sse41
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
-        using Sse::RightNotZero32f;
+        using Sse2::RightNotZero32f;
 #endif
 
         template <int part> SIMD_INLINE __m128i UnpackI8(__m128i a);

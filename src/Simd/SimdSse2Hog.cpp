@@ -87,7 +87,7 @@ namespace Simd
                 bestIndex = Combine(_mm_castps_si128(mask), buffer.neg[i], bestIndex);
             }
             Store<align>((__m128i*)(buffer.index + col), bestIndex);
-            Sse::Store<align>(buffer.value + col, Sse::Sqrt<0>(_mm_add_ps(_mm_mul_ps(dx, dx), _mm_mul_ps(dy, dy))));
+            Store<align>(buffer.value + col, Sse2::Sqrt<0>(_mm_add_ps(_mm_mul_ps(dx, dx), _mm_mul_ps(dy, dy))));
         }
 
         template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m128i & t, const __m128i & l, const __m128i & r, const __m128i & b, Buffer & buffer, size_t col)
@@ -142,18 +142,18 @@ namespace Simd
         SIMD_INLINE void HogDeinterleave(const float* src, size_t count, float** dst, size_t offset, size_t i)
         {
             src += i;
-            __m128 a0 = Sse::Load<false>(src + 0 * count);
-            __m128 a1 = Sse::Load<false>(src + 1 * count);
-            __m128 a2 = Sse::Load<false>(src + 2 * count);
-            __m128 a3 = Sse::Load<false>(src + 3 * count);
+            __m128 a0 = Load<false>(src + 0 * count);
+            __m128 a1 = Load<false>(src + 1 * count);
+            __m128 a2 = Load<false>(src + 2 * count);
+            __m128 a3 = Load<false>(src + 3 * count);
             __m128 b0 = _mm_unpacklo_ps(a0, a2);
             __m128 b1 = _mm_unpackhi_ps(a0, a2);
             __m128 b2 = _mm_unpacklo_ps(a1, a3);
             __m128 b3 = _mm_unpackhi_ps(a1, a3);
-            Sse::Store<false>(dst[i + 0] + offset, _mm_unpacklo_ps(b0, b2));
-            Sse::Store<false>(dst[i + 1] + offset, _mm_unpackhi_ps(b0, b2));
-            Sse::Store<false>(dst[i + 2] + offset, _mm_unpacklo_ps(b1, b3));
-            Sse::Store<false>(dst[i + 3] + offset, _mm_unpackhi_ps(b1, b3));
+            Store<false>(dst[i + 0] + offset, _mm_unpacklo_ps(b0, b2));
+            Store<false>(dst[i + 1] + offset, _mm_unpackhi_ps(b0, b2));
+            Store<false>(dst[i + 2] + offset, _mm_unpacklo_ps(b1, b3));
+            Store<false>(dst[i + 3] + offset, _mm_unpackhi_ps(b1, b3));
         }
 
         void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride)
@@ -195,17 +195,17 @@ namespace Simd
         {
             template <int add, bool end> SIMD_INLINE void Set(float* dst, const __m128& value, const __m128& mask)
             {
-                Sse::Store<false>(dst, value);
+                Store<false>(dst, value);
             }
 
             template <> SIMD_INLINE void Set<1, false>(float* dst, const __m128& value, const __m128& mask)
             {
-                Sse::Store<false>(dst, _mm_add_ps(Sse::Load<false>(dst), value));
+                Store<false>(dst, _mm_add_ps(Load<false>(dst), value));
             }
 
             template <> SIMD_INLINE void Set<1, true>(float* dst, const __m128& value, const __m128& mask)
             {
-                Sse::Store<false>(dst, _mm_add_ps(Sse::Load<false>(dst), _mm_and_ps(value, mask)));
+                Store<false>(dst, _mm_add_ps(Load<false>(dst), _mm_and_ps(value, mask)));
             }
         }
 
@@ -227,8 +227,8 @@ namespace Simd
             {
                 __m128 sum = _mm_setzero_ps();
                 for (size_t i = 0; i < size; ++i)
-                    sum = _mm_add_ps(sum, _mm_mul_ps(Sse::Load<false>(src + i), filter[i]));
-                Sse::Store<align>(dst, sum);
+                    sum = _mm_add_ps(sum, _mm_mul_ps(Load<false>(src + i), filter[i]));
+                Store<align>(dst, sum);
             }
 
             void FilterRows(const float* src, size_t srcStride, size_t width, size_t height, const float* filter, size_t size, float* dst, size_t dstStride)
@@ -254,7 +254,7 @@ namespace Simd
             {
                 __m128 sum = _mm_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
-                    sum = _mm_add_ps(sum, _mm_mul_ps(Sse::Load<!end>(src), filter[i]));
+                    sum = _mm_add_ps(sum, _mm_mul_ps(Load<!end>(src), filter[i]));
                 HogSeparableFilter_Detail::Set<add, end>(dst, sum, mask);
             }
 

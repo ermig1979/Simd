@@ -266,8 +266,8 @@ namespace Simd
                             size_t i = 0;
                             for (; i < aligned; i += F)
                             {
-                                __m128 value = _mm_add_ps(Sse::Load<false>(dst + i), Sse::Load<false>(bias + i));
-                                Sse::Store<false>(dst + i, SynetHswish32f(value, _shift, _scale));
+                                __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, SynetHswish32f(value, _shift, _scale));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetHswish32f(dst[i] + bias[i], shift, scale);
@@ -282,8 +282,8 @@ namespace Simd
                             size_t j = 0;
                             for (; j < aligned; j += F)
                             {
-                                __m128 value = _mm_add_ps(Sse::Load<false>(dst + j), _bias);
-                                Sse::Store<false>(dst + j, SynetHswish32f(value, _shift, _scale));
+                                __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, SynetHswish32f(value, _shift, _scale));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetHswish32f(dst[j] + bias[i], shift, scale);
@@ -307,8 +307,8 @@ namespace Simd
                             size_t i = 0;
                             for (; i < aligned; i += F)
                             {
-                                __m128 value = _mm_add_ps(Sse::Load<false>(dst + i), Sse::Load<false>(bias + i));
-                                Sse::Store<false>(dst + i, Mish(value, _threshold));
+                                __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Mish(value, _threshold));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetMish32f(dst[i] + bias[i], threshold);
@@ -323,8 +323,8 @@ namespace Simd
                             size_t j = 0;
                             for (; j < aligned; j += F)
                             {
-                                __m128 value = _mm_add_ps(Sse::Load<false>(dst + j), _bias);
-                                Sse::Store<false>(dst + j, Mish(value, _threshold));
+                                __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Mish(value, _threshold));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetMish32f(dst[j] + bias[i], threshold);
@@ -631,7 +631,7 @@ namespace Simd
                             size_t x = dstW - F;
                             __m128 _dst = _mm_loadu_ps(pd + x);
                             __m128 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
-                            _mm_storeu_ps(pd + x, Sse::Combine(tail, Activate<type>(_mm_add_ps(_bias, conv), _params), _dst));
+                            _mm_storeu_ps(pd + x, Combine(tail, Activate<type>(_mm_add_ps(_bias, conv), _params), _dst));
                         }
                         ps += srcW * stride;
                         pd += dstW;
@@ -659,7 +659,7 @@ namespace Simd
                                 size_t x = dstW - F;
                                 __m128 _dst = _mm_loadu_ps(pd + x);
                                 __m128 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
-                                _mm_storeu_ps(pd + x, Sse::Combine(tail, _mm_add_ps(_bias, conv), _dst));
+                                _mm_storeu_ps(pd + x, Combine(tail, _mm_add_ps(_bias, conv), _dst));
                             }
                             ps += srcW * stride;
                             pd += dstW;
@@ -709,7 +709,7 @@ namespace Simd
                                 size_t x = dstW - F;
                                 __m128 _dst = _mm_loadu_ps(pd + x);
                                 __m128 conv = Kernel<kernel, stride>::SynetConvolution32f(ps + x * stride, srcW, _weight);
-                                _mm_storeu_ps(pd + x, Sse::Combine(tail, Activate<type>(_mm_add_ps(_dst, conv), _params), _dst));
+                                _mm_storeu_ps(pd + x, Combine(tail, Activate<type>(_mm_add_ps(_dst, conv), _params), _dst));
                             }
                             ps += srcW * stride;
                             pd += dstW;

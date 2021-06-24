@@ -36,8 +36,8 @@ namespace Simd
         PadTail2,
     };
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         template <bool align> SIMD_INLINE __m128 Load(const float * p);
 
@@ -54,15 +54,7 @@ namespace Simd
         SIMD_INLINE __m128 Load(const float * p0, const float * p1)
         {
             return _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1);
-        }
-
-    }
-#endif//SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
-        using namespace Sse;
+        } 
 
         SIMD_INLINE __m128 LoadPadZeroNose1(const float* p)
         {
@@ -212,7 +204,6 @@ namespace Simd
     namespace Sse3
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse::Load;
         using Sse2::Load;
 #endif
     }
@@ -222,7 +213,6 @@ namespace Simd
     namespace Sse41
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse::Load;
         using Sse2::Load;
 #endif
     }
@@ -245,12 +235,12 @@ namespace Simd
 
         template<bool align> SIMD_INLINE __m256 Load(const float * p0, const float * p1)
         {
-            return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse::Load<align>(p0)), Sse::Load<align>(p1), 1);
+            return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse2::Load<align>(p0)), Sse2::Load<align>(p1), 1);
         }
 
         SIMD_INLINE __m256 Load(const float * p0, const float * p1, const float * p2, const float * p3)
         {
-            return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse::Load(p0, p1)), Sse::Load(p2, p3), 1);
+            return _mm256_insertf128_ps(_mm256_castps128_ps256(Sse2::Load(p0, p1)), Sse2::Load(p2, p3), 1);
         }
 
         SIMD_INLINE __m256 Load(const float * ptr, __m256i mask)
@@ -522,13 +512,12 @@ namespace Simd
 
         template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
         {
-            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse::Load<align>(p0)), Sse::Load<align>(p1), 1), Sse::Load<align>(p2), 2), Sse::Load<align>(p3), 3);
+            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Load<align>(p0)), Load<align>(p1), 1), Load<align>(p2), 2), Load<align>(p3), 3);
         }
 
         const __m512i K32_GATHER_ANY = SIMD_MM512_SET1_EPI32(1);
         const __m512i K32_GATHER_3A = SIMD_MM512_SETR_EPI32(0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0, 0, 0, 0, 0);
         const __m512i K32_GATHER_3B = SIMD_MM512_SETR_EPI32(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 4, 7, 10, 13);
-
 
         template<int period> SIMD_INLINE __m512 Gather(const float * ptr)
         {
@@ -733,7 +722,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
         {
-            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse::Load<align>(p0)), Sse::Load<align>(p1), 1), Sse::Load<align>(p2), 2), Sse::Load<align>(p3), 3);
+            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse2::Load<align>(p0)), Sse2::Load<align>(p1), 1), Sse2::Load<align>(p2), 2), Sse2::Load<align>(p3), 3);
         }
 
         template<bool align> SIMD_INLINE __m512i Load(const __m256i* p0, const __m256i* p1)

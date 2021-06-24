@@ -142,8 +142,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SquaredDifferenceSum32f(const float* a, const float* b, size_t offset, __m128& sum)
         {
-            __m128 _a = Sse::Load<align>(a + offset);
-            __m128 _b = Sse::Load<align>(b + offset);
+            __m128 _a = Load<align>(a + offset);
+            __m128 _b = Load<align>(b + offset);
             __m128 _d = _mm_sub_ps(_a, _b);
             sum = _mm_add_ps(sum, _mm_mul_ps(_d, _d));
         }
@@ -191,8 +191,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t offset, __m128& sum, __m128& correction)
         {
-            __m128 _a = Sse::Load<align>(a + offset);
-            __m128 _b = Sse::Load<align>(b + offset);
+            __m128 _a = Load<align>(a + offset);
+            __m128 _b = Load<align>(b + offset);
             __m128 _d = _mm_sub_ps(_a, _b);
             __m128 term = _mm_sub_ps(_mm_mul_ps(_d, _d), correction);
             __m128 temp = _mm_add_ps(sum, term);

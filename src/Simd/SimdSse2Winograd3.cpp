@@ -424,7 +424,7 @@ namespace Simd
             if(lastCol)
                 _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]));
             else
-                Sse::StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]), mask);
+                StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]), mask);
             if (lastRow)
             {
                 dst += dstStride;
@@ -432,7 +432,7 @@ namespace Simd
                 if (lastCol)
                     _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]));
                 else
-                    Sse::StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]), mask);
+                    StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]), mask);
             }
         }
 

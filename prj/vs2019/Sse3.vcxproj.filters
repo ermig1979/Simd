@@ -77,9 +77,6 @@
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSse1.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdStore.h">
       <Filter>Inc</Filter>
     </ClInclude>

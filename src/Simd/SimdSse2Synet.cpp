@@ -37,12 +37,12 @@ namespace Simd
     {
         template <bool align> SIMD_INLINE void SynetAddBias(const float* bias, float* dst)
         {
-            Sse::Store<align>(dst, _mm_add_ps(Sse::Load<align>(dst), Sse::Load<align>(bias)));
+            Store<align>(dst, _mm_add_ps(Load<align>(dst), Load<align>(bias)));
         }
 
         template <bool align> SIMD_INLINE void SynetAddBias(__m128 bias, float* dst)
         {
-            Sse::Store<align>(dst, _mm_add_ps(Sse::Load<align>(dst), bias));
+            Store<align>(dst, _mm_add_ps(Load<align>(dst), bias));
         }
 
         template <bool align> void SynetAddBiasNchw(const float* bias, size_t channels, size_t spatial, float* dst)
@@ -126,7 +126,7 @@ namespace Simd
             size_t spatial4 = AlignLo(spatial, 4);
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _bias = Sse::Load<false>(bias + c);
+                __m128 _bias = Load<false>(bias + c);
                 size_t s = 0;
                 for (; s < spatial4; s += 4, dst += 4 * F)
                 {
@@ -181,7 +181,7 @@ namespace Simd
 
         template <SimdSynetEltwiseOperationType type, bool align> SIMD_INLINE void SynetEltwiseLayerForward(const float* src0, const float* src1, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, SynetEltwiseLayerForward<type>(Sse::Load<align>(src0 + offset), Sse::Load<align>(src1 + offset)));
+            Store<align>(dst + offset, SynetEltwiseLayerForward<type>(Load<align>(src0 + offset), Load<align>(src1 + offset)));
         }
 
         template <SimdSynetEltwiseOperationType type, bool align> void SynetEltwiseLayerForward(float const* const* src, size_t count, size_t size, float* dst)
@@ -228,12 +228,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetEltwiseLayerForwardSum(const float* src0, const __m128& weight0, const float* src1, const __m128& weight1, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Sse::Load<align>(src0 + offset), weight0), _mm_mul_ps(Sse::Load<align>(src1 + offset), weight1)));
+            Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Load<align>(src0 + offset), weight0), _mm_mul_ps(Load<align>(src1 + offset), weight1)));
         }
 
         template <bool align> SIMD_INLINE void SynetEltwiseLayerForwardSum(const float* src, const __m128& weight, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Sse::Load<align>(src + offset), weight), Sse::Load<align>(dst + offset)));
+            Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(Load<align>(src + offset), weight), Load<align>(dst + offset)));
         }
 
         template <bool align> void SynetEltwiseLayerForwardSum(float const* const* src, const float* weight, size_t count, size_t size, float* dst)
@@ -318,8 +318,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetInnerProductLayerForward(const float* src, const float* weight, size_t offset, __m128& sum)
         {
-            __m128 s = Sse::Load<align>(src + offset);
-            __m128 w = Sse::Load<align>(weight + offset);
+            __m128 s = Load<align>(src + offset);
+            __m128 w = Load<align>(weight + offset);
             sum = _mm_add_ps(_mm_mul_ps(s, w), sum);
         }
 
@@ -349,7 +349,7 @@ namespace Simd
                     }
                     for (; j < partial; j += F)
                         SynetInnerProductLayerForward<align>(src, weight, j, sums[0]);
-                    sum = Sse::ExtractSum(sums[0]);
+                    sum = ExtractSum(sums[0]);
                 }
                 for (; j < size; ++j)
                     sum += src[j] * weight[j];
@@ -376,20 +376,20 @@ namespace Simd
 
         SIMD_INLINE __m128 NoseSquareSum(const float * src)
         {
-            return _mm_add_ps(_mm_add_ps(Sse::Square(LoadAtEdge<-2>(src)), Sse::Square(LoadAtEdge<-1>(src))),
-                _mm_add_ps(Sse::Square(_mm_loadu_ps(src)), _mm_add_ps(Sse::Square(_mm_loadu_ps(src + 1)), Sse::Square(_mm_loadu_ps(src + 2)))));
+            return _mm_add_ps(_mm_add_ps(Square(LoadAtEdge<-2>(src)), Square(LoadAtEdge<-1>(src))),
+                _mm_add_ps(Square(_mm_loadu_ps(src)), _mm_add_ps(Square(_mm_loadu_ps(src + 1)), Square(_mm_loadu_ps(src + 2)))));
         }
 
         SIMD_INLINE __m128 BodySquareSum(const float * src)
         {
-            return _mm_add_ps(_mm_add_ps(Sse::Square(_mm_loadu_ps(src - 2)), Sse::Square(_mm_loadu_ps(src - 1))),
-                _mm_add_ps(Sse::Square(_mm_loadu_ps(src)), _mm_add_ps(Sse::Square(_mm_loadu_ps(src + 1)), Sse::Square(_mm_loadu_ps(src + 2)))));
+            return _mm_add_ps(_mm_add_ps(Square(_mm_loadu_ps(src - 2)), Square(_mm_loadu_ps(src - 1))),
+                _mm_add_ps(Square(_mm_loadu_ps(src)), _mm_add_ps(Square(_mm_loadu_ps(src + 1)), Square(_mm_loadu_ps(src + 2)))));
         }
 
         SIMD_INLINE __m128 TailSquareSum(const float * src)
         {
-            return _mm_add_ps(_mm_add_ps(Sse::Square(LoadAtEdge<2>(src)), Sse::Square(LoadAtEdge<1>(src))),
-                _mm_add_ps(Sse::Square(_mm_loadu_ps(src)), _mm_add_ps(Sse::Square(_mm_loadu_ps(src - 1)), Sse::Square(_mm_loadu_ps(src - 2)))));
+            return _mm_add_ps(_mm_add_ps(Square(LoadAtEdge<2>(src)), Square(LoadAtEdge<1>(src))),
+                _mm_add_ps(Square(_mm_loadu_ps(src)), _mm_add_ps(Square(_mm_loadu_ps(src - 1)), Square(_mm_loadu_ps(src - 2)))));
         }
 
         template<bool align> void SynetLrnLayerCrossChannelsNchw(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst)
@@ -406,8 +406,8 @@ namespace Simd
                 size_t s = 0;
                 for (; s < aligned; s += F)
                 {
-                    __m128 _pos = Sse::Load<align>(pos + s);
-                    Sse::Store<true>(sum.data + s, _mm_add_ps(Sse::Load<true>(sum.data + s), _mm_mul_ps(_pos, _pos)));
+                    __m128 _pos = Load<align>(pos + s);
+                    Store<true>(sum.data + s, _mm_add_ps(Load<true>(sum.data + s), _mm_mul_ps(_pos, _pos)));
                 }
                 for (; s < spatial; ++s)
                     sum[s] += Simd::Square(pos[s]);
@@ -419,13 +419,13 @@ namespace Simd
                 size_t s = 0;
                 for (; s < aligned; s += F)
                 {
-                    __m128 _pos = Sse::Load<align>(pos + s);
-                    __m128 _neg = Sse::Load<align>(neg + s);
-                    __m128 _sum = Sse::Load<true>(sum.data + s);
+                    __m128 _pos = Load<align>(pos + s);
+                    __m128 _neg = Load<align>(neg + s);
+                    __m128 _sum = Load<true>(sum.data + s);
                     _sum = _mm_add_ps(_sum, _mm_sub_ps(_mm_mul_ps(_pos, _pos), _mm_mul_ps(_neg, _neg)));
-                    __m128 _src = Sse::Load<align>(src + s);
-                    Sse::Store<true>(sum.data + s, _sum);
-                    Sse::Store<align>(dst + s, _mm_mul_ps(_src, pow(_mm_add_ps(k0, _mm_mul_ps(k1, _sum)), k2)));
+                    __m128 _src = Load<align>(src + s);
+                    Store<true>(sum.data + s, _sum);
+                    Store<align>(dst + s, _mm_mul_ps(_src, pow(_mm_add_ps(k0, _mm_mul_ps(k1, _sum)), k2)));
                 }
                 for (; s < spatial; ++s)
                 {
@@ -455,16 +455,16 @@ namespace Simd
             size_t aligned = AlignLo(channels - half, F);
             for (size_t s = 0; s < spatial; ++s)
             {
-                Sse::Store<align>(dst + 0, _mm_mul_ps(Sse::Load<align>(src + 0), pow(_mm_add_ps(k0, _mm_mul_ps(k1, NoseSquareSum(src + 0))), k2)));
+                Store<align>(dst + 0, _mm_mul_ps(Load<align>(src + 0), pow(_mm_add_ps(k0, _mm_mul_ps(k1, NoseSquareSum(src + 0))), k2)));
                 for (size_t c = F; c < aligned; c += F)
-                    Sse::Store<align>(dst + c, _mm_mul_ps(Sse::Load<align>(src + c), pow(_mm_add_ps(k0, _mm_mul_ps(k1, BodySquareSum(src + c))), k2)));
+                    Store<align>(dst + c, _mm_mul_ps(Load<align>(src + c), pow(_mm_add_ps(k0, _mm_mul_ps(k1, BodySquareSum(src + c))), k2)));
                 if (aligned != channels - half)
                 {
                     size_t c = channels - half - F;
-                    Sse::Store<false>(dst + c, _mm_mul_ps(Sse::Load<false>(src + c), pow(_mm_add_ps(k0, _mm_mul_ps(k1, BodySquareSum(src + c))), k2)));
+                    Store<false>(dst + c, _mm_mul_ps(Load<false>(src + c), pow(_mm_add_ps(k0, _mm_mul_ps(k1, BodySquareSum(src + c))), k2)));
                 }
                 size_t c = channels - F;
-                Sse::Store<false>(dst + c, _mm_mul_ps(Sse::Load<false>(src + c), pow(_mm_add_ps(k0, _mm_mul_ps(k1, TailSquareSum(src + c))), k2)));
+                Store<false>(dst + c, _mm_mul_ps(Load<false>(src + c), pow(_mm_add_ps(k0, _mm_mul_ps(k1, TailSquareSum(src + c))), k2)));
                 src += channels;
                 dst += channels;
             }
@@ -775,13 +775,13 @@ namespace Simd
             size_t i = 0;
             for (; i < sizeQF; i += QF)
             {
-                Sse::Store<align>(dst + i + 0 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 0 * F)));
-                Sse::Store<align>(dst + i + 1 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 1 * F)));
-                Sse::Store<align>(dst + i + 2 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 2 * F)));
-                Sse::Store<align>(dst + i + 3 * F, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i + 3 * F)));
+                Store<align>(dst + i + 0 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 0 * F)));
+                Store<align>(dst + i + 1 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 1 * F)));
+                Store<align>(dst + i + 2 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 2 * F)));
+                Store<align>(dst + i + 3 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 3 * F)));
             }
             for (; i < sizeF; i += F)
-                Sse::Store<align>(dst + i, SynetUnaryOperation32f<type>(Sse::Load<align>(src + i)));
+                Store<align>(dst + i, SynetUnaryOperation32f<type>(Load<align>(src + i)));
             for (; i < size; ++i)
                 dst[i] = Base::SynetUnaryOperation32f<type>(src[i]);
         }

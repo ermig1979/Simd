@@ -81,7 +81,7 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        using namespace Sse;
+        using namespace Sse2;
     }
 #endif //SIMD_SSE41_ENABLE
 

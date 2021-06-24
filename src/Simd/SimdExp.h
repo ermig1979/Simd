@@ -112,7 +112,7 @@ namespace Simd
                 __m128 exp = Exp2(_mm_mul_ps(_k, value));
                 __m128 neg = _mm_mul_ps(alpha, _mm_sub_ps(exp, _1_0));
                 __m128 mask = _mm_cmpgt_ps(_mm_setzero_ps(), value);
-                return Sse::Combine(mask, neg, value);
+                return Combine(mask, neg, value);
             }
         };
 
@@ -160,7 +160,7 @@ namespace Simd
             __m128 exp = Exponent(value);
             __m128 neg = _mm_mul_ps(alpha, _mm_sub_ps(exp, _mm_set1_ps(1.0f)));
             __m128 mask = _mm_cmpgt_ps(_mm_setzero_ps(), value);
-            return Sse::Combine(mask, neg, value);
+            return Combine(mask, neg, value);
         }
 
         SIMD_INLINE __m128 Logarithm(__m128 value)
@@ -174,7 +174,7 @@ namespace Simd
             __m128 mish = _mm_add_ps(Exponent(value), _1);
             mish = _mm_add_ps(_mm_mul_ps(mish, mish), _1);
             mish = _mm_mul_ps(value, _mm_sub_ps(_1, _mm_div_ps(_mm_set1_ps(2.0f), mish)));
-            return Sse::Combine(_mm_cmpgt_ps(threshold, value), mish, value);
+            return Combine(_mm_cmpgt_ps(threshold, value), mish, value);
         }
 
         SIMD_INLINE __m128 Softplus(__m128 value, __m128 beta, __m128 threshold)
@@ -182,7 +182,7 @@ namespace Simd
             __m128 exp = Exponent(_mm_mul_ps(value, beta));
             __m128 log = Logarithm(_mm_add_ps(_mm_set1_ps(1.0f), exp));
             __m128 mask = _mm_cmpgt_ps(threshold, value);
-            return Sse::Combine(mask, _mm_div_ps(log, beta), value);
+            return Combine(mask, _mm_div_ps(log, beta), value);
         }
 
         SIMD_INLINE __m128 Tanh(__m128 value)

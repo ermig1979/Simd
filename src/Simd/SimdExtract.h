@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         SIMD_INLINE float ExtractValue(__m128 a, int i)
         {
@@ -43,13 +43,8 @@ namespace Simd
             float SIMD_ALIGNED(16) _a[4];
             _mm_store_ps(_a, a);
             return _a[0] + _a[1] + _a[2] + _a[3];
-        }
-    }
-#endif//SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
+        }        
+        
         template <int index> SIMD_INLINE int ExtractInt8(__m128i a)
         {
             return _mm_extract_epi16(_mm_srli_si128(a, index & 0x1), index >> 1) & 0xFF;

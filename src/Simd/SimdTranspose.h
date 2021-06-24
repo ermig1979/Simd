@@ -33,65 +33,65 @@ namespace Simd
     {
         template <bool align> SIMD_INLINE void Copy(const float * src, float * dst)
         {
-            Sse::Store<align>(dst, Sse::Load<align>(src));
+            Store<align>(dst, Load<align>(src));
         }
 
         template<bool align> SIMD_INLINE void Transpose4x4(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
-            __m128 s0 = Sse::Load<align>(src + 0 * srcStride);
-            __m128 s1 = Sse::Load<align>(src + 1 * srcStride);
-            __m128 s2 = Sse::Load<align>(src + 2 * srcStride);
-            __m128 s3 = Sse::Load<align>(src + 3 * srcStride);
+            __m128 s0 = Load<align>(src + 0 * srcStride);
+            __m128 s1 = Load<align>(src + 1 * srcStride);
+            __m128 s2 = Load<align>(src + 2 * srcStride);
+            __m128 s3 = Load<align>(src + 3 * srcStride);
             __m128 s00 = _mm_unpacklo_ps(s0, s2);
             __m128 s01 = _mm_unpacklo_ps(s1, s3);
             __m128 s10 = _mm_unpackhi_ps(s0, s2);
             __m128 s11 = _mm_unpackhi_ps(s1, s3);
-            Sse::Store<align>(dst + 0 * dstStride, _mm_unpacklo_ps(s00, s01));
-            Sse::Store<align>(dst + 1 * dstStride, _mm_unpackhi_ps(s00, s01));
-            Sse::Store<align>(dst + 2 * dstStride, _mm_unpacklo_ps(s10, s11));
-            Sse::Store<align>(dst + 3 * dstStride, _mm_unpackhi_ps(s10, s11));
+            Store<align>(dst + 0 * dstStride, _mm_unpacklo_ps(s00, s01));
+            Store<align>(dst + 1 * dstStride, _mm_unpackhi_ps(s00, s01));
+            Store<align>(dst + 2 * dstStride, _mm_unpacklo_ps(s10, s11));
+            Store<align>(dst + 3 * dstStride, _mm_unpackhi_ps(s10, s11));
         }
 
         template<bool align> SIMD_INLINE void Transpose4x4xF(const float * src, size_t srcStride, float * dst, size_t dstStride)
         {
-            __m128 buf00 = Sse::Load<align>(src + 0 * F);
-            __m128 buf01 = Sse::Load<align>(src + 1 * F);
-            __m128 buf02 = Sse::Load<align>(src + 2 * F);
-            __m128 buf03 = Sse::Load<align>(src + 3 * F);
+            __m128 buf00 = Load<align>(src + 0 * F);
+            __m128 buf01 = Load<align>(src + 1 * F);
+            __m128 buf02 = Load<align>(src + 2 * F);
+            __m128 buf03 = Load<align>(src + 3 * F);
             src += srcStride;
-            __m128 buf10 = Sse::Load<align>(src + 0 * F);
-            __m128 buf11 = Sse::Load<align>(src + 1 * F);
-            __m128 buf12 = Sse::Load<align>(src + 2 * F);
-            __m128 buf13 = Sse::Load<align>(src + 3 * F);
+            __m128 buf10 = Load<align>(src + 0 * F);
+            __m128 buf11 = Load<align>(src + 1 * F);
+            __m128 buf12 = Load<align>(src + 2 * F);
+            __m128 buf13 = Load<align>(src + 3 * F);
             src += srcStride;
-            __m128 buf20 = Sse::Load<align>(src + 0 * F);
-            __m128 buf21 = Sse::Load<align>(src + 1 * F);
-            __m128 buf22 = Sse::Load<align>(src + 2 * F);
-            __m128 buf23 = Sse::Load<align>(src + 3 * F);
+            __m128 buf20 = Load<align>(src + 0 * F);
+            __m128 buf21 = Load<align>(src + 1 * F);
+            __m128 buf22 = Load<align>(src + 2 * F);
+            __m128 buf23 = Load<align>(src + 3 * F);
             src += srcStride;
-            __m128 buf30 = Sse::Load<align>(src + 0 * F);
-            __m128 buf31 = Sse::Load<align>(src + 1 * F);
-            __m128 buf32 = Sse::Load<align>(src + 2 * F);
-            __m128 buf33 = Sse::Load<align>(src + 3 * F);
-            Sse::Store<align>(dst + 0 * F, buf00);
-            Sse::Store<align>(dst + 1 * F, buf10);
-            Sse::Store<align>(dst + 2 * F, buf20);
-            Sse::Store<align>(dst + 3 * F, buf30);
+            __m128 buf30 = Load<align>(src + 0 * F);
+            __m128 buf31 = Load<align>(src + 1 * F);
+            __m128 buf32 = Load<align>(src + 2 * F);
+            __m128 buf33 = Load<align>(src + 3 * F);
+            Store<align>(dst + 0 * F, buf00);
+            Store<align>(dst + 1 * F, buf10);
+            Store<align>(dst + 2 * F, buf20);
+            Store<align>(dst + 3 * F, buf30);
             dst += dstStride;
-            Sse::Store<align>(dst + 0 * F, buf01);
-            Sse::Store<align>(dst + 1 * F, buf11);
-            Sse::Store<align>(dst + 2 * F, buf21);
-            Sse::Store<align>(dst + 3 * F, buf31);
+            Store<align>(dst + 0 * F, buf01);
+            Store<align>(dst + 1 * F, buf11);
+            Store<align>(dst + 2 * F, buf21);
+            Store<align>(dst + 3 * F, buf31);
             dst += dstStride;
-            Sse::Store<align>(dst + 0 * F, buf02);
-            Sse::Store<align>(dst + 1 * F, buf12);
-            Sse::Store<align>(dst + 2 * F, buf22);
-            Sse::Store<align>(dst + 3 * F, buf32);
+            Store<align>(dst + 0 * F, buf02);
+            Store<align>(dst + 1 * F, buf12);
+            Store<align>(dst + 2 * F, buf22);
+            Store<align>(dst + 3 * F, buf32);
             dst += dstStride;
-            Sse::Store<align>(dst + 0 * F, buf03);
-            Sse::Store<align>(dst + 1 * F, buf13);
-            Sse::Store<align>(dst + 2 * F, buf23);
-            Sse::Store<align>(dst + 3 * F, buf33);
+            Store<align>(dst + 0 * F, buf03);
+            Store<align>(dst + 1 * F, buf13);
+            Store<align>(dst + 2 * F, buf23);
+            Store<align>(dst + 3 * F, buf33);
         }
     }
 #endif//SIMD_SSE2_ENABLE

@@ -87,12 +87,12 @@ namespace Simd
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
 
-            __m128 _scale0 = Sse::Load<false>(_scale + 0 * F);
-            __m128 _scale1 = Sse::Load<false>(_scale + 1 * F);
-            __m128 _scale2 = Sse::Load<false>(_scale + 2 * F);
-            __m128 _shift0 = Sse::Load<false>(_shift + 0 * F);
-            __m128 _shift1 = Sse::Load<false>(_shift + 1 * F);
-            __m128 _shift2 = Sse::Load<false>(_shift + 2 * F);
+            __m128 _scale0 = Sse2::Load<false>(_scale + 0 * F);
+            __m128 _scale1 = Sse2::Load<false>(_scale + 1 * F);
+            __m128 _scale2 = Sse2::Load<false>(_scale + 2 * F);
+            __m128 _shift0 = Sse2::Load<false>(_shift + 0 * F);
+            __m128 _shift1 = Sse2::Load<false>(_shift + 1 * F);
+            __m128 _shift2 = Sse2::Load<false>(_shift + 2 * F);
 
             size_t s = 0;
             for (; s < spatial3F; s += 3 * F)

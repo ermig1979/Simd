@@ -36,7 +36,7 @@ namespace Simd
     {
         template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Sse2::Exp & exp, __m128 alpha, float * dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, exp.Elu(Sse::Load<align>(src + offset), alpha));
+            Store<align>(dst + offset, exp.Elu(Load<align>(src + offset), alpha));
         }
 
         template<bool align> void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst)
@@ -74,9 +74,9 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetHswish32f(const float* src, __m128 shift, __m128 scale, float* dst, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
+            __m128 _src = Load<align>(src + offset);
             __m128 _dst = SynetHswish32f(_src, shift, scale);
-            Sse::Store<align>(dst + offset, _dst);
+            Store<align>(dst + offset, _dst);
         }
 
         template<bool align> void SynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst)
@@ -111,7 +111,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetMish32f(const float* src, __m128 threshold, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, Mish(Sse::Load<align>(src + offset), threshold));
+            Store<align>(dst + offset, Mish(Load<align>(src + offset), threshold));
         }
 
         template<bool align> void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
@@ -148,12 +148,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, const float* slope, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, SynetRelu32f(Sse::Load<align>(src + offset), Sse::Load<align>(slope + offset)));
+            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), Load<align>(slope + offset)));
         }
 
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, __m128 slope, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, SynetRelu32f(Sse::Load<align>(src + offset), slope));
+            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), slope));
         }
 
         template <bool align> void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
@@ -240,7 +240,7 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4) * F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _slope = Sse::Load<false>(slope + c);
+                __m128 _slope = Load<false>(slope + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -280,7 +280,7 @@ namespace Simd
         
         template<bool align> SIMD_INLINE void SynetRelu32f(const float* src, __m128 slope, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, SynetRelu32f(Sse::Load<align>(src + offset), slope));
+            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), slope));
         }
 
         template<bool align> void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
@@ -329,13 +329,13 @@ namespace Simd
             size_t i = 0;
             for (; i < sizeQF; i += QF)
             {
-                Sse::Store<align>(dst + i + 0 * F, _mm_min_ps(_mm_max_ps(_min, Sse::Load<align>(src + i + 0 * F)), _max));
-                Sse::Store<align>(dst + i + 1 * F, _mm_min_ps(_mm_max_ps(_min, Sse::Load<align>(src + i + 1 * F)), _max));
-                Sse::Store<align>(dst + i + 2 * F, _mm_min_ps(_mm_max_ps(_min, Sse::Load<align>(src + i + 2 * F)), _max));
-                Sse::Store<align>(dst + i + 3 * F, _mm_min_ps(_mm_max_ps(_min, Sse::Load<align>(src + i + 3 * F)), _max));
+                Store<align>(dst + i + 0 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
+                Store<align>(dst + i + 1 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
+                Store<align>(dst + i + 2 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
+                Store<align>(dst + i + 3 * F, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
             }
             for (; i < sizeF; i += F)
-                Sse::Store<align>(dst + i, _mm_min_ps(_mm_max_ps(_min, Sse::Load<align>(src + i)), _max));
+                Store<align>(dst + i, _mm_min_ps(_mm_max_ps(_min, Load<align>(src + i)), _max));
             for (; i < size; ++i)
                 dst[i] = Simd::RestrictRange(src[i], min, max);
         }
@@ -352,7 +352,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Sse2::Exp & exp, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, exp.Sigmoid(Sse::Load<align>(src + offset)));
+            Store<align>(dst + offset, exp.Sigmoid(Load<align>(src + offset)));
         }
 
         template<bool align> void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
@@ -389,7 +389,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetSoftplus32f(const float* src, __m128 beta, __m128 threshold, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, Softplus(Sse::Load<align>(src + offset), beta, threshold));
+            Store<align>(dst + offset, Softplus(Load<align>(src + offset), beta, threshold));
         }
 
         template<bool align> void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
@@ -427,7 +427,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Sse2::Exp& exp, float* dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, exp.Tanh(Sse::Load<align>(src + offset)));
+            Store<align>(dst + offset, exp.Tanh(Load<align>(src + offset)));
         }
 
         template<bool align> void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)

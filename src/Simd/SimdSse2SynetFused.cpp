@@ -36,16 +36,16 @@ namespace Simd
     {
         template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, __m128 sign, float * dst, size_t offset)
         {
-            __m128 _bias = Sse::Load<align>(bias + offset);
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), _bias);
-            __m128 _scale = Sse::Load<align>(scale + offset);
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(_mm_sub_ps(x, _mm_andnot_ps(sign, x)), _scale), _mm_max_ps(_mm_setzero_ps(), x)));
+            __m128 _bias = Load<align>(bias + offset);
+            __m128 x = _mm_add_ps(Load<align>(src + offset), _bias);
+            __m128 _scale = Load<align>(scale + offset);
+            Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(_mm_sub_ps(x, _mm_andnot_ps(sign, x)), _scale), _mm_max_ps(_mm_setzero_ps(), x)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, __m128 bias, __m128 scale, __m128 sign, float * dst, size_t offset)
         {
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), bias);
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(_mm_sub_ps(x, _mm_andnot_ps(sign, x)), scale), _mm_max_ps(_mm_setzero_ps(), x)));
+            __m128 x = _mm_add_ps(Load<align>(src + offset), bias);
+            Store<align>(dst + offset, _mm_add_ps(_mm_mul_ps(_mm_sub_ps(x, _mm_andnot_ps(sign, x)), scale), _mm_max_ps(_mm_setzero_ps(), x)));
         }
 
         template <bool align> void SynetFusedLayerForward0Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -136,8 +136,8 @@ namespace Simd
             __m128 sign = _mm_set1_ps(-0.0f);
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _bias = Sse::Load<false>(bias + c);
-                __m128 _scale = Sse::Load<false>(scale + c);
+                __m128 _bias = Load<false>(bias + c);
+                __m128 _scale = Load<false>(scale + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -177,17 +177,17 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float *  bias1, float * dst, size_t offset)
         {
-            __m128 _bias0 = Sse::Load<align>(bias0 + offset);
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), _bias0);
-            __m128 _scale1 = Sse::Load<align>(scale1 + offset);
-            __m128 _bias1 = Sse::Load<align>(bias1 + offset);
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(_mm_setzero_ps(), x)), _scale1), _bias1), _mm_max_ps(_mm_setzero_ps(), x)));
+            __m128 _bias0 = Load<align>(bias0 + offset);
+            __m128 x = _mm_add_ps(Load<align>(src + offset), _bias0);
+            __m128 _scale1 = Load<align>(scale1 + offset);
+            __m128 _bias1 = Load<align>(bias1 + offset);
+            Store<align>(dst + offset, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(_mm_setzero_ps(), x)), _scale1), _bias1), _mm_max_ps(_mm_setzero_ps(), x)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward1(const float * src, __m128 bias0, __m128 scale1, __m128 bias1, float * dst, size_t offset)
         {
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), bias0);
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(_mm_setzero_ps(), x)), scale1), bias1), _mm_max_ps(_mm_setzero_ps(), x)));
+            __m128 x = _mm_add_ps(Load<align>(src + offset), bias0);
+            Store<align>(dst + offset, _mm_add_ps(_mm_add_ps(_mm_mul_ps(_mm_max_ps(_mm_setzero_ps(), _mm_sub_ps(_mm_setzero_ps(), x)), scale1), bias1), _mm_max_ps(_mm_setzero_ps(), x)));
         }
 
         template <bool align> void SynetFusedLayerForward1Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
@@ -276,9 +276,9 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _bias0 = Sse::Load<false>(bias0 + c);
-                __m128 _scale1 = Sse::Load<false>(scale1 + c);
-                __m128 _bias1 = Sse::Load<false>(bias1 + c);
+                __m128 _bias0 = Load<false>(bias0 + c);
+                __m128 _scale1 = Load<false>(scale1 + c);
+                __m128 _bias1 = Load<false>(bias1 + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -318,18 +318,18 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, __m128 slope, float * dst, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
-            __m128 _scale = Sse::Load<align>(scale + offset);
-            __m128 _bias = Sse::Load<align>(bias + offset);
+            __m128 _src = Load<align>(src + offset);
+            __m128 _scale = Load<align>(scale + offset);
+            __m128 _bias = Load<align>(bias + offset);
             __m128 x = _mm_add_ps(_mm_mul_ps(_src, _scale), _bias);
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), x), _mm_mul_ps(_mm_min_ps(_mm_setzero_ps(), x), slope)));
+            Store<align>(dst + offset, _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), x), _mm_mul_ps(_mm_min_ps(_mm_setzero_ps(), x), slope)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward2(const float * src, __m128 scale, __m128 bias, __m128 slope, float * dst, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
+            __m128 _src = Load<align>(src + offset);
             __m128 x = _mm_add_ps(_mm_mul_ps(_src, scale), bias);
-            Sse::Store<align>(dst + offset, _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), x), _mm_mul_ps(_mm_min_ps(_mm_setzero_ps(), x), slope)));
+            Store<align>(dst + offset, _mm_add_ps(_mm_max_ps(_mm_setzero_ps(), x), _mm_mul_ps(_mm_min_ps(_mm_setzero_ps(), x), slope)));
         }
 
         template <bool align> void SynetFusedLayerForward2Nchw(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
@@ -420,8 +420,8 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _scale = Sse::Load<false>(scale + c);
-                __m128 _bias = Sse::Load<false>(bias + c);
+                __m128 _scale = Load<false>(scale + c);
+                __m128 _bias = Load<false>(bias + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -461,20 +461,20 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, float * dst, size_t offset)
         {
-            __m128 _bias = Sse::Load<align>(bias + offset);
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), _bias);
-            __m128 _scale = Sse::Load<align>(scale + offset);
+            __m128 _bias = Load<align>(bias + offset);
+            __m128 x = _mm_add_ps(Load<align>(src + offset), _bias);
+            __m128 _scale = Load<align>(scale + offset);
             __m128 pos = _mm_max_ps(_mm_setzero_ps(), x);
             __m128 neg = _mm_min_ps(_mm_setzero_ps(), x);
-            Sse::Store<align>(dst + offset, _mm_add_ps(pos, _mm_mul_ps(_scale, neg)));
+            Store<align>(dst + offset, _mm_add_ps(pos, _mm_mul_ps(_scale, neg)));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward3(const float * src, __m128 bias, __m128 scale, float * dst, size_t offset)
         {
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), bias);
+            __m128 x = _mm_add_ps(Load<align>(src + offset), bias);
             __m128 pos = _mm_max_ps(_mm_setzero_ps(), x);
             __m128 neg = _mm_min_ps(_mm_setzero_ps(), x);
-            Sse::Store<align>(dst + offset, _mm_add_ps(pos, _mm_mul_ps(scale, neg)));
+            Store<align>(dst + offset, _mm_add_ps(pos, _mm_mul_ps(scale, neg)));
         }
 
         template <bool align> void SynetFusedLayerForward3Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -562,8 +562,8 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _bias = Sse::Load<false>(bias + c);
-                __m128 _scale = Sse::Load<false>(scale + c);
+                __m128 _bias = Load<false>(bias + c);
+                __m128 _scale = Load<false>(scale + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -603,16 +603,16 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward4(const float * src, const float * bias0, __m128 scale1, __m128 bias1, float * dst0, float * dst1, size_t offset)
         {
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), Sse::Load<align>(bias0 + offset));
-            Sse::Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), x));
-            Sse::Store<align>(dst1 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(bias1, _mm_mul_ps(scale1, x))));
+            __m128 x = _mm_add_ps(Load<align>(src + offset), Load<align>(bias0 + offset));
+            Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), x));
+            Store<align>(dst1 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(bias1, _mm_mul_ps(scale1, x))));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward4(const float * src, __m128 bias0, __m128 scale1, __m128 bias1, float * dst0, float * dst1, size_t offset)
         {
-            __m128 x = _mm_add_ps(Sse::Load<align>(src + offset), bias0);
-            Sse::Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), x));
-            Sse::Store<align>(dst1 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(bias1, _mm_mul_ps(scale1, x))));
+            __m128 x = _mm_add_ps(Load<align>(src + offset), bias0);
+            Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), x));
+            Store<align>(dst1 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(bias1, _mm_mul_ps(scale1, x))));
         }
 
         template <bool align> void SynetFusedLayerForward4Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
@@ -710,7 +710,7 @@ namespace Simd
             float * dst1 = dst0 + channels * spatial;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _bias0 = Sse::Load<false>(bias0 + c);
+                __m128 _bias0 = Load<false>(bias0 + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -752,12 +752,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, float * dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, _mm_add_ps(Sse::Load<align>(src0 + offset), _mm_mul_ps(Sse::Load<align>(src1 + offset), Sse::Load<align>(src2 + offset))));
+            Store<align>(dst + offset, _mm_add_ps(Load<align>(src0 + offset), _mm_mul_ps(Load<align>(src1 + offset), Load<align>(src2 + offset))));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const __m128 & src2, float * dst, size_t offset)
         {
-            Sse::Store<align>(dst + offset, _mm_add_ps(Sse::Load<align>(src0 + offset), _mm_mul_ps(Sse::Load<align>(src1 + offset), src2)));
+            Store<align>(dst + offset, _mm_add_ps(Load<align>(src0 + offset), _mm_mul_ps(Load<align>(src1 + offset), src2)));
         }
 
         template <bool align> void SynetFusedLayerForward8Nchw(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
@@ -846,7 +846,7 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m128 _src2 = Sse::Load<false>(src2 + c);
+                __m128 _src2 = Load<false>(src2 + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -887,28 +887,28 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, float * dst1, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
-            Sse::Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, Sse::Load<align>(scale + offset)), Sse::Load<align>(bias + offset))));
-            Sse::Store<align>(dst1 + offset, _src);
+            __m128 _src = Load<align>(src + offset);
+            Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, Load<align>(scale + offset)), Load<align>(bias + offset))));
+            Store<align>(dst1 + offset, _src);
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
-            Sse::Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, Sse::Load<align>(scale + offset)), Sse::Load<align>(bias + offset))));
+            __m128 _src = Load<align>(src + offset);
+            Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, Load<align>(scale + offset)), Load<align>(bias + offset))));
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const __m128 & scale, const __m128 & bias, float * dst0, float * dst1, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
-            Sse::Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, scale), bias)));
-            Sse::Store<align>(dst1 + offset, _src);
+            __m128 _src = Load<align>(src + offset);
+            Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, scale), bias)));
+            Store<align>(dst1 + offset, _src);
         }
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const __m128 & scale, const __m128 & bias, float * dst0, size_t offset)
         {
-            __m128 _src = Sse::Load<align>(src + offset);
-            Sse::Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, scale), bias)));
+            __m128 _src = Load<align>(src + offset);
+            Store<align>(dst0 + offset, _mm_max_ps(_mm_setzero_ps(), _mm_add_ps(_mm_mul_ps(_src, scale), bias)));
         }
 
         template<bool align> void SynetFusedLayerForward9Nchw(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
@@ -1127,8 +1127,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < channels0; c += F)
                 {
-                    __m128 _scale0 = Sse::Load<false>(scale0 + c);
-                    __m128 _bias0 = Sse::Load<false>(bias0 + c);
+                    __m128 _scale0 = Load<false>(scale0 + c);
+                    __m128 _bias0 = Load<false>(bias0 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1145,8 +1145,8 @@ namespace Simd
                 }
                 for (size_t c = 0; c < channels1; c += F)
                 {
-                    __m128 _scale1 = Sse::Load<false>(scale1 + c);
-                    __m128 _bias1 = Sse::Load<false>(bias1 + c);
+                    __m128 _scale1 = Load<false>(scale1 + c);
+                    __m128 _bias1 = Load<false>(bias1 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1166,8 +1166,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < channels0; c += F)
                 {
-                    __m128 _scale0 = Sse::Load<false>(scale0 + c);
-                    __m128 _bias0 = Sse::Load<false>(bias0 + c);
+                    __m128 _scale0 = Load<false>(scale0 + c);
+                    __m128 _bias0 = Load<false>(bias0 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1183,8 +1183,8 @@ namespace Simd
                 }
                 for (size_t c = 0; c < channels1; c += F)
                 {
-                    __m128 _scale1 = Sse::Load<false>(scale1 + c);
-                    __m128 _bias1 = Sse::Load<false>(bias1 + c);
+                    __m128 _scale1 = Load<false>(scale1 + c);
+                    __m128 _bias1 = Load<false>(bias1 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {

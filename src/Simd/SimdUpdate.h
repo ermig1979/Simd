@@ -47,8 +47,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         template <UpdateType update, bool align> SIMD_INLINE void Update(float  * p, __m128 a)
         {
@@ -63,13 +63,8 @@ namespace Simd
         template <> SIMD_INLINE void Update<UpdateAdd, true>(float  * p, __m128 a)
         {
             Store<true>(p, _mm_add_ps(Load<true>(p), a));
-        }
-    }
-#endif//SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
+        }        
+        
         template <UpdateType update, bool align> SIMD_INLINE void Update(int32_t  * p, __m128i a)
         {
             Store<align>((__m128i*)p, a);

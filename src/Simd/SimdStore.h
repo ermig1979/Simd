@@ -31,8 +31,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         template <bool align> SIMD_INLINE void Store(float  * p, __m128 a);
 
@@ -62,14 +62,7 @@ namespace Simd
         {
             __m128 old = Load<align>(p);
             Store<align>(p, Combine(mask, value, old));
-        }
-    }
-#endif//SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
-        using namespace Sse;
+        } 
 
         SIMD_INLINE void Store(float* ptr, __m128 val, size_t size)
         {
@@ -113,7 +106,7 @@ namespace Simd
 
         template <int part> SIMD_INLINE void StoreHalf(__m128i* p, __m128i a)
         {
-            Sse::StoreHalf<part>((float*)p, _mm_castsi128_ps(a));
+            StoreHalf<part>((float*)p, _mm_castsi128_ps(a));
         }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m128i * p, __m128i value, __m128i mask)
@@ -128,7 +121,6 @@ namespace Simd
     namespace Sse41
     {
 #if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
-        using Sse::Store;
         using Sse2::Store;
 #endif
     }
@@ -159,8 +151,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(float * p0, float * p1, __m256 a)
         {
-            Sse::Store<align>(p0, _mm256_extractf128_ps(a, 0));
-            Sse::Store<align>(p1, _mm256_extractf128_ps(a, 1));
+            Sse2::Store<align>(p0, _mm256_extractf128_ps(a, 0));
+            Sse2::Store<align>(p1, _mm256_extractf128_ps(a, 1));
         }
 
         template <bool align> SIMD_INLINE void StoreMasked(float * p, __m256 value, __m256 mask)
@@ -289,10 +281,10 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(float * p0, float * p1, float * p2, float * p3, __m512 a)
         {
-            Sse::Store<align>(p0, _mm512_extractf32x4_ps(a, 0));
-            Sse::Store<align>(p1, _mm512_extractf32x4_ps(a, 1));
-            Sse::Store<align>(p2, _mm512_extractf32x4_ps(a, 2));
-            Sse::Store<align>(p3, _mm512_extractf32x4_ps(a, 3));
+            Sse2::Store<align>(p0, _mm512_extractf32x4_ps(a, 0));
+            Sse2::Store<align>(p1, _mm512_extractf32x4_ps(a, 1));
+            Sse2::Store<align>(p2, _mm512_extractf32x4_ps(a, 2));
+            Sse2::Store<align>(p3, _mm512_extractf32x4_ps(a, 3));
         }
 
         SIMD_INLINE __m128i Cvt32fTo8u(__m512 a)

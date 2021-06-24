@@ -35,10 +35,10 @@ namespace Simd
     {
         template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, const __m128& norm, const __m128& alpha, const __m128& epsilon, float* gradient, float* weight)
         {
-            __m128 d = _mm_mul_ps(Sse::Load<align>(delta), norm);
-            __m128 _gradient = _mm_add_ps(Sse::Load<align>(gradient), _mm_mul_ps(d, d));
-            Sse::Store<align>(gradient, _gradient);
-            Sse::Store<align>(weight, _mm_sub_ps(Sse::Load<align>(weight), _mm_mul_ps(_mm_mul_ps(alpha, d), _mm_rsqrt_ps(_mm_add_ps(_gradient, epsilon)))));
+            __m128 d = _mm_mul_ps(Load<align>(delta), norm);
+            __m128 _gradient = _mm_add_ps(Load<align>(gradient), _mm_mul_ps(d, d));
+            Store<align>(gradient, _gradient);
+            Store<align>(weight, _mm_sub_ps(Load<align>(weight), _mm_mul_ps(_mm_mul_ps(alpha, d), _mm_rsqrt_ps(_mm_add_ps(_gradient, epsilon)))));
         }
 
         template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, size_t offset, const __m128& norm, const __m128& alpha, const __m128& epsilon, float* gradient, float* weight)
@@ -89,7 +89,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddMultiplied(const float* src, const __m128& value, float* dst)
         {
-            Sse::Store<align>(dst, _mm_add_ps(Sse::Load<align>(dst), _mm_mul_ps(value, Sse::Load<align>(src))));
+            Store<align>(dst, _mm_add_ps(Load<align>(dst), _mm_mul_ps(value, Load<align>(src))));
         }
 
         template <bool align> SIMD_INLINE void AddMultiplied(const float* src, size_t aligned, size_t partial, size_t full, float value, float* dst)
@@ -126,7 +126,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, float* dst)
         {
-            Sse::Store<align>(dst, _mm_add_ps(Sse::Load<align>(dst), Sse::Load<align>(src)));
+            Store<align>(dst, _mm_add_ps(Load<align>(dst), Load<align>(src)));
         }
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, size_t aligned, size_t partial, size_t full, float* dst)
@@ -159,7 +159,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void AddValue(const __m128& value, float* dst)
         {
-            Sse::Store<align>(dst, _mm_add_ps(Sse::Load<align>(dst), value));
+            Store<align>(dst, _mm_add_ps(Load<align>(dst), value));
         }
 
         template <bool align> SIMD_INLINE void AddValue(const float* value, float* dst, size_t aligned, size_t partial, size_t full)
@@ -247,8 +247,8 @@ namespace Simd
         {
             template <bool align> static SIMD_INLINE __m128 Convolution2(const float* src, const __m128* weights)
             {
-                return _mm_add_ps(_mm_mul_ps(Sse::Load<align>(src), weights[0]),
-                    _mm_mul_ps(Sse::Load<false>(src + 1), weights[1]));
+                return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]),
+                    _mm_mul_ps(Load<false>(src + 1), weights[1]));
             }
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float* src, size_t stride, const __m128* weights)
@@ -265,8 +265,8 @@ namespace Simd
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, const __m128& dst, __m128* sums)
             {
-                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Sse::Load<align>(src + 0)));
-                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Sse::Load<false>(src + 1)));
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, size_t stride, const __m128& dst, __m128* sums)
@@ -280,9 +280,9 @@ namespace Simd
         {
             template <bool align> static SIMD_INLINE __m128 Convolution3(const float* src, const __m128* weights)
             {
-                return _mm_add_ps(_mm_mul_ps(Sse::Load<align>(src), weights[0]),
-                    _mm_add_ps(_mm_mul_ps(Sse::Load<false>(src + 1), weights[1]),
-                        _mm_mul_ps(Sse::Load<false>(src + 2), weights[2])));
+                return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]),
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]),
+                        _mm_mul_ps(Load<false>(src + 2), weights[2])));
             }
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float* src, size_t stride, const __m128* weights)
@@ -301,9 +301,9 @@ namespace Simd
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, const __m128& dst, __m128* sums)
             {
-                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Sse::Load<align>(src + 0)));
-                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Sse::Load<false>(src + 1)));
-                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Sse::Load<false>(src + 2)));
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
+                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, size_t stride, const __m128& dst, __m128* sums)
@@ -318,8 +318,8 @@ namespace Simd
         {
             template <bool align> static SIMD_INLINE __m128 Convolution4(const float* src, const __m128* weights)
             {
-                return _mm_add_ps(_mm_add_ps(_mm_mul_ps(Sse::Load<align>(src), weights[0]), _mm_mul_ps(Sse::Load<false>(src + 1), weights[1])),
-                    _mm_add_ps(_mm_mul_ps(Sse::Load<false>(src + 2), weights[2]), _mm_mul_ps(Sse::Load<false>(src + 3), weights[3])));
+                return _mm_add_ps(_mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]), _mm_mul_ps(Load<false>(src + 1), weights[1])),
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 2), weights[2]), _mm_mul_ps(Load<false>(src + 3), weights[3])));
             }
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float* src, size_t stride, const __m128* weights)
@@ -340,10 +340,10 @@ namespace Simd
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, const __m128& dst, __m128* sums)
             {
-                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Sse::Load<align>(src + 0)));
-                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Sse::Load<false>(src + 1)));
-                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Sse::Load<false>(src + 2)));
-                sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Sse::Load<false>(src + 3)));
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
+                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
+                sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Load<false>(src + 3)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, size_t stride, const __m128& dst, __m128* sums)
@@ -359,9 +359,9 @@ namespace Simd
         {
             template <bool align> static SIMD_INLINE __m128 Convolution5(const float* src, const __m128* weights)
             {
-                return _mm_add_ps(_mm_mul_ps(Sse::Load<align>(src), weights[0]), _mm_add_ps(
-                    _mm_add_ps(_mm_mul_ps(Sse::Load<false>(src + 1), weights[1]), _mm_mul_ps(Sse::Load<false>(src + 2), weights[2])),
-                    _mm_add_ps(_mm_mul_ps(Sse::Load<false>(src + 3), weights[3]), _mm_mul_ps(Sse::Load<align>(src + 4), weights[4]))));
+                return _mm_add_ps(_mm_mul_ps(Load<align>(src), weights[0]), _mm_add_ps(
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 1), weights[1]), _mm_mul_ps(Load<false>(src + 2), weights[2])),
+                    _mm_add_ps(_mm_mul_ps(Load<false>(src + 3), weights[3]), _mm_mul_ps(Load<align>(src + 4), weights[4]))));
             }
 
             template<bool align> static SIMD_INLINE __m128 Forward(const float* src, size_t stride, const __m128* weights)
@@ -384,11 +384,11 @@ namespace Simd
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, const __m128& dst, __m128* sums)
             {
-                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Sse::Load<align>(src + 0)));
-                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Sse::Load<false>(src + 1)));
-                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Sse::Load<false>(src + 2)));
-                sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Sse::Load<false>(src + 3)));
-                sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(dst, Sse::Load<align>(src + 4)));
+                sums[0] = _mm_add_ps(sums[0], _mm_mul_ps(dst, Load<align>(src + 0)));
+                sums[1] = _mm_add_ps(sums[1], _mm_mul_ps(dst, Load<false>(src + 1)));
+                sums[2] = _mm_add_ps(sums[2], _mm_mul_ps(dst, Load<false>(src + 2)));
+                sums[3] = _mm_add_ps(sums[3], _mm_mul_ps(dst, Load<false>(src + 3)));
+                sums[4] = _mm_add_ps(sums[4], _mm_mul_ps(dst, Load<align>(src + 4)));
             }
 
             template <bool align> static SIMD_INLINE void Sum(const float* src, size_t stride, const __m128& dst, __m128* sums)
@@ -420,16 +420,16 @@ namespace Simd
                 size_t col = 0;
                 for (; col < alignedWidth; col += F)
                 {
-                    __m128 _dst = Sse::Load<align>(dst + col);
+                    __m128 _dst = Load<align>(dst + col);
                     _dst = _mm_add_ps(_dst, Convolution<coreX, coreY>::template Forward<align>(src + col, srcStride, _weights));
-                    Sse::Store<align>(dst + col, _dst);
+                    Store<align>(dst + col, _dst);
                 }
                 if (width - alignedWidth)
                 {
                     size_t col = width - F;
-                    __m128 _dst = Sse::Load<false>(dst + col);
+                    __m128 _dst = Load<false>(dst + col);
                     _dst = _mm_add_ps(_dst, _mm_and_ps(tailMask, Convolution<coreX, coreY>::template Forward<false>(src + col, srcStride, _weights)));
-                    Sse::Store<false>(dst + col, _dst);
+                    Store<false>(dst + col, _dst);
                 }
                 src += srcStride;
                 dst += dstStride;
@@ -527,16 +527,16 @@ namespace Simd
                 buffer.Update(row <= height - coreY ? src : NULL);
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m128 _dst = Sse::Load<align>(dst + col);
+                    __m128 _dst = Load<align>(dst + col);
                     _dst = _mm_add_ps(_dst, Convolution<coreX, coreY>::template Backward<true>(buffer, col, _weights));
-                    Sse::Store<align>(dst + col, _dst);
+                    Store<align>(dst + col, _dst);
                 }
                 if (width - alignedWidth)
                 {
                     size_t col = width - F;
-                    __m128 _dst = Sse::Load<false>(dst + col);
+                    __m128 _dst = Load<false>(dst + col);
                     _dst = _mm_add_ps(_dst, _mm_and_ps(tailMask, Convolution<coreX, coreY>::template Backward<false>(buffer, col, _weights)));
-                    Sse::Store<false>(dst + col, _dst);
+                    Store<false>(dst + col, _dst);
                 }
                 src += srcStride;
                 dst += dstStride;
@@ -595,13 +595,13 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += F)
                 {
-                    __m128 _dst = Sse::Load<align>(dst + col);
+                    __m128 _dst = Load<align>(dst + col);
                     Convolution<coreX, coreY>::template Sum<align>(src + col, srcStride, _dst, _sums);
                 }
                 if (alignedWidth < width)
                 {
                     size_t col = width - F;
-                    __m128 _dst = _mm_and_ps(tailMask, Sse::Load<false>(dst + col));
+                    __m128 _dst = _mm_and_ps(tailMask, Load<false>(dst + col));
                     Convolution<coreX, coreY>::template Sum<false>(src + col, srcStride, _dst, _sums);
                 }
                 src += srcStride;
@@ -659,8 +659,8 @@ namespace Simd
 
         template <bool align, bool stream> void Convert(__m128i src, const __m128 &_1_255, float * dst)
         {
-            Sse::Stream<align, stream>(dst + 0, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<0>(src)), _1_255));
-            Sse::Stream<align, stream>(dst + 4, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<1>(src)), _1_255));
+            Stream<align, stream>(dst + 0, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<0>(src)), _1_255));
+            Stream<align, stream>(dst + 4, _mm_mul_ps(_mm_cvtepi32_ps(UnpackU16<1>(src)), _1_255));
         }
 
         template <bool inversion, bool align, bool stream> void Convert(const uint8_t * src, const __m128 &_1_255, float * dst)
@@ -727,9 +727,9 @@ namespace Simd
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
-                __m128 mask = _mm_cmpgt_ps(Sse::Load<align>(src + i), _0);
-                __m128 _dst = Sse::Load<align>(dst + i);
-                Sse::Store<align>(dst + i, _mm_mul_ps(_mm_add_ps(_s, _mm_and_ps(mask, d)), _dst));
+                __m128 mask = _mm_cmpgt_ps(Load<align>(src + i), _0);
+                __m128 _dst = Load<align>(dst + i);
+                Store<align>(dst + i, _mm_mul_ps(_mm_add_ps(_s, _mm_and_ps(mask, d)), _dst));
             }
             for (; i < size; ++i)
                 dst[i] *= src[i] > 0 ? 1.0f : s;
@@ -755,9 +755,9 @@ namespace Simd
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
-                __m128 _src = Sse::Load<align>(src + i);
-                __m128 _dst = Sse::Load<align>(dst + i);
-                Sse::Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_mul_ps(_mm_sub_ps(_1, _src), _src)));
+                __m128 _src = Load<align>(src + i);
+                __m128 _dst = Load<align>(dst + i);
+                Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_mul_ps(_mm_sub_ps(_1, _src), _src)));
             }
             for (; i < size; ++i)
                 dst[i] *= slope[0] * Base::DerivativeSigmoid(src[i]);
@@ -783,9 +783,9 @@ namespace Simd
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
-                __m128 _src = Sse::Load<align>(src + i);
-                __m128 _dst = Sse::Load<align>(dst + i);
-                Sse::Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_sub_ps(_1, _mm_mul_ps(_src, _src))));
+                __m128 _src = Load<align>(src + i);
+                __m128 _dst = Load<align>(dst + i);
+                Store<align>(dst + i, _mm_mul_ps(_mm_mul_ps(_dst, _slope), _mm_sub_ps(_1, _mm_mul_ps(_src, _src))));
             }
             for (; i < size; ++i)
                 dst[i] *= slope[0] * Base::DerivativeTanh(src[i]);
@@ -803,7 +803,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m128 Pooling1x1Max3x1Body(const float* src)
         {
-            return _mm_max_ps(_mm_max_ps(Sse::Load<false>(src - 1), Sse::Load<align>(src)), Sse::Load<false>(src + 1));
+            return _mm_max_ps(_mm_max_ps(Load<false>(src - 1), Load<align>(src)), Load<false>(src + 1));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x3Body(const float* src, size_t stride, float* dst)
@@ -811,21 +811,21 @@ namespace Simd
             __m128 src0 = Pooling1x1Max3x1Body<align>(src - stride);
             __m128 src1 = Pooling1x1Max3x1Body<align>(src);
             __m128 src2 = Pooling1x1Max3x1Body<align>(src + stride);
-            Sse::Store<align>(dst, _mm_max_ps(_mm_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm_max_ps(_mm_max_ps(src0, src1), src2));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Body(const float* src, size_t stride, float* dst)
         {
             __m128 src0 = Pooling1x1Max3x1Body<align>(src);
             __m128 src1 = Pooling1x1Max3x1Body<align>(src + stride);
-            Sse::Store<align>(dst, _mm_max_ps(src0, src1));
+            Store<align>(dst, _mm_max_ps(src0, src1));
         }
 
         template <bool align> SIMD_INLINE __m128 Pooling1x1Max3x1Nose(const float* src)
         {
-            __m128 src1 = Sse::Load<align>(src);
+            __m128 src1 = Load<align>(src);
             __m128 src0 = _mm_shuffle_ps(src1, src1, 0x90);
-            __m128 src2 = Sse::Load<false>(src + 1);
+            __m128 src2 = Load<false>(src + 1);
             return _mm_max_ps(_mm_max_ps(src0, src1), src2);
         }
 
@@ -834,19 +834,19 @@ namespace Simd
             __m128 src0 = Pooling1x1Max3x1Nose<align>(src - stride);
             __m128 src1 = Pooling1x1Max3x1Nose<align>(src);
             __m128 src2 = Pooling1x1Max3x1Nose<align>(src + stride);
-            Sse::Store<align>(dst, _mm_max_ps(_mm_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm_max_ps(_mm_max_ps(src0, src1), src2));
         }
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Nose(const float* src, size_t stride, float* dst)
         {
             __m128 src0 = Pooling1x1Max3x1Nose<align>(src);
             __m128 src1 = Pooling1x1Max3x1Nose<align>(src + stride);
-            Sse::Store<align>(dst, _mm_max_ps(src0, src1));
+            Store<align>(dst, _mm_max_ps(src0, src1));
         }
 
         template <bool align> SIMD_INLINE __m128 Pooling1x1Max3x1Tail(const float* src)
         {
-            __m128 src0 = Sse::Load<false>(src - 1);
-            __m128 src1 = Sse::Load<align>(src);
+            __m128 src0 = Load<false>(src - 1);
+            __m128 src1 = Load<align>(src);
             __m128 src2 = _mm_shuffle_ps(src1, src1, 0xF9);
             return _mm_max_ps(_mm_max_ps(src0, src1), src2);
         }
@@ -856,13 +856,13 @@ namespace Simd
             __m128 src0 = Pooling1x1Max3x1Tail<align>(src - stride);
             __m128 src1 = Pooling1x1Max3x1Tail<align>(src);
             __m128 src2 = Pooling1x1Max3x1Tail<align>(src + stride);
-            Sse::Store<align>(dst, _mm_max_ps(_mm_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm_max_ps(_mm_max_ps(src0, src1), src2));
         }
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Tail(const float* src, size_t stride, float* dst)
         {
             __m128 src0 = Pooling1x1Max3x1Tail<align>(src);
             __m128 src1 = Pooling1x1Max3x1Tail<align>(src + stride);
-            Sse::Store<align>(dst, _mm_max_ps(src0, src1));
+            Store<align>(dst, _mm_max_ps(src0, src1));
         }
 
         template <bool align> void NeuralPooling1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
@@ -906,15 +906,15 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max2x2(const float* src, size_t stride)
         {
-            __m128 _src0 = _mm_max_ps(Sse::Load<align>(src + 0), Sse::Load<align>(src + stride + 0));
-            __m128 _src1 = _mm_max_ps(Sse::Load<align>(src + F), Sse::Load<align>(src + stride + F));
+            __m128 _src0 = _mm_max_ps(Load<align>(src + 0), Load<align>(src + stride + 0));
+            __m128 _src1 = _mm_max_ps(Load<align>(src + F), Load<align>(src + stride + F));
             return _mm_max_ps(_mm_shuffle_ps(_src0, _src1, 0x88), _mm_shuffle_ps(_src0, _src1, 0xDD));
         }
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max2(const float* src)
         {
-            __m128 _src0 = Sse::Load<align>(src + 0);
-            __m128 _src1 = Sse::Load<align>(src + F);
+            __m128 _src0 = Load<align>(src + 0);
+            __m128 _src1 = Load<align>(src + F);
             return _mm_max_ps(_mm_shuffle_ps(_src0, _src1, 0x88), _mm_shuffle_ps(_src0, _src1, 0xDD));
         }
 
@@ -926,11 +926,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Sse::Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Sse::Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
@@ -940,11 +940,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Sse::Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Sse::Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];
@@ -978,7 +978,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max1x3(const float* src, size_t stride)
         {
-            return _mm_max_ps(_mm_max_ps(Sse::Load<align>(src), Sse::Load<align>(src + stride)), Sse::Load<align>(src + 2 * stride));
+            return _mm_max_ps(_mm_max_ps(Load<align>(src), Load<align>(src + stride)), Load<align>(src + 2 * stride));
         }
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max3x3(const float* src, size_t stride)
@@ -994,7 +994,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max1x2(const float* src, size_t stride)
         {
-            return _mm_max_ps(Sse::Load<align>(src), Sse::Load<align>(src + stride));
+            return _mm_max_ps(Load<align>(src), Load<align>(src + stride));
         }
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max3x2(const float* src, size_t stride)
@@ -1018,11 +1018,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Sse::Store<align>(dst + (col >> 1), Pooling2x2Max3x3<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max3x3<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Sse::Store<false>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Max2x3(src + widthEven, srcStride);
@@ -1032,11 +1032,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Sse::Store<align>(dst + (col >> 1), Pooling2x2Max3x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max3x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Sse::Store<false>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Max2x2(src + widthEven, srcStride);
@@ -1064,7 +1064,7 @@ namespace Simd
             Pow pow;
             size_t i = 0;
             for (; i < alignedSize; i += F)
-                Sse::Store<align>(dst + i, pow(Sse::Load<align>(src + i), _e));
+                Store<align>(dst + i, pow(Load<align>(src + i), _e));
             for (; i < size; ++i)
                 dst[i] = Base::Pow(src[i], e);
         }
@@ -1081,8 +1081,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralProductSum(const float* a, const float* b, size_t offset, __m128& sum)
         {
-            __m128 _a = Sse::Load<align>(a + offset);
-            __m128 _b = Sse::Load<align>(b + offset);
+            __m128 _a = Load<align>(a + offset);
+            __m128 _b = Load<align>(b + offset);
             sum = _mm_add_ps(sum, _mm_mul_ps(_a, _b));
         }
 
@@ -1140,7 +1140,7 @@ namespace Simd
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
-                __m128 _src = Sse::Load<align>(src + i);
+                __m128 _src = Load<align>(src + i);
                 __m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
                 __m128 x2 = _mm_mul_ps(x, x);
                 __m128 x4 = _mm_mul_ps(x2, x2);
@@ -1148,7 +1148,7 @@ namespace Simd
                 __m128 mask = _mm_cmpgt_ps(_src, _0);
                 __m128 exp = _mm_or_ps(_mm_and_ps(_mm_rcp_ps(series), mask), _mm_andnot_ps(mask, series));
                 __m128 sigmoid = _mm_rcp_ps(_mm_add_ps(_1, exp));
-                Sse::Store<align>(dst + i, sigmoid);
+                Store<align>(dst + i, sigmoid);
             }
             for (; i < size; ++i)
                 dst[i] = Base::RoughSigmoid(src[i] * slope[0]);
@@ -1166,7 +1166,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, const __m128& k, const __m128& o, const __m128& m, float* dst)
         {
-            __m128 _src = Sse::Load<align>(src);
+            __m128 _src = Load<align>(src);
             __m128 e1 = _mm_max_ps(m, _mm_sub_ps(o, _mm_mul_ps(_src, k)));
             __m128 e2 = _mm_mul_ps(e1, e1);
             __m128 e4 = _mm_mul_ps(e2, e2);
@@ -1175,7 +1175,7 @@ namespace Simd
             __m128 e32 = _mm_mul_ps(e16, e16);
             __m128 e64 = _mm_mul_ps(e32, e32);
             __m128 sigmoid = _mm_rcp_ps(_mm_add_ps(o, _mm_mul_ps(e64, e64)));
-            Sse::Store<align>(dst, sigmoid);
+            Store<align>(dst, sigmoid);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, size_t size, const float* slope, float* dst)
@@ -1224,7 +1224,7 @@ namespace Simd
             size_t i = 0;
             for (; i < alignedSize; i += F)
             {
-                __m128 _src = Sse::Load<align>(src + i);
+                __m128 _src = Load<align>(src + i);
                 __m128 x = _mm_andnot_ps(_0, _mm_mul_ps(_src, _slope));
                 __m128 x2 = _mm_mul_ps(x, x);
                 __m128 x4 = _mm_mul_ps(x2, x2);
@@ -1232,7 +1232,7 @@ namespace Simd
                 __m128 ne = _mm_rcp_ps(pe);
                 __m128 absTanh = _mm_mul_ps(_mm_sub_ps(pe, ne), _mm_rcp_ps(_mm_add_ps(pe, ne)));
                 __m128 tanh = _mm_xor_ps(absTanh, _mm_and_ps(_0, _mm_cmpgt_ps(_0, _src)));
-                Sse::Store<align>(dst + i, tanh);
+                Store<align>(dst + i, tanh);
             }
             for (; i < size; ++i)
                 dst[i] = Base::RoughTanh(src[i] * slope[0]);
@@ -1250,9 +1250,9 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float* x, const __m128& a, const __m128& b, float* d, float* w)
         {
-            __m128 _d = _mm_add_ps(_mm_mul_ps(a, Sse::Load<align>(d)), _mm_mul_ps(b, Sse::Load<align>(x)));
-            Sse::Store<align>(d, _d);
-            Sse::Store<align>(w, _mm_add_ps(Sse::Load<align>(w), _d));
+            __m128 _d = _mm_add_ps(_mm_mul_ps(a, Load<align>(d)), _mm_mul_ps(b, Load<align>(x)));
+            Store<align>(d, _d);
+            Store<align>(w, _mm_add_ps(Load<align>(w), _d));
         }
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float* x, size_t offset, const __m128& a, const __m128& b, float* d, float* w)
