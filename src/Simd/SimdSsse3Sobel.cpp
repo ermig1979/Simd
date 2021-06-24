@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
 
 namespace Simd

@@ -164,5 +164,8 @@
     <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoadBlock.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -27,7 +27,7 @@
 
 #include "Simd/SimdConst.h"
 #include "Simd/SimdMath.h"
-#include "Simd/SimdLoad.h"
+#include "Simd/SimdLoadBlock.h"
 
 namespace Simd
 {
