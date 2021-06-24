@@ -25,10 +25,6 @@
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse1*.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>

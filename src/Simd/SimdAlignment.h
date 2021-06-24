@@ -70,11 +70,6 @@ namespace Simd
             return sizeof(__m128i);
         else
 #endif
-#ifdef SIMD_SSE_ENABLE
-        if (Sse::Enable)
-            return sizeof(__m128);
-        else
-#endif
 #ifdef SIMD_VSX_ENABLE
         if (Vsx::Enable)
             return sizeof(__vector uint8_t);

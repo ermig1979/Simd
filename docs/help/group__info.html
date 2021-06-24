@@ -115,7 +115,6 @@ int main()
     std::cout &lt;&lt; "L1D Cache : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL1) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
     std::cout &lt;&lt; "L2 Cache : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
     std::cout &lt;&lt; "L3 Cache : " &lt;&lt; SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  &lt;&lt; " KB" &lt;&lt; std::endl;
-    std::cout &lt;&lt; "SSE: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSse) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "SSE2: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSse2) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "SSE3: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSse3) ? "Yes" : "No") &lt;&lt; std::endl;
     std::cout &lt;&lt; "SSSE3: " &lt;&lt; (SimdCpuInfo(SimdCpuInfoSsse3) ? "Yes" : "No") &lt;&lt; std::endl;

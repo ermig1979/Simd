@@ -25,7 +25,6 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
@@ -609,7 +608,7 @@ namespace Simd
             if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
                 _params[1] = _mm_set1_ps(params[1]);
             size_t dstWF = Simd::AlignLo(dstW, F);
-            __m128 tail = Sse::RightNotZero32f(dstW - dstWF);
+            __m128 tail = RightNotZero32f(dstW - dstWF);
             for (size_t dc = 0; dc < dstC; ++dc)
             {
                 if (type == ::SimdConvolutionActivationPrelu)

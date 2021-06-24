@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdWinograd.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
@@ -1361,10 +1360,10 @@ namespace Simd
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInputLoad8n(const float * src, __m256 * dst, PadType pad)
         {
-            __m256 a0 = Set(pad == PadNose1 ? Sse::LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0), _mm_loadu_ps(src + 8));
+            __m256 a0 = Set(pad == PadNose1 ? Sse2::LoadPadZeroNose1(src + 0) : _mm_loadu_ps(src + 0), _mm_loadu_ps(src + 8));
             __m256 a1 = Load<false>(src + 2, src + 10);
             __m256 a2 = Load<false>(src + 4, src + 12);
-            __m256 a3 = Set(_mm_loadu_ps(src + 6), pad == PadTail2 ? Sse::LoadPadZeroTail2(src + 14) : (pad == PadTail1 ? Sse::LoadPadZeroTail1(src + 14) : _mm_loadu_ps(src + 14)));
+            __m256 a3 = Set(_mm_loadu_ps(src + 6), pad == PadTail2 ? Sse2::LoadPadZeroTail2(src + 14) : (pad == PadTail1 ? Sse2::LoadPadZeroTail1(src + 14) : _mm_loadu_ps(src + 14)));
             dst[0] = _mm256_shuffle_ps(a0, a2, 0x88);
             dst[1] = _mm256_shuffle_ps(a0, a2, 0xDD);
             dst[2] = _mm256_shuffle_ps(a1, a3, 0x88);

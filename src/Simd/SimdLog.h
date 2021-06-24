@@ -58,21 +58,16 @@ namespace Simd
         Log<T>(array.data, array.size, name);
     }
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         SIMD_INLINE void Log(const __m128 & value, const std::string & name)
         {
             float buffer[F];
             _mm_storeu_ps(buffer, value);
             Simd::Log<float>(buffer, F, name);
-        }
-    }
-#endif //SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
+        }        
+        
         template<class T> SIMD_INLINE void Log(const __m128i & value, const std::string & name)
         {
             const size_t n = sizeof(__m128i) / sizeof(T);

@@ -76,25 +76,13 @@ namespace Simd
         const int DIVISION_BY_9_FACTOR = (1 << DIVISION_BY_9_SHIFT) / 9;
     }
 
-#ifdef SIMD_SSE_ENABLE    
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE    
+    namespace Sse2
     {
         const size_t F = sizeof(__m128) / sizeof(float);
         const size_t DF = 2 * F;
         const size_t QF = 4 * F;
         const size_t HF = F / 2;
-    }
-#endif// SIMD_SSE_ENABLE
-
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-        using namespace Sse;
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug
-        using Sse::F;
-        using Sse::DF;
-        using Sse::QF;
-#endif
 
         const size_t A = sizeof(__m128i);
         const size_t DA = 2 * A;
@@ -169,9 +157,9 @@ namespace Simd
     {
         using namespace Sse2;
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse::F;
-        using Sse::DF;
-        using Sse::QF;
+        using Sse2::F;
+        using Sse2::DF;
+        using Sse2::QF;
 #endif
     }
 #endif// SIMD_SSE3_ENABLE
@@ -216,9 +204,9 @@ namespace Simd
     {
         using namespace Ssse3;
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse::F;
-        using Sse::DF;
-        using Sse::QF;
+        using Sse2::F;
+        using Sse2::DF;
+        using Sse2::QF;
 #endif
     }
 #endif// SIMD_SSE41_ENABLE

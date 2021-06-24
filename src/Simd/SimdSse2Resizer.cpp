@@ -305,7 +305,7 @@ namespace Simd
             size_t rs = _param.dstW * cn;
             float* pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
-            size_t rsa = AlignLo(rs, Sse::F);
+            size_t rsa = AlignLo(rs, F);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 float fy1 = _ay[dy];
@@ -331,7 +331,7 @@ namespace Simd
                     if (cn == 1)
                     {
                         __m128 _1 = _mm_set1_ps(1.0f);
-                        for (; dx < rsa; dx += Sse::F)
+                        for (; dx < rsa; dx += F)
                         {
                             __m128 s01 = Sse::Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
                             __m128 s23 = Sse::Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
@@ -366,7 +366,7 @@ namespace Simd
                 size_t dx = 0;
                 __m128 _fy0 = _mm_set1_ps(fy0);
                 __m128 _fy1 = _mm_set1_ps(fy1);
-                for (; dx < rsa; dx += Sse::F)
+                for (; dx < rsa; dx += F)
                 {
                     __m128 m0 = _mm_mul_ps(_mm_load_ps(pbx[0] + dx), _fy0);
                     __m128 m1 = _mm_mul_ps(_mm_load_ps(pbx[1] + dx), _fy1);

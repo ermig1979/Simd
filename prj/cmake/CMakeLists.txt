@@ -116,9 +116,6 @@ endif()
     file(GLOB_RECURSE SIMD_BASE_SRC ${TRUNK_DIR}/src/Simd/SimdBase*.cpp)
     set_source_files_properties(${SIMD_BASE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
-    file(GLOB_RECURSE SIMD_SSE1_SRC ${TRUNK_DIR}/src/Simd/SimdSse1*.cpp)
-    set_source_files_properties(${SIMD_SSE1_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse")
-
     file(GLOB_RECURSE SIMD_SSE2_SRC ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
     set_source_files_properties(${SIMD_SSE2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2")
 

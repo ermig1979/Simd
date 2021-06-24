@@ -76,7 +76,7 @@ namespace Simd
 
     SIMD_INLINE int Round(float value)
     {
-#if defined(SIMD_X64_ENABLE) || (defined(SIMD_X86_ENABLE) && !defined(SIMD_SSE_DISABLE))
+#if defined(SIMD_X64_ENABLE) || (defined(SIMD_X86_ENABLE) && !defined(SIMD_SSE2_DISABLE))
         __m128 _value = _mm_set_ss(value);
         return _mm_cvtss_si32(_value);
 #else
@@ -283,18 +283,6 @@ namespace Simd
             return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
         }
 
-        SIMD_INLINE __m128 RightNotZero32f(ptrdiff_t count)
-        {
-            const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
-            return _mm_loadu_ps((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
-        }
-
-        SIMD_INLINE __m128 LeftNotZero32f(ptrdiff_t count)
-        {
-            const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
-            return _mm_loadu_ps((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
-        }
-
         template <bool condition> SIMD_INLINE __m128 Masked(const __m128 & value, const __m128 & mask);
 
         template <> SIMD_INLINE __m128 Masked<false>(const __m128 & value, const __m128 & mask)
@@ -331,6 +319,18 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
+        SIMD_INLINE __m128 RightNotZero32f(ptrdiff_t count)
+        {
+            const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
+            return _mm_loadu_ps((float*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
+        SIMD_INLINE __m128 LeftNotZero32f(ptrdiff_t count)
+        {
+            const int32_t mask[DF] = { -1, -1, -1, -1, 0, 0, 0, 0 };
+            return _mm_loadu_ps((float*)(mask + F - Simd::RestrictRange<ptrdiff_t>(count, 0, F)));
+        }
+
         SIMD_INLINE __m128i SaturateI16ToU8(__m128i value)
         {
             return _mm_min_epi16(K16_00FF, _mm_max_epi16(value, K_ZERO));

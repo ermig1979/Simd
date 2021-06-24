@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2020 Yermalayeu Ihar.
+* Copyright (c) 2011-2021 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -649,7 +649,7 @@ namespace Simd
                     }
                     else
                     {
-                        __m128 mask0 = Sse::LeftNotZero32f(n - 0 * F);
+                        __m128 mask0 = LeftNotZero32f(n - 0 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -672,8 +672,8 @@ namespace Simd
                     }
                     else
                     {
-                        __m128 mask0 = Sse::LeftNotZero32f(n - 0 * F);
-                        __m128 mask1 = Sse::LeftNotZero32f(n - 1 * F);
+                        __m128 mask0 = LeftNotZero32f(n - 0 * F);
+                        __m128 mask1 = LeftNotZero32f(n - 1 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;
@@ -698,9 +698,9 @@ namespace Simd
                     }
                     else
                     {
-                        __m128 mask0 = Sse::LeftNotZero32f(n - 0 * F);
-                        __m128 mask1 = Sse::LeftNotZero32f(n - 1 * F);
-                        __m128 mask2 = Sse::LeftNotZero32f(n - 2 * F);
+                        __m128 mask0 = LeftNotZero32f(n - 0 * F);
+                        __m128 mask1 = LeftNotZero32f(n - 1 * F);
+                        __m128 mask2 = LeftNotZero32f(n - 2 * F);
                         for (; k < K - 1; ++k)
                         {
                             const float * b = B + k * ldb;

@@ -884,7 +884,7 @@ namespace Simd
             {
                 if (p.kernelY > p.srcH || p.kernelX > p.srcW)
                     return false;
-                if (p.IsKernel(1) && p.dstC < Sse::F)
+                if (p.IsKernel(1) && p.dstC < Sse2::F)
                     return false;
                 return p.srcC <= 16 || (p.IsKernel(1) && p.srcC*p.dstC <= 8 * 1024 && p.dstC >= F && p.dstC > p.srcC);
             }
@@ -2043,7 +2043,7 @@ namespace Simd
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
             : Sse2::SynetConvolution32fNhwcDirect(p)
         {
-            if (p.dstC <= Sse::F)
+            if (p.dstC <= Sse2::F)
                 return;
 #ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             //_old.enable = true;

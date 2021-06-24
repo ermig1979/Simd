@@ -58,7 +58,6 @@
 #include "Simd/SimdEnable.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSse3.h"
 #include "Simd/SimdSsse3.h"

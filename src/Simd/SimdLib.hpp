@@ -63,7 +63,6 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoSsse3) ? " SSSE3" : "");
         os << (SimdCpuInfo(SimdCpuInfoSse3) ? " SSE3" : "");
         os << (SimdCpuInfo(SimdCpuInfoSse2) ? " SSE2" : "");
-        os << (SimdCpuInfo(SimdCpuInfoSse) ? " SSE" : "");
         os << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
         os << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
         os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");

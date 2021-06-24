@@ -118,9 +118,6 @@
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>
     </ProjectReference>
-    <ProjectReference Include="Sse1.vcxproj">
-      <Project>{5bd9c258-d7fb-4477-bd5f-8f6ce6ec22ae}</Project>
-    </ProjectReference>
     <ProjectReference Include="Sse2.vcxproj">
       <Project>{01bfb333-09d1-4d8e-85c0-c05d333cf807}</Project>
     </ProjectReference>

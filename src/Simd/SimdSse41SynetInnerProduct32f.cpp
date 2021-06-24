@@ -27,7 +27,6 @@
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSse3.h"
 #include "Simd/SimdSse41.h"
@@ -94,7 +93,7 @@ namespace Simd
                 w0 = _mm_loadu_ps(weight0 + off);
                 d00 = _mm_add_ps(_mm_mul_ps(w0, s0), d00);
             }
-            Sse::Store(dst + 0 * F, d00, tail);
+            Sse2::Store(dst + 0 * F, d00, tail);
         }
 
         void InnerProductKxKNr1x4(size_t K, const float* src, const float* weight0, const float* bias, float* dst)
@@ -206,7 +205,7 @@ namespace Simd
         {
             if (_param.output > 1)
             {
-                SetSize(Sse::F);
+                SetSize(Sse2::F);
                 _prod = InnerProductKxKNr;
             }
         }

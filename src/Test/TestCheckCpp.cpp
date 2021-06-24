@@ -46,7 +46,6 @@ namespace Test
         std::cout << "L1D Cache : " << SimdCpuInfo(SimdCpuInfoCacheL1) / 1024 << " KB" << std::endl;
         std::cout << "L2 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024 << " KB" << std::endl;
         std::cout << "L3 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024 << " KB" << std::endl;
-        std::cout << "SSE: " << (SimdCpuInfo(SimdCpuInfoSse) ? "Yes" : "No") << std::endl;
         std::cout << "SSE2: " << (SimdCpuInfo(SimdCpuInfoSse2) ? "Yes" : "No") << std::endl;
         std::cout << "SSE3: " << (SimdCpuInfo(SimdCpuInfoSse3) ? "Yes" : "No") << std::endl;
         std::cout << "SSSE3: " << (SimdCpuInfo(SimdCpuInfoSsse3) ? "Yes" : "No") << std::endl;

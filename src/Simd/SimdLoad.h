@@ -56,7 +56,15 @@ namespace Simd
             return _mm_loadh_pi(_mm_loadl_pi(_mm_setzero_ps(), (__m64*)p0), (__m64*)p1);
         }
 
-        SIMD_INLINE __m128 LoadPadZeroNose1(const float * p)
+    }
+#endif//SIMD_SSE_ENABLE
+
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
+    {
+        using namespace Sse;
+
+        SIMD_INLINE __m128 LoadPadZeroNose1(const float* p)
         {
             SIMD_ALIGNED(16) const int32_t m[F] = { 0, -1, -1, -1 };
             __m128 a = _mm_loadu_ps(p + 1);
@@ -64,7 +72,7 @@ namespace Simd
             return _mm_and_ps(b, _mm_load_ps((float*)m));
         }
 
-        SIMD_INLINE __m128 LoadPadZeroTail1(const float * p)
+        SIMD_INLINE __m128 LoadPadZeroTail1(const float* p)
         {
             SIMD_ALIGNED(16) const int32_t m[F] = { -1, -1, -1, 0 };
             __m128 a = _mm_loadu_ps(p - 1);
@@ -72,7 +80,7 @@ namespace Simd
             return _mm_and_ps(b, _mm_load_ps((float*)m));
         }
 
-        SIMD_INLINE __m128 LoadPadZeroTail2(const float * p)
+        SIMD_INLINE __m128 LoadPadZeroTail2(const float* p)
         {
             SIMD_ALIGNED(16) const int32_t m[F] = { -1, -1, 0, 0 };
             __m128 a = _mm_loadu_ps(p - 2);
@@ -97,13 +105,8 @@ namespace Simd
                 buf[i] = ptr[i * step];
             return _mm_load_ps(buf);
         }
-    }
-#endif//SIMD_SSE_ENABLE
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
-        using namespace Sse;
+        //---------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE __m128i Load(const __m128i * p);
 

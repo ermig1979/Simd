@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse3.h"
 
 namespace Simd

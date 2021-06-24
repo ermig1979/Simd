@@ -123,8 +123,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
         const unsigned int SCR_FTZ = 1 << 15;
         const unsigned int SCR_DAZ = 1 << 6;

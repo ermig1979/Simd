@@ -637,26 +637,26 @@ namespace Simd
             size_t aligned = Simd::AlignLo(outer, F);
             for (size_t o = 0; o < aligned; o += F)
             {
-                buf[0] = Sse::Gather<3>(src + 0);
-                buf[1] = Sse::Gather<3>(src + 1);
-                buf[2] = Sse::Gather<3>(src + 2);
+                buf[0] = Gather<3>(src + 0);
+                buf[1] = Gather<3>(src + 1);
+                buf[2] = Gather<3>(src + 2);
                 SynetSoftmaxLayerForward31(exp, buf);
-                Sse::Scater<3>(dst + 0, buf[0]);
-                Sse::Scater<3>(dst + 1, buf[1]);
-                Sse::Scater<3>(dst + 2, buf[2]);
+                Scater<3>(dst + 0, buf[0]);
+                Scater<3>(dst + 1, buf[1]);
+                Scater<3>(dst + 2, buf[2]);
                 src += 3*F;
                 dst += 3*F;
             }
             if (aligned < outer)
             {
                 size_t tail = outer - aligned;
-                buf[0] = Sse::Gather<3>(src + 0, tail);
-                buf[1] = Sse::Gather<3>(src + 1, tail);
-                buf[2] = Sse::Gather<3>(src + 2, tail);
+                buf[0] = Gather<3>(src + 0, tail);
+                buf[1] = Gather<3>(src + 1, tail);
+                buf[2] = Gather<3>(src + 2, tail);
                 SynetSoftmaxLayerForward31(exp, buf);
-                Sse::Scater<3>(dst + 0, buf[0], tail);
-                Sse::Scater<3>(dst + 1, buf[1], tail);
-                Sse::Scater<3>(dst + 2, buf[2], tail);
+                Scater<3>(dst + 0, buf[0], tail);
+                Scater<3>(dst + 1, buf[1], tail);
+                Scater<3>(dst + 2, buf[2], tail);
             }
         }
 

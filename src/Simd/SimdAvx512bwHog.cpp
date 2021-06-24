@@ -690,9 +690,9 @@ namespace Simd
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
         {
-            assert(width >= F && count >= Sse::F);
+            assert(width >= F && count >= Sse2::F);
 
-            size_t alignedCount = AlignLo(count, Sse::F);
+            size_t alignedCount = AlignLo(count, Sse2::F);
             size_t alignedWidth = AlignLo(width, F);
 
             for (size_t row = 0; row < height; ++row)
@@ -702,20 +702,20 @@ namespace Simd
                 {
                     const float * s = src + count * col;
                     size_t offset = rowOffset + col;
-                    for (size_t i = 0; i < alignedCount; i += Sse::F)
+                    for (size_t i = 0; i < alignedCount; i += Sse2::F)
                         HogDeinterleave(s, count, dst, offset, i);
                     if (alignedCount != count)
-                        HogDeinterleave(s, count, dst, offset, count - Sse::F);
+                        HogDeinterleave(s, count, dst, offset, count - Sse2::F);
                 }
                 if (alignedWidth != width)
                 {
                     size_t col = width - F;
                     const float * s = src + count * col;
                     size_t offset = rowOffset + col;
-                    for (size_t i = 0; i < alignedCount; i += Sse::F)
+                    for (size_t i = 0; i < alignedCount; i += Sse2::F)
                         HogDeinterleave(s, count, dst, offset, i);
                     if (alignedCount != count)
-                        HogDeinterleave(s, count, dst, offset, count - Sse::F);
+                        HogDeinterleave(s, count, dst, offset, count - Sse2::F);
                 }
                 src += srcStride;
             }

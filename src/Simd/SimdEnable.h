@@ -28,15 +28,6 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE_ENABLE
-    namespace Sse
-    {
-        bool GetEnable();
-
-        const bool Enable = GetEnable();
-    }
-#endif
-
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
@@ -156,12 +147,6 @@ namespace Simd
 }
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func
-
-#ifdef SIMD_SSE_ENABLE
-#define SIMD_SSE_FUNC(func) Simd::Sse::Enable ? Simd::Sse::func : 
-#else
-#define SIMD_SSE_FUNC(func) 
-#endif
 
 #ifdef SIMD_SSE2_ENABLE
 #define SIMD_SSE2_FUNC(func) Simd::Sse2::Enable ? Simd::Sse2::func : 

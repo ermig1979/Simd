@@ -26,7 +26,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse1.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx1.h"
 
