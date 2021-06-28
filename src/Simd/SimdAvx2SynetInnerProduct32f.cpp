@@ -54,6 +54,12 @@ namespace Simd
                 if (_param.output > Sse2::F)
                     _gemm = Avx2::Gemm32fNN;
             }
+            if (_param.output > Sse2::F && _prod == NULL)
+            {
+                _cbRun = Avx2::Gemm32fNNcbRun;
+                _cbPack = Avx2::Gemm32fNNcbReorderB;
+                _cbWeight.Resize(Avx2::Gemm32fNNcbBufferSize(_M, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+            }
         }
 
         //---------------------------------------------------------------------

@@ -52,6 +52,12 @@ namespace Simd
             {
                 _gemm = Sse2::Gemm32fNN;
             }
+            if (_param.output > Sse2::F && _prod == NULL)
+            {
+                _cbRun = Sse2::Gemm32fNNcbRun;
+                _cbPack = Sse2::Gemm32fNNcbReorderB;
+                _cbWeight.Resize(Sse2::Gemm32fNNcbBufferSize(_M, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+            }
         }
 
         //---------------------------------------------------------------------

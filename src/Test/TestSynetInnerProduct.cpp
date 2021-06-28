@@ -155,10 +155,23 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, t, a, f1, f2);
 #endif
 #if 1
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 388, 96, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 1024, 4096, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 256, 1024, f, a, f1, f2);       
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 4096, 254, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 1024, 4096, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 256, 1024, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 4096, 254, t, a, f1, f2);
+        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, f, a, f1, f2);
+        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 256, 1024, f, a, f1, f2);
+        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 254, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, f, a, f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 195, 99, f, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, t, a, f1, f2);
 #endif
 
         return result;

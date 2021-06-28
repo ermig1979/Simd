@@ -90,13 +90,36 @@ namespace Simd
             }
         }
 
+        void SynetInnerProduct32fGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
+        {
+            Simd::SynetInnerProduct32f::SetParams(weight, internal, bias, params);
+            if (_cbWeight.data)
+            {
+                Array32f buffer;
+                if (_param.transpose)
+                {
+                    buffer.Resize(_N * _K);
+                    for (size_t k = 0; k < _K; ++k)
+                        for (size_t j = 0; j < _N; ++j)
+                            buffer[k*_N + j] = weight[j * _K + k];
+                    weight = buffer.data;
+                }
+                _cbPack(_M, _N, _K, weight, _cbWeight.data, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                if (internal)
+                    *internal = SimdTrue;
+            }
+        }
+
         void SynetInnerProduct32fGemm::Forward(const float * src, float * dst)
         {
             if (_prod)
                 _prod(src, _weight, _bias, _N, _K, dst);
             else
             {
-                _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
+                if (_cbWeight.data)
+                    _cbRun(_M, _N, _K, src, _cbWeight.data, dst, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                else
+                    _gemm(_M, _N, _K, &_1, src, _ldS, _weight, _ldW, &_0, dst, _ldD);
                 _biasAndActivation(_bias, _N, _M, _param.activation, _params, SimdTrue, dst);
             }
         }
