@@ -518,7 +518,7 @@ namespace Simd
 
         SIMD_INLINE __m512 BilColS1(const uint16_t* src, const int32_t* idx, __m512 fx0, __m512 fx1, __mmask16 tail = -1)
         {
-            __m512i s = _mm512_mask_i32gather_epi32(K_ZERO, tail, _mm512_maskz_loadu_epi32(tail, idx), src, 2);
+            __m512i s = _mm512_mask_i32gather_epi32(K_ZERO, tail, _mm512_maskz_loadu_epi32(tail, idx), (int32_t*)src, 2);
             __m512 m0 = _mm512_mul_ps(fx0, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_1_0)));
             __m512 m1 = _mm512_mul_ps(fx1, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_1_1)));
             return _mm512_add_ps(m0, m1);
@@ -549,7 +549,7 @@ namespace Simd
 
         SIMD_INLINE __m512 BilColS2(const uint16_t* src, const int32_t* idx, __m512 fx0, __m512 fx1, __mmask16 tail)
         {
-            __m512i s = _mm512_i64gather_epi64(_mm512_and_epi32(_mm512_maskz_loadu_epi32(tail, idx), K64_00000000FFFFFFFF), src, 2);
+            __m512i s = _mm512_i64gather_epi64(_mm512_and_epi32(_mm512_maskz_loadu_epi32(tail, idx), K64_00000000FFFFFFFF), (int64_t*)src, 2);
             __m512 m0 = _mm512_mul_ps(fx0, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_2_0)));
             __m512 m1 = _mm512_mul_ps(fx1, _mm512_cvtepi32_ps(_mm512_shuffle_epi8(s, RSB_2_1)));
             return _mm512_add_ps(m0, m1);
