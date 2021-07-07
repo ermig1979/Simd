@@ -905,6 +905,41 @@ namespace Simd
                 assert(0);
             }
 
+        case Frame<A>::Rgba32:
+            switch (dst.format)
+            {
+            case Frame<A>::Nv12:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                RgbaToBgr(src.planes[0], bgr);
+                View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
+                BgrToYuv420p(bgr, dst.planes[0], u, v);
+                InterleaveUv(u, v, dst.planes[1]);
+                break;
+            }
+            case Frame<A>::Yuv420p:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                RgbaToBgr(src.planes[0], bgr);
+                BgrToYuv420p(bgr, dst.planes[0], dst.planes[1], dst.planes[2]);
+                break;
+            }
+            case Frame<A>::Bgra32:
+                RgbaToBgra(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Gray8:
+                RgbaToGray(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Bgr24:
+                RgbaToBgr(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Rgb24:
+                RgbaToRgb(src.planes[0], dst.planes[0]);
+                break;
+            default:
+                assert(0);
+            }
+
         default:
             assert(0);
         }
