@@ -157,7 +157,7 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void BgraToRgba(const uint8_t* bgra, uint8_t* rgba, __mmask64 tail = -1)
         {
-            Store<align, mask>(rgba, _mm512_shuffle_epi8(Load<align, mask>(bgra, tail), K8_BGRA_TO_RGBA), tail);
+            Store<align, mask>(rgba, _mm512_shuffle_epi8((Load<align, mask>(bgra, tail)), K8_BGRA_TO_RGBA), tail);
         }
 
         template <bool align> void BgraToRgba(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgba, size_t rgbaStride)
