@@ -64,6 +64,8 @@ namespace Simd
             Gray8,
             /*! One plane 24-bit (3 8-bit channels) RGB (Red, Green, Blue) pixel format. */
             Rgb24,
+            /*! One plane 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
+            Rgba32,
         };
 
         const size_t width; /*!< \brief A width of the frame. */
@@ -380,6 +382,7 @@ namespace Simd
         case View<A>::Bgr24: (Format&)format = Bgr24; break;
         case View<A>::Bgra32: (Format&)format = Bgra32; break;
         case View<A>::Rgb24: (Format&)format = Rgb24; break;
+        case View<A>::Rgba32: (Format&)format = Rgba32; break;
         default:
             assert(0);
         }
@@ -440,6 +443,9 @@ namespace Simd
             break;
         case Rgb24:
             planes[0] = View<A>(width, height, stride0, View<A>::Rgb24, data0);
+            break;
+        case Rgba32:
+            planes[0] = View<A>(width, height, stride0, View<A>::Rgba32, data0);
             break;
         default:
             assert(0);
@@ -530,6 +536,9 @@ namespace Simd
             break;
         case Rgb24:
             planes[0].Recreate(width, height, View<A>::Rgb24);
+            break;
+        case Rgba32:
+            planes[0].Recreate(width, height, View<A>::Rgba32);
             break;
         default:
             assert(0);
@@ -647,6 +656,7 @@ namespace Simd
         case Bgr24:   return 1;
         case Gray8:   return 1;
         case Rgb24:   return 1;
+        case Rgba32:  return 1;
         default: assert(0); return 0;
         }
     }
@@ -726,6 +736,15 @@ namespace Simd
                 Yuv420pToRgb(src.planes[0], u, v, dst.planes[0]);
                 break;
             }
+            case Frame<A>::Rgba32:
+            {
+                View<A> u(src.Size(), View<A>::Gray8), v(src.Size(), View<A>::Gray8);
+                DeinterleaveUv(src.planes[1], u, v);
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                Yuv420pToBgr(src.planes[0], u, v, bgr);
+                BgrToRgba(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -750,6 +769,13 @@ namespace Simd
             case Frame<A>::Rgb24:
                 Yuv420pToRgb(src.planes[0], src.planes[1], src.planes[2], dst.planes[0]);
                 break;
+            case Frame<A>::Rgba32:
+            {
+                View<A> bgr(src.Size(), View<A>::Bgr24);
+                Yuv420pToBgr(src.planes[0], src.planes[1], src.planes[2], bgr);
+                BgrToRgba(bgr, dst.planes[0]);
+                break;
+            }
             default:
                 assert(0);
             }
@@ -776,6 +802,9 @@ namespace Simd
                 break;
             case Frame<A>::Rgb24:
                 BgraToRgb(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Rgba32:
+                BgraToRgba(src.planes[0], dst.planes[0]);
                 break;
             default:
                 assert(0);
@@ -804,6 +833,9 @@ namespace Simd
             case Frame<A>::Rgb24:
                 BgrToRgb(src.planes[0], dst.planes[0]);
                 break;
+            case Frame<A>::Rgba32:
+                BgrToRgba(src.planes[0], dst.planes[0]);
+                break;
             default:
                 assert(0);
             }
@@ -829,6 +861,9 @@ namespace Simd
                 break;
             case Frame<A>::Rgb24:
                 GrayToRgb(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Rgba32:
+                GrayToRgba(src.planes[0], dst.planes[0]);
                 break;
             default:
                 assert(0);
@@ -862,6 +897,9 @@ namespace Simd
                 break;
             case Frame<A>::Bgr24:
                 RgbToBgr(src.planes[0], dst.planes[0]);
+                break;
+            case Frame<A>::Rgba32:
+                RgbToRgba(src.planes[0], dst.planes[0]);
                 break;
             default:
                 assert(0);
