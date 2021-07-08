@@ -28,7 +28,7 @@
 
 namespace Simd
 {
-#if defined(_MSC_VER) && (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE))
+#if defined(_MSC_VER) && !defined(__clang__) && (defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE))
 
     template <class T> SIMD_INLINE char GetChar(T value, size_t index)
     {
@@ -94,7 +94,11 @@ namespace Simd
 #define SIMD_LL_SET2_EPI32(a, b) \
     SIMD_INT_AS_LONGLONG(a) | (SIMD_INT_AS_LONGLONG(b) << 32)
 
-#endif//defined(__GNUC__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
+#else
+
+#error This platform is unsupported!
+
+#endif
 
 #if defined(SIMD_SSE2_ENABLE)
 
