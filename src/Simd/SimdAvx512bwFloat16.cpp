@@ -429,12 +429,12 @@ namespace Simd
             }
             __m128 _bb = _mm_loadu_ps(bb);
             __m128 _1 = _mm_set1_ps(1.0f);
-            _mm_storeu_ps(distances + 0 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))), Extract4Sums(c00, c01, c02, c03), _1));
-            _mm_storeu_ps(distances + 1 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[1]))), Extract4Sums(c10, c11, c12, c13), _1));
-            _mm_storeu_ps(distances + 2 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))), Extract4Sums(c20, c21, c22, c23), _1));
-            _mm_storeu_ps(distances + 3 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[3]))), Extract4Sums(c30, c31, c32, c33), _1));
-            _mm_storeu_ps(distances + 4 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[4]))), Extract4Sums(c40, c41, c42, c43), _1));
-            _mm_storeu_ps(distances + 5 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[5]))), Extract4Sums(c50, c51, c52, c53), _1));
+            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
+            _mm_storeu_ps(distances + 1 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c10, c11, c12, c13), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[1]))))));
+            _mm_storeu_ps(distances + 2 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c20, c21, c22, c23), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))))));
+            _mm_storeu_ps(distances + 3 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c30, c31, c32, c33), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[3]))))));
+            _mm_storeu_ps(distances + 4 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c40, c41, c42, c43), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[4]))))));
+            _mm_storeu_ps(distances + 5 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c50, c51, c52, c53), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[5]))))));
         }
 
         static void MicroCosineDistances6x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
@@ -553,9 +553,9 @@ namespace Simd
             }
             __m128 _bb = _mm_loadu_ps(bb);
             __m128 _1 = _mm_set1_ps(1.0f);
-            _mm_storeu_ps(distances + 0 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))), Extract4Sums(c00, c01, c02, c03), _1));
-            _mm_storeu_ps(distances + 1 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[1]))), Extract4Sums(c10, c11, c12, c13), _1));
-            _mm_storeu_ps(distances + 2 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))), Extract4Sums(c20, c21, c22, c23), _1));
+            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
+            _mm_storeu_ps(distances + 1 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c10, c11, c12, c13), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[1]))))));
+            _mm_storeu_ps(distances + 2 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c20, c21, c22, c23), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[2]))))));
         }
 
         static void MicroCosineDistances3x1(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
@@ -628,7 +628,7 @@ namespace Simd
             }
             __m128 _bb = _mm_loadu_ps(bb);
             __m128 _1 = _mm_set1_ps(1.0f);
-            _mm_storeu_ps(distances + 0 * stride, _mm_fnmadd_ps(_mm_rsqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))), Extract4Sums(c00, c01, c02, c03), _1));
+            _mm_storeu_ps(distances + 0 * stride, _mm_sub_ps(_1, _mm_div_ps(Extract4Sums(c00, c01, c02, c03), _mm_sqrt_ps(_mm_mul_ps(_bb, _mm_set1_ps(aa[0]))))));
         }
 
         static void MacroCosineDistances(size_t M, size_t N, size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
