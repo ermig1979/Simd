@@ -22,17 +22,17 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
-#include "Simd/SimdSse3.h"
+#include "Simd/SimdSse41.h"
 
 namespace Simd
 {
-#if defined(SIMD_SSE3_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-    namespace Sse3
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+    namespace Sse41
     {
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
             : Base::SynetConvolution32fGemmNT(p)
         {
-            _gemm.Init(InitGemmFuncs(Sse3::Gemm32fNT, "Sse3"));
+            _gemm.Init(InitGemmFuncs(Sse41::Gemm32fNT, "Sse41"));
             _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
         }
 

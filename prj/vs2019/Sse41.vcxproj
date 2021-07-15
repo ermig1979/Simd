@@ -15,6 +15,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp" />
@@ -27,6 +28,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDepthwise.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect1x1.cpp" />

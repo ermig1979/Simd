@@ -264,9 +264,9 @@ namespace Test
 
         result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Base::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
 
-#ifdef SIMD_SSE3_ENABLE
-        if (Simd::Sse3::Enable)
-            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Sse3::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Gemm32fNTAutoTest(FUNC_GEMM32F(Simd::Sse41::Gemm32fNT), FUNC_GEMM32F(SimdGemm32fNT));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

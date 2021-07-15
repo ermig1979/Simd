@@ -42,7 +42,7 @@ namespace Simd
             _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
             if (_param.transpose)
             {
-                _gemm = Sse3::Gemm32fNT;
+                _gemm = Sse41::Gemm32fNT;
                 if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
                     _prod = Sse2::SynetInnerProductLayerForward;
                 else

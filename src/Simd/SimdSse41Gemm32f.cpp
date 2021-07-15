@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE3_ENABLE    
-    namespace Sse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE __m128 Tail(size_t tail)
         {
@@ -325,5 +325,5 @@ namespace Simd
             gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
-#endif// SIMD_SSE3_ENABLE
+#endif// SIMD_SSE41_ENABLE
 }

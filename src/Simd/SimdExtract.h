@@ -85,8 +85,8 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE3_ENABLE
-    namespace Sse3
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE float ExtractSum(__m128 a)
         {
@@ -98,7 +98,7 @@ namespace Simd
             return _mm_hadd_ps(_mm_hadd_ps(a[0], a[1]), _mm_hadd_ps(a[2], a[3]));
         }
     }
-#endif//SIMD_SSE3_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx

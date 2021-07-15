@@ -531,7 +531,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f & p)
-            : Sse3::SynetConvolution32fGemmNT(p)
+            : Sse41::SynetConvolution32fGemmNT(p)
         {
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNT, "Avx"));
             _biasAndActivation = Avx::ConvolutionBiasAndActivation;

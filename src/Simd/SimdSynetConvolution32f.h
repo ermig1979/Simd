@@ -526,20 +526,20 @@ namespace Simd
     }
 #endif//SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE3_ENABLE    
-    namespace Sse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         class SynetConvolution32fGemmNT : public Base::SynetConvolution32fGemmNT
         {
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);
-            virtual String Ext() const { return "Sse3"; }
+            virtual String Ext() const { return "Sse41"; }
 
         };
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
     }
-#endif//SIMD_SSE3_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
@@ -555,7 +555,7 @@ namespace Simd
             virtual void ImgToRow(const float * src, float * dst);
         };
 
-        class SynetConvolution32fGemmNT : public Sse3::SynetConvolution32fGemmNT
+        class SynetConvolution32fGemmNT : public Sse41::SynetConvolution32fGemmNT
         {
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);

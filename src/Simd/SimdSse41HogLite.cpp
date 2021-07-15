@@ -424,7 +424,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, Sse3::Extract4Sums(sums), _mask));
+                            _mm_storeu_ps(dst + dstCol, _mm_blendv_ps(_min, Extract4Sums(sums), _mask));
                         }
                     }
                     for (; dstCol < dstWidth; ++dstCol)
@@ -717,7 +717,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
-                        Store<true>(dst + col, Sse3::Extract4Sums(sums));
+                        Store<true>(dst + col, Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
@@ -725,7 +725,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx1<align>(s + i, filter + i, sum);
-                        dst[col] = Sse3::ExtractSum(sum);
+                        dst[col] = ExtractSum(sum);
                     }
                     src += srcStride;
                     dst += dstStride;

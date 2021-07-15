@@ -55,6 +55,8 @@ namespace Simd
 
         void Float16ToFloat32(const uint16_t* src, size_t size, float* dst);
 
+        void Gemm32fNT(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
+
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
