@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse3Neural.cpp">
-      <Filter>Sse3</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse3Cpu.cpp">
       <Filter>Sse3</Filter>
     </ClCompile>

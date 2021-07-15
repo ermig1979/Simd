@@ -11,7 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse3Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse3Neural.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />

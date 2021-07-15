@@ -3839,9 +3839,9 @@ SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride
         Avx::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable && width >= Sse3::F)
-        Sse3::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::F)
+        Sse41::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -3874,9 +3874,9 @@ SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride
         Avx::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable && width >= Sse3::F)
-        Sse3::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::F)
+        Sse41::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -3909,9 +3909,9 @@ SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride
         Avx::NeuralAddConvolution4x4Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable && width >= Sse3::F)
-        Sse3::NeuralAddConvolution4x4Sum(src, srcStride, dst, dstStride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::F)
+        Sse41::NeuralAddConvolution4x4Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -3944,9 +3944,9 @@ SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride
         Avx::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE3_ENABLE
-    if (Sse3::Enable && width >= Sse3::F)
-        Sse3::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::F)
+        Sse41::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -4044,7 +4044,7 @@ SIMD_API void SimdNeuralConvolutionForward(const float * src, size_t srcWidth, s
     typedef void(*SimdNeuralConvolutionForwardPtr) (const float * src, size_t srcWidth, size_t srcHeight, size_t srcDepth, 
         const float * weight, size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY, 
         void * buffer, size_t * size, float * dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
-    const static SimdNeuralConvolutionForwardPtr simdNeuralConvolutionForward = SIMD_FUNC5(NeuralConvolutionForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE3_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralConvolutionForwardPtr simdNeuralConvolutionForward = SIMD_FUNC5(NeuralConvolutionForward, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralConvolutionForward(src, srcWidth, srcHeight, srcDepth, weight, kernelX, kernelY, padX, padY, strideX, strideY, dilationX, dilationY, buffer, size, dst, dstWidth, dstHeight, dstDepth, add);
 }

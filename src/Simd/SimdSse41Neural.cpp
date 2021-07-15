@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE3_ENABLE    
-    namespace Sse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<size_t kernelX, size_t kernelY> struct Convolution
         {
@@ -1095,5 +1095,5 @@ namespace Simd
             }
         }
     }
-#endif// SIMD_SSE3_ENABLE
+#endif// SIMD_SSE41_ENABLE
 }

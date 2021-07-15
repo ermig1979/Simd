@@ -1427,9 +1427,9 @@ namespace Test
             result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse2::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
 #endif 
 
-#ifdef SIMD_SSE3_ENABLE
-        if (Simd::Sse3::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse41::NeuralAddConvolution2x2Sum), FUNC_CS(SimdNeuralAddConvolution2x2Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -1467,9 +1467,9 @@ namespace Test
             result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse2::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif 
 
-#ifdef SIMD_SSE3_ENABLE
-        if (Simd::Sse3::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse41::NeuralAddConvolution3x3Sum), FUNC_CS(SimdNeuralAddConvolution3x3Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -1507,9 +1507,9 @@ namespace Test
             result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse2::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
 #endif 
 
-#ifdef SIMD_SSE3_ENABLE
-        if (Simd::Sse3::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse41::NeuralAddConvolution4x4Sum), FUNC_CS(SimdNeuralAddConvolution4x4Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -1547,9 +1547,9 @@ namespace Test
             result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse2::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif 
 
-#ifdef SIMD_SSE3_ENABLE
-        if (Simd::Sse3::Enable)
-            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse3::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && NeuralAddConvolutionSumAutoTest(EPS, core, FUNC_CS(Simd::Sse41::NeuralAddConvolution5x5Sum), FUNC_CS(SimdNeuralAddConvolution5x5Sum));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -1877,9 +1877,9 @@ namespace Test
 
         result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Base::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 
-#ifdef SIMD_SSE3_ENABLE
-        if (Simd::Sse3::Enable)
-            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sse3::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && NeuralConvolutionForwardAutoTest(EPS, FUNC_CF(Simd::Sse41::NeuralConvolutionForward), FUNC_CF(SimdNeuralConvolutionForward));
 #endif
 
 #ifdef SIMD_AVX_ENABLE
