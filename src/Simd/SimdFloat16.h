@@ -141,34 +141,34 @@ namespace Simd
             v.i = _mm_xor_si128(v.i, sign);
             sign = _mm_srli_epi32(sign, Base::Fp16::SHIFT_SIGN);
             s.i = Fp16::MUL_N;
-            s.i = _mm_cvtps_epi32(_mm_floor_ps(_mm_mul_ps(s.f, v.f))); // correct subnormals
+            s.i = _mm_cvtps_epi32(_mm_floor_ps(_mm_mul_ps(s.f, v.f))); 
             v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(s.i, v.i), _mm_cmpgt_epi32(Fp16::MIN_N, v.i)));
             v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(Fp16::INF_N, v.i), _mm_and_si128(_mm_cmpgt_epi32(Fp16::INF_N, v.i), _mm_cmpgt_epi32(v.i, Fp16::MAX_N))));
             v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(Fp16::NAN_N, v.i), _mm_and_si128(_mm_cmpgt_epi32(Fp16::NAN_N, v.i), _mm_cmpgt_epi32(v.i, Fp16::INF_N))));
-            v.i = _mm_srli_epi32(v.i, Base::Fp16::SHIFT); // logical shift
+            v.i = _mm_srli_epi32(v.i, Base::Fp16::SHIFT); 
             v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(_mm_sub_epi32(v.i, Fp16::MAX_D), v.i), _mm_cmpgt_epi32(v.i, Fp16::MAX_C)));
             v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(_mm_sub_epi32(v.i, Fp16::MIN_D), v.i), _mm_cmpgt_epi32(v.i, Fp16::SUB_C)));
             return _mm_or_si128(v.i, sign);
         }
 
-        //SIMD_INLINE __m128 Float16ToFloat32(__m128i value)
-        //{
-        //    Fp16::Bits v;
-        //    v.ui = value;
-        //    int32_t sign = v.si & Fp16::SIGN_C;
-        //    v.si ^= sign;
-        //    sign <<= Fp16::SHIFT_SIGN;
-        //    v.si ^= ((v.si + Fp16::MIN_D) ^ v.si) & -(v.si > Fp16::SUB_C);
-        //    v.si ^= ((v.si + Fp16::MAX_D) ^ v.si) & -(v.si > Fp16::MAX_C);
-        //    Fp16::Bits s;
-        //    s.si = Fp16::MUL_C;
-        //    s.f *= v.si;
-        //    int32_t mask = -(Fp16::NOR_C > v.si);
-        //    v.si <<= Fp16::SHIFT;
-        //    v.si ^= (s.si ^ v.si) & mask;
-        //    v.si |= sign;
-        //    return v.f;
-        //}
+        SIMD_INLINE __m128 Float16ToFloat32(__m128i value)
+        {
+            Fp16::Bits v;
+            v.i = value;
+            __m128i sign = _mm_and_si128(v.i, Fp16::SIGN_C);
+            v.i = _mm_xor_si128(v.i, sign);
+            sign = _mm_slli_epi32(sign, Base::Fp16::SHIFT_SIGN);
+            v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(_mm_add_epi32(v.i, Fp16::MIN_D), v.i), _mm_cmpgt_epi32(v.i, Fp16::SUB_C)));
+            v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(_mm_add_epi32(v.i, Fp16::MAX_D), v.i), _mm_cmpgt_epi32(v.i, Fp16::MAX_C)));
+            Fp16::Bits s;
+            s.i = Fp16::MUL_C;
+            s.f = _mm_mul_ps(s.f, _mm_cvtepi32_ps(v.i));
+            __m128i mask = _mm_cmpgt_epi32(Fp16::NOR_C, v.i);
+            v.i = _mm_slli_epi32(v.i, Base::Fp16::SHIFT);
+            v.i = _mm_xor_si128(v.i, _mm_and_si128(_mm_xor_si128(s.i, v.i), mask));
+            v.i = _mm_or_si128(v.i, sign);
+            return v.f;
+        }
     }
 #endif //SIMD_SSE2_ENABLE   
 }
