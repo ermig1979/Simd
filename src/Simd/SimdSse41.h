@@ -51,6 +51,10 @@ namespace Simd
         void DetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 
+        void Float32ToFloat16(const float* src, size_t size, uint16_t* dst);
+
+        void Float16ToFloat32(const uint16_t* src, size_t size, float* dst);
+
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);

@@ -438,6 +438,9 @@
     <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdFloat16.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Base">

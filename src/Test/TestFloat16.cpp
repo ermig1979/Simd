@@ -87,6 +87,11 @@ namespace Test
 
         result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Base::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Sse41::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
+#endif 
+
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && Float32ToFloat16AutoTest(FUNC_SH(Simd::Avx2::Float32ToFloat16), FUNC_SH(SimdFloat32ToFloat16));
@@ -164,6 +169,11 @@ namespace Test
         bool result = true;
 
         result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Base::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Float16ToFloat32AutoTest(FUNC_HS(Simd::Sse41::Float16ToFloat32), FUNC_HS(SimdFloat16ToFloat32));
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
