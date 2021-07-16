@@ -253,7 +253,7 @@ namespace Test
         //result = result && Gemm32fAutoTest(0, 1, 36, 2048, 448, f1, f2);
 
         result = result && Gemm32fAutoTest(0, 1, 1, 192, 192, f1, f2);
-        //result = result && Gemm32fAutoTest(0, 1, 10, 192, 192, f1, f2);
+        result = result && Gemm32fAutoTest(0, 1, 10, 192, 192, f1, f2);
 
         return result;
     }

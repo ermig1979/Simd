@@ -33,6 +33,8 @@ namespace Simd
     {
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
+        uint32_t Crc32c(const void* src, size_t size);
+
         void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
 

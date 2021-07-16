@@ -175,12 +175,6 @@ namespace Simd
     }
 #endif// SIMD_SSE41_ENABLE
 
-#ifdef SIMD_SSE42_ENABLE
-    namespace Sse42
-    {
-    }
-#endif// SIMD_SSE42_ENABLE
-
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {

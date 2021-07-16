@@ -286,9 +286,9 @@ namespace Test
             AddToFunction(src, dst.base, enable.base);
         if (desc.find("Simd::Sse2::") != std::string::npos)
             AddToFunction(src, dst.sse2, enable.sse2);
-        if (desc.find("Simd::Ssse3::") != std::string::npos != std::string::npos)
+        if (desc.find("Simd::Ssse3::") != std::string::npos)
             AddToFunction(src, dst.ssse3, enable.ssse3);
-        if (desc.find("Simd::Sse41::") != std::string::npos || desc.find("Simd::Sse42::") != std::string::npos)
+        if (desc.find("Simd::Sse41::") != std::string::npos)
             AddToFunction(src, dst.sse41, enable.sse41);
         if (desc.find("Simd::Avx::") != std::string::npos)
             AddToFunction(src, dst.avx, enable.avx);

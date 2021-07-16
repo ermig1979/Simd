@@ -101,9 +101,9 @@ namespace Test
 
         result = result && Crc32AutoTest(FUNC(Simd::Base::Crc32c), FUNC(SimdCrc32c));
 
-#ifdef SIMD_SSE42_ENABLE
-        if (Simd::Sse42::Enable)
-            result = result && Crc32AutoTest(FUNC(Simd::Sse42::Crc32c), FUNC(SimdCrc32c));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Crc32AutoTest(FUNC(Simd::Sse41::Crc32c), FUNC(SimdCrc32c));
 #endif 
 
         return result;

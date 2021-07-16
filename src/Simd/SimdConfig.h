@@ -30,8 +30,6 @@
 
 //#define SIMD_SSE41_DISABLE
 
-//#define SIMD_SSE42_DISABLE
-
 //#define SIMD_AVX_DISABLE
 
 //#define SIMD_AVX2_DISABLE

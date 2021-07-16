@@ -57,12 +57,14 @@
  <li>Replace SSE3 optimizations to SSE4.1 for function NeuralAddConvolution4x4Sum.</li>
  <li>Replace SSE3 optimizations to SSE4.1 for function NeuralAddConvolution5x5Sum.</li>
  <li>Replace SSE3 optimizations to SSE4.1 for function NeuralConvolutionForward.</li>
+ <li>Replace SSE4.2 optimizations to SSE4.1 for function Crc32c.</li>
 </ul>
 
 <h4>Infrastructure</h4>
 <h5>Removing</h5>
 <ul>
- <li>Support of SSE3 extension.</li>
+ <li>Separate support of SSE3 extension (it has been moved into SSE4.1).</li>
+ <li>Separate support of SSE4.2 extension (it has been moved into SSE4.1).</li>
 </ul>
 
 <a href="#HOME">Home</a> 
@@ -178,7 +180,7 @@
 <h4>Infrastructure</h4>
 <h5>Removing</h5>
 <ul>
- <li>Support of SSE extension.</li>
+ <li>Separate support of SSE extension (it has been moved into SSE2).</li>
 </ul>
 
 <a href="#HOME">Home</a> 

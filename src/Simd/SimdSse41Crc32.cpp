@@ -25,8 +25,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE42_ENABLE
-    namespace Sse42
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE void Crc32c(size_t & crc, const size_t * p, const size_t * end)
         {
@@ -59,5 +59,5 @@ namespace Simd
             return ~(uint32_t)crc;
         }
     }
-#endif// SIMD_SSE42_ENABLE
+#endif// SIMD_SSE41_ENABLE
 }

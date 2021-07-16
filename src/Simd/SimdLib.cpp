@@ -78,7 +78,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"
@@ -122,9 +121,6 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_SSE41_ENABLE
     case SimdCpuInfoSse41: return Sse41::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_SSE42_ENABLE
-    case SimdCpuInfoSse42: return Sse42::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX_ENABLE
     case SimdCpuInfoAvx: return Avx::Enable ? 1 : 0;
@@ -233,9 +229,9 @@ SIMD_API uint32_t SimdCrc32(const void* src, size_t size)
 
 SIMD_API uint32_t SimdCrc32c(const void * src, size_t size)
 {
-#ifdef SIMD_SSE42_ENABLE
-    if(Sse42::Enable)
-        return Sse42::Crc32c(src, size);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable)
+        return Sse41::Crc32c(src, size);
     else
 #endif
         return Base::Crc32c(src, size);

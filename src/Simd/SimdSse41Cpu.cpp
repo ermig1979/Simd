@@ -35,7 +35,9 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE41);
+            return 
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE41) &&
+                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::SSE42);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -44,6 +46,7 @@ namespace Simd
             __try
             {
                 int value = _mm_testz_si128(_mm_set1_epi8(0), _mm_set1_epi8(-1)); // try to execute of SSE41 instructions;
+                uint32_t crc = _mm_crc32_u8(0, 1); // try to execute of SSE42 instructions;
                 return true;
             }
             __except (EXCEPTION_EXECUTE_HANDLER)

@@ -54,9 +54,6 @@
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
     </ProjectReference>
-    <ProjectReference Include="Sse42.vcxproj">
-      <Project>{310d4930-8048-41a0-87ec-b0987be24281}</Project>
-    </ProjectReference>
     <ProjectReference Include="Ssse3.vcxproj">
       <Project>{5153f702-a5fd-440d-917d-fda213663527}</Project>
     </ProjectReference>

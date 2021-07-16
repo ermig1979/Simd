@@ -169,7 +169,7 @@ namespace Simd
             __asm__ volatile("vmsr FPSCR, %[src]" : : [src] "r" (src));
 #endif
 #endif
-    }
+        }
 
         const unsigned int FPSCR_FTZ = 1 << 24;
 

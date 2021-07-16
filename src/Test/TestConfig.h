@@ -61,7 +61,6 @@
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdSse42.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512f.h"

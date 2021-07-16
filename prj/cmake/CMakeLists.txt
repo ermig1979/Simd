@@ -117,16 +117,13 @@ endif()
     set_source_files_properties(${SIMD_BASE_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS}")
 
     file(GLOB_RECURSE SIMD_SSE2_SRC ${TRUNK_DIR}/src/Simd/SimdSse2*.cpp)
-    set_source_files_properties(${SIMD_SSE2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse2")
+    set_source_files_properties(${SIMD_SSE2_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse -msse2")
 
     file(GLOB_RECURSE SIMD_SSSE3_SRC ${TRUNK_DIR}/src/Simd/SimdSsse3*.cpp)
-    set_source_files_properties(${SIMD_SSSE3_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -mssse3")
+    set_source_files_properties(${SIMD_SSSE3_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse3 -mssse3")
 
     file(GLOB_RECURSE SIMD_SSE41_SRC ${TRUNK_DIR}/src/Simd/SimdSse41*.cpp)
-    set_source_files_properties(${SIMD_SSE41_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.1")
-
-    file(GLOB_RECURSE SIMD_SSE42_SRC ${TRUNK_DIR}/src/Simd/SimdSse42*.cpp)
-    set_source_files_properties(${SIMD_SSE42_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.2")
+    set_source_files_properties(${SIMD_SSE41_SRC} PROPERTIES COMPILE_FLAGS "${COMMON_CXX_FLAGS} -msse4.1 -msse4.2")
 
     file(GLOB_RECURSE SIMD_AVX1_SRC ${TRUNK_DIR}/src/Simd/SimdAvx1*.cpp)
     if ((CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))
@@ -143,7 +140,7 @@ endif()
     endif()
 
     set(SIMD_LIB_FLAGS "${COMMON_CXX_FLAGS} -mavx2 -mfma")
-    set(SIMD_ALG_SRC ${SIMD_BASE_SRC} ${SIMD_SSE2_SRC} ${SIMD_SSSE3_SRC} ${SIMD_SSE41_SRC} ${SIMD_SSE42_SRC} ${SIMD_AVX1_SRC} ${SIMD_AVX2_SRC})
+    set(SIMD_ALG_SRC ${SIMD_BASE_SRC} ${SIMD_SSE2_SRC} ${SIMD_SSSE3_SRC} ${SIMD_SSE41_SRC} ${SIMD_AVX1_SRC} ${SIMD_AVX2_SRC})
 
     if((((CMAKE_CXX_COMPILER_ID MATCHES "GNU") OR (CMAKE_CXX_COMPILER MATCHES "gnu")) AND (NOT(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "5.5.0"))) OR (CMAKE_CXX_COMPILER MATCHES "clang") OR (CMAKE_CXX_COMPILER_ID MATCHES "Clang"))    
         file(GLOB_RECURSE SIMD_AVX512F_SRC ${TRUNK_DIR}/src/Simd/SimdAvx512f*.cpp)
