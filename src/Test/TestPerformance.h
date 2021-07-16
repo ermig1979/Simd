@@ -108,6 +108,7 @@ namespace Test
         Thread & ThisThread();
 
         typedef std::shared_ptr<class Table> TablePtr;
+        void Combine(FunctionMap& map) const;
         TablePtr GenerateTable(bool align) const;
 
     public:
@@ -120,7 +121,9 @@ namespace Test
 
         size_t Align(size_t size);
 
-        String TextReport(bool align = false, bool raw = false) const;
+        String ConsoleReport(bool align = false, bool raw = false) const;
+
+        bool TextReport(const String& path, bool align = false) const;
 
         bool HtmlReport(const String & path, bool align = false) const;
 

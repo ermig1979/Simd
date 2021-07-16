@@ -88,17 +88,18 @@ namespace Test
             std::lock_guard<std::mutex> lock(_mutex);
             if (_level == Error)
             {
-                const String last = _lastSkippedMessages[std::this_thread::get_id()];
+                String & last = _lastSkippedMessages[std::this_thread::get_id()];
                 if (last.size())
                 {
-                    std::cout << last;
+                    std::cout << last << std::flush;
                     if (_file.is_open())
-                        _file << last;
+                        _file << last << std::flush;
                 }
+                last = String();
             }
-            std::cout << ss.str();
+            std::cout << ss.str() << std::flush;
             if (_file.is_open())
-                _file << ss.str();
+                _file << ss.str() << std::flush;
         }
     }
 }

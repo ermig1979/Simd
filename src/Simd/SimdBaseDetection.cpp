@@ -24,6 +24,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdDetection.h"
+#include "Simd/SimdLog.h"
 #include "Simd/SimdXml.hpp"
 
 #include <exception>
@@ -323,7 +324,10 @@ namespace Simd
         {
             Xml::File file;
             if (!file.Open(path))
-                SIMD_EX("Can't load XML file '" << path << "'!");
+            {
+                SIMD_LOG_ERROR("Can't load XML file '" << path << "'!");
+                return NULL;
+            }
 
             return DetectionLoadStringXml(file.Data(), path);
         }

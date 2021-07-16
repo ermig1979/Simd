@@ -156,7 +156,7 @@ namespace Test
         video.Start();
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.TextReport(false, true));
+        TEST_LOG_SS(Info, PerformanceMeasurerStorage::s_storage.ConsoleReport(false, true));
         PerformanceMeasurerStorage::s_storage.Clear();
 #endif
 

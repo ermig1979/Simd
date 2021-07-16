@@ -240,13 +240,14 @@ namespace Simd
 #define SIMD_LOG2(value) Log<int16_t>(value, #value)
 #define SIMD_LOG4(value) Log<int32_t>(value, #value)
 
-#define SIMD_LOG_SS(message) \
+#define SIMD_LOG_ERROR(message) \
 { \
-    std::cout << __FUNCTION__  << " : " << message << std::endl; \
-    std::cout.flush(); \
+    std::stringstream ss; \
+    ss << std::endl << " In function " << SIMD_FUNCTION << ":" << std::endl; \
+    ss << " In file " << __FILE__ << ":" << __LINE__ << ":" << std::endl; \
+    ss << " Error: " << message << std::endl << std::endl; \
+    std::cerr << ss.str() << std::flush; \
 }
-
-#define SIMD_LOG_LINE() std::cout << __FUNCTION__  << " : " << __LINE__ << std::endl << std::flush; 
 
 #else//SIMD_LOG_ENABLE
 
@@ -255,9 +256,7 @@ namespace Simd
 #define SIMD_LOG2(value)
 #define SIMD_LOG4(value)
 
-#define SIMD_LOG_SS(message)
-
-#define SIMD_LOG_LINE()
+#define SIMD_LOG_ERROR(message)
 
 #endif//SIMD_LOG_ENABLE 
 

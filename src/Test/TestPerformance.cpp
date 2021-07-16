@@ -336,39 +336,6 @@ namespace Test
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
     }
 
-    String PerformanceMeasurerStorage::TextReport(bool align, bool raw) const
-    {
-        FunctionMap map;
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            for (ThreadMap::const_iterator thread = _map.begin(); thread != _map.end(); ++thread)
-            {
-                for (FunctionMap::const_iterator function = thread->second.map.begin(); function != thread->second.map.end(); ++function)
-                {
-                    if (map.find(function->first) == map.end())
-                        map[function->first].reset(new PerformanceMeasurer(function->first));
-                    map[function->first]->Combine(*function->second);
-                }
-            }
-        }
-
-        std::stringstream report;
-
-        if (raw)
-        {
-            report << std::endl << std::endl << "Performance report:" << std::endl << std::endl;
-            for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
-                report << it->second->Statistic() << std::endl;
-        }
-        else
-        {
-            report << std::endl << std::endl << "Performance report:" << std::endl << std::endl;
-            report << GenerateTable(align)->GenerateText();
-        }
-
-        return report.str();
-    }
-
 	static void AddHeader(Table & table, const StatisticNames & names, const StatisticEnable & enable, bool align)
 	{
 		size_t col = 0, last = 0;
@@ -421,21 +388,24 @@ namespace Test
         }
     }
 
+    void PerformanceMeasurerStorage::Combine(FunctionMap& map) const
+    {
+        std::lock_guard<std::recursive_mutex> lock(_mutex);
+        for (ThreadMap::const_iterator thread = _map.begin(); thread != _map.end(); ++thread)
+        {
+            for (FunctionMap::const_iterator function = thread->second.map.begin(); function != thread->second.map.end(); ++function)
+            {
+                if (map.find(function->first) == map.end())
+                    map[function->first].reset(new PerformanceMeasurer(function->first));
+                map[function->first]->Combine(*function->second);
+            }
+        }
+    }
+
     PerformanceMeasurerStorage::TablePtr PerformanceMeasurerStorage::GenerateTable(bool align) const
     {
         FunctionMap map;
-        {
-            std::lock_guard<std::recursive_mutex> lock(_mutex);
-            for (ThreadMap::const_iterator thread = _map.begin(); thread != _map.end(); ++thread)
-            {
-                for (FunctionMap::const_iterator function = thread->second.map.begin(); function != thread->second.map.end(); ++function)
-                {
-                    if (map.find(function->first) == map.end())
-                        map[function->first].reset(new PerformanceMeasurer(function->first));
-                    map[function->first]->Combine(*function->second);
-                }
-            }
-        }
+        Combine(map);
 
         FunctionStatisticMap functions;
         CommonStatistic common;
@@ -467,6 +437,46 @@ namespace Test
         return table;
     }
 
+    String PerformanceMeasurerStorage::ConsoleReport(bool align, bool raw) const
+    {
+        std::stringstream report;
+        report << std::endl << std::endl << "Simd Library Performance Report:" << std::endl << std::endl;
+
+        report << "Test generation time: " + GetCurrentDateTimeString() << std::endl << std::endl;
+
+        if (raw)
+        {
+            FunctionMap map;
+            Combine(map);
+            for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
+                report << it->second->Statistic() << std::endl;
+        }
+        else
+        {
+            report << GenerateTable(align)->GenerateText();
+        }
+
+        return report.str();
+    }  
+
+    bool PerformanceMeasurerStorage::TextReport(const String& path, bool align) const
+    {
+        CreatePathIfNotExist(path, true);
+        std::ofstream file(path);
+        if (!file.is_open())
+            return false;
+
+        file << "Simd Library Performance Report:" << std::endl << std::endl;
+
+        file << "Test generation time: " + GetCurrentDateTimeString() << std::endl << std::endl;
+
+        file << GenerateTable(align)->GenerateText();
+
+        file.close();
+
+        return true;
+    }
+    
     bool PerformanceMeasurerStorage::HtmlReport(const String & path, bool align) const
     {
         CreatePathIfNotExist(path, true);

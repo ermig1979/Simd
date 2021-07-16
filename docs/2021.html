@@ -47,6 +47,7 @@
  <li>Compiler error in file SimdAvx512bwBgraToBgr.cpp (MSVS-2017).</li>
  <li>Compiler error in file SimdInit.h (CLang, Windows).</li>
  <li>Error in AVX2 and AVX-512BW optimizations of functions CosineDistancesMxNa16f and CosineDistancesMxNp16f (functions may return small negative values).</li>
+ <li>Error in function Base::DetectionLoadA (it generates exception instead of returns NULL).</li>
 </ul>
 <h5>Replacing</h5>
 <ul>
@@ -58,6 +59,12 @@
  <li>Replace SSE3 optimizations to SSE4.1 for function NeuralAddConvolution5x5Sum.</li>
  <li>Replace SSE3 optimizations to SSE4.1 for function NeuralConvolutionForward.</li>
  <li>Replace SSE4.2 optimizations to SSE4.1 for function Crc32c.</li>
+</ul>
+
+<h4>Tests</h4>
+<h5>Improving</h5>
+<ul>
+ <li>Performance report generation to text file.</li>
 </ul>
 
 <h4>Infrastructure</h4>

@@ -496,11 +496,14 @@ namespace Test
                 const Group & group = _groups[i];
                 TEST_LOG_SS(Info, group.name << "AutoTest is started :");
                 bool result = group.autoTest();
-                TEST_LOG_SS(Info, group.name << "AutoTest is finished " << (result ? "successfully." : "with errors!") << std::endl);
-                if (!result)
+                if (result)
+                {
+                    TEST_LOG_SS(Info, group.name << "AutoTest is finished successfully." << std::endl);
+                }
+                else
                 {
                     s_stopped = true;
-                    TEST_LOG_SS(Error, "ERROR! TEST EXECUTION IS TERMINATED !" << std::endl);
+                    TEST_LOG_SS(Error, group.name << "AutoTest has errors. TEST EXECUTION IS TERMINATED!" << std::endl);
                     return;
                 }
             }
@@ -703,7 +706,9 @@ namespace Test
         TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.TextReport(options.printAlign, false) << SimdPerformanceStatistic());
+        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.ConsoleReport(options.printAlign, false) << SimdPerformanceStatistic());
+        if (!options.text.empty())
+            Test::PerformanceMeasurerStorage::s_storage.TextReport(options.text, options.printAlign);
         if (!options.html.empty())
             Test::PerformanceMeasurerStorage::s_storage.HtmlReport(options.html, options.printAlign);
 #endif
@@ -819,9 +824,6 @@ int main(int argc, char* argv[])
 
     if (options.help)
         return Test::PrintHelp();
-
-    if (!options.text.empty())
-        Test::Log::s_log.SetLogFile(options.text);
 
     Test::Groups groups;
     for (const Test::Group & group : Test::g_groups)
