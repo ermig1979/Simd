@@ -76,7 +76,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
-#include "Simd/SimdSse3.h"
 #include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdSse42.h"
@@ -117,9 +116,6 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
     case SimdCpuInfoCacheL3: return Cpu::L3_CACHE_SIZE;
 #ifdef SIMD_SSE2_ENABLE
     case SimdCpuInfoSse2: return Sse2::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_SSE3_ENABLE
-    case SimdCpuInfoSse3: return Sse3::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSSE3_ENABLE
     case SimdCpuInfoSsse3: return Ssse3::Enable ? 1 : 0;

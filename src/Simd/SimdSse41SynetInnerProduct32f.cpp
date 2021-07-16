@@ -28,7 +28,6 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
-#include "Simd/SimdSse3.h"
 #include "Simd/SimdSse41.h"
 
 namespace Simd

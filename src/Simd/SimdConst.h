@@ -152,22 +152,15 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE3_ENABLE    
-    namespace Sse3
+#ifdef SIMD_SSSE3_ENABLE    
+    namespace Ssse3
     {
         using namespace Sse2;
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
         using Sse2::F;
         using Sse2::DF;
         using Sse2::QF;
-#endif
-    }
-#endif// SIMD_SSE3_ENABLE
-
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
-    {
-        using namespace Sse3;
+#endif        
 
         const __m128i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5);
         const __m128i K8_SHUFFLE_GRAY_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5, 0x5, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA);

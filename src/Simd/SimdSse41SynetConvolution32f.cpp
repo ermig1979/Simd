@@ -59,5 +59,5 @@ namespace Simd
                 return new Sse2::SynetConvolution32fGemmNN(param);
         }
     }
-#endif//SIMD_SSE3_ENABLE
+#endif
 }

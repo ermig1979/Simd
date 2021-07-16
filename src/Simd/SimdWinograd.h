@@ -554,7 +554,7 @@ namespace Simd
         }
     }
 
-#if defined(SIMD_SSE_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Sse2
     {
         SIMD_INLINE void Load4(const float* src, size_t step, __m128* dst)

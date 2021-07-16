@@ -222,6 +222,6 @@ namespace Simd
             Store<true>(p, vaddq_f32(Load<true>(p), a));
         }
     }
-#endif//SIMD_SSE_ENABLE
+#endif//SIMD_NEON_ENABLE
 }
 #endif//__SimdUpdate_h__

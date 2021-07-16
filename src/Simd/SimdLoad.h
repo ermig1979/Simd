@@ -108,15 +108,6 @@ namespace Simd
     }
 #endif//SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE3_ENABLE
-    namespace Sse3
-    {
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse2::Load;
-#endif
-    }
-#endif
-
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {

@@ -24,11 +24,7 @@
 #ifndef __SimdConfig_h__
 #define __SimdConfig_h__
 
-//#define SIMD_SSE_DISABLE
-
 //#define SIMD_SSE2_DISABLE
-
-//#define SIMD_SSE3_DISABLE
 
 //#define SIMD_SSSE3_DISABLE
 

@@ -392,7 +392,7 @@ namespace Simd
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }
-                        dst[dstCol] = Sse3::ExtractSum(sum);
+                        dst[dstCol] = ExtractSum(sum);
                     }
                     dst += dstStride;
                 }
@@ -441,7 +441,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            dst[dstCol] = Sse3::ExtractSum(sum);
+                            dst[dstCol] = ExtractSum(sum);
                         }
                         else
                             dst[dstCol] = -FLT_MAX;

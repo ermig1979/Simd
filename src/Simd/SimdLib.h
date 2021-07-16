@@ -176,7 +176,6 @@ typedef enum
     SimdCpuInfoCacheL2, /*!< A size of level 2 cache. */
     SimdCpuInfoCacheL3, /*!< A size of level 3 cache. */
     SimdCpuInfoSse2, /*!< Availability of SSE2 (x86). */
-    SimdCpuInfoSse3, /*!< Availability of SSE3 (x86). */
     SimdCpuInfoSsse3, /*!< Availability of SSSE3 (x86). */
     SimdCpuInfoSse41, /*!< Availability of SSE4.1 (x86). */
     SimdCpuInfoSse42, /*!< Availability of SSE4.2 (x86). */
@@ -613,7 +612,6 @@ extern "C"
             std::cout << "L2 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024  << " KB" << std::endl;
             std::cout << "L3 Cache : " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024  << " KB" << std::endl;
             std::cout << "SSE2: " << (SimdCpuInfo(SimdCpuInfoSse2) ? "Yes" : "No") << std::endl;
-            std::cout << "SSE3: " << (SimdCpuInfo(SimdCpuInfoSse3) ? "Yes" : "No") << std::endl;
             std::cout << "SSSE3: " << (SimdCpuInfo(SimdCpuInfoSsse3) ? "Yes" : "No") << std::endl;
             std::cout << "SSE4.1: " << (SimdCpuInfo(SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
             std::cout << "SSE4.2: " << (SimdCpuInfo(SimdCpuInfoSse42) ? "Yes" : "No") << std::endl;

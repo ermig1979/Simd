@@ -240,7 +240,6 @@ namespace Test
     {
         T simd;
         T base;
-        T sse;
         T sse2;
         T ssse3;
         T sse41;
@@ -285,11 +284,9 @@ namespace Test
             AddToFunction(src, dst.simd, enable.simd);
         if (desc.find("Simd::Base::") != std::string::npos)
             AddToFunction(src, dst.base, enable.base);
-        if (desc.find("Simd::Sse::") != std::string::npos)
-            AddToFunction(src, dst.sse, enable.sse);
         if (desc.find("Simd::Sse2::") != std::string::npos)
             AddToFunction(src, dst.sse2, enable.sse2);
-        if (desc.find("Simd::Ssse3::") != std::string::npos || desc.find("Simd::Sse3::") != std::string::npos)
+        if (desc.find("Simd::Ssse3::") != std::string::npos != std::string::npos)
             AddToFunction(src, dst.ssse3, enable.ssse3);
         if (desc.find("Simd::Sse41::") != std::string::npos || desc.find("Simd::Sse42::") != std::string::npos)
             AddToFunction(src, dst.sse41, enable.sse41);
@@ -326,15 +323,14 @@ namespace Test
     {
         Add(s.simd, d.simd);
         if (enable.base) Add(Cond(s.base, s.simd), d.base);
-        if (enable.sse) Add(Cond(s.sse, s.base), d.sse);
-        if (enable.sse2) Add(Cond(s.sse2, Cond(s.sse, s.base)), d.sse2);
-        if (enable.ssse3) Add(Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))), d.ssse3);
-        if (enable.sse41) Add(Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))), d.sse41);
-        if (enable.avx) Add(Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))), d.avx);
-        if (enable.avx2) Add(Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))))), d.avx2);
-        if (enable.avx512f) Add(Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))))), d.avx512f);
-        if (enable.avx512bw) Add(Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base)))))))), d.avx512bw);
-        if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, Cond(s.sse, s.base))))))))), d.avx512vnni);
+        if (enable.sse2) Add(Cond(s.sse2, s.base), d.sse2);
+        if (enable.ssse3) Add(Cond(s.ssse3, Cond(s.sse2, s.base)), d.ssse3);
+        if (enable.sse41) Add(Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))), d.sse41);
+        if (enable.avx) Add(Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base)))), d.avx);
+        if (enable.avx2) Add(Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))))), d.avx2);
+        if (enable.avx512f) Add(Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base)))))), d.avx512f);
+        if (enable.avx512bw) Add(Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base))))))), d.avx512bw);
+        if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.ssse3, Cond(s.sse2, s.base)))))))), d.avx512vnni);
         if (enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if (enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
@@ -443,8 +439,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false, false, false };
-        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse", "S1" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Avx5v", "A7" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false, false};
+        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse2", "S2" },{ "Ssse3", "S3" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Avx5v", "A7" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
         double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
