@@ -261,6 +261,9 @@
     <ClInclude Include="..\..\src\Test\TestString.h">
       <Filter>Utils</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Test\TestConsole.h">
+      <Filter>Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Test">

@@ -142,6 +142,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h" />
+    <ClInclude Include="..\..\src\Test\TestConsole.h" />
     <ClInclude Include="..\..\src\Test\TestData.h" />
     <ClInclude Include="..\..\src\Test\TestFile.h" />
     <ClInclude Include="..\..\src\Test\TestHtml.h" />

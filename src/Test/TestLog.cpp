@@ -23,6 +23,8 @@
 */
 #include "Test/TestLog.h"
 #include "Test/TestFile.h"
+#include "Test/TestConsole.h"
+#include "Test/TestString.h"
 
 namespace Test
 {
@@ -66,14 +68,19 @@ namespace Test
     void Log::Write(Level level, const String & message)
     {
         std::stringstream ss;
+        std::thread::id id = std::this_thread::get_id();
         if (_enableThreadId)
-            ss << "[" << std::this_thread::get_id() << "] ";
+        {
+            if(_threadNames.find(id) == _threadNames.end())
+                _threadNames[id] = ToString(_threadNames.size(), 3);
+            ss << "[" << _threadNames[id] << "] ";
+        }
         if (_enablePrefix)
         {
             switch (level)
             {
-            case Log::Error: ss << "ERROR: "; break;
-            case Log::Info: ss << "INFO: "; break;
+            case Log::Error: ss << Console::Stylized("Error: ", Console::FormatDefault, Console::ForegroundLightRed); break;
+            case Log::Info: ss << Console::Stylized("Info: ", Console::FormatDefault, Console::ForegroundGreen); break;
             default:
                 assert(0);
             }
@@ -81,14 +88,14 @@ namespace Test
         ss << message << std::endl;
         if (level > _level)
         {
-            _lastSkippedMessages[std::this_thread::get_id()] = ss.str();
+            _lastSkippedMessages[id] = ss.str();
         }
         else
         {
             std::lock_guard<std::mutex> lock(_mutex);
             if (_level == Error)
             {
-                String & last = _lastSkippedMessages[std::this_thread::get_id()];
+                String & last = _lastSkippedMessages[id];
                 if (last.size())
                 {
                     std::cout << last << std::flush;

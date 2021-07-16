@@ -56,7 +56,7 @@ namespace Test
         bool _enablePrefix;
 
         typedef std::map<std::thread::id, String> Messages;
-        Messages _lastSkippedMessages;
+        Messages _lastSkippedMessages, _threadNames;
     };
 }
 
