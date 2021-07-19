@@ -62,6 +62,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fDirectNchw.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fDirectNhwc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect3r.cpp" />
