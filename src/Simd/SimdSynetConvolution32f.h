@@ -381,7 +381,7 @@ namespace Simd
             struct AlgParam;
 
             typedef void(*ConvolutionPtr)(const float * src, const ConvParam32f & p, const AlgParam & a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, 
-                const float * weight, const float * bias, const float * params, float * dst);
+                const float * weight, const float * bias, const float * params, float * dst, int first);
 
             struct AlgParam
             {

@@ -33,13 +33,13 @@ namespace Simd
     {
         using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
 
-        typedef void(*ConvolutionNhwcDirect_NxM_Ptr)(const float* src0, const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails);
-        typedef void(*ConvolutionNhwcDirect1x1_NxM_Ptr)(const float* src0, const ConvParam32f& p, const AlgParam& a, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails);
+        typedef void(*ConvolutionNhwcDirect_NxM_Ptr)(const float* src0, const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first);
+        typedef void(*ConvolutionNhwcDirect1x1_NxM_Ptr)(const float* src0, const ConvParam32f& p, const AlgParam& a, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first);
 
         //---------------------------------------------------------------------
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_3x1(const float* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails)
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, d02, s0, w0, w1, w2;
             size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
@@ -120,7 +120,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_3x9(const float* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails)
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72, d80, d81, d82, s0, w0, w1, w2;
             size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
@@ -325,7 +325,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect_3xM(const float* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails)
+            const AlgParam& a, size_t dy, size_t dx, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72, d80, d81, d82, s0, w0, w1, w2;
             size_t srcH = p.srcH, srcW = p.srcW, dilY = p.dilationY, dilX = p.dilationX;
@@ -510,7 +510,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_3(const float* src, const ConvParam32f& p, const AlgParam& a,
-            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
             size_t n = 9, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
@@ -544,37 +544,37 @@ namespace Simd
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < bodyWn; dx += n, d += p.dstC * n)
-                        convolutionNhwcDirect_3xN(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3xN(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < bodyW; dx += m, d += p.dstC * m)
-                        convolutionNhwcDirect_3xM(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3xM(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < tailW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                 }
                 for (; dy < bodyH && dy < yEnd; dy++)
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < bodyWn; dx += n, d += p.dstC * n)
-                        convolutionNhwcDirect_3xN(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3xN(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < bodyW; dx += m, d += p.dstC * m)
-                        convolutionNhwcDirect_3xM(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3xM(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < tailW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                 }
                 for (; dy < tailH && dy < yEnd; dy++)
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < bodyWn; dx += n, d += p.dstC * n)
-                        convolutionNhwcDirect_3xN(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3xN(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < bodyW; dx += m, d += p.dstC * m)
-                        convolutionNhwcDirect_3xM(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3xM(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                     for (; dx < tailW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails);
+                        convolutionNhwcDirect_3x1(src, p, a, dy, dx, srcC, weight, _bias, _params, d, tails, first);
                 }
                 weight += p.kernelY * p.kernelX * p.srcC * a.microD;
             }
@@ -583,7 +583,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_3x9(const float* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails)
+            const AlgParam& a, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72, d80, d81, d82, s0, w0, w1, w2;
             size_t dS = p.srcC, dD = p.dstC;
@@ -725,7 +725,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_3xM(const float* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails)
+            const AlgParam& a, size_t srcC, const float* weight0, const __m512* bias, const __m512* params, float* dst, const __mmask16* tails, int first)
         {
             __m512 d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72, d80, d81, d82, s0, w0, w1, w2;
             size_t dS = p.srcC, dD = p.dstC;
@@ -862,7 +862,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_3(const float* src, const ConvParam32f& p, const AlgParam& a,
-            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             size_t n = 9, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             ConvolutionNhwcDirect1x1_NxM_Ptr convolutionNhwcDirect1x1_3xN = ConvolutionNhwcDirect1x1_3x9<term, type>;
@@ -890,9 +890,9 @@ namespace Simd
                 float* pd = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
                 for (; i < nn; i += n, ps += n * p.srcC, pd += n * p.dstC)
-                    convolutionNhwcDirect1x1_3xN(ps, p, a, srcC, weight, _bias, _params, pd, tails);
+                    convolutionNhwcDirect1x1_3xN(ps, p, a, srcC, weight, _bias, _params, pd, tails, first);
                 for (; i < n1; i += m, ps += m * p.srcC, pd += m * p.dstC)
-                    convolutionNhwcDirect1x1_3xM(ps, p, a, srcC, weight, _bias, _params, pd, tails);
+                    convolutionNhwcDirect1x1_3xM(ps, p, a, srcC, weight, _bias, _params, pd, tails, first);
                 weight += p.srcC * a.microD;
             }
         }
