@@ -74,6 +74,10 @@
 #define SIMD_SYNET_ENABLE
 #endif
 
+#if !defined(SIMD_INT8_DEBUG_DISABLE)
+#define SIMD_INT8_DEBUG_ENABLE
+#endif
+
 #if defined(_MSC_VER) && defined(_MSC_FULL_VER)
 
 #define SIMD_ALIGNED(x) __declspec(align(x))

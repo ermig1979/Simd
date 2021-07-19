@@ -52,6 +52,7 @@ namespace Simd
             return (format == SimdTensorFormatNhwc && channels != 1) || (format == SimdTensorFormatNchw && spatial == 1);
         }
 
+#if defined(SIMD_INT8_DEBUG_ENABLE)
         SIMD_INLINE bool FmaAvoid(SimdSynetCompatibilityType compatibility)
         {
             return (compatibility & SimdSynetCompatibilityFmaMask) == SimdSynetCompatibilityFmaAvoid;
@@ -76,6 +77,32 @@ namespace Simd
         {
             return (compatibility & SimdSynetCompatibility8iMask) == SimdSynetCompatibility8iNarrowed;
         }
+#else
+        SIMD_INLINE constexpr bool FmaAvoid(SimdSynetCompatibilityType compatibility)
+        {
+            return false;
+        }
+
+        SIMD_INLINE constexpr bool FmaNoTail(SimdSynetCompatibilityType compatibility)
+        {
+            return false;
+        }
+
+        SIMD_INLINE constexpr bool Precise(SimdSynetCompatibilityType compatibility)
+        {
+            return false;
+        }
+
+        SIMD_INLINE constexpr bool Overflow(SimdSynetCompatibilityType compatibility)
+        {
+            return false;
+        }
+
+        SIMD_INLINE constexpr bool Narrowed(SimdSynetCompatibilityType compatibility)
+        {
+            return true;
+        }
+#endif
 
         //---------------------------------------------------------------------
 

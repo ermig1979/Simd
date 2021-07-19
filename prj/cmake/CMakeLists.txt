@@ -9,6 +9,7 @@ option(SIMD_PERF "Internal performance statistic" OFF)
 option(SIMD_SHARED "Build as SHARED library" OFF)
 option(SIMD_GET_VERSION "Get Simd Library version" ON)
 option(SIMD_SYNET "Synet optimizations enable" ON)
+option(SIMD_INT8_DEBUG "Synet INT8 debug enable" ON)
 option(SIMD_HIDE "Hide internal functions of Simd Library" OFF)
 set(MAX_ERRORS 5)
 
@@ -63,6 +64,10 @@ endif()
 
 if(NOT SIMD_SYNET)
 	add_definitions(-DSIMD_SYNET_DISABLE)
+endif()
+
+if(NOT SIMD_INT8_DEBUG)
+	add_definitions(-DSIMD_INT8_DEBUG_DISABLE)
 endif()
 
 if(SIMD_HIDE)
