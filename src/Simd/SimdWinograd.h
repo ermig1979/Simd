@@ -574,6 +574,23 @@ namespace Simd
         }
     }
 #endif
+
+#if defined(SIMD_NEON_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Neon
+    {
+        SIMD_INLINE void Load4(const float* src, size_t step, float32x4_t* dst)
+        {
+            float32x4_t a0 = Load<false>(src + 0 * step);
+            float32x4_t a1 = Load<false>(src + 1 * step);
+            float32x4_t a2 = Load<false>(src + 2 * step);
+            float32x4_t a3 = Load<false>(src + 3 * step);
+            float32x4x2_t b0 = vzipq_f32(a0, a2);
+            float32x4x2_t b1 = vzipq_f32(a1, a3);
+            *(float32x4x2_t*)(dst + 0) = vzipq_f32(b0.val[0], b1.val[0]);
+            *(float32x4x2_t*)(dst + 2) = vzipq_f32(b0.val[1], b1.val[1]);
+        }
+    }
+#endif
 }
 
 #endif//__SimdWinograd_h__

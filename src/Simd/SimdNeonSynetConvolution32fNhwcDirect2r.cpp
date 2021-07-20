@@ -526,32 +526,7 @@ namespace Simd
                     if (dC > 1 * F) _params[1] = Load<false>(params + dc + 1 * F);
                 }
                 float* d = dst + dc + yBeg * p.dstW * p.dstC;
-                size_t dy = yBeg;
-                for (; dy < noseH && dy < yEnd; dy++)
-                {
-                    size_t dx = 0;
-                    for (; dx < noseW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                    for (; dx < bodyWn; dx += n, d += p.dstC * n)
-                        convolutionNhwcDirect_2xN(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                    for (; dx < bodyW; dx += m, d += p.dstC * m)
-                        convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                    for (; dx < tailW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                }
-                for (; dy < bodyH && dy < yEnd; dy++)
-                {
-                    size_t dx = 0;
-                    for (; dx < noseW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                    for (; dx < bodyWn; dx += n, d += p.dstC * n)
-                        convolutionNhwcDirect_2xN(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                    for (; dx < bodyW; dx += m, d += p.dstC * m)
-                        convolutionNhwcDirect_2xM(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                    for (; dx < tailW; dx++, d += p.dstC)
-                        convolutionNhwcDirect_2x1(src, p, a, dy, dx, srcC, dC, weight, _bias, _params, d, first);
-                }
-                for (; dy < tailH && dy < yEnd; dy++)
+                for (size_t dy = yBeg; dy < yEnd; dy++)
                 {
                     size_t dx = 0;
                     for (; dx < noseW; dx++, d += p.dstC)

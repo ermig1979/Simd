@@ -226,9 +226,6 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseTransform.cpp">
       <Filter>Base</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdBaseWinograd.cpp">
-      <Filter>Base</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToBgr.cpp">
       <Filter>Base</Filter>
     </ClCompile>
@@ -272,6 +269,15 @@
       <Filter>Base</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdBaseImageLoadPng.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseWinograd1.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseWinograd2.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseWinograd3.cpp">
       <Filter>Base</Filter>
     </ClCompile>
   </ItemGroup>

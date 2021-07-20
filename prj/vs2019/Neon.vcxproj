@@ -48,7 +48,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonFloat32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fNT.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp" />
@@ -86,6 +88,8 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNhwc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect3r.cpp" />
@@ -97,7 +101,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp" />

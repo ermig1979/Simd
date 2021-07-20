@@ -223,8 +223,8 @@ namespace Simd
                     _params[0] = Load<false>(params + dc);
                 const float * s = src + yBeg * p.srcW * p.srcC;
                 float * d = dst + yBeg * p.strideY * p.dstW * p.dstC;
-                const float * w0 = weight + 0 * p.kernelX * p.srcC * F;
-                const float * w1 = weight + 1 * p.kernelX * p.srcC * F;
+                const float * w0 = weight + 0 * p.kernelX * srcC * F;
+                const float * w1 = weight + 1 * p.kernelX * srcC * F;
                 for (size_t sy = yBeg; sy < yEnd; sy += 1, s += p.srcW * p.srcC)
                 {
                     for (size_t sx = 0; sx < srcW6; sx += 6)
