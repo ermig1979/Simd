@@ -23,6 +23,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNchw.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNhwc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect2f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect2r.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect3r.cpp" />
@@ -34,7 +36,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fDc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetScale.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
