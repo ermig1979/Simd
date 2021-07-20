@@ -1365,6 +1365,7 @@ namespace Simd
                     _old.enable = true;
                 if (p.SizeW()*sizeof(float) > Base::AlgCacheL3() * 1.0)
                     _old.enable = true;
+                _old.enable = false;
             }
             _old.convolution = NULL;
 #endif
@@ -1479,9 +1480,9 @@ namespace Simd
                         else if (sc == 0)
                             a.convolutions[TermFirst](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc + macroC == p.srcC)
-                            a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
+                            a.convolutions[TermSingle](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         else
-                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
+                            a.convolutions[TermFirst](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         yBeg = yEnd;
                     }
                     weight += a.F * macroC;

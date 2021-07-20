@@ -510,8 +510,6 @@ namespace Simd
         {
             Set<TermSingle, type>(p, a);
             Set<TermFirst, SimdConvolutionActivationIdentity>(p, a);
-            Set<TermIterim, SimdConvolutionActivationIdentity>(p, a);
-            Set<TermLast, type>(p, a);
         }
 
         bool SynetConvolution32fNhwcDirect::Set2r(const ConvParam32f& p, AlgParam& a)
