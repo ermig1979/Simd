@@ -1365,7 +1365,6 @@ namespace Simd
                     _old.enable = true;
                 if (p.SizeW()*sizeof(float) > Base::AlgCacheL3() * 1.0)
                     _old.enable = true;
-                _old.enable = false;
             }
             _old.convolution = NULL;
 #endif

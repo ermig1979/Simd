@@ -55,9 +55,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetPooling.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd.cpp">
-      <Filter>Avx1</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetScale.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
@@ -74,6 +71,21 @@
       <Filter>Avx1</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx1SynetInnerProduct32f.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNchw.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNhwc.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd1.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd2.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd3.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
   </ItemGroup>

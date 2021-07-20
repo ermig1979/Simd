@@ -1916,7 +1916,6 @@ namespace Simd
 
         bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f& p)
         {
-            return true;
             if (p.trans != SimdTrue || p.group != 1 || !p.IsDilation(1))
                 return false;
             if (!p.Is1x1() && p.dstW < 6 + p.padX + p.padY)
