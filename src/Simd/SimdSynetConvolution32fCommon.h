@@ -33,10 +33,8 @@ namespace Simd
 {
     enum TermType
     {
-        TermSingle,
-        TermFirst,
-        TermIterim,
         TermLast,
+        TermIterim,
         TermSize
     };
 
@@ -219,7 +217,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params, size_t tail);
         };
 
-        template <> struct Term<TermSingle>
+        template <> struct Term<TermLast>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params)
             {
@@ -235,7 +233,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermFirst>
+        template <> struct Term<TermIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params)
             {
@@ -246,38 +244,6 @@ namespace Simd
             {
                 float tmp[F];
                 _mm_storeu_ps(tmp, value);
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermIterim>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params)
-            {
-                _mm_storeu_ps(ptr, _mm_add_ps(_mm_loadu_ps(ptr), value));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm_storeu_ps(tmp, _mm_add_ps(_mm_loadu_ps(ptr), value));
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params)
-            {
-                _mm_storeu_ps(ptr, Activate<type>(_mm_add_ps(_mm_add_ps(_mm_loadu_ps(ptr), value), bias[index]), params, index));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm_storeu_ps(tmp, Activate<type>(_mm_add_ps(_mm_add_ps(_mm_loadu_ps(ptr), value), bias[index]), params, index));
                 for (size_t i = 0; i < tail; ++i)
                     ptr[i] = tmp[i];
             }
@@ -364,7 +330,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail);
         };
 
-        template <> struct Term<TermSingle>
+        template <> struct Term<TermLast>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
             {
@@ -380,7 +346,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermFirst>
+        template <> struct Term<TermIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
             {
@@ -391,38 +357,6 @@ namespace Simd
             {
                 float tmp[F];
                 _mm256_storeu_ps(tmp, value);
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermIterim>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
-            {
-                _mm256_storeu_ps(ptr, _mm256_add_ps(_mm256_loadu_ps(ptr), value));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm256_storeu_ps(tmp, _mm256_add_ps(_mm256_loadu_ps(ptr), value));
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
-            {
-                _mm256_storeu_ps(ptr, Activate<type>(_mm256_add_ps(_mm256_add_ps(_mm256_loadu_ps(ptr), value), bias[index]), params, index));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm256_storeu_ps(tmp, Activate<type>(_mm256_add_ps(_mm256_add_ps(_mm256_loadu_ps(ptr), value), bias[index]), params, index));
                 for (size_t i = 0; i < tail; ++i)
                     ptr[i] = tmp[i];
             }
@@ -563,7 +497,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail);
         };
 
-        template <> struct Term<TermSingle>
+        template <> struct Term<TermLast>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
             {
@@ -579,7 +513,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermFirst>
+        template <> struct Term<TermIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
             {
@@ -590,38 +524,6 @@ namespace Simd
             {
                 float tmp[F];
                 _mm256_storeu_ps(tmp, value);
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermIterim>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
-            {
-                _mm256_storeu_ps(ptr, _mm256_add_ps(_mm256_loadu_ps(ptr), value));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm256_storeu_ps(tmp, _mm256_add_ps(_mm256_loadu_ps(ptr), value));
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
-            {
-                _mm256_storeu_ps(ptr, Activate<type>(_mm256_add_ps(_mm256_add_ps(_mm256_loadu_ps(ptr), value), bias[index]), params, index));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params, size_t tail)
-            {
-                float tmp[F];
-                _mm256_storeu_ps(tmp, Activate<type>(_mm256_add_ps(_mm256_add_ps(_mm256_loadu_ps(ptr), value), bias[index]), params, index));
                 for (size_t i = 0; i < tail; ++i)
                     ptr[i] = tmp[i];
             }
@@ -761,7 +663,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1));
         };
 
-        template <> struct Term<TermSingle>
+        template <> struct Term<TermLast>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1))
             {
@@ -769,27 +671,11 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermFirst>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1))
-            {
-                _mm512_mask_storeu_ps(ptr, tail, value);
-            }
-        };
-
         template <> struct Term<TermIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1))
             {
-                _mm512_mask_storeu_ps(ptr, tail, _mm512_add_ps(_mm512_maskz_loadu_ps(tail, ptr), value));
-            }
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1))
-            {
-                _mm512_mask_storeu_ps(ptr, tail, Activate<type>(_mm512_add_ps(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, ptr), value), bias[index]), params, index));
+                _mm512_mask_storeu_ps(ptr, tail, value);
             }
         };
 
@@ -864,7 +750,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params, size_t tail);
         };
 
-        template <> struct Term<TermSingle>
+        template <> struct Term<TermLast>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params)
             {
@@ -880,7 +766,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermFirst>
+        template <> struct Term<TermIterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params)
             {
@@ -891,38 +777,6 @@ namespace Simd
             {
                 float tmp[F];
                 Store<false>(tmp, value);
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermIterim>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params)
-            {
-                Store<false>(ptr, vaddq_f32(Load<false>(ptr), value));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params, size_t tail)
-            {
-                float tmp[F];
-                Store<false>(tmp, vaddq_f32(Load<false>(ptr), value));
-                for (size_t i = 0; i < tail; ++i)
-                    ptr[i] = tmp[i];
-            }
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params)
-            {
-                Store<false>(ptr, Activate<type>(vaddq_f32(vaddq_f32(Load<false>(ptr), value), bias[index]), params, index));
-            }
-
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params, size_t tail)
-            {
-                float tmp[F];
-                Store<false>(tmp, Activate<type>(vaddq_f32(vaddq_f32(Load<false>(ptr), value), bias[index]), params, index));
                 for (size_t i = 0; i < tail; ++i)
                     ptr[i] = tmp[i];
             }

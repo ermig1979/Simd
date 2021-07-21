@@ -191,13 +191,13 @@ namespace Simd
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.srcH);
                         if (a.macroC == p.srcC)
-                            DeconvolutionNhwcDirect2x2<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
+                            DeconvolutionNhwcDirect2x2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc == 0)
-                            DeconvolutionNhwcDirect2x2<TermFirst, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
+                            DeconvolutionNhwcDirect2x2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc + macroC == p.srcC)
-                            DeconvolutionNhwcDirect2x2<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                            DeconvolutionNhwcDirect2x2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         else
-                            DeconvolutionNhwcDirect2x2<TermFirst, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                            DeconvolutionNhwcDirect2x2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD)*macroK;

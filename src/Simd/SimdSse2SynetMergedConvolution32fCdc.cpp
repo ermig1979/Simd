@@ -239,16 +239,10 @@ namespace Simd
 				_params[0] = _mm_set1_ps(params[0]);
 				if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
 					_params[1] = _mm_set1_ps(params[1]);
-#ifdef SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
 				size_t yInt = Simd::Max(yBeg, yEnd & (~dstM)), nBeg = yBeg * dstW, nInt = yInt * dstW, nEnd = yEnd * dstW;
 				size_t nInt6 = AlignLoAny(nInt - nBeg, 6) + nBeg, nEnd6 = AlignLoAny(nEnd - nInt, 6) + nInt, nIntTail = nInt - nInt6, nEndTail = nEnd - nEnd6;
 				InputConvolution1x1_2xM_Ptr tailInt_2 = GetInputConvolution1x1_2xM<type>(nIntTail);
 				InputConvolution1x1_2xM_Ptr tailEnd_2 = GetInputConvolution1x1_2xM<type>(nEndTail);
-#else
-				size_t dstW6 = AlignLoAny(dstW, 6), wTail = dstW - dstW6;
-				InputConvolution1x1_2xM_Ptr tailW_2 = GetInputConvolution1x1_2xM<type>(wTail);
-				InputConvolution1x1_1xM_Ptr tailW_1 = GetInputConvolution1x1_1xM<type>(wTail);
-#endif
 
 				size_t dc = 0;
 				for (; dc < dstC; dc += DF)
@@ -263,7 +257,6 @@ namespace Simd
 					const float* pS = src + yBeg * srcW * srcC;
 					const float* pW = weight + dc * srcC;
 					float* pD = dst + (dc / F) * dstS;
-#ifdef SIMD_MERGECONV_MERGE_INPUT_ROWS_1X1
 					float* dst0 = pD + (yBeg & dstM) * dstW * F;
 					float* dst1 = pD + (yInt & dstM) * dstW * F;
 					size_t dn = nBeg;
@@ -291,27 +284,6 @@ namespace Simd
 						if (nEndTail)
 							tailEnd_1(pS, srcC, pW, _bias, _params, dst1), pS += nEndTail * srcC, dn += nEndTail;
 					}
-#else
-					for (size_t dy = yBeg; dy < yEnd; ++dy)
-					{
-						float* dst0 = pD + (dy & dstM) * dstW * F;
-						size_t dx = 0;
-						if (dstC - dc > F)
-						{
-							for (; dx < dstW6; dx += 6, pS += 6 * srcC, dst0 += 6 * F)
-								InputConvolution1x1_2x6<type>(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS);
-							if (wTail)
-								tailW_2(pS, srcC, pW, _bias, _params, dst0, dst0 + dstS), pS += wTail * srcC, dx += wTail;
-						}
-						else
-						{
-							for (; dx < dstW6; dx += 6, pS += 6 * srcC, dst0 += 6 * F)
-								InputConvolution1x1_1x6<type>(pS, srcC, pW, _bias, _params, dst0);
-							if (wTail)
-								tailW_1(pS, srcC, pW, _bias, _params, dst0), pS += wTail * srcC, dx += wTail;
-						}
-					}
-#endif
 				}
 			}
 
@@ -1452,8 +1424,8 @@ namespace Simd
 						c[i + 0] = DepthwiseConvolution<type>;
 					break;
 				case 2:
-					c[i + 0] = OutputConvolution<TermSingle, type>;
-					c[i + 1] = OutputConvolution<TermFirst, SimdConvolutionActivationIdentity>;
+					c[i + 0] = OutputConvolution<TermLast, type>;
+					c[i + 1] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
 					break;
 				default:
 					assert(0);

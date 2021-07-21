@@ -1475,13 +1475,13 @@ namespace Simd
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
                         if (a.macroC == p.srcC)
-                            a.convolutions[TermSingle](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
+                            a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc == 0)
-                            a.convolutions[TermFirst](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
+                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc + macroC == p.srcC)
-                            a.convolutions[TermSingle](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                            a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         else
-                            a.convolutions[TermFirst](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         yBeg = yEnd;
                     }
                     weight += a.F * macroC;

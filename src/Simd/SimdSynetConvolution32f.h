@@ -386,7 +386,7 @@ namespace Simd
             struct AlgParam
             {
                 size_t F, microD, macroH, macroC, macroD;
-                ConvolutionPtr convolutions[4];
+                ConvolutionPtr convolutions[2];
                 size_t stepW;
             };
 
