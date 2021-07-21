@@ -230,7 +230,7 @@ namespace Simd
 			}
 
 			template<SimdConvolutionActivationType type> void InputConvolution1x1(const float* src, const SimdConvolutionParameters& p,
-				size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
 				size_t dstM = (bufH[0] - 1), dstS = bufH[0] * dstW * F;
@@ -469,7 +469,7 @@ namespace Simd
 			}
 
 			template<SimdConvolutionActivationType type> void InputConvolution(const float* src, const SimdConvolutionParameters& p,
-				size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t dstC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
 				size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX;
@@ -605,7 +605,7 @@ namespace Simd
 			//---------------------------------------------------------------------
 
 			template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
-				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
 				size_t srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F, strideXF = strideX * F;
@@ -856,7 +856,7 @@ namespace Simd
 			}
 
 			template<SimdConvolutionActivationType type> void DepthwiseConvolution3x3(const float* src, const SimdConvolutionParameters& p,
-				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
 				size_t srcW = p.srcW * F, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;
@@ -928,17 +928,29 @@ namespace Simd
 			//---------------------------------------------------------------------
 
 			template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x6(const float* src, size_t srcC, size_t srcS,
-				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail)
+				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail, int first)
 			{
 				__m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
 				if (tail > F)
 				{
-					d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
-					d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
-					d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
-					d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
-					d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
-					d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
+					if (first)
+					{
+						d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+						d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+						d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+						d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+						d40 = _mm_setzero_ps(), d41 = _mm_setzero_ps();
+						d50 = _mm_setzero_ps(), d51 = _mm_setzero_ps();
+					}
+					else
+					{
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0), d01 = _mm_loadu_ps(dst + 0 * dstC + F);
+						d10 = _mm_loadu_ps(dst + 1 * dstC + 0), d11 = _mm_loadu_ps(dst + 1 * dstC + F);
+						d20 = _mm_loadu_ps(dst + 2 * dstC + 0), d21 = _mm_loadu_ps(dst + 2 * dstC + F);
+						d30 = _mm_loadu_ps(dst + 3 * dstC + 0), d31 = _mm_loadu_ps(dst + 3 * dstC + F);
+						d40 = _mm_loadu_ps(dst + 4 * dstC + 0), d41 = _mm_loadu_ps(dst + 4 * dstC + F);
+						d50 = _mm_loadu_ps(dst + 5 * dstC + 0), d51 = _mm_loadu_ps(dst + 5 * dstC + F);
+					}
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1011,12 +1023,24 @@ namespace Simd
 				}
 				else
 				{
-					d00 = _mm_setzero_ps();
-					d10 = _mm_setzero_ps();
-					d20 = _mm_setzero_ps();
-					d30 = _mm_setzero_ps();
-					d40 = _mm_setzero_ps();
-					d50 = _mm_setzero_ps();
+					if (first)
+					{
+						d00 = _mm_setzero_ps();
+						d10 = _mm_setzero_ps();
+						d20 = _mm_setzero_ps();
+						d30 = _mm_setzero_ps();
+						d40 = _mm_setzero_ps();
+						d50 = _mm_setzero_ps();
+					}
+					else
+					{
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0);
+						d10 = _mm_loadu_ps(dst + 1 * dstC + 0);
+						d20 = _mm_loadu_ps(dst + 2 * dstC + 0);
+						d30 = _mm_loadu_ps(dst + 3 * dstC + 0);
+						d40 = _mm_loadu_ps(dst + 4 * dstC + 0);
+						d50 = _mm_loadu_ps(dst + 5 * dstC + 0);
+					}
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1070,15 +1094,25 @@ namespace Simd
 			}
 
 			template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x4(const float* src, size_t srcC, size_t srcS,
-				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail)
+				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail, int first)
 			{
 				__m128 d00, d01, d10, d11, d20, d21, d30, d31, s0, w0, w1;
 				if (tail > F)
 				{
-					d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
-					d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
-					d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
-					d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+					if (first)
+					{
+						d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+						d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+						d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+						d30 = _mm_setzero_ps(), d31 = _mm_setzero_ps();
+					}
+					else
+					{
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0), d01 = _mm_loadu_ps(dst + 0 * dstC + F);
+						d10 = _mm_loadu_ps(dst + 1 * dstC + 0), d11 = _mm_loadu_ps(dst + 1 * dstC + F);
+						d20 = _mm_loadu_ps(dst + 2 * dstC + 0), d21 = _mm_loadu_ps(dst + 2 * dstC + F);
+						d30 = _mm_loadu_ps(dst + 3 * dstC + 0), d31 = _mm_loadu_ps(dst + 3 * dstC + F);
+					}
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1133,10 +1167,20 @@ namespace Simd
 				}
 				else
 				{
-					d00 = _mm_setzero_ps();
-					d10 = _mm_setzero_ps();
-					d20 = _mm_setzero_ps();
-					d30 = _mm_setzero_ps();
+					if (first)
+					{
+						d00 = _mm_setzero_ps();
+						d10 = _mm_setzero_ps();
+						d20 = _mm_setzero_ps();
+						d30 = _mm_setzero_ps();
+					}
+					else
+					{
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0);
+						d10 = _mm_loadu_ps(dst + 1 * dstC + 0);
+						d20 = _mm_loadu_ps(dst + 2 * dstC + 0);
+						d30 = _mm_loadu_ps(dst + 3 * dstC + 0);
+					}
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1178,14 +1222,23 @@ namespace Simd
 			}
 
 			template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x3(const float* src, size_t srcC, size_t srcS,
-				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail)
+				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail, int first)
 			{
 				__m128 d00, d01, d10, d11, d20, d21, s0, w0, w1;
 				if (tail > F)
 				{
-					d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
-					d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
-					d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+					if (first)
+					{
+						d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+						d10 = _mm_setzero_ps(), d11 = _mm_setzero_ps();
+						d20 = _mm_setzero_ps(), d21 = _mm_setzero_ps();
+					}
+					else
+					{
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0), d01 = _mm_loadu_ps(dst + 0 * dstC + F);
+						d10 = _mm_loadu_ps(dst + 1 * dstC + 0), d11 = _mm_loadu_ps(dst + 1 * dstC + F);
+						d20 = _mm_loadu_ps(dst + 2 * dstC + 0), d21 = _mm_loadu_ps(dst + 2 * dstC + F);
+					}
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1231,9 +1284,18 @@ namespace Simd
 				}
 				else
 				{
-					d00 = _mm_setzero_ps();
-					d10 = _mm_setzero_ps();
-					d20 = _mm_setzero_ps();
+					if (first)
+					{
+						d00 = _mm_setzero_ps();
+						d10 = _mm_setzero_ps();
+						d20 = _mm_setzero_ps();
+					}
+					else
+					{
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0);
+						d10 = _mm_loadu_ps(dst + 1 * dstC + 0);
+						d20 = _mm_loadu_ps(dst + 2 * dstC + 0);
+					}
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1269,12 +1331,15 @@ namespace Simd
 			}
 
 			template<TermType term, SimdConvolutionActivationType type> void OutputConvolution_2x1(const float* src, size_t srcC, size_t srcS,
-				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail)
+				const float* weight, const __m128* bias, const __m128* params, float* dst, size_t dstC, size_t tail, int first)
 			{
 				__m128 d00, d01, s0, w0, w1;
 				if (tail > F)
 				{
-					d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+					if (first)
+						d00 = _mm_setzero_ps(), d01 = _mm_setzero_ps();
+					else
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0), d01 = _mm_loadu_ps(dst + 0 * dstC + F);
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1301,7 +1366,10 @@ namespace Simd
 				}
 				else
 				{
-					d00 = _mm_setzero_ps();
+					if (first)
+						d00 = _mm_setzero_ps();
+					else
+						d00 = _mm_loadu_ps(dst + 0 * dstC + 0);
 					for (size_t c = 0; c < srcC; c += F)
 					{
 						size_t n = Simd::Min(F, srcC - c);
@@ -1321,7 +1389,7 @@ namespace Simd
 			}
 
 			template<TermType term, SimdConvolutionActivationType type> void OutputConvolution(const float* src, const SimdConvolutionParameters& p,
-				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				assert(p.group == 1 && p.kernelY == 1 && p.strideY == 1);
 				size_t srcH = p.srcH, srcW = p.srcW, dstW = p.dstW, dstC = p.dstC;
@@ -1350,15 +1418,15 @@ namespace Simd
 						const float* pSrc = src + (y & srcM) * srcW * F;
 						size_t x = 0;
 						for (; x < dstW6; x += 6, pDst += 6 * dstC, pSrc += 6 * F)
-							OutputConvolution_2x6<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+							OutputConvolution_2x6<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail, first);
 						if (dstW - dstW6 == 4)
-							OutputConvolution_2x4<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail), pDst += 4 * dstC;
+							OutputConvolution_2x4<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail, first), pDst += 4 * dstC;
 						else
 						{
 							for (; x < dstW3; x += 3, pDst += 3 * dstC, pSrc += 3 * F)
-								OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+								OutputConvolution_2x3<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail, first);
 							for (; x < dstW; ++x, pDst += dstC, pSrc += F)
-								OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail);
+								OutputConvolution_2x1<term, type>(pSrc, srcC, srcS, weight, _bias, _params, pDst, dstC, tail, first);
 						}
 					}
 					weight += srcC * DF;
@@ -1384,20 +1452,8 @@ namespace Simd
 						c[i + 0] = DepthwiseConvolution<type>;
 					break;
 				case 2:
-					if (p.add)
-					{
-						c[i + 0] = OutputConvolution<TermLast, type>;
-						c[i + 1] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
-						c[i + 2] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
-						c[i + 3] = OutputConvolution<TermLast, type>;
-					}
-					else
-					{
-						c[i + 0] = OutputConvolution<TermSingle, type>;
-						c[i + 1] = OutputConvolution<TermFirst, SimdConvolutionActivationIdentity>;
-						c[i + 2] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
-						c[i + 3] = OutputConvolution<TermLast, type>;
-					}
+					c[i + 0] = OutputConvolution<TermSingle, type>;
+					c[i + 1] = OutputConvolution<TermFirst, SimdConvolutionActivationIdentity>;
 					break;
 				default:
 					assert(0);

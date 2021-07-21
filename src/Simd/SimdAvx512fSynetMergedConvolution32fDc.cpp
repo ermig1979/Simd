@@ -34,7 +34,7 @@ namespace Simd
 		namespace Dc
 		{
 			template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
-				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				size_t strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
 				size_t srcX = p.srcC, srcW = p.srcW * srcX, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F, strideXC = strideX * srcX;
@@ -329,7 +329,7 @@ namespace Simd
 			}
 
 			template<SimdConvolutionActivationType type> void DepthwiseConvolution3x3(const float* src, const SimdConvolutionParameters& p,
-				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+				size_t srcC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
 			{
 				size_t strideY = p.strideY, padY = p.padY, padX = p.padX, padH = p.padH, padW = p.padW;
 				size_t srcX = p.srcC, srcW = p.srcW * srcX, dstW = p.dstW * F, weightS = p.kernelY * p.kernelX * F;

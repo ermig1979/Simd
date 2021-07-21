@@ -34,7 +34,7 @@ namespace Simd
     namespace Base
     {
         template<SimdConvolutionActivationType type, UpdateType update> void DirectConvolution(const float* src, const SimdConvolutionParameters& p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
@@ -119,7 +119,7 @@ namespace Simd
            , _perf(NULL)
 #endif        
         {
-            for (size_t i = 0; i < 6; ++i)
+            for (size_t i = 0; i < 4; ++i)
                 _convolution[i] = NULL;
             const SimdConvolutionParameters& beg = p.conv[0];
             const SimdConvolutionParameters& end = p.conv[p.count - 1];
@@ -240,13 +240,13 @@ namespace Simd
             float* buf1 = buf0 + _sizeB[0];
             for (size_t b = 0; b < p.batch; ++b)
             {
-                _convolution[0](src, p.conv[0], 0, 0, p.conv[0].dstH, NULL, _weight[0], _bias[0], _params[0], buf0);
-                _convolution[1](buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight[1], _bias[1], _params[1], (p.count == 3 ? buf1 : dst));
+                _convolution[0](src, p.conv[0], 0, 0, p.conv[0].dstH, NULL, _weight[0], _bias[0], _params[0], buf0, 1);
+                _convolution[1](buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight[1], _bias[1], _params[1], (p.count == 3 ? buf1 : dst), 1);
                 if (p.count > 2)
                 {
                     if (p.add)
                         memcpy(dst, src, sizeof(float) * _sizeS);
-                    _convolution[2](buf1, p.conv[2], 0, 0, p.conv[2].dstH, NULL, _weight[2], _bias[2], _params[2], dst);
+                    _convolution[2](buf1, p.conv[2], 0, 0, p.conv[2].dstH, NULL, _weight[2], _bias[2], _params[2], dst, 1);
                 }
                 src += _sizeS;
                 dst += _sizeD;
@@ -398,21 +398,17 @@ namespace Simd
                     {
                         size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
                         size_t yEnd0 = Simd::Min(Simd::Max(yBeg0 + _yStep[0], (_yStep[1] - 1)*p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY), p.conv[0].dstH);
-                        _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
-                        _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], buf1);
+                        _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0, 1);
+                        _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], buf1, 1);
                         if (p.add && c == 0)
                         {
                             size_t offset = yBeg1 * p.conv[2].dstW * p.conv[2].dstC, size = (yEnd1 - yBeg1)*p.conv[2].dstW * p.conv[2].dstC;
                             memcpy(dst + offset, src + offset, sizeof(float)*size);
                         }
-                        if(maC == C)
-                            _convolution[2](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
-                        else if (c == 0)
-                            _convolution[3](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
-                        else if (c + maC < C)
-                            _convolution[4](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
+                        if(c + maC == C)
+                            _convolution[2](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst, (maC != C || p.add) ? 0 : 1);
                         else
-                            _convolution[5](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst);
+                            _convolution[3](buf1, p.conv[2], maC, yBeg1, yEnd1, _bufH, _weight[2] + c * _dw[2], _bias[2], _params[2], dst, (c != 0 || p.add) ? 0 : 1);
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
                     }
@@ -525,8 +521,8 @@ namespace Simd
                     {
                         size_t yEnd1 = Simd::Min(yBeg1 + _yStep[1], p.conv[1].dstH);
                         size_t yEnd0 = Simd::Min(Simd::Max(yBeg0 + _yStep[0], (_yStep[1] - 1) * p.conv[1].strideY + p.conv[1].kernelY - p.conv[1].padY), p.conv[0].dstH);
-                        _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
-                        _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], dst + c);
+                        _convolution[0](src, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0, 1);
+                        _convolution[1](buf0, p.conv[1], maC, yBeg1, yEnd1, _bufH, _weight[1] + c * _dw[1], _bias[1] + c, _params[1] + c * _dp[1], dst + c, 1);
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
                     }
@@ -642,15 +638,11 @@ namespace Simd
                     for (size_t yBeg0 = 0; yBeg0 < p.conv[0].dstH;)
                     {
                         size_t yEnd0 = Simd::Min(yBeg0 + _yStep[0], p.conv[0].dstH);
-                        _convolution[0](src + c, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0);
-                        if (maC == C)
-                            _convolution[1](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst);
-                        else if (c == 0)
-                            _convolution[2](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst);
-                        else if (c + maC < C)
-                            _convolution[3](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst);
+                        _convolution[0](src + c, p.conv[0], maC, yBeg0, yEnd0, _bufH, _weight[0] + c * _dw[0], _bias[0] + c, _params[0] + c * _dp[0], buf0, 1);
+                        if (c + maC == C)
+                            _convolution[1](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst, maC == C ? 1 : 0);
                         else
-                            _convolution[4](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst);
+                            _convolution[2](buf0, p.conv[1], maC, yBeg0, yEnd0, _bufH, _weight[1] + c * _dw[1], _bias[1], _params[1], dst, c == 0 ? 1 : 0);
                         yBeg0 = yEnd0;
                     }
                 }

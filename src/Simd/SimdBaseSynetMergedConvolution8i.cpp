@@ -55,7 +55,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const ConvParam8i& p, const SynetMergedConvolution8i::AlgParam& a,
             size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t* dst)
         {
-            DepthwiseConvolution<type>(src, p, 0, 0, p.dstH, NULL, weight, bias, params, (float*)dst);
+            DepthwiseConvolution<type>(src, p, 0, 0, p.dstH, NULL, weight, bias, params, (float*)dst, 1);
         }
 
         SynetMergedConvolution8i::SynetMergedConvolution8i(const MergConvParam8i& p)

@@ -72,7 +72,7 @@ namespace Test
         if (_enableThreadId)
         {
             if(_threadNames.find(id) == _threadNames.end())
-                _threadNames[id] = ToString(_threadNames.size(), 3);
+                _threadNames[id] = ToString((int)_threadNames.size(), 3);
             ss << "[" << _threadNames[id] << "] ";
         }
         if (_enablePrefix)

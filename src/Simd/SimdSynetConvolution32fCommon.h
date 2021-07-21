@@ -85,7 +85,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst)
+            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             assert(p.group == p.srcC && p.group == p.dstC);
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;

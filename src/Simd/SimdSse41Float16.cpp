@@ -44,7 +44,7 @@ namespace Simd
             for (; i < size4; i += 4)
             {
                 __m128i d0 = Float32ToFloat16(_mm_loadu_ps(src + i + 0));
-                _mm_storeu_si64(dst + i, _mm_packus_epi32(d0, K_ZERO));
+                _mm_storel_epi64((__m128i*)(dst + i), _mm_packus_epi32(d0, K_ZERO));
             }
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToFloat16(src[i]);

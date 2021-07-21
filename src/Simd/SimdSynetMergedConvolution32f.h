@@ -187,7 +187,7 @@ namespace Simd
             }
 
             typedef void(*ConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, size_t maC, size_t yBeg, size_t yEnd,
-                const size_t * bufH, const float* weight, const float* bias, const float* params, float* dst);
+                const size_t * bufH, const float* weight, const float* bias, const float* params, float* dst, int first);
 
         protected:
             float* GetBuffer(float* buffer);
@@ -197,7 +197,7 @@ namespace Simd
             virtual void ReorderThirdWeight(const float* src, float* dst) const {}
 
             MergConvParam32f _param;
-            ConvolutionPtr _convolution[6];
+            ConvolutionPtr _convolution[4];
             size_t _sizeS, _sizeD, _sizeB[2];
             Array32f _buffer, _rWeight[3], _rBias[3], _rParams[3];
             const float * _weight[3], * _bias[3], * _params[3];
