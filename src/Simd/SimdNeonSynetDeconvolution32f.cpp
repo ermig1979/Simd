@@ -61,84 +61,11 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        typedef void(*DeconvolutionNhwcDirect2x2_Ptr) (const float * src0, const DeconvParam32f & p, size_t srcC, size_t dstC, const float * weight, const float32x4_t * bias, const float32x4_t * params, float * ds);
-
-        template<TermType term, SimdConvolutionActivationType type> void DeconvolutionNhwcDirect2x2_6(const float * src0,
-            const DeconvParam32f & p, size_t srcC, size_t dstC, const float * weight0, const float32x4_t * bias, const float32x4_t * params, float * dst)
-        {
-            size_t dS = p.srcC, dD = p.dstC;
-            const float * weight1 = weight0 + srcC * F;
-            const float * src1 = src0 + 1 * dS;
-            const float * src2 = src0 + 2 * dS;
-            const float * src3 = src0 + 3 * dS;
-            const float * src4 = src0 + 4 * dS;
-            const float * src5 = src0 + 5 * dS;
-            float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
-            d00 = vdupq_n_f32(0.0f); d01 = vdupq_n_f32(0.0f);
-            d10 = vdupq_n_f32(0.0f); d11 = vdupq_n_f32(0.0f);
-            d20 = vdupq_n_f32(0.0f); d21 = vdupq_n_f32(0.0f);
-            d30 = vdupq_n_f32(0.0f); d31 = vdupq_n_f32(0.0f);
-            d40 = vdupq_n_f32(0.0f); d41 = vdupq_n_f32(0.0f);
-            d50 = vdupq_n_f32(0.0f); d51 = vdupq_n_f32(0.0f);
-            for (size_t sc = 0; sc < srcC; ++sc)
-            {
-                w0 = Load<false>(weight0);
-                w1 = Load<false>(weight1);
-                s0 = vld1q_dup_f32(src0 + sc);
-                d00 = vmlaq_f32(d00, s0, w0);
-                d01 = vmlaq_f32(d01, s0, w1);
-                s0 = vld1q_dup_f32(src1 + sc);
-                d10 = vmlaq_f32(d10, s0, w0);
-                d11 = vmlaq_f32(d11, s0, w1);
-                s0 = vld1q_dup_f32(src2 + sc);
-                d20 = vmlaq_f32(d20, s0, w0);
-                d21 = vmlaq_f32(d21, s0, w1);
-                s0 = vld1q_dup_f32(src3 + sc);
-                d30 = vmlaq_f32(d30, s0, w0);
-                d31 = vmlaq_f32(d31, s0, w1);
-                s0 = vld1q_dup_f32(src4 + sc);
-                d40 = vmlaq_f32(d40, s0, w0);
-                d41 = vmlaq_f32(d41, s0, w1);
-                s0 = vld1q_dup_f32(src5 + sc);
-                d50 = vmlaq_f32(d50, s0, w0);
-                d51 = vmlaq_f32(d51, s0, w1);
-                weight0 += F;
-                weight1 += F;
-            }
-            if (dstC == F)
-            {
-                Term<term>::template Save<type, 0>(dst + 0x0 * dD, d00, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x1 * dD, d01, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x2 * dD, d10, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x3 * dD, d11, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x4 * dD, d20, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x5 * dD, d21, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x6 * dD, d30, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x7 * dD, d31, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x8 * dD, d40, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0x9 * dD, d41, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0xA * dD, d50, bias, params);
-                Term<term>::template Save<type, 0>(dst + 0xB * dD, d51, bias, params);
-            }
-            else
-            {
-                Term<term>::template Save<type, 0>(dst + 0x0 * dD, d00, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x1 * dD, d01, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x2 * dD, d10, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x3 * dD, d11, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x4 * dD, d20, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x5 * dD, d21, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x6 * dD, d30, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x7 * dD, d31, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x8 * dD, d40, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0x9 * dD, d41, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0xA * dD, d50, bias, params, dstC);
-                Term<term>::template Save<type, 0>(dst + 0xB * dD, d51, bias, params, dstC);
-            }
-}
+        typedef void(*DeconvolutionNhwcDirect2x2_Ptr) (const float * src0, const DeconvParam32f & p, size_t srcC, size_t dstC, 
+            const float * weight, const float32x4_t * bias, const float32x4_t * params, float * ds, int first);
 
         template<TermType term, SimdConvolutionActivationType type, size_t tail> void DeconvolutionNhwcDirect2x2_M(const float * src0,
-            const DeconvParam32f & p, size_t srcC, size_t dstC, const float * weight0, const float32x4_t * bias, const float32x4_t * params, float * dst)
+            const DeconvParam32f & p, size_t srcC, size_t dstC, const float * weight0, const float32x4_t * bias, const float32x4_t * params, float * dst, int first)
         {
             size_t dS = p.srcC, dD = p.dstC;
             const float * weight1 = weight0 + srcC * F, *src1, *src2, *src3, *src4, *src5;
@@ -187,16 +114,17 @@ namespace Simd
             }
         }
 
-        template <TermType term, SimdConvolutionActivationType type> SIMD_INLINE DeconvolutionNhwcDirect2x2_Ptr GetTailKernel(size_t tail)
+        template <TermType term, SimdConvolutionActivationType type> SIMD_INLINE DeconvolutionNhwcDirect2x2_Ptr GetDeconvolutionNhwcDirect2x2(size_t tail)
         {
             switch (tail)
             {
-            case 0: return DeconvolutionNhwcDirect2x2_M<term, type, 0>;
+            case 0: return NULL;
             case 1: return DeconvolutionNhwcDirect2x2_M<term, type, 1>;
             case 2: return DeconvolutionNhwcDirect2x2_M<term, type, 2>;
             case 3: return DeconvolutionNhwcDirect2x2_M<term, type, 3>;
             case 4: return DeconvolutionNhwcDirect2x2_M<term, type, 4>;
             case 5: return DeconvolutionNhwcDirect2x2_M<term, type, 5>;
+            case 6: return DeconvolutionNhwcDirect2x2_M<term, type, 6>;
             default:
                 assert(0);
                 return NULL;
@@ -204,11 +132,11 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void DeconvolutionNhwcDirect2x2(const float * src, const DeconvParam32f & p,
-            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst)
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float * weight, const float * bias, const float * params, float * dst, int first)
         {
-            size_t srcW6 = AlignLoAny(p.srcW, 6), tail = p.srcW - srcW6;
-            DeconvolutionNhwcDirect2x2_Ptr bodyKernel = DeconvolutionNhwcDirect2x2_6<term, type>;
-            DeconvolutionNhwcDirect2x2_Ptr tailKernel = GetTailKernel<term, type>(tail);
+            size_t body = 6, srcWb = AlignLoAny(p.srcW, body), tail = p.srcW - srcWb;
+            DeconvolutionNhwcDirect2x2_Ptr bodyKernel = GetDeconvolutionNhwcDirect2x2<term, type>(body);
+            DeconvolutionNhwcDirect2x2_Ptr tailKernel = GetDeconvolutionNhwcDirect2x2<term, type>(tail);
 
             float32x4_t _params[2], _bias[1];
             _params[0] = vdupq_n_f32(params[0]);
@@ -227,14 +155,14 @@ namespace Simd
                 const float * w1 = weight + 1 * p.kernelX * srcC * F;
                 for (size_t sy = yBeg; sy < yEnd; sy += 1, s += p.srcW * p.srcC)
                 {
-                    for (size_t sx = 0; sx < srcW6; sx += 6)
-                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w0, _bias, _params, d), d += 6 * p.strideX * p.dstC;
+                    for (size_t sx = 0; sx < srcWb; sx += body)
+                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w0, _bias, _params, d, first), d += body * p.strideX * p.dstC;
                     if (tail)
-                        tailKernel(s + srcW6 * p.srcC, p, srcC, dC, w0, _bias, _params, d), d += tail * p.strideX * p.dstC;
-                    for (size_t sx = 0; sx < srcW6; sx += 6)
-                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w1, _bias, _params, d), d += 6 * p.strideX * p.dstC;
+                        tailKernel(s + srcWb * p.srcC, p, srcC, dC, w0, _bias, _params, d, first), d += tail * p.strideX * p.dstC;
+                    for (size_t sx = 0; sx < srcWb; sx += body)
+                        bodyKernel(s + sx * p.srcC, p, srcC, dC, w1, _bias, _params, d, first), d += body * p.strideX * p.dstC;
                     if (tail)
-                        tailKernel(s + srcW6 * p.srcC, p, srcC, dC, w1, _bias, _params, d), d += tail * p.strideX * p.dstC;
+                        tailKernel(s + srcWb * p.srcC, p, srcC, dC, w1, _bias, _params, d, first), d += tail * p.strideX * p.dstC;
                 }
                 weight += p.kernelY * p.kernelX*srcC*F;
                 dst += F;
@@ -255,13 +183,13 @@ namespace Simd
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.srcH);
                         if (a.macroC == p.srcC)
-                            DeconvolutionNhwcDirect2x2<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                            DeconvolutionNhwcDirect2x2<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc == 0)
-                            DeconvolutionNhwcDirect2x2<TermFirst, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                            DeconvolutionNhwcDirect2x2<TermFirst, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
                         else if (sc + macroC == p.srcC)
-                            DeconvolutionNhwcDirect2x2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                            DeconvolutionNhwcDirect2x2<TermSingle, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         else
-                            DeconvolutionNhwcDirect2x2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                            DeconvolutionNhwcDirect2x2<TermFirst, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD)*macroK;
