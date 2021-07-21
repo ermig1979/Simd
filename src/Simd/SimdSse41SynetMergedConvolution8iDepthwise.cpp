@@ -476,9 +476,9 @@ namespace Simd
         template<SimdConvolutionActivationType type> static void SetDepthwise(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise)
         {
             if (p.dstT == SimdTensorData32f)
-                SetDepthwise<Term8iSingle32f, type>(p, depthwise);
+                SetDepthwise<Term8iLast32f, type>(p, depthwise);
             else
-                SetDepthwise<Term8iSingle8u, type>(p, depthwise);
+                SetDepthwise<Term8iLast8u, type>(p, depthwise);
         }
 
         void SetDepthwise(const ConvParam8i& p, DepthwiseConvolutionPtr& depthwise)

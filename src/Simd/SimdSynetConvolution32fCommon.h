@@ -34,7 +34,7 @@ namespace Simd
     enum TermType
     {
         TermLast,
-        TermIterim,
+        TermInterim,
         TermSize
     };
 
@@ -233,7 +233,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermIterim>
+        template <> struct Term<TermInterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m128 value, const __m128 * bias, const __m128 * params)
             {
@@ -346,7 +346,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermIterim>
+        template <> struct Term<TermInterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
             {
@@ -513,7 +513,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermIterim>
+        template <> struct Term<TermInterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m256 value, const __m256 * bias, const __m256 * params)
             {
@@ -671,7 +671,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermIterim>
+        template <> struct Term<TermInterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, __m512 value, const __m512 * bias, const __m512 * params, __mmask16 tail = __mmask16(-1))
             {
@@ -766,7 +766,7 @@ namespace Simd
             }
         };
 
-        template <> struct Term<TermIterim>
+        template <> struct Term<TermInterim>
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params)
             {

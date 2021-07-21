@@ -506,18 +506,12 @@ namespace Simd
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf0);
                         _depthwise(buf0, c1, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[1], _bias[1].data + c, 
                             _params[1].data + c * a.dp[1], _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf3);
-                        if (maC == C)
+                        if (c + maC == C)
                             _output[0](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data, 
-                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, NULL, dst);
-                        else if (c == 0)
-                            _output[1](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
-                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
-                        else if (c + maC < C)
-                            _output[2](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
-                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, maC == C ? NULL : buf4, dst, maC == C ? 1 : 0);
                         else
-                            _output[3](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
-                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
+                            _output[1](buf3, c2, a, maC, yBeg2, yEnd2, _weight8i[1].data + c * a.dw[2], _norm[1].data, _bias[2].data,
+                                _params[2].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst, c == 0 ? 1 : 0);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;
@@ -708,18 +702,12 @@ namespace Simd
                                 _cvt[0].iShift.data + c, buf0, a.bufH[1], c0.compatibility);
                         _depthwise(_s8u ? buf0 : (float*)src + c, c0, a, maC, yBeg2, yEnd2, _weight32f.data + c * a.dw[0], _bias[0].data + c,
                             _params[0].data + c * a.dp[0], _cvt[1].scale.data + c, _cvt[1].shift.data + c, buf2);
-                        if (maC == C)
+                        if (c + maC == C)
                             _output[0](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
-                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, NULL, dst);
-                        else if (c == 0)
-                            _output[1](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
-                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
-                        else if (c + maC < C)
-                            _output[2](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
-                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
+                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, maC == C ? NULL : buf4, dst, maC == C ? 1 : 0);
                         else
-                            _output[3](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
-                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst);
+                            _output[1](buf2, c1, a, maC, yBeg2, yEnd2, _weight8i[0].data + c * a.dw[1], _norm[0].data, _bias[1].data,
+                                _params[1].data, _cvt[2].scale.data, _cvt[2].shift.data, buf4, dst, c == 0 ? 1 : 0);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                     }

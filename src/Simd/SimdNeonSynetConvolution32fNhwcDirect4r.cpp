@@ -1170,7 +1170,7 @@ namespace Simd
         template <SimdConvolutionActivationType type> static SIMD_INLINE void Set(const ConvParam32f& p, AlgParam& a)
         {
             Set<TermLast, type>(p, a);
-            Set<TermIterim, SimdConvolutionActivationIdentity>(p, a);
+            Set<TermInterim, SimdConvolutionActivationIdentity>(p, a);
         }
 
         bool SynetConvolution32fNhwcDirect::Set4r(const ConvParam32f& p, AlgParam& a)

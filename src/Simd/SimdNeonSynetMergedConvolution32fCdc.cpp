@@ -1425,7 +1425,7 @@ namespace Simd
 					break;
 				case 2:
 					convolution[2] = OutputConvolution<TermLast, type>;
-					convolution[3] = OutputConvolution<TermIterim, SimdConvolutionActivationIdentity>;
+					convolution[3] = OutputConvolution<TermInterim, SimdConvolutionActivationIdentity>;
 					break;
 				default:
 					assert(0);

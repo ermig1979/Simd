@@ -488,7 +488,7 @@ namespace Simd
                         if (sc + macroC == p.srcC)
                             ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            ConvolutionNhwcDirect_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
+                            ConvolutionNhwcDirect_2<TermInterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD) * macroK;
@@ -682,7 +682,7 @@ namespace Simd
                         if (sc + macroC == p.srcC)
                             ConvolutionNhwcDirect1x1_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            ConvolutionNhwcDirect1x1_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
+                            ConvolutionNhwcDirect1x1_2<TermInterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD) * macroC;

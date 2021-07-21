@@ -1469,7 +1469,7 @@ namespace Simd
                         if (sc + macroC == p.srcC)
                             a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
+                            a.convolutions[TermInterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += a.F * macroC;

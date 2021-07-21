@@ -629,9 +629,9 @@ namespace Simd
 
         template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            Set<Term8iSingle8u, activation>(p, a, d);
-            Set<Term8iSingle32f, activation>(p, a, d);
-            Set<Term8iFirst, SimdConvolutionActivationIdentity>(p, a, d);
+            Set<Term8iLast8u, activation>(p, a, d);
+            Set<Term8iLast32f, activation>(p, a, d);
+            Set<Term8iInterim, SimdConvolutionActivationIdentity>(p, a, d);
         }
 
         static void Set(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)

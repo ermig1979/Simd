@@ -187,7 +187,7 @@ namespace Simd
                 const float* weight, const float* bias, const float* params, const float* scale, const float* shift, uint8_t * dst);
 
             typedef void(*OutputConvolutionPtr)(const uint8_t* src, const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst);
+                const int8_t* weight, const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first);
 
         protected:
             uint8_t* GetBuffer(uint8_t* buffer);
@@ -209,7 +209,7 @@ namespace Simd
             Convert32fTo8uPtr _cvt32fTo8u;
             InputConvolutionPtr _input;
             DepthwiseConvolutionPtr _depthwise;
-            OutputConvolutionPtr _output[4];
+            OutputConvolutionPtr _output[2];
 
         private:
 #if defined(SIMD_PERFORMANCE_STATISTIC)

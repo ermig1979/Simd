@@ -544,12 +544,12 @@ namespace Simd
                         {
                             int first = macroC == p.srcC ? 1 : 0;
                             if (_alg.size == 1)
-                                _convolutions[Term8iSingle8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst, first);
+                                _convolutions[Term8iLast8u](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst, first);
                             else
-                                _convolutions[Term8iSingle32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst, first);
+                                _convolutions[Term8iLast32f](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst, first);
                         }
                         else
-                            _convolutions[Term8iFirst](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst, sc == 0 ? 1 : 0);
+                            _convolutions[Term8iInterim](src + sc, p, _alg, macroD, yBeg, yEnd, macroC, weight, norm, bias, params, scale, shift, buf, dst, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += DivHi(macroC, 4) * _alg.F * 4;

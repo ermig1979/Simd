@@ -384,9 +384,9 @@ namespace Simd
         template<SimdConvolutionActivationType activation> void Set(const ConvParam8i& p, ConvolutionPtr & d)
         {
             if(p.dstT == SimdTensorData8u)
-                Set<Term8iSingle8u, activation>(p, d);
+                Set<Term8iLast8u, activation>(p, d);
             else
-                Set<Term8iSingle32f, activation>(p, d);
+                Set<Term8iLast32f, activation>(p, d);
         }
 
         static void Set(const ConvParam8i& p, ConvolutionPtr & d)

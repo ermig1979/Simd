@@ -41,7 +41,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type, int M> void OutputConvolution1x1_2xM(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight,
-            const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst)
+            const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst, int first)
         {
             __m256i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w0, w1;
             size_t dS = a.maC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
@@ -52,11 +52,22 @@ namespace Simd
             __m256i upper = _mm256_set1_epi32(a.upper);
             if (dstC > F)
             {
-                if (M > 0) d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
-                if (M > 1) d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
-                if (M > 2) d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
-                if (M > 3) d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
-                if (M > 4) d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
+                if (first)
+                {
+                    if (M > 0) d00 = _mm256_setzero_si256(), d01 = _mm256_setzero_si256();
+                    if (M > 1) d10 = _mm256_setzero_si256(), d11 = _mm256_setzero_si256();
+                    if (M > 2) d20 = _mm256_setzero_si256(), d21 = _mm256_setzero_si256();
+                    if (M > 3) d30 = _mm256_setzero_si256(), d31 = _mm256_setzero_si256();
+                    if (M > 4) d40 = _mm256_setzero_si256(), d41 = _mm256_setzero_si256();
+                }
+                else
+                {
+                    if (M > 0) d00 = _mm256_loadu_si256((__m256i*)(buf + 0 * dB + 0)), d01 = _mm256_loadu_si256((__m256i*)(buf + 0 * dB + F));
+                    if (M > 1) d10 = _mm256_loadu_si256((__m256i*)(buf + 1 * dB + 0)), d11 = _mm256_loadu_si256((__m256i*)(buf + 1 * dB + F));
+                    if (M > 2) d20 = _mm256_loadu_si256((__m256i*)(buf + 2 * dB + 0)), d21 = _mm256_loadu_si256((__m256i*)(buf + 2 * dB + F));
+                    if (M > 3) d30 = _mm256_loadu_si256((__m256i*)(buf + 3 * dB + 0)), d31 = _mm256_loadu_si256((__m256i*)(buf + 3 * dB + F));
+                    if (M > 4) d40 = _mm256_loadu_si256((__m256i*)(buf + 4 * dB + 0)), d41 = _mm256_loadu_si256((__m256i*)(buf + 4 * dB + F));
+                }
                 if (Base::Overflow(p.compatibility) || Base::Narrowed(p.compatibility))
                 {
                     for (size_t offs = 0; offs < srcC; offs += 4)
@@ -126,11 +137,22 @@ namespace Simd
             }
             else
             {
-                if (M > 0) d00 = _mm256_setzero_si256();
-                if (M > 1) d10 = _mm256_setzero_si256();
-                if (M > 2) d20 = _mm256_setzero_si256();
-                if (M > 3) d30 = _mm256_setzero_si256();
-                if (M > 4) d40 = _mm256_setzero_si256();
+                if (first)
+                {
+                    if (M > 0) d00 = _mm256_setzero_si256();
+                    if (M > 1) d10 = _mm256_setzero_si256();
+                    if (M > 2) d20 = _mm256_setzero_si256();
+                    if (M > 3) d30 = _mm256_setzero_si256();
+                    if (M > 4) d40 = _mm256_setzero_si256();
+                }
+                else
+                {
+                    if (M > 0) d00 = _mm256_loadu_si256((__m256i*)(buf + 0 * dB + 0));
+                    if (M > 1) d10 = _mm256_loadu_si256((__m256i*)(buf + 1 * dB + 0));
+                    if (M > 2) d20 = _mm256_loadu_si256((__m256i*)(buf + 2 * dB + 0));
+                    if (M > 3) d30 = _mm256_loadu_si256((__m256i*)(buf + 3 * dB + 0));
+                    if (M > 4) d40 = _mm256_loadu_si256((__m256i*)(buf + 4 * dB + 0));
+                }
                 if (Base::Overflow(p.compatibility) || Base::Narrowed(p.compatibility))
                 {
                     for (size_t offs = 0; offs < srcC; offs += 4)
@@ -199,7 +221,7 @@ namespace Simd
         }
 
         typedef void(*OutputConvolution1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC,
-            const int8_t* weight0, const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst);
+            const int8_t* weight0, const __m256* norm, const __m256* bias, const __m256* params, const __m256* scale, const __m256* shift, int32_t* buf, uint8_t* dst, int first);
 
         template<Term8iType term, SimdConvolutionActivationType type> OutputConvolution1x1_2xM_Ptr GetOutputConvolution1x1_2xM(size_t M)
         {
@@ -218,7 +240,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type> void OutputConvolution1x1_2(const uint8_t* src,
             const ConvParam8i& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const int8_t* weight,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
+            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t n = 5, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             OutputConvolution1x1_2xM_Ptr outputConvolution1x1_2xN = GetOutputConvolution1x1_2xM<term, type>(n);
@@ -247,9 +269,9 @@ namespace Simd
                 int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
                 for (; i < nn; i += n, s += a.maC * n, b += p.dstC * n, d += p.dstC * a.size * n)
-                    outputConvolution1x1_2xN(s, p, a, maC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
+                    outputConvolution1x1_2xN(s, p, a, maC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
                 for (; i < n1; i += m, s += a.maC * m, b += p.dstC * m, d += p.dstC * a.size * m)
-                    outputConvolution1x1_2xM(s, p, a, maC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
+                    outputConvolution1x1_2xM(s, p, a, maC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
                 weight += DivHi(maC, 4) * DA;
             }
         }
@@ -258,10 +280,8 @@ namespace Simd
 
         template<SimdConvolutionActivationType type> static void SetOutput(const ConvParam8i& p, OutputConvolutionPtr* output)
         {
-            output[0] = p.dstT == SimdTensorData32f ? OutputConvolution1x1_2<Term8iSingle32f, type> : OutputConvolution1x1_2<Term8iSingle8u, type>;
-            output[1] = OutputConvolution1x1_2<Term8iFirst, SimdConvolutionActivationIdentity>;
-            output[2] = OutputConvolution1x1_2<Term8iIterim, SimdConvolutionActivationIdentity>;
-            output[3] = p.dstT == SimdTensorData32f ? OutputConvolution1x1_2<Term8iLast32f, type> : OutputConvolution1x1_2<Term8iLast8u, type>;
+            output[0] = p.dstT == SimdTensorData32f ? OutputConvolution1x1_2<Term8iLast32f, type> : OutputConvolution1x1_2<Term8iLast8u, type>;
+            output[1] = OutputConvolution1x1_2<Term8iInterim, SimdConvolutionActivationIdentity>;
         }
 
         void SetOutput(const ConvParam8i& p, OutputConvolutionPtr* output)

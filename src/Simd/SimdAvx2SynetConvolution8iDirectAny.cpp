@@ -541,9 +541,9 @@ namespace Simd
 
         template<SimdConvolutionActivationType activation> void SetDirectAny(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
         {
-            SetDirectAny<Term8iSingle8u, activation>(p, a, d);
-            SetDirectAny<Term8iSingle32f, activation>(p, a, d);
-            SetDirectAny<Term8iFirst, SimdConvolutionActivationIdentity>(p, a, d);
+            SetDirectAny<Term8iLast8u, activation>(p, a, d);
+            SetDirectAny<Term8iLast32f, activation>(p, a, d);
+            SetDirectAny<Term8iInterim, SimdConvolutionActivationIdentity>(p, a, d);
         }
 
         void SetDirectAny(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)
