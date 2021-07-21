@@ -364,8 +364,6 @@ namespace Simd
             size_t _count, _size, _batch, _sizeS, _sizeD;
         }; 
 
-#define SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
-
         class SynetConvolution32fNhwcDirect : public SynetConvolution32f
         {
         public:
@@ -390,9 +388,7 @@ namespace Simd
                 size_t stepW;
             };
 
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             typedef void(*OldConvolutionPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, const float* weight, const float* bias, const float* params, float* dst);
-#endif
 
         protected:
             size_t _sizeS, _sizeD;
@@ -439,7 +435,6 @@ namespace Simd
             typedef Runtime<RunFunc, RunArgs> RuntimeRun;
             RuntimeRun _run;
 
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             struct Old
             {
                 bool enable;
@@ -449,7 +444,6 @@ namespace Simd
             } _old;
             void OldSetAlgParam(size_t F);
             void OldReorderWeight(const float* src, float* dst);
-#endif
 
             void SetAlgParam(size_t F, size_t N, AlgParam & alg);
             void ReorderWeight(const float* src, float* dst);

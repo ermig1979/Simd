@@ -577,7 +577,6 @@ namespace Simd
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
             : Base::SynetConvolution32fNhwcDirect(p)
         {
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             //_old.enable = true;
             if (_old.enable)
             {
@@ -585,7 +584,6 @@ namespace Simd
                     OldSetAlgParam(F);
             }
             else
-#endif
             {
                 RunFuncs funcs;
                 for (size_t n = 2; n <= 4; ++n)

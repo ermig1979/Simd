@@ -1357,7 +1357,6 @@ namespace Simd
         {
             _sizeS = p.srcC*p.srcH*p.srcW;
             _sizeD = p.dstC*p.dstH*p.dstW;
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             _old.enable = false;
             if (p.IsDilation(1))
             {
@@ -1367,22 +1366,18 @@ namespace Simd
                     _old.enable = true;
             }
             _old.convolution = NULL;
-#endif
         }
 
         size_t SynetConvolution32fNhwcDirect::InternalBufferSize() const
         {
             size_t size = _buffer.size + _rWeight.size + _rBias.size + _rParams.size;
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             size += _old.weight.size;
-#endif
             return size;
         }
 
         void SynetConvolution32fNhwcDirect::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
         {
             SynetConvolution32f::SetParams(weight, internal, bias, params);
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             if (_old.enable && _old.weight.data)
             {
                 OldReorderWeight(weight, _old.weight.data);
@@ -1391,7 +1386,6 @@ namespace Simd
                     *internal = SimdTrue;
             }
             else
-#endif
             if (_rWeight.data)
             {
                 ReorderWeight(weight, _rWeight.data);
@@ -1452,11 +1446,9 @@ namespace Simd
             const ConvParam32f & p = _param;
             for (size_t b = 0; b < p.batch; ++b)
             {
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
                 if(_old.enable)
                     _old.convolution(src, _param, _old.alg, _weight, _bias, _params, dst);
                 else
-#endif
                 _run.Run(RunArgs(src, _param, _weight, _bias, _params, dst));
                 src += _sizeS;
                 dst += _sizeD;
@@ -1474,14 +1466,10 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < p.dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
-                        if (a.macroC == p.srcC)
-                            a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
-                        else if (sc == 0)
-                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
-                        else if (sc + macroC == p.srcC)
-                            a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                        if (sc + macroC == p.srcC)
+                            a.convolutions[TermLast](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                            a.convolutions[TermIterim](src + sc, p, a, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += a.F * macroC;
@@ -1542,7 +1530,6 @@ namespace Simd
             }
         }
 
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
         void SynetConvolution32fNhwcDirect::OldSetAlgParam(size_t F)
         {
             const ConvParam32f& p = _param;
@@ -1599,7 +1586,6 @@ namespace Simd
                 }
             }
         }
-#endif
 
         bool SynetConvolution32fNhwcDirect::Preferable(const ConvParam32f & p)
         {

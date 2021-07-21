@@ -692,7 +692,6 @@ namespace Simd
         {
             if (p.dstC <= Sse2::F)
                 return;
-#ifdef SIMD_SYNET_CONVOLUTION_NHWC_DIRECT_OLD
             //_old.enable = true;
             if (_old.enable)
             {
@@ -700,7 +699,6 @@ namespace Simd
                     OldSetAlgParam(F);
             }
             else
-#endif
             {
                 RunFuncs funcs;
                 for (size_t n = 2; n <= 3; ++n)

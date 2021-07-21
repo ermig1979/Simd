@@ -41,7 +41,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(
             const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC, const int8_t* weight0,
-            const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst)
+            const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first)
         {
             __m512i d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, d60, d61, d70, d71, d80, d81, d90, d91, dA0, dA1, dB0, dB1, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dD = p.dstC * a.size, dB = p.dstC;
@@ -54,18 +54,36 @@ namespace Simd
             __m128i upper = _mm_set1_epi32(a.upper);
             if (dstC > F)
             {
-                if (M > 0x0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
-                if (M > 0x1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
-                if (M > 0x2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
-                if (M > 0x3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
-                if (M > 0x4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
-                if (M > 0x5) d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
-                if (M > 0x6) d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
-                if (M > 0x7) d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
-                if (M > 0x8) d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
-                if (M > 0x9) d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
-                if (M > 0xA) dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
-                if (M > 0xB) dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
+                if (first)
+                {
+                    if (M > 0x0) d00 = _mm512_setzero_si512(), d01 = _mm512_setzero_si512();
+                    if (M > 0x1) d10 = _mm512_setzero_si512(), d11 = _mm512_setzero_si512();
+                    if (M > 0x2) d20 = _mm512_setzero_si512(), d21 = _mm512_setzero_si512();
+                    if (M > 0x3) d30 = _mm512_setzero_si512(), d31 = _mm512_setzero_si512();
+                    if (M > 0x4) d40 = _mm512_setzero_si512(), d41 = _mm512_setzero_si512();
+                    if (M > 0x5) d50 = _mm512_setzero_si512(), d51 = _mm512_setzero_si512();
+                    if (M > 0x6) d60 = _mm512_setzero_si512(), d61 = _mm512_setzero_si512();
+                    if (M > 0x7) d70 = _mm512_setzero_si512(), d71 = _mm512_setzero_si512();
+                    if (M > 0x8) d80 = _mm512_setzero_si512(), d81 = _mm512_setzero_si512();
+                    if (M > 0x9) d90 = _mm512_setzero_si512(), d91 = _mm512_setzero_si512();
+                    if (M > 0xA) dA0 = _mm512_setzero_si512(), dA1 = _mm512_setzero_si512();
+                    if (M > 0xB) dB0 = _mm512_setzero_si512(), dB1 = _mm512_setzero_si512();
+                }
+                else
+                {
+                    if (M > 0x0) d00 = _mm512_loadu_si512(buf + 0x0 * dB + 0), d01 = _mm512_loadu_si512(buf + 0x0 * dB + F);
+                    if (M > 0x1) d10 = _mm512_loadu_si512(buf + 0x1 * dB + 0), d11 = _mm512_loadu_si512(buf + 0x1 * dB + F);
+                    if (M > 0x2) d20 = _mm512_loadu_si512(buf + 0x2 * dB + 0), d21 = _mm512_loadu_si512(buf + 0x2 * dB + F);
+                    if (M > 0x3) d30 = _mm512_loadu_si512(buf + 0x3 * dB + 0), d31 = _mm512_loadu_si512(buf + 0x3 * dB + F);
+                    if (M > 0x4) d40 = _mm512_loadu_si512(buf + 0x4 * dB + 0), d41 = _mm512_loadu_si512(buf + 0x4 * dB + F);
+                    if (M > 0x5) d50 = _mm512_loadu_si512(buf + 0x5 * dB + 0), d51 = _mm512_loadu_si512(buf + 0x5 * dB + F);
+                    if (M > 0x6) d60 = _mm512_loadu_si512(buf + 0x6 * dB + 0), d61 = _mm512_loadu_si512(buf + 0x6 * dB + F);
+                    if (M > 0x7) d70 = _mm512_loadu_si512(buf + 0x7 * dB + 0), d71 = _mm512_loadu_si512(buf + 0x7 * dB + F);
+                    if (M > 0x8) d80 = _mm512_loadu_si512(buf + 0x8 * dB + 0), d81 = _mm512_loadu_si512(buf + 0x8 * dB + F);
+                    if (M > 0x9) d90 = _mm512_loadu_si512(buf + 0x9 * dB + 0), d91 = _mm512_loadu_si512(buf + 0x9 * dB + F);
+                    if (M > 0xA) dA0 = _mm512_loadu_si512(buf + 0xA * dB + 0), dA1 = _mm512_loadu_si512(buf + 0xA * dB + F);
+                    if (M > 0xB) dB0 = _mm512_loadu_si512(buf + 0xB * dB + 0), dB1 = _mm512_loadu_si512(buf + 0xB * dB + F);
+                }
                 if (Base::Overflow(p.compatibility) || Base::Narrowed(p.compatibility))
                 {
                     for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
@@ -142,18 +160,36 @@ namespace Simd
             }
             else
             {
-                if (M > 0x0) d00 = _mm512_setzero_si512();
-                if (M > 0x1) d10 = _mm512_setzero_si512();
-                if (M > 0x2) d20 = _mm512_setzero_si512();
-                if (M > 0x3) d30 = _mm512_setzero_si512();
-                if (M > 0x4) d40 = _mm512_setzero_si512();
-                if (M > 0x5) d50 = _mm512_setzero_si512();
-                if (M > 0x6) d60 = _mm512_setzero_si512();
-                if (M > 0x7) d70 = _mm512_setzero_si512();
-                if (M > 0x8) d80 = _mm512_setzero_si512();
-                if (M > 0x9) d90 = _mm512_setzero_si512();
-                if (M > 0xA) dA0 = _mm512_setzero_si512();
-                if (M > 0xB) dB0 = _mm512_setzero_si512();
+                if (first)
+                {
+                    if (M > 0x0) d00 = _mm512_setzero_si512();
+                    if (M > 0x1) d10 = _mm512_setzero_si512();
+                    if (M > 0x2) d20 = _mm512_setzero_si512();
+                    if (M > 0x3) d30 = _mm512_setzero_si512();
+                    if (M > 0x4) d40 = _mm512_setzero_si512();
+                    if (M > 0x5) d50 = _mm512_setzero_si512();
+                    if (M > 0x6) d60 = _mm512_setzero_si512();
+                    if (M > 0x7) d70 = _mm512_setzero_si512();
+                    if (M > 0x8) d80 = _mm512_setzero_si512();
+                    if (M > 0x9) d90 = _mm512_setzero_si512();
+                    if (M > 0xA) dA0 = _mm512_setzero_si512();
+                    if (M > 0xB) dB0 = _mm512_setzero_si512();
+                }
+                else
+                {
+                    if (M > 0x0) d00 = _mm512_loadu_si512(buf + 0x0 * dB + 0);
+                    if (M > 0x1) d10 = _mm512_loadu_si512(buf + 0x1 * dB + 0);
+                    if (M > 0x2) d20 = _mm512_loadu_si512(buf + 0x2 * dB + 0);
+                    if (M > 0x3) d30 = _mm512_loadu_si512(buf + 0x3 * dB + 0);
+                    if (M > 0x4) d40 = _mm512_loadu_si512(buf + 0x4 * dB + 0);
+                    if (M > 0x5) d50 = _mm512_loadu_si512(buf + 0x5 * dB + 0);
+                    if (M > 0x6) d60 = _mm512_loadu_si512(buf + 0x6 * dB + 0);
+                    if (M > 0x7) d70 = _mm512_loadu_si512(buf + 0x7 * dB + 0);
+                    if (M > 0x8) d80 = _mm512_loadu_si512(buf + 0x8 * dB + 0);
+                    if (M > 0x9) d90 = _mm512_loadu_si512(buf + 0x9 * dB + 0);
+                    if (M > 0xA) dA0 = _mm512_loadu_si512(buf + 0xA * dB + 0);
+                    if (M > 0xB) dB0 = _mm512_loadu_si512(buf + 0xB * dB + 0);
+                }
                 if (Base::Overflow(p.compatibility) || Base::Narrowed(p.compatibility))
                 {
                     for (size_t offs0 = 0, offs6 = offs0 + 6 * dS; offs0 < srcC; offs0 += 4, offs6 += 4)
@@ -229,7 +265,7 @@ namespace Simd
         }
 
         typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const uint8_t* src0, const ConvParam8i& p, const AlgParam& a, size_t srcC, size_t dstC,
-            const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst);
+            const int8_t* weight0, const __m512* norm, const __m512* bias, const __m512* params, const __m512* scale, const __m512* shift, int32_t* buf, uint8_t* dst, int first);
 
         template<Term8iType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
         {
@@ -255,7 +291,7 @@ namespace Simd
 
         template<Term8iType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const uint8_t* src,
             const ConvParam8i& p, const AlgParam& a, size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const int8_t* weight,
-            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst)
+            const float* norm, const float* bias, const float* params, const float* scale, const float* shift, int32_t* buf, uint8_t* dst, int first)
         {
             size_t n = 12, n1 = (yEnd - yBeg) * p.dstW, nn = AlignLoAny(n1, n), m = n1 - nn;
             ConvolutionNhwcDirect1x1_2xM_Ptr convolutionNhwcDirect1x1_2xN = GetConvolutionNhwcDirect1x1_2xM<term, type>(n);
@@ -284,9 +320,9 @@ namespace Simd
                 int32_t* b = buf + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
                 for (; i < nn; i += n, s += p.srcC * n, b += p.dstC * n, d += p.dstC * a.size * n)
-                    convolutionNhwcDirect1x1_2xN(s, p, a, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
+                    convolutionNhwcDirect1x1_2xN(s, p, a, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
                 for (; i < n1; i += m, s += p.srcC * m, b += p.dstC * m, d += p.dstC * a.size * m)
-                    convolutionNhwcDirect1x1_2xM(s, p, a, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d);
+                    convolutionNhwcDirect1x1_2xM(s, p, a, srcC, dC, weight, _norm, _bias, _params, _scale, _shift, b, d, first);
                 weight += DivHi(p.srcC, 4) * DA;
             }
         }
@@ -304,9 +340,6 @@ namespace Simd
             SetDirect1x1<Term8iSingle8u, activation>(p, a, d);
             SetDirect1x1<Term8iSingle32f, activation>(p, a, d);
             SetDirect1x1<Term8iFirst, SimdConvolutionActivationIdentity>(p, a, d);
-            SetDirect1x1<Term8iIterim, SimdConvolutionActivationIdentity>(p, a, d);
-            SetDirect1x1<Term8iLast8u, activation>(p, a, d);
-            SetDirect1x1<Term8iLast32f, activation>(p, a, d);
         }
 
         void SetDirect1x1(const ConvParam8i& p, const AlgParam& a, ConvolutionPtr* d)

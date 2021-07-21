@@ -33,7 +33,7 @@ namespace Simd
         using AlgParam = SynetConvolution32fNhwcDirect::AlgParam;
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x6(const float* src0, const ConvParam32f& p,
-            size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst)
+            size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst, int first)
         {
             float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dW = DF * (p.kernelX - kernelW) * srcC, dY = p.srcW * p.srcC, dX = p.srcC, dD = p.dstC;
@@ -44,12 +44,24 @@ namespace Simd
             const float* src5 = src0 + 5 * dS;
             if (dstC > F)
             {
-                d00 = vdupq_n_f32(0.0f); d01 = vdupq_n_f32(0.0f);
-                d10 = vdupq_n_f32(0.0f); d11 = vdupq_n_f32(0.0f);
-                d20 = vdupq_n_f32(0.0f); d21 = vdupq_n_f32(0.0f);
-                d30 = vdupq_n_f32(0.0f); d31 = vdupq_n_f32(0.0f);
-                d40 = vdupq_n_f32(0.0f); d41 = vdupq_n_f32(0.0f);
-                d50 = vdupq_n_f32(0.0f); d51 = vdupq_n_f32(0.0f);
+                if (first)
+                {
+                    d00 = vdupq_n_f32(0.0f); d01 = vdupq_n_f32(0.0f);
+                    d10 = vdupq_n_f32(0.0f); d11 = vdupq_n_f32(0.0f);
+                    d20 = vdupq_n_f32(0.0f); d21 = vdupq_n_f32(0.0f);
+                    d30 = vdupq_n_f32(0.0f); d31 = vdupq_n_f32(0.0f);
+                    d40 = vdupq_n_f32(0.0f); d41 = vdupq_n_f32(0.0f);
+                    d50 = vdupq_n_f32(0.0f); d51 = vdupq_n_f32(0.0f);
+                }
+                else
+                {
+                    d00 = Load<false>(dst + 0 * dD + 0), d01 = Load<false>(dst + 0 * dD + F);
+                    d10 = Load<false>(dst + 1 * dD + 0), d11 = Load<false>(dst + 1 * dD + F);
+                    d20 = Load<false>(dst + 2 * dD + 0), d21 = Load<false>(dst + 2 * dD + F);
+                    d30 = Load<false>(dst + 3 * dD + 0), d31 = Load<false>(dst + 3 * dD + F);
+                    d40 = Load<false>(dst + 4 * dD + 0), d41 = Load<false>(dst + 4 * dD + F);
+                    d50 = Load<false>(dst + 5 * dD + 0), d51 = Load<false>(dst + 5 * dD + F);
+                }
                 for (size_t ky = 0; ky < kernelH; ++ky)
                 {
                     for (size_t kx = 0; kx < kernelW; ++kx)
@@ -125,12 +137,24 @@ namespace Simd
             }
             else
             {
-                d00 = vdupq_n_f32(0.0f);
-                d10 = vdupq_n_f32(0.0f);
-                d20 = vdupq_n_f32(0.0f);
-                d30 = vdupq_n_f32(0.0f);
-                d40 = vdupq_n_f32(0.0f);
-                d50 = vdupq_n_f32(0.0f);
+                if (first)
+                {
+                    d00 = vdupq_n_f32(0.0f);
+                    d10 = vdupq_n_f32(0.0f);
+                    d20 = vdupq_n_f32(0.0f);
+                    d30 = vdupq_n_f32(0.0f);
+                    d40 = vdupq_n_f32(0.0f);
+                    d50 = vdupq_n_f32(0.0f);
+                }
+                else
+                {
+                    d00 = Load<false>(dst + 0 * dD + 0);
+                    d10 = Load<false>(dst + 1 * dD + 0);
+                    d20 = Load<false>(dst + 2 * dD + 0);
+                    d30 = Load<false>(dst + 3 * dD + 0);
+                    d40 = Load<false>(dst + 4 * dD + 0);
+                    d50 = Load<false>(dst + 5 * dD + 0);
+                }
                 for (size_t ky = 0; ky < kernelH; ++ky)
                 {
                     for (size_t kx = 0; kx < kernelW; ++kx)
@@ -187,7 +211,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x3(const float* src0, const ConvParam32f& p,
-            size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst)
+            size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst, int first)
         {
             float32x4_t d00, d01, d10, d11, d20, d21, s0, w0, w1;
             size_t dS = p.srcC * p.strideX, dW = DF * (p.kernelX - kernelW) * srcC, dY = p.srcW * p.srcC, dX = p.srcC, dD = p.dstC;
@@ -195,9 +219,18 @@ namespace Simd
             const float* src2 = src0 + 2 * dS;
             if (dstC > F)
             {
-                d00 = vdupq_n_f32(0.0f); d01 = vdupq_n_f32(0.0f);
-                d10 = vdupq_n_f32(0.0f); d11 = vdupq_n_f32(0.0f);
-                d20 = vdupq_n_f32(0.0f); d21 = vdupq_n_f32(0.0f);
+                if (first)
+                {
+                    d00 = vdupq_n_f32(0.0f); d01 = vdupq_n_f32(0.0f);
+                    d10 = vdupq_n_f32(0.0f); d11 = vdupq_n_f32(0.0f);
+                    d20 = vdupq_n_f32(0.0f); d21 = vdupq_n_f32(0.0f);
+                }
+                else
+                {
+                    d00 = Load<false>(dst + 0 * dD + 0), d01 = Load<false>(dst + 0 * dD + F);
+                    d10 = Load<false>(dst + 1 * dD + 0), d11 = Load<false>(dst + 1 * dD + F);
+                    d20 = Load<false>(dst + 2 * dD + 0), d21 = Load<false>(dst + 2 * dD + F);
+                }
                 for (size_t ky = 0; ky < kernelH; ++ky)
                 {
                     for (size_t kx = 0; kx < kernelW; ++kx)
@@ -246,9 +279,18 @@ namespace Simd
             }
             else
             {
-                d00 = vdupq_n_f32(0.0f);
-                d10 = vdupq_n_f32(0.0f);
-                d20 = vdupq_n_f32(0.0f);
+                if (first)
+                {
+                    d00 = vdupq_n_f32(0.0f);
+                    d10 = vdupq_n_f32(0.0f);
+                    d20 = vdupq_n_f32(0.0f);
+                }
+                else
+                {
+                    d00 = Load<false>(dst + 0 * dD + 0);
+                    d10 = Load<false>(dst + 1 * dD + 0);
+                    d20 = Load<false>(dst + 2 * dD + 0);
+                }
                 for (size_t ky = 0; ky < kernelH; ++ky)
                 {
                     for (size_t kx = 0; kx < kernelW; ++kx)
@@ -287,14 +329,16 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2x1(const float* src0, const ConvParam32f& p,
-            size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst)
+            size_t kernelH, size_t kernelW, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst, int first)
         {
             float32x4_t d00, d01, s0, w0, w1;
             size_t dW = DF * (p.kernelX - kernelW) * srcC, dY = p.srcW * p.srcC, dX = p.srcC;
             if (dstC > F)
             {
-                d00 = vdupq_n_f32(0.0f);
-                d01 = vdupq_n_f32(0.0f);
+                if (first)
+                    d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                else
+                    d00 = Load<false>(dst + 0), d01 = Load<false>(dst + F);
                 for (size_t ky = 0; ky < kernelH; ++ky)
                 {
                     for (size_t kx = 0; kx < kernelW; ++kx)
@@ -324,7 +368,10 @@ namespace Simd
             }
             else
             {
-                d00 = vdupq_n_f32(0.0f);
+                if (first)
+                    d00 = vdupq_n_f32(0.0f);
+                else
+                    d00 = Load<false>(dst + 0);
                 for (size_t ky = 0; ky < kernelH; ++ky)
                 {
                     for (size_t kx = 0; kx < kernelW; ++kx)
@@ -347,7 +394,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float* src, const ConvParam32f& p,
-            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             size_t noseH = p.padY, noseW = p.padX;
             size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
@@ -379,15 +426,15 @@ namespace Simd
                     const float* s = src;
                     const float* w = weight + (noseH - sy) * p.kernelX * srcC * DF;
                     for (; sx < noseW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s, p, kY + sy, kX + sx, srcC, dC, w + (noseW - sx) * srcC * DF, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s, p, kY + sy, kX + sx, srcC, dC, w + (noseW - sx) * srcC * DF, _bias, _params, d, first);
                     for (; sx < bodyW6; sx += 6 * p.strideX, d += 6 * p.dstC)
-                        ConvolutionNhwcDirect_2x6<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x6<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < bodyW3; sx += 3 * p.strideX, d += 3 * p.dstC)
-                        ConvolutionNhwcDirect_2x3<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x3<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < bodyW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < tailW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, kW - sx, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kY + sy, kW - sx, srcC, dC, w, _bias, _params, d, first);
                 }
                 for (; sy < bodyH && dy < yEnd; sy += p.strideY, dy++)
                 {
@@ -395,15 +442,15 @@ namespace Simd
                     const float* s = src + (sy - noseH) * p.srcW * p.srcC;
                     const float* w = weight;
                     for (; sx < noseW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s, p, p.kernelY, kX + sx, srcC, dC, w + (noseW - sx) * srcC * DF, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s, p, p.kernelY, kX + sx, srcC, dC, w + (noseW - sx) * srcC * DF, _bias, _params, d, first);
                     for (; sx < bodyW6; sx += 6 * p.strideX, d += 6 * p.dstC)
-                        ConvolutionNhwcDirect_2x6<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x6<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < bodyW3; sx += 3 * p.strideX, d += 3 * p.dstC)
-                        ConvolutionNhwcDirect_2x3<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x3<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < bodyW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < tailW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, kW - sx, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, p.kernelY, kW - sx, srcC, dC, w, _bias, _params, d, first);
                 }
                 for (; sy < tailH && dy < yEnd; sy += p.strideY, dy++)
                 {
@@ -411,15 +458,15 @@ namespace Simd
                     const float* s = src + (sy - noseH) * p.srcW * p.srcC;
                     const float* w = weight;
                     for (; sx < noseW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s, p, kH - sy, kX + sx, srcC, dC, w + (noseW - sx) * srcC * DF, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s, p, kH - sy, kX + sx, srcC, dC, w + (noseW - sx) * srcC * DF, _bias, _params, d, first);
                     for (; sx < bodyW6; sx += 6 * p.strideX, d += 6 * p.dstC)
-                        ConvolutionNhwcDirect_2x6<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x6<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < bodyW3; sx += 3 * p.strideX, d += 3 * p.dstC)
-                        ConvolutionNhwcDirect_2x3<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x3<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < bodyW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, p.kernelX, srcC, dC, w, _bias, _params, d, first);
                     for (; sx < tailW; sx += p.strideX, d += p.dstC)
-                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, kW - sx, srcC, dC, w, _bias, _params, d);
+                        ConvolutionNhwcDirect_2x1<term, type>(s + (sx - noseW) * p.srcC, p, kH - sy, kW - sx, srcC, dC, w, _bias, _params, d, first);
                 }
                 weight += p.kernelY * p.kernelX * srcC * DF;
             }
@@ -438,14 +485,10 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < p.dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
-                        if (a.macroC == p.srcC)
-                            ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
-                        else if (sc == 0)
-                            ConvolutionNhwcDirect_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
-                        else if (sc + macroC == p.srcC)
-                            ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                        if (sc + macroC == p.srcC)
+                            ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            ConvolutionNhwcDirect_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                            ConvolutionNhwcDirect_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD) * macroK;
@@ -457,148 +500,8 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2x6(const float* src0, const ConvParam32f& p,
-            size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst)
-        {
-            float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
-            size_t dS = p.srcC, dD = p.dstC;
-            const float* src1 = src0 + 1 * dS;
-            const float* src2 = src0 + 2 * dS;
-            const float* src3 = src0 + 3 * dS;
-            const float* src4 = src0 + 4 * dS;
-            const float* src5 = src0 + 5 * dS;
-            if (dstC > F)
-            {
-                d00 = vdupq_n_f32(0.0f); d01 = vdupq_n_f32(0.0f);
-                d10 = vdupq_n_f32(0.0f); d11 = vdupq_n_f32(0.0f);
-                d20 = vdupq_n_f32(0.0f); d21 = vdupq_n_f32(0.0f);
-                d30 = vdupq_n_f32(0.0f); d31 = vdupq_n_f32(0.0f);
-                d40 = vdupq_n_f32(0.0f); d41 = vdupq_n_f32(0.0f);
-                d50 = vdupq_n_f32(0.0f); d51 = vdupq_n_f32(0.0f);
-                for (size_t offset = 0; offset < srcC; ++offset)
-                {
-                    w0 = Load<false>(weight + 0);
-                    w1 = Load<false>(weight + F);
-                    s0 = vdupq_n_f32(src0[offset]);
-                    d00 = vmlaq_f32(d00, s0, w0);
-                    d01 = vmlaq_f32(d01, s0, w1);
-                    s0 = vdupq_n_f32(src1[offset]);
-                    d10 = vmlaq_f32(d10, s0, w0);
-                    d11 = vmlaq_f32(d11, s0, w1);
-                    s0 = vdupq_n_f32(src2[offset]);
-                    d20 = vmlaq_f32(d20, s0, w0);
-                    d21 = vmlaq_f32(d21, s0, w1);
-                    s0 = vdupq_n_f32(src3[offset]);
-                    d30 = vmlaq_f32(d30, s0, w0);
-                    d31 = vmlaq_f32(d31, s0, w1);
-                    s0 = vdupq_n_f32(src4[offset]);
-                    d40 = vmlaq_f32(d40, s0, w0);
-                    d41 = vmlaq_f32(d41, s0, w1);
-                    s0 = vdupq_n_f32(src5[offset]);
-                    d50 = vmlaq_f32(d50, s0, w0);
-                    d51 = vmlaq_f32(d51, s0, w1);
-                    weight += DF;
-                }
-                if (dstC == DF)
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d41, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d51, bias, params);
-                }
-                else
-                {
-                    dstC -= F;
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d01, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d11, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d21, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d31, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d41, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
-                    Term<term>::template Save<type, 1>(dst + F, d51, bias, params, dstC);
-                }
-            }
-            else
-            {
-                d00 = vdupq_n_f32(0.0f);
-                d10 = vdupq_n_f32(0.0f);
-                d20 = vdupq_n_f32(0.0f);
-                d30 = vdupq_n_f32(0.0f);
-                d40 = vdupq_n_f32(0.0f);
-                d50 = vdupq_n_f32(0.0f);
-                for (size_t offset = 0; offset < srcC; ++offset)
-                {
-                    w0 = Load<false>(weight + 0);
-                    s0 = vdupq_n_f32(src0[offset]);
-                    d00 = vmlaq_f32(d00, s0, w0);
-                    s0 = vdupq_n_f32(src1[offset]);
-                    d10 = vmlaq_f32(d10, s0, w0);
-                    s0 = vdupq_n_f32(src2[offset]);
-                    d20 = vmlaq_f32(d20, s0, w0);
-                    s0 = vdupq_n_f32(src3[offset]);
-                    d30 = vmlaq_f32(d30, s0, w0);
-                    s0 = vdupq_n_f32(src4[offset]);
-                    d40 = vmlaq_f32(d40, s0, w0);
-                    s0 = vdupq_n_f32(src5[offset]);
-                    d50 = vmlaq_f32(d50, s0, w0);
-                    weight += DF;
-                }
-                if (dstC == F)
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params);
-                }
-                else
-                {
-                    Term<term>::template Save<type, 0>(dst + 0, d00, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d10, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d20, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d30, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d40, bias, params, dstC);
-                    dst += dD;
-                    Term<term>::template Save<type, 0>(dst + 0, d50, bias, params, dstC);
-                }
-            }
-        }
-
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionNhwcDirect1x1_2xM(const float* src0, const ConvParam32f& p,
-            size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst)
+            size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst, int first)
         {
             float32x4_t d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51, s0, w0, w1;
             size_t dS = p.srcC, dD = p.dstC;
@@ -609,12 +512,24 @@ namespace Simd
             const float* src5 = src0 + 5 * dS;
             if (dstC > F)
             {
-                if (M > 0) d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
-                if (M > 1) d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
-                if (M > 2) d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
-                if (M > 3) d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
-                if (M > 4) d40 = vdupq_n_f32(0.0f), d41 = vdupq_n_f32(0.0f);
-                if (M > 5) d50 = vdupq_n_f32(0.0f), d51 = vdupq_n_f32(0.0f);
+                if (first)
+                {
+                    if (M > 0x0) d00 = vdupq_n_f32(0.0f), d01 = vdupq_n_f32(0.0f);
+                    if (M > 0x1) d10 = vdupq_n_f32(0.0f), d11 = vdupq_n_f32(0.0f);
+                    if (M > 0x2) d20 = vdupq_n_f32(0.0f), d21 = vdupq_n_f32(0.0f);
+                    if (M > 0x3) d30 = vdupq_n_f32(0.0f), d31 = vdupq_n_f32(0.0f);
+                    if (M > 0x4) d40 = vdupq_n_f32(0.0f), d41 = vdupq_n_f32(0.0f);
+                    if (M > 0x5) d50 = vdupq_n_f32(0.0f), d51 = vdupq_n_f32(0.0f);
+                }
+                else
+                {
+                    if (M > 0x0) d00 = Load<false>(dst + 0x0 * dD + 0), d01 = Load<false>(dst + 0x0 * dD + F);
+                    if (M > 0x1) d10 = Load<false>(dst + 0x1 * dD + 0), d11 = Load<false>(dst + 0x1 * dD + F);
+                    if (M > 0x2) d20 = Load<false>(dst + 0x2 * dD + 0), d21 = Load<false>(dst + 0x2 * dD + F);
+                    if (M > 0x3) d30 = Load<false>(dst + 0x3 * dD + 0), d31 = Load<false>(dst + 0x3 * dD + F);
+                    if (M > 0x4) d40 = Load<false>(dst + 0x4 * dD + 0), d41 = Load<false>(dst + 0x4 * dD + F);
+                    if (M > 0x5) d50 = Load<false>(dst + 0x5 * dD + 0), d51 = Load<false>(dst + 0x5 * dD + F);
+                } 
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
                     w0 = Load<false>(weight + 0);
@@ -649,12 +564,24 @@ namespace Simd
             }
             else
             {
-                if (M > 0) d00 = vdupq_n_f32(0.0f);
-                if (M > 1) d10 = vdupq_n_f32(0.0f);
-                if (M > 2) d20 = vdupq_n_f32(0.0f);
-                if (M > 3) d30 = vdupq_n_f32(0.0f);
-                if (M > 4) d40 = vdupq_n_f32(0.0f);
-                if (M > 5) d50 = vdupq_n_f32(0.0f);
+                if (first)
+                {
+                    if (M > 0x0) d00 = vdupq_n_f32(0.0f);
+                    if (M > 0x1) d10 = vdupq_n_f32(0.0f);
+                    if (M > 0x2) d20 = vdupq_n_f32(0.0f);
+                    if (M > 0x3) d30 = vdupq_n_f32(0.0f);
+                    if (M > 0x4) d40 = vdupq_n_f32(0.0f);
+                    if (M > 0x5) d50 = vdupq_n_f32(0.0f);
+                }
+                else
+                {
+                    if (M > 0x0) d00 = Load<false>(dst + 0x0 * dD + 0);
+                    if (M > 0x1) d10 = Load<false>(dst + 0x1 * dD + 0);
+                    if (M > 0x2) d20 = Load<false>(dst + 0x2 * dD + 0);
+                    if (M > 0x3) d30 = Load<false>(dst + 0x3 * dD + 0);
+                    if (M > 0x4) d40 = Load<false>(dst + 0x4 * dD + 0);
+                    if (M > 0x5) d50 = Load<false>(dst + 0x5 * dD + 0);
+                }
                 for (size_t offset = 0; offset < srcC; ++offset)
                 {
                     w0 = Load<false>(weight + 0);
@@ -687,29 +614,31 @@ namespace Simd
             }
         }
 
-        typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const float* src0, const ConvParam32f& p, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst);
+        typedef void(*ConvolutionNhwcDirect1x1_2xM_Ptr)(const float* src0, const ConvParam32f& p, size_t srcC, size_t dstC, const float* weight, const float32x4_t* bias, const float32x4_t* params, float* dst, int first);
 
         template<TermType term, SimdConvolutionActivationType type> ConvolutionNhwcDirect1x1_2xM_Ptr GetConvolutionNhwcDirect1x1_2xM(size_t M)
         {
             switch (M)
             {
-            case 0: return ConvolutionNhwcDirect1x1_2xM<term, type, 0>;
+            case 0: return NULL;
             case 1: return ConvolutionNhwcDirect1x1_2xM<term, type, 1>;
             case 2: return ConvolutionNhwcDirect1x1_2xM<term, type, 2>;
             case 3: return ConvolutionNhwcDirect1x1_2xM<term, type, 3>;
             case 4: return ConvolutionNhwcDirect1x1_2xM<term, type, 4>;
             case 5: return ConvolutionNhwcDirect1x1_2xM<term, type, 5>;
+            case 6: return ConvolutionNhwcDirect1x1_2xM<term, type, 6>;
             }
             assert(0);
             return NULL;
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect1x1_2(const float* src, const ConvParam32f& p,
-            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
             size_t n1 = (yEnd - yBeg) * p.dstW;
             size_t n6 = AlignLoAny(n1, 6);
             size_t nTail = n1 - n6;
+            ConvolutionNhwcDirect1x1_2xM_Ptr bodyN = GetConvolutionNhwcDirect1x1_2xM<term, type>(6);
             ConvolutionNhwcDirect1x1_2xM_Ptr tailN = GetConvolutionNhwcDirect1x1_2xM<term, type>(nTail);
 
             float32x4_t _params[2], _bias[2];
@@ -731,9 +660,9 @@ namespace Simd
                 float* pd = dst + dc + yBeg * p.dstW * p.dstC;
                 size_t i = 0;
                 for (; i < n6; i += 6, ps += 6 * p.srcC, pd += 6 * p.dstC)
-                    ConvolutionNhwcDirect1x1_2x6<term, type>(ps, p, srcC, dC, weight, _bias, _params, pd);
+                    bodyN(ps, p, srcC, dC, weight, _bias, _params, pd, first);
                 if (nTail)
-                    tailN(ps, p, srcC, dC, weight, _bias, _params, pd), ps += nTail * p.srcC, pd += nTail * p.dstC;
+                    tailN(ps, p, srcC, dC, weight, _bias, _params, pd, first), ps += nTail * p.srcC, pd += nTail * p.dstC;
                 weight += srcC * DF;
             }
         }
@@ -750,14 +679,10 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < p.dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
-                        if (a.macroC == p.srcC)
-                            ConvolutionNhwcDirect1x1_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
-                        else if (sc == 0)
-                            ConvolutionNhwcDirect1x1_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
-                        else if (sc + macroC == p.srcC)
-                            ConvolutionNhwcDirect1x1_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                        if (sc + macroC == p.srcC)
+                            ConvolutionNhwcDirect1x1_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            ConvolutionNhwcDirect1x1_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc);
+                            ConvolutionNhwcDirect1x1_2<TermIterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD) * macroC;
