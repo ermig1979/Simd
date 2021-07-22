@@ -242,7 +242,7 @@ namespace Simd
             size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
             size_t n = 6;
             size_t bodyWn = bodyW < noseW ? 0 : AlignLoAny(bodyW - noseW, n * p.strideX) + noseW;
-            size_t m = (bodyW - bodyWn) / p.strideX;
+            size_t m = (DivHi(bodyW, p.strideX) - DivHi(noseW, p.strideX)) % n;
             size_t tailH = bodyH + p.padH, tailW = bodyW + p.padW;
             size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2x1 = ConvolutionNhwcDirect_2x1<term, type>;
