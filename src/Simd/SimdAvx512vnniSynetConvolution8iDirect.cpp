@@ -53,8 +53,10 @@ namespace Simd
             ConvParam8i param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
+#if defined(SIMD_INT8_DEBUG_ENABLE)
             else if (SynetConvolution8iNhwcDepthwise::Preferable(param))
                 return new SynetConvolution8iNhwcDepthwise(param);
+#endif
             else if (SynetConvolution8iNhwcDirect::Preferable(param))
                 return new SynetConvolution8iNhwcDirect(param);
             else

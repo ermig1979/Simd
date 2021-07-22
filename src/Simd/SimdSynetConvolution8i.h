@@ -298,6 +298,7 @@ namespace Simd
 
         void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
+#if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Base::SynetConvolution8iNhwcDepthwise
         {
         public:
@@ -307,6 +308,7 @@ namespace Simd
 
             static bool Preferable(const ConvParam8i& p);
         };
+#endif
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
@@ -327,6 +329,7 @@ namespace Simd
 
         void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
+#if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Sse41::SynetConvolution8iNhwcDepthwise
         {
         public:
@@ -334,6 +337,7 @@ namespace Simd
 
             virtual String Ext() const { return "Avx2"; }
         };
+#endif
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
@@ -354,6 +358,7 @@ namespace Simd
 
         void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
+#if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Avx2::SynetConvolution8iNhwcDepthwise
         {
         public:
@@ -361,6 +366,7 @@ namespace Simd
 
             virtual String Ext() const { return "Avx512bw"; }
         };
+#endif
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
@@ -381,6 +387,7 @@ namespace Simd
 
         void SetDirect1x1(const ConvParam8i& p, const SynetConvolution8iNhwcDirect::AlgParam& a, SynetConvolution8iNhwcDirect::ConvolutionPtr* d);
 
+#if defined(SIMD_INT8_DEBUG_ENABLE)
         class SynetConvolution8iNhwcDepthwise : public Avx512bw::SynetConvolution8iNhwcDepthwise
         {
         public:
@@ -388,6 +395,7 @@ namespace Simd
 
             virtual String Ext() const { return "Avx512vnni"; }
         };
+#endif
 
         void* SynetConvolution8iInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }

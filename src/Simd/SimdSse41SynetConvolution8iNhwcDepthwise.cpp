@@ -31,7 +31,7 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) && defined(SIMD_INT8_DEBUG_ENABLE) 
     namespace Sse41
     {
         using AlgParam = SynetConvolution8iNhwcDepthwise::AlgParam;
