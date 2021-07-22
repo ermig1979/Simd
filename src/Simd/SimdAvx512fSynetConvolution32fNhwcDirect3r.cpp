@@ -533,15 +533,30 @@ namespace Simd
             }
             else if (tails[1])
             {
-                if (M > 0) d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
-                if (M > 1) d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
-                if (M > 2) d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
-                if (M > 3) d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
-                if (M > 4) d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
-                if (M > 5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
-                if (M > 6) d60 = _mm512_setzero_ps(), d61 = _mm512_setzero_ps();
-                if (M > 7) d70 = _mm512_setzero_ps(), d71 = _mm512_setzero_ps();
-                if (M > 8) d80 = _mm512_setzero_ps(), d81 = _mm512_setzero_ps();
+                if (first)
+                {
+                    if (M > 0) d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
+                    if (M > 1) d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
+                    if (M > 2) d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
+                    if (M > 3) d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
+                    if (M > 4) d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
+                    if (M > 5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
+                    if (M > 6) d60 = _mm512_setzero_ps(), d61 = _mm512_setzero_ps();
+                    if (M > 7) d70 = _mm512_setzero_ps(), d71 = _mm512_setzero_ps();
+                    if (M > 8) d80 = _mm512_setzero_ps(), d81 = _mm512_setzero_ps();
+                }
+                else
+                {
+                    if (M > 0) d00 = _mm512_loadu_ps(dst + 0 * dD + 0 * F), d01 = _mm512_loadu_ps(dst + 0 * dD + 1 * F);
+                    if (M > 1) d10 = _mm512_loadu_ps(dst + 1 * dD + 0 * F), d11 = _mm512_loadu_ps(dst + 1 * dD + 1 * F);
+                    if (M > 2) d20 = _mm512_loadu_ps(dst + 2 * dD + 0 * F), d21 = _mm512_loadu_ps(dst + 2 * dD + 1 * F);
+                    if (M > 3) d30 = _mm512_loadu_ps(dst + 3 * dD + 0 * F), d31 = _mm512_loadu_ps(dst + 3 * dD + 1 * F);
+                    if (M > 4) d40 = _mm512_loadu_ps(dst + 4 * dD + 0 * F), d41 = _mm512_loadu_ps(dst + 4 * dD + 1 * F);
+                    if (M > 5) d50 = _mm512_loadu_ps(dst + 5 * dD + 0 * F), d51 = _mm512_loadu_ps(dst + 5 * dD + 1 * F);
+                    if (M > 6) d60 = _mm512_loadu_ps(dst + 6 * dD + 0 * F), d61 = _mm512_loadu_ps(dst + 6 * dD + 1 * F);
+                    if (M > 7) d70 = _mm512_loadu_ps(dst + 7 * dD + 0 * F), d71 = _mm512_loadu_ps(dst + 7 * dD + 1 * F);
+                    if (M > 8) d80 = _mm512_loadu_ps(dst + 8 * dD + 0 * F), d81 = _mm512_loadu_ps(dst + 8 * dD + 1 * F);
+                }
                 for (size_t off0 = 0, off5 = 5 * dS, offw = 0; off0 < srcC; ++off0, ++off5, offw += F)
                 {
                     w0 = _mm512_loadu_ps(weight0 + offw);

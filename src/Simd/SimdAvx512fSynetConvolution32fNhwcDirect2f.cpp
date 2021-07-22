@@ -315,13 +315,16 @@ namespace Simd
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionNhwcDirect_2(const float* src, const ConvParam32f& p,
             size_t dstC, size_t yBeg, size_t yEnd, size_t srcC, const float* weight, const float* bias, const float* params, float* dst, int first)
         {
-            size_t noseH = p.NoseH(), noseW = p.NoseW(), bodyH = p.BodyH(), bodyW = p.BodyW();
-            size_t n = 14, bodyWn = AlignLoAny(bodyW - noseW, n) + noseW, m = bodyW - bodyWn;
+            size_t noseH = p.padY, noseW = p.padX;
+            size_t bodyH = p.srcH - p.kernelY + 1 + noseH, bodyW = p.srcW - p.kernelX + 1 + noseW;
+            size_t n = 14;
+            size_t bodyWn = bodyW < noseW ? 0 : AlignLoAny(bodyW - noseW, n * p.strideX) + noseW;
+            size_t m = (bodyW - bodyWn) / p.strideX;
+            size_t tailH = bodyH + p.padH, tailW = bodyW + p.padW;
+            size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2x1 = ConvolutionNhwcDirect_2x1<term, type>;
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xN = GetConvolutionNhwcDirect_2xM<term, type>(n);
             ConvolutionNhwcDirect_2xM_Ptr convolutionNhwcDirect_2xM = GetConvolutionNhwcDirect_2xM<term, type>(m);
-            size_t tailH = p.dstH, tailW = p.dstW;
-            size_t kY = p.kernelY - noseH, kX = p.kernelX - noseW, kH = bodyH + p.kernelY - 1, kW = bodyW + p.kernelX - 1;
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -345,7 +348,7 @@ namespace Simd
                 {
                     size_t sx = 0;
                     const float* s = src;
-                    const float* w = weight + (noseH - sy) * p.kernelX * srcC * DF;
+                    const float* w = weight + (p.padY - sy) * p.kernelX * srcC * DF;
                     for (; sx < noseW; sx += p.strideX, d += p.dstC)
                         convolutionNhwcDirect_2x1(s, p, kY + sy, kX + sx, srcC, w + (noseW - sx) * srcC * DF, _bias, _params, d, tails, first);
                     for (; sx < bodyWn; sx += n * p.strideX, d += n * p.dstC)
@@ -400,14 +403,10 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < p.dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
-                        if (a.macroC == p.srcC)
-                            ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
-                        else if (sc == 0)
-                            ConvolutionNhwcDirect_2<TermInterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 1);
-                        else if (sc + macroC == p.srcC)
-                            ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                        if (sc + macroC == p.srcC)
+                            ConvolutionNhwcDirect_2<TermLast, type>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, macroC == p.srcC ? 1 : 0);
                         else
-                            ConvolutionNhwcDirect_2<TermInterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, 0);
+                            ConvolutionNhwcDirect_2<TermInterim, SimdConvolutionActivationIdentity>(src + sc, p, macroD, yBeg, yEnd, macroC, weight, bias + dc, params, dst + dc, sc == 0 ? 1 : 0);
                         yBeg = yEnd;
                     }
                     weight += AlignHiAny(macroD, a.microD) * macroK;
