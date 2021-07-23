@@ -463,9 +463,9 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Avx2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -498,9 +498,9 @@ SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, si
         Avx2::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -528,9 +528,9 @@ SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t 
         Avx2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable)
-        Ssse3::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE

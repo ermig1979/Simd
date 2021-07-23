@@ -102,9 +102,9 @@ namespace Test
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Ssse3::AlphaBlending), FUNC_AB(SimdAlphaBlending));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse41::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -206,9 +206,9 @@ namespace Test
             result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Sse2::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Ssse3::AlphaFilling), FUNC_AF(SimdAlphaFilling));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Sse41::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
@@ -296,9 +296,9 @@ namespace Test
             result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Sse2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Ssse3::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Sse41::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

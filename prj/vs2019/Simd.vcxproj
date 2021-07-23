@@ -74,9 +74,7 @@
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdShift.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdSse2.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSse3.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
-    <ClInclude Include="..\..\src\Simd\SimdSse42.h" />
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
