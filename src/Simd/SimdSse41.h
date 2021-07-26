@@ -43,6 +43,8 @@ namespace Simd
 
         void BayerToBgr(const uint8_t* bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t* bgr, size_t bgrStride);
 
+        void BgraToBayer(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
+
         uint32_t Crc32c(const void* src, size_t size);
 
         void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,

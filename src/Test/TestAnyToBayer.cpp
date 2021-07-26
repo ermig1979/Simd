@@ -117,9 +117,9 @@ namespace Test
 
         result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Base::BgraToBayer), FUNC(SimdBgraToBayer));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Ssse3::BgraToBayer), FUNC(SimdBgraToBayer));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToBayerAutoTest(View::Bgra32, FUNC(Simd::Sse41::BgraToBayer), FUNC(SimdBgraToBayer));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE

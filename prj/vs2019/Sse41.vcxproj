@@ -12,6 +12,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />

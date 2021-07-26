@@ -891,9 +891,9 @@ SIMD_API void SimdBgraToBayer(const uint8_t * bgra, size_t width, size_t height,
         Avx512bw::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::BgraToBayer(bgra, width, height, bgraStride, bayer, bayerStride, bayerFormat);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE

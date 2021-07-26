@@ -100,6 +100,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBayer.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
