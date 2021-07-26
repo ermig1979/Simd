@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE  
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE  
+    namespace Sse41
     {
         __m128i K8_SHUFFLE_GR_0 = SIMD_MM_SETR_EPI8(0x1, 0x5, 0x7, 0xB, 0xD, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         __m128i K8_SHUFFLE_GR_1 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, 0x1, 0x3, 0x7, 0x9, 0xD, 0xF, -1, -1, -1, -1, -1);
@@ -121,5 +121,5 @@ namespace Simd
                 BgrToBayer<false>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

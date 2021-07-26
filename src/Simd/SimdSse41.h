@@ -58,6 +58,8 @@ namespace Simd
         void BgraToYuva420p(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
             uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, uint8_t* a, size_t aStride);
 
+        void BgrToBayer(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* bayer, size_t bayerStride, SimdPixelFormatType bayerFormat);
+
         uint32_t Crc32c(const void* src, size_t size);
 
         void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,
