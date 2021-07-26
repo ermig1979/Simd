@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void SaveBgr(const __m128i src[3], uint8_t * dst)
         {
@@ -103,5 +103,5 @@ namespace Simd
                 BayerToBgr<false>(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

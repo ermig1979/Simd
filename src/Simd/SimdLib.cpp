@@ -846,9 +846,9 @@ SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height,
         Avx2::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::A + 2)
-        Ssse3::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A + 2)
+        Sse41::BayerToBgr(bayer, width, height, bayerStride, bayerFormat, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
