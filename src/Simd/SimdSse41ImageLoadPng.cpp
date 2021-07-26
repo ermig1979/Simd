@@ -26,7 +26,7 @@
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
-#include "Simd/SimdSsse3.h"
+#include "Simd/SimdSse41.h"
 
 namespace Simd
 {
@@ -1780,13 +1780,13 @@ namespace Simd
                         Sse2::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
                         break;
                     case SimdPixelFormatBgr24:
-                        Ssse3::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
+                        Sse41::BgraToRgb(data, x, y, stride, _image.data, _image.stride);
                         break;
                     case SimdPixelFormatBgra32:
-                        Ssse3::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
+                        Sse41::BgraToRgba(data, x, y, stride, _image.data, _image.stride);
                         break;
                     case SimdPixelFormatRgb24:
-                        Ssse3::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
+                        Sse41::BgraToBgr(data, x, y, stride, _image.data, _image.stride);
                         break;
                     case SimdPixelFormatRgba32:
                         Base::Copy(data, stride, x, y, 4, _image.data, _image.stride);

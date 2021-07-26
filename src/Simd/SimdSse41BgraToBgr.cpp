@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE  
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE  
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void BgraToBgrBody(const uint8_t * bgra, uint8_t * bgr, __m128i k[3][2])
         {
@@ -161,5 +161,5 @@ namespace Simd
                 BgraToRgba<false>(bgra, width, height, bgraStride, rgba, rgbaStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }
