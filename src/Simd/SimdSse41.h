@@ -64,6 +64,8 @@ namespace Simd
 
         void BgrToGray(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* gray, size_t grayStride);
 
+        void BgrToRgb(const uint8_t* bgr, size_t width, size_t height, size_t bgrStride, uint8_t* rgb, size_t rgbStride);
+
         uint32_t Crc32c(const void* src, size_t size);
 
         void DetectionHaarDetect32fp(const void * hid, const uint8_t * mask, size_t maskStride,

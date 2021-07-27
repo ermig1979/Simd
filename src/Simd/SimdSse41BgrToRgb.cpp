@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         const __m128i K8_CVT_00 = SIMD_MM_SETR_EPI8(0x2, 0x1, 0x0, 0x5, 0x4, 0x3, 0x8, 0x7, 0x6, 0xB, 0xA, 0x9, 0xE, 0xD, 0xC, -1);
         const __m128i K8_CVT_01 = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x1);
@@ -76,5 +76,5 @@ namespace Simd
                 BgrToRgb<false>(bgr, width, height, bgrStride, rgb, rgbStride);
         }
     }
-#endif//SIMD_SSSE3_ENABLE
+#endif
 }

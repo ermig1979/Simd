@@ -270,9 +270,9 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Bgr24, View::Rgb24, FUNC_O(Simd::Base::BgrToRgb), FUNC_O(SimdBgrToRgb));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AnyToAnyAutoTest(View::Bgr24, View::Rgb24, FUNC_O(Simd::Ssse3::BgrToRgb), FUNC_O(SimdBgrToRgb));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Bgr24, View::Rgb24, FUNC_O(Simd::Sse41::BgrToRgb), FUNC_O(SimdBgrToRgb));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

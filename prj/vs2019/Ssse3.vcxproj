@@ -10,7 +10,6 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3BgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Deinterleave.cpp" />

@@ -1293,9 +1293,9 @@ SIMD_API void SimdBgrToRgb(const uint8_t *bgr, size_t width, size_t height, size
         Avx2::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::BgrToRgb(bgr, width, height, bgrStride, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

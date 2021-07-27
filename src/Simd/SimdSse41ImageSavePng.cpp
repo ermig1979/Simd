@@ -354,7 +354,7 @@ namespace Simd
             : Base::ImagePngSaver(param)
         {
             if (_param.format == SimdPixelFormatBgr24)
-                _convert = Ssse3::BgrToRgb;
+                _convert = Sse41::BgrToRgb;
             else if (_param.format == SimdPixelFormatBgra32)
                 _convert = Sse41::BgraToRgba;
             _encode[0] = Sse41::EncodeLine0;

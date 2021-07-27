@@ -18,6 +18,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToRgb.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
