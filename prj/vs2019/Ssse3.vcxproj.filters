@@ -49,9 +49,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3Texture.cpp">
       <Filter>Ssse3</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Transform.cpp">
-      <Filter>Ssse3</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp">
       <Filter>Ssse3</Filter>
     </ClCompile>

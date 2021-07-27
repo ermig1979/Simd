@@ -49,6 +49,7 @@
  <li>Reducing of compilation time and binaries size of class SynetMergedConvolution32f.</li>
  <li>Reducing of compilation time and binaries size of class SynetConvolution8i.</li>
  <li>Reducing of compilation time and binaries size of class SynetMergedConvolution8i.</li>
+ <li>SSE41 optimizations of function TransformImage (case of BGR, BGRA for Rotate90, Rotate270, TransposeRotate180).</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -86,6 +87,7 @@
  <li>Replace SSSE3 optimizations to SSE4.1 for function BgrToGray.</li>
  <li>Replace SSSE3 optimizations to SSE4.1 for function RgbToGray.</li>
  <li>Replace SSSE3 optimizations to SSE4.1 for function BgrToRgb.</li>
+ <li>Replace SSSE3 optimizations to SSE4.1 for function TransformImage.</li>
 </ul>
 
 <h4>Tests</h4>

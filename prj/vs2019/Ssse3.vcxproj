@@ -27,7 +27,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Texture.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp" />
   </ItemGroup>
   <ItemGroup>
