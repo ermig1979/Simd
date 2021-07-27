@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void LoadBgr(const __m128i * p, __m128i & blue, __m128i & green, __m128i & red)
         {
@@ -225,5 +225,5 @@ namespace Simd
                 BgrToYuv444p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

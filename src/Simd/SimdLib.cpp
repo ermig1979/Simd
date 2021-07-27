@@ -1318,9 +1318,9 @@ SIMD_API void SimdBgrToYuv420p(const uint8_t * bgr, size_t width, size_t height,
         Avx2::BgrToYuv420p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::DA)
-        Ssse3::BgrToYuv420p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::BgrToYuv420p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1348,9 +1348,9 @@ SIMD_API void SimdBgrToYuv422p(const uint8_t * bgr, size_t width, size_t height,
         Avx2::BgrToYuv422p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::DA)
-        Ssse3::BgrToYuv422p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::BgrToYuv422p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1378,9 +1378,9 @@ SIMD_API void SimdBgrToYuv444p(const uint8_t * bgr, size_t width, size_t height,
         Avx2::BgrToYuv444p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::BgrToYuv444p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::BgrToYuv444p(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE

@@ -208,9 +208,9 @@ namespace Test
 
         result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC_YUV(Simd::Base::BgrToYuv420p), FUNC_YUV(SimdBgrToYuv420p));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::DA)
-            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC_YUV(Simd::Ssse3::BgrToYuv420p), FUNC_YUV(SimdBgrToYuv420p));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 2, FUNC_YUV(Simd::Sse41::BgrToYuv420p), FUNC_YUV(SimdBgrToYuv420p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -242,9 +242,9 @@ namespace Test
 
         result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC_YUV(Simd::Base::BgrToYuv422p), FUNC_YUV(SimdBgrToYuv422p));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::DA)
-            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC_YUV(Simd::Ssse3::BgrToYuv422p), FUNC_YUV(SimdBgrToYuv422p));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
+            result = result && AnyToYuvAutoTest(View::Bgr24, 2, 1, FUNC_YUV(Simd::Sse41::BgrToYuv422p), FUNC_YUV(SimdBgrToYuv422p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -276,9 +276,9 @@ namespace Test
 
         result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC_YUV(Simd::Base::BgrToYuv444p), FUNC_YUV(SimdBgrToYuv444p));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC_YUV(Simd::Ssse3::BgrToYuv444p), FUNC_YUV(SimdBgrToYuv444p));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToYuvAutoTest(View::Bgr24, 1, 1, FUNC_YUV(Simd::Sse41::BgrToYuv444p), FUNC_YUV(SimdBgrToYuv444p));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
