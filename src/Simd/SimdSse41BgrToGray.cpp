@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE  
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE  
+    namespace Sse41
     {
         const __m128i K16_BLUE_RED = SIMD_MM_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);
         const __m128i K16_GREEN_ROUND = SIMD_MM_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, Base::BGR_TO_GRAY_ROUND_TERM);
@@ -144,5 +144,5 @@ namespace Simd
                 RgbToGray<false>(rgb, width, height, rgbStride, gray, grayStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

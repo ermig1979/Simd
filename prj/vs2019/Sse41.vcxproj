@@ -17,6 +17,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41BgrToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
@@ -55,6 +56,7 @@
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
