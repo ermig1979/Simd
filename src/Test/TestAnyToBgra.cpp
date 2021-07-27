@@ -86,9 +86,9 @@ namespace Test
 
         result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Base::BgrToBgra), FUNC(SimdBgrToBgra));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Ssse3::BgrToBgra), FUNC(SimdBgrToBgra));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToBgraAutoTest(View::Bgr24, FUNC(Simd::Sse41::BgrToBgra), FUNC(SimdBgrToBgra));
 #endif 
 
 #if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
@@ -154,9 +154,9 @@ namespace Test
 
         result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Base::RgbToBgra), FUNC(SimdRgbToBgra));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Ssse3::RgbToBgra), FUNC(SimdRgbToBgra));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToBgraAutoTest(View::Rgb24, FUNC(Simd::Sse41::RgbToBgra), FUNC(SimdRgbToBgra));
 #endif 
 
 #if defined(SIMD_AVX2_ENABLE) && !defined(SIMD_CLANG_AVX2_BGR_TO_BGRA_ERROR)
