@@ -22,6 +22,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41BgrToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />

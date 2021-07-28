@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdImageSaveJpeg.h"
-#include "Simd/SimdSsse3.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
@@ -415,11 +415,11 @@ namespace Simd
             {
             case SimdPixelFormatBgr24:
             case SimdPixelFormatRgb24:
-                _deintBgr = _param.width < 16 ? Base::DeinterleaveBgr : Ssse3::DeinterleaveBgr;
+                _deintBgr = _param.width < 16 ? Base::DeinterleaveBgr : Sse41::DeinterleaveBgr;
                 break;
             case SimdPixelFormatBgra32:
             case SimdPixelFormatRgba32:
-                _deintBgra = _param.width < 16 ? Base::DeinterleaveBgra : Ssse3::DeinterleaveBgra;
+                _deintBgra = _param.width < 16 ? Base::DeinterleaveBgra : Sse41::DeinterleaveBgra;
                 break;
             default: 
                 break;

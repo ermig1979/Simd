@@ -184,9 +184,9 @@ namespace Test
 
         result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Base::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Ssse3::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && DeinterleaveBgrAutoTest(FUNC3(Simd::Sse41::DeinterleaveBgr), FUNC3(SimdDeinterleaveBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -291,9 +291,9 @@ namespace Test
 
         result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Base::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Ssse3::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && DeinterleaveBgraAutoTest(FUNC4(Simd::Sse41::DeinterleaveBgra), FUNC4(SimdDeinterleaveBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

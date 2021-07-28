@@ -51,6 +51,7 @@
  <li>Reducing of compilation time and binaries size of class SynetMergedConvolution8i.</li>
  <li>SSE41 optimizations of function TransformImage (case of Bgr24, Bgra32 for Rotate90, Rotate270, TransposeRotate180).</li>
  <li>SSE41 optimizations of function TransformImage (case of Uv16 for Rotate90, Rotate270, TransposeRotate0, TransposeRotate180).</li>
+ <li>SSE41 optimizations of function TransformImage (case of Gray8 for Rotate90, Rotate270, TransposeRotate0, TransposeRotate180).</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
@@ -92,6 +93,8 @@
  <li>Replace SSSE3 optimizations to SSE4.1 for function BgrToYuv420p.</li>
  <li>Replace SSSE3 optimizations to SSE4.1 for function BgrToYuv422p.</li>
  <li>Replace SSSE3 optimizations to SSE4.1 for function BgrToYuv444p.</li>
+ <li>Replace SSSE3 optimizations to SSE4.1 for function DeinterleaveBgr.</li>
+ <li>Replace SSSE3 optimizations to SSE4.1 for function DeinterleaveBgra.</li>
 </ul>
 
 <h4>Tests</h4>

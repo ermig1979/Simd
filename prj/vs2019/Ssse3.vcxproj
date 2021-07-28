@@ -11,7 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSsse3Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Interleave.cpp" />
