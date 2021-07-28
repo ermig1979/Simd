@@ -503,23 +503,23 @@ namespace Simd
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatGray8>(const uint8_t * src, const __m256 * scale, const __m256 * shift, float * dst)
         {
             __m128i gray0 = Sse2::Load<false>((__m128i*)src + 0);
-            __m128i bgr0 = _mm_shuffle_epi8(gray0, Ssse3::K8_SHUFFLE_GRAY_TO_BGR0);
+            __m128i bgr0 = _mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR0);
             StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr0, 0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr0, 8)), scale[1], shift[1]);
-            __m128i bgr1 = _mm_shuffle_epi8(gray0, Ssse3::K8_SHUFFLE_GRAY_TO_BGR1);
+            __m128i bgr1 = _mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR1);
             StoreScaled<false>(dst + 0x2 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr1, 0)), scale[2], shift[2]);
             StoreScaled<false>(dst + 0x3 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr1, 8)), scale[0], shift[0]);
-            __m128i bgr2 = _mm_shuffle_epi8(gray0, Ssse3::K8_SHUFFLE_GRAY_TO_BGR2);
+            __m128i bgr2 = _mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR2);
             StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr2, 0)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr2, 8)), scale[2], shift[2]);
             __m128i gray1 = Sse2::Load<false>((__m128i*)src + 1);
-            __m128i bgr3 = _mm_shuffle_epi8(gray1, Ssse3::K8_SHUFFLE_GRAY_TO_BGR0);
+            __m128i bgr3 = _mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR0);
             StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr3, 0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr3, 8)), scale[1], shift[1]);
-            __m128i bgr4 = _mm_shuffle_epi8(gray1, Ssse3::K8_SHUFFLE_GRAY_TO_BGR1);
+            __m128i bgr4 = _mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR1);
             StoreScaled<false>(dst + 0x8 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr4, 0)), scale[2], shift[2]);
             StoreScaled<false>(dst + 0x9 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr4, 8)), scale[0], shift[0]);
-            __m128i bgr5 = _mm_shuffle_epi8(gray1, Ssse3::K8_SHUFFLE_GRAY_TO_BGR2);
+            __m128i bgr5 = _mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR2);
             StoreScaled<false>(dst + 0xA * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr5, 0)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0xB * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr5, 8)), scale[2], shift[2]);
         }

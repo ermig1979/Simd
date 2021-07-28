@@ -181,5 +181,5 @@ namespace Simd
                 LaplaceAbsSum<false>(src, srcStride, width, height, sum);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

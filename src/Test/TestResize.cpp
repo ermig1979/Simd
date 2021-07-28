@@ -486,9 +486,9 @@ namespace Test
             result = result && ResizeSpecialTest(FUNC_RB(Simd::Sse2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Ssse3::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && ResizeSpecialTest(FUNC_RB(Simd::Sse41::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageLoad.h"
 #include "Simd/SimdSse2.h"
-#include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 
 #include <memory>
@@ -49,7 +48,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Sse41::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Sse2::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Sse41::GrayToBgr; break;
-                case SimdPixelFormatRgba32: _toBgra = Ssse3::GrayToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Sse41::GrayToBgra; break;
                 default: break;
                 }
             }
@@ -72,7 +71,7 @@ namespace Simd
                 case SimdPixelFormatBgr24: _toAny = Sse41::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Sse2::GrayToBgra; break;
                 case SimdPixelFormatRgb24: _toAny = Sse41::GrayToBgr; break;
-                case SimdPixelFormatRgba32: _toBgra = Ssse3::GrayToBgra; break;
+                case SimdPixelFormatRgba32: _toBgra = Sse41::GrayToBgra; break;
                 default: break;
                 }
             }

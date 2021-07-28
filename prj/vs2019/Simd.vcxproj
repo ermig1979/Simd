@@ -122,9 +122,6 @@
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
     </ProjectReference>
-    <ProjectReference Include="Ssse3.vcxproj">
-      <Project>{5153f702-a5fd-440d-917d-fda213663527}</Project>
-    </ProjectReference>
     <ProjectReference Include="Vmx.vcxproj">
       <Project>{a88b854a-fcf9-484a-bda2-e27f1ec3a0a9}</Project>
     </ProjectReference>

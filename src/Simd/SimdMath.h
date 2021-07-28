@@ -493,10 +493,14 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSSE3_ENABLE
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         using namespace Sse2;
+
+#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
+        using Sse2::RightNotZero32f;
+#endif
 
         template <bool abs> __m128i ConditionalAbs(__m128i a);
 
@@ -514,15 +518,6 @@ namespace Simd
         {
             return _mm_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
         }
-    }
-#endif// SIMD_SSSE3_ENABLE
-
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
-        using Sse2::RightNotZero32f;
-#endif
 
         template <int part> SIMD_INLINE __m128i UnpackI8(__m128i a);
 

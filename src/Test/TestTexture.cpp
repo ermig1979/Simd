@@ -104,9 +104,9 @@ namespace Test
             result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Ssse3::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sse41::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

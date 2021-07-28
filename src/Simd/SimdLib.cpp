@@ -76,7 +76,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
-#include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
@@ -115,9 +114,6 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
     case SimdCpuInfoCacheL3: return Cpu::L3_CACHE_SIZE;
 #ifdef SIMD_SSE2_ENABLE
     case SimdCpuInfoSse2: return Sse2::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_SSSE3_ENABLE
-    case SimdCpuInfoSsse3: return Ssse3::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_SSE41_ENABLE
     case SimdCpuInfoSse41: return Sse41::Enable ? 1 : 0;
@@ -2469,9 +2465,9 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
         Avx2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && (width - 1)*channelCount >= Ssse3::A)
-        Ssse3::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && (width - 1)*channelCount >= Sse41::A)
+        Sse41::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -3260,9 +3256,9 @@ SIMD_API void SimdLaplace(const uint8_t * src, size_t srcStride, size_t width, s
         Avx2::Laplace(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::Laplace(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::Laplace(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -4738,9 +4734,9 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
         Avx2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::SobelDx(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -6372,9 +6368,9 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
         Avx2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE

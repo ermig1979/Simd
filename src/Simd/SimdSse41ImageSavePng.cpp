@@ -25,7 +25,6 @@
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSsse3.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdExtract.h"
 

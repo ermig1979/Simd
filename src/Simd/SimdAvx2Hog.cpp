@@ -198,7 +198,7 @@ namespace Simd
 
             template <int part> SIMD_INLINE __m256 CovertDifference(const __m128i & a, const __m128i & b)
             {
-                return _mm256_cvtepi32_ps(_mm256_cvtepi16_epi32(Ssse3::SubUnpackedU8<part>(a, b)));
+                return _mm256_cvtepi32_ps(_mm256_cvtepi16_epi32(Sse41::SubUnpackedU8<part>(a, b)));
             }
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
@@ -480,7 +480,7 @@ namespace Simd
 
             template <int part> SIMD_INLINE __m256 ConvertDifference(const __m128i & a, const __m128i & b)
             {
-                return _mm256_cvtepi32_ps(_mm256_cvtepi16_epi32(Ssse3::SubUnpackedU8<part>(a, b)));
+                return _mm256_cvtepi32_ps(_mm256_cvtepi16_epi32(Sse41::SubUnpackedU8<part>(a, b)));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)

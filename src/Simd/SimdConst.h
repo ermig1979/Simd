@@ -152,15 +152,15 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         using namespace Sse2;
 #if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
         using Sse2::F;
         using Sse2::DF;
         using Sse2::QF;
-#endif        
+#endif
 
         const __m128i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5);
         const __m128i K8_SHUFFLE_GRAY_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5, 0x5, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA);
@@ -189,18 +189,6 @@ namespace Simd
         const __m128i K8_SHUFFLE_BGR0_TO_RED = SIMD_MM_SETR_EPI8(0x2, 0x5, 0x8, 0xB, 0xE, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
         const __m128i K8_SHUFFLE_BGR1_TO_RED = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1);
         const __m128i K8_SHUFFLE_BGR2_TO_RED = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
-    }
-#endif// SIMD_SSSE3_ENABLE
-
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
-    {
-        using namespace Ssse3;
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse2::F;
-        using Sse2::DF;
-        using Sse2::QF;
-#endif
     }
 #endif// SIMD_SSE41_ENABLE
 

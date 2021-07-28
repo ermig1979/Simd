@@ -198,9 +198,9 @@ namespace Test
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Ssse3::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sse41::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -237,9 +237,9 @@ namespace Test
             result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked), 1);
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Ssse3::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked), 1);
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Sse41::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked), 1);
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
