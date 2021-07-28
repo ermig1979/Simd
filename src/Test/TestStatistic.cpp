@@ -733,9 +733,9 @@ namespace Test
 
         result = result && SumAutoTest(FUNC4(Simd::Base::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Ssse3::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse41::LaplaceAbsSum), FUNC4(SimdLaplaceAbsSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

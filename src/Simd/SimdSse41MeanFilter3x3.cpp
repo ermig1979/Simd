@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         namespace
         {
@@ -152,5 +152,5 @@ namespace Simd
                 MeanFilter3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

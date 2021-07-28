@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<int part> SIMD_INLINE __m128i Laplace(__m128i a[3][3])
         {

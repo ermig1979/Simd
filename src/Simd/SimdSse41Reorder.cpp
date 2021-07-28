@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         const __m128i K8_SHUFFLE_REORDER_16 = SIMD_MM_SETR_EPI8(0x1, 0x0, 0x3, 0x2, 0x5, 0x4, 0x7, 0x6, 0x9, 0x8, 0xB, 0xA, 0xD, 0xC, 0xF, 0xE);
 
@@ -110,5 +110,5 @@ namespace Simd
                 Reorder64bit<false>(src, size, dst);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

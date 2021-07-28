@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE __m128i Average16(const __m128i & s0, const __m128i & s1)
         {
@@ -89,5 +89,5 @@ namespace Simd
                 ReduceGray2x2<false>(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

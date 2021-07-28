@@ -102,9 +102,9 @@ namespace Test
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Ssse3::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -633,9 +633,9 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::Laplace), FUNC_G(SimdLaplace));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::Laplace), FUNC_G(SimdLaplace));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -667,9 +667,9 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::LaplaceAbs), FUNC_G(SimdLaplaceAbs));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

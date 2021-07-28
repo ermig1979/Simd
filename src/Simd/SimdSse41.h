@@ -128,6 +128,14 @@ namespace Simd
 
         void InterleaveBgra(const uint8_t* b, size_t bStride, const uint8_t* g, size_t gStride, const uint8_t* r, size_t rStride, const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride);
 
+        void Laplace(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
+        void LaplaceAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+
+        void LaplaceAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
+
+        void MeanFilter3x3(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
+
         void NeuralAddConvolution2x2Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
 
         void NeuralAddConvolution3x3Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
@@ -139,6 +147,24 @@ namespace Simd
         void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float* weight,
             size_t kernelX, size_t kernelY, size_t padX, size_t padY, size_t strideX, size_t strideY, size_t dilationX, size_t dilationY,
             void* buffer, size_t* size, float* dst, size_t dstWidth, size_t dstHeight, size_t dstDepth, int add);
+
+        void ReduceColor2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
+
+        void ReduceGray2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void ReduceGray4x4(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void Reorder16bit(const uint8_t* src, size_t size, uint8_t* dst);
+
+        void Reorder32bit(const uint8_t* src, size_t size, uint8_t* dst);
+
+        void Reorder64bit(const uint8_t* src, size_t size, uint8_t* dst);
+
+        void ResizeBilinear(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
 
         void RgbToBgra(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
 

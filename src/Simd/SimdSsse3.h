@@ -31,32 +31,6 @@ namespace Simd
 #ifdef SIMD_SSSE3_ENABLE
     namespace Ssse3
     {
-        void Laplace(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void LaplaceAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum);
-
-        void MeanFilter3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride);
-
-        void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
-
-        void ReduceGray2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-        void ReduceGray4x4(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void ResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
-
         void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
         void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);

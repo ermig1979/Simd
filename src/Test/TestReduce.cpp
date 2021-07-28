@@ -106,9 +106,9 @@ namespace Test
             result = result && ReduceColorAutoTest(FUNC_RC(Simd::Sse2::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && ReduceColorAutoTest(FUNC_RC(Simd::Ssse3::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && ReduceColorAutoTest(FUNC_RC(Simd::Sse41::ReduceColor2x2), FUNC_RC(SimdReduceColor2x2));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
@@ -219,9 +219,9 @@ namespace Test
             result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Sse2::ReduceGray2x2), FUNC_RG1(SimdReduceGray2x2));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Ssse3::ReduceGray2x2), FUNC_RG1(SimdReduceGray2x2));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Sse41::ReduceGray2x2), FUNC_RG1(SimdReduceGray2x2));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -308,9 +308,9 @@ namespace Test
             result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Sse2::ReduceGray4x4), FUNC_RG1(SimdReduceGray4x4));
 #endif
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W > Simd::Ssse3::A)
-            result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Ssse3::ReduceGray4x4), FUNC_RG1(SimdReduceGray4x4));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W > Simd::Sse41::A)
+            result = result && ReduceGrayAutoTest(FUNC_RG1(Simd::Sse41::ReduceGray4x4), FUNC_RG1(SimdReduceGray4x4));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

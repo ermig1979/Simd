@@ -37,7 +37,14 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Reduce.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Reorder.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />

@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         namespace
         {
