@@ -4466,11 +4466,6 @@ SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t ds
         return Sse41::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable)
-        return Ssse3::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
 #ifdef SIMD_SSE2_ENABLE
     if (Sse2::Enable)
         return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
@@ -4778,9 +4773,9 @@ SIMD_API void SimdSobelDxAbs(const uint8_t * src, size_t srcStride, size_t width
         Avx2::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::SobelDxAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4808,9 +4803,9 @@ SIMD_API void SimdSobelDxAbsSum(const uint8_t * src, size_t stride, size_t width
         Avx2::SobelDxAbsSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::SobelDxAbsSum(src, stride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::SobelDxAbsSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4838,9 +4833,9 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
         Avx2::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::SobelDy(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -4873,9 +4868,9 @@ SIMD_API void SimdSobelDyAbs(const uint8_t * src, size_t srcStride, size_t width
         Avx2::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::SobelDyAbs(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4903,9 +4898,9 @@ SIMD_API void SimdSobelDyAbsSum(const uint8_t * src, size_t stride, size_t width
         Avx2::SobelDyAbsSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::SobelDyAbsSum(src, stride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::SobelDyAbsSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4933,9 +4928,9 @@ SIMD_API void SimdContourMetrics(const uint8_t * src, size_t srcStride, size_t w
         Avx2::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::ContourMetrics(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::ContourMetrics(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4964,9 +4959,9 @@ SIMD_API void SimdContourMetricsMasked(const uint8_t * src, size_t srcStride, si
         Avx2::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width > Ssse3::A)
-        Ssse3::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::ContourMetricsMasked(src, srcStride, width, height, mask, maskStride, indexMin, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5025,9 +5020,9 @@ SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const u
         Avx2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE
@@ -5061,9 +5056,9 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
         Avx2::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
 #ifdef SIMD_SSE2_ENABLE

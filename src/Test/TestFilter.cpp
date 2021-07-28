@@ -277,9 +277,9 @@ namespace Test
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Ssse3::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -453,9 +453,9 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDx), FUNC_G(SimdSobelDx));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::SobelDx), FUNC_G(SimdSobelDx));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -487,9 +487,9 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::SobelDxAbs), FUNC_G(SimdSobelDxAbs));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -526,9 +526,9 @@ namespace Test
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDy), FUNC_G(SimdSobelDy));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::SobelDy), FUNC_G(SimdSobelDy));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -560,9 +560,9 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::SobelDyAbs), FUNC_G(SimdSobelDyAbs));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -594,9 +594,9 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::ContourMetrics), FUNC_G(SimdContourMetrics));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W - 1 >= Simd::Ssse3::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Ssse3::ContourMetrics), FUNC_G(SimdContourMetrics));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::ContourMetrics), FUNC_G(SimdContourMetrics));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

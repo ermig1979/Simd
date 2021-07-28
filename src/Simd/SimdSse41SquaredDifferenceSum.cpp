@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE __m128i SquaredDifference(__m128i a, __m128i b)
         {
@@ -130,5 +130,5 @@ namespace Simd
                 SquaredDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

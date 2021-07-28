@@ -29,8 +29,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<bool abs> SIMD_INLINE void SobelDx(__m128i a[3][3], __m128i & lo, __m128i & hi)
         {
@@ -437,5 +437,5 @@ namespace Simd
                 ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

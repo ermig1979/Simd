@@ -90,9 +90,9 @@ namespace Test
 
         result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Base::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W > Simd::Ssse3::A)
-            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Ssse3::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W > Simd::Sse41::A)
+            result = result && ContourMetricsMaskedAutoTest(FUNC_M(Simd::Sse41::ContourMetricsMasked), FUNC_M(SimdContourMetricsMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

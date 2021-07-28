@@ -11,10 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSsse3Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Resizer.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Sobel.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3SquaredDifferenceSum.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />

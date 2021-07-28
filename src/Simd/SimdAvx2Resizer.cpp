@@ -34,7 +34,7 @@ namespace Simd
     namespace Avx2
     {
         ResizerByteBilinear::ResizerByteBilinear(const ResParam & param)
-            : Ssse3::ResizerByteBilinear(param)
+            : Sse41::ResizerByteBilinear(param)
         {
         }
 

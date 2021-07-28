@@ -193,8 +193,8 @@ namespace Simd
     }
 #endif //SIMD_SSE2_ENABLE 
 
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         class ResizerByteBilinear : public Sse2::ResizerByteBilinear
         {
@@ -216,15 +216,8 @@ namespace Simd
             ResizerByteBilinear(const ResParam & param);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        };
-
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    }
-#endif //SIMD_SSSE3_ENABLE 
-
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
-    {
+        };        
+        
         class ResizerByteArea : public Sse2::ResizerByteArea
         {
         protected:
@@ -267,7 +260,7 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        class ResizerByteBilinear : public Ssse3::ResizerByteBilinear
+        class ResizerByteBilinear : public Sse41::ResizerByteBilinear
         {
         protected:
             struct Idx

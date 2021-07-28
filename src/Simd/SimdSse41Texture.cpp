@@ -29,8 +29,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE __m128i TextureBoostedSaturatedGradient16(__m128i difference, __m128i saturation, const __m128i & boost)
         {
@@ -102,5 +102,5 @@ namespace Simd
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

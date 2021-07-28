@@ -665,9 +665,9 @@ namespace Test
 
         result = result && SumAutoTest(FUNC4(Simd::Base::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Ssse3::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse41::SobelDxAbsSum), FUNC4(SimdSobelDxAbsSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -699,9 +699,9 @@ namespace Test
 
         result = result && SumAutoTest(FUNC4(Simd::Base::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Ssse3::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse41::SobelDyAbsSum), FUNC4(SimdSobelDyAbsSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

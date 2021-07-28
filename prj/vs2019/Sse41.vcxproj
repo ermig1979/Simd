@@ -47,6 +47,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
@@ -62,6 +64,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution8iOutput.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
   </ItemGroup>
