@@ -2533,9 +2533,9 @@ SIMD_API void SimdGrayToBgr(const uint8_t * gray, size_t width, size_t height, s
         Avx2::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GrayToBgr(gray, width, height, grayStride, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -3209,9 +3209,9 @@ SIMD_API void SimdInterleaveBgr(const uint8_t * b, size_t bStride, const uint8_t
         Avx2::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::InterleaveBgr(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3235,9 +3235,9 @@ SIMD_API void SimdInterleaveBgra(const uint8_t * b, size_t bStride, const uint8_
         Avx2::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::InterleaveBgra(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -6789,9 +6789,9 @@ SIMD_API void SimdYuv420pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
         Avx2::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::DA)
-        Ssse3::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv420pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6820,9 +6820,9 @@ SIMD_API void SimdYuv422pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
         Avx2::Yuv422pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::DA)
-        Ssse3::Yuv422pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv422pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6851,9 +6851,9 @@ SIMD_API void SimdYuv444pToBgr(const uint8_t * y, size_t yStride, const uint8_t 
         Avx2::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if(Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToBgr(y, yStride, u, uStride, v, vStride, width, height, bgr, bgrStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -7049,9 +7049,9 @@ SIMD_API void SimdYuv420pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
         Avx2::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::DA)
-        Ssse3::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv420pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -7075,9 +7075,9 @@ SIMD_API void SimdYuv422pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
         Avx2::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::DA)
-        Ssse3::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv422pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -7101,9 +7101,9 @@ SIMD_API void SimdYuv444pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
         Avx2::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
     else
 #endif
-#ifdef SIMD_SSSE3_ENABLE
-    if (Ssse3::Enable && width >= Ssse3::A)
-        Ssse3::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

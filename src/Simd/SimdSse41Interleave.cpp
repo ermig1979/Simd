@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void InterleaveBgr(const uint8_t * b, const uint8_t * g, const uint8_t * r, size_t offset, uint8_t * bgr)
         {
@@ -124,5 +124,5 @@ namespace Simd
                 InterleaveBgra<false>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

@@ -26,8 +26,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void GrayToBgr(uint8_t * bgr, __m128i gray)
         {
@@ -68,5 +68,5 @@ namespace Simd
                 GrayToBgr<false>(gray, width, height, grayStride, bgr, bgrStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

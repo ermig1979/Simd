@@ -94,9 +94,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(1, 1, View::Bgr24, FUNC(Simd::Base::Yuv444pToBgr), FUNC(SimdYuv444pToBgr));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && YuvToAnyAutoTest(1, 1, View::Bgr24, FUNC(Simd::Ssse3::Yuv444pToBgr), FUNC(SimdYuv444pToBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(1, 1, View::Bgr24, FUNC(Simd::Sse41::Yuv444pToBgr), FUNC(SimdYuv444pToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -128,9 +128,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 1, View::Bgr24, FUNC(Simd::Base::Yuv422pToBgr), FUNC(SimdYuv422pToBgr));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && YuvToAnyAutoTest(2, 1, View::Bgr24, FUNC(Simd::Ssse3::Yuv422pToBgr), FUNC(SimdYuv422pToBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(2, 1, View::Bgr24, FUNC(Simd::Sse41::Yuv422pToBgr), FUNC(SimdYuv422pToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -162,9 +162,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 2, View::Bgr24, FUNC(Simd::Base::Yuv420pToBgr), FUNC(SimdYuv420pToBgr));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && YuvToAnyAutoTest(2, 2, View::Bgr24, FUNC(Simd::Ssse3::Yuv420pToBgr), FUNC(SimdYuv420pToBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Bgr24, FUNC(Simd::Sse41::Yuv420pToBgr), FUNC(SimdYuv420pToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -288,9 +288,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Base::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(1, 1, View::Rgb24, FUNC(Simd::Sse41::Yuv444pToRgb), FUNC(SimdYuv444pToRgb));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -317,9 +317,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Base::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Ssse3::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Sse41::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -346,9 +346,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Base::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Ssse3::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Sse41::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

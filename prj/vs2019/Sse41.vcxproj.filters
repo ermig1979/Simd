@@ -130,6 +130,18 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Deinterleave.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgr.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

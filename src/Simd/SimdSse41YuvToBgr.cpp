@@ -27,8 +27,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void YuvToBgr(__m128i y, __m128i u, __m128i v, __m128i * bgr)
         {
@@ -338,5 +338,5 @@ namespace Simd
                 Yuv444pToRgb<false>(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
         }
     }
-#endif// SIMD_SSSE3_ENABLE
+#endif
 }

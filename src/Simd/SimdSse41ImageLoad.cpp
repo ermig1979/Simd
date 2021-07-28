@@ -46,9 +46,9 @@ namespace Simd
             {
                 switch (_param.format)
                 {
-                case SimdPixelFormatBgr24: _toAny = Ssse3::GrayToBgr; break;
+                case SimdPixelFormatBgr24: _toAny = Sse41::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Sse2::GrayToBgra; break;
-                case SimdPixelFormatRgb24: _toAny = Ssse3::GrayToBgr; break;
+                case SimdPixelFormatRgb24: _toAny = Sse41::GrayToBgr; break;
                 case SimdPixelFormatRgba32: _toBgra = Ssse3::GrayToBgra; break;
                 default: break;
                 }
@@ -69,9 +69,9 @@ namespace Simd
             {
                 switch (_param.format)
                 {
-                case SimdPixelFormatBgr24: _toAny = Ssse3::GrayToBgr; break;
+                case SimdPixelFormatBgr24: _toAny = Sse41::GrayToBgr; break;
                 case SimdPixelFormatBgra32: _toBgra = Sse2::GrayToBgra; break;
-                case SimdPixelFormatRgb24: _toAny = Ssse3::GrayToBgr; break;
+                case SimdPixelFormatRgb24: _toAny = Sse41::GrayToBgr; break;
                 case SimdPixelFormatRgba32: _toBgra = Ssse3::GrayToBgra; break;
                 default: break;
                 }

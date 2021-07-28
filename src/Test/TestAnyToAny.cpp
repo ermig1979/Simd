@@ -299,9 +299,9 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC_O(Simd::Base::GrayToBgr), FUNC_O(SimdGrayToBgr));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable && W >= Simd::Ssse3::A)
-            result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC_O(Simd::Ssse3::GrayToBgr), FUNC_O(SimdGrayToBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Gray8, View::Bgr24, FUNC_O(Simd::Sse41::GrayToBgr), FUNC_O(SimdGrayToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

@@ -11,9 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSsse3Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3GaussianBlur3x3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3GrayToBgr.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Reduce.cpp" />
@@ -25,7 +22,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSsse3Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSsse3Texture.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSsse3YuvToBgr.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />

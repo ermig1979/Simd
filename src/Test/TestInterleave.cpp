@@ -179,9 +179,9 @@ namespace Test
 
         result = result && InterleaveBgrAutoTest(FUNC3(Simd::Base::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && InterleaveBgrAutoTest(FUNC3(Simd::Ssse3::InterleaveBgr), FUNC3(SimdInterleaveBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && InterleaveBgrAutoTest(FUNC3(Simd::Sse41::InterleaveBgr), FUNC3(SimdInterleaveBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -267,9 +267,9 @@ namespace Test
 
         result = result && InterleaveBgraAutoTest(FUNC4(Simd::Base::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 
-#ifdef SIMD_SSSE3_ENABLE
-        if (Simd::Ssse3::Enable)
-            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Ssse3::InterleaveBgra), FUNC4(SimdInterleaveBgra));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && InterleaveBgraAutoTest(FUNC4(Simd::Sse41::InterleaveBgra), FUNC4(SimdInterleaveBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

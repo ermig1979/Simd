@@ -432,8 +432,8 @@ namespace Simd
     }
 #endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSSE3_ENABLE    
-    namespace Ssse3
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <int index> __m128i InterleaveBgr(__m128i blue, __m128i green, __m128i red);
 
@@ -485,7 +485,7 @@ namespace Simd
                         _mm_shuffle_epi8(bgr[2], K8_SHUFFLE_BGR2_TO_RED)));
         }
     }
-#endif//SIMD_SSSE3_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
