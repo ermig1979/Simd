@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
     {
         template<size_t N> void TransformImageRotate90(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
@@ -43,7 +43,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width16; col += 16)
-                    TransformImageTranspose_1x8x16(src + col * 1, srcStride, dst - col * dstStride, -dstStride);
+                    Sse41::TransformImageTranspose_1x8x16(src + col * 1, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst - col * dstStride + i * 1);
@@ -69,7 +69,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width8; col += 8)
-                    TransformImageTranspose_2x8x8(src + col * 2, srcStride, dst - col * dstStride, -dstStride);
+                    Sse41::TransformImageTranspose_2x8x8(src + col * 2, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<2>(src + col * 2 + i * srcStride, dst - col * dstStride + i * 2);
@@ -95,7 +95,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_3x4x4(src + col * 3, srcStride, dst - col * dstStride, -dstStride);
+                    Sse41::TransformImageTranspose_3x4x4(src + col * 3, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<3>(src + col * 3 + i * srcStride, dst - col * dstStride + i * 3);
@@ -121,7 +121,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_4x4x4(src + col * 4, srcStride, dst - col * dstStride, -dstStride);
+                    Sse41::TransformImageTranspose_4x4x4(src + col * 4, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst - col * dstStride + i * 4);
@@ -141,18 +141,37 @@ namespace Simd
 
         template<size_t N> void TransformImageRotate180(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            dst += (height - 1)*dstStride + (width - A)*N;
-            size_t widthA = AlignLo(width, A);
-            size_t widthQA = AlignLo(width, QA);
+            dst += (height - 1)*dstStride + (width - HA)*N;
+            size_t widthHA = AlignLo(width, HA);
+            size_t widthDA = AlignLo(width, DA);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                for (; col < widthQA; col +=64)
-                    TransformImageMirror64<N>(src + col * N, dst - col * N);
-                for (; col < widthA; col += A)
-                    TransformImageMirror16<N>(src + col * N, dst - col * N);
+                for (; col < widthDA; col += DA)
+                    Sse41::TransformImageMirror64<N>(src + col * N, dst - col * N);
+                for (; col < widthHA; col += A)
+                    Sse41::TransformImageMirror16<N>(src + col * N, dst - col * N);
                 if(col < width)
-                    TransformImageMirror16<N>(src + (width - A) * N, dst - (width - A) * N);
+                    Sse41::TransformImageMirror16<N>(src + (width - HA) * N, dst - (width - HA) * N);
+                src += srcStride;
+                dst -= dstStride;
+            }
+        }
+
+        template<> void TransformImageRotate180<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            dst += (height - 1) * dstStride + (width - A) * 4;
+            size_t widthA = AlignLo(width, A);
+            size_t widthDA = AlignLo(width, DA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthDA; col += DA)
+                    Avx2::TransformImageMirror64<4>(src + col * 4, dst - col * 4);
+                for (; col < widthA; col += A)
+                    Avx2::TransformImageMirror32<4>(src + col * 4, dst - col * 4);
+                if (col < width)
+                    Avx2::TransformImageMirror32<4>(src + (width - A) * 4, dst - (width - A) * 4);
                 src += srcStride;
                 dst -= dstStride;
             }
@@ -172,7 +191,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width16; col += 16)
-                    TransformImageTranspose_1x8x16(src + col * 1 + 7 * srcStride, -srcStride, dst + col * dstStride - 7, dstStride);
+                    Sse41::TransformImageTranspose_1x8x16(src + col * 1 + 7 * srcStride, -srcStride, dst + col * dstStride - 7, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst + col * dstStride - i * 1);
@@ -198,7 +217,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width8; col += 8)
-                    TransformImageTranspose_2x8x8(src + col * 2 + 7 * srcStride, -srcStride, dst + col * dstStride - 14, dstStride);
+                    Sse41::TransformImageTranspose_2x8x8(src + col * 2 + 7 * srcStride, -srcStride, dst + col * dstStride - 14, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<2>(src + col * 2 + i * srcStride, dst + col * dstStride - i * 2);
@@ -224,7 +243,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_3x4x4(src + col * 3, -srcStride, dst + col * dstStride, dstStride);
+                    Sse41::TransformImageTranspose_3x4x4(src + col * 3, -srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<3>(src + col * 3 - i * srcStride, dst + col * dstStride + i * 3);
@@ -250,7 +269,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_4x4x4(src + col * 4 + 3 * srcStride, -srcStride, dst + col * dstStride - 12, dstStride);
+                    Sse41::TransformImageTranspose_4x4x4(src + col * 4 + 3 * srcStride, -srcStride, dst + col * dstStride - 12, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst + col * dstStride - i * 4);
@@ -279,7 +298,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width16; col += 16)
-                    TransformImageTranspose_1x8x16(src + col * 1, srcStride, dst + col * dstStride, dstStride);
+                    Sse41::TransformImageTranspose_1x8x16(src + col * 1, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst + col * dstStride + i * 1);
@@ -304,7 +323,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width8; col += 8)
-                    TransformImageTranspose_2x8x8(src + col * 2, srcStride, dst + col * dstStride, dstStride);
+                    Sse41::TransformImageTranspose_2x8x8(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<2>(src + col * 2 + i * srcStride, dst + col * dstStride + i * 2);
@@ -329,7 +348,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_3x4x4(src + col * 3, srcStride, dst + col * dstStride, dstStride);
+                    Sse41::TransformImageTranspose_3x4x4(src + col * 3, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<3>(src + col * 3 + i * srcStride, dst + col * dstStride + i * 3);
@@ -354,7 +373,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_4x4x4(src + col * 4, srcStride,  dst + col * dstStride, dstStride);
+                    Sse41::TransformImageTranspose_4x4x4(src + col * 4, srcStride,  dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<4>(src + col * 4 + i*srcStride, dst + col * dstStride + i*4);
@@ -374,18 +393,37 @@ namespace Simd
 
         template<size_t N> void TransformImageTransposeRotate90(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            dst += (width - A)*N;
-            size_t widthA = AlignLo(width, A);
-            size_t widthQA = AlignLo(width, QA);
+            dst += (width - HA)*N;
+            size_t widthHA = AlignLo(width, HA);
+            size_t widthDA = AlignLo(width, DA);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                for (; col < widthQA; col += QA)
-                    TransformImageMirror64<N>(src + col * N, dst - col * N);
-                for (; col < widthA; col += A)
-                    TransformImageMirror16<N>(src + col * N, dst - col * N);
+                for (; col < widthDA; col += DA)
+                    Sse41::TransformImageMirror64<N>(src + col * N, dst - col * N);
+                for (; col < widthHA; col += HA)
+                    Sse41::TransformImageMirror16<N>(src + col * N, dst - col * N);
                 if (col < width)
-                    TransformImageMirror16<N>(src + (width - A) * N, dst - (width - A) * N);
+                    Sse41::TransformImageMirror16<N>(src + (width - HA) * N, dst - (width - HA) * N);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        template<> void TransformImageTransposeRotate90<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            dst += (width - A) * 4;
+            size_t widthA = AlignLo(width, A);
+            size_t widthDA = AlignLo(width, DA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthDA; col += DA)
+                    Avx2::TransformImageMirror64<4>(src + col * 4, dst - col * 4);
+                for (; col < widthA; col += A)
+                    Avx2::TransformImageMirror32<4>(src + col * 4, dst - col * 4);
+                if (col < width)
+                    Avx2::TransformImageMirror32<4>(src + (width - A) * 4, dst - (width - A) * 4);
                 src += srcStride;
                 dst += dstStride;
             }
@@ -405,7 +443,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width16; col += 16)
-                    TransformImageTranspose_1x8x16(src + col * 1 + 7 * srcStride, -srcStride, dst - col * dstStride - 7, -dstStride);
+                    Sse41::TransformImageTranspose_1x8x16(src + col * 1 + 7 * srcStride, -srcStride, dst - col * dstStride - 7, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst - col * dstStride - i * 1);
@@ -431,7 +469,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width8; col += 8)
-                    TransformImageTranspose_2x8x8(src + col * 2 + 7 * srcStride, -srcStride, dst - col * dstStride - 14, -dstStride);
+                    Sse41::TransformImageTranspose_2x8x8(src + col * 2 + 7 * srcStride, -srcStride, dst - col * dstStride - 14, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 8; ++i)
                         Base::CopyPixel<2>(src + col * 2 + i * srcStride, dst - col * dstStride - i * 2);
@@ -457,7 +495,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_3x4x4(src - col * 3 - 9, -srcStride, dst + (col + 3)* dstStride, -dstStride);
+                    Sse41::TransformImageTranspose_3x4x4(src - col * 3 - 9, -srcStride, dst + (col + 3)* dstStride, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<3>(src - col * 3 - i * srcStride, dst + col * dstStride + i * 3);
@@ -483,7 +521,7 @@ namespace Simd
             {
                 size_t col = 0;
                 for (; col < width4; col += 4)
-                    TransformImageTranspose_4x4x4(src + col * 4 + 3 * srcStride, -srcStride, dst - col * dstStride - 12, -dstStride);
+                    Sse41::TransformImageTranspose_4x4x4(src + col * 4 + 3 * srcStride, -srcStride, dst - col * dstStride - 12, -dstStride);
                 for (; col < width; ++col)
                     for (size_t i = 0; i < 4; ++i)
                         Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst - col * dstStride - i * 4);
@@ -512,7 +550,7 @@ namespace Simd
         }
 
         ImageTransforms::ImageTransforms()
-            : Base::ImageTransforms::ImageTransforms()
+            : Sse41::ImageTransforms::ImageTransforms()
         {
             Init<1>(transforms[0]);
             Init<2>(transforms[1]);

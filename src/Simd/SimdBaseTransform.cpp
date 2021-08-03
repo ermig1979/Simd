@@ -22,7 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdDefs.h"
-#include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdTransform.h"
 
 namespace Simd
 {
@@ -122,24 +122,35 @@ namespace Simd
             }
         }
 
-        template<size_t N> void TransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, SimdTransformType transform, uint8_t * dst, size_t dstStride)
+        //-----------------------------------------------------------------------------------------
+
+        template<size_t N> void Init(ImageTransforms::TransformPtr transforms[8])
         {
-            typedef void(*TransformImagePtr)(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-            static const TransformImagePtr transformImage[8] = { TransformImageRotate0<N>, TransformImageRotate90<N>, TransformImageRotate180<N>, TransformImageRotate270<N>,
-                TransformImageTransposeRotate0<N>, TransformImageTransposeRotate90<N>, TransformImageTransposeRotate180<N>, TransformImageTransposeRotate270<N> };
-            transformImage[(int)transform](src, srcStride, width, height, dst, dstStride);
-        };
+            transforms[SimdTransformRotate0] = TransformImageRotate0<N>;
+            transforms[SimdTransformRotate90] = TransformImageRotate90<N>;
+            transforms[SimdTransformRotate180] = TransformImageRotate180<N>;
+            transforms[SimdTransformRotate270] = TransformImageRotate270<N>;
+            transforms[SimdTransformTransposeRotate0] = TransformImageTransposeRotate0<N>;
+            transforms[SimdTransformTransposeRotate90] = TransformImageTransposeRotate90<N>;
+            transforms[SimdTransformTransposeRotate180] = TransformImageTransposeRotate180<N>;
+            transforms[SimdTransformTransposeRotate270] = TransformImageTransposeRotate270<N>;
+        }
+
+        ImageTransforms::ImageTransforms()
+        {
+            Init<1>(transforms[0]);
+            Init<2>(transforms[1]);
+            Init<3>(transforms[2]);
+            Init<4>(transforms[3]);
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         void TransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride)
         {
-            switch (pixelSize)
-            {
-            case 1: TransformImage<1>(src, srcStride, width, height, transform, dst, dstStride); break;
-            case 2: TransformImage<2>(src, srcStride, width, height, transform, dst, dstStride); break;
-            case 3: TransformImage<3>(src, srcStride, width, height, transform, dst, dstStride); break;
-            case 4: TransformImage<4>(src, srcStride, width, height, transform, dst, dstStride); break;
-            default: assert(0);
-            }
+            static ImageTransforms transforms = ImageTransforms();
+
+            transforms.TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
         }
     }
 }
