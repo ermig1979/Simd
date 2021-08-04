@@ -141,37 +141,37 @@ namespace Simd
 
         template<size_t N> void TransformImageRotate180(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            dst += (height - 1)*dstStride + (width - HA)*N;
-            size_t widthHA = AlignLo(width, HA);
-            size_t widthDA = AlignLo(width, DA);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthDA; col += DA)
-                    Sse41::TransformImageMirror64<N>(src + col * N, dst - col * N);
-                for (; col < widthHA; col += A)
-                    Sse41::TransformImageMirror16<N>(src + col * N, dst - col * N);
-                if(col < width)
-                    Sse41::TransformImageMirror16<N>(src + (width - HA) * N, dst - (width - HA) * N);
-                src += srcStride;
-                dst -= dstStride;
-            }
-        }
-
-        template<> void TransformImageRotate180<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            dst += (height - 1) * dstStride + (width - A) * 4;
+            dst += (height - 1)*dstStride + (width - A)*N;
             size_t widthA = AlignLo(width, A);
             size_t widthDA = AlignLo(width, DA);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
                 for (; col < widthDA; col += DA)
-                    Avx2::TransformImageMirror64<4>(src + col * 4, dst - col * 4);
+                    Avx2::TransformImageMirror64<N>(src + col * N, dst - col * N);
                 for (; col < widthA; col += A)
-                    Avx2::TransformImageMirror32<4>(src + col * 4, dst - col * 4);
+                    Avx2::TransformImageMirror32<N>(src + col * N, dst - col * N);
+                if(col < width)
+                    Avx2::TransformImageMirror32<N>(src + (width - A) * N, dst - (width - A) * N);
+                src += srcStride;
+                dst -= dstStride;
+            }
+        }
+
+        template<> void TransformImageRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            dst += (height - 1) * dstStride + (width - HA) * 3;
+            size_t widthHA = AlignLo(width, HA);
+            size_t widthDA = AlignLo(width, DA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthDA; col += DA)
+                    Sse41::TransformImageMirror64<3>(src + col * 3, dst - col * 3);
+                for (; col < widthHA; col += A)
+                    Sse41::TransformImageMirror16<3>(src + col * 3, dst - col * 3);
                 if (col < width)
-                    Avx2::TransformImageMirror32<4>(src + (width - A) * 4, dst - (width - A) * 4);
+                    Sse41::TransformImageMirror16<3>(src + (width - HA) * 3, dst - (width - HA) * 3);
                 src += srcStride;
                 dst -= dstStride;
             }
@@ -393,37 +393,37 @@ namespace Simd
 
         template<size_t N> void TransformImageTransposeRotate90(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
-            dst += (width - HA)*N;
-            size_t widthHA = AlignLo(width, HA);
-            size_t widthDA = AlignLo(width, DA);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthDA; col += DA)
-                    Sse41::TransformImageMirror64<N>(src + col * N, dst - col * N);
-                for (; col < widthHA; col += HA)
-                    Sse41::TransformImageMirror16<N>(src + col * N, dst - col * N);
-                if (col < width)
-                    Sse41::TransformImageMirror16<N>(src + (width - HA) * N, dst - (width - HA) * N);
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        template<> void TransformImageTransposeRotate90<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            dst += (width - A) * 4;
+            dst += (width - A)*N;
             size_t widthA = AlignLo(width, A);
             size_t widthDA = AlignLo(width, DA);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
                 for (; col < widthDA; col += DA)
-                    Avx2::TransformImageMirror64<4>(src + col * 4, dst - col * 4);
+                    Avx2::TransformImageMirror64<N>(src + col * N, dst - col * N);
                 for (; col < widthA; col += A)
-                    Avx2::TransformImageMirror32<4>(src + col * 4, dst - col * 4);
+                    Avx2::TransformImageMirror32<N>(src + col * N, dst - col * N);
                 if (col < width)
-                    Avx2::TransformImageMirror32<4>(src + (width - A) * 4, dst - (width - A) * 4);
+                    Avx2::TransformImageMirror32<N>(src + (width - A) * N, dst - (width - A) * N);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        template<> void TransformImageTransposeRotate90<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            dst += (width - HA) * 3;
+            size_t widthHA = AlignLo(width, HA);
+            size_t widthDA = AlignLo(width, DA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < widthDA; col += DA)
+                    Sse41::TransformImageMirror64<3>(src + col * 3, dst - col * 3);
+                for (; col < widthHA; col += HA)
+                    Sse41::TransformImageMirror16<3>(src + col * 3, dst - col * 3);
+                if (col < width)
+                    Sse41::TransformImageMirror16<3>(src + (width - HA) * 3, dst - (width - HA) * 3);
                 src += srcStride;
                 dst += dstStride;
             }

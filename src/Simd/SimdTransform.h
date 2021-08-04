@@ -243,6 +243,13 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        const __m256i K8_MIRROR_1 = SIMD_MM256_SETR_EPI8(
+            0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0,
+            0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0);
+        const __m256i K8_MIRROR_2 = SIMD_MM256_SETR_EPI8(
+            0xE, 0xF, 0xC, 0xD, 0xA, 0xB, 0x8, 0x9, 0x6, 0x7, 0x4, 0x5, 0x2, 0x3, 0x0, 0x1,
+            0xE, 0xF, 0xC, 0xD, 0xA, 0xB, 0x8, 0x9, 0x6, 0x7, 0x4, 0x5, 0x2, 0x3, 0x0, 0x1);
+
         const __m256i K32_MIRROR_4 = SIMD_MM256_SETR_EPI32(7, 6, 5, 4, 3, 2, 1, 0);
 
         template<size_t N> SIMD_INLINE void TransformImageMirror32(const uint8_t* src, uint8_t* dst)
@@ -250,6 +257,17 @@ namespace Simd
             dst += (32 - 1) * N;
             for (size_t i = 0; i < 32; ++i)
                 Base::CopyPixel<N>(src + i * N, dst - i * N);
+        }
+
+        template<> SIMD_INLINE void TransformImageMirror32<1>(const uint8_t* src, uint8_t* dst)
+        {
+            _mm256_storeu_si256((__m256i*)dst, _mm256_shuffle_epi8(Load<false>((__m128i*)src + 1, (__m128i*)src + 0), K8_MIRROR_1));
+        }
+
+        template<> SIMD_INLINE void TransformImageMirror32<2>(const uint8_t* src, uint8_t* dst)
+        {
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_shuffle_epi8(Load<false>((__m128i*)src + 1, (__m128i*)src + 0), K8_MIRROR_2));
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_shuffle_epi8(Load<false>((__m128i*)src + 3, (__m128i*)src + 2), K8_MIRROR_2));
         }
 
         template<> SIMD_INLINE void TransformImageMirror32<4>(const uint8_t* src, uint8_t* dst)
