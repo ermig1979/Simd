@@ -98,6 +98,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ae4707759c7424c6cb4369bf2a8155f6e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a46f4f23b9bb60566c3146b1be00e1dc2"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a46f4f23b9bb60566c3146b1be00e1dc2">Clone</a> () const</td></tr>
 <tr class="separator:a46f4f23b9bb60566c3146b1be00e1dc2"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab290a93e205a0a559587a8ad71448313"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ab290a93e205a0a559587a8ad71448313">Clone</a> (const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;rect) const</td></tr>
+<tr class="separator:ab290a93e205a0a559587a8ad71448313"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab15976429bab921fb6042bfe98bfd73b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ab15976429bab921fb6042bfe98bfd73b">Clone</a> (<a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;buffer) const</td></tr>
 <tr class="separator:ab15976429bab921fb6042bfe98bfd73b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b98869df8e7e6275ae38ab97365da76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a8b98869df8e7e6275ae38ab97365da76">operator=</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;frame)</td></tr>
@@ -533,7 +535,7 @@ struct Simd::Frame&lt; A &gt;</h3>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
 <a id="a46f4f23b9bb60566c3146b1be00e1dc2"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a46f4f23b9bb60566c3146b1be00e1dc2">&#9670;&nbsp;</a></span>Clone() <span class="overload">[1/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a46f4f23b9bb60566c3146b1be00e1dc2">&#9670;&nbsp;</a></span>Clone() <span class="overload">[1/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -548,8 +550,34 @@ struct Simd::Frame&lt; A &gt;</h3>
 
 </div>
 </div>
+<a id="ab290a93e205a0a559587a8ad71448313"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab290a93e205a0a559587a8ad71448313">&#9670;&nbsp;</a></span>Clone() <span class="overload">[2/3]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">SIMD_INLINE <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; * Clone </td>
+          <td>(</td>
+          <td class="paramtype">const <a class="el" href="struct_simd_1_1_rectangle.html">Rectangle</a>&lt; ptrdiff_t &gt; &amp;&#160;</td>
+          <td class="paramname"><em>rect</em></td><td>)</td>
+          <td> const</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Gets a copy of region of current frame which bounded by the rectangle with specified coordinates.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">rect</td><td>- a rectangle which bound the region. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>- a pointer to the new <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure. The user must free this pointer after usage. </dd></dl>
+
+</div>
+</div>
 <a id="ab15976429bab921fb6042bfe98bfd73b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab15976429bab921fb6042bfe98bfd73b">&#9670;&nbsp;</a></span>Clone() <span class="overload">[2/2]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#ab15976429bab921fb6042bfe98bfd73b">&#9670;&nbsp;</a></span>Clone() <span class="overload">[3/3]</span></h2>
 
 <div class="memitem">
 <div class="memproto">

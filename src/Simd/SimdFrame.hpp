@@ -152,6 +152,14 @@ namespace Simd
         Frame * Clone() const;
 
         /*!
+            Gets a copy of region of current frame which bounded by the rectangle with specified coordinates.
+
+            \param [in] rect - a rectangle which bound the region.
+            \return - a pointer to the new Frame structure. The user must free this pointer after usage.
+        */
+        Frame * Clone(const Rectangle<ptrdiff_t>& rect) const;
+
+        /*!
             Gets a copy of current frame using buffer as a storage.
 
             \param [in, out] buffer - an external frame as a buffer.
@@ -461,6 +469,11 @@ namespace Simd
         Frame<A> * clone = new Frame<A>(width, height, format, flipped, timestamp);
         Copy(*this, *clone);
         return clone;
+    }
+
+    template <template<class> class A> SIMD_INLINE Frame<A>* Frame<A>::Clone(const Rectangle<ptrdiff_t>& rect) const
+    {
+        return Region(rect).Clone();
     }
 
     /*! \cond */

@@ -239,6 +239,14 @@ namespace Simd
         View * Clone() const;
 
         /*!
+            Gets a copy of region of current image view which bounded by the rectangle with specified coordinates.
+
+            \param [in] rect - a rectangle which bound the region.
+            \return - a pointer to the new View structure. The user must free this pointer after usage.
+        */
+        View* Clone(const Rectangle<ptrdiff_t>& rect) const;
+
+        /*!
             Gets a copy of current image view using buffer as a storage.
 
             \param [in] buffer - an external view as a buffer.
@@ -865,6 +873,11 @@ namespace Simd
         for (size_t row = 0; row < height; ++row)
             memcpy(view->data + view->stride*row, data + stride*row, size);
         return view;
+    }
+
+    template <template<class> class A> SIMD_INLINE View<A>* View<A>::Clone(const Rectangle<ptrdiff_t>& rect) const
+    {
+        return Region(rect).Clone();
     }
 
     template <template<class> class A> SIMD_INLINE View<A> * View<A>::Clone(View & buffer) const
