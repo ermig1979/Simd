@@ -115,11 +115,28 @@ namespace Simd
         {
             dst += (width - 1) * dstStride;
             size_t width4 = AlignLo(width, 4);
+            size_t width8 = AlignLo(width, 8);
             size_t height4 = AlignLo(height, 4);
+            size_t height8 = AlignLo(height, 8);
             size_t row = 0;
+            for (; row < height8; row += 8)
+            {
+                size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x8x8(src + col * 4, srcStride, dst - col * dstStride, -dstStride);
+                for (; col < width4; col += 4)
+                    Avx2::TransformImageTranspose_4x8x4(src + col * 4, srcStride, dst - col * dstStride, -dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 8; ++i)
+                        Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst - col * dstStride + i * 4);
+                src += 8 * srcStride;
+                dst += 32;
+            }
             for (; row < height4; row += 4)
             {
                 size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x4x8(src + col * 4, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width4; col += 4)
                     Sse41::TransformImageTranspose_4x4x4(src + col * 4, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width; ++col)
@@ -263,11 +280,28 @@ namespace Simd
         {
             dst += (height - 1) * 4;
             size_t width4 = AlignLo(width, 4);
+            size_t width8 = AlignLo(width, 8);
             size_t height4 = AlignLo(height, 4);
+            size_t height8 = AlignLo(height, 8);
             size_t row = 0;
+            for (; row < height8; row += 8)
+            {
+                size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x8x8(src + col * 4 + 7 * srcStride, -srcStride, dst + col * dstStride - 28, dstStride);
+                for (; col < width4; col += 4)
+                    Avx2::TransformImageTranspose_4x8x4(src + col * 4 + 7 * srcStride, -srcStride, dst + col * dstStride - 28, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 8; ++i)
+                        Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst + col * dstStride - i * 4);
+                src += 8 * srcStride;
+                dst -= 32;
+            }
             for (; row < height4; row += 4)
             {
                 size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x4x8(src + col * 4 + 3 * srcStride, -srcStride, dst + col * dstStride - 12, dstStride);
                 for (; col < width4; col += 4)
                     Sse41::TransformImageTranspose_4x4x4(src + col * 4 + 3 * srcStride, -srcStride, dst + col * dstStride - 12, dstStride);
                 for (; col < width; ++col)
@@ -367,11 +401,28 @@ namespace Simd
         template<> void TransformImageTransposeRotate0<4>(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
             size_t width4 = AlignLo(width, 4);
+            size_t width8 = AlignLo(width, 8);
             size_t height4 = AlignLo(height, 4);
+            size_t height8 = AlignLo(height, 8);
             size_t row = 0;
+            for (; row < height8; row += 8)
+            {
+                size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x8x8(src + col * 4, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width4; col += 4)
+                    Avx2::TransformImageTranspose_4x8x4(src + col * 4, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 8; ++i)
+                        Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst + col * dstStride + i * 4);
+                src += 8 * srcStride;
+                dst += 32;
+            }
             for (; row < height4; row += 4)
             {
                 size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x4x8(src + col * 4, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width4; col += 4)
                     Sse41::TransformImageTranspose_4x4x4(src + col * 4, srcStride,  dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
@@ -515,11 +566,28 @@ namespace Simd
         {
             dst += (width - 1) * dstStride + (height - 1) * 4;
             size_t width4 = AlignLo(width, 4);
+            size_t width8 = AlignLo(width, 8);
             size_t height4 = AlignLo(height, 4);
+            size_t height8 = AlignLo(height, 8);
             size_t row = 0;
+            for (; row < height8; row += 8)
+            {
+                size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x8x8(src + col * 4 + 7 * srcStride, -srcStride, dst - col * dstStride - 28, -dstStride);
+                for (; col < width4; col += 4)
+                    Avx2::TransformImageTranspose_4x8x4(src + col * 4 + 7 * srcStride, -srcStride, dst - col * dstStride - 28, -dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 8; ++i)
+                        Base::CopyPixel<4>(src + col * 4 + i * srcStride, dst - col * dstStride - i * 4);
+                src += 8 * srcStride;
+                dst -= 32;
+            }
             for (; row < height4; row += 4)
             {
                 size_t col = 0;
+                for (; col < width8; col += 8)
+                    Avx2::TransformImageTranspose_4x4x8(src + col * 4 + 3 * srcStride, -srcStride, dst - col * dstStride - 12, -dstStride);
                 for (; col < width4; col += 4)
                     Sse41::TransformImageTranspose_4x4x4(src + col * 4 + 3 * srcStride, -srcStride, dst - col * dstStride - 12, -dstStride);
                 for (; col < width; ++col)

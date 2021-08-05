@@ -286,6 +286,76 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        SIMD_INLINE void TransformImageTranspose_4x8x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m256i a0 = _mm256_loadu_si256((__m256i*)(src + 0 * srcStride));
+            __m256i a1 = _mm256_loadu_si256((__m256i*)(src + 1 * srcStride));
+            __m256i a2 = _mm256_loadu_si256((__m256i*)(src + 2 * srcStride));
+            __m256i a3 = _mm256_loadu_si256((__m256i*)(src + 3 * srcStride));
+            __m256i a4 = _mm256_loadu_si256((__m256i*)(src + 4 * srcStride));
+            __m256i a5 = _mm256_loadu_si256((__m256i*)(src + 5 * srcStride));
+            __m256i a6 = _mm256_loadu_si256((__m256i*)(src + 6 * srcStride));
+            __m256i a7 = _mm256_loadu_si256((__m256i*)(src + 7 * srcStride));
+            __m256i b0 = _mm256_unpacklo_epi32(a0, a2);
+            __m256i b1 = _mm256_unpacklo_epi32(a1, a3);
+            __m256i b2 = _mm256_unpackhi_epi32(a0, a2);
+            __m256i b3 = _mm256_unpackhi_epi32(a1, a3);
+            __m256i b4 = _mm256_unpacklo_epi32(a4, a6);
+            __m256i b5 = _mm256_unpacklo_epi32(a5, a7);
+            __m256i b6 = _mm256_unpackhi_epi32(a4, a6);
+            __m256i b7 = _mm256_unpackhi_epi32(a5, a7);
+            a0 = _mm256_unpacklo_epi32(b0, b1);
+            a1 = _mm256_unpackhi_epi32(b0, b1);
+            a2 = _mm256_unpacklo_epi32(b2, b3);
+            a3 = _mm256_unpackhi_epi32(b2, b3);
+            a4 = _mm256_unpacklo_epi32(b4, b5);
+            a5 = _mm256_unpackhi_epi32(b4, b5);
+            a6 = _mm256_unpacklo_epi32(b6, b7);
+            a7 = _mm256_unpackhi_epi32(b6, b7);
+            _mm256_storeu_si256((__m256i*)(dst + 0 * dstStride), _mm256_permute2f128_si256(a0, a4, 0x20));
+            _mm256_storeu_si256((__m256i*)(dst + 1 * dstStride), _mm256_permute2f128_si256(a1, a5, 0x20));
+            _mm256_storeu_si256((__m256i*)(dst + 2 * dstStride), _mm256_permute2f128_si256(a2, a6, 0x20));
+            _mm256_storeu_si256((__m256i*)(dst + 3 * dstStride), _mm256_permute2f128_si256(a3, a7, 0x20));
+            _mm256_storeu_si256((__m256i*)(dst + 4 * dstStride), _mm256_permute2f128_si256(a0, a4, 0x31));
+            _mm256_storeu_si256((__m256i*)(dst + 5 * dstStride), _mm256_permute2f128_si256(a1, a5, 0x31));
+            _mm256_storeu_si256((__m256i*)(dst + 6 * dstStride), _mm256_permute2f128_si256(a2, a6, 0x31));
+            _mm256_storeu_si256((__m256i*)(dst + 7 * dstStride), _mm256_permute2f128_si256(a3, a7, 0x31));
+        }
+
+        SIMD_INLINE void TransformImageTranspose_4x4x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m256i a0 = _mm256_loadu_si256((__m256i*)(src + 0 * srcStride));
+            __m256i a1 = _mm256_loadu_si256((__m256i*)(src + 1 * srcStride));
+            __m256i a2 = _mm256_loadu_si256((__m256i*)(src + 2 * srcStride));
+            __m256i a3 = _mm256_loadu_si256((__m256i*)(src + 3 * srcStride));
+            __m256i b0 = _mm256_unpacklo_epi32(a0, a2);
+            __m256i b1 = _mm256_unpacklo_epi32(a1, a3);
+            __m256i b2 = _mm256_unpackhi_epi32(a0, a2);
+            __m256i b3 = _mm256_unpackhi_epi32(a1, a3);
+            Avx2::Store<false>((__m128i*)(dst + 0x0 * dstStride), (__m128i*)(dst + 0x4 * dstStride), _mm256_unpacklo_epi32(b0, b1));
+            Avx2::Store<false>((__m128i*)(dst + 0x1 * dstStride), (__m128i*)(dst + 0x5 * dstStride), _mm256_unpackhi_epi32(b0, b1));
+            Avx2::Store<false>((__m128i*)(dst + 0x2 * dstStride), (__m128i*)(dst + 0x6 * dstStride), _mm256_unpacklo_epi32(b2, b3));
+            Avx2::Store<false>((__m128i*)(dst + 0x3 * dstStride), (__m128i*)(dst + 0x7 * dstStride), _mm256_unpackhi_epi32(b2, b3));
+        }
+
+        SIMD_INLINE void TransformImageTranspose_4x8x4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m256i a0 = Load<false>((__m128i*)(src + 0 * srcStride), (__m128i*)(src + 4 * srcStride));
+            __m256i a1 = Load<false>((__m128i*)(src + 1 * srcStride), (__m128i*)(src + 5 * srcStride));
+            __m256i a2 = Load<false>((__m128i*)(src + 2 * srcStride), (__m128i*)(src + 6 * srcStride));
+            __m256i a3 = Load<false>((__m128i*)(src + 3 * srcStride), (__m128i*)(src + 7 * srcStride));
+            __m256i b0 = _mm256_unpacklo_epi32(a0, a2);
+            __m256i b1 = _mm256_unpacklo_epi32(a1, a3);
+            __m256i b2 = _mm256_unpackhi_epi32(a0, a2);
+            __m256i b3 = _mm256_unpackhi_epi32(a1, a3);
+            _mm256_storeu_si256((__m256i*)(dst + 0 * dstStride), _mm256_unpacklo_epi32(b0, b1));
+            _mm256_storeu_si256((__m256i*)(dst + 1 * dstStride), _mm256_unpackhi_epi32(b0, b1));
+            _mm256_storeu_si256((__m256i*)(dst + 2 * dstStride), _mm256_unpacklo_epi32(b2, b3));
+            _mm256_storeu_si256((__m256i*)(dst + 3 * dstStride), _mm256_unpackhi_epi32(b2, b3));
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         struct ImageTransforms : public Sse41::ImageTransforms
         {
             ImageTransforms();
