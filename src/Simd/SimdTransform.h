@@ -325,6 +325,51 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        SIMD_INLINE void TransformImageTranspose_1x16x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m256i a0 = Load<false>((__m128i*)(src + 0x0 * srcStride), (__m128i*)(src + 0x8 * srcStride));
+            __m256i a1 = Load<false>((__m128i*)(src + 0x1 * srcStride), (__m128i*)(src + 0x9 * srcStride));
+            __m256i a2 = Load<false>((__m128i*)(src + 0x2 * srcStride), (__m128i*)(src + 0xa * srcStride));
+            __m256i a3 = Load<false>((__m128i*)(src + 0x3 * srcStride), (__m128i*)(src + 0xb * srcStride));
+            __m256i a4 = Load<false>((__m128i*)(src + 0x4 * srcStride), (__m128i*)(src + 0xc * srcStride));
+            __m256i a5 = Load<false>((__m128i*)(src + 0x5 * srcStride), (__m128i*)(src + 0xd * srcStride));
+            __m256i a6 = Load<false>((__m128i*)(src + 0x6 * srcStride), (__m128i*)(src + 0xe * srcStride));
+            __m256i a7 = Load<false>((__m128i*)(src + 0x7 * srcStride), (__m128i*)(src + 0xf * srcStride));
+            __m256i b0 = _mm256_unpacklo_epi8(a0, a4);
+            __m256i b1 = _mm256_unpackhi_epi8(a0, a4);
+            __m256i b2 = _mm256_unpacklo_epi8(a1, a5);
+            __m256i b3 = _mm256_unpackhi_epi8(a1, a5);
+            __m256i b4 = _mm256_unpacklo_epi8(a2, a6);
+            __m256i b5 = _mm256_unpackhi_epi8(a2, a6);
+            __m256i b6 = _mm256_unpacklo_epi8(a3, a7);
+            __m256i b7 = _mm256_unpackhi_epi8(a3, a7);
+            a0 = _mm256_unpacklo_epi8(b0, b4);
+            a1 = _mm256_unpackhi_epi8(b0, b4);
+            a2 = _mm256_unpacklo_epi8(b1, b5);
+            a3 = _mm256_unpackhi_epi8(b1, b5);
+            a4 = _mm256_unpacklo_epi8(b2, b6);
+            a5 = _mm256_unpackhi_epi8(b2, b6);
+            a6 = _mm256_unpacklo_epi8(b3, b7);
+            a7 = _mm256_unpackhi_epi8(b3, b7);
+            b0 = _mm256_unpacklo_epi8(a0, a4);
+            b1 = _mm256_unpackhi_epi8(a0, a4);
+            b2 = _mm256_unpacklo_epi8(a1, a5);
+            b3 = _mm256_unpackhi_epi8(a1, a5);
+            b4 = _mm256_unpacklo_epi8(a2, a6);
+            b5 = _mm256_unpackhi_epi8(a2, a6);
+            b6 = _mm256_unpacklo_epi8(a3, a7);
+            b7 = _mm256_unpackhi_epi8(a3, a7);
+            Avx2::Store<false>((__m128i*)(dst + 0x0 * dstStride), (__m128i*)(dst + 0x1 * dstStride), _mm256_permute4x64_epi64(b0, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0x2 * dstStride), (__m128i*)(dst + 0x3 * dstStride), _mm256_permute4x64_epi64(b1, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0x4 * dstStride), (__m128i*)(dst + 0x5 * dstStride), _mm256_permute4x64_epi64(b2, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0x6 * dstStride), (__m128i*)(dst + 0x7 * dstStride), _mm256_permute4x64_epi64(b3, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0x8 * dstStride), (__m128i*)(dst + 0x9 * dstStride), _mm256_permute4x64_epi64(b4, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0xa * dstStride), (__m128i*)(dst + 0xb * dstStride), _mm256_permute4x64_epi64(b5, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0xc * dstStride), (__m128i*)(dst + 0xd * dstStride), _mm256_permute4x64_epi64(b6, 0xD8));
+            Avx2::Store<false>((__m128i*)(dst + 0xe * dstStride), (__m128i*)(dst + 0xf * dstStride), _mm256_permute4x64_epi64(b7, 0xD8));
+        }
+        //-----------------------------------------------------------------------------------------
+
         SIMD_INLINE void TransformImageTranspose_2x16x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             __m256i a0 = Load<false>((__m128i*)(src + 0x0 * srcStride), (__m128i*)(src + 0x8 * srcStride));
