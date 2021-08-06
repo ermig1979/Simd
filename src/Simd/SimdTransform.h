@@ -325,6 +325,80 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        SIMD_INLINE void TransformImageTranspose_2x16x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m256i a0 = Load<false>((__m128i*)(src + 0x0 * srcStride), (__m128i*)(src + 0x8 * srcStride));
+            __m256i a1 = Load<false>((__m128i*)(src + 0x1 * srcStride), (__m128i*)(src + 0x9 * srcStride));
+            __m256i a2 = Load<false>((__m128i*)(src + 0x2 * srcStride), (__m128i*)(src + 0xa * srcStride));
+            __m256i a3 = Load<false>((__m128i*)(src + 0x3 * srcStride), (__m128i*)(src + 0xb * srcStride));
+            __m256i a4 = Load<false>((__m128i*)(src + 0x4 * srcStride), (__m128i*)(src + 0xc * srcStride));
+            __m256i a5 = Load<false>((__m128i*)(src + 0x5 * srcStride), (__m128i*)(src + 0xd * srcStride));
+            __m256i a6 = Load<false>((__m128i*)(src + 0x6 * srcStride), (__m128i*)(src + 0xe * srcStride));
+            __m256i a7 = Load<false>((__m128i*)(src + 0x7 * srcStride), (__m128i*)(src + 0xf * srcStride));
+            __m256i b0 = _mm256_unpacklo_epi16(a0, a4);
+            __m256i b1 = _mm256_unpackhi_epi16(a0, a4);
+            __m256i b2 = _mm256_unpacklo_epi16(a1, a5);
+            __m256i b3 = _mm256_unpackhi_epi16(a1, a5);
+            __m256i b4 = _mm256_unpacklo_epi16(a2, a6);
+            __m256i b5 = _mm256_unpackhi_epi16(a2, a6);
+            __m256i b6 = _mm256_unpacklo_epi16(a3, a7);
+            __m256i b7 = _mm256_unpackhi_epi16(a3, a7);
+            a0 = _mm256_unpacklo_epi16(b0, b4);
+            a1 = _mm256_unpackhi_epi16(b0, b4);
+            a2 = _mm256_unpacklo_epi16(b1, b5);
+            a3 = _mm256_unpackhi_epi16(b1, b5);
+            a4 = _mm256_unpacklo_epi16(b2, b6);
+            a5 = _mm256_unpackhi_epi16(b2, b6);
+            a6 = _mm256_unpacklo_epi16(b3, b7);
+            a7 = _mm256_unpackhi_epi16(b3, b7);
+            _mm256_storeu_si256((__m256i*)(dst + 0 * dstStride), _mm256_unpacklo_epi16(a0, a4));
+            _mm256_storeu_si256((__m256i*)(dst + 1 * dstStride), _mm256_unpackhi_epi16(a0, a4));
+            _mm256_storeu_si256((__m256i*)(dst + 2 * dstStride), _mm256_unpacklo_epi16(a1, a5));
+            _mm256_storeu_si256((__m256i*)(dst + 3 * dstStride), _mm256_unpackhi_epi16(a1, a5));
+            _mm256_storeu_si256((__m256i*)(dst + 4 * dstStride), _mm256_unpacklo_epi16(a2, a6));
+            _mm256_storeu_si256((__m256i*)(dst + 5 * dstStride), _mm256_unpackhi_epi16(a2, a6));
+            _mm256_storeu_si256((__m256i*)(dst + 6 * dstStride), _mm256_unpacklo_epi16(a3, a7));
+            _mm256_storeu_si256((__m256i*)(dst + 7 * dstStride), _mm256_unpackhi_epi16(a3, a7));
+        }
+
+        SIMD_INLINE void TransformImageTranspose_2x8x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m256i a0 = _mm256_loadu_si256((__m256i*)(src + 0 * srcStride));
+            __m256i a1 = _mm256_loadu_si256((__m256i*)(src + 1 * srcStride));
+            __m256i a2 = _mm256_loadu_si256((__m256i*)(src + 2 * srcStride));
+            __m256i a3 = _mm256_loadu_si256((__m256i*)(src + 3 * srcStride));
+            __m256i a4 = _mm256_loadu_si256((__m256i*)(src + 4 * srcStride));
+            __m256i a5 = _mm256_loadu_si256((__m256i*)(src + 5 * srcStride));
+            __m256i a6 = _mm256_loadu_si256((__m256i*)(src + 6 * srcStride));
+            __m256i a7 = _mm256_loadu_si256((__m256i*)(src + 7 * srcStride));
+            __m256i b0 = _mm256_unpacklo_epi16(a0, a4);
+            __m256i b1 = _mm256_unpackhi_epi16(a0, a4);
+            __m256i b2 = _mm256_unpacklo_epi16(a1, a5);
+            __m256i b3 = _mm256_unpackhi_epi16(a1, a5);
+            __m256i b4 = _mm256_unpacklo_epi16(a2, a6);
+            __m256i b5 = _mm256_unpackhi_epi16(a2, a6);
+            __m256i b6 = _mm256_unpacklo_epi16(a3, a7);
+            __m256i b7 = _mm256_unpackhi_epi16(a3, a7);
+            a0 = _mm256_unpacklo_epi16(b0, b4);
+            a1 = _mm256_unpackhi_epi16(b0, b4);
+            a2 = _mm256_unpacklo_epi16(b1, b5);
+            a3 = _mm256_unpackhi_epi16(b1, b5);
+            a4 = _mm256_unpacklo_epi16(b2, b6);
+            a5 = _mm256_unpackhi_epi16(b2, b6);
+            a6 = _mm256_unpacklo_epi16(b3, b7);
+            a7 = _mm256_unpackhi_epi16(b3, b7);
+            Store<false>((__m128i*)(dst + 0x0 * dstStride), (__m128i*)(dst + 0x8 * dstStride), _mm256_unpacklo_epi16(a0, a4));
+            Store<false>((__m128i*)(dst + 0x1 * dstStride), (__m128i*)(dst + 0x9 * dstStride), _mm256_unpackhi_epi16(a0, a4));
+            Store<false>((__m128i*)(dst + 0x2 * dstStride), (__m128i*)(dst + 0xa * dstStride), _mm256_unpacklo_epi16(a1, a5));
+            Store<false>((__m128i*)(dst + 0x3 * dstStride), (__m128i*)(dst + 0xb * dstStride), _mm256_unpackhi_epi16(a1, a5));
+            Store<false>((__m128i*)(dst + 0x4 * dstStride), (__m128i*)(dst + 0xc * dstStride), _mm256_unpacklo_epi16(a2, a6));
+            Store<false>((__m128i*)(dst + 0x5 * dstStride), (__m128i*)(dst + 0xd * dstStride), _mm256_unpackhi_epi16(a2, a6));
+            Store<false>((__m128i*)(dst + 0x6 * dstStride), (__m128i*)(dst + 0xe * dstStride), _mm256_unpacklo_epi16(a3, a7));
+            Store<false>((__m128i*)(dst + 0x7 * dstStride), (__m128i*)(dst + 0xf * dstStride), _mm256_unpackhi_epi16(a3, a7));
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         const __m256i K8_SHUFFLE_BGR_TO_BGRA = SIMD_MM256_SETR_EPI8(
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
             0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
