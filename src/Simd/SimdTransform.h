@@ -250,6 +250,28 @@ namespace Simd
             0xE, 0xF, 0xC, 0xD, 0xA, 0xB, 0x8, 0x9, 0x6, 0x7, 0x4, 0x5, 0x2, 0x3, 0x0, 0x1,
             0xE, 0xF, 0xC, 0xD, 0xA, 0xB, 0x8, 0x9, 0x6, 0x7, 0x4, 0x5, 0x2, 0x3, 0x0, 0x1);
 
+        const __m256i K8_MIRROR_3_02 = SIMD_MM256_SETR_EPI8(
+            0xD, 0xE, 0xF, 0xA, 0xB, 0xC, 0x7, 0x8, 0x9, 0x4, 0x5, 0x6, 0x1, 0x2, 0x3, -1,
+            0xD, 0xE, 0xF, 0xA, 0xB, 0xC, 0x7, 0x8, 0x9, 0x4, 0x5, 0x6, 0x1, 0x2, 0x3, -1);
+        const __m256i K8_MIRROR_3_01 = SIMD_MM256_SETR_EPI8(
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0xE,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0xE);
+        const __m256i K8_MIRROR_3_12 = SIMD_MM256_SETR_EPI8(
+            -1, 0x0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            -1, 0x0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m256i K8_MIRROR_3_11 = SIMD_MM256_SETR_EPI8(
+            0xF, -1, 0xB, 0xC, 0xD, 0x8, 0x9, 0xA, 0x5, 0x6, 0x7, 0x2, 0x3, 0x4, -1, 0x0,
+            0xF, -1, 0xB, 0xC, 0xD, 0x8, 0x9, 0xA, 0x5, 0x6, 0x7, 0x2, 0x3, 0x4, -1, 0x0);
+        const __m256i K8_MIRROR_3_10 = SIMD_MM256_SETR_EPI8(
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0xF, -1,
+            -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0xF, -1);
+        const __m256i K8_MIRROR_3_21 = SIMD_MM256_SETR_EPI8(
+            0x1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+            0x1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
+        const __m256i K8_MIRROR_3_20 = SIMD_MM256_SETR_EPI8(
+            -1, 0xC, 0xD, 0xE, 0x9, 0xA, 0xB, 0x6, 0x7, 0x8, 0x3, 0x4, 0x5, 0x0, 0x1, 0x2,
+            -1, 0xC, 0xD, 0xE, 0x9, 0xA, 0xB, 0x6, 0x7, 0x8, 0x3, 0x4, 0x5, 0x0, 0x1, 0x2);
+
         const __m256i K32_MIRROR_4 = SIMD_MM256_SETR_EPI32(7, 6, 5, 4, 3, 2, 1, 0);
 
         template<size_t N> SIMD_INLINE void TransformImageMirror32(const uint8_t* src, uint8_t* dst)
@@ -268,6 +290,22 @@ namespace Simd
         {
             _mm256_storeu_si256((__m256i*)dst + 1, _mm256_shuffle_epi8(Load<false>((__m128i*)src + 1, (__m128i*)src + 0), K8_MIRROR_2));
             _mm256_storeu_si256((__m256i*)dst + 0, _mm256_shuffle_epi8(Load<false>((__m128i*)src + 3, (__m128i*)src + 2), K8_MIRROR_2));
+        }
+
+        template<> SIMD_INLINE void TransformImageMirror32<3>(const uint8_t* src, uint8_t* dst)
+        {
+            __m256i s0 = _mm256_loadu_si256((__m256i*)src + 0);
+            __m256i s1 = _mm256_loadu_si256((__m256i*)src + 1);
+            __m256i s2 = _mm256_loadu_si256((__m256i*)src + 2);
+            __m256i d0 = _mm256_permute2f128_si256(s0, s1, 0x30);
+            __m256i d1 = _mm256_permute2f128_si256(s0, s2, 0x21);
+            __m256i d2 = _mm256_permute2f128_si256(s1, s2, 0x30);
+            s0 = _mm256_or_si256(_mm256_shuffle_epi8(d2, K8_MIRROR_3_02), _mm256_shuffle_epi8(d1, K8_MIRROR_3_01));
+            s1 = _mm256_or_si256(_mm256_or_si256(_mm256_shuffle_epi8(d2, K8_MIRROR_3_12), _mm256_shuffle_epi8(d1, K8_MIRROR_3_11)), _mm256_shuffle_epi8(d0, K8_MIRROR_3_10));
+            s2 = _mm256_or_si256(_mm256_shuffle_epi8(d1, K8_MIRROR_3_21), _mm256_shuffle_epi8(d0, K8_MIRROR_3_20));
+            _mm256_storeu_si256((__m256i*)dst + 0, _mm256_permute2f128_si256(s0, s1, 0x31));
+            _mm256_storeu_si256((__m256i*)dst + 1, _mm256_permute2f128_si256(s2, s0, 0x21));
+            _mm256_storeu_si256((__m256i*)dst + 2, _mm256_permute2f128_si256(s1, s2, 0x20));
         }
 
         template<> SIMD_INLINE void TransformImageMirror32<4>(const uint8_t* src, uint8_t* dst)

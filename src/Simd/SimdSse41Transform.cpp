@@ -147,7 +147,7 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 size_t col = 0;
-                for (; col < widthQA; col +=64)
+                for (; col < widthQA; col += 64)
                     TransformImageMirror64<N>(src + col * N, dst - col * N);
                 for (; col < widthA; col += A)
                     TransformImageMirror16<N>(src + col * N, dst - col * N);

@@ -175,25 +175,6 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            dst += (height - 1) * dstStride + (width - HA) * 3;
-            size_t widthHA = AlignLo(width, HA);
-            size_t widthDA = AlignLo(width, DA);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthDA; col += DA)
-                    Sse41::TransformImageMirror64<3>(src + col * 3, dst - col * 3);
-                for (; col < widthHA; col += A)
-                    Sse41::TransformImageMirror16<3>(src + col * 3, dst - col * 3);
-                if (col < width)
-                    Sse41::TransformImageMirror16<3>(src + (width - HA) * 3, dst - (width - HA) * 3);
-                src += srcStride;
-                dst -= dstStride;
-            }
-        }
-
         //-----------------------------------------------------------------------------------------
 
         template<size_t N> void TransformImageRotate270(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
@@ -456,25 +437,6 @@ namespace Simd
                     Avx2::TransformImageMirror32<N>(src + col * N, dst - col * N);
                 if (col < width)
                     Avx2::TransformImageMirror32<N>(src + (width - A) * N, dst - (width - A) * N);
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
-
-        template<> void TransformImageTransposeRotate90<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            dst += (width - HA) * 3;
-            size_t widthHA = AlignLo(width, HA);
-            size_t widthDA = AlignLo(width, DA);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthDA; col += DA)
-                    Sse41::TransformImageMirror64<3>(src + col * 3, dst - col * 3);
-                for (; col < widthHA; col += HA)
-                    Sse41::TransformImageMirror16<3>(src + col * 3, dst - col * 3);
-                if (col < width)
-                    Sse41::TransformImageMirror16<3>(src + (width - HA) * 3, dst - (width - HA) * 3);
                 src += srcStride;
                 dst += dstStride;
             }
