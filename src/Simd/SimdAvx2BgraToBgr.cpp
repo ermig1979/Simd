@@ -23,22 +23,17 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdConst.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE  
     namespace Avx2
     {
-        const __m256i K8_SUFFLE_BGRA_TO_BGR = SIMD_MM256_SETR_EPI8(
-            0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1,
-            0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xA, 0xC, 0xD, 0xE, -1, -1, -1, -1);
-
-        const __m256i K32_PERMUTE_BGRA_TO_BGR = SIMD_MM256_SETR_EPI32(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, -1, -1);
-
         template <bool align> SIMD_INLINE __m256i BgraToBgr(const uint8_t* bgra)
         {
             __m256i _bgra = Load<align>((__m256i*)bgra);
-            return _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_BGR), K32_PERMUTE_BGRA_TO_BGR);
+            return _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_bgra, K8_SHUFFLE_BGRA_TO_BGR), K32_PERMUTE_BGRA_TO_BGR);
         }
 
         template <bool align> void BgraToBgr(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * bgr, size_t bgrStride)
@@ -72,14 +67,14 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        const __m256i K8_SUFFLE_BGRA_TO_RGB = SIMD_MM256_SETR_EPI8(
+        const __m256i K8_SHUFFLE_BGRA_TO_RGB = SIMD_MM256_SETR_EPI8(
             0x2, 0x1, 0x0, 0x6, 0x5, 0x4, 0xA, 0x9, 0x8, 0xE, 0xD, 0xC, -1, -1, -1, -1,
             0x2, 0x1, 0x0, 0x6, 0x5, 0x4, 0xA, 0x9, 0x8, 0xE, 0xD, 0xC, -1, -1, -1, -1);
 
         template <bool align> SIMD_INLINE __m256i BgraToRgb(const uint8_t* bgra)
         {
             __m256i _bgra = Load<align>((__m256i*)bgra);
-            return _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_bgra, K8_SUFFLE_BGRA_TO_RGB), K32_PERMUTE_BGRA_TO_BGR);
+            return _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(_bgra, K8_SHUFFLE_BGRA_TO_RGB), K32_PERMUTE_BGRA_TO_BGR);
         }
 
         template <bool align> void BgraToRgb(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* rgb, size_t rgbStride)
