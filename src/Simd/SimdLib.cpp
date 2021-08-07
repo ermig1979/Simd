@@ -6486,6 +6486,11 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
 
 SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx2::A)
+        Avx512bw::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable && width >= Avx2::A)
         Avx2::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);

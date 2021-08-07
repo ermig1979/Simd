@@ -558,6 +558,35 @@ namespace Simd
         };
     }
 #endif
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        const __m512i K32_MIRROR_4 = SIMD_MM512_SETR_EPI32(0xf, 0xe, 0xd, 0xc, 0xb, 0xa, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0);
+
+        SIMD_INLINE void TransformImageMirror4x16(const uint8_t* src, uint8_t* dst, __mmask16 tail = -1, __mmask16 nose = -1)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi32(tail, src);
+            __m512i _dst = _mm512_permutexvar_epi32(K32_MIRROR_4, _src);
+            _mm512_mask_storeu_epi32(dst, nose, _dst);
+        }
+
+        SIMD_INLINE void TransformImageMirror4x64(const uint8_t* src, uint8_t* dst)
+        {
+            _mm512_storeu_epi32(dst - 0 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 0 * A)));
+            _mm512_storeu_epi32(dst - 1 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 1 * A)));
+            _mm512_storeu_epi32(dst - 2 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 2 * A)));
+            _mm512_storeu_epi32(dst - 3 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 3 * A)));
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        struct ImageTransforms : public Avx2::ImageTransforms
+        {
+            ImageTransforms();
+        };
+    }
+#endif
 }
 
 #endif//__SimdTransform_h__

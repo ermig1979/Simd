@@ -118,6 +118,11 @@ namespace Test
 
         result = result && TransformImageAutoTest(FUNC_TI(Simd::Base::TransformImage), FUNC_TI(SimdTransformImage));
 
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && W >= Simd::Avx2::A)
+            result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx512bw::TransformImage), FUNC_TI(SimdTransformImage));
+#endif 
+
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx2::TransformImage), FUNC_TI(SimdTransformImage));

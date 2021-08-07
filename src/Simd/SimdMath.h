@@ -822,6 +822,11 @@ namespace Simd
             return tail <= 0 ? __mmask16(0) : (tail >= 16 ? __mmask16(-1) : __mmask16(-1) >> (16 - tail));
         }
 
+        SIMD_INLINE __mmask16 NoseMask16(ptrdiff_t nose)
+        {
+            return nose <= 0 ? __mmask16(0) : (nose >= 16 ? __mmask16(-1) : __mmask16(-1) << (16 - nose));
+        }
+
         SIMD_INLINE __m512 Cast(const __m512i & value)
         {
 #if defined(__clang__)
@@ -992,6 +997,11 @@ namespace Simd
         SIMD_INLINE __mmask32 TailMask32(ptrdiff_t tail)
         {
             return tail <= 0 ? __mmask32(0) : (tail >= 32 ? __mmask32(-1) : __mmask32(-1) >> (32 - tail));
+        }
+
+        SIMD_INLINE __mmask32 NoseMask32(ptrdiff_t nose)
+        {
+            return nose <= 0 ? __mmask32(0) : (nose >= 32 ? __mmask32(-1) : __mmask32(-1) << (32 - nose));
         }
 
         SIMD_INLINE __mmask64 TailMask64(ptrdiff_t tail)

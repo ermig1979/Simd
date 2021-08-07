@@ -84,6 +84,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp" />
