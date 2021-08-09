@@ -408,6 +408,20 @@ namespace Simd
         {
             return _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(lo, hi));
         }
+
+        template <bool align> SIMD_INLINE void Store(__m256i* p0, __m256i* p1, __m512i a)
+        {
+            Avx2::Store<align>(p0, _mm512_extracti64x4_epi64(a, 0));
+            Avx2::Store<align>(p1, _mm512_extracti64x4_epi64(a, 1));
+        }
+
+        template <bool align> SIMD_INLINE void Store(__m128i* p0, __m128i* p1, __m128i* p2, __m128i* p3, __m512i a)
+        {
+            Sse2::Store<align>(p0, _mm512_extracti64x2_epi64(a, 0));
+            Sse2::Store<align>(p1, _mm512_extracti64x2_epi64(a, 1));
+            Sse2::Store<align>(p2, _mm512_extracti64x2_epi64(a, 2));
+            Sse2::Store<align>(p3, _mm512_extracti64x2_epi64(a, 3));
+        }
     }
 #endif//SIMD_AVX512BW_ENABLE
 

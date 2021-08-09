@@ -626,6 +626,81 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        SIMD_INLINE void TransformImageTranspose_4x4x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m512i a0, a1, a2, a3, b0, b1, b2, b3;
+
+            a0 = _mm512_loadu_epi32(src + 0x0 * srcStride);
+            a1 = _mm512_loadu_epi32(src + 0x1 * srcStride);
+            a2 = _mm512_loadu_epi32(src + 0x2 * srcStride);
+            a3 = _mm512_loadu_epi32(src + 0x3 * srcStride);
+
+            b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a2);
+            b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a2);
+            b2 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_0, a3);
+            b3 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_1, a3);
+
+            a0 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_0, b2);
+            a1 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_1, b2);
+            a2 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_0, b3);
+            a3 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_1, b3);
+
+            Store<false>((__m128i*)(dst + 0x0 * dstStride), (__m128i*)(dst + 0x1 * dstStride), (__m128i*)(dst + 0x2 * dstStride), (__m128i*)(dst + 0x3 * dstStride), a0);
+            Store<false>((__m128i*)(dst + 0x4 * dstStride), (__m128i*)(dst + 0x5 * dstStride), (__m128i*)(dst + 0x6 * dstStride), (__m128i*)(dst + 0x7 * dstStride), a1);
+            Store<false>((__m128i*)(dst + 0x8 * dstStride), (__m128i*)(dst + 0x9 * dstStride), (__m128i*)(dst + 0xa * dstStride), (__m128i*)(dst + 0xb * dstStride), a2);
+            Store<false>((__m128i*)(dst + 0xc * dstStride), (__m128i*)(dst + 0xd * dstStride), (__m128i*)(dst + 0xe * dstStride), (__m128i*)(dst + 0xf * dstStride), a3);
+        }
+
+        SIMD_INLINE void TransformImageTranspose_4x8x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m512i a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
+
+            a0 = _mm512_loadu_epi32(src + 0x0 * srcStride);
+            a1 = _mm512_loadu_epi32(src + 0x1 * srcStride);
+            a2 = _mm512_loadu_epi32(src + 0x2 * srcStride);
+            a3 = _mm512_loadu_epi32(src + 0x3 * srcStride);
+            a4 = _mm512_loadu_epi32(src + 0x4 * srcStride);
+            a5 = _mm512_loadu_epi32(src + 0x5 * srcStride);
+            a6 = _mm512_loadu_epi32(src + 0x6 * srcStride);
+            a7 = _mm512_loadu_epi32(src + 0x7 * srcStride);
+
+            b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a4);
+            b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a4);
+            b2 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_0, a5);
+            b3 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_1, a5);
+            b4 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_0, a6);
+            b5 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_1, a6);
+            b6 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_0, a7);
+            b7 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_1, a7);
+
+            a0 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_0, b4);
+            a1 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_1, b4);
+            a2 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_0, b5);
+            a3 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_1, b5);
+            a4 = _mm512_permutex2var_epi32(b2, K32_INTERLEAVE_0, b6);
+            a5 = _mm512_permutex2var_epi32(b2, K32_INTERLEAVE_1, b6);
+            a6 = _mm512_permutex2var_epi32(b3, K32_INTERLEAVE_0, b7);
+            a7 = _mm512_permutex2var_epi32(b3, K32_INTERLEAVE_1, b7);
+
+            b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a4);
+            b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a4);
+            b2 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_0, a5);
+            b3 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_1, a5);
+            b4 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_0, a6);
+            b5 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_1, a6);
+            b6 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_0, a7);
+            b7 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_1, a7);
+
+            Store<false>((__m256i*)(dst + 0x0 * dstStride), (__m256i*)(dst + 0x8 * dstStride), b0);
+            Store<false>((__m256i*)(dst + 0x1 * dstStride), (__m256i*)(dst + 0x9 * dstStride), b1);
+            Store<false>((__m256i*)(dst + 0x2 * dstStride), (__m256i*)(dst + 0xa * dstStride), b2);
+            Store<false>((__m256i*)(dst + 0x3 * dstStride), (__m256i*)(dst + 0xb * dstStride), b3);
+            Store<false>((__m256i*)(dst + 0x4 * dstStride), (__m256i*)(dst + 0xc * dstStride), b4);
+            Store<false>((__m256i*)(dst + 0x5 * dstStride), (__m256i*)(dst + 0xd * dstStride), b5);
+            Store<false>((__m256i*)(dst + 0x6 * dstStride), (__m256i*)(dst + 0xe * dstStride), b6);
+            Store<false>((__m256i*)(dst + 0x7 * dstStride), (__m256i*)(dst + 0xf * dstStride), b7);
+        }
+
         const __m512i K32_PERM_4_16_8 = SIMD_MM512_SETR_EPI32(0x0, 0x8, 0x1, 0x9, 0x2, 0xa, 0x3, 0xb, 0x4, 0xc, 0x5, 0xd, 0x6, 0xe, 0x7, 0xf);
 
         SIMD_INLINE void TransformImageTranspose_4x16x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
