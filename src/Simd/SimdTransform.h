@@ -562,6 +562,30 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        const __m512i K8_MIRROR_1 = SIMD_MM512_SETR_EPI8(
+            0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0,
+            0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0,
+            0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0,
+            0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0);
+
+        const __m512i K64_MIRROR_1 = SIMD_MM512_SETR_EPI64(6, 7, 4, 5, 2, 3, 0, 1);
+
+        SIMD_INLINE void TransformImageMirror1x64(const uint8_t* src, uint8_t* dst, __mmask64 tail = -1, __mmask64 nose = -1)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
+            __m512i _dst = _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(K8_MIRROR_1, _src));
+            _mm512_mask_storeu_epi8(dst, nose, _dst);
+        }
+
+        SIMD_INLINE void TransformImageMirror1x256(const uint8_t* src, uint8_t* dst)
+        {
+            _mm512_storeu_epi32(dst - 0 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(K8_MIRROR_1, _mm512_loadu_epi32(src + 0 * A))));
+            _mm512_storeu_epi32(dst - 1 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(K8_MIRROR_1, _mm512_loadu_epi32(src + 1 * A))));
+            _mm512_storeu_epi32(dst - 2 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(K8_MIRROR_1, _mm512_loadu_epi32(src + 2 * A))));
+            _mm512_storeu_epi32(dst - 3 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(K8_MIRROR_1, _mm512_loadu_epi32(src + 3 * A))));
+        }
+        //-----------------------------------------------------------------------------------------
+
         const __m512i K16_MIRROR_2 = SIMD_MM512_SETR_EPI16(
             0x1f, 0x1e, 0x1d, 0x1c, 0x1b, 0x1a, 0x19, 0x18, 0x17, 0x16, 0x15, 0x14, 0x13, 0x12, 0x11, 0x10,
             0x0f, 0x0e, 0x0d, 0x0c, 0x0b, 0x0a, 0x09, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01, 0x00);
