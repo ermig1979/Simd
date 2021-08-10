@@ -584,6 +584,7 @@ namespace Simd
             _mm512_storeu_epi32(dst - 2 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_epi32(src + 2 * A), K8_MIRROR_1)));
             _mm512_storeu_epi32(dst - 3 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_epi32(src + 3 * A), K8_MIRROR_1)));
         }
+
         //-----------------------------------------------------------------------------------------
 
         const __m512i K16_MIRROR_2 = SIMD_MM512_SETR_EPI16(
