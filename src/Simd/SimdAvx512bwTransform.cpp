@@ -76,6 +76,7 @@ namespace Simd
             dst += (width - 1) * dstStride;
             size_t width8 = AlignLo(width, 8);
             size_t width16 = AlignLo(width, 16);
+            size_t width32 = AlignLo(width, 32);
             size_t height8 = AlignLo(height, 8);
             size_t height16 = AlignLo(height, 16);
             size_t row = 0;
@@ -93,6 +94,8 @@ namespace Simd
             for (; row < height8; row += 8)
             {
                 size_t col = 0;
+                //for (; col < width32; col += 32)
+                //    Avx512bw::TransformImageTranspose_2x8x32(src + col * 2, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width16; col += 16)
                     Avx2::TransformImageTranspose_2x8x16(src + col * 2, srcStride, dst - col * dstStride, -dstStride);
                 for (; col < width8; col += 8)
@@ -527,12 +530,15 @@ namespace Simd
         {
             size_t width8 = AlignLo(width, 8);
             size_t width16 = AlignLo(width, 16);
+            size_t width32 = AlignLo(width, 32);
             size_t height8 = AlignLo(height, 8);
             size_t height16 = AlignLo(height, 16);
             size_t row = 0;
             for (; row < height16; row += 16)
             {
                 size_t col = 0;
+                //for (; col < width32; col += 32)
+                //    Avx512bw::TransformImageTranspose_2x16x32(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width8; col += 8)
                     Avx2::TransformImageTranspose_2x16x8(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
@@ -544,6 +550,8 @@ namespace Simd
             for (; row < height8; row += 8)
             {
                 size_t col = 0;
+                for (; col < width32; col += 32)
+                    Avx512bw::TransformImageTranspose_2x8x32(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width16; col += 16)
                     Avx2::TransformImageTranspose_2x8x16(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width8; col += 8)
