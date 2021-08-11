@@ -91,7 +91,7 @@ namespace Test
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, transform, d2));
 
-        result = result && Compare(d1, d2, 0, true, 32);
+        result = result && Compare(d1, d2, 0, true, 64);
 
         return result;
     }
@@ -104,6 +104,8 @@ namespace Test
         {
             for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
+                //if (transform != ::SimdTransformTransposeRotate0 || format != View::Uv16)
+                //    continue;
                 result = result && TransformImageAutoTest(transform, format, W, H, f1, f2);
                 result = result && TransformImageAutoTest(transform, format, W + O, H - O, f1, f2);
             }

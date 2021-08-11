@@ -391,6 +391,9 @@ namespace Simd
 
         const __m512i K32_PERMUTE_FOR_PACK = SIMD_MM512_SETR_EPI32(0, 1, 4, 5, 8, 9, 12, 13, 2, 3, 6, 7, 10, 11, 14, 15);
         const __m512i K32_PERMUTE_FOR_UNPACK = SIMD_MM512_SETR_EPI32(0, 1, 8, 9, 2, 3, 10, 11, 4, 5, 12, 13, 6, 7, 14, 15);
+
+        const __m512i K64_INTERLEAVE_0 = SIMD_MM512_SETR_EPI64(0x0, 0x8, 0x01, 0x9, 0x2, 0xa, 0x3, 0xb);
+        const __m512i K64_INTERLEAVE_1 = SIMD_MM512_SETR_EPI64(0x4, 0xc, 0x05, 0xd, 0x6, 0xe, 0x7, 0xf);
     }
 #endif// SIMD_AVX512F_ENABLE
 
