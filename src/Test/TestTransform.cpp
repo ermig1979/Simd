@@ -89,6 +89,12 @@ namespace Test
                 for (int x = 0; x < width; ++x)
                     s.At<Simd::Pixel::Bgra32>(x, y) = Simd::Pixel::Bgra32(x, y, Random(255), Random(255));
         }
+        if (format == View::Bgr24)
+        {
+            for (int y = 0; y < height; ++y)
+                for (int x = 0; x < width; ++x)
+                    s.At<Simd::Pixel::Bgr24>(x, y) = Simd::Pixel::Bgr24(3 * x + 0, 3 * x + 1, 3 * x + 2);
+        }
 #endif
 
         Size ds = Simd::TransformSize(s.Size(), transform);
@@ -112,8 +118,8 @@ namespace Test
         {
             for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                if (transform != ::SimdTransformRotate180 || format != View::Bgr24)
-                    continue;
+                //if (transform != ::SimdTransformTransposeRotate90 || format != View::Bgr24)
+                //    continue;
                 result = result && TransformImageAutoTest(transform, format, W, H, f1, f2);
                 result = result && TransformImageAutoTest(transform, format, W + O, H - O, f1, f2);
             }

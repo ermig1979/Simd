@@ -241,24 +241,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageRotate180(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            dst += (height - 1) * dstStride + (width - Avx2::A) * N;
-            size_t widthA = AlignLo(width, Avx2::A);
-            size_t widthDA = AlignLo(width, Avx2::DA);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthDA; col += Avx2::DA)
-                    Avx2::TransformImageMirror64<N>(src + col * N, dst - col * N);
-                for (; col < widthA; col += Avx2::A)
-                    Avx2::TransformImageMirror32<N>(src + col * N, dst - col * N);
-                if (col < width)
-                    Avx2::TransformImageMirror32<N>(src + (width - Avx2::A) * N, dst - (width - Avx2::A) * N);
-                src += srcStride;
-                dst -= dstStride;
-            }
-        }
+        template<size_t N> void TransformImageRotate180(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
         template<> void TransformImageRotate180<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
@@ -300,23 +283,25 @@ namespace Simd
             }
         }
 
-        //template<> void TransformImageRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        //{
-        //    dst += (height - 1) * dstStride + (width - 16) * 3;
-        //    size_t width16 = AlignLo(width, 16);
-        //    size_t size = width * 3, size48 = width16 * 3;
-        //    __mmask64 tail = TailMask64(size - size48), nose = NoseMask64(size - size48);
-        //    for (size_t row = 0; row < height; ++row)
-        //    {
-        //        size_t offs = 0;
-        //        for (; offs < size48; offs += 48)
-        //            Avx512bw::TransformImageMirror3x16(src + offs, dst - offs);
-        //        if (offs < size)
-        //            Avx512bw::TransformImageMirror3x16(src + offs, dst - offs, tail);
-        //        src += srcStride;
-        //        dst -= dstStride;
-        //    }
-        //}
+        template<> void TransformImageRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            dst += (height - 1) * dstStride + (width - 16) * 3;
+            size_t width16 = AlignLo(width, 16);
+            size_t size = width * 3, size48 = width16 * 3, size192 = AlignLo(width, 64)* 3;
+            __mmask64 tail = TailMask64(size - size48), nose = NoseMask64(size - size48);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t offs = 0;
+                for (; offs < size192; offs += 192)
+                    Avx512bw::TransformImageMirror3x64(src + offs, dst - offs - 16);
+                for (; offs < size48; offs += 48)
+                    Avx512bw::TransformImageMirror3x16(src + offs, dst - offs);
+                if (offs < size)
+                    Avx512bw::TransformImageMirror3x16(src + offs, dst - offs, tail);
+                src += srcStride;
+                dst -= dstStride;
+            }
+        }
 
         template<> void TransformImageRotate180<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
@@ -757,24 +742,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageTransposeRotate90(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
-        {
-            dst += (width - Avx2::A) * N;
-            size_t widthA = AlignLo(width, Avx2::A);
-            size_t widthDA = AlignLo(width, Avx2::DA);
-            for (size_t row = 0; row < height; ++row)
-            {
-                size_t col = 0;
-                for (; col < widthDA; col += Avx2::DA)
-                    Avx2::TransformImageMirror64<N>(src + col * N, dst - col * N);
-                for (; col < widthA; col += Avx2::A)
-                    Avx2::TransformImageMirror32<N>(src + col * N, dst - col * N);
-                if (col < width)
-                    Avx2::TransformImageMirror32<N>(src + (width - Avx2::A) * N, dst - (width - Avx2::A) * N);
-                src += srcStride;
-                dst += dstStride;
-            }
-        }
+        template<size_t N> void TransformImageTransposeRotate90(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
         template<> void TransformImageTransposeRotate90<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
@@ -811,6 +779,26 @@ namespace Simd
                     Avx512bw::TransformImageMirror2x32(src + offs, dst - offs);
                 if (offs < size)
                     Avx512bw::TransformImageMirror2x32(src + offs, dst - offs, tail, nose);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        template<> void TransformImageTransposeRotate90<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            dst += (width - 16) * 3;
+            size_t width16 = AlignLo(width, 16);
+            size_t size = width * 3, size48 = width16 * 3, size192 = AlignLo(width, 64) * 3;
+            __mmask64 tail = TailMask64(size - size48), nose = NoseMask64(size - size48 + 16) & 0x0000FFFFFFFFFFFF;
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t offs = 0;
+                for (; offs < size192; offs += 192)
+                    Avx512bw::TransformImageMirror3x64(src + offs, dst - offs - 16);
+                for (; offs < size48; offs += 48)
+                    Avx512bw::TransformImageMirror3x16(src + offs, dst - offs);
+                if (offs < size)
+                    Avx512bw::TransformImageMirror3x16(src + offs, dst - offs, tail, nose);
                 src += srcStride;
                 dst += dstStride;
             }
