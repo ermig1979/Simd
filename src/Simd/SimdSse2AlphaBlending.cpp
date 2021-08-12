@@ -126,6 +126,41 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, 
+            size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
+            size_t size = width * channelCount;
+            size_t sizeA = AlignLo(size, A);
+            __m128i _alpha = _mm_set1_epi8(alpha);
+            __m128i tail = _mm_and_si128(ShiftLeft(K_INV_ZERO, A - size + sizeA), _alpha);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t offs = 0; offs < sizeA; offs += A)
+                    AlphaBlending<align>((__m128i*)(src + offs), (__m128i*)(dst + offs), _alpha);
+                if (sizeA != size)
+                    AlphaBlending<false>((__m128i*)(src + size - A), (__m128i*)(dst + size - A), tail);
+                src += srcStride;
+                dst += dstStride;
+            }            
+        }
+
+        void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AlphaBlendingUniform<true>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+            else
+                AlphaBlendingUniform<false>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+        }
+
+        //---------------------------------------------------------------------
+
         template <bool align, size_t channelCount> struct AlphaFiller
         {
             void operator() (__m128i * dst, __m128i channel, __m128i alpha);

@@ -172,6 +172,7 @@ namespace Test
     TEST_ADD_GROUP_00S(Detection);
 
     TEST_ADD_GROUP_AD0(AlphaBlending);
+    TEST_ADD_GROUP_A00(AlphaBlendingUniform);
     TEST_ADD_GROUP_AD0(AlphaFilling);
     TEST_ADD_GROUP_A00(AlphaPremultiply);
     TEST_ADD_GROUP_A00(AlphaUnpremultiply);

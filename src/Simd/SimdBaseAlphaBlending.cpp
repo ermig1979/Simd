@@ -90,6 +90,32 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template <size_t channelCount> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < width; ++col, offset += channelCount)
+                    AlphaBlending<channelCount>(src + offset, alpha, dst + offset);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            assert(channelCount >= 1 && channelCount <= 4);
+
+            switch (channelCount)
+            {
+            case 1: AlphaBlendingUniform<1>(src, srcStride, width, height, alpha, dst, dstStride); break;
+            case 2: AlphaBlendingUniform<2>(src, srcStride, width, height, alpha, dst, dstStride); break;
+            case 3: AlphaBlendingUniform<3>(src, srcStride, width, height, alpha, dst, dstStride); break;
+            case 4: AlphaBlendingUniform<4>(src, srcStride, width, height, alpha, dst, dstStride); break;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         template <size_t channelCount> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, const uint8_t * alpha, size_t alphaStride)
         {
             for (size_t row = 0; row < height; ++row)

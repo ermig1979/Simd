@@ -300,6 +300,24 @@ namespace Simd
             }
         }
 
+        //template<> void TransformImageRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        //{
+        //    dst += (height - 1) * dstStride + (width - 16) * 3;
+        //    size_t width16 = AlignLo(width, 16);
+        //    size_t size = width * 3, size48 = width16 * 3;
+        //    __mmask64 tail = TailMask64(size - size48), nose = NoseMask64(size - size48);
+        //    for (size_t row = 0; row < height; ++row)
+        //    {
+        //        size_t offs = 0;
+        //        for (; offs < size48; offs += 48)
+        //            Avx512bw::TransformImageMirror3x16(src + offs, dst - offs);
+        //        if (offs < size)
+        //            Avx512bw::TransformImageMirror3x16(src + offs, dst - offs, tail);
+        //        src += srcStride;
+        //        dst -= dstStride;
+        //    }
+        //}
+
         template<> void TransformImageRotate180<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             dst += (height - 1) * dstStride + (width - 16) * 4;

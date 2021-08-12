@@ -608,6 +608,25 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        const __m512i K32_MIRROR_3U = SIMD_MM512_SETR_EPI32(0x0, 0x1, 0x2, 0x0, 0x3, 0x4, 0x5, 0x0, 0x6, 0x7, 0x8, 0x0, 0x9, 0xa, 0xb, 0x0);
+        const __m512i K8_MIRROR_3R = SIMD_MM512_SETR_EPI8(
+            0x9, 0xA, 0xB, 0x6, 0x7, 0x8, 0x3, 0x4, 0x5, 0x0, 0x1, 0x2, -1, -1, -1, -1,
+            0x9, 0xA, 0xB, 0x6, 0x7, 0x8, 0x3, 0x4, 0x5, 0x0, 0x1, 0x2, -1, -1, -1, -1,
+            0x9, 0xA, 0xB, 0x6, 0x7, 0x8, 0x3, 0x4, 0x5, 0x0, 0x1, 0x2, -1, -1, -1, -1,
+            0x9, 0xA, 0xB, 0x6, 0x7, 0x8, 0x3, 0x4, 0x5, 0x0, 0x1, 0x2, -1, -1, -1, -1);
+        const __m512i K32_MIRROR_3P = SIMD_MM512_SETR_EPI32(0xc, 0xd, 0xe, 0x8, 0x9, 0xa, 0x4, 0x5, 0x6, 0x0, 0x1, 0x2, 0x0, 0x0, 0x0, 0x0);
+
+        SIMD_INLINE void TransformImageMirror3x16(const uint8_t* src, uint8_t* dst, __mmask64 tail = 0x0000FFFFFFFFFFFF, __mmask64 nose = 0x0000FFFFFFFFFFFF)
+        {
+            __m512i _src = _mm512_maskz_loadu_epi8(tail, src);
+            __m512i perm = _mm512_permutexvar_epi32(K32_MIRROR_3U, _src);
+            __m512i shfl = _mm512_shuffle_epi8(perm, K8_MIRROR_3R);
+            __m512i _dst = _mm512_permutexvar_epi32(K32_MIRROR_3P, shfl);
+            _mm512_mask_storeu_epi8(dst, nose, _dst);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         const __m512i K32_MIRROR_4 = SIMD_MM512_SETR_EPI32(0xf, 0xe, 0xd, 0xc, 0xb, 0xa, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0);
 
         SIMD_INLINE void TransformImageMirror4x16(const uint8_t* src, uint8_t* dst, __mmask16 tail = -1, __mmask16 nose = -1)
@@ -953,6 +972,76 @@ namespace Simd
             ae = _mm512_loadu_epi32(src + 0xe * srcStride);
             af = _mm512_loadu_epi32(src + 0xf * srcStride);
 
+#if 0
+            b0 = _mm512_shuffle_i32x4(a0, a4, 0x44);
+            b1 = _mm512_shuffle_i32x4(a1, a5, 0x44);
+            b2 = _mm512_shuffle_i32x4(a2, a6, 0x44);
+            b3 = _mm512_shuffle_i32x4(a3, a7, 0x44);
+            b4 = _mm512_shuffle_i32x4(a0, a4, 0xEE);
+            b5 = _mm512_shuffle_i32x4(a1, a5, 0xEE);
+            b6 = _mm512_shuffle_i32x4(a2, a6, 0xEE);
+            b7 = _mm512_shuffle_i32x4(a3, a7, 0xEE);
+            b8 = _mm512_shuffle_i32x4(a8, ac, 0x44);
+            b9 = _mm512_shuffle_i32x4(a9, ad, 0x44);
+            ba = _mm512_shuffle_i32x4(aa, ae, 0x44);
+            bb = _mm512_shuffle_i32x4(ab, af, 0x44);
+            bc = _mm512_shuffle_i32x4(a8, ac, 0xEE);
+            bd = _mm512_shuffle_i32x4(a9, ad, 0xEE);
+            be = _mm512_shuffle_i32x4(aa, ae, 0xEE);
+            bf = _mm512_shuffle_i32x4(ab, af, 0xEE);
+
+            a0 = _mm512_shuffle_i32x4(b0, b8, 0x88);
+            a1 = _mm512_shuffle_i32x4(b1, b9, 0x88);
+            a2 = _mm512_shuffle_i32x4(b2, ba, 0x88);
+            a3 = _mm512_shuffle_i32x4(b3, bb, 0x88);
+            a4 = _mm512_shuffle_i32x4(b0, b8, 0xDD);
+            a5 = _mm512_shuffle_i32x4(b1, b9, 0xDD);
+            a6 = _mm512_shuffle_i32x4(b2, ba, 0xDD);
+            a7 = _mm512_shuffle_i32x4(b3, bb, 0xDD);
+            a8 = _mm512_shuffle_i32x4(b4, bc, 0x88);
+            a9 = _mm512_shuffle_i32x4(b5, bd, 0x88);
+            aa = _mm512_shuffle_i32x4(b6, be, 0x88);
+            ab = _mm512_shuffle_i32x4(b7, bf, 0x88);
+            ac = _mm512_shuffle_i32x4(b4, bc, 0xDD);
+            ad = _mm512_shuffle_i32x4(b5, bd, 0xDD);
+            ae = _mm512_shuffle_i32x4(b6, be, 0xDD);
+            af = _mm512_shuffle_i32x4(b7, bf, 0xDD);
+
+            b0 = _mm512_unpacklo_epi32(a0, a1);
+            b1 = _mm512_unpackhi_epi32(a0, a1);
+            b2 = _mm512_unpacklo_epi32(a2, a3);
+            b3 = _mm512_unpackhi_epi32(a2, a3);
+            b4 = _mm512_unpacklo_epi32(a4, a5);
+            b5 = _mm512_unpackhi_epi32(a4, a5);
+            b6 = _mm512_unpacklo_epi32(a6, a7);
+            b7 = _mm512_unpackhi_epi32(a6, a7);
+            b8 = _mm512_unpacklo_epi32(a8, a9);
+            b9 = _mm512_unpackhi_epi32(a8, a9);
+            ba = _mm512_unpacklo_epi32(aa, ab);
+            bb = _mm512_unpackhi_epi32(aa, ab);
+            bc = _mm512_unpacklo_epi32(ac, ad);
+            bd = _mm512_unpackhi_epi32(ac, ad);
+            be = _mm512_unpacklo_epi32(ae, af);
+            bf = _mm512_unpackhi_epi32(ae, af);
+
+            a0 = _mm512_unpacklo_epi64(b0, b2);
+            a1 = _mm512_unpackhi_epi64(b0, b2);
+            a2 = _mm512_unpacklo_epi64(b1, b3);
+            a3 = _mm512_unpackhi_epi64(b1, b3);
+            a4 = _mm512_unpacklo_epi64(b4, b6);
+            a5 = _mm512_unpackhi_epi64(b4, b6);
+            a6 = _mm512_unpacklo_epi64(b5, b7);
+            a7 = _mm512_unpackhi_epi64(b5, b7);
+            a8 = _mm512_unpacklo_epi64(b8, ba);
+            a9 = _mm512_unpackhi_epi64(b8, ba);
+            aa = _mm512_unpacklo_epi64(b9, bb);
+            ab = _mm512_unpackhi_epi64(b9, bb);
+            ac = _mm512_unpacklo_epi64(bc, be);
+            ad = _mm512_unpackhi_epi64(bc, be);
+            ae = _mm512_unpacklo_epi64(bd, bf);
+            af = _mm512_unpackhi_epi64(bd, bf);
+#else
+
             b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a8);
             b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a8);
             b2 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_0, a9);
@@ -1020,6 +1109,7 @@ namespace Simd
             ad = _mm512_permutex2var_epi32(b6, K32_INTERLEAVE_1, be);
             ae = _mm512_permutex2var_epi32(b7, K32_INTERLEAVE_0, bf);
             af = _mm512_permutex2var_epi32(b7, K32_INTERLEAVE_1, bf);
+#endif
 
             _mm512_storeu_epi32(dst + 0x0 * dstStride, a0);
             _mm512_storeu_epi32(dst + 0x1 * dstStride, a1);

@@ -253,7 +253,7 @@ namespace Simd
 
         \short Performs alpha blending operation.
 
-        All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, BGR24 or BGRA32). Alpha must be 8-bit gray image.
+        All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alpha must be 8-bit gray image.
 
         For every point:
         \verbatim
@@ -273,6 +273,34 @@ namespace Simd
         assert(Compatible(src, dst) && EqualSize(src, alpha) && alpha.format == View<A>::Gray8 && src.ChannelSize() == 1);
 
         SimdAlphaBlending(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha.data, alpha.stride, dst.data, dst.stride);
+    }
+
+    /*! @ingroup drawing
+
+        \fn void AlphaBlending(const View<A>& src, uint8_t alpha, View<A>& dst)
+
+        \short Performs alpha blending operation.
+
+        All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32).
+
+        For every point:
+        \verbatim
+        dst[x, y, c] = (src[x, y, c]*alpha[x, y] + dst[x, y, c]*(255 - alpha))/255;
+        \endverbatim
+
+        This function is used for image drawing.
+
+        \note This function is a C++ wrapper for function ::SimdAlphaBlendingUniform.
+
+        \param [in] src - a foreground image.
+        \param [in] alpha - a value of alpha.
+        \param [in, out] dst - a background image.
+    */
+    template<template<class> class A> SIMD_INLINE void AlphaBlending(const View<A>& src, uint8_t alpha, View<A>& dst)
+    {
+        assert(Compatible(src, dst));
+
+        SimdAlphaBlendingUniform(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha, dst.data, dst.stride);
     }
 
     /*! @ingroup drawing

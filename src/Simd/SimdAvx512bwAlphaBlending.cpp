@@ -150,6 +150,44 @@ namespace Simd
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
         }
 
+        //---------------------------------------------------------------------
+
+        template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
+            size_t size = width * channelCount;
+            size_t sizeA = AlignLo(size, A);
+            __m512i _alpha = _mm512_set1_epi8(alpha);
+            __mmask64 tail = TailMask64(size - sizeA);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t offs = 0;
+                for (; offs < sizeA; offs += A)
+                    AlphaBlending<align, false>(src + offs, dst + offs, _alpha, -1);
+                if (offs < size)
+                    AlphaBlending<align, true>(src + offs, dst + offs, _alpha, tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AlphaBlendingUniform<true>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+            else
+                AlphaBlendingUniform<false>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+        }
+
+        //---------------------------------------------------------------------
+
         template <bool align, bool mask> SIMD_INLINE void AlphaFilling(uint8_t * dst, __m512i channelLo, __m512i channelHi, __m512i alpha, __mmask64 m)
         {
             __m512i _dst = Load<align, mask>(dst, m);

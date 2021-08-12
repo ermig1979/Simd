@@ -482,6 +482,31 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
+SIMD_API void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
+{
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::A)
+        Avx2::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable && width >= Sse2::A)
+        Sse2::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+    else
+#endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::A)
+        Neon::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+    else
+#endif
+        Base::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+}
+
 SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, size_t channelCount, const uint8_t * alpha, size_t alphaStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE

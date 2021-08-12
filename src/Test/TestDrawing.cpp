@@ -134,6 +134,99 @@ namespace Test
 
     namespace
     {
+        struct FuncABU
+        {
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride);
+            FuncPtr func;
+            String description;
+
+            FuncABU(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, uint8_t alpha, const View& dstSrc, View& dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, src.ChannelCount(), alpha, dstDst.data, dstDst.stride);
+            }
+        };
+    }
+
+#define FUNC_ABU(func) FuncABU(func, #func)
+
+    bool AlphaBlendingUniformAutoTest(View::Format format, int width, int height, const FuncABU& f1, const FuncABU& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
+
+        View s(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(s);
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(b);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        uint8_t a = 77;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, a, b, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, a, b, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool AlphaBlendingUniformAutoTest(const FuncABU& f1, const FuncABU& f2)
+    {
+        bool result = true;
+
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            FuncABU f1c = FuncABU(f1.func, f1.description + ColorDescription(format));
+            FuncABU f2c = FuncABU(f2.func, f2.description + ColorDescription(format));
+
+            result = result && AlphaBlendingUniformAutoTest(format, W, H, f1c, f2c);
+            result = result && AlphaBlendingUniformAutoTest(format, W + O, H - O, f1c, f2c);
+        }
+
+        return result;
+    }
+
+    bool AlphaBlendingUniformAutoTest()
+    {
+        bool result = true;
+
+        result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Base::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
+            result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Sse2::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+            result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Avx2::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
+#endif 
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Avx512bw::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
+            result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Neon::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
+#endif
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncAF
         {
             typedef void(*FuncPtr)(uint8_t * dst, size_t dstStride, size_t width, size_t height,
