@@ -104,7 +104,7 @@ namespace Test
         {
             for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                //if (transform != ::SimdTransformTransposeRotate0 || format != View::Uv16)
+                //if (transform != ::SimdTransformTransposeRotate0 || format != View::Gray8)
                 //    continue;
                 result = result && TransformImageAutoTest(transform, format, W, H, f1, f2);
                 result = result && TransformImageAutoTest(transform, format, W + O, H - O, f1, f2);

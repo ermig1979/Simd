@@ -39,7 +39,19 @@ namespace Simd
             size_t width16 = AlignLo(width, 16);
             size_t height8 = AlignLo(height, 8);
             size_t height16 = AlignLo(height, 16);
+            size_t height64 = AlignLo(height, 64);
             size_t row = 0;
+            for (; row < height64; row += 64)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_1x64x16(src + col * 1, srcStride, dst - col * dstStride, -dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 64; ++i)
+                        Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst - col * dstStride + i * 1);
+                src += 64 * srcStride;
+                dst += 64;
+            }
             for (; row < height16; row += 16)
             {
                 size_t col = 0;
@@ -318,7 +330,19 @@ namespace Simd
             size_t width16 = AlignLo(width, 16);
             size_t height8 = AlignLo(height, 8);
             size_t height16 = AlignLo(height, 16);
+            size_t height64 = AlignLo(height, 64);
             size_t row = 0;
+            for (; row < height64; row += 64)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_1x64x16(src + col * 1 + 63 * srcStride, -srcStride, dst + col * dstStride - 63, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 64; ++i)
+                        Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst + col * dstStride - i * 1);
+                src += 64 * srcStride;
+                dst -= 64;
+            }
             for (; row < height16; row += 16)
             {
                 size_t col = 0;
@@ -513,9 +537,21 @@ namespace Simd
         template<> void TransformImageTransposeRotate0<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
             size_t width16 = AlignLo(width, 16);
-            size_t height16 = AlignLo(height, 16);
             size_t height8 = AlignLo(height, 8);
+            size_t height16 = AlignLo(height, 16);
+            size_t height64 = AlignLo(height, 64);
             size_t row = 0;
+            for (; row < height64; row += 64)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_1x64x16(src + col * 1, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 64; ++i)
+                        Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst + col * dstStride + i * 1);
+                src += 64 * srcStride;
+                dst += 64;
+            }
             for (; row < height16; row += 16)
             {
                 size_t col = 0;
@@ -792,7 +828,19 @@ namespace Simd
             size_t width16 = AlignLo(width, 16);
             size_t height8 = AlignLo(height, 8);
             size_t height16 = AlignLo(height, 16);
+            size_t height64 = AlignLo(height, 64);
             size_t row = 0;
+            for (; row < height64; row += 64)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_1x64x16(src + col * 1 + 63 * srcStride, -srcStride, dst - col * dstStride - 63, -dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 64; ++i)
+                        Base::CopyPixel<1>(src + col * 1 + i * srcStride, dst - col * dstStride - i * 1);
+                src += 64 * srcStride;
+                dst -= 64;
+            }
             for (; row < height16; row += 16)
             {
                 size_t col = 0;
@@ -997,7 +1045,7 @@ namespace Simd
         {
             Init<1>(transforms[0]);
             Init<2>(transforms[1]);
-            //Init<3>(transforms[2]);
+            Init<3>(transforms[2]);
             Init<4>(transforms[3]);
         }
 
