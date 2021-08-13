@@ -271,6 +271,14 @@ namespace Simd
         */
         View & operator = (const View & view);
 
+        /*!
+            Moves View structure.
+
+            \param [in] view - a moved image view.
+            \return a reference to itself.
+        */
+        View& operator = (View&& view);
+
 #ifdef SIMD_OPENCV_ENABLE
         /*!
             Creates view which references to an OpenCV Mat.
@@ -930,6 +938,16 @@ namespace Simd
         return *this;
     }
     /*! \endcond */
+
+    template <template<class> class A> SIMD_INLINE View<A>& View<A>::operator = (View<A>&& view)
+    {
+        if (this != &view)
+        {
+            Swap(view);
+            view.Clear();
+        }
+        return *this;
+    }
 
 #ifdef SIMD_OPENCV_ENABLE
     template <template<class> class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)

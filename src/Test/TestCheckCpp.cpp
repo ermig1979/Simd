@@ -146,6 +146,15 @@ namespace Test
         }
     }
 
+    static void TestViewMove()
+    {
+        typedef Simd::View<Simd::Allocator> View;
+
+        View a = View(128, 96, View::Gray8), b(40, 30, View::Bgr24);
+
+        b = std::move(a);
+    }
+
     void CheckCpp()
     {
         TestCpuInfo();
@@ -165,6 +174,8 @@ namespace Test
         TestResize();
 
         TestViewVector();
+
+        TestViewMove();
     }
 }
 
