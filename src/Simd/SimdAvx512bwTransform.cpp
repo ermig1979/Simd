@@ -141,9 +141,24 @@ namespace Simd
             dst += (width - 1) * dstStride;
             size_t width4 = AlignLo(width - 5, 4);
             size_t width8 = AlignLo(width - 9, 8);
+            size_t width16 = AlignLo(width, 16);
             size_t height4 = AlignLo(height - 5, 4);
-            size_t height8 = AlignLo(height - 9, 4);
+            size_t height8 = AlignLo(height - 9, 8);
+            size_t height16 = AlignLo(height, 16);
             size_t row = 0;
+            for (; row < height16; row += 16)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_3x16x16(src + col * 3, srcStride, dst - col * dstStride, -dstStride);
+                for (; col < width4; col += 4)
+                    Avx512bw::TransformImageTranspose_3x16x4(src + col * 3, srcStride, dst - col * dstStride, -dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 16; ++i)
+                        Base::CopyPixel<3>(src + col * 3 + i * srcStride, dst - col * dstStride + i * 3);
+                src += 16 * srcStride;
+                dst += 48;
+            }
             for (; row < height8; row += 8)
             {
                 size_t col = 0;
@@ -435,9 +450,24 @@ namespace Simd
             src += (height - 1) * srcStride;
             size_t width4 = AlignLo(width - 5, 4);
             size_t width8 = AlignLo(width - 9, 8);
+            size_t width16 = AlignLo(width, 16);
             size_t height4 = AlignLo(height - 5, 4);
             size_t height8 = AlignLo(height - 9, 8);
+            size_t height16 = AlignLo(height, 16);
             size_t row = 0;
+            for (; row < height16; row += 16)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_3x16x16(src + col * 3, -srcStride, dst + col * dstStride, dstStride);
+                for (; col < width4; col += 4)
+                    Avx512bw::TransformImageTranspose_3x16x4(src + col * 3, -srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 16; ++i)
+                        Base::CopyPixel<3>(src + col * 3 - i * srcStride, dst + col * dstStride + i * 3);
+                src -= 16 * srcStride;
+                dst += 48;
+            }
             for (; row < height8; row += 8)
             {
                 size_t col = 0;
@@ -597,6 +627,8 @@ namespace Simd
             for (; row < height32; row += 32)
             {
                 size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_2x32x16(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width8; col += 8)
                     Avx512bw::TransformImageTranspose_2x32x8(src + col * 2, srcStride, dst + col * dstStride, dstStride);
                 for (; col < width; ++col)
@@ -642,9 +674,24 @@ namespace Simd
         {
             size_t width4 = AlignLo(width - 5, 4);
             size_t width8 = AlignLo(width - 9, 8);
+            size_t width16 = AlignLo(width, 16);
             size_t height4 = AlignLo(height - 5, 4);
             size_t height8 = AlignLo(height - 9, 8);
+            size_t height16 = AlignLo(height, 16);
             size_t row = 0;
+            for (; row < height16; row += 16)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_3x16x16(src + col * 3, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width4; col += 4)
+                    Avx512bw::TransformImageTranspose_3x16x4(src + col * 3, srcStride, dst + col * dstStride, dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 16; ++i)
+                        Base::CopyPixel<3>(src + col * 3 + i * srcStride, dst + col * dstStride + i * 3);
+                src += 16 * srcStride;
+                dst += 48;
+            }
             for (; row < height8; row += 8)
             {
                 size_t col = 0;
@@ -936,9 +983,24 @@ namespace Simd
             src += (height - 1) * srcStride + (width - 1) * 3;
             size_t width4 = AlignLo(width - 5, 4);
             size_t width8 = AlignLo(width - 9, 8);
+            size_t width16 = AlignLo(width, 16);
             size_t height4 = AlignLo(height - 5, 4);
             size_t height8 = AlignLo(height - 9, 8);
+            size_t height16 = AlignLo(height, 16);
             size_t row = 0;
+            for (; row < height16; row += 16)
+            {
+                size_t col = 0;
+                for (; col < width16; col += 16)
+                    Avx512bw::TransformImageTranspose_3x16x16(src - col * 3 - 45, -srcStride, dst + (col + 15) * dstStride, -dstStride);
+                for (; col < width4; col += 4)
+                    Avx512bw::TransformImageTranspose_3x16x4(src - col * 3 - 9, -srcStride, dst + (col + 3) * dstStride, -dstStride);
+                for (; col < width; ++col)
+                    for (size_t i = 0; i < 16; ++i)
+                        Base::CopyPixel<3>(src - col * 3 - i * srcStride, dst + col * dstStride + i * 3);
+                src -= 16 * srcStride;
+                dst += 48;
+            }
             for (; row < height8; row += 8)
             {
                 size_t col = 0;

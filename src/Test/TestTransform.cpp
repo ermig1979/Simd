@@ -93,7 +93,16 @@ namespace Test
         {
             for (int y = 0; y < height; ++y)
                 for (int x = 0; x < width; ++x)
-                    s.At<Simd::Pixel::Bgr24>(x, y) = Simd::Pixel::Bgr24(3 * x + 0, 3 * x + 1, 3 * x + 2);
+                    s.At<Simd::Pixel::Bgr24>(x, y) = Simd::Pixel::Bgr24(y, x, Random(255));// Simd::Pixel::Bgr24(3 * x + 0, 3 * x + 1, 3 * x + 2);
+        }
+        if (format == View::Uv16)
+        {
+            for (int y = 0; y < height; ++y)
+                for (int x = 0; x < width; ++x)
+                {
+                    s.Row<uint8_t>(y)[2 * x + 0] = y;
+                    s.Row<uint8_t>(y)[2 * x + 1] = x;
+                }
         }
 #endif
 
@@ -118,7 +127,7 @@ namespace Test
         {
             for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
             {
-                //if (transform != ::SimdTransformTransposeRotate90 || format != View::Bgr24)
+                //if (transform != ::SimdTransformTransposeRotate0 || format != View::Bgr24)
                 //    continue;
                 result = result && TransformImageAutoTest(transform, format, W, H, f1, f2);
                 result = result && TransformImageAutoTest(transform, format, W + O, H - O, f1, f2);

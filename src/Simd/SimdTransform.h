@@ -884,6 +884,291 @@ namespace Simd
             _mm512_storeu_epi32(dst + 0x7 * dstStride, b7);
         }
 
+        SIMD_INLINE void TransformImageTranspose_2x32x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m512i a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af, b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, ba, bb, bc, bd, be, bf;
+
+            a0 = Load<false>((__m256i*)(src + 0x00 * srcStride), (__m256i*)(src + 0x08 * srcStride));
+            a1 = Load<false>((__m256i*)(src + 0x01 * srcStride), (__m256i*)(src + 0x09 * srcStride));
+            a2 = Load<false>((__m256i*)(src + 0x02 * srcStride), (__m256i*)(src + 0x0a * srcStride));
+            a3 = Load<false>((__m256i*)(src + 0x03 * srcStride), (__m256i*)(src + 0x0b * srcStride));
+            a4 = Load<false>((__m256i*)(src + 0x04 * srcStride), (__m256i*)(src + 0x0c * srcStride));
+            a5 = Load<false>((__m256i*)(src + 0x05 * srcStride), (__m256i*)(src + 0x0d * srcStride));
+            a6 = Load<false>((__m256i*)(src + 0x06 * srcStride), (__m256i*)(src + 0x0e * srcStride));
+            a7 = Load<false>((__m256i*)(src + 0x07 * srcStride), (__m256i*)(src + 0x0f * srcStride));
+            a8 = Load<false>((__m256i*)(src + 0x10 * srcStride), (__m256i*)(src + 0x18 * srcStride));
+            a9 = Load<false>((__m256i*)(src + 0x11 * srcStride), (__m256i*)(src + 0x19 * srcStride));
+            aa = Load<false>((__m256i*)(src + 0x12 * srcStride), (__m256i*)(src + 0x1a * srcStride));
+            ab = Load<false>((__m256i*)(src + 0x13 * srcStride), (__m256i*)(src + 0x1b * srcStride));
+            ac = Load<false>((__m256i*)(src + 0x14 * srcStride), (__m256i*)(src + 0x1c * srcStride));
+            ad = Load<false>((__m256i*)(src + 0x15 * srcStride), (__m256i*)(src + 0x1d * srcStride));
+            ae = Load<false>((__m256i*)(src + 0x16 * srcStride), (__m256i*)(src + 0x1e * srcStride));
+            af = Load<false>((__m256i*)(src + 0x17 * srcStride), (__m256i*)(src + 0x1f * srcStride));
+
+            b0 = _mm512_shuffle_i32x4(a0, a8, 0x88);
+            b1 = _mm512_shuffle_i32x4(a1, a9, 0x88);
+            b2 = _mm512_shuffle_i32x4(a2, aa, 0x88);
+            b3 = _mm512_shuffle_i32x4(a3, ab, 0x88);
+            b4 = _mm512_shuffle_i32x4(a4, ac, 0x88);
+            b5 = _mm512_shuffle_i32x4(a5, ad, 0x88);
+            b6 = _mm512_shuffle_i32x4(a6, ae, 0x88);
+            b7 = _mm512_shuffle_i32x4(a7, af, 0x88);
+            b8 = _mm512_shuffle_i32x4(a0, a8, 0xDD);
+            b9 = _mm512_shuffle_i32x4(a1, a9, 0xDD);
+            ba = _mm512_shuffle_i32x4(a2, aa, 0xDD);
+            bb = _mm512_shuffle_i32x4(a3, ab, 0xDD);
+            bc = _mm512_shuffle_i32x4(a4, ac, 0xDD);
+            bd = _mm512_shuffle_i32x4(a5, ad, 0xDD);
+            be = _mm512_shuffle_i32x4(a6, ae, 0xDD);
+            bf = _mm512_shuffle_i32x4(a7, af, 0xDD);
+
+            a0 = _mm512_unpacklo_epi16(b0, b1);
+            a1 = _mm512_unpackhi_epi16(b0, b1);
+            a2 = _mm512_unpacklo_epi16(b2, b3);
+            a3 = _mm512_unpackhi_epi16(b2, b3);
+            a4 = _mm512_unpacklo_epi16(b4, b5);
+            a5 = _mm512_unpackhi_epi16(b4, b5);
+            a6 = _mm512_unpacklo_epi16(b6, b7);
+            a7 = _mm512_unpackhi_epi16(b6, b7);
+            a8 = _mm512_unpacklo_epi16(b8, b9);
+            a9 = _mm512_unpackhi_epi16(b8, b9);
+            aa = _mm512_unpacklo_epi16(ba, bb);
+            ab = _mm512_unpackhi_epi16(ba, bb);
+            ac = _mm512_unpacklo_epi16(bc, bd);
+            ad = _mm512_unpackhi_epi16(bc, bd);
+            ae = _mm512_unpacklo_epi16(be, bf);
+            af = _mm512_unpackhi_epi16(be, bf);
+
+            b0 = _mm512_unpacklo_epi32(a0, a2);
+            b1 = _mm512_unpackhi_epi32(a0, a2);
+            b2 = _mm512_unpacklo_epi32(a1, a3);
+            b3 = _mm512_unpackhi_epi32(a1, a3);
+            b4 = _mm512_unpacklo_epi32(a4, a6);
+            b5 = _mm512_unpackhi_epi32(a4, a6);
+            b6 = _mm512_unpacklo_epi32(a5, a7);
+            b7 = _mm512_unpackhi_epi32(a5, a7);
+            b8 = _mm512_unpacklo_epi32(a8, aa);
+            b9 = _mm512_unpackhi_epi32(a8, aa);
+            ba = _mm512_unpacklo_epi32(a9, ab);
+            bb = _mm512_unpackhi_epi32(a9, ab);
+            bc = _mm512_unpacklo_epi32(ac, ae);
+            bd = _mm512_unpackhi_epi32(ac, ae);
+            be = _mm512_unpacklo_epi32(ad, af);
+            bf = _mm512_unpackhi_epi32(ad, af);
+
+            a0 = _mm512_unpacklo_epi64(b0, b4);
+            a1 = _mm512_unpackhi_epi64(b0, b4);
+            a2 = _mm512_unpacklo_epi64(b1, b5);
+            a3 = _mm512_unpackhi_epi64(b1, b5);
+            a4 = _mm512_unpacklo_epi64(b2, b6);
+            a5 = _mm512_unpackhi_epi64(b2, b6);
+            a6 = _mm512_unpacklo_epi64(b3, b7);
+            a7 = _mm512_unpackhi_epi64(b3, b7);
+            a8 = _mm512_unpacklo_epi64(b8, bc);
+            a9 = _mm512_unpackhi_epi64(b8, bc);
+            aa = _mm512_unpacklo_epi64(b9, bd);
+            ab = _mm512_unpackhi_epi64(b9, bd);
+            ac = _mm512_unpacklo_epi64(ba, be);
+            ad = _mm512_unpackhi_epi64(ba, be);
+            ae = _mm512_unpacklo_epi64(bb, bf);
+            af = _mm512_unpackhi_epi64(bb, bf);
+
+            _mm512_storeu_epi32(dst + 0x0 * dstStride, a0);
+            _mm512_storeu_epi32(dst + 0x1 * dstStride, a1);
+            _mm512_storeu_epi32(dst + 0x2 * dstStride, a2);
+            _mm512_storeu_epi32(dst + 0x3 * dstStride, a3);
+            _mm512_storeu_epi32(dst + 0x4 * dstStride, a4);
+            _mm512_storeu_epi32(dst + 0x5 * dstStride, a5);
+            _mm512_storeu_epi32(dst + 0x6 * dstStride, a6);
+            _mm512_storeu_epi32(dst + 0x7 * dstStride, a7);
+            _mm512_storeu_epi32(dst + 0x8 * dstStride, a8);
+            _mm512_storeu_epi32(dst + 0x9 * dstStride, a9);
+            _mm512_storeu_epi32(dst + 0xa * dstStride, aa);
+            _mm512_storeu_epi32(dst + 0xb * dstStride, ab);
+            _mm512_storeu_epi32(dst + 0xc * dstStride, ac);
+            _mm512_storeu_epi32(dst + 0xd * dstStride, ad);
+            _mm512_storeu_epi32(dst + 0xe * dstStride, ae);
+            _mm512_storeu_epi32(dst + 0xf * dstStride, af);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        const __m512i K32_3x16x16_I_0 = SIMD_MM512_SETR_EPI32(0x00, 0x01, 0x02, 0x00, 0x03, 0x04, 0x05, 0x00, 0x10, 0x11, 0x12, 0x00, 0x13, 0x14, 0x15, 0x00);
+        const __m512i K32_3x16x16_I_1 = SIMD_MM512_SETR_EPI32(0x06, 0x07, 0x08, 0x00, 0x09, 0x0a, 0x0b, 0x00, 0x16, 0x17, 0x18, 0x10, 0x19, 0x1a, 0x1b, 0x00);
+
+        const __m512i K8_3x16x16_I = SIMD_MM512_SETR_EPI8(
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1,
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
+
+        const __m512i K8_3x16x16_O = SIMD_MM512_SETR_EPI8(
+            0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xa, 0xc, 0xd, 0xe, -1, -1, -1, -1,
+            0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xa, 0xc, 0xd, 0xe, -1, -1, -1, -1,
+            0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xa, 0xc, 0xd, 0xe, -1, -1, -1, -1,
+            0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xa, 0xc, 0xd, 0xe, -1, -1, -1, -1);
+
+        const __m512i K32_3x16x16_O = SIMD_MM512_SETR_EPI32(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x8, 0x9, 0xa, 0xc, 0xd, 0xe, 0x0, 0x0, 0x0, 0x0);
+
+        SIMD_INLINE void TransformImageTranspose_3x16x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m512i a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af, b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, ba, bb, bc, bd, be, bf;
+
+            a0 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x0 * srcStride);
+            a1 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x1 * srcStride);
+            a2 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x2 * srcStride);
+            a3 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x3 * srcStride);
+            a4 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x4 * srcStride);
+            a5 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x5 * srcStride);
+            a6 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x6 * srcStride);
+            a7 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x7 * srcStride);
+            a8 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x8 * srcStride);
+            a9 = _mm512_maskz_loadu_epi32(0xFFF, src + 0x9 * srcStride);
+            aa = _mm512_maskz_loadu_epi32(0xFFF, src + 0xa * srcStride);
+            ab = _mm512_maskz_loadu_epi32(0xFFF, src + 0xb * srcStride);
+            ac = _mm512_maskz_loadu_epi32(0xFFF, src + 0xc * srcStride);
+            ad = _mm512_maskz_loadu_epi32(0xFFF, src + 0xd * srcStride);
+            ae = _mm512_maskz_loadu_epi32(0xFFF, src + 0xe * srcStride);
+            af = _mm512_maskz_loadu_epi32(0xFFF, src + 0xf * srcStride);
+
+            b0 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a0, K32_3x16x16_I_0, a4), K8_3x16x16_I);
+            b1 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a1, K32_3x16x16_I_0, a5), K8_3x16x16_I);
+            b2 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a2, K32_3x16x16_I_0, a6), K8_3x16x16_I);
+            b3 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a3, K32_3x16x16_I_0, a7), K8_3x16x16_I);
+            b4 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a0, K32_3x16x16_I_1, a4), K8_3x16x16_I);
+            b5 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a1, K32_3x16x16_I_1, a5), K8_3x16x16_I);
+            b6 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a2, K32_3x16x16_I_1, a6), K8_3x16x16_I);
+            b7 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a3, K32_3x16x16_I_1, a7), K8_3x16x16_I);
+            b8 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a8, K32_3x16x16_I_0, ac), K8_3x16x16_I);
+            b9 = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a9, K32_3x16x16_I_0, ad), K8_3x16x16_I);
+            ba = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(aa, K32_3x16x16_I_0, ae), K8_3x16x16_I);
+            bb = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(ab, K32_3x16x16_I_0, af), K8_3x16x16_I);
+            bc = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a8, K32_3x16x16_I_1, ac), K8_3x16x16_I);
+            bd = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(a9, K32_3x16x16_I_1, ad), K8_3x16x16_I);
+            be = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(aa, K32_3x16x16_I_1, ae), K8_3x16x16_I);
+            bf = _mm512_shuffle_epi8(_mm512_permutex2var_epi32(ab, K32_3x16x16_I_1, af), K8_3x16x16_I);
+
+            a0 = _mm512_shuffle_i32x4(b0, b8, 0x88);
+            a1 = _mm512_shuffle_i32x4(b1, b9, 0x88);
+            a2 = _mm512_shuffle_i32x4(b2, ba, 0x88);
+            a3 = _mm512_shuffle_i32x4(b3, bb, 0x88);
+            a4 = _mm512_shuffle_i32x4(b0, b8, 0xDD);
+            a5 = _mm512_shuffle_i32x4(b1, b9, 0xDD);
+            a6 = _mm512_shuffle_i32x4(b2, ba, 0xDD);
+            a7 = _mm512_shuffle_i32x4(b3, bb, 0xDD);
+            a8 = _mm512_shuffle_i32x4(b4, bc, 0x88);
+            a9 = _mm512_shuffle_i32x4(b5, bd, 0x88);
+            aa = _mm512_shuffle_i32x4(b6, be, 0x88);
+            ab = _mm512_shuffle_i32x4(b7, bf, 0x88);
+            ac = _mm512_shuffle_i32x4(b4, bc, 0xDD);
+            ad = _mm512_shuffle_i32x4(b5, bd, 0xDD);
+            ae = _mm512_shuffle_i32x4(b6, be, 0xDD);
+            af = _mm512_shuffle_i32x4(b7, bf, 0xDD);
+
+            b0 = _mm512_unpacklo_epi32(a0, a1);
+            b1 = _mm512_unpackhi_epi32(a0, a1);
+            b2 = _mm512_unpacklo_epi32(a2, a3);
+            b3 = _mm512_unpackhi_epi32(a2, a3);
+            b4 = _mm512_unpacklo_epi32(a4, a5);
+            b5 = _mm512_unpackhi_epi32(a4, a5);
+            b6 = _mm512_unpacklo_epi32(a6, a7);
+            b7 = _mm512_unpackhi_epi32(a6, a7);
+            b8 = _mm512_unpacklo_epi32(a8, a9);
+            b9 = _mm512_unpackhi_epi32(a8, a9);
+            ba = _mm512_unpacklo_epi32(aa, ab);
+            bb = _mm512_unpackhi_epi32(aa, ab);
+            bc = _mm512_unpacklo_epi32(ac, ad);
+            bd = _mm512_unpackhi_epi32(ac, ad);
+            be = _mm512_unpacklo_epi32(ae, af);
+            bf = _mm512_unpackhi_epi32(ae, af);
+
+            a0 = _mm512_unpacklo_epi64(b0, b2);
+            a1 = _mm512_unpackhi_epi64(b0, b2);
+            a2 = _mm512_unpacklo_epi64(b1, b3);
+            a3 = _mm512_unpackhi_epi64(b1, b3);
+            a4 = _mm512_unpacklo_epi64(b4, b6);
+            a5 = _mm512_unpackhi_epi64(b4, b6);
+            a6 = _mm512_unpacklo_epi64(b5, b7);
+            a7 = _mm512_unpackhi_epi64(b5, b7);
+            a8 = _mm512_unpacklo_epi64(b8, ba);
+            a9 = _mm512_unpackhi_epi64(b8, ba);
+            aa = _mm512_unpacklo_epi64(b9, bb);
+            ab = _mm512_unpackhi_epi64(b9, bb);
+            ac = _mm512_unpacklo_epi64(bc, be);
+            ad = _mm512_unpackhi_epi64(bc, be);
+            ae = _mm512_unpacklo_epi64(bd, bf);
+            af = _mm512_unpackhi_epi64(bd, bf);
+
+            a0 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a0, K8_3x16x16_O));
+            a1 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a1, K8_3x16x16_O));
+            a2 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a2, K8_3x16x16_O));
+            a3 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a3, K8_3x16x16_O));
+            a4 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a4, K8_3x16x16_O));
+            a5 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a5, K8_3x16x16_O));
+            a6 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a6, K8_3x16x16_O));
+            a7 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a7, K8_3x16x16_O));
+            a8 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a8, K8_3x16x16_O));
+            a9 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a9, K8_3x16x16_O));
+            aa = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(aa, K8_3x16x16_O));
+            ab = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(ab, K8_3x16x16_O));
+            ac = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(ac, K8_3x16x16_O));
+            ad = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(ad, K8_3x16x16_O));
+            ae = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(ae, K8_3x16x16_O));
+            af = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(af, K8_3x16x16_O));
+
+            _mm512_mask_storeu_epi32(dst + 0x0 * dstStride, 0xFFF, a0);
+            _mm512_mask_storeu_epi32(dst + 0x1 * dstStride, 0xFFF, a1);
+            _mm512_mask_storeu_epi32(dst + 0x2 * dstStride, 0xFFF, a2);
+            _mm512_mask_storeu_epi32(dst + 0x3 * dstStride, 0xFFF, a3);
+            _mm512_mask_storeu_epi32(dst + 0x4 * dstStride, 0xFFF, a4);
+            _mm512_mask_storeu_epi32(dst + 0x5 * dstStride, 0xFFF, a5);
+            _mm512_mask_storeu_epi32(dst + 0x6 * dstStride, 0xFFF, a6);
+            _mm512_mask_storeu_epi32(dst + 0x7 * dstStride, 0xFFF, a7);
+            _mm512_mask_storeu_epi32(dst + 0x8 * dstStride, 0xFFF, a8);
+            _mm512_mask_storeu_epi32(dst + 0x9 * dstStride, 0xFFF, a9);
+            _mm512_mask_storeu_epi32(dst + 0xa * dstStride, 0xFFF, aa);
+            _mm512_mask_storeu_epi32(dst + 0xb * dstStride, 0xFFF, ab);
+            _mm512_mask_storeu_epi32(dst + 0xc * dstStride, 0xFFF, ac);
+            _mm512_mask_storeu_epi32(dst + 0xd * dstStride, 0xFFF, ad);
+            _mm512_mask_storeu_epi32(dst + 0xe * dstStride, 0xFFF, ae);
+            _mm512_mask_storeu_epi32(dst + 0xf * dstStride, 0xFFF, af);
+        }
+
+        SIMD_INLINE void TransformImageTranspose_3x16x4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            __m512i a0, a1, a2, a3, b0, b1, b2, b3;
+
+            a0 = Load<false>((__m128i*)(src + 0x00 * srcStride), (__m128i*)(src + 0x04 * srcStride), (__m128i*)(src + 0x08 * srcStride), (__m128i*)(src + 0x0c * srcStride));
+            a1 = Load<false>((__m128i*)(src + 0x01 * srcStride), (__m128i*)(src + 0x05 * srcStride), (__m128i*)(src + 0x09 * srcStride), (__m128i*)(src + 0x0d * srcStride));
+            a2 = Load<false>((__m128i*)(src + 0x02 * srcStride), (__m128i*)(src + 0x06 * srcStride), (__m128i*)(src + 0x0a * srcStride), (__m128i*)(src + 0x0e * srcStride));
+            a3 = Load<false>((__m128i*)(src + 0x03 * srcStride), (__m128i*)(src + 0x07 * srcStride), (__m128i*)(src + 0x0b * srcStride), (__m128i*)(src + 0x0f * srcStride));
+
+            a0 = _mm512_shuffle_epi8(a0, K8_3x16x16_I);
+            a1 = _mm512_shuffle_epi8(a1, K8_3x16x16_I);
+            a2 = _mm512_shuffle_epi8(a2, K8_3x16x16_I);
+            a3 = _mm512_shuffle_epi8(a3, K8_3x16x16_I);
+
+            b0 = _mm512_unpacklo_epi32(a0, a1);
+            b1 = _mm512_unpackhi_epi32(a0, a1);
+            b2 = _mm512_unpacklo_epi32(a2, a3);
+            b3 = _mm512_unpackhi_epi32(a2, a3);
+
+            a0 = _mm512_unpacklo_epi64(b0, b2);
+            a1 = _mm512_unpackhi_epi64(b0, b2);
+            a2 = _mm512_unpacklo_epi64(b1, b3);
+            a3 = _mm512_unpackhi_epi64(b1, b3);
+
+            a0 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a0, K8_3x16x16_O));
+            a1 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a1, K8_3x16x16_O));
+            a2 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a2, K8_3x16x16_O));
+            a3 = _mm512_permutexvar_epi32(K32_3x16x16_O, _mm512_shuffle_epi8(a3, K8_3x16x16_O));
+
+            _mm512_mask_storeu_epi32(dst + 0x0 * dstStride, 0xFFF, a0);
+            _mm512_mask_storeu_epi32(dst + 0x1 * dstStride, 0xFFF, a1);
+            _mm512_mask_storeu_epi32(dst + 0x2 * dstStride, 0xFFF, a2);
+            _mm512_mask_storeu_epi32(dst + 0x3 * dstStride, 0xFFF, a3);
+        }
+
         //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void TransformImageTranspose_4x4x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
@@ -1034,7 +1319,6 @@ namespace Simd
             ae = _mm512_loadu_epi32(src + 0xe * srcStride);
             af = _mm512_loadu_epi32(src + 0xf * srcStride);
 
-#if 0
             b0 = _mm512_shuffle_i32x4(a0, a4, 0x44);
             b1 = _mm512_shuffle_i32x4(a1, a5, 0x44);
             b2 = _mm512_shuffle_i32x4(a2, a6, 0x44);
@@ -1102,76 +1386,6 @@ namespace Simd
             ad = _mm512_unpackhi_epi64(bc, be);
             ae = _mm512_unpacklo_epi64(bd, bf);
             af = _mm512_unpackhi_epi64(bd, bf);
-#else
-
-            b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a8);
-            b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a8);
-            b2 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_0, a9);
-            b3 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_1, a9);
-            b4 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_0, aa);
-            b5 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_1, aa);
-            b6 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_0, ab);
-            b7 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_1, ab);
-            b8 = _mm512_permutex2var_epi32(a4, K32_INTERLEAVE_0, ac);
-            b9 = _mm512_permutex2var_epi32(a4, K32_INTERLEAVE_1, ac);
-            ba = _mm512_permutex2var_epi32(a5, K32_INTERLEAVE_0, ad);
-            bb = _mm512_permutex2var_epi32(a5, K32_INTERLEAVE_1, ad);
-            bc = _mm512_permutex2var_epi32(a6, K32_INTERLEAVE_0, ae);
-            bd = _mm512_permutex2var_epi32(a6, K32_INTERLEAVE_1, ae);
-            be = _mm512_permutex2var_epi32(a7, K32_INTERLEAVE_0, af);
-            bf = _mm512_permutex2var_epi32(a7, K32_INTERLEAVE_1, af);
-
-            a0 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_0, b8);
-            a1 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_1, b8);
-            a2 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_0, b9);
-            a3 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_1, b9);
-            a4 = _mm512_permutex2var_epi32(b2, K32_INTERLEAVE_0, ba);
-            a5 = _mm512_permutex2var_epi32(b2, K32_INTERLEAVE_1, ba);
-            a6 = _mm512_permutex2var_epi32(b3, K32_INTERLEAVE_0, bb);
-            a7 = _mm512_permutex2var_epi32(b3, K32_INTERLEAVE_1, bb);
-            a8 = _mm512_permutex2var_epi32(b4, K32_INTERLEAVE_0, bc);
-            a9 = _mm512_permutex2var_epi32(b4, K32_INTERLEAVE_1, bc);
-            aa = _mm512_permutex2var_epi32(b5, K32_INTERLEAVE_0, bd);
-            ab = _mm512_permutex2var_epi32(b5, K32_INTERLEAVE_1, bd);
-            ac = _mm512_permutex2var_epi32(b6, K32_INTERLEAVE_0, be);
-            ad = _mm512_permutex2var_epi32(b6, K32_INTERLEAVE_1, be);
-            ae = _mm512_permutex2var_epi32(b7, K32_INTERLEAVE_0, bf);
-            af = _mm512_permutex2var_epi32(b7, K32_INTERLEAVE_1, bf);
-
-            b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a8);
-            b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a8);
-            b2 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_0, a9);
-            b3 = _mm512_permutex2var_epi32(a1, K32_INTERLEAVE_1, a9);
-            b4 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_0, aa);
-            b5 = _mm512_permutex2var_epi32(a2, K32_INTERLEAVE_1, aa);
-            b6 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_0, ab);
-            b7 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_1, ab);
-            b8 = _mm512_permutex2var_epi32(a4, K32_INTERLEAVE_0, ac);
-            b9 = _mm512_permutex2var_epi32(a4, K32_INTERLEAVE_1, ac);
-            ba = _mm512_permutex2var_epi32(a5, K32_INTERLEAVE_0, ad);
-            bb = _mm512_permutex2var_epi32(a5, K32_INTERLEAVE_1, ad);
-            bc = _mm512_permutex2var_epi32(a6, K32_INTERLEAVE_0, ae);
-            bd = _mm512_permutex2var_epi32(a6, K32_INTERLEAVE_1, ae);
-            be = _mm512_permutex2var_epi32(a7, K32_INTERLEAVE_0, af);
-            bf = _mm512_permutex2var_epi32(a7, K32_INTERLEAVE_1, af);
-
-            a0 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_0, b8);
-            a1 = _mm512_permutex2var_epi32(b0, K32_INTERLEAVE_1, b8);
-            a2 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_0, b9);
-            a3 = _mm512_permutex2var_epi32(b1, K32_INTERLEAVE_1, b9);
-            a4 = _mm512_permutex2var_epi32(b2, K32_INTERLEAVE_0, ba);
-            a5 = _mm512_permutex2var_epi32(b2, K32_INTERLEAVE_1, ba);
-            a6 = _mm512_permutex2var_epi32(b3, K32_INTERLEAVE_0, bb);
-            a7 = _mm512_permutex2var_epi32(b3, K32_INTERLEAVE_1, bb);
-            a8 = _mm512_permutex2var_epi32(b4, K32_INTERLEAVE_0, bc);
-            a9 = _mm512_permutex2var_epi32(b4, K32_INTERLEAVE_1, bc);
-            aa = _mm512_permutex2var_epi32(b5, K32_INTERLEAVE_0, bd);
-            ab = _mm512_permutex2var_epi32(b5, K32_INTERLEAVE_1, bd);
-            ac = _mm512_permutex2var_epi32(b6, K32_INTERLEAVE_0, be);
-            ad = _mm512_permutex2var_epi32(b6, K32_INTERLEAVE_1, be);
-            ae = _mm512_permutex2var_epi32(b7, K32_INTERLEAVE_0, bf);
-            af = _mm512_permutex2var_epi32(b7, K32_INTERLEAVE_1, bf);
-#endif
 
             _mm512_storeu_epi32(dst + 0x0 * dstStride, a0);
             _mm512_storeu_epi32(dst + 0x1 * dstStride, a1);
