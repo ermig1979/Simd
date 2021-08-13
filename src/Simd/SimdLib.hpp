@@ -3184,6 +3184,38 @@ namespace Simd
         }
     }
 
+    /*! @ingroup resizing
+
+        \fn void Resize(const View<A> & src, View<A> & dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
+
+        \short Performs resizing of image.
+
+        \param [in] src - an original input image.
+        \param [out] dst - a resized output image. The input image can be the output.
+        \param [in] size - a size of output image.
+        \param [in] method - a resizing method. By default it is equal to ::SimdResizeMethodBilinear.
+    */
+    template<template<class> class A> SIMD_INLINE void Resize(const View<A>& src, View<A>& dst, const Point<ptrdiff_t> & size, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
+    {
+        assert(src.format == View<A>::Float || src.ChannelSize() == 1);
+
+        if (&src == &dst)
+        {
+            if (src.Size() != size)
+            {
+                View<A> tmp(size, src.format);
+                Resize(src, tmp, method);
+                dst.Swap(tmp);
+            }
+        }
+        else
+        {
+            if (dst.Size() != size)
+                dst.Recreate(size, src.format);
+            Resize(src, dst, method);
+        }
+    }
+
     /*! @ingroup rgb_conversion
 
         \fn void RgbToBgr(const View<A> & rgb, View<A> & bgr)
