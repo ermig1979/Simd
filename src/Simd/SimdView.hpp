@@ -729,7 +729,6 @@ namespace Simd
         , _owner(false)
     {
     }
-    /*! \endcond */
 
     template <template<class> class A> SIMD_INLINE View<A>::View(View<A> && view) noexcept
         : width(0)
@@ -741,6 +740,7 @@ namespace Simd
     {
         Swap(view);
     }
+    /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
     template <template<class> class A> SIMD_INLINE View<A>::View(const cv::Mat & mat)
@@ -937,7 +937,6 @@ namespace Simd
         }
         return *this;
     }
-    /*! \endcond */
 
     template <template<class> class A> SIMD_INLINE View<A>& View<A>::operator = (View<A>&& view)
     {
@@ -948,6 +947,7 @@ namespace Simd
         }
         return *this;
     }
+    /*! \endcond */
 
 #ifdef SIMD_OPENCV_ENABLE
     template <template<class> class A> SIMD_INLINE View<A> & View<A>::operator = (const cv::Mat & mat)

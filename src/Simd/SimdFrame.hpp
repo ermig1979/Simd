@@ -301,6 +301,11 @@ namespace Simd
             \return - a number of planes.
         */
         size_t PlaneCount() const;
+
+        /*!
+            Clears Frame structure (reset all fields).
+         */
+        void Clear();
     };
 
     /*! @ingroup cpp_frame_functions
@@ -677,6 +682,17 @@ namespace Simd
     template <template<class> class A> SIMD_INLINE size_t Frame<A>::PlaneCount() const
     {
         return PlaneCount(format);
+    }
+
+    template <template<class> class A> SIMD_INLINE void Frame<A>::Clear()
+    {
+        for (size_t i = 0, n = PlaneCount(); i < n; ++i)
+            planes[i].Clear();
+        *(size_t*)&width = 0;
+        *(size_t*)&height = 0;
+        *(Format*)&format = 0;
+        flipped = false;
+        timestamp = 0;
     }
 
     // View utilities implementation:
