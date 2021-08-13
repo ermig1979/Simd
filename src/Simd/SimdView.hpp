@@ -151,6 +151,13 @@ namespace Simd
         */
         View(const View & view);
 
+        /*!
+            Move constructor of View structure.
+
+            \param [in] view - a moved View.
+        */
+        View(View&& view) noexcept;
+
 #ifdef SIMD_OPENCV_ENABLE
         /*!
             Creates a new View structure on the base of OpenCV Mat type.
@@ -715,6 +722,17 @@ namespace Simd
     {
     }
     /*! \endcond */
+
+    template <template<class> class A> SIMD_INLINE View<A>::View(View<A> && view) noexcept
+        : width(0)
+        , height(0)
+        , stride(0)
+        , format(None)
+        , data(NULL)
+        , _owner(false)
+    {
+        Swap(view);
+    }
 
 #ifdef SIMD_OPENCV_ENABLE
     template <template<class> class A> SIMD_INLINE View<A>::View(const cv::Mat & mat)

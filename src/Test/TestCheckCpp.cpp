@@ -81,6 +81,7 @@ namespace Test
     static void TestView()
     {
         typedef Simd::View<Simd::Allocator> View;
+
         View vs(6, 6, View::Bgra32);
         View vd(6, 6, View::Gray8);
         Simd::Convert(vs, vd);
@@ -98,6 +99,7 @@ namespace Test
     static void TestFrame()
     {
         typedef Simd::Frame<Simd::Allocator> Frame;
+
         Frame fs(2, 2, Frame::Yuv420p);
         Frame fd(2, 2, Frame::Bgr24);
         Simd::Convert(fs, fd);
@@ -106,6 +108,7 @@ namespace Test
     static void TestPyramid()
     {
         typedef Simd::Pyramid<Simd::Allocator> Pyramid;
+
         Pyramid p1(16, 16, 3), p2(16, 16, 3);
         Fill(p1, 1);
         Build(p1, ::SimdReduce2x2);
@@ -115,6 +118,7 @@ namespace Test
     static void TestStdVector()
     {
         typedef std::vector<float, Simd::Allocator<float> > Vector;
+
         Vector v(16, 1.0f);
         v[15] = 0.0f;
     }
@@ -122,8 +126,24 @@ namespace Test
     static void TestResize()
     {
         typedef Simd::View<Simd::Allocator> View;
+        typedef Simd::Point<ptrdiff_t> Size;
+
         View src(128, 96, View::Bgr24), dst(40, 30, View::Bgr24);
         Simd::Resize(src, dst, SimdResizeMethodArea);
+        Simd::Resize(dst, dst, Size(80, 60), SimdResizeMethodArea);
+    }
+
+    static void TestViewVector()
+    {
+        typedef Simd::View<Simd::Allocator> View;
+        typedef std::vector<View> Views;
+
+        Views views;
+        for (size_t i = 0; i < 10; ++i)
+        {
+            views.push_back(View(128 + i, 96 + i, View::Gray8));
+            views[i].data[i] = i;
+        }
     }
 
     void CheckCpp()
@@ -141,6 +161,10 @@ namespace Test
         TestPyramid();
 
         TestStdVector();
+
+        TestResize();
+
+        TestViewVector();
     }
 }
 

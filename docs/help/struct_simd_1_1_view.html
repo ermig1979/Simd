@@ -126,6 +126,8 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a83019c80d40affb9f704ee42e6b287d6"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a79f536deef0a988b58ee03d94285c680"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a79f536deef0a988b58ee03d94285c680">View</a> (const <a class="el" href="struct_simd_1_1_view.html">View</a> &amp;view)</td></tr>
 <tr class="separator:a79f536deef0a988b58ee03d94285c680"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a70fa2546e9b4ec2c29e6686a0fe681aa"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a70fa2546e9b4ec2c29e6686a0fe681aa">View</a> (<a class="el" href="struct_simd_1_1_view.html">View</a> &amp;&amp;view) noexcept</td></tr>
+<tr class="separator:a70fa2546e9b4ec2c29e6686a0fe681aa"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9680ad2a027a70568a9c3e570a9811ab"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a9680ad2a027a70568a9c3e570a9811ab">View</a> (const cv::Mat &amp;mat)</td></tr>
 <tr class="separator:a9680ad2a027a70568a9c3e570a9811ab"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a76d9a5c242ae95700069ff85d83d068f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_view.html#a76d9a5c242ae95700069ff85d83d068f">View</a> (size_t w, size_t h, ptrdiff_t s, <a class="el" href="struct_simd_1_1_view.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> f, void *d)</td></tr>
@@ -376,7 +378,7 @@ int main()
 </div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a83019c80d40affb9f704ee42e6b287d6"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a83019c80d40affb9f704ee42e6b287d6">&#9670;&nbsp;</a></span>View() <span class="overload">[1/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a83019c80d40affb9f704ee42e6b287d6">&#9670;&nbsp;</a></span>View() <span class="overload">[1/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -391,7 +393,7 @@ int main()
 </div>
 </div>
 <a id="a79f536deef0a988b58ee03d94285c680"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a79f536deef0a988b58ee03d94285c680">&#9670;&nbsp;</a></span>View() <span class="overload">[2/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a79f536deef0a988b58ee03d94285c680">&#9670;&nbsp;</a></span>View() <span class="overload">[2/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -416,8 +418,41 @@ int main()
 
 </div>
 </div>
+<a id="a70fa2546e9b4ec2c29e6686a0fe681aa"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a70fa2546e9b4ec2c29e6686a0fe681aa">&#9670;&nbsp;</a></span>View() <span class="overload">[3/7]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_view.html">View</a> </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_view.html">View</a>&lt; A &gt; &amp;&amp;&#160;</td>
+          <td class="paramname"><em>view</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">noexcept</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+<p>Move constructor of <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a> structure.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">view</td><td>- a moved <a class="el" href="struct_simd_1_1_view.html" title="The View structure provides storage and manipulation of images.">View</a>. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="a9680ad2a027a70568a9c3e570a9811ab"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9680ad2a027a70568a9c3e570a9811ab">&#9670;&nbsp;</a></span>View() <span class="overload">[3/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a9680ad2a027a70568a9c3e570a9811ab">&#9670;&nbsp;</a></span>View() <span class="overload">[4/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -443,7 +478,7 @@ int main()
 </div>
 </div>
 <a id="a76d9a5c242ae95700069ff85d83d068f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a76d9a5c242ae95700069ff85d83d068f">&#9670;&nbsp;</a></span>View() <span class="overload">[4/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a76d9a5c242ae95700069ff85d83d068f">&#9670;&nbsp;</a></span>View() <span class="overload">[5/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -500,7 +535,7 @@ int main()
 </div>
 </div>
 <a id="a1cba36d484b58b52855d056d47f41939"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a1cba36d484b58b52855d056d47f41939">&#9670;&nbsp;</a></span>View() <span class="overload">[5/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a1cba36d484b58b52855d056d47f41939">&#9670;&nbsp;</a></span>View() <span class="overload">[6/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -557,7 +592,7 @@ int main()
 </div>
 </div>
 <a id="a040c77ac090c394bc7f29a873692edfb"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a040c77ac090c394bc7f29a873692edfb">&#9670;&nbsp;</a></span>View() <span class="overload">[6/6]</span></h2>
+<h2 class="memtitle"><span class="permalink"><a href="#a040c77ac090c394bc7f29a873692edfb">&#9670;&nbsp;</a></span>View() <span class="overload">[7/7]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
