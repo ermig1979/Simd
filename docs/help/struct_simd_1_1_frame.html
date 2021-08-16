@@ -106,8 +106,10 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:ab290a93e205a0a559587a8ad71448313"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ab15976429bab921fb6042bfe98bfd73b"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#ab15976429bab921fb6042bfe98bfd73b">Clone</a> (<a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;buffer) const</td></tr>
 <tr class="separator:ab15976429bab921fb6042bfe98bfd73b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8b98869df8e7e6275ae38ab97365da76"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a8b98869df8e7e6275ae38ab97365da76">operator=</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;frame)</td></tr>
-<tr class="separator:a8b98869df8e7e6275ae38ab97365da76"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a862696f86666d3d46bea7a59b9d21464"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a862696f86666d3d46bea7a59b9d21464">operator=</a> (const <a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;frame)</td></tr>
+<tr class="separator:a862696f86666d3d46bea7a59b9d21464"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3ae808e82db8083afb8256cb462fa78f"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a3ae808e82db8083afb8256cb462fa78f">operator=</a> (<a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&amp;frame)</td></tr>
+<tr class="separator:a3ae808e82db8083afb8256cb462fa78f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a68acc92a0dd91b49cff63f7589d551b8"><td class="memItemLeft" align="right" valign="top"><a class="el" href="struct_simd_1_1_frame.html">Frame</a> &amp;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a68acc92a0dd91b49cff63f7589d551b8">Ref</a> ()</td></tr>
 <tr class="separator:a68acc92a0dd91b49cff63f7589d551b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a369ca1d3dbc34120af53fe8215f39b66"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="struct_simd_1_1_frame.html#a369ca1d3dbc34120af53fe8215f39b66">Recreate</a> (size_t width_, size_t height_, <a class="el" href="struct_simd_1_1_frame.html#ab4e88c89b3b7ea1735996cc4def22d58">Format</a> format_)</td></tr>
@@ -686,14 +688,14 @@ struct Simd::Frame&lt; A &gt;</h3>
 
 </div>
 </div>
-<a id="a8b98869df8e7e6275ae38ab97365da76"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a8b98869df8e7e6275ae38ab97365da76">&#9670;&nbsp;</a></span>operator=()</h2>
+<a id="a862696f86666d3d46bea7a59b9d21464"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a862696f86666d3d46bea7a59b9d21464">&#9670;&nbsp;</a></span>operator=() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
       <table class="memname">
         <tr>
-          <td class="memname">SIMD_INLINE <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp; operator= </td>
+          <td class="memname"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&amp; operator= </td>
           <td>(</td>
           <td class="paramtype">const <a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&#160;</td>
           <td class="paramname"><em>frame</em></td><td>)</td>
@@ -706,6 +708,32 @@ struct Simd::Frame&lt; A &gt;</h3>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- an original frame. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>a reference to itself. </dd></dl>
+
+</div>
+</div>
+<a id="a3ae808e82db8083afb8256cb462fa78f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a3ae808e82db8083afb8256cb462fa78f">&#9670;&nbsp;</a></span>operator=() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&amp; operator= </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="struct_simd_1_1_frame.html">Frame</a>&lt; A &gt; &amp;&amp;&#160;</td>
+          <td class="paramname"><em>frame</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p>Moves <a class="el" href="struct_simd_1_1_frame.html" title="The Frame structure provides storage and manipulation of frames (multiplanar images).">Frame</a> structure.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">frame</td><td>- a moved frame. </td></tr>
   </table>
   </dd>
 </dl>

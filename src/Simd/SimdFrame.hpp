@@ -194,6 +194,14 @@ namespace Simd
         Frame & operator = (const Frame & frame);
 
         /*!
+            Moves Frame structure.
+
+            \param [in] frame - a moved frame.
+            \return a reference to itself.
+        */
+        Frame& operator = (Frame&& frame);
+
+        /*!
             Creates reference to itself.
 
             \return a reference to itself.
@@ -550,7 +558,6 @@ namespace Simd
         Copy(*this, *clone);
         return clone;
     }
-    /*! \endcond */
 
     template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::operator = (const Frame<A> & frame)
     {
@@ -566,6 +573,17 @@ namespace Simd
         }
         return *this;
     }
+
+    template <template<class> class A> SIMD_INLINE Frame<A>& Frame<A>::operator = (Frame<A>&& frame)
+    {
+        if (this != &frame)
+        {
+            Clear();
+            Swap(frame);
+        }
+        return *this;
+    }
+    /*! \endcond */
 
     template <template<class> class A> SIMD_INLINE Frame<A> & Frame<A>::Ref()
     {
@@ -743,7 +761,7 @@ namespace Simd
             planes[i].Clear();
         *(size_t*)&width = 0;
         *(size_t*)&height = 0;
-        *(Format*)&format = 0;
+        *(Format*)&format = None;
         flipped = false;
         timestamp = 0;
     }

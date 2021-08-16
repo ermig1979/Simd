@@ -166,6 +166,16 @@ namespace Test
             frames.push_back(Frame(View(128 + i, 96 + i, View::Gray8), false, i * 0.040));
     }
 
+    static void TestFrameMove()
+    {
+        typedef Simd::View<Simd::Allocator> View;
+        typedef Simd::Frame<Simd::Allocator> Frame;
+
+        Frame a = Frame(View(128, 96, View::Gray8)), b(View(40, 30, View::Bgr24));
+
+        b = std::move(a);
+    }
+
     void CheckCpp()
     {
         TestCpuInfo();
@@ -189,6 +199,8 @@ namespace Test
         TestViewMove();
 
         TestFrameVector();
+
+        TestFrameMove();
     }
 }
 
