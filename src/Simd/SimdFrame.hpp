@@ -83,7 +83,7 @@ namespace Simd
         /*!
             Creates a new Frame structure on the base of the other frame.
 
-            \note This constructor is not create new frame! It only creates a reference to the same frame. If you want to create a copy then must use method Simd::FRame::Clone.
+            \note This constructor is not create new frame! It only creates a reference to the same frame. If you want to create a copy then must use method Simd::Frame::Clone.
 
             \param [in] frame - an original frame.
         */
@@ -306,6 +306,13 @@ namespace Simd
             Clears Frame structure (reset all fields).
          */
         void Clear();
+
+        /*!
+            Swaps content of two (this and other) Frame  structures.
+
+            \param [in] other - an other frame.
+        */
+        void Swap(Frame& other);
     };
 
     /*! @ingroup cpp_frame_functions
@@ -693,6 +700,17 @@ namespace Simd
         *(Format*)&format = 0;
         flipped = false;
         timestamp = 0;
+    }
+
+    template <template<class> class A> SIMD_INLINE void Frame<A>::Swap(Frame<A>& other)
+    {
+        for (size_t i = 0, n = PlaneCount(); i < n; ++i)
+            planes[i].Swap(other.planes[i]);
+        std::swap((size_t&)width, (size_t&)other.width);
+        std::swap((size_t&)height, (size_t&)other.height);
+        std::swap((Format&)format, (Format&)other.format);
+        std::swap(flipped, other.flipped);
+        std::swap(timestamp, other.timestamp);
     }
 
     // View utilities implementation:

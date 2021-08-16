@@ -2,7 +2,7 @@
 * Simd Library (http://ermig1979.github.io/Simd).
 *
 * Copyright (c) 2011-2021 Yermalayeu Ihar, 
-*               2014-2019 Antonenka Mikhail.
+*               2014-2021 Antonenka Mikhail.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
