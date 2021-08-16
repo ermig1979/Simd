@@ -579,10 +579,10 @@ namespace Simd
 
         SIMD_INLINE void TransformImageMirror1x256(const uint8_t* src, uint8_t* dst)
         {
-            _mm512_storeu_epi32(dst - 0 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_epi32(src + 0 * A), K8_MIRROR_1)));
-            _mm512_storeu_epi32(dst - 1 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_epi32(src + 1 * A), K8_MIRROR_1)));
-            _mm512_storeu_epi32(dst - 2 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_epi32(src + 2 * A), K8_MIRROR_1)));
-            _mm512_storeu_epi32(dst - 3 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_epi32(src + 3 * A), K8_MIRROR_1)));
+            _mm512_storeu_si512(dst - 0 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 0 * A), K8_MIRROR_1)));
+            _mm512_storeu_si512(dst - 1 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 1 * A), K8_MIRROR_1)));
+            _mm512_storeu_si512(dst - 2 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 2 * A), K8_MIRROR_1)));
+            _mm512_storeu_si512(dst - 3 * A, _mm512_permutexvar_epi64(K64_MIRROR_1, _mm512_shuffle_epi8(_mm512_loadu_si512(src + 3 * A), K8_MIRROR_1)));
         }
 
         //-----------------------------------------------------------------------------------------
@@ -600,10 +600,10 @@ namespace Simd
 
         SIMD_INLINE void TransformImageMirror2x128(const uint8_t* src, uint8_t* dst)
         {
-            _mm512_storeu_epi32(dst - 0 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_epi32(src + 0 * A)));
-            _mm512_storeu_epi32(dst - 1 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_epi32(src + 1 * A)));
-            _mm512_storeu_epi32(dst - 2 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_epi32(src + 2 * A)));
-            _mm512_storeu_epi32(dst - 3 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_epi32(src + 3 * A)));
+            _mm512_storeu_si512(dst - 0 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_si512(src + 0 * A)));
+            _mm512_storeu_si512(dst - 1 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_si512(src + 1 * A)));
+            _mm512_storeu_si512(dst - 2 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_si512(src + 2 * A)));
+            _mm512_storeu_si512(dst - 3 * A, _mm512_permutexvar_epi16(K16_MIRROR_2, _mm512_loadu_si512(src + 3 * A)));
         }
 
         //-----------------------------------------------------------------------------------------
@@ -666,9 +666,9 @@ namespace Simd
 
         SIMD_INLINE void TransformImageMirror3x64(const uint8_t* src, uint8_t* dst)
         {
-            __m512i s0 = _mm512_loadu_epi32(src + 0 * A);
-            __m512i s1 = _mm512_loadu_epi32(src + 1 * A);
-            __m512i s2 = _mm512_loadu_epi32(src + 2 * A);
+            __m512i s0 = _mm512_loadu_si512(src + 0 * A);
+            __m512i s1 = _mm512_loadu_si512(src + 1 * A);
+            __m512i s2 = _mm512_loadu_si512(src + 2 * A);
 
             __m512i p00 = _mm512_permutexvar_epi64(K64_MIRROR_3_4P00, s0);
             __m512i p01 = _mm512_permutex2var_epi64(s1, K64_MIRROR_3_4P01, s0);
@@ -682,9 +682,9 @@ namespace Simd
             __m512i p21 = _mm512_permutex2var_epi64(s2, K64_MIRROR_3_4P21, s1);
             __m512i d2 = _mm512_or_si512(_mm512_shuffle_epi8(p20, K8_MIRROR_3_4S20), _mm512_shuffle_epi8(p21, K8_MIRROR_3_4S21));
 
-            _mm512_storeu_epi32(dst - 0 * A, d0);
-            _mm512_storeu_epi32(dst - 1 * A, d1);
-            _mm512_storeu_epi32(dst - 2 * A, d2);
+            _mm512_storeu_si512(dst - 0 * A, d0);
+            _mm512_storeu_si512(dst - 1 * A, d1);
+            _mm512_storeu_si512(dst - 2 * A, d2);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -700,10 +700,10 @@ namespace Simd
 
         SIMD_INLINE void TransformImageMirror4x64(const uint8_t* src, uint8_t* dst)
         {
-            _mm512_storeu_epi32(dst - 0 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 0 * A)));
-            _mm512_storeu_epi32(dst - 1 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 1 * A)));
-            _mm512_storeu_epi32(dst - 2 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 2 * A)));
-            _mm512_storeu_epi32(dst - 3 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_epi32(src + 3 * A)));
+            _mm512_storeu_si512(dst - 0 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_si512(src + 0 * A)));
+            _mm512_storeu_si512(dst - 1 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_si512(src + 1 * A)));
+            _mm512_storeu_si512(dst - 2 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_si512(src + 2 * A)));
+            _mm512_storeu_si512(dst - 3 * A, _mm512_permutexvar_epi32(K32_MIRROR_4, _mm512_loadu_si512(src + 3 * A)));
         }
 
         //-----------------------------------------------------------------------------------------
@@ -801,22 +801,22 @@ namespace Simd
             ae = _mm512_unpacklo_epi64(b7, bf);
             af = _mm512_unpackhi_epi64(b7, bf);
 
-            _mm512_storeu_epi32(dst + 0x0 * dstStride, a0);
-            _mm512_storeu_epi32(dst + 0x1 * dstStride, a1);
-            _mm512_storeu_epi32(dst + 0x2 * dstStride, a2);
-            _mm512_storeu_epi32(dst + 0x3 * dstStride, a3);
-            _mm512_storeu_epi32(dst + 0x4 * dstStride, a4);
-            _mm512_storeu_epi32(dst + 0x5 * dstStride, a5);
-            _mm512_storeu_epi32(dst + 0x6 * dstStride, a6);
-            _mm512_storeu_epi32(dst + 0x7 * dstStride, a7);
-            _mm512_storeu_epi32(dst + 0x8 * dstStride, a8);
-            _mm512_storeu_epi32(dst + 0x9 * dstStride, a9);
-            _mm512_storeu_epi32(dst + 0xa * dstStride, aa);
-            _mm512_storeu_epi32(dst + 0xb * dstStride, ab);
-            _mm512_storeu_epi32(dst + 0xc * dstStride, ac);
-            _mm512_storeu_epi32(dst + 0xd * dstStride, ad);
-            _mm512_storeu_epi32(dst + 0xe * dstStride, ae);
-            _mm512_storeu_epi32(dst + 0xf * dstStride, af);
+            _mm512_storeu_si512(dst + 0x0 * dstStride, a0);
+            _mm512_storeu_si512(dst + 0x1 * dstStride, a1);
+            _mm512_storeu_si512(dst + 0x2 * dstStride, a2);
+            _mm512_storeu_si512(dst + 0x3 * dstStride, a3);
+            _mm512_storeu_si512(dst + 0x4 * dstStride, a4);
+            _mm512_storeu_si512(dst + 0x5 * dstStride, a5);
+            _mm512_storeu_si512(dst + 0x6 * dstStride, a6);
+            _mm512_storeu_si512(dst + 0x7 * dstStride, a7);
+            _mm512_storeu_si512(dst + 0x8 * dstStride, a8);
+            _mm512_storeu_si512(dst + 0x9 * dstStride, a9);
+            _mm512_storeu_si512(dst + 0xa * dstStride, aa);
+            _mm512_storeu_si512(dst + 0xb * dstStride, ab);
+            _mm512_storeu_si512(dst + 0xc * dstStride, ac);
+            _mm512_storeu_si512(dst + 0xd * dstStride, ad);
+            _mm512_storeu_si512(dst + 0xe * dstStride, ae);
+            _mm512_storeu_si512(dst + 0xf * dstStride, af);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -874,14 +874,14 @@ namespace Simd
             b6 = _mm512_permutex2var_epi64(a3, K64_INTERLEAVE_0, a7);
             b7 = _mm512_permutex2var_epi64(a3, K64_INTERLEAVE_1, a7);
 
-            _mm512_storeu_epi32(dst + 0x0 * dstStride, b0);
-            _mm512_storeu_epi32(dst + 0x1 * dstStride, b1);
-            _mm512_storeu_epi32(dst + 0x2 * dstStride, b2);
-            _mm512_storeu_epi32(dst + 0x3 * dstStride, b3);
-            _mm512_storeu_epi32(dst + 0x4 * dstStride, b4);
-            _mm512_storeu_epi32(dst + 0x5 * dstStride, b5);
-            _mm512_storeu_epi32(dst + 0x6 * dstStride, b6);
-            _mm512_storeu_epi32(dst + 0x7 * dstStride, b7);
+            _mm512_storeu_si512(dst + 0x0 * dstStride, b0);
+            _mm512_storeu_si512(dst + 0x1 * dstStride, b1);
+            _mm512_storeu_si512(dst + 0x2 * dstStride, b2);
+            _mm512_storeu_si512(dst + 0x3 * dstStride, b3);
+            _mm512_storeu_si512(dst + 0x4 * dstStride, b4);
+            _mm512_storeu_si512(dst + 0x5 * dstStride, b5);
+            _mm512_storeu_si512(dst + 0x6 * dstStride, b6);
+            _mm512_storeu_si512(dst + 0x7 * dstStride, b7);
         }
 
         SIMD_INLINE void TransformImageTranspose_2x32x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
@@ -973,22 +973,22 @@ namespace Simd
             ae = _mm512_unpacklo_epi64(bb, bf);
             af = _mm512_unpackhi_epi64(bb, bf);
 
-            _mm512_storeu_epi32(dst + 0x0 * dstStride, a0);
-            _mm512_storeu_epi32(dst + 0x1 * dstStride, a1);
-            _mm512_storeu_epi32(dst + 0x2 * dstStride, a2);
-            _mm512_storeu_epi32(dst + 0x3 * dstStride, a3);
-            _mm512_storeu_epi32(dst + 0x4 * dstStride, a4);
-            _mm512_storeu_epi32(dst + 0x5 * dstStride, a5);
-            _mm512_storeu_epi32(dst + 0x6 * dstStride, a6);
-            _mm512_storeu_epi32(dst + 0x7 * dstStride, a7);
-            _mm512_storeu_epi32(dst + 0x8 * dstStride, a8);
-            _mm512_storeu_epi32(dst + 0x9 * dstStride, a9);
-            _mm512_storeu_epi32(dst + 0xa * dstStride, aa);
-            _mm512_storeu_epi32(dst + 0xb * dstStride, ab);
-            _mm512_storeu_epi32(dst + 0xc * dstStride, ac);
-            _mm512_storeu_epi32(dst + 0xd * dstStride, ad);
-            _mm512_storeu_epi32(dst + 0xe * dstStride, ae);
-            _mm512_storeu_epi32(dst + 0xf * dstStride, af);
+            _mm512_storeu_si512(dst + 0x0 * dstStride, a0);
+            _mm512_storeu_si512(dst + 0x1 * dstStride, a1);
+            _mm512_storeu_si512(dst + 0x2 * dstStride, a2);
+            _mm512_storeu_si512(dst + 0x3 * dstStride, a3);
+            _mm512_storeu_si512(dst + 0x4 * dstStride, a4);
+            _mm512_storeu_si512(dst + 0x5 * dstStride, a5);
+            _mm512_storeu_si512(dst + 0x6 * dstStride, a6);
+            _mm512_storeu_si512(dst + 0x7 * dstStride, a7);
+            _mm512_storeu_si512(dst + 0x8 * dstStride, a8);
+            _mm512_storeu_si512(dst + 0x9 * dstStride, a9);
+            _mm512_storeu_si512(dst + 0xa * dstStride, aa);
+            _mm512_storeu_si512(dst + 0xb * dstStride, ab);
+            _mm512_storeu_si512(dst + 0xc * dstStride, ac);
+            _mm512_storeu_si512(dst + 0xd * dstStride, ad);
+            _mm512_storeu_si512(dst + 0xe * dstStride, ae);
+            _mm512_storeu_si512(dst + 0xf * dstStride, af);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -1175,10 +1175,10 @@ namespace Simd
         {
             __m512i a0, a1, a2, a3, b0, b1, b2, b3;
 
-            a0 = _mm512_loadu_epi32(src + 0x0 * srcStride);
-            a1 = _mm512_loadu_epi32(src + 0x1 * srcStride);
-            a2 = _mm512_loadu_epi32(src + 0x2 * srcStride);
-            a3 = _mm512_loadu_epi32(src + 0x3 * srcStride);
+            a0 = _mm512_loadu_si512(src + 0x0 * srcStride);
+            a1 = _mm512_loadu_si512(src + 0x1 * srcStride);
+            a2 = _mm512_loadu_si512(src + 0x2 * srcStride);
+            a3 = _mm512_loadu_si512(src + 0x3 * srcStride);
 
             b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a2);
             b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a2);
@@ -1200,14 +1200,14 @@ namespace Simd
         {
             __m512i a0, a1, a2, a3, a4, a5, a6, a7, b0, b1, b2, b3, b4, b5, b6, b7;
 
-            a0 = _mm512_loadu_epi32(src + 0x0 * srcStride);
-            a1 = _mm512_loadu_epi32(src + 0x1 * srcStride);
-            a2 = _mm512_loadu_epi32(src + 0x2 * srcStride);
-            a3 = _mm512_loadu_epi32(src + 0x3 * srcStride);
-            a4 = _mm512_loadu_epi32(src + 0x4 * srcStride);
-            a5 = _mm512_loadu_epi32(src + 0x5 * srcStride);
-            a6 = _mm512_loadu_epi32(src + 0x6 * srcStride);
-            a7 = _mm512_loadu_epi32(src + 0x7 * srcStride);
+            a0 = _mm512_loadu_si512(src + 0x0 * srcStride);
+            a1 = _mm512_loadu_si512(src + 0x1 * srcStride);
+            a2 = _mm512_loadu_si512(src + 0x2 * srcStride);
+            a3 = _mm512_loadu_si512(src + 0x3 * srcStride);
+            a4 = _mm512_loadu_si512(src + 0x4 * srcStride);
+            a5 = _mm512_loadu_si512(src + 0x5 * srcStride);
+            a6 = _mm512_loadu_si512(src + 0x6 * srcStride);
+            a7 = _mm512_loadu_si512(src + 0x7 * srcStride);
 
             b0 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_0, a4);
             b1 = _mm512_permutex2var_epi32(a0, K32_INTERLEAVE_1, a4);
@@ -1288,36 +1288,36 @@ namespace Simd
             b6 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_0, a7);
             b7 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_1, a7);
 
-            _mm512_storeu_epi32(dst + 0x0 * dstStride, b0);
-            _mm512_storeu_epi32(dst + 0x1 * dstStride, b1);
-            _mm512_storeu_epi32(dst + 0x2 * dstStride, b2);
-            _mm512_storeu_epi32(dst + 0x3 * dstStride, b3);
-            _mm512_storeu_epi32(dst + 0x4 * dstStride, b4);
-            _mm512_storeu_epi32(dst + 0x5 * dstStride, b5);
-            _mm512_storeu_epi32(dst + 0x6 * dstStride, b6);
-            _mm512_storeu_epi32(dst + 0x7 * dstStride, b7);
+            _mm512_storeu_si512(dst + 0x0 * dstStride, b0);
+            _mm512_storeu_si512(dst + 0x1 * dstStride, b1);
+            _mm512_storeu_si512(dst + 0x2 * dstStride, b2);
+            _mm512_storeu_si512(dst + 0x3 * dstStride, b3);
+            _mm512_storeu_si512(dst + 0x4 * dstStride, b4);
+            _mm512_storeu_si512(dst + 0x5 * dstStride, b5);
+            _mm512_storeu_si512(dst + 0x6 * dstStride, b6);
+            _mm512_storeu_si512(dst + 0x7 * dstStride, b7);
         }
 
         SIMD_INLINE void TransformImageTranspose_4x16x16(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             __m512i a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af, b0, b1, b2, b3, b4, b5, b6, b7, b8, b9, ba, bb, bc, bd, be, bf;
 
-            a0 = _mm512_loadu_epi32(src + 0x0 * srcStride);
-            a1 = _mm512_loadu_epi32(src + 0x1 * srcStride);
-            a2 = _mm512_loadu_epi32(src + 0x2 * srcStride);
-            a3 = _mm512_loadu_epi32(src + 0x3 * srcStride);
-            a4 = _mm512_loadu_epi32(src + 0x4 * srcStride);
-            a5 = _mm512_loadu_epi32(src + 0x5 * srcStride);
-            a6 = _mm512_loadu_epi32(src + 0x6 * srcStride);
-            a7 = _mm512_loadu_epi32(src + 0x7 * srcStride);
-            a8 = _mm512_loadu_epi32(src + 0x8 * srcStride);
-            a9 = _mm512_loadu_epi32(src + 0x9 * srcStride);
-            aa = _mm512_loadu_epi32(src + 0xa * srcStride);
-            ab = _mm512_loadu_epi32(src + 0xb * srcStride);
-            ac = _mm512_loadu_epi32(src + 0xc * srcStride);
-            ad = _mm512_loadu_epi32(src + 0xd * srcStride);
-            ae = _mm512_loadu_epi32(src + 0xe * srcStride);
-            af = _mm512_loadu_epi32(src + 0xf * srcStride);
+            a0 = _mm512_loadu_si512(src + 0x0 * srcStride);
+            a1 = _mm512_loadu_si512(src + 0x1 * srcStride);
+            a2 = _mm512_loadu_si512(src + 0x2 * srcStride);
+            a3 = _mm512_loadu_si512(src + 0x3 * srcStride);
+            a4 = _mm512_loadu_si512(src + 0x4 * srcStride);
+            a5 = _mm512_loadu_si512(src + 0x5 * srcStride);
+            a6 = _mm512_loadu_si512(src + 0x6 * srcStride);
+            a7 = _mm512_loadu_si512(src + 0x7 * srcStride);
+            a8 = _mm512_loadu_si512(src + 0x8 * srcStride);
+            a9 = _mm512_loadu_si512(src + 0x9 * srcStride);
+            aa = _mm512_loadu_si512(src + 0xa * srcStride);
+            ab = _mm512_loadu_si512(src + 0xb * srcStride);
+            ac = _mm512_loadu_si512(src + 0xc * srcStride);
+            ad = _mm512_loadu_si512(src + 0xd * srcStride);
+            ae = _mm512_loadu_si512(src + 0xe * srcStride);
+            af = _mm512_loadu_si512(src + 0xf * srcStride);
 
             b0 = _mm512_shuffle_i32x4(a0, a4, 0x44);
             b1 = _mm512_shuffle_i32x4(a1, a5, 0x44);
@@ -1387,22 +1387,22 @@ namespace Simd
             ae = _mm512_unpacklo_epi64(bd, bf);
             af = _mm512_unpackhi_epi64(bd, bf);
 
-            _mm512_storeu_epi32(dst + 0x0 * dstStride, a0);
-            _mm512_storeu_epi32(dst + 0x1 * dstStride, a1);
-            _mm512_storeu_epi32(dst + 0x2 * dstStride, a2);
-            _mm512_storeu_epi32(dst + 0x3 * dstStride, a3);
-            _mm512_storeu_epi32(dst + 0x4 * dstStride, a4);
-            _mm512_storeu_epi32(dst + 0x5 * dstStride, a5);
-            _mm512_storeu_epi32(dst + 0x6 * dstStride, a6);
-            _mm512_storeu_epi32(dst + 0x7 * dstStride, a7);
-            _mm512_storeu_epi32(dst + 0x8 * dstStride, a8);
-            _mm512_storeu_epi32(dst + 0x9 * dstStride, a9);
-            _mm512_storeu_epi32(dst + 0xa * dstStride, aa);
-            _mm512_storeu_epi32(dst + 0xb * dstStride, ab);
-            _mm512_storeu_epi32(dst + 0xc * dstStride, ac);
-            _mm512_storeu_epi32(dst + 0xd * dstStride, ad);
-            _mm512_storeu_epi32(dst + 0xe * dstStride, ae);
-            _mm512_storeu_epi32(dst + 0xf * dstStride, af);
+            _mm512_storeu_si512(dst + 0x0 * dstStride, a0);
+            _mm512_storeu_si512(dst + 0x1 * dstStride, a1);
+            _mm512_storeu_si512(dst + 0x2 * dstStride, a2);
+            _mm512_storeu_si512(dst + 0x3 * dstStride, a3);
+            _mm512_storeu_si512(dst + 0x4 * dstStride, a4);
+            _mm512_storeu_si512(dst + 0x5 * dstStride, a5);
+            _mm512_storeu_si512(dst + 0x6 * dstStride, a6);
+            _mm512_storeu_si512(dst + 0x7 * dstStride, a7);
+            _mm512_storeu_si512(dst + 0x8 * dstStride, a8);
+            _mm512_storeu_si512(dst + 0x9 * dstStride, a9);
+            _mm512_storeu_si512(dst + 0xa * dstStride, aa);
+            _mm512_storeu_si512(dst + 0xb * dstStride, ab);
+            _mm512_storeu_si512(dst + 0xc * dstStride, ac);
+            _mm512_storeu_si512(dst + 0xd * dstStride, ad);
+            _mm512_storeu_si512(dst + 0xe * dstStride, ae);
+            _mm512_storeu_si512(dst + 0xf * dstStride, af);
         }
 
         //-----------------------------------------------------------------------------------------
