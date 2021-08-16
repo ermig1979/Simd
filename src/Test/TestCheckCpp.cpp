@@ -142,7 +142,7 @@ namespace Test
         for (size_t i = 0; i < 10; ++i)
         {
             views.push_back(View(128 + i, 96 + i, View::Gray8));
-            views[i].data[i] = i;
+            views[i].data[i] = uint8_t(i);
         }
     }
 
@@ -153,6 +153,17 @@ namespace Test
         View a = View(128, 96, View::Gray8), b(40, 30, View::Bgr24);
 
         b = std::move(a);
+    }
+
+    static void TestFrameVector()
+    {
+        typedef Simd::View<Simd::Allocator> View;
+        typedef Simd::Frame<Simd::Allocator> Frame;
+        typedef std::vector<Frame> Frames;
+
+        Frames frames;
+        for (size_t i = 0; i < 10; ++i)
+            frames.push_back(Frame(View(128 + i, 96 + i, View::Gray8), false, i * 0.040));
     }
 
     void CheckCpp()
@@ -176,6 +187,8 @@ namespace Test
         TestViewVector();
 
         TestViewMove();
+
+        TestFrameVector();
     }
 }
 

@@ -90,6 +90,13 @@ namespace Simd
         Frame(const Frame & frame);
 
         /*!
+            Move constructor of Frame structure.
+
+            \param [in] frame - a moved Frame.
+        */
+        Frame(Frame&& frame) noexcept;
+
+        /*!
             Creates a new one plane Frame structure on the base of the image view.
 
             \note This constructor is not create new image frame! It only creates a reference to the same image. If you want to create a copy then must use method Simd::Frame::Clone.
@@ -99,6 +106,15 @@ namespace Simd
             \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
         */
         Frame(const View<A> & view, bool flipped_ = false, double timestamp_ = 0);
+
+        /*!
+            Creates a new one plane Frame structure on the base of the temporal image view.
+
+            \param [in] view - a temporal image view.
+            \param [in] flipped_ - a flag of vertically flipped image of created frame. It is equal to false by default.
+            \param [in] timestamp_ - a timestamp of created frame. It is equal to 0 by default.
+        */
+        Frame(View<A>&& view, bool flipped_ = false, double timestamp_ = 0);
 
         /*!
             Creates a new Frame structure with specified width, height and pixel format.
@@ -389,6 +405,16 @@ namespace Simd
             planes[i] = frame.planes[i];
     }
 
+    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(Frame && frame) noexcept
+        : width(0)
+        , height(0)
+        , format(None)
+        , flipped(false)
+        , timestamp(0)
+    {
+        Swap(frame);
+    }
+
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(const View<A> & view, bool flipped_, double timestamp_)
         : width(view.width)
         , height(view.height)
@@ -407,6 +433,26 @@ namespace Simd
             assert(0);
         }
         planes[0] = view;
+    }
+
+    template <template<class> class A> SIMD_INLINE Frame<A>::Frame(View<A>&& view, bool flipped_, double timestamp_)
+        : width(view.width)
+        , height(view.height)
+        , format(None)
+        , flipped(flipped_)
+        , timestamp(timestamp_)
+    {
+        switch (view.format)
+        {
+        case View<A>::Gray8: (Format&)format = Gray8; break;
+        case View<A>::Bgr24: (Format&)format = Bgr24; break;
+        case View<A>::Bgra32: (Format&)format = Bgra32; break;
+        case View<A>::Rgb24: (Format&)format = Rgb24; break;
+        case View<A>::Rgba32: (Format&)format = Rgba32; break;
+        default:
+            assert(0);
+        }
+        planes[0] = std::move(view);
     }
 
     template <template<class> class A> SIMD_INLINE Frame<A>::Frame(size_t width_, size_t height_, Format format_, bool flipped_, double timestamp_)
@@ -704,7 +750,7 @@ namespace Simd
 
     template <template<class> class A> SIMD_INLINE void Frame<A>::Swap(Frame<A>& other)
     {
-        for (size_t i = 0, n = PlaneCount(); i < n; ++i)
+        for (size_t i = 0; i < PLANE_COUNT_MAX; ++i)
             planes[i].Swap(other.planes[i]);
         std::swap((size_t&)width, (size_t&)other.width);
         std::swap((size_t&)height, (size_t&)other.height);

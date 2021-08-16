@@ -819,7 +819,7 @@ namespace Test
 
 int main(int argc, char* argv[])
 {
-    //Test::CheckCpp();
+    Test::CheckCpp();
 
     Test::Options options(argc, argv);
 
