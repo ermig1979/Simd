@@ -50,7 +50,7 @@ namespace Simd
 	Simd::GetChar(int64_t(a), 4), Simd::GetChar(int64_t(a), 5), \
 	Simd::GetChar(int64_t(a), 6), Simd::GetChar(int64_t(a), 7)
 
-#elif defined(__GNUC__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
+#elif defined(__GNUC__) || defined(__clang__) || (defined(_MSC_VER) && defined(SIMD_NEON_ENABLE))
 
 #define SIMD_CHAR_AS_LONGLONG(a) (((long long)a) & 0xFF)
 
