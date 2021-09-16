@@ -51,6 +51,7 @@
 #include <mutex>
 
 #define SIMD_STATIC
+#include "Simd/SimdConfig.h"
 #include "Simd/SimdLib.hpp"
 
 #include "Simd/SimdConst.h"

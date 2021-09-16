@@ -199,10 +199,10 @@
     <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
-      <Filter>Lib</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

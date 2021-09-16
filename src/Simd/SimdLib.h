@@ -27,8 +27,6 @@
 #ifndef __SimdLib_h__
 #define __SimdLib_h__
 
-#include "Simd/SimdConfig.h"
-
 #include <stddef.h>
 
 #if defined(_MSC_VER) || defined(__CODEGEARC__)
