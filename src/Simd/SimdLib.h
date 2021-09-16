@@ -6651,6 +6651,30 @@ extern "C"
 
     /*! @ingroup synet_activation
 
+        \fn void SimdSynetHardSigmoid32f(const float * src, size_t size, const float * scale, const float * shift, float * dst);
+
+        \short Calculates HardSigmoid activation function (https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html) for 32-bit float array.
+
+        Input and output arrays must have the same size.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = Max(Min(0, src[i] * scale + shift) + shift, 1);
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the input 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] scale - a pointer to scale parameter. This parameter is equal to 1/6 in Pytorch documentation.
+        \param [in] shift - a pointer to shift parameter. This parameter is equal to 1/2 in Pytorch documentation.
+        \param [out] dst - a pointer to the output 32-bit float array.
+    */
+    SIMD_API void SimdSynetHardSigmoid32f(const float * src, size_t size, const float * scale, const float * shift, float * dst);
+
+    /*! @ingroup synet_activation
+
         \fn void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
 
         \short Calculates H-Swish activation function (https://arxiv.org/pdf/1905.02244.pdf) for 32-bit float array.
@@ -6671,7 +6695,7 @@ extern "C"
         \param [in] scale - a pointer to scale parameter. It is equal to 1/6 in original paper.
         \param [out] dst - a pointer to the output 32-bit float array.
     */
-    SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
+    SIMD_API void SimdSynetHswish32f(const float* src, size_t size, const float* shift, const float* scale, float* dst);
 
     /*! @ingroup synet_inner_product
 

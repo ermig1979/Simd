@@ -209,6 +209,11 @@ namespace Simd
             return Simd::Max(0.0f, src * scale + bias);
         }
 
+        SIMD_INLINE float SynetHardSigmoid32f(float value, float scale, float shift)
+        {
+            return Simd::Max(Simd::Min(0.0f, value * scale + shift), 1.0f);
+        }
+
         SIMD_INLINE float SynetHswish32f(float value, float shift, float scale)
         {
             return Simd::Max(Simd::Min(value, shift) + shift, 0.0f)*scale*value;

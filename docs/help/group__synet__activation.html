@@ -53,6 +53,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gaee4f654aee53a18b5506e71f6790f39f"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gaee4f654aee53a18b5506e71f6790f39f">SimdSynetElu32f</a> (const float *src, size_t size, const float *alpha, float *dst)</td></tr>
 <tr class="memdesc:gaee4f654aee53a18b5506e71f6790f39f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates ELU activation function for 32-bit float array.  <a href="group__synet__activation.html#gaee4f654aee53a18b5506e71f6790f39f">More...</a><br /></td></tr>
 <tr class="separator:gaee4f654aee53a18b5506e71f6790f39f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga9f63fbc70cb4746624d9f4f9c91dfbf9"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga9f63fbc70cb4746624d9f4f9c91dfbf9">SimdSynetHardSigmoid32f</a> (const float *src, size_t size, const float *scale, const float *shift, float *dst)</td></tr>
+<tr class="memdesc:ga9f63fbc70cb4746624d9f4f9c91dfbf9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates HardSigmoid activation function (<a href="https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html">https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html</a>) for 32-bit float array.  <a href="group__synet__activation.html#ga9f63fbc70cb4746624d9f4f9c91dfbf9">More...</a><br /></td></tr>
+<tr class="separator:ga9f63fbc70cb4746624d9f4f9c91dfbf9"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga6881796a8ea3754414ccd14cde744e62"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga6881796a8ea3754414ccd14cde744e62">SimdSynetHswish32f</a> (const float *src, size_t size, const float *shift, const float *scale, float *dst)</td></tr>
 <tr class="memdesc:ga6881796a8ea3754414ccd14cde744e62"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates H-Swish activation function (<a href="https://arxiv.org/pdf/1905.02244.pdf">https://arxiv.org/pdf/1905.02244.pdf</a>) for 32-bit float array.  <a href="group__synet__activation.html#ga6881796a8ea3754414ccd14cde744e62">More...</a><br /></td></tr>
 <tr class="separator:ga6881796a8ea3754414ccd14cde744e62"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -128,6 +131,68 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">alpha</td><td>- a pointer to alpha parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga9f63fbc70cb4746624d9f4f9c91dfbf9" name="ga9f63fbc70cb4746624d9f4f9c91dfbf9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga9f63fbc70cb4746624d9f4f9c91dfbf9">&#9670;&nbsp;</a></span>SimdSynetHardSigmoid32f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetHardSigmoid32f </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>scale</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>shift</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Calculates HardSigmoid activation function (<a href="https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html">https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html</a>) for 32-bit float array. </p>
+<p >Input and output arrays must have the same size.</p>
+<p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+    dst[i] = Max(Min(0, src[i] * scale + shift) + shift, 1);
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the input 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">scale</td><td>- a pointer to scale parameter. This parameter is equal to 1/6 in Pytorch documentation. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">shift</td><td>- a pointer to shift parameter. This parameter is equal to 1/2 in Pytorch documentation. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
   </table>
   </dd>

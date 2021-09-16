@@ -48,6 +48,25 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
+        {
+            float _scale = scale[0];
+            float _shift = shift[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetHardSigmoid32f(src[i + 0], _scale, _shift);
+                dst[i + 1] = SynetHardSigmoid32f(src[i + 1], _scale, _shift);
+                dst[i + 2] = SynetHardSigmoid32f(src[i + 2], _scale, _shift);
+                dst[i + 3] = SynetHardSigmoid32f(src[i + 3], _scale, _shift);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetHardSigmoid32f(src[i], _scale, _shift);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
         {
             float _shift = shift[0];

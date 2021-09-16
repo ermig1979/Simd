@@ -117,6 +117,93 @@ namespace Test
 
     namespace
     {
+        struct FuncHardSigmoid32f
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* scale, const float* shift, float* dst);
+
+            FuncPtr func;
+            String desc;
+
+            FuncHardSigmoid32f(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Call(const Tensor32f& src, const float& scale, const float& shift, Tensor32f& dst) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                func(src.Data(), src.Size(), &scale, &shift, dst.Data());
+            }
+        };
+    }
+
+#define FUNC_HARDSIGMOID32F(func) FuncHardSigmoid32f(func, #func)
+
+    bool SynetHardSigmoid32fAutoTest(size_t size, const FuncHardSigmoid32f& f1, const FuncHardSigmoid32f& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc << " [" << size << "].");
+
+        Tensor32f src(ToShape(size));
+        Tensor32f dst1(ToShape(size));
+        Tensor32f dst2(ToShape(size));
+
+        FillRandom(src, -10.0, 10.0);
+        float scale = 1.0f / 6.0f;
+        float shift = 1.0f / 2.0f;
+
+        TEST_ALIGN(SIMD_ALIGN);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, scale, shift, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32, DifferenceBoth);
+
+        return result;
+    }
+
+    bool SynetHardSigmoid32fAutoTest(const FuncHardSigmoid32f& f1, const FuncHardSigmoid32f& f2)
+    {
+        bool result = true;
+
+        result = result && SynetHardSigmoid32fAutoTest(W * H, f1, f2);
+        result = result && SynetHardSigmoid32fAutoTest(W * H - O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetHardSigmoid32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Base::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
+
+//#ifdef SIMD_SSE2_ENABLE
+//        if (Simd::Sse2::Enable)
+//            result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Sse2::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
+//#endif 
+//
+//#ifdef SIMD_AVX_ENABLE
+//        if (Simd::Avx::Enable)
+//            result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Avx::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
+//#endif 
+//
+//#ifdef SIMD_AVX512F_ENABLE
+//        if (Simd::Avx512f::Enable)
+//            result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Avx512f::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
+//#endif 
+//
+//#ifdef SIMD_NEON_ENABLE
+//        if (Simd::Neon::Enable)
+//            result = result && SynetHardSigmoid32fAutoTest(FUNC_HARDSIGMOID32F(Simd::Neon::SynetHardSigmoid32f), FUNC_HARDSIGMOID32F(SimdSynetHardSigmoid32f));
+//#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncHswish32f
         {
             typedef void(*FuncPtr)(const float * src, size_t size, const float * shift, const float * scale, float * dst);

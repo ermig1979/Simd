@@ -5873,6 +5873,18 @@ SIMD_API void SimdSynetFusedLayerForward9(const float * src0, const float * src1
 #endif
 }
 
+SIMD_API void SimdSynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
+{
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetHardSigmoid32fPtr) (const float* src, size_t size, const float* scale, const float* shift, float* dst);
+    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC0(SynetHardSigmoid32f);//, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetHardSigmoid32f(src, size, scale, shift, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
 {
 #if defined(SIMD_SYNET_ENABLE)
