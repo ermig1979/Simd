@@ -6658,7 +6658,7 @@ extern "C"
         Algorithm's details:
         \verbatim
         for(i = 0; i < size; ++i)
-            dst[i] = Max(Min(0, src[i] * scale + shift) + shift, 1);
+            dst[i] = Max(0, Min(src[i] * scale + shift, 1));
         \endverbatim
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.

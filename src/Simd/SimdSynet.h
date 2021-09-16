@@ -211,7 +211,7 @@ namespace Simd
 
         SIMD_INLINE float SynetHardSigmoid32f(float value, float scale, float shift)
         {
-            return Simd::Max(Simd::Min(0.0f, value * scale + shift), 1.0f);
+            return Simd::Max(0.0f, Simd::Min(value * scale + shift, 1.0f));
         }
 
         SIMD_INLINE float SynetHswish32f(float value, float shift, float scale)
@@ -299,6 +299,11 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2
     {
+        SIMD_INLINE __m128 SynetHardSigmoid32f(__m128 value, __m128 scale, __m128 shift)
+        {
+            return _mm_max_ps(_mm_setzero_ps(), _mm_min_ps(_mm_add_ps(_mm_mul_ps(value, scale), shift), _mm_set1_ps(1.0f)));
+        }
+
         SIMD_INLINE __m128 SynetHswish32f(__m128 value, __m128 shift, __m128 scale)
         {
             return _mm_mul_ps(_mm_mul_ps(_mm_max_ps(_mm_add_ps(_mm_min_ps(value, shift), shift), _mm_setzero_ps()), scale), value);
