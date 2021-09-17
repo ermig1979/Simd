@@ -391,6 +391,11 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE
     namespace Avx512f
     {
+        SIMD_INLINE __m512 SynetHardSigmoid32f(__m512 value, __m512 scale, __m512 shift)
+        {
+            return _mm512_max_ps(_mm512_setzero_ps(), _mm512_min_ps(_mm512_add_ps(_mm512_mul_ps(value, scale), shift), _mm512_set1_ps(1.0f)));
+        }
+
         SIMD_INLINE __m512 SynetHswish32f(__m512 value, __m512 shift, __m512 scale)
         {
             return _mm512_mul_ps(_mm512_mul_ps(_mm512_max_ps(_mm512_add_ps(_mm512_min_ps(value, shift), shift), _mm512_setzero_ps()), scale), value);
