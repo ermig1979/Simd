@@ -345,6 +345,11 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
     {
+        SIMD_INLINE __m256 SynetHardSigmoid32f(__m256 value, __m256 scale, __m256 shift)
+        {
+            return _mm256_max_ps(_mm256_setzero_ps(), _mm256_min_ps(_mm256_add_ps(_mm256_mul_ps(value, scale), shift), _mm256_set1_ps(1.0f)));
+        }
+
         SIMD_INLINE __m256 SynetHswish32f(__m256 value, __m256 shift, __m256 scale)
         {
             return _mm256_mul_ps(_mm256_mul_ps(_mm256_max_ps(_mm256_add_ps(_mm256_min_ps(value, shift), shift), _mm256_setzero_ps()), scale), value);

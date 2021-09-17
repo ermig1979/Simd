@@ -32,6 +32,43 @@ namespace Simd
 #if defined(SIMD_AVX_ENABLE) && defined(SIMD_SYNET_ENABLE)    
     namespace Avx
     {
+        template<bool align> SIMD_INLINE void SynetHardSigmoid32f(const float* src, __m256 scale, __m256 shift, float* dst, size_t offset)
+        {
+            __m256 _src = Load<align>(src + offset);
+            __m256 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            Store<align>(dst + offset, _dst);
+        }
+
+        template<bool align> void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
+        {
+            __m256 _scale = _mm256_set1_ps(scale[0]);
+            __m256 _shift = _mm256_set1_ps(shift[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetHardSigmoid32f<align>(src, _scale, _shift, dst, i + 0 * F);
+                SynetHardSigmoid32f<align>(src, _scale, _shift, dst, i + 1 * F);
+                SynetHardSigmoid32f<align>(src, _scale, _shift, dst, i + 2 * F);
+                SynetHardSigmoid32f<align>(src, _scale, _shift, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetHardSigmoid32f<align>(src, _scale, _shift, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetHardSigmoid32f(src[i], scale[0], shift[0]);
+        }
+
+        void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetHardSigmoid32f<true>(src, size, scale, shift, dst);
+            else
+                SynetHardSigmoid32f<false>(src, size, scale, shift, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         template<bool align> SIMD_INLINE void SynetHswish32f(const float * src, __m256 shift, __m256 scale, float * dst, size_t offset)
         {
             __m256 value = Load<align>(src + offset);
