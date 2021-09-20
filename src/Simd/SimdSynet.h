@@ -454,6 +454,11 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
     {
+        SIMD_INLINE float32x4_t SynetHardSigmoid32f(float32x4_t value, float32x4_t scale, float32x4_t shift)
+        {
+            return vmaxq_f32(vdupq_n_f32(0.0f), vminq_f32(vaddq_f32(vmulq_f32(value, scale), shift), vdupq_n_f32(1.0f)));
+        }
+
         SIMD_INLINE float32x4_t SynetHswish32f(float32x4_t value, float32x4_t shift, float32x4_t scale)
         {
             return vmulq_f32(vmulq_f32(vmaxq_f32(vaddq_f32(vminq_f32(value, shift), shift), vdupq_n_f32(0.0f)), scale), value);

@@ -517,6 +517,8 @@ namespace Simd
 
         void SynetFusedLayerForward9(const float * src0, const float * src1, const float * scale, const float * bias, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1, SimdTensorFormatType format);
 
+        void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst);
+
         void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst);
 
         void SynetInnerProductLayerForward(const float * src, const float * weight, const float * bias, size_t count, size_t size, float * dst);
