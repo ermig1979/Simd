@@ -160,6 +160,14 @@ typedef enum
         \endverbatim
     */
     SimdConvolutionActivationMish,
+    /*!
+        HardSigmoid (https://pytorch.org/docs/stable/generated/torch.nn.Hardsigmoid.html) activation function.
+        It has two parameters: scale (params[0]) and shift (params[1]).
+        \verbatim
+        dst[i] = Max(0, Min(src[i] * scale + shift, 1));
+        \endverbatim
+    */
+    SimdConvolutionActivationHardSigmoid,
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types
