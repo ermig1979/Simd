@@ -442,6 +442,57 @@ namespace Simd
                 else
                     SynetMish32f(dst, size * count, &threshold, dst);
             }
+            else if (activation == ::SimdConvolutionActivationHardSigmoid)
+            {
+                float scale = params[0];
+                float shift = params[1];
+                if (bias)
+                {
+                    __m512 _scale = _mm512_set1_ps(scale);
+                    __m512 _shift = _mm512_set1_ps(shift);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m512 _dst = _mm512_loadu_ps(dst + i);
+                                __m512 _bias = _mm512_loadu_ps(bias + i);
+                                _mm512_storeu_ps(dst + i, Avx512f::SynetHardSigmoid32f(_mm512_add_ps(_dst, _bias), _scale, _shift));
+                            }
+                            if (i < count)
+                            {
+                                __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
+                                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
+                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::SynetHardSigmoid32f(_mm512_add_ps(_dst, _bias), _scale, _shift));
+                            }
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m512 _bias = _mm512_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
+                                _mm512_storeu_ps(dst + j, Avx512f::SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            if (j < size)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
+                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetHardSigmoid32f(dst, size * count, &scale, &shift, dst);
+            }
             else
                 assert(0);
 #endif
