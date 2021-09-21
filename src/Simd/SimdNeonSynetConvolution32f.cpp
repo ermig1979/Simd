@@ -337,6 +337,49 @@ namespace Simd
                 else
                     Neon::SynetMish32f(dst, size * count, &threshold, dst);
             }
+            else if (activation == ::SimdConvolutionActivationHardSigmoid)
+            {
+                float scale = params[0];
+                float shift = params[1];
+                if (bias)
+                {
+                    float32x4_t _scale = vdupq_n_f32(scale);
+                    float32x4_t _shift = vdupq_n_f32(shift);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Neon::SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetHardSigmoid32f(dst[i] + bias[i], scale, shift);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float32x4_t _bias = vdupq_n_f32(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Neon::SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetHardSigmoid32f(dst[j] + bias[i], scale, shift);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    Neon::SynetHardSigmoid32f(dst, size * count, &scale, &shift, dst);
+            }
             else
                 assert(0);
         }

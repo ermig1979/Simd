@@ -612,7 +612,9 @@ namespace Simd
 
             float32x4_t _params[3], _bias[3];
             _params[0] = vdupq_n_f32(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = vdupq_n_f32(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += a.microD)
@@ -1021,7 +1023,9 @@ namespace Simd
 
             float32x4_t _params[3], _bias[3];
             _params[0] = vdupq_n_f32(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = vdupq_n_f32(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += a.microD)
@@ -1073,6 +1077,7 @@ namespace Simd
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, a); break;
             case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, a); break;
             case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, a); break;
+            case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, a); break;
             default: assert(0);
             }
             return true;
