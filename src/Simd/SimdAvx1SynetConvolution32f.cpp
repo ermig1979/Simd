@@ -294,6 +294,49 @@ namespace Simd
                 else
                     SynetHswish32f(dst, count * size, &shift, &scale, dst);
             }
+            else if (activation == ::SimdConvolutionActivationHardSigmoid)
+            {
+                float scale = params[0];
+                float shift = params[1];
+                if (bias)
+                {
+                    __m256 _scale = _mm256_set1_ps(scale);
+                    __m256 _shift = _mm256_set1_ps(shift);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetHardSigmoid32f(dst[i] + bias[i], scale, shift);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, SynetHardSigmoid32f(value, _scale, _shift));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetHardSigmoid32f(dst[j] + bias[i], scale, shift);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetHardSigmoid32f(dst, count * size, &scale, &shift, dst);
+            }
             else
             {
                 Sse2::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);

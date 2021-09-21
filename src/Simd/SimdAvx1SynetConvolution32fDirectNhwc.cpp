@@ -90,6 +90,11 @@ namespace Simd
             return Avx::SynetHswish32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const float* params, size_t offset)
+        {
+            return Avx::SynetHardSigmoid32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
+        }
+
         SIMD_INLINE void KernelHwcDefaultEdge(const float * src, const ConvParam32f & p, size_t kH, size_t kW, const float * weight, __m256 & sum)
         {
             size_t size = kW * p.srcC, tail = (p.kernelX - kW)*p.srcC*p.dstC, dstC = p.dstC, stride = p.srcW * p.srcC;
@@ -1131,6 +1136,7 @@ namespace Simd
                 case ::SimdConvolutionActivationRestrictRange: func = GetConvolutionBiasActivation<::SimdConvolutionActivationRestrictRange>(p); break;
                 case ::SimdConvolutionActivationPrelu: func = GetConvolutionBiasActivation<::SimdConvolutionActivationPrelu>(p); break;
                 case ::SimdConvolutionActivationHswish: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHswish>(p); break;
+                case ::SimdConvolutionActivationHardSigmoid: func = GetConvolutionBiasActivation<::SimdConvolutionActivationHardSigmoid>(p); break;
                 default: break;
                 }
             }

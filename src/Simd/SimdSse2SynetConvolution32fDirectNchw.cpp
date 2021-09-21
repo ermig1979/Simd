@@ -184,6 +184,11 @@ namespace Simd
             return Sse2::Mish(value, params[0]);
         }
 
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHardSigmoid>(__m128 value, const __m128* params)
+        {
+            return SynetHardSigmoid32f(value, params[0], params[1]);
+        }
+
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 
         void ConvolutionBiasActivation(const float * src, size_t srcC, size_t srcH, size_t srcW, const float * weight, 
             const float * bias, const float * params, float * dst, size_t dstC, size_t dstH, size_t dstW)
@@ -191,7 +196,9 @@ namespace Simd
             __m128 _weight[kernel*kernel];
             __m128 _params[2];
             _params[0] = _mm_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm_set1_ps(params[1]);
             size_t dstWF = Simd::AlignLo(dstW, F);
             __m128 tail = RightNotZero32f(dstW - dstWF);
@@ -329,6 +336,7 @@ namespace Simd
             case ::SimdConvolutionActivationElu: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationElu>;
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
             case ::SimdConvolutionActivationMish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationMish>;
+            case ::SimdConvolutionActivationHardSigmoid: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHardSigmoid>;
             default:
                 assert(0);
                 return NULL;

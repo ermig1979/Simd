@@ -82,6 +82,11 @@ namespace Simd
             return SynetMish32f(value, params[0]);
         }
 
+        template<> SIMD_INLINE float Activate<SimdConvolutionActivationHardSigmoid>(float value, const float* params, size_t offset)
+        {
+            return SynetHardSigmoid32f(value, params[0], params[1]);
+        }
+
         template<SimdConvolutionActivationType type> void DepthwiseConvolution(const float* src, const SimdConvolutionParameters& p,
             size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
         {
@@ -165,6 +170,11 @@ namespace Simd
             return Sse2::Mish(value, _mm_set1_ps(params[0]));
         }
 
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHardSigmoid>(__m128 value, const float* params, size_t offset)
+        {
+            return SynetHardSigmoid32f(value, _mm_set1_ps(params[0]), _mm_set1_ps(params[1]));
+        }
+
         //---------------------------------------------------------------------
 
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const __m128 * params, size_t index);
@@ -207,6 +217,11 @@ namespace Simd
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const __m128* params, size_t index)
         {
             return Sse2::Mish(value, params[0]);
+        }
+
+        template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHardSigmoid>(__m128 value, const __m128* params, size_t index)
+        {
+            return SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         //---------------------------------------------------------------------
@@ -320,6 +335,11 @@ namespace Simd
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHswish>(__m256 value, const __m256 * params, size_t index)
         {
             return Avx::SynetHswish32f(value, params[0], params[1]);
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const __m256* params, size_t index)
+        {
+            return Avx::SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         //---------------------------------------------------------------------
@@ -445,6 +465,11 @@ namespace Simd
             return Avx2::Mish(value, _mm256_set1_ps(params[0]));
         }
 
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const float* params, size_t offset)
+        {
+            return Avx::SynetHardSigmoid32f(value, _mm256_set1_ps(params[0]), _mm256_set1_ps(params[1]));
+        }
+
         //---------------------------------------------------------------------
 
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m256 Activate(__m256 value, const __m256 * params, size_t index);
@@ -487,6 +512,11 @@ namespace Simd
         template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationMish>(__m256 value, const __m256* params, size_t index)
         {
             return Avx2::Mish(value, params[0]);
+        }
+
+        template<> SIMD_INLINE __m256 Activate<::SimdConvolutionActivationHardSigmoid>(__m256 value, const __m256* params, size_t index)
+        {
+            return Avx::SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         //---------------------------------------------------------------------
@@ -612,6 +642,11 @@ namespace Simd
             return Avx512f::Mish(value, _mm512_set1_ps(params[0]));
         }
 
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHardSigmoid>(__m512 value, const float* params, size_t offset, __mmask16 tail)
+        {
+            return Avx512f::SynetHardSigmoid32f(value, _mm512_set1_ps(params[0]), _mm512_set1_ps(params[1]));
+        }
+
         //---------------------------------------------------------------------
 
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m512 Activate(__m512 value, const __m512 * params, size_t index);
@@ -654,6 +689,11 @@ namespace Simd
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationMish>(__m512 value, const __m512* params, size_t index)
         {
             return Avx512f::Mish(value, params[0]);
+        }
+
+        template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHardSigmoid>(__m512 value, const __m512* params, size_t index)
+        {
+            return Avx512f::SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         //---------------------------------------------------------------------
@@ -742,6 +782,11 @@ namespace Simd
         template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationMish>(float32x4_t value, const float32x4_t* params, size_t index)
         {
             return Neon::Mish<1>(value, params[0]);
+        }
+
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationHardSigmoid>(float32x4_t value, const float32x4_t* params, size_t index)
+        {
+            return Neon::SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         template <TermType term> struct Term

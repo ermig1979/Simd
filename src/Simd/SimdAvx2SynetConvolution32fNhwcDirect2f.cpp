@@ -250,7 +250,9 @@ namespace Simd
 
             __m256 _params[2], _bias[2];
             _params[0] = _mm256_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm256_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -482,7 +484,9 @@ namespace Simd
 
             __m256 _params[2], _bias[2];
             _params[0] = _mm256_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm256_set1_ps(params[1]);
 
             for (size_t dc = 0; dc < dstC; dc += DF)
@@ -553,6 +557,7 @@ namespace Simd
             case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, convolution); break;
             case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, convolution); break;
             case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, convolution); break;
+            case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, convolution); break;
             default: assert(0);
             }
             return true;
