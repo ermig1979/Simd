@@ -402,6 +402,10 @@ namespace Simd
                 case SimdConvolutionActivationMish:
                     _rParams.data[0] = params[0];
                     break;
+                case SimdConvolutionActivationHardSigmoid:
+                    _rParams.data[0] = params[0];
+                    _rParams.data[1] = params[1];
+                    break;
                 default:
                     assert(0);
                 }
