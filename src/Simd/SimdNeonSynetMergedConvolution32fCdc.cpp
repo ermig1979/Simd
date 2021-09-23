@@ -1479,6 +1479,8 @@ namespace Simd
 				return NULL;
 			if (SynetMergedConvolution32fCdc::Preferable(param))
 				return new Neon::SynetMergedConvolution32fCdc(param);
+			else if (SynetMergedConvolution32fDc::Preferable(param))
+				return new Neon::SynetMergedConvolution32fDc(param);
 			else
 				return new Base::SynetMergedConvolution32f(param);
 		}
