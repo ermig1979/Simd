@@ -401,6 +401,8 @@ namespace Simd
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
             virtual String Ext() const { return "Neon"; }
+
+            static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
