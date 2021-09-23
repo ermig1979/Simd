@@ -174,6 +174,7 @@ Also you can use parameters:
 * `-help` or `-?` in order to print help message.
 * `-r=../..` to set project root directory.
 * `-pa=1` to print alignment statistics.
+* `-pi=1` to print internal statistics (Cmake parameter SIMD_PERF must be ON).
 * `-c=512` a number of channels in test image for performance testing.
 * `-h=1080` a height of test image for performance testing.
 * `-w=1920` a width of test image for performance testing.

@@ -164,6 +164,7 @@
      - `-help` or `-?` in order to print help message.
      - `-r=../..` to set project root directory.
      - `-pa=1` to print alignment statistics.
+     - `-pi=1` to print internal statistics (Cmake parameter SIMD_PERF must be ON).
      - `-c=512` a number of channels in test image for performance testing.
      - `-h=1080` a height of test image for performance testing.
      - `-w=1920` a width of test image for performance testing.
@@ -173,7 +174,7 @@
      - `-wt=1` a thread number used to parallelize algorithms.
      - `-fe=Abs` an exlude filter to exclude some tests.
      - `-mt=100` a minimal test execution time (in milliseconds).
-     - `lc=1` to litter CPU cache between test runs.
+     - `-lc=1` to litter CPU cache between test runs.
      - `-ri=city.jpg` a name of real image used in some tests. The image have to be placed in `./data/image` directory.
 */
 

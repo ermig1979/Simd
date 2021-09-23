@@ -539,7 +539,7 @@ namespace Test
 
         size_t testThreads, workThreads;
 
-        bool printAlign;
+        bool printAlign, printInternal;
 
         Options(int argc, char* argv[])
             : mode(Auto)
@@ -547,6 +547,7 @@ namespace Test
             , testThreads(0)
             , workThreads(1)
             , printAlign(false)
+            , printInternal(true)
         {
             for (int i = 1; i < argc; ++i)
             {
@@ -618,6 +619,10 @@ namespace Test
                 else if (arg.find("-pa=") == 0)
                 {
                     printAlign = FromString<bool>(arg.substr(4, arg.size() - 4));
+                }
+                else if (arg.find("-pi=") == 0)
+                {
+                    printInternal = FromString<bool>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-wt=") == 0)
                 {
@@ -708,7 +713,8 @@ namespace Test
         TEST_LOG_SS(Info, "ALL TESTS ARE FINISHED SUCCESSFULLY!" << std::endl);
 
 #ifdef TEST_PERFORMANCE_TEST_ENABLE
-        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.ConsoleReport(options.printAlign, false) << SimdPerformanceStatistic());
+        TEST_LOG_SS(Info, Test::PerformanceMeasurerStorage::s_storage.ConsoleReport(options.printAlign, false) <<
+            (options.printInternal ? SimdPerformanceStatistic() : ""));
         if (!options.text.empty())
             Test::PerformanceMeasurerStorage::s_storage.TextReport(options.text, options.printAlign);
         if (!options.html.empty())
@@ -783,6 +789,7 @@ namespace Test
         std::cout << "    -help or -?   to print this help message." << std::endl << std::endl;
         std::cout << "    -r=../..      to set project root directory." << std::endl << std::endl;
         std::cout << "    -pa=1         to print alignment statistics." << std::endl << std::endl;
+        std::cout << "    -pi=1         to print internal statistics (Cmake parameter SIMD_PERF must be ON)." << std::endl << std::endl;
         std::cout << "    -c=512        a number of channels in test image for performance testing." << std::endl << std::endl;
         std::cout << "    -h=1080       a height of test image for performance testing." << std::endl << std::endl;
         std::cout << "    -w=1920       a width of test image for performance testing." << std::endl << std::endl;
