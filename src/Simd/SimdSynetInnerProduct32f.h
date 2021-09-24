@@ -122,7 +122,7 @@ namespace Simd
         public:
             SynetInnerProduct32fGemm(const InnerProductParam32f & p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::GemmN" + (_cbWeight.size ?  "Ncb" : (_param.transpose == SimdTrue ? "T" : "N")); }
+            virtual String Desc() const;
             virtual size_t InternalBufferSize() const { return _cbWeight.size; }
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float * src, float * dst);
@@ -133,7 +133,6 @@ namespace Simd
             typedef void(*ProdPtr)(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst);
             typedef void(*CbPackPtr)(size_t M, size_t N, size_t K, const float* B, float* pB, GemmKernelType type, bool compatibility);
             typedef void(*CbRunPtr)(size_t M, size_t N, size_t K, const float* A, const float* B, float* C, GemmKernelType type, bool compatibility);
-
 
             float _0, _1;
             GemmPtr _gemm;
@@ -266,6 +265,24 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+        class SynetInnerProduct32fGemm : public Base::SynetInnerProduct32fGemm
+        {
+        public:
+            SynetInnerProduct32fGemm(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+
+        class SynetInnerProduct32fProd : public Base::SynetInnerProduct32fProd
+        {
+        public:
+            SynetInnerProduct32fProd(const InnerProductParam32f& p);
+
+            virtual String Ext() const { return "Neon"; }
+        };
+
+        void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     }
 #endif//SIMD_NEON_ENABLE
 }

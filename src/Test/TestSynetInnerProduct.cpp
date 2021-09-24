@@ -142,7 +142,7 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 96, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 10, 288, 192, f, a, f1, f2);
 #endif
-#if 0        
+#if 1        
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, t, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 288, 96, t, a, f1, f2);
@@ -202,6 +202,11 @@ namespace Test
 #ifdef SIMD_AVX512F_ENABLE
         if (Simd::Avx512f::Enable)
             result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx512f::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
+#endif
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Neon::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 #endif
 
         return result;

@@ -719,7 +719,6 @@ namespace Simd
 #endif
         }
 
-
         template <bool align> SIMD_INLINE void Store3(uint8_t * p, uint8x16x3_t a);
 
         template <> SIMD_INLINE void Store3<false>(uint8_t * p, uint8x16x3_t a)
@@ -813,6 +812,14 @@ namespace Simd
 #else
             vst1q_f32(p, a);
 #endif
+        }
+
+        SIMD_INLINE void Store(float* ptr, float32x4_t val, size_t size)
+        {
+            SIMD_ALIGNED(16) float buf[F];
+            Store<true>(buf, val);
+            for (size_t i = 0; i < size; ++i)
+                ptr[i] = buf[i];
         }
 
         template <bool align> SIMD_INLINE void Store(float * p, float32x2_t a);

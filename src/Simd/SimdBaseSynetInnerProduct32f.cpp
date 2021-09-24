@@ -90,6 +90,12 @@ namespace Simd
             }
         }
 
+        String SynetInnerProduct32fGemm::Desc() const 
+        { 
+            return Ext() + "::Gemm" + (_prod ? "Prod" : 
+                String("N") + (_cbWeight.size ? "Ncb" : (_param.transpose == SimdTrue ? "T" : "N")));
+        }
+
         void SynetInnerProduct32fGemm::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
         {
             Simd::SynetInnerProduct32f::SetParams(weight, internal, bias, params);

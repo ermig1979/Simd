@@ -265,6 +265,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCd.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
