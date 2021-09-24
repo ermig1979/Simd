@@ -405,6 +405,15 @@ namespace Simd
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
+        class SynetMergedConvolution32fCd : public Base::SynetMergedConvolution32fCd
+        {
+        public:
+            SynetMergedConvolution32fCd(const MergConvParam32f& p);
+            virtual String Ext() const { return "Neon"; }
+
+            static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
+        };
+        
         class SynetMergedConvolution32fDc : public Base::SynetMergedConvolution32fDc
         {
         public:
