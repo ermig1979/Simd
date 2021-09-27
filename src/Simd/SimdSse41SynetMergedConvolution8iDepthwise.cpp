@@ -55,7 +55,9 @@ namespace Simd
             __m128i _upper = _mm_set1_epi32(a.upper);
             __m128 _params[2];
             _params[0] = _mm_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm_set1_ps(params[1]);
             for (size_t c = 0; c < dstC; c += F)
             {
@@ -394,7 +396,9 @@ namespace Simd
             __m128i _upper = _mm_set1_epi32(a.upper);
             __m128 _params[2];
             _params[0] = _mm_set1_ps(params[0]);
-            if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+            if (type == SimdConvolutionActivationRestrictRange ||
+                type == SimdConvolutionActivationHswish ||
+                type == SimdConvolutionActivationHardSigmoid)
                 _params[1] = _mm_set1_ps(params[1]);
             for (size_t c = 0; c < dstC; c += F)
             {
@@ -493,6 +497,7 @@ namespace Simd
             case SimdConvolutionActivationElu: SetDepthwise<SimdConvolutionActivationElu>(p, depthwise); break;
             case SimdConvolutionActivationHswish: SetDepthwise<SimdConvolutionActivationHswish>(p, depthwise); break;
             case SimdConvolutionActivationMish: SetDepthwise<SimdConvolutionActivationMish>(p, depthwise); break;
+            case SimdConvolutionActivationHardSigmoid: SetDepthwise<SimdConvolutionActivationHardSigmoid>(p, depthwise); break;
             }
         }
     }

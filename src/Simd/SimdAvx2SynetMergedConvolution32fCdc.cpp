@@ -596,7 +596,9 @@ namespace Simd
 
 				__m256 _params[2];
 				_params[0] = _mm256_set1_ps(params[0]);
-				if (type == ::SimdConvolutionActivationRestrictRange || type == ::SimdConvolutionActivationHswish)
+				if (type == SimdConvolutionActivationRestrictRange ||
+					type == SimdConvolutionActivationHswish ||
+					type == SimdConvolutionActivationHardSigmoid)
 					_params[1] = _mm256_set1_ps(params[1]);
 				for (size_t c = 0; c < srcC; c += F)
 				{

@@ -189,6 +189,13 @@ namespace Test
                 params[i].Data()[0] = 3.0f;
                 params[i].Data()[1] = 1.0f / 6.0f;
             }
+            else if (p.conv[i].activation == ::SimdConvolutionActivationMish)
+                params[i].Data()[0] = 20.0f;
+            else if (p.conv[i].activation == ::SimdConvolutionActivationHardSigmoid)
+            {
+                params[i].Data()[0] = 1.0f / 6.0f;
+                params[i].Data()[1] = 0.5f;
+            }
             else
             {
                 params[i].Data()[0] = 0.0f + 0.1f * float(i);
@@ -259,9 +266,10 @@ namespace Test
         SimdSynetCompatibilityType p = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iPrecise | fma);
         SimdSynetCompatibilityType o = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iOverflow | fma);
         SimdSynetCompatibilityType n = (SimdSynetCompatibilityType)(SimdSynetCompatibility8iNarrowed | fma);
-        const SimdConvolutionActivationType a0 = SimdConvolutionActivationPrelu, a1 = SimdConvolutionActivationHswish, a2 = SimdConvolutionActivationIdentity;
+        //const SimdConvolutionActivationType a0 = SimdConvolutionActivationPrelu, a1 = SimdConvolutionActivationHswish, a2 = SimdConvolutionActivationIdentity;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationHswish, a1 = SimdConvolutionActivationIdentity, a2 = SimdConvolutionActivationPrelu;
         //const SimdConvolutionActivationType a0 = SimdConvolutionActivationMish, a1 = SimdConvolutionActivationMish, a2 = SimdConvolutionActivationMish;
+        const SimdConvolutionActivationType a0 = SimdConvolutionActivationHardSigmoid, a1 = SimdConvolutionActivationHardSigmoid, a2 = SimdConvolutionActivationHardSigmoid;
 #if defined(NDEBUG)
 #if 0
         result = result && SynetMergedConvolution8iForwardAutoTest(eps, Param(Shp(1, 128, 20, 12), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 20), u8, u8, 1, n), f1, f2);
