@@ -31,7 +31,13 @@ namespace Simd
     class InputMemoryStream
     {
         const uint8_t* _data;
-        size_t _pos, _size;
+        size_t _pos, _size, _bitCount;
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+        uint64_t _bitBuffer;
+#else
+        uint32_t _bitBuffer;
+#endif
+
     public:
         SIMD_INLINE InputMemoryStream(const uint8_t* data = NULL, size_t size = 0)
         {
@@ -43,6 +49,8 @@ namespace Simd
             _pos = 0;
             _data = data;
             _size = size;
+            _bitBuffer = 0;
+            _bitCount = 0;
         }
 
         SIMD_INLINE bool Seek(size_t pos)
@@ -215,6 +223,45 @@ namespace Simd
         static SIMD_INLINE bool IsGap(uint8_t value)
         {
             return value == ' ' || value == '\t' || value == '\n' || value == '\r';
+        }
+
+#if defined(SIMD_X64_ENABLE) || defined(SIMD_ARM64_ENABLE)
+        SIMD_INLINE uint64_t& BitBuffer()
+        {
+            return _bitBuffer;
+        }
+#else
+        SIMD_INLINE uint32_t& BitBuffer()
+        {
+            return _bitBuffer;
+        }
+#endif
+
+        SIMD_INLINE size_t& BitCount()
+        {
+            return _bitCount;
+        }
+
+        SIMD_INLINE void FillBits()
+        {
+            const size_t canReadByte = (sizeof(size_t) - 1) * 8;
+            while (_bitCount <= canReadByte && _pos < _size);
+            {
+                _bitBuffer |= (size_t)_data[_pos++] << _bitCount;
+                _bitCount += 8;
+            }
+        }
+
+        SIMD_INLINE bool ReadBits(size_t & bits, size_t count)
+        {
+            if (_bitCount < count)
+                FillBits();
+            if (_bitCount < count)
+                return false;
+            bits = _bitBuffer & ((size_t(1) << count) - 1);
+            _bitBuffer >>= count;
+            _bitCount -= count;
+            return true;
         }
     };
 
