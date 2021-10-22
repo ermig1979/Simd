@@ -25,6 +25,7 @@
 #define __SimdMemoryStream_h__
 
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdPerformance.h"
 
 namespace Simd
 {
@@ -361,6 +362,40 @@ namespace Simd
             _size = Max(_size, _pos);
         }
 
+        SIMD_INLINE bool Write(InputMemoryStream & input, size_t size)
+        {
+            if (input.CanRead(size))
+            {
+                Write(input.Current(), size);
+                input.Skip(size);
+                return true;
+            }
+            return false;
+        }
+
+        SIMD_INLINE bool WriteSelf(ptrdiff_t offset, size_t size)
+        {
+            //SIMD_PERF_FUNC();
+
+            if (offset < 0)
+                return false;
+            Reserve(_pos + size);
+            if (offset + size > _pos)// || size < 32)
+            {
+                //SIMD_PERF_BEG("loop");
+                for (size_t i = 0; i < size; ++i)
+                    _data[_pos++] = _data[offset++];
+            }
+            else
+            {
+                //SIMD_PERF_BEG("memcpy");
+                memcpy(_data + _pos, _data + offset, size);
+                _pos += size;
+            }
+            _size = Max(_size, _pos);
+            return true;
+        }
+
         template <class Value> SIMD_INLINE void Write(const Value& value)
         {
             Write(&value, sizeof(Value));
@@ -370,6 +405,14 @@ namespace Simd
         {
             Reserve(_pos + 1);
             _data[_pos++] = value;
+            _size = Max(_size, _pos);
+        }
+
+        SIMD_INLINE void Write8u(uint8_t value, size_t count)
+        {
+            Reserve(_pos + count);
+            memset(_data + _pos, value, count);
+            _pos += count;
             _size = Max(_size, _pos);
         }
 
