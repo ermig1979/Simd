@@ -188,7 +188,7 @@ namespace Simd
             bool ReadPalette(const Chunk& chunk);
             bool ReadTransparency(const Chunk& chunk);
             bool ReadData(const Chunk& chunk);
-            uint8_t* MergedData(uint32_t &size);
+            InputMemoryStream MergedDataStream();
         };
 
         class ImageJpegLoader : public ImageLoader

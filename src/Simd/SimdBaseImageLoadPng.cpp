@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdImageLoad.h"
+#include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
@@ -63,8 +64,6 @@ namespace Simd
         {
             uint32_t img_x, img_y;
             int img_n, img_out_n;
-
-            InputMemoryStream * stream;
         };
 
         static int png__addsizes_valid(int a, int b)
@@ -256,14 +255,6 @@ namespace Simd
             return n;
         }
 
-        SIMD_INLINE static int png__bit_reverse(int v, int bits)
-        {
-            assert(bits <= 16);
-            // to bit reverse n bits, reverse 16 and shift
-            // e.g. 11 bits, bit reverse and shift away 5
-            return png__bitreverse16(v) >> (16 - bits);
-        }
-
         static int png__zbuild_huffman(png__zhuffman* z, const uint8_t* sizelist, int num)
         {
             int i, k = 0;
@@ -299,7 +290,7 @@ namespace Simd
                     z->size[c] = (uint8_t)s;
                     z->value[c] = (uint16_t)i;
                     if (s <= PNG__ZFAST_BITS) {
-                        int j = png__bit_reverse(next_code[s], s);
+                        int j = ZlibBitRev(next_code[s], s);
                         while (j < (1 << PNG__ZFAST_BITS)) {
                             z->fast[j] = fastv;
                             j += (1 << s);
@@ -319,9 +310,7 @@ namespace Simd
 
         typedef struct
         {
-            uint8_t* zbuffer, * zbuffer_end;
-            int num_bits;
-            uint32_t code_buffer;
+            InputMemoryStream* stream;
 
             char* zout;
             char* zout_start;
@@ -331,46 +320,12 @@ namespace Simd
             png__zhuffman z_length, z_distance;
         } png__zbuf;
 
-        SIMD_INLINE static int png__zeof(png__zbuf* z)
-        {
-            return (z->zbuffer >= z->zbuffer_end);
-        }
-
-        SIMD_INLINE static uint8_t png__zget8(png__zbuf* z)
-        {
-            return png__zeof(z) ? 0 : *z->zbuffer++;
-        }
-
-        static void png__fill_bits(png__zbuf* z)
-        {
-            do 
-            {
-                if (z->code_buffer >= (1U << z->num_bits)) 
-                {
-                    z->zbuffer = z->zbuffer_end;  /* treat this as EOF so we fail. */
-                    return;
-                }
-                z->code_buffer |= (unsigned int)png__zget8(z) << z->num_bits;
-                z->num_bits += 8;
-            } while (z->num_bits <= 24);
-        }
-
-        SIMD_INLINE static unsigned int png__zreceive(png__zbuf* z, int n)
-        {
-            unsigned int k;
-            if (z->num_bits < n) png__fill_bits(z);
-            k = z->code_buffer & ((1 << n) - 1);
-            z->code_buffer >>= n;
-            z->num_bits -= n;
-            return k;
-        }
-
         static int png__zhuffman_decode_slowpath(png__zbuf* a, png__zhuffman* z)
         {
             int b, s, k;
             // not resolved by fast table, so compute it the slow way
             // use jpeg approach, which requires MSbits at top
-            k = png__bit_reverse(a->code_buffer, 16);
+            k = png__bitreverse16(a->stream->BitBuffer());
             for (s = PNG__ZFAST_BITS + 1; ; ++s)
                 if (k < z->maxcode[s])
                     break;
@@ -379,25 +334,28 @@ namespace Simd
             b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
             if (b >= sizeof(z->size)) return -1; // some data was corrupt somewhere!
             if (z->size[b] != s) return -1;  // was originally an assert, but report failure instead.
-            a->code_buffer >>= s;
-            a->num_bits -= s;
+            a->stream->BitBuffer() >>= s;
+            a->stream->BitCount() -= s;
             return z->value[b];
         }
 
         SIMD_INLINE static int png__zhuffman_decode(png__zbuf* a, png__zhuffman* z)
         {
             int b, s;
-            if (a->num_bits < 16) {
-                if (png__zeof(a)) {
+            if (a->stream->BitCount() < 16) 
+            {
+                if (a->stream->Eof())
+                {
                     return -1;   /* report error for unexpected end of data. */
                 }
-                png__fill_bits(a);
+                a->stream->FillBits();
             }
-            b = z->fast[a->code_buffer & PNG__ZFAST_MASK];
-            if (b) {
+            b = z->fast[a->stream->BitBuffer() & PNG__ZFAST_MASK];
+            if (b) 
+            {
                 s = b >> 9;
-                a->code_buffer >>= s;
-                a->num_bits -= s;
+                a->stream->BitBuffer() >>= s;
+                a->stream->BitCount() -= s;
                 return b & 511;
             }
             return png__zhuffman_decode_slowpath(a, z);
@@ -469,14 +427,14 @@ namespace Simd
                     }
                     z -= 257;
                     len = png__zlength_base[z];
-                    if (png__zlength_extra[z]) 
-                        len += png__zreceive(a, png__zlength_extra[z]);
+                    if (png__zlength_extra[z])
+                        len += a->stream->ReadBits(png__zlength_extra[z]);
                     z = png__zhuffman_decode(a, &a->z_distance);
                     if (z < 0) 
                         return PngError("bad huffman code", "Corrupt PNG");
                     dist = png__zdist_base[z];
-                    if (png__zdist_extra[z]) 
-                        dist += png__zreceive(a, png__zdist_extra[z]);
+                    if (png__zdist_extra[z])
+                        dist += a->stream->ReadBits(png__zdist_extra[z]);
                     if (zout - a->zout_start < dist) 
                         return PngError("bad dist", "Corrupt PNG");
                     if (zout + len > a->zout_end)
@@ -512,15 +470,15 @@ namespace Simd
             uint8_t codelength_sizes[19];
             int i, n;
 
-            int hlit = png__zreceive(a, 5) + 257;
-            int hdist = png__zreceive(a, 5) + 1;
-            int hclen = png__zreceive(a, 4) + 4;
+            int hlit = a->stream->ReadBits(5) + 257;
+            int hdist = a->stream->ReadBits(5) + 1;
+            int hclen = a->stream->ReadBits(4) + 4;
             int ntot = hlit + hdist;
 
             memset(codelength_sizes, 0, sizeof(codelength_sizes));
             for (i = 0; i < hclen; ++i) 
             {
-                int s = png__zreceive(a, 3);
+                int s = a->stream->ReadBits(3);
                 codelength_sizes[length_dezigzag[i]] = (uint8_t)s;
             }
             if (!png__zbuild_huffman(&z_codelength, codelength_sizes, 19)) 
@@ -536,15 +494,15 @@ namespace Simd
                 else {
                     uint8_t fill = 0;
                     if (c == 16) {
-                        c = png__zreceive(a, 2) + 3;
+                        c = a->stream->ReadBits(2) + 3;
                         if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
                         fill = lencodes[n - 1];
                     }
                     else if (c == 17) {
-                        c = png__zreceive(a, 3) + 3;
+                        c = a->stream->ReadBits(3) + 3;
                     }
                     else if (c == 18) {
-                        c = png__zreceive(a, 7) + 11;
+                        c = a->stream->ReadBits(7) + 11;
                     }
                     else {
                         return PngError("bad codelengths", "Corrupt PNG");
@@ -562,43 +520,27 @@ namespace Simd
 
         static int png__parse_uncompressed_block(png__zbuf* a)
         {
-            uint8_t header[4];
-            int len, nlen, k;
-            if (a->num_bits & 7)
-                png__zreceive(a, a->num_bits & 7); // discard
-             // drain the bit-packed data into header
-            k = 0;
-            while (a->num_bits > 0) {
-                header[k++] = (uint8_t)(a->code_buffer & 255); // suppress MSVC run-time check
-                a->code_buffer >>= 8;
-                a->num_bits -= 8;
-            }
-            if (a->num_bits < 0) return PngError("zlib corrupt", "Corrupt PNG");
-            // now fill header the normal way
-            while (k < 4)
-                header[k++] = png__zget8(a);
-            len = header[1] * 256 + header[0];
-            nlen = header[3] * 256 + header[2];
-            if (nlen != (len ^ 0xffff)) return PngError("zlib corrupt", "Corrupt PNG");
-            if (a->zbuffer + len > a->zbuffer_end) return PngError("read past buffer", "Corrupt PNG");
+            a->stream->ClearBits();
+            uint16_t len, nlen;
+            if(!a->stream->Read16u(len) || !a->stream->Read16u(nlen) || nlen != (len ^ 0xffff))
+                return PngError("zlib corrupt", "Corrupt PNG");
+            if (!a->stream->CanRead(len))
+                return PngError("read past buffer", "Corrupt PNG");
             if (a->zout + len > a->zout_end)
                 if (!png__zexpand(a, a->zout, len)) return 0;
-            memcpy(a->zout, a->zbuffer, len);
-            a->zbuffer += len;
+            a->stream->Read(len, a->zout);
             a->zout += len;
             return 1;
         }
 
         static int png__parse_zlib_header(png__zbuf* a)
         {
-            int cmf = png__zget8(a);
-            int cm = cmf & 15;
-            /* int cinfo = cmf >> 4; */
-            int flg = png__zget8(a);
-            if (png__zeof(a)) return PngError("bad zlib header", "Corrupt PNG"); // zlib spec
-            if ((cmf * 256 + flg) % 31 != 0) return PngError("bad zlib header", "Corrupt PNG"); // zlib spec
+            uint8_t cmf, flg;
+            if(!(a->stream->Read8u(cmf) && a->stream->Read8u(flg)))
+                return PngError("bad zlib header", "Corrupt PNG");
+            if ((int(cmf) * 256 + flg) % 31 != 0) return PngError("bad zlib header", "Corrupt PNG"); // zlib spec
             if (flg & 32) return PngError("no preset dict", "Corrupt PNG"); // preset dictionary not allowed in png
-            if (cm != 8) return PngError("bad compression", "Corrupt PNG"); // DEFLATE required for png
+            if ((cmf & 15) != 8) return PngError("bad compression", "Corrupt PNG"); // DEFLATE required for png
             // window = 1 << (8 + cinfo)... but who cares, we fully buffer output
             return 1;
         }
@@ -640,12 +582,10 @@ namespace Simd
                 if (!png__parse_zlib_header(a))
                     return 0;
             }
-            a->num_bits = 0;
-            a->code_buffer = 0;
             do 
             {
-                final = png__zreceive(a, 1);
-                type = png__zreceive(a, 2);
+                final = a->stream->ReadBits(1);
+                type = a->stream->ReadBits(2);
                 if (type == 0) 
                 {
                     if (!png__parse_uncompressed_block(a)) 
@@ -685,14 +625,14 @@ namespace Simd
             return png__parse_zlib(a, parse_header);
         }
 
-        static char* png_zlib_decode_malloc_guesssize_headerflag(const char* buffer, int len, int initial_size, int* outlen, int parse_header)
+        static char* png_zlib_decode_malloc_guesssize_headerflag(InputMemoryStream & stream, int initial_size, int* outlen, int parse_header)
         {
+            SIMD_PERF_FUNC();
             png__zbuf a;
             char* p = (char*)png__malloc(initial_size);
             if (p == NULL) 
                 return NULL;
-            a.zbuffer = (uint8_t*)buffer;
-            a.zbuffer_end = (uint8_t*)buffer + len;
+            a.stream = &stream;
             if (png__do_zlib(&a, p, initial_size, 1, parse_header)) 
             {
                 if (outlen) 
@@ -1184,7 +1124,6 @@ namespace Simd
         {
             const int req_comp = 4;
             PngContext context;
-            context.stream = &_stream;
             png__png p;
             p.s = &context;
             png__png* z = &p;
@@ -1202,21 +1141,17 @@ namespace Simd
             z->depth = _depth;
             s->img_n = _channels;
 
-            uint32_t isize = 0;
-            char * idata = (char*)MergedData(isize);
-            if (idata == NULL) 
-                return false;
-
-            uint32_t bpl = (s->img_x * z->depth + 7) / 8;
-            uint32_t raw_len = bpl * s->img_y * s->img_n + s->img_y;
-            z->expanded = (uint8_t*)png_zlib_decode_malloc_guesssize_headerflag(idata, isize, raw_len, (int*)&raw_len, _iPhone ? 0 : 1);
+            uint32_t bpl = (_width * _depth + 7) / 8;
+            uint32_t rawLen = bpl * _height * _channels + _height;
+            InputMemoryStream stream = MergedDataStream();
+            z->expanded = (uint8_t*)png_zlib_decode_malloc_guesssize_headerflag(stream, rawLen, (int*)&rawLen, _iPhone ? 0 : 1);
             if (z->expanded == NULL) 
                 return false;
             if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
                 s->img_out_n = s->img_n + 1;
             else
                 s->img_out_n = s->img_n;
-            if (!png__create_png_image(z, z->expanded, raw_len, s->img_out_n, z->depth, _color, _interlace)) 
+            if (!png__create_png_image(z, z->expanded, rawLen, s->img_out_n, z->depth, _color, _interlace))
                 return 0;
             if (_hasTrans) 
             {
@@ -1251,9 +1186,9 @@ namespace Simd
             if (req_comp && req_comp != p.s->img_out_n)
             {
                 if (p.depth <= 8)
-                    data = png__convert_format((uint8_t*)data, p.s->img_out_n, req_comp, p.s->img_x, p.s->img_y);
+                    data = png__convert_format((uint8_t*)data, p.s->img_out_n, req_comp, _width, _height);
                 else
-                    data = (uint8_t*)png__convert_format16((uint16_t*)data, p.s->img_out_n, req_comp, p.s->img_x, p.s->img_y);
+                    data = (uint8_t*)png__convert_format16((uint16_t*)data, p.s->img_out_n, req_comp, _width, _height);
                 p.s->img_out_n = req_comp;
                 if (data == NULL)
                     return false;
@@ -1352,7 +1287,7 @@ namespace Simd
                 if (!_stream.ReadBe32u(crc32))
                     return false;
             }
-            return true;
+            return _idats.size() != 0;
         }
 
         bool ImagePngLoader::CheckHeader()
@@ -1477,21 +1412,13 @@ namespace Simd
             return true;
         }
 
-        uint8_t* ImagePngLoader::MergedData(uint32_t& size)
+        InputMemoryStream ImagePngLoader::MergedDataStream()
         {
-            if (_idats.empty())
-            {
-                size = 0;
-                return NULL;
-            }
-            else if (_idats.size() == 1)
-            {
-                size = _idats[0].size;
-                return (uint8_t*)_stream.Data() + _idats[0].offs;
-            }
+            if (_idats.size() == 1)
+                return InputMemoryStream((uint8_t*)_stream.Data() + _idats[0].offs, _idats[0].size);
             else
             {
-                size = 0;
+                size_t size = 0;
                 for (size_t i = 0; i < _idats.size(); ++i)
                     size += _idats[i].size;
                 _idat.Resize(size);
@@ -1500,7 +1427,7 @@ namespace Simd
                     memcpy(_idat.data + offset, _stream.Data() + _idats[i].offs, _idats[i].size);
                     offset += _idats[i].size;
                 }
-                return _idat.data;
+                return InputMemoryStream(_idat.data, _idat.size);
             }
         }
     }

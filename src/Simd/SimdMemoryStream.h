@@ -245,11 +245,18 @@ namespace Simd
         SIMD_INLINE void FillBits()
         {
             const size_t canReadByte = (sizeof(size_t) - 1) * 8;
-            while (_bitCount <= canReadByte && _pos < _size);
+            while (_bitCount <= canReadByte && _pos < _size)
             {
                 _bitBuffer |= (size_t)_data[_pos++] << _bitCount;
                 _bitCount += 8;
             }
+        }
+
+        SIMD_INLINE void ClearBits()
+        {
+            _pos -= _bitCount / 8;
+            _bitBuffer = 0;
+            _bitCount = 0;
         }
 
         SIMD_INLINE bool ReadBits(size_t & bits, size_t count)
@@ -262,6 +269,13 @@ namespace Simd
             _bitBuffer >>= count;
             _bitCount -= count;
             return true;
+        }
+
+        SIMD_INLINE size_t ReadBits(size_t count)
+        {
+            size_t bits = 0;
+            ReadBits(bits, count);
+            return bits;
         }
     };
 
