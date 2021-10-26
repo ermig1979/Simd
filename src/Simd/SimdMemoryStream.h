@@ -245,7 +245,7 @@ namespace Simd
 
         SIMD_INLINE void FillBits()
         {
-            const size_t canReadByte = (sizeof(size_t) - 1) * 8;
+            static const size_t canReadByte = (sizeof(_bitBuffer) - 1) * 8;
             while (_bitCount <= canReadByte && _pos < _size)
             {
                 _bitBuffer |= (size_t)_data[_pos++] << _bitCount;
@@ -274,8 +274,11 @@ namespace Simd
 
         SIMD_INLINE size_t ReadBits(size_t count)
         {
-            size_t bits = 0;
-            ReadBits(bits, count);
+            if (_bitCount < count)
+                FillBits();
+            size_t bits = _bitBuffer & ((size_t(1) << count) - 1);
+            _bitBuffer >>= count;
+            _bitCount -= count;
             return bits;
         }
     };
@@ -334,6 +337,11 @@ namespace Simd
             return _size;
         }
 
+        SIMD_INLINE size_t Capacity() const
+        {
+            return _capacity;
+        }
+
         SIMD_INLINE uint8_t* Data()
         {
             return _data;
@@ -375,20 +383,16 @@ namespace Simd
 
         SIMD_INLINE bool WriteSelf(ptrdiff_t offset, size_t size)
         {
-            //SIMD_PERF_FUNC();
-
             if (offset < 0)
                 return false;
             Reserve(_pos + size);
-            if (offset + size > _pos)// || size < 32)
+            if (offset + size > _pos)
             {
-                //SIMD_PERF_BEG("loop");
                 for (size_t i = 0; i < size; ++i)
                     _data[_pos++] = _data[offset++];
             }
             else
             {
-                //SIMD_PERF_BEG("memcpy");
                 memcpy(_data + _pos, _data + offset, size);
                 _pos += size;
             }

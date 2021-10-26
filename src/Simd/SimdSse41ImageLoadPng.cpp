@@ -582,6 +582,7 @@ namespace Simd
 
         static int png__parse_huffman_block(png__zbuf* a)
         {
+            SIMD_PERF_FUNC();
             char* zout = a->zout;
             for (;;) {
                 int z = png__zhuffman_decode(a, &a->z_length);

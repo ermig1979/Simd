@@ -230,15 +230,13 @@ namespace Simd
             return good;
         }
 
-        // fast-way is faster to check than jpeg huffman, but slow way is slower
-#define PNG__ZFAST_BITS  9 // accelerate all cases in default tables
-#define PNG__ZFAST_MASK  ((1 << PNG__ZFAST_BITS) - 1)
+        const size_t ZFAST_BITS = 9;
+        const size_t ZFAST_SIZE = 1 << ZFAST_BITS;
+        const size_t ZFAST_MASK = ZFAST_SIZE - 1;
 
-// zlib-style huffman encoding
-// (jpegs packs from left, zlib from right, so can't share code)
         typedef struct
         {
-            uint16_t fast[1 << PNG__ZFAST_BITS];
+            uint16_t fast[ZFAST_SIZE];
             uint16_t firstcode[16];
             int maxcode[17];
             uint16_t firstsymbol[16];
@@ -246,7 +244,7 @@ namespace Simd
             uint16_t value[288];
         } png__zhuffman;
 
-        SIMD_INLINE static int png__bitreverse16(int n)
+        SIMD_INLINE static int BitRev16(int n)
         {
             n = ((n & 0xAAAA) >> 1) | ((n & 0x5555) << 1);
             n = ((n & 0xCCCC) >> 2) | ((n & 0x3333) << 2);
@@ -282,16 +280,19 @@ namespace Simd
                 k += sizes[i];
             }
             z->maxcode[16] = 0x10000; // sentinel
-            for (i = 0; i < num; ++i) {
+            for (i = 0; i < num; ++i) 
+            {
                 int s = sizelist[i];
-                if (s) {
+                if (s) 
+                {
                     int c = next_code[s] - z->firstcode[s] + z->firstsymbol[s];
                     uint16_t fastv = (uint16_t)((s << 9) | i);
                     z->size[c] = (uint8_t)s;
                     z->value[c] = (uint16_t)i;
-                    if (s <= PNG__ZFAST_BITS) {
+                    if (s <= (int)ZFAST_BITS) {
                         int j = ZlibBitRev(next_code[s], s);
-                        while (j < (1 << PNG__ZFAST_BITS)) {
+                        while (j < (1 << ZFAST_BITS)) 
+                        {
                             z->fast[j] = fastv;
                             j += (1 << s);
                         }
@@ -315,45 +316,38 @@ namespace Simd
             png__zhuffman z_length, z_distance;
         } png__zbuf;
 
-        static int png__zhuffman_decode_slowpath(png__zbuf* a, png__zhuffman* z)
+        SIMD_INLINE int ZhuffmanDecode(InputMemoryStream& is, png__zhuffman* z)
         {
-            int b, s, k;
-            // not resolved by fast table, so compute it the slow way
-            // use jpeg approach, which requires MSbits at top
-            k = png__bitreverse16(a->input->BitBuffer());
-            for (s = PNG__ZFAST_BITS + 1; ; ++s)
-                if (k < z->maxcode[s])
-                    break;
-            if (s >= 16) return -1; // invalid code!
-            // code size is s, so:
-            b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
-            if (b >= sizeof(z->size)) return -1; // some data was corrupt somewhere!
-            if (z->size[b] != s) return -1;  // was originally an assert, but report failure instead.
-            a->input->BitBuffer() >>= s;
-            a->input->BitCount() -= s;
-            return z->value[b];
-        }
-
-        SIMD_INLINE static int png__zhuffman_decode(png__zbuf* a, png__zhuffman* z)
-        {
+            //SIMD_PERF_FUNC();
             int b, s;
-            if (a->input->BitCount() < 16) 
+            if (is.BitCount() < 16)
             {
-                if (a->input->Eof())
-                {
-                    return -1;   /* report error for unexpected end of data. */
-                }
-                a->input->FillBits();
+                if (is.Eof())
+                    return -1;   
+                is.FillBits();
             }
-            b = z->fast[a->input->BitBuffer() & PNG__ZFAST_MASK];
-            if (b) 
+            b = z->fast[is.BitBuffer() & ZFAST_MASK];
+            if (b)
             {
                 s = b >> 9;
-                a->input->BitBuffer() >>= s;
-                a->input->BitCount() -= s;
+                is.BitBuffer() >>= s;
+                is.BitCount() -= s;
                 return b & 511;
             }
-            return png__zhuffman_decode_slowpath(a, z);
+            else
+            {
+                int k;
+                k = BitRev16(is.BitBuffer());
+                for (s = ZFAST_BITS + 1; k >= z->maxcode[s]; ++s);
+                if (s >= 16) 
+                    return -1;
+                b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
+                if (b >= sizeof(z->size) || z->size[b] != s) 
+                    return -1; 
+                is.BitBuffer() >>= s;
+                is.BitCount() -= s;
+                return z->value[b];
+            }
         }
 
         static const int png__zlength_base[31] = {
@@ -370,97 +364,134 @@ namespace Simd
         static const int png__zdist_extra[32] =
         { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
 
-        static int png__parse_huffman_block(png__zbuf* a)
+        static int ParseHuffmanBlock(png__zbuf* a)
         {
             SIMD_PERF_FUNC();
-            for (;;) 
+            InputMemoryStream& is = *a->input;
+            OutputMemoryStream& os = *a->output;
+            uint8_t* beg = os.Data(), * dst = os.Current(), * end = beg + os.Capacity();
+            for (;;)
             {
-                int z = png__zhuffman_decode(a, &a->z_length);
-                if (z < 256) 
+                ptrdiff_t z = ZhuffmanDecode(is, &a->z_length);
+                if (z < 256)
                 {
-                    if (z < 0) 
-                        return PngError("bad huffman code", "Corrupt PNG"); // error in huffman codes
-                    a->output->Write8u(z);
+                    if (z < 0)
+                        return PngError("bad huffman code", "Corrupt PNG");
+                    if (dst >= end)
+                    {
+                        os.Reserve(end - beg + 1);
+                        beg = os.Data();
+                        dst = os.Current();
+                        end = beg + os.Capacity();
+                    }
+                    *dst++ = (uint8_t)z;
                 }
-                else 
+                else
                 {
                     uint8_t* p;
-                    int len, dist;
-                    if (z == 256) 
+                    ptrdiff_t len, dist;
+                    if (z == 256)
+                    {
+                        os.Seek(dst - beg);
                         return 1;
+                    }
                     z -= 257;
                     len = png__zlength_base[z];
                     if (png__zlength_extra[z])
-                        len += a->input->ReadBits(png__zlength_extra[z]);
-                    z = png__zhuffman_decode(a, &a->z_distance);
-                    if (z < 0) 
+                        len += is.ReadBits(png__zlength_extra[z]);
+                    z = ZhuffmanDecode(is, &a->z_distance);
+                    if (z < 0)
                         return PngError("bad huffman code", "Corrupt PNG");
                     dist = png__zdist_base[z];
                     if (png__zdist_extra[z])
-                        dist += a->input->ReadBits(png__zdist_extra[z]);
-                    if (a->output->Size() < dist)
+                        dist += is.ReadBits(png__zdist_extra[z]);
+                    if (dst - beg < dist)
                         return PngError("bad dist", "Corrupt PNG");
+                    if (dst + len > end)
+                    {
+                        os.Reserve(end - beg + 1);
+                        beg = os.Data();
+                        dst = os.Current();
+                        end = beg + os.Capacity();
+                    }
+                    uint8_t* src = dst - dist;
                     if (dist == 1)
-                        a->output->Write8u(a->output->Current()[-dist], len);
+                    {
+                        memset(dst, *src, len);
+                        dst += len;
+                    }
+                    else if (dist < len || len < 16)
+                    {
+                        for (; len; len--)
+                            *dst++ = *src++;
+                    }
                     else
-                        a->output->WriteSelf(a->output->Size() - dist, len);
+                    {
+                        memcpy(dst, src, len);
+                        dst += len;
+                    }
                 }
             }
         }
 
         static int png__compute_huffman_codes(png__zbuf* a)
         {
+            InputMemoryStream& is = *a->input;
+
             static const uint8_t length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
             png__zhuffman z_codelength;
             uint8_t lencodes[286 + 32 + 137];//padding for maximum single op
             uint8_t codelength_sizes[19];
             int i, n;
 
-            int hlit = a->input->ReadBits(5) + 257;
-            int hdist = a->input->ReadBits(5) + 1;
-            int hclen = a->input->ReadBits(4) + 4;
+            int hlit = is.ReadBits(5) + 257;
+            int hdist = is.ReadBits(5) + 1;
+            int hclen = is.ReadBits(4) + 4;
             int ntot = hlit + hdist;
 
             memset(codelength_sizes, 0, sizeof(codelength_sizes));
             for (i = 0; i < hclen; ++i) 
             {
-                int s = a->input->ReadBits(3);
+                int s = is.ReadBits(3);
                 codelength_sizes[length_dezigzag[i]] = (uint8_t)s;
             }
             if (!png__zbuild_huffman(&z_codelength, codelength_sizes, 19)) 
                 return 0;
-
             n = 0;
             while (n < ntot) 
             {
-                int c = png__zhuffman_decode(a, &z_codelength);
-                if (c < 0 || c >= 19) return PngError("bad codelengths", "Corrupt PNG");
+                int c = ZhuffmanDecode(is, &z_codelength);
+                if (c < 0 || c >= 19) 
+                    return PngError("bad codelengths", "Corrupt PNG");
                 if (c < 16)
                     lencodes[n++] = (uint8_t)c;
-                else {
+                else 
+                {
                     uint8_t fill = 0;
-                    if (c == 16) {
-                        c = a->input->ReadBits(2) + 3;
+                    if (c == 16) 
+                    {
+                        c = is.ReadBits(2) + 3;
                         if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
                         fill = lencodes[n - 1];
                     }
-                    else if (c == 17) {
-                        c = a->input->ReadBits(3) + 3;
-                    }
-                    else if (c == 18) {
-                        c = a->input->ReadBits(7) + 11;
-                    }
-                    else {
+                    else if (c == 17)
+                        c = is.ReadBits(3) + 3;
+                    else if (c == 18)
+                        c = is.ReadBits(7) + 11;
+                    else
                         return PngError("bad codelengths", "Corrupt PNG");
-                    }
-                    if (ntot - n < c) return PngError("bad codelengths", "Corrupt PNG");
+                    if (ntot - n < c) 
+                        return PngError("bad codelengths", "Corrupt PNG");
                     memset(lencodes + n, fill, c);
                     n += c;
                 }
             }
-            if (n != ntot) return PngError("bad codelengths", "Corrupt PNG");
-            if (!png__zbuild_huffman(&a->z_length, lencodes, hlit)) return 0;
-            if (!png__zbuild_huffman(&a->z_distance, lencodes + hlit, hdist)) return 0;
+            if (n != ntot) 
+                return PngError("bad codelengths", "Corrupt PNG");
+            if (!png__zbuild_huffman(&a->z_length, lencodes, hlit)) 
+                return 0;
+            if (!png__zbuild_huffman(&a->z_distance, lencodes + hlit, hdist)) 
+                return 0;
             return 1;
         }
 
@@ -550,7 +581,7 @@ namespace Simd
                         if (!png__compute_huffman_codes(a)) 
                             return 0;
                     }
-                    if (!png__parse_huffman_block(a)) 
+                    if (!ParseHuffmanBlock(a))
                         return 0;
                 }
             } while (!final);
@@ -559,7 +590,6 @@ namespace Simd
 
         static char* PngZlibDecode(InputMemoryStream & input, OutputMemoryStream & output, int parseHeader)
         {
-            //SIMD_PERF_FUNC();
             png__zbuf a;
             a.input = &input;
             a.output = &output;
@@ -1045,6 +1075,8 @@ namespace Simd
 
         bool ImagePngLoader::FromStream()
         {
+            SIMD_PERF_FUNC();
+
             const int req_comp = 4;
             PngContext context;
             png__png p;

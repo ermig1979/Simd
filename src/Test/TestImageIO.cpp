@@ -421,8 +421,8 @@ namespace Test
     {
         bool result = true;
 
-        View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 0; format < 5; format++)
+        std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
+        for (size_t format = 0; format < formats.size(); format++)
         {
             for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
             {
@@ -508,8 +508,8 @@ namespace Test
     {
         bool result = true;
 
-        View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 0; format < 5; format++)
+        std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
+        for (size_t format = 0; format < formats.size(); format++)
             result = result && ImageLoadFromMemorySpecialTest(name, formats[format], f1, f2);
 
         return result;
