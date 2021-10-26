@@ -25,6 +25,7 @@
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -339,7 +340,7 @@ namespace Simd
                 _filt[row * (_size + 1)] = (uint8_t)bestFilter;
                 memcpy(_filt.data + row * (_size + 1) + 1, _line.data + _size * bestFilter, _size);
             }
-            OutputMemoryStream zlib;
+            OutputMemoryStream zlib(Min(_param.width * _param.height, Base::AlgCacheL1()));
             _compress(_filt.data, (int)_filt.size, COMPRESSION, zlib);
             WriteToStream(zlib.Data(), zlib.Size());
             return true;

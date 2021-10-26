@@ -34,13 +34,6 @@ namespace Simd
 #define PNG_MALLOC(sz)           malloc(sz)
 #define PNG_REALLOC(p,newsz)     realloc(p,newsz)
 #define PNG_FREE(p)              free(p)
-#define PNG_REALLOC_SIZED(p,oldsz,newsz) PNG_REALLOC(p,newsz)
-
-#ifdef _MSC_VER
-#define PNG_NOTUSED(v)  (void)(v)
-#else
-#define PNG_NOTUSED(v)  (void)sizeof(v)
-#endif
 
 #define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
 
@@ -230,384 +223,328 @@ namespace Simd
             return good;
         }
 
-        const size_t ZFAST_BITS = 9;
-        const size_t ZFAST_SIZE = 1 << ZFAST_BITS;
-        const size_t ZFAST_MASK = ZFAST_SIZE - 1;
-
-        typedef struct
+        namespace Zlib
         {
-            uint16_t fast[ZFAST_SIZE];
-            uint16_t firstcode[16];
-            int maxcode[17];
-            uint16_t firstsymbol[16];
-            uint8_t  size[288];
-            uint16_t value[288];
-        } png__zhuffman;
+            const size_t ZFAST_BITS = 9;
+            const size_t ZFAST_SIZE = 1 << ZFAST_BITS;
+            const size_t ZFAST_MASK = ZFAST_SIZE - 1;
 
-        SIMD_INLINE static int BitRev16(int n)
-        {
-            n = ((n & 0xAAAA) >> 1) | ((n & 0x5555) << 1);
-            n = ((n & 0xCCCC) >> 2) | ((n & 0x3333) << 2);
-            n = ((n & 0xF0F0) >> 4) | ((n & 0x0F0F) << 4);
-            n = ((n & 0xFF00) >> 8) | ((n & 0x00FF) << 8);
-            return n;
-        }
-
-        static int png__zbuild_huffman(png__zhuffman* z, const uint8_t* sizelist, int num)
-        {
-            int i, k = 0;
-            int code, next_code[16], sizes[17];
-
-            // DEFLATE spec for generating codes
-            memset(sizes, 0, sizeof(sizes));
-            memset(z->fast, 0, sizeof(z->fast));
-            for (i = 0; i < num; ++i)
-                ++sizes[sizelist[i]];
-            sizes[0] = 0;
-            for (i = 1; i < 16; ++i)
-                if (sizes[i] > (1 << i))
-                    return PngError("bad sizes", "Corrupt PNG");
-            code = 0;
-            for (i = 1; i < 16; ++i) {
-                next_code[i] = code;
-                z->firstcode[i] = (uint16_t)code;
-                z->firstsymbol[i] = (uint16_t)k;
-                code = (code + sizes[i]);
-                if (sizes[i])
-                    if (code - 1 >= (1 << i)) return PngError("bad codelengths", "Corrupt PNG");
-                z->maxcode[i] = code << (16 - i); // preshift for inner loop
-                code <<= 1;
-                k += sizes[i];
-            }
-            z->maxcode[16] = 0x10000; // sentinel
-            for (i = 0; i < num; ++i) 
+            struct Zhuffman
             {
-                int s = sizelist[i];
-                if (s) 
+                uint16_t fast[ZFAST_SIZE];
+                uint16_t firstCode[16];
+                int maxCode[17];
+                uint16_t firstSymbol[16];
+                uint8_t  size[288];
+                uint16_t value[288];
+
+                bool Build(const uint8_t* sizelist, int num)
                 {
-                    int c = next_code[s] - z->firstcode[s] + z->firstsymbol[s];
-                    uint16_t fastv = (uint16_t)((s << 9) | i);
-                    z->size[c] = (uint8_t)s;
-                    z->value[c] = (uint16_t)i;
-                    if (s <= (int)ZFAST_BITS) {
-                        int j = ZlibBitRev(next_code[s], s);
-                        while (j < (1 << ZFAST_BITS)) 
+                    int i, k = 0;
+                    int code, nextCode[16], sizes[17];
+
+                    memset(sizes, 0, sizeof(sizes));
+                    memset(fast, 0, sizeof(fast));
+                    for (i = 0; i < num; ++i)
+                        ++sizes[sizelist[i]];
+                    sizes[0] = 0;
+                    for (i = 1; i < 16; ++i)
+                        if (sizes[i] > (1 << i))
+                            return PngError("bad sizes", "Corrupt PNG");
+                    code = 0;
+                    for (i = 1; i < 16; ++i)
+                    {
+                        nextCode[i] = code;
+                        firstCode[i] = (uint16_t)code;
+                        firstSymbol[i] = (uint16_t)k;
+                        code = (code + sizes[i]);
+                        if (sizes[i] && code - 1 >= (1 << i))
+                            return PngError("bad codelengths", "Corrupt PNG");
+                        maxCode[i] = code << (16 - i); // preshift for inner loop
+                        code <<= 1;
+                        k += sizes[i];
+                    }
+                    maxCode[16] = 0x10000; // sentinel
+                    for (i = 0; i < num; ++i)
+                    {
+                        int s = sizelist[i];
+                        if (s)
                         {
-                            z->fast[j] = fastv;
-                            j += (1 << s);
+                            int c = nextCode[s] - firstCode[s] + firstSymbol[s];
+                            uint16_t fastv = (uint16_t)((s << 9) | i);
+                            size[c] = (uint8_t)s;
+                            value[c] = (uint16_t)i;
+                            if (s <= (int)ZFAST_BITS)
+                            {
+                                int j = ZlibBitRev(nextCode[s], s);
+                                while (j < (1 << ZFAST_BITS))
+                                {
+                                    fast[j] = fastv;
+                                    j += (1 << s);
+                                }
+                            }
+                            ++nextCode[s];
                         }
                     }
-                    ++next_code[s];
+                    return 1;
                 }
-            }
-            return 1;
-        }
+            };
 
-        // zlib-from-memory implementation for PNG reading
-        //    because PNG allows splitting the zlib stream arbitrarily,
-        //    and it's annoying structurally to have PNG call ZLIB call PNG,
-        //    we require PNG read all the IDATs and combine them into a single
-        //    memory buffer
-
-        typedef struct
-        {
-            InputMemoryStream* input;
-            OutputMemoryStream* output;
-            png__zhuffman z_length, z_distance;
-        } png__zbuf;
-
-        SIMD_INLINE int ZhuffmanDecode(InputMemoryStream& is, png__zhuffman* z)
-        {
-            //SIMD_PERF_FUNC();
-            int b, s;
-            if (is.BitCount() < 16)
+            SIMD_INLINE static int BitRev16(int n)
             {
-                if (is.Eof())
-                    return -1;   
-                is.FillBits();
+                n = ((n & 0xAAAA) >> 1) | ((n & 0x5555) << 1);
+                n = ((n & 0xCCCC) >> 2) | ((n & 0x3333) << 2);
+                n = ((n & 0xF0F0) >> 4) | ((n & 0x0F0F) << 4);
+                n = ((n & 0xFF00) >> 8) | ((n & 0x00FF) << 8);
+                return n;
             }
-            b = z->fast[is.BitBuffer() & ZFAST_MASK];
-            if (b)
+
+            static int ZhuffmanDecode(InputMemoryStream& is, const Zhuffman& z)
             {
-                s = b >> 9;
-                is.BitBuffer() >>= s;
-                is.BitCount() -= s;
-                return b & 511;
-            }
-            else
-            {
-                int k;
-                k = BitRev16(is.BitBuffer());
-                for (s = ZFAST_BITS + 1; k >= z->maxcode[s]; ++s);
-                if (s >= 16) 
-                    return -1;
-                b = (k >> (16 - s)) - z->firstcode[s] + z->firstsymbol[s];
-                if (b >= sizeof(z->size) || z->size[b] != s) 
-                    return -1; 
-                is.BitBuffer() >>= s;
-                is.BitCount() -= s;
-                return z->value[b];
-            }
-        }
-
-        static const int png__zlength_base[31] = {
-           3,4,5,6,7,8,9,10,11,13,
-           15,17,19,23,27,31,35,43,51,59,
-           67,83,99,115,131,163,195,227,258,0,0 };
-
-        static const int png__zlength_extra[31] =
-        { 0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0 };
-
-        static const int png__zdist_base[32] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193,
-        257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0 };
-
-        static const int png__zdist_extra[32] =
-        { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
-
-        static int ParseHuffmanBlock(png__zbuf* a)
-        {
-            SIMD_PERF_FUNC();
-            InputMemoryStream& is = *a->input;
-            OutputMemoryStream& os = *a->output;
-            uint8_t* beg = os.Data(), * dst = os.Current(), * end = beg + os.Capacity();
-            for (;;)
-            {
-                ptrdiff_t z = ZhuffmanDecode(is, &a->z_length);
-                if (z < 256)
+                //SIMD_PERF_FUNC();
+                int b, s;
+                if (is.BitCount() < 16)
                 {
-                    if (z < 0)
-                        return PngError("bad huffman code", "Corrupt PNG");
-                    if (dst >= end)
-                    {
-                        os.Reserve(end - beg + 1);
-                        beg = os.Data();
-                        dst = os.Current();
-                        end = beg + os.Capacity();
-                    }
-                    *dst++ = (uint8_t)z;
+                    if (is.Eof())
+                        return -1;
+                    is.FillBits();
+                }
+                b = z.fast[is.BitBuffer() & ZFAST_MASK];
+                if (b)
+                {
+                    s = b >> 9;
+                    is.BitBuffer() >>= s;
+                    is.BitCount() -= s;
+                    return b & 511;
                 }
                 else
                 {
-                    uint8_t* p;
-                    ptrdiff_t len, dist;
-                    if (z == 256)
+                    int k;
+                    k = BitRev16(is.BitBuffer());
+                    for (s = ZFAST_BITS + 1; k >= z.maxCode[s]; ++s);
+                    if (s >= 16)
+                        return -1;
+                    b = (k >> (16 - s)) - z.firstCode[s] + z.firstSymbol[s];
+                    if (b >= sizeof(z.size) || z.size[b] != s)
+                        return -1;
+                    is.BitBuffer() >>= s;
+                    is.BitCount() -= s;
+                    return z.value[b];
+                }
+            }
+
+            static int ParseHuffmanBlock(InputMemoryStream& is, const Zhuffman& zLength, const Zhuffman& zDistance, OutputMemoryStream& os)
+            {
+                static const int zlengthBase[31] = { 3,4,5,6,7,8,9,10,11,13, 15,17,19,23,27,31,35,43,51,59, 67,83,99,115,131,163,195,227,258,0,0 };
+                static const int zlengthExtra[31] = { 0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,0,0 };
+                static const int zdistBase[32] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193, 257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0 };
+                static const int zdistExtra[32] = { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
+
+                uint8_t* beg = os.Data(), * dst = os.Current(), * end = beg + os.Capacity();
+                for (;;)
+                {
+                    ptrdiff_t z = ZhuffmanDecode(is, zLength);
+                    if (z < 256)
                     {
-                        os.Seek(dst - beg);
-                        return 1;
-                    }
-                    z -= 257;
-                    len = png__zlength_base[z];
-                    if (png__zlength_extra[z])
-                        len += is.ReadBits(png__zlength_extra[z]);
-                    z = ZhuffmanDecode(is, &a->z_distance);
-                    if (z < 0)
-                        return PngError("bad huffman code", "Corrupt PNG");
-                    dist = png__zdist_base[z];
-                    if (png__zdist_extra[z])
-                        dist += is.ReadBits(png__zdist_extra[z]);
-                    if (dst - beg < dist)
-                        return PngError("bad dist", "Corrupt PNG");
-                    if (dst + len > end)
-                    {
-                        os.Reserve(end - beg + 1);
-                        beg = os.Data();
-                        dst = os.Current();
-                        end = beg + os.Capacity();
-                    }
-                    uint8_t* src = dst - dist;
-                    if (dist == 1)
-                    {
-                        memset(dst, *src, len);
-                        dst += len;
-                    }
-                    else if (dist < len || len < 16)
-                    {
-                        for (; len; len--)
-                            *dst++ = *src++;
+                        if (z < 0)
+                            return PngError("bad huffman code", "Corrupt PNG");
+                        if (dst >= end)
+                        {
+                            os.Reserve(end - beg + 1);
+                            beg = os.Data();
+                            dst = os.Current();
+                            end = beg + os.Capacity();
+                        }
+                        *dst++ = (uint8_t)z;
                     }
                     else
                     {
-                        memcpy(dst, src, len);
-                        dst += len;
+                        uint8_t* p;
+                        ptrdiff_t len, dist;
+                        if (z == 256)
+                        {
+                            os.Seek(dst - beg);
+                            return 1;
+                        }
+                        z -= 257;
+                        len = zlengthBase[z];
+                        if (zlengthExtra[z])
+                            len += is.ReadBits(zlengthExtra[z]);
+                        z = ZhuffmanDecode(is, zDistance);
+                        if (z < 0)
+                            return PngError("bad huffman code", "Corrupt PNG");
+                        dist = zdistBase[z];
+                        if (zdistExtra[z])
+                            dist += is.ReadBits(zdistExtra[z]);
+                        if (dst - beg < dist)
+                            return PngError("bad dist", "Corrupt PNG");
+                        if (dst + len > end)
+                        {
+                            os.Reserve(end - beg + 1);
+                            beg = os.Data();
+                            dst = os.Current();
+                            end = beg + os.Capacity();
+                        }
+                        uint8_t* src = dst - dist;
+                        if (dist == 1)
+                        {
+                            memset(dst, *src, len);
+                            dst += len;
+                        }
+                        else if (dist < len || len < 16)
+                        {
+                            for (; len; len--)
+                                *dst++ = *src++;
+                        }
+                        else
+                        {
+                            memcpy(dst, src, len);
+                            dst += len;
+                        }
                     }
                 }
             }
-        }
 
-        static int png__compute_huffman_codes(png__zbuf* a)
-        {
-            InputMemoryStream& is = *a->input;
-
-            static const uint8_t length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
-            png__zhuffman z_codelength;
-            uint8_t lencodes[286 + 32 + 137];//padding for maximum single op
-            uint8_t codelength_sizes[19];
-            int i, n;
-
-            int hlit = is.ReadBits(5) + 257;
-            int hdist = is.ReadBits(5) + 1;
-            int hclen = is.ReadBits(4) + 4;
-            int ntot = hlit + hdist;
-
-            memset(codelength_sizes, 0, sizeof(codelength_sizes));
-            for (i = 0; i < hclen; ++i) 
+            static int ComputeHuffmanCodes(InputMemoryStream& is, Zhuffman& zLength, Zhuffman& zDistance)
             {
-                int s = is.ReadBits(3);
-                codelength_sizes[length_dezigzag[i]] = (uint8_t)s;
-            }
-            if (!png__zbuild_huffman(&z_codelength, codelength_sizes, 19)) 
-                return 0;
-            n = 0;
-            while (n < ntot) 
-            {
-                int c = ZhuffmanDecode(is, &z_codelength);
-                if (c < 0 || c >= 19) 
+                static const uint8_t length_dezigzag[19] = { 16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15 };
+                Zhuffman z_codelength;
+                uint8_t lencodes[286 + 32 + 137];
+                uint8_t codelength_sizes[19];
+                int i, n;
+
+                int hlit = is.ReadBits(5) + 257;
+                int hdist = is.ReadBits(5) + 1;
+                int hclen = is.ReadBits(4) + 4;
+                int ntot = hlit + hdist;
+
+                memset(codelength_sizes, 0, sizeof(codelength_sizes));
+                for (i = 0; i < hclen; ++i)
+                {
+                    int s = is.ReadBits(3);
+                    codelength_sizes[length_dezigzag[i]] = (uint8_t)s;
+                }
+                if (!z_codelength.Build(codelength_sizes, 19))
+                    return 0;
+                n = 0;
+                while (n < ntot)
+                {
+                    int c = ZhuffmanDecode(is, z_codelength);
+                    if (c < 0 || c >= 19)
+                        return PngError("bad codelengths", "Corrupt PNG");
+                    if (c < 16)
+                        lencodes[n++] = (uint8_t)c;
+                    else
+                    {
+                        uint8_t fill = 0;
+                        if (c == 16)
+                        {
+                            c = is.ReadBits(2) + 3;
+                            if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
+                            fill = lencodes[n - 1];
+                        }
+                        else if (c == 17)
+                            c = is.ReadBits(3) + 3;
+                        else if (c == 18)
+                            c = is.ReadBits(7) + 11;
+                        else
+                            return PngError("bad codelengths", "Corrupt PNG");
+                        if (ntot - n < c)
+                            return PngError("bad codelengths", "Corrupt PNG");
+                        memset(lencodes + n, fill, c);
+                        n += c;
+                    }
+                }
+                if (n != ntot)
                     return PngError("bad codelengths", "Corrupt PNG");
-                if (c < 16)
-                    lencodes[n++] = (uint8_t)c;
-                else 
-                {
-                    uint8_t fill = 0;
-                    if (c == 16) 
-                    {
-                        c = is.ReadBits(2) + 3;
-                        if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
-                        fill = lencodes[n - 1];
-                    }
-                    else if (c == 17)
-                        c = is.ReadBits(3) + 3;
-                    else if (c == 18)
-                        c = is.ReadBits(7) + 11;
-                    else
-                        return PngError("bad codelengths", "Corrupt PNG");
-                    if (ntot - n < c) 
-                        return PngError("bad codelengths", "Corrupt PNG");
-                    memset(lencodes + n, fill, c);
-                    n += c;
-                }
-            }
-            if (n != ntot) 
-                return PngError("bad codelengths", "Corrupt PNG");
-            if (!png__zbuild_huffman(&a->z_length, lencodes, hlit)) 
-                return 0;
-            if (!png__zbuild_huffman(&a->z_distance, lencodes + hlit, hdist)) 
-                return 0;
-            return 1;
-        }
-
-        static int png__parse_uncompressed_block(png__zbuf* a)
-        {
-            a->input->ClearBits();
-            uint16_t len, nlen;
-            if(!a->input->Read16u(len) || !a->input->Read16u(nlen) || nlen != (len ^ 0xffff))
-                return PngError("zlib corrupt", "Corrupt PNG");
-            if (!a->output->Write(*a->input, len))
-                return PngError("read past buffer", "Corrupt PNG");
-            return 1;
-        }
-
-        static int png__parse_zlib_header(png__zbuf* a)
-        {
-            uint8_t cmf, flg;
-            if(!(a->input->Read8u(cmf) && a->input->Read8u(flg)))
-                return PngError("bad zlib header", "Corrupt PNG");
-            if ((int(cmf) * 256 + flg) % 31 != 0) return PngError("bad zlib header", "Corrupt PNG"); // zlib spec
-            if (flg & 32) return PngError("no preset dict", "Corrupt PNG"); // preset dictionary not allowed in png
-            if ((cmf & 15) != 8) return PngError("bad compression", "Corrupt PNG"); // DEFLATE required for png
-            // window = 1 << (8 + cinfo)... but who cares, we fully buffer output
-            return 1;
-        }
-
-        static const uint8_t png__zdefault_length[288] =
-        {
-           8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-           8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-           8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-           8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
-           8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-           9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-           9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-           9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
-           7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7, 7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8
-        };
-        static const uint8_t png__zdefault_distance[32] =
-        {
-           5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
-        };
-        /*
-        Init algorithm:
-        {
-           int i;   // use <= to match clearly with spec
-           for (i=0; i <= 143; ++i)     png__zdefault_length[i]   = 8;
-           for (   ; i <= 255; ++i)     png__zdefault_length[i]   = 9;
-           for (   ; i <= 279; ++i)     png__zdefault_length[i]   = 7;
-           for (   ; i <= 287; ++i)     png__zdefault_length[i]   = 8;
-
-           for (i=0; i <=  31; ++i)     png__zdefault_distance[i] = 5;
-        }
-        */
-
-        static int png__parse_zlib(png__zbuf* a, int parse_header)
-        {
-            int final, type;
-            if (parse_header)
-            {
-                if (!png__parse_zlib_header(a))
+                if (!zLength.Build(lencodes, hlit))
                     return 0;
-            }
-            do 
-            {
-                final = a->input->ReadBits(1);
-                type = a->input->ReadBits(2);
-                if (type == 0) 
-                {
-                    if (!png__parse_uncompressed_block(a)) 
-                        return 0;
-                }
-                else if (type == 3)
+                if (!zDistance.Build(lencodes + hlit, hdist))
                     return 0;
-                else 
+                return 1;
+            }
+
+            static int ParseUncompressedBlock(InputMemoryStream& is, OutputMemoryStream& os)
+            {
+                is.ClearBits();
+                uint16_t len, nlen;
+                if (!is.Read16u(len) || !is.Read16u(nlen) || nlen != (len ^ 0xffff))
+                    return PngError("zlib corrupt", "Corrupt PNG");
+                if (!os.Write(is, len))
+                    return PngError("read past buffer", "Corrupt PNG");
+                return 1;
+            }
+
+            static int ParseHeader(InputMemoryStream& is)
+            {
+                uint8_t cmf, flg;
+                if (!(is.Read8u(cmf) && is.Read8u(flg)))
+                    return PngError("bad zlib header", "Corrupt PNG");
+                if ((int(cmf) * 256 + flg) % 31 != 0)
+                    return PngError("bad zlib header", "Corrupt PNG");
+                if (flg & 32)
+                    return PngError("no preset dict", "Corrupt PNG");
+                if ((cmf & 15) != 8)
+                    return PngError("bad compression", "Corrupt PNG");
+                return 1;
+            }
+
+            bool Decode(InputMemoryStream& is, OutputMemoryStream& os, int parseHeader)
+            {
+                static const uint8_t ZdefaultLength[288] = {
+                   8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+                   8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+                   8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+                   8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
+                   8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
+                   9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
+                   9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
+                   9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9, 9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,9,
+                   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7, 7,7,7,7,7,7,7,7,8,8,8,8,8,8,8,8
+                };
+                static const uint8_t ZdefaultDistance[32] = {
+                   5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5
+                };
+
+                Zhuffman zLength, zDistance;
+                int final, type;
+                if (parseHeader)
                 {
-                    if (type == 1) 
+                    if (!ParseHeader(is))
+                        return false;
+                }
+                do
+                {
+                    final = is.ReadBits(1);
+                    type = is.ReadBits(2);
+                    if (type == 0)
                     {
-                        // use fixed code lengths
-                        if (!png__zbuild_huffman(&a->z_length, png__zdefault_length, 288)) 
-                            return 0;
-                        if (!png__zbuild_huffman(&a->z_distance, png__zdefault_distance, 32)) 
-                            return 0;
+                        if (!ParseUncompressedBlock(is, os))
+                            return false;
                     }
+                    else if (type == 3)
+                        return false;
                     else
                     {
-                        if (!png__compute_huffman_codes(a)) 
-                            return 0;
+                        if (type == 1)
+                        {
+                            if (!zLength.Build(ZdefaultLength, 288))
+                                return false;
+                            if (!zDistance.Build(ZdefaultDistance, 32))
+                                return false;
+                        }
+                        else
+                        {
+                            if (!ComputeHuffmanCodes(is, zLength, zDistance))
+                                return false;
+                        }
+                        if (!ParseHuffmanBlock(is, zLength, zDistance, os))
+                            return false;
                     }
-                    if (!ParseHuffmanBlock(a))
-                        return 0;
-                }
-            } while (!final);
-            return 1;
+                } while (!final);
+                return true;
+            }
         }
-
-        static char* PngZlibDecode(InputMemoryStream & input, OutputMemoryStream & output, int parseHeader)
-        {
-            png__zbuf a;
-            a.input = &input;
-            a.output = &output;
-            if (png__parse_zlib(&a, parseHeader))
-                return (char*)a.output->Data();
-            else 
-                return NULL;
-        }
-
-        // public domain "baseline" PNG decoder   v0.10  Sean Barrett 2006-11-18
-        //    simple implementation
-        //      - only 8-bit samples
-        //      - no CRC checking
-        //      - allocates lots of intermediate memory
-        //        - avoids problem of streaming data between subsystems
-        //        - avoids explicit window management
-        //    performance
-        //      - uses stb_zlib, a PD zlib implementation with fast huffman decoding
 
         typedef struct
         {
@@ -1045,8 +982,6 @@ namespace Simd
             PNG_FREE(a->out);
             a->out = temp_out;
 
-            PNG_NOTUSED(len);
-
             return 1;
         }
 
@@ -1101,10 +1036,10 @@ namespace Simd
             InputMemoryStream zSrc = MergedDataStream();
             OutputMemoryStream zDst;
             zDst.Reserve(rawLen);
-            z->expanded = (uint8_t*)PngZlibDecode(zSrc, zDst, _iPhone ? 0 : 1);
-            rawLen = zDst.Size();
-            if (z->expanded == NULL) 
+            if(!Zlib::Decode(zSrc, zDst, _iPhone ? 0 : 1))
                 return false;
+            rawLen = zDst.Size();
+            z->expanded = zDst.Data();
             if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
                 s->img_out_n = s->img_n + 1;
             else

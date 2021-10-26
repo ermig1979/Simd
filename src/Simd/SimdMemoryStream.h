@@ -287,7 +287,7 @@ namespace Simd
 
     class OutputMemoryStream
     {
-        const size_t CAPACITY_MIN = 4096;
+        const size_t CAPACITY_MIN = 64;
 
         uint8_t * _data;
         size_t _pos, _size, _capacity, _bitCount;
@@ -310,9 +310,11 @@ namespace Simd
         }
 
     public:
-        SIMD_INLINE OutputMemoryStream()
+        SIMD_INLINE OutputMemoryStream(size_t capacity = 0)
         {
             Reset(false);
+            if (capacity)
+                Reserve(capacity);
         }
 
         SIMD_INLINE ~OutputMemoryStream()
