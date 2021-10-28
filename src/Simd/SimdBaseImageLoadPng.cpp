@@ -301,7 +301,6 @@ namespace Simd
 
             static int ZhuffmanDecode(InputMemoryStream& is, const Zhuffman& z)
             {
-                //SIMD_PERF_FUNC();
                 int b, s;
                 if (is.BitCount() < 16)
                 {
@@ -489,7 +488,7 @@ namespace Simd
                 return 1;
             }
 
-            bool Decode(InputMemoryStream& is, OutputMemoryStream& os, int parseHeader)
+            bool Decode(InputMemoryStream& is, OutputMemoryStream& os, bool parseHeader)
             {
                 static const uint8_t ZdefaultLength[288] = {
                    8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8, 8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,
@@ -549,7 +548,7 @@ namespace Simd
         typedef struct
         {
             PngContext* s;
-            uint8_t * expanded, * out;
+            uint8_t * out;
             uint8_t depth;
         } png__png;
 
@@ -1010,8 +1009,6 @@ namespace Simd
 
         bool ImagePngLoader::FromStream()
         {
-            SIMD_PERF_FUNC();
-
             const int req_comp = 4;
             PngContext context;
             png__png p;
@@ -1020,7 +1017,6 @@ namespace Simd
 
             PngContext* s = z->s;
 
-            z->expanded = NULL;
             z->out = NULL;
 
             if (!ParseFile())
@@ -1031,20 +1027,16 @@ namespace Simd
             z->depth = _depth;
             s->img_n = _channels;
 
-            uint32_t bytePerLine = (_width * _depth + 7) / 8;
-            uint32_t rawLen = bytePerLine * _height * _channels + _height;
             InputMemoryStream zSrc = MergedDataStream();
-            OutputMemoryStream zDst;
-            zDst.Reserve(rawLen);
-            if(!Zlib::Decode(zSrc, zDst, _iPhone ? 0 : 1))
+            OutputMemoryStream zDst(AlignHi(size_t(_width) * _depth, 8) * _height * _channels + _height);
+            if(!Zlib::Decode(zSrc, zDst, !_iPhone))
                 return false;
-            rawLen = zDst.Size();
-            z->expanded = zDst.Data();
+
             if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
                 s->img_out_n = s->img_n + 1;
             else
                 s->img_out_n = s->img_n;
-            if (!png__create_png_image(z, z->expanded, rawLen, s->img_out_n, z->depth, _color, _interlace))
+            if (!png__create_png_image(z, zDst.Data(), zDst.Size(), s->img_out_n, z->depth, _color, _interlace))
                 return 0;
             if (_hasTrans) 
             {

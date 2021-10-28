@@ -120,7 +120,7 @@ namespace Simd
             ImageSaverParam param(width, height, format, file, quality);
             if (param.Validate())
             {
-                std::unique_ptr<ImageSaver> saver(CreateImageSaver(param));
+                Holder<ImageSaver> saver(CreateImageSaver(param));
                 if (saver)
                 {
                     if (saver->ToStream(src, stride))

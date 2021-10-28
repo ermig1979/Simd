@@ -141,10 +141,63 @@ namespace Simd
 #endif
     }
 
+    //---------------------------------------------------------------------------------------------
+
     struct Deletable
     {
         virtual ~Deletable() {}
     };
+
+    //---------------------------------------------------------------------------------------------
+
+#if defined(SIMD_CPP_2011_ENABLE)
+    template<class T> using Holder = std::unique_ptr<T>;
+#else
+    template <class T> class Holder
+    {
+        T* _ptr;
+
+    public:
+        Holder(T* ptr)
+            : _ptr(ptr)
+        {
+        }
+
+        ~Holder()
+        {
+            if (_ptr)
+                delete _ptr;
+        }
+
+        T& operator * ()
+        {
+            return *_ptr;
+        }
+
+        const T& operator * () const
+        {
+            return *_ptr;
+        }
+
+        T* operator -> ()
+        {
+            return _ptr;
+        }
+
+        const T* operator -> () const
+        {
+            return _ptr;
+        }
+
+        operator bool() const 
+        {
+            return _ptr != NULL;
+        }
+    };
+#endif
+
+    //---------------------------------------------------------------------------------------------
+
 
 #ifdef SIMD_SSE2_ENABLE
     namespace Sse2

@@ -448,7 +448,7 @@ namespace Simd
         {
             if (size > _capacity)
             {
-                size_t capacity = Max(CAPACITY_MIN, Max(_capacity * 2, AlignHi(size, CAPACITY_MIN)));
+                size_t capacity = Max(CAPACITY_MIN, Max(_capacity * 2, size));
                 uint8_t* data = (uint8_t*)Allocate(capacity, SIMD_ALIGN);
                 if (_data)
                 {
