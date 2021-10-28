@@ -66,6 +66,21 @@ typedef unsigned __int64  uint64_t;
 #endif
 
 /*! @ingroup c_types
+    Describes Bayer pixel layout.
+*/
+typedef enum
+{
+    /*! A Bayer pixel layout (GRBG). */
+    SimdBayerLayoutGrbg,
+    /*! A Bayer pixel layout (GBRG). */
+    SimdBayerLayoutGbrg,
+    /*! A Bayer pixel layout (RGGB). */
+    SimdBayerLayoutRggb,
+    /*! A Bayer pixel layout (BGGR). */
+    SimdBayerLayoutBggr,
+} SimdBayerLayoutType;
+
+/*! @ingroup c_types
     Describes boolean type.
 */
 typedef enum
@@ -690,7 +705,7 @@ extern "C"
 
         \fn size_t SimdAlignment();
 
-        \short Gets alignment required for the most productive work of the Simd Library.
+        \short Gets alignment required for the most productive work of Simd Library.
 
         \return a required alignment.
     */
