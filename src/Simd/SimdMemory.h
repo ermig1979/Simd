@@ -31,6 +31,7 @@
 #if defined(SIMD_ALLOCATE_ERROR_MESSAGE)
 #include <iostream>
 #endif
+#include <memory>
 
 namespace Simd
 {

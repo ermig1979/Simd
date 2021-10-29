@@ -351,7 +351,7 @@ typedef enum
 } SimdResizeChannelType;
 
 /*! @ingroup resizing
-    Describes methods used in oreder to resize image.
+    Describes methods used in order to resize image.
 */
 typedef enum
 {
@@ -363,6 +363,8 @@ typedef enum
     SimdResizeMethodArea,
     /*! InferenceEngine::Extension::Cpu::Interp compatible method. */
     SimdResizeMethodInferenceEngineInterp,
+    /*! Nearest pixel method. */
+    SimdResizeMethodNearest,
 } SimdResizeMethodType;
 
 /*! @ingroup synet

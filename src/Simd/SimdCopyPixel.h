@@ -56,6 +56,23 @@ namespace Simd
         {
             ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
         }
+
+        template<> SIMD_INLINE void CopyPixel<6>(const uint8_t* src, uint8_t* dst)
+        {
+            ((uint32_t*)dst)[0] = ((uint32_t*)src)[0];
+            ((uint16_t*)dst)[2] = ((uint16_t*)src)[2];
+        }
+
+        template<> SIMD_INLINE void CopyPixel<8>(const uint8_t* src, uint8_t* dst)
+        {
+            ((uint64_t*)dst)[0] = ((uint64_t*)src)[0];
+        }
+
+        template<> SIMD_INLINE void CopyPixel<12>(const uint8_t* src, uint8_t* dst)
+        {
+            ((uint64_t*)dst)[0] = ((uint64_t*)src)[0];
+            ((uint32_t*)dst)[2] = ((uint32_t*)src)[2];
+        }
     }
 }
 

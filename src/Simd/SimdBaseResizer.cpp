@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
@@ -491,6 +492,67 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ResizerNearest::ResizerNearest(const ResParam& param)
+            : Resizer(param)
+        {
+            _pixelSize = _param.PixelSize();
+            _iy.Resize(_param.dstH, false, _param.align);
+            EstimateIndex(_param.srcH, _param.dstH, 1, _iy.data);
+            _ix.Resize(_param.dstW, false, _param.align);
+            EstimateIndex(_param.srcW, _param.dstW, _pixelSize, _ix.data);
+        }
+
+        void ResizerNearest::EstimateIndex(size_t srcSize, size_t dstSize, size_t pixelSize, int32_t* indices)
+        {
+            float scale = (float)srcSize / dstSize;
+            for (size_t i = 0; i < dstSize; ++i)
+            {
+                float alpha = (i + 0.5f) * scale;
+                int index = RestrictRange((int)::floor(alpha), 0, (int)srcSize - 1);
+                indices[i] = (int)(index * pixelSize);
+            }
+        }
+
+        void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t* srcRow = src + _iy[dy] * srcStride;
+                for (size_t dx = 0, offset = 0; dx < _param.dstW; dx++, offset += _pixelSize)
+                    memcpy(dst + offset, srcRow + _ix[dx], _pixelSize);
+                dst += dstStride;
+            }
+        }
+
+        template<size_t N> void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t * srcRow = src + _iy[dy] * srcStride;
+                for (size_t dx = 0, offset = 0; dx < _param.dstW; dx++, offset += N)
+                    CopyPixel<N>(srcRow + _ix[dx], dst + offset);
+                dst += dstStride;
+            }
+        }
+
+        void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            switch (_pixelSize)
+            {
+            case 1: Resize<1>(src, srcStride, dst, dstStride); break;
+            case 2: Resize<2>(src, srcStride, dst, dstStride); break;
+            case 3: Resize<3>(src, srcStride, dst, dstStride); break;
+            case 4: Resize<4>(src, srcStride, dst, dstStride); break;
+            case 6: Resize<6>(src, srcStride, dst, dstStride); break;
+            case 8: Resize<8>(src, srcStride, dst, dstStride); break;
+            case 12: Resize<12>(src, srcStride, dst, dstStride); break;
+            default:
+                Resize(src, srcStride, dst, dstStride);
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(void*));
@@ -502,6 +564,8 @@ namespace Simd
                 return new ResizerShortBilinear(param);
             else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
+            else if (param.IsNearest())
+                return new ResizerNearest(param);
             else
                 return NULL;
         }

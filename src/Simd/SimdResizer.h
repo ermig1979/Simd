@@ -67,6 +67,22 @@ namespace Simd
             return type == SimdResizeChannelFloat && 
                 (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp || method == SimdResizeMethodInferenceEngineInterp);
         }
+
+        bool IsNearest() const
+        {
+            return method == SimdResizeMethodNearest;
+        }
+
+        size_t ChannelSize() const
+        {
+            static const size_t sizes[3] = { 1, 2, 4 };
+            return sizes[(int)type];
+        }
+
+        size_t PixelSize() const
+        {
+            return ChannelSize() * channels;
+        }
     };
 
     class Resizer : Deletable
@@ -150,6 +166,21 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
+        class ResizerNearest : public Resizer
+        {
+            void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<size_t N> void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        protected:
+            size_t _pixelSize;
+            Array32i _ix, _iy;
+
+            void EstimateIndex(size_t srcSize, size_t dstSize, size_t pixelSize, int32_t* indices);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };        
+        
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 
