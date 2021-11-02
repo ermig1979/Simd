@@ -270,6 +270,26 @@ namespace Simd
             ResizerShortBilinear(const ResParam& param);
         };
 
+        class ResizerNearest : public Base::ResizerNearest
+        {
+        protected:
+            size_t _blocks;
+            struct IndexShuffle128
+            {
+                int32_t src, dst;
+                uint8_t shuffle[A];
+            };
+            Array<IndexShuffle128> _ix128;
+
+            size_t BlockCountMax(size_t align);
+            void EstimateParams();
+            void RunShuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif //SIMD_SSE41_ENABLE

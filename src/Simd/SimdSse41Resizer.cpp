@@ -756,6 +756,81 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ResizerNearest::ResizerNearest(const ResParam& param)
+            : Base::ResizerNearest(param)
+            , _blocks(0)
+        {
+            EstimateParams();
+        }
+
+        size_t ResizerNearest::BlockCountMax(size_t align)
+        {
+            return (size_t)Simd::Max(::ceil(float(_param.srcW) / (align - 1)), ::ceil(float(_param.dstW) * _param.PixelSize() / align));
+        }
+
+        void ResizerNearest::EstimateParams()
+        {
+            if (_param.PixelSize()*_param.dstW < A)
+                return;
+            if (_param.PixelSize() < 2 && _param.srcW < 4 * _param.dstW)
+                _blocks = BlockCountMax(A);
+            float scale = (float)_param.srcW / _param.dstW;
+            if (_blocks)
+            {
+                _ix128.Resize(_blocks);
+                int block = 0;
+                _ix128[0].src = 0;
+                _ix128[0].dst = 0;
+                for (int dstIndex = 0; dstIndex < (int)_param.dstW; ++dstIndex)
+                {
+                    float alpha = (dstIndex + 0.5f) * scale;
+                    int srcIndex = RestrictRange((int)::floor(alpha), 0, (int)_param.srcW - 1);
+                    int dst = dstIndex - _ix128[block].dst;
+                    int src = srcIndex - _ix128[block].src;
+                    if (src >= A - 1 || dst >= A)
+                    {
+                        block++;
+                        _ix128[block].src = Simd::Min(srcIndex, int(_param.srcW - A));
+                        _ix128[block].dst = dstIndex;
+                        dst = 0;
+                        src = srcIndex - _ix128[block].src;
+                    }
+                    _ix128[block].shuffle[dst] = src;
+                    _ix128[block].shuffle[dst + 1] = src + 1;
+                }
+                _blocks = block + 1;
+            }
+        }
+
+        void ResizerNearest::RunShuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t blocks = _blocks;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t* srcRow = src + _iy[dy] * srcStride;
+                for (size_t i = 0; i < blocks; ++i)
+                {
+                   const IndexShuffle128 & index = _ix128[i];
+                    __m128i _src = _mm_loadu_si128((__m128i*)(srcRow + index.src));
+                    __m128i _shuffle = _mm_loadu_si128((__m128i*) & index.shuffle);
+                    _mm_storeu_si128((__m128i*)(dst + index.dst), _mm_shuffle_epi8(_src, _shuffle));
+                }
+                dst += dstStride;
+            }
+        }
+
+        void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_param.dstW >= A);
+
+            if (_blocks)
+                RunShuffle128(src, srcStride, dst, dstStride);
+            else
+                Base::ResizerNearest::Run(src, srcStride, dst, dstStride);
+        }
+
+        //---------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m128i));
@@ -765,6 +840,8 @@ namespace Simd
                 return new ResizerByteArea(param);
             else if (param.IsShortBilinear())
                 return new ResizerShortBilinear(param);
+            else if (param.IsNearest())
+                return new ResizerNearest(param);
             else
                 return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
