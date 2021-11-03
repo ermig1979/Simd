@@ -123,6 +123,12 @@ namespace Simd
 #if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
         using Sse2::Store;
 #endif
+
+        template <bool align> SIMD_INLINE void StoreMasked(__m128i* p, __m128i value, __m128i mask)
+        {
+            __m128i old = Load<align>(p);
+            Store<align>(p, _mm_blendv_epi8(old, value, mask));
+        }
     }
 #endif
 

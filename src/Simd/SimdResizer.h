@@ -280,6 +280,7 @@ namespace Simd
                 uint8_t shuffle[A];
             };
             Array<IndexShuffle128> _ix128;
+            __m128i _tail128;
 
             size_t BlockCountMax(size_t align);
             void EstimateParams();

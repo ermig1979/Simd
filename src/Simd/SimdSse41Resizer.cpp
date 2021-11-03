@@ -765,46 +765,49 @@ namespace Simd
 
         size_t ResizerNearest::BlockCountMax(size_t align)
         {
-            return (size_t)Simd::Max(::ceil(float(_param.srcW) / (align - 1)), ::ceil(float(_param.dstW) * _param.PixelSize() / align));
+            return (size_t)::ceil(float(Simd::Max(_param.srcW, _param.dstW) * _param.PixelSize()) / (align - _param.PixelSize()));
         }
 
         void ResizerNearest::EstimateParams()
         {
-            if (_param.PixelSize()*_param.dstW < A)
+            const size_t pixelSize = _param.PixelSize();
+            if (pixelSize *_param.dstW < A || pixelSize * _param.srcW < A)
                 return;
-            if (_param.PixelSize() < 2 && _param.srcW < 4 * _param.dstW)
+            if (pixelSize < 4 && _param.srcW < 4 * _param.dstW)
                 _blocks = BlockCountMax(A);
             float scale = (float)_param.srcW / _param.dstW;
             if (_blocks)
             {
                 _ix128.Resize(_blocks);
-                int block = 0;
+                int block = 0, tail = 0;
                 _ix128[0].src = 0;
                 _ix128[0].dst = 0;
                 for (int dstIndex = 0; dstIndex < (int)_param.dstW; ++dstIndex)
                 {
                     float alpha = (dstIndex + 0.5f) * scale;
                     int srcIndex = RestrictRange((int)::floor(alpha), 0, (int)_param.srcW - 1);
-                    int dst = dstIndex - _ix128[block].dst;
-                    int src = srcIndex - _ix128[block].src;
-                    if (src >= A - 1 || dst >= A)
+                    int dst = dstIndex * pixelSize - _ix128[block].dst;
+                    int src = srcIndex * pixelSize - _ix128[block].src;
+                    if (src >= A - pixelSize || dst >= A - pixelSize)
                     {
                         block++;
-                        _ix128[block].src = Simd::Min(srcIndex, int(_param.srcW - A));
-                        _ix128[block].dst = dstIndex;
+                        _ix128[block].src = srcIndex * pixelSize;
+                        _ix128[block].dst = dstIndex * pixelSize;
                         dst = 0;
-                        src = srcIndex - _ix128[block].src;
+                        src = srcIndex * pixelSize - _ix128[block].src;
                     }
-                    _ix128[block].shuffle[dst] = src;
-                    _ix128[block].shuffle[dst + 1] = src + 1;
+                    for(size_t i = 0; i < pixelSize; ++i)
+                        _ix128[block].shuffle[dst + i] = src + i;
+                    tail = dst + pixelSize;
                 }
+                _tail128 = LeftNotZero8i(tail);
                 _blocks = block + 1;
             }
         }
 
         void ResizerNearest::RunShuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            size_t blocks = _blocks;
+            size_t blocks = _blocks - 1;
             for (size_t dy = 0; dy < _param.dstH; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
@@ -814,6 +817,12 @@ namespace Simd
                     __m128i _src = _mm_loadu_si128((__m128i*)(srcRow + index.src));
                     __m128i _shuffle = _mm_loadu_si128((__m128i*) & index.shuffle);
                     _mm_storeu_si128((__m128i*)(dst + index.dst), _mm_shuffle_epi8(_src, _shuffle));
+                }
+                {
+                    const IndexShuffle128& index = _ix128[blocks];
+                    __m128i _src = _mm_loadu_si128((__m128i*)(srcRow + index.src));
+                    __m128i _shuffle = _mm_loadu_si128((__m128i*) & index.shuffle);
+                    StoreMasked<false>((__m128i*)(dst + index.dst), _mm_shuffle_epi8(_src, _shuffle), _tail128);
                 }
                 dst += dstStride;
             }

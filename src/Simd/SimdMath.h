@@ -314,6 +314,18 @@ namespace Simd
             return _mm_store_ss(dst, _mm_max_ss(m, _mm_shuffle_ps(m, m, 1)));
         }
 
+        SIMD_INLINE __m128i RightNotZero8i(ptrdiff_t count)
+        {
+            static const int8_t mask[DA] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
+            return _mm_loadu_si128((__m128i*)(mask + Simd::RestrictRange<ptrdiff_t>(count, 0, A)));
+        }
+
+        SIMD_INLINE __m128i LeftNotZero8i(ptrdiff_t count)
+        {
+            static const int8_t mask[DA] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            return _mm_loadu_si128((__m128i*)(mask + A - Simd::RestrictRange<ptrdiff_t>(count, 0, A)));
+        }
+
         SIMD_INLINE __m128 RightNotZero32f(ptrdiff_t count)
         {
             const int32_t mask[DF] = { 0, 0, 0, 0, -1, -1, -1, -1 };
