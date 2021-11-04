@@ -35,9 +35,9 @@ namespace Simd
     {
         struct BitBuf
         {
-            static const uint32_t capacity = 1024;
+            static const uint32_t capacity = 2048;
             uint32_t size;
-            uint16_t data[1024][2];
+            uint16_t data[capacity][2];
 
             SIMD_INLINE BitBuf()
                 : size(0) 
@@ -51,6 +51,7 @@ namespace Simd
 
             SIMD_INLINE bool Full(uint32_t tail = capacity / 2) const
             {
+                assert(size <= capacity);
                 return size + tail >= capacity;
             }
 
