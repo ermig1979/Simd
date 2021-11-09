@@ -760,7 +760,6 @@ namespace Simd
             : Base::ResizerNearest(param)
             , _blocks(0)
         {
-            EstimateParams();
         }
 
         size_t ResizerNearest::BlockCountMax(size_t align)
@@ -770,6 +769,9 @@ namespace Simd
 
         void ResizerNearest::EstimateParams()
         {
+            if (_blocks)
+                return;
+            Base::ResizerNearest::EstimateParams();
             const size_t pixelSize = _param.PixelSize();
             if (pixelSize *_param.dstW < A || pixelSize * _param.srcW < A)
                 return;
@@ -786,13 +788,13 @@ namespace Simd
                 {
                     float alpha = (dstIndex + 0.5f) * scale;
                     int srcIndex = RestrictRange((int)::floor(alpha), 0, (int)_param.srcW - 1);
-                    int dst = dstIndex * pixelSize - _ix128[block].dst;
-                    int src = srcIndex * pixelSize - _ix128[block].src;
+                    int dst = dstIndex * (int)pixelSize - _ix128[block].dst;
+                    int src = srcIndex * (int)pixelSize - _ix128[block].src;
                     if (src >= A - pixelSize || dst >= A - pixelSize)
                     {
                         block++;
-                        _ix128[block].src = srcIndex * pixelSize;
-                        _ix128[block].dst = dstIndex * pixelSize;
+                        _ix128[block].src = srcIndex * (int)pixelSize;
+                        _ix128[block].dst = dstIndex * (int)pixelSize;
                         dst = 0;
                         src = srcIndex * pixelSize - _ix128[block].src;
                     }
@@ -831,7 +833,7 @@ namespace Simd
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             assert(_param.dstW >= A);
-
+            EstimateParams();
             if (_blocks)
                 RunShuffle128(src, srcStride, dst, dstStride);
             else

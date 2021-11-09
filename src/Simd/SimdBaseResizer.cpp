@@ -494,23 +494,34 @@ namespace Simd
 
         ResizerNearest::ResizerNearest(const ResParam& param)
             : Resizer(param)
+            , _pixelSize(0)
         {
-            _pixelSize = _param.PixelSize();
-            _iy.Resize(_param.dstH, false, _param.align);
-            EstimateIndex(_param.srcH, _param.dstH, 1, _iy.data);
-            _ix.Resize(_param.dstW, false, _param.align);
-            EstimateIndex(_param.srcW, _param.dstW, _pixelSize, _ix.data);
         }
 
-        void ResizerNearest::EstimateIndex(size_t srcSize, size_t dstSize, size_t pixelSize, int32_t* indices)
+        void ResizerNearest::EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices)
         {
             float scale = (float)srcSize / dstSize;
             for (size_t i = 0; i < dstSize; ++i)
             {
                 float alpha = (i + 0.5f) * scale;
                 int index = RestrictRange((int)::floor(alpha), 0, (int)srcSize - 1);
-                indices[i] = (int)(index * pixelSize);
+                for (size_t c = 0; c < channels; c++)
+                {
+                    size_t offset = i * channels + c;
+                    indices[offset] = (int32_t)((channels * index + c)*channelSize);
+                }
             }
+        }
+
+        void ResizerNearest::EstimateParams()
+        {
+            if (_pixelSize)
+                return;
+            _pixelSize = _param.PixelSize();
+            _iy.Resize(_param.dstH, false, _param.align);
+            EstimateIndex(_param.srcH, _param.dstH, 1, 1, _iy.data);
+            _ix.Resize(_param.dstW, false, _param.align);
+            EstimateIndex(_param.srcW, _param.dstW, _pixelSize, 1, _ix.data);
         }
 
         void ResizerNearest::Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
@@ -537,6 +548,7 @@ namespace Simd
 
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
+            EstimateParams();
             switch (_pixelSize)
             {
             case 1: Resize<1>(src, srcStride, dst, dstStride); break;

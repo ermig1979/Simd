@@ -174,7 +174,9 @@ namespace Simd
             size_t _pixelSize;
             Array32i _ix, _iy;
 
-            void EstimateIndex(size_t srcSize, size_t dstSize, size_t pixelSize, int32_t* indices);
+            void EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices);
+
+            void EstimateParams();
         public:
             ResizerNearest(const ResParam& param);
 
@@ -357,6 +359,18 @@ namespace Simd
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
         public:
             ResizerFloatBilinear(const ResParam & param);
+        };
+
+        class ResizerNearest : public Sse41::ResizerNearest
+        {
+        protected:
+            void EstimateParams();
+            void RunGathering4x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void RunGathering8x4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
