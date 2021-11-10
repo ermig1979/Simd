@@ -27,6 +27,7 @@
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
@@ -807,7 +808,7 @@ namespace Simd
             }
         }
 
-        void ResizerNearest::RunShuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        void ResizerNearest::Shuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             size_t blocks = _blocks - 1;
             for (size_t dy = 0; dy < _param.dstH; dy++)
@@ -830,12 +831,34 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE void CopyPixel12(const uint8_t* src, uint8_t* dst)
+        {
+            __m128i val = _mm_loadu_si128((__m128i*)src);
+            _mm_storeu_si128((__m128i*)dst, val);
+        }
+        
+        void ResizerNearest::Resize12(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t body = _param.dstW - 1;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t* srcRow = src + _iy[dy] * srcStride;
+                size_t dx = 0, offset = 0;
+                for (; dx < body; dx++, offset += 12)
+                    CopyPixel12(srcRow + _ix[dx], dst + offset);
+                Base::CopyPixel<12>(srcRow + _ix[dx], dst + offset);
+                dst += dstStride;
+            }
+        }
+
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             assert(_param.dstW >= A);
             EstimateParams();
             if (_blocks)
-                RunShuffle128(src, srcStride, dst, dstStride);
+                Shuffle128(src, srcStride, dst, dstStride);
+            else if (_pixelSize == 12)
+                Resize12(src, srcStride, dst, dstStride);
             else
                 Base::ResizerNearest::Run(src, srcStride, dst, dstStride);
         }

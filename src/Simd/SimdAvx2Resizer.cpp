@@ -1036,6 +1036,76 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ResizerNearest::ResizerNearest(const ResParam& param)
+            : Sse41::ResizerNearest(param)
+        {
+        }
+
+        void ResizerNearest::EstimateParams()
+        {
+            if (_pixelSize)
+                return;
+            size_t pixelSize = _param.PixelSize();
+            if (pixelSize == 4 || pixelSize == 8)
+                Base::ResizerNearest::EstimateParams();
+        }
+
+        SIMD_INLINE void Gather4(const int32_t * src, const int32_t* idx, int32_t* dst)
+        {
+            __m256i _idx = _mm256_loadu_si256((__m256i*)idx);
+            __m256i val = _mm256_i32gather_epi32(src, _idx, 1);
+            _mm256_storeu_si256((__m256i*)dst, val);
+        }
+
+        void ResizerNearest::Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t body = AlignLo(_param.dstW, 8);
+            size_t tail = _param.dstW - 8;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const int32_t* srcRow = (int32_t*)(src + _iy[dy] * srcStride);
+                for (size_t dx = 0; dx < body; dx += 8)
+                    Avx2::Gather4(srcRow, _ix.data + dx, (int32_t*)dst + dx);
+                Avx2::Gather4(srcRow, _ix.data + tail, (int32_t*)dst + tail);
+                dst += dstStride;
+            }
+        }
+
+        SIMD_INLINE void Gather8(const int64_t* src, const int32_t* idx, int64_t* dst)
+        {
+            __m128i _idx = _mm_loadu_si128((__m128i*)idx);
+            __m256i val = _mm256_i32gather_epi64(src, _idx, 1);
+            _mm256_storeu_si256((__m256i*)dst, val);
+        }
+
+        void ResizerNearest::Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t body = AlignLo(_param.dstW, 4);
+            size_t tail = _param.dstW - 4;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const int64_t* srcRow = (int64_t*)(src + _iy[dy] * srcStride);
+                for (size_t dx = 0; dx < body; dx += 4)
+                    Avx2::Gather8(srcRow, _ix.data + dx, (int64_t*)dst + dx);
+                Avx2::Gather8(srcRow, _ix.data + tail, (int64_t*)dst + tail);
+                dst += dstStride;
+            }
+        }
+
+        void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            EstimateParams();
+            if (_pixelSize == 4)
+                Gather4(src, srcStride, dst, dstStride);
+            else if (_pixelSize == 8)
+                Gather8(src, srcStride, dst, dstStride);
+            else 
+                Sse41::ResizerNearest::Run(src, srcStride, dst, dstStride);
+        }
+
+       //---------------------------------------------------------------------
+
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m256i));
@@ -1047,6 +1117,8 @@ namespace Simd
                 return new ResizerShortBilinear(param);
             else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
+            else if (param.IsNearest() && dstX >= F)
+                return new ResizerNearest(param);
             else
                 return Avx::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }

@@ -286,7 +286,8 @@ namespace Simd
 
             size_t BlockCountMax(size_t align);
             void EstimateParams();
-            void RunShuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Shuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Resize12(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
             ResizerNearest(const ResParam& param);
 
@@ -365,8 +366,8 @@ namespace Simd
         {
         protected:
             void EstimateParams();
-            void RunGathering4x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            void RunGathering8x4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
             ResizerNearest(const ResParam& param);
 
