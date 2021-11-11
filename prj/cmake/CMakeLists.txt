@@ -93,7 +93,7 @@ else()
 	add_definitions(-DSIMD_VERSION="unknown")
 endif()
 
-string(REGEX REPLACE "(-march=[a-z]*)|(-mtune=[a-z]*)|(-msse[0-9,\\.]*)|(-mavx[0-9]*)|(-mfma)" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+string(REGEX REPLACE "(-march=[a-zA-Z0-9-]*)|(-mtune=[a-zA-Z0-9-]*)|(-msse[0-9,\\.]*)|(-mavx[0-9]*)|(-mfma)" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set(COMMON_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -std=c++11 -O3")
