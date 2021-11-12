@@ -1074,7 +1074,7 @@ namespace Simd
         SIMD_INLINE void Gather8(const int64_t* src, const int32_t* idx, int64_t* dst)
         {
             __m128i _idx = _mm_loadu_si128((__m128i*)idx);
-            __m256i val = _mm256_i32gather_epi64(src, _idx, 1);
+            __m256i val = _mm256_i32gather_epi64((long long*)src, _idx, 1);
             _mm256_storeu_si256((__m256i*)dst, val);
         }
 
