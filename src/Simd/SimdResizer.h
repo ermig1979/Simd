@@ -388,6 +388,19 @@ namespace Simd
             ResizerFloatBilinear(const ResParam & param);
         };
 
+        class ResizerNearest : public Avx2::ResizerNearest
+        {
+        protected:
+            void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            static bool Preferable(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif //SIMD_AVX512F_ENABLE 
