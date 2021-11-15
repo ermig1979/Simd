@@ -903,6 +903,92 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        ResizerNearest::ResizerNearest(const ResParam& param)
+            : Avx512f::ResizerNearest(param)
+        {
+        }
+
+        void ResizerNearest::EstimateParams()
+        {
+            if (_blocks)
+                return;
+            Base::ResizerNearest::EstimateParams();
+            const size_t pixelSize = _param.PixelSize();
+            if (pixelSize * _param.dstW < A || pixelSize * _param.srcW < A)
+                return;
+            if (pixelSize < 4 && _param.srcW < 4 * _param.dstW)
+                _blocks = BlockCountMax(A);
+            float scale = (float)_param.srcW / _param.dstW;
+            if (_blocks)
+            {
+                _ix32x2.Resize(_blocks);
+                int block = 0, tail = 0;
+                _ix32x2[0].src = 0;
+                _ix32x2[0].dst = 0;
+                for (int dstIndex = 0; dstIndex < (int)_param.dstW; ++dstIndex)
+                {
+                    float alpha = (dstIndex + 0.5f) * scale;
+                    int srcIndex = RestrictRange((int)::floor(alpha), 0, (int)_param.srcW - 1);
+                    int dst = dstIndex * (int)pixelSize - _ix32x2[block].dst;
+                    int src = srcIndex * (int)pixelSize - _ix32x2[block].src;
+                    if (src >= A - pixelSize || dst >= A - pixelSize)
+                    {
+                        block++;
+                        _ix32x2[block].src = srcIndex * (int)pixelSize;
+                        _ix32x2[block].dst = dstIndex * (int)pixelSize;
+                        dst = 0;
+                        src = srcIndex * pixelSize - _ix32x2[block].src;
+                    }
+                    for (size_t i = 0; i < pixelSize; i += 2)
+                        _ix32x2[block].shuffle[(dst + i) / 2] = (src + i) /2;
+                    tail = (dst + pixelSize) / 2;
+                }
+                _tail32x2 = TailMask32(tail);
+                _blocks = block + 1;
+            }
+        }
+
+        void ResizerNearest::Shuffle32x2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t blocks = _blocks - 1;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t* srcRow = src + _iy[dy] * srcStride;
+                for (size_t i = 0; i < blocks; ++i)
+                {
+                    const IndexShuffle32x2& index = _ix32x2[i];
+                    __m512i _src = _mm512_loadu_si512((__m512i*)(srcRow + index.src));
+                    __m512i _shuffle = _mm512_loadu_si512((__m512i*) & index.shuffle);
+                    _mm512_storeu_si512((__m512i*)(dst + index.dst), _mm512_permutexvar_epi16(_shuffle, _src));
+                }
+                {
+                    const IndexShuffle32x2& index = _ix32x2[blocks];
+                    __m512i _src = _mm512_loadu_si512((__m512i*)(srcRow + index.src));
+                    __m512i _shuffle = _mm512_loadu_si512((__m512i*)&index.shuffle);
+                    _mm512_mask_storeu_epi16(dst + index.dst, _tail32x2, _mm512_permutexvar_epi16(_shuffle, _src));
+                }
+                dst += dstStride;
+            }
+        }
+
+        void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_param.dstW >= A);
+            EstimateParams();
+            if (_blocks)
+                Shuffle32x2(src, srcStride, dst, dstStride);
+            else
+                Avx512f::ResizerNearest::Run(src, srcStride, dst, dstStride);
+        }
+
+        bool ResizerNearest::Preferable(const ResParam& param)
+        {
+            const size_t pixelSize = param.PixelSize();
+            return (pixelSize & 1) == 0 && pixelSize < 8 && param.srcW < 8 * param.dstW;
+        }
+
+        //---------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
         {
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m512i));
@@ -912,6 +998,8 @@ namespace Simd
                 return new ResizerByteArea(param);
             else if (param.IsShortBilinear() && dstX > F)
                 return new ResizerShortBilinear(param);
+            else if (param.IsNearest() && ResizerNearest::Preferable(param))
+                return new ResizerNearest(param);
             else
                 return Avx512f::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }

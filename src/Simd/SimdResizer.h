@@ -276,17 +276,17 @@ namespace Simd
         {
         protected:
             size_t _blocks;
-            struct IndexShuffle128
+            struct IndexShuffle16x1
             {
                 int32_t src, dst;
                 uint8_t shuffle[A];
             };
-            Array<IndexShuffle128> _ix128;
-            __m128i _tail128;
+            Array<IndexShuffle16x1> _ix16x1;
+            __m128i _tail16x1;
 
             size_t BlockCountMax(size_t align);
             void EstimateParams();
-            void Shuffle128(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Shuffle16x1(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
             void Resize12(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
             ResizerNearest(const ResParam& param);
@@ -438,6 +438,27 @@ namespace Simd
             virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
         public:
             ResizerShortBilinear(const ResParam& param);
+        };
+
+        class ResizerNearest : public Avx512f::ResizerNearest
+        {
+        protected:
+            struct IndexShuffle32x2
+            {
+                int32_t src, dst;
+                uint16_t shuffle[HA];
+            };
+            Array<IndexShuffle32x2> _ix32x2;
+            __mmask32 _tail32x2;
+
+            void EstimateParams();
+            void Shuffle32x2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            static bool Preferable(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
