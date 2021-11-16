@@ -61,15 +61,15 @@ Enumerations</h2></td></tr>
  }</td></tr>
 <tr class="separator:ga7f03c4de676449287955615f68c8a83b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gabcaf67f1fd7327ca3f47c0d04b671b1a"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__resizing.html#gabcaf67f1fd7327ca3f47c0d04b671b1a">SimdResizeMethodType</a> { <br />
+&#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19">SimdResizeMethodNearest</a>
+, <br />
 &#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd">SimdResizeMethodBilinear</a>
 , <br />
-&#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aa26f57b81d9c0160beded97fdf739b4c7">SimdResizeMethodCaffeInterp</a>
+&#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d">SimdResizeMethodBilinearCaffe</a>
+, <br />
+&#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd">SimdResizeMethodBilinearPytorch</a>
 , <br />
 &#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77">SimdResizeMethodArea</a>
-, <br />
-&#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aa5d6f1549cf3cdb74311dc5f9d92594ea">SimdResizeMethodInferenceEngineInterp</a>
-, <br />
-&#160;&#160;<a class="el" href="group__resizing.html#ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19">SimdResizeMethodNearest</a>
 <br />
  }</td></tr>
 <tr class="separator:gabcaf67f1fd7327ca3f47c0d04b671b1a"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -194,15 +194,15 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 <p >Describes methods used in order to resize image. </p>
 <table class="fieldtable">
-<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd"></a>SimdResizeMethodBilinear&#160;</td><td class="fielddoc"><p >Bilinear method. </p>
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19"></a>SimdResizeMethodNearest&#160;</td><td class="fielddoc"><p >Nearest pixel method. </p>
 </td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa26f57b81d9c0160beded97fdf739b4c7" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa26f57b81d9c0160beded97fdf739b4c7"></a>SimdResizeMethodCaffeInterp&#160;</td><td class="fielddoc"><p >caffe::interp compatible method. </p>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aafb63411cd5f588a6e609f5e6dca549fd"></a>SimdResizeMethodBilinear&#160;</td><td class="fielddoc"><p >Bilinear method. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa1eb08f750ec9dbaca81ca834471e670d"></a>SimdResizeMethodBilinearCaffe&#160;</td><td class="fielddoc"><p >Bilinear Caffe compatible method. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aabe4689c192e32aba9e7bbd95fbcd8cbd"></a>SimdResizeMethodBilinearPytorch&#160;</td><td class="fielddoc"><p >Bilinear Pytorch compatible method. </p>
 </td></tr>
 <tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5f47c771d0166c236475a535b0de2a77"></a>SimdResizeMethodArea&#160;</td><td class="fielddoc"><p >Area method. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5d6f1549cf3cdb74311dc5f9d92594ea" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aa5d6f1549cf3cdb74311dc5f9d92594ea"></a>SimdResizeMethodInferenceEngineInterp&#160;</td><td class="fielddoc"><p >InferenceEngine::Extension::Cpu::Interp compatible method. </p>
-</td></tr>
-<tr><td class="fieldname"><a id="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19" name="ggabcaf67f1fd7327ca3f47c0d04b671b1aad93d2e18b660691df290c6bc1fb14b19"></a>SimdResizeMethodNearest&#160;</td><td class="fielddoc"><p >Nearest pixel method. </p>
 </td></tr>
 </table>
 

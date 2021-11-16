@@ -355,16 +355,16 @@ typedef enum
 */
 typedef enum
 {
-    /*! Bilinear method. */
-    SimdResizeMethodBilinear,
-    /*! caffe::interp compatible method. */
-    SimdResizeMethodCaffeInterp,
-    /*! Area method. */
-    SimdResizeMethodArea,
-    /*! InferenceEngine::Extension::Cpu::Interp compatible method. */
-    SimdResizeMethodInferenceEngineInterp,
     /*! Nearest pixel method. */
     SimdResizeMethodNearest,
+    /*! Bilinear method. */
+    SimdResizeMethodBilinear,
+    /*! Bilinear Caffe compatible method. */
+    SimdResizeMethodBilinearCaffe,
+    /*! Bilinear Pytorch compatible method. */
+    SimdResizeMethodBilinearPytorch,
+    /*! Area method. */
+    SimdResizeMethodArea,
 } SimdResizeMethodType;
 
 /*! @ingroup synet

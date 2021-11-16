@@ -145,11 +145,11 @@ namespace Test
     {
         switch (method)
         {
-        case SimdResizeMethodBilinear: return "B";
-        case SimdResizeMethodCaffeInterp: return "C";
-        case SimdResizeMethodArea: return "A";
-        case SimdResizeMethodInferenceEngineInterp: return "I";
-        case SimdResizeMethodNearest: return "N";
+        case SimdResizeMethodNearest: return "No";
+        case SimdResizeMethodBilinear: return "Bo";
+        case SimdResizeMethodBilinearCaffe: return "Bc";
+        case SimdResizeMethodBilinearPytorch: return "Bp";
+        case SimdResizeMethodArea: return "Ao";
         default: assert(0); return "";
         }
     }
@@ -319,7 +319,7 @@ namespace Test
         bool result = true;
 
 #if !defined(__aarch64__) || 1  
-        SimdResizeMethodType methods[2] = { SimdResizeMethodBilinear, SimdResizeMethodNearest };
+        SimdResizeMethodType methods[2] = { SimdResizeMethodNearest, SimdResizeMethodBilinear };
         for (size_t i = 0; i < 2; ++i)
         {
             result = result && ResizerAutoTest(methods[i], SimdResizeChannelByte, 1, f1, f2);

@@ -47,14 +47,14 @@ namespace Simd
             this->align = align;
         }
 
+        bool IsNearest() const
+        {
+            return method == SimdResizeMethodNearest;
+        }
+
         bool IsByteBilinear() const
         {
             return type == SimdResizeChannelByte && method == SimdResizeMethodBilinear;
-        }
-
-        bool IsByteArea() const
-        {
-            return type == SimdResizeChannelByte && method == SimdResizeMethodArea;
         }
 
         bool IsShortBilinear() const
@@ -65,12 +65,12 @@ namespace Simd
         bool IsFloatBilinear() const
         {
             return type == SimdResizeChannelFloat && 
-                (method == SimdResizeMethodBilinear || method == SimdResizeMethodCaffeInterp || method == SimdResizeMethodInferenceEngineInterp);
+                (method == SimdResizeMethodBilinear || method == SimdResizeMethodBilinearCaffe || method == SimdResizeMethodBilinearPytorch);
         }
 
-        bool IsNearest() const
+        bool IsByteArea() const
         {
-            return method == SimdResizeMethodNearest;
+            return type == SimdResizeChannelByte && method == SimdResizeMethodArea;
         }
 
         size_t ChannelSize() const

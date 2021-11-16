@@ -394,7 +394,7 @@ namespace Simd
                     }
                 }
             }            
-            else if (_param.method == SimdResizeMethodCaffeInterp)
+            else if (_param.method == SimdResizeMethodBilinearCaffe)
             {
                 float scale = dstSize > 1 ? float(srcSize - 1) / float(dstSize - 1) : 0.0f;
                 for (size_t i = 0; i < dstSize; ++i)
@@ -415,7 +415,7 @@ namespace Simd
                     }
                 }
             }
-            else if (_param.method == SimdResizeMethodInferenceEngineInterp)
+            else if (_param.method == SimdResizeMethodBilinearPytorch)
             {
                 float scale = (float)srcSize / dstSize;
                 for (size_t i = 0; i < dstSize; ++i)
