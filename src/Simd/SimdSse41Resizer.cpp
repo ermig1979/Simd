@@ -787,8 +787,7 @@ namespace Simd
                 _ix16x1[0].dst = 0;
                 for (int dstIndex = 0; dstIndex < (int)_param.dstW; ++dstIndex)
                 {
-                    float alpha = (dstIndex + 0.5f) * scale;
-                    int srcIndex = RestrictRange((int)::floor(alpha), 0, (int)_param.srcW - 1);
+                    int srcIndex = _ix[dstIndex] / (int)pixelSize;
                     int dst = dstIndex * (int)pixelSize - _ix16x1[block].dst;
                     int src = srcIndex * (int)pixelSize - _ix16x1[block].src;
                     if (src >= A - pixelSize || dst >= A - pixelSize)

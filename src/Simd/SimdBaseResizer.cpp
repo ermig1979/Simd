@@ -500,17 +500,34 @@ namespace Simd
 
         void ResizerNearest::EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices)
         {
-            float scale = (float)srcSize / dstSize;
-            for (size_t i = 0; i < dstSize; ++i)
+            if (_param.method == SimdResizeMethodNearest)
             {
-                float alpha = (i + 0.5f) * scale;
-                int index = RestrictRange((int)::floor(alpha), 0, (int)srcSize - 1);
-                for (size_t c = 0; c < channels; c++)
+                float scale = (float)srcSize / dstSize;
+                for (size_t i = 0; i < dstSize; ++i)
                 {
-                    size_t offset = i * channels + c;
-                    indices[offset] = (int32_t)((channels * index + c)*channelSize);
+                    float alpha = (i + 0.5f) * scale;
+                    int index = RestrictRange((int)::floor(alpha), 0, (int)srcSize - 1);
+                    for (size_t c = 0; c < channels; c++)
+                    {
+                        size_t offset = i * channels + c;
+                        indices[offset] = (int32_t)((channels * index + c) * channelSize);
+                    }
                 }
             }
+            else if (_param.method == SimdResizeMethodNearestPytorch)
+            {
+                for (size_t i = 0; i < dstSize; ++i)
+                {
+                    int index = RestrictRange((int)(i * srcSize / dstSize), 0, (int)srcSize - 1);
+                    for (size_t c = 0; c < channels; c++)
+                    {
+                        size_t offset = i * channels + c;
+                        indices[offset] = (int32_t)((channels * index + c) * channelSize);
+                    }
+                }
+            }
+            else
+                assert(0);
         }
 
         void ResizerNearest::EstimateParams()

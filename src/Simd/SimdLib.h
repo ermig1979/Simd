@@ -355,8 +355,10 @@ typedef enum
 */
 typedef enum
 {
-    /*! Nearest pixel method. */
+    /*! Nearest method. */
     SimdResizeMethodNearest,
+    /*! Nearest Pytorch compatible method. */
+    SimdResizeMethodNearestPytorch,
     /*! Bilinear method. */
     SimdResizeMethodBilinear,
     /*! Bilinear Caffe compatible method. */

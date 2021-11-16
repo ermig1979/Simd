@@ -49,7 +49,7 @@ namespace Simd
 
         bool IsNearest() const
         {
-            return method == SimdResizeMethodNearest;
+            return method == SimdResizeMethodNearest || method == SimdResizeMethodNearestPytorch;
         }
 
         bool IsByteBilinear() const
