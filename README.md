@@ -34,7 +34,7 @@ The Simd Library has next folder's structure:
 * `simd/data/network/` - contains examples of trained networks.
 * `simd/docs/` - contains documentation of the library.
 
-The library building for Windows
+Building the library for Windows
 ================================
 
 To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2019 (or 2015/2017). 
@@ -55,7 +55,7 @@ Also in order to build the library you can use CMake and MinGW:
 	cmake ..\prj\cmake -DSIMD_TOOLCHAIN="your_toolchain\bin\g++" -DSIMD_TARGET="x86_64" -DCMAKE_BUILD_TYPE="Release" -G "MinGW Makefiles"
 	mingw32-make
 
-The library building for Linux
+Building the library for Linux
 ==============================
 
 To build the library and test application for Linux 32/64 you need to use CMake build systems.
@@ -63,15 +63,15 @@ Files of CMake build systems are placed in the directory:
 
 `simd/prj/cmake/`
 	
-The library can be built for x86/x64, PowerPC(64, big-endian) and ARM(32/64) platforms with using of G++ or Clang compilers.
-With using of native compiler (g++) for current platform it is simple:
+The library can be built for x86/x64, PowerPC(64, big-endian) and ARM(32/64) platforms using the G++ or Clang compilers.
+Using the native compiler (g++) for the current platform is simple:
 
 	mkdir build
 	cd build
 	cmake ../prj/cmake -DSIMD_TOOLCHAIN="" -DSIMD_TARGET=""
 	make
 	
-To build the library for PowerPC(64, big-endian) and ARM(32/64) platforms you can also use toolchain for cross compilation.
+To build the library for PowerPC(64, big-endian) and ARM(32/64) platforms you can also use a toolchain for cross compilation.
 There is an example of using for PowerPC (64 bit, big-endian):
 
 	mkdir build
@@ -109,7 +109,7 @@ There are addition build parameters:
 * `SIMD_HIDE` - Hide internal functions of Simd Library. It is switched off by default.
 * `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
 
-The library using
+Using the library
 =================
 
 If you use the library from C code you must include:
@@ -135,7 +135,7 @@ In order to use [Simd::Motion](http://ermig1979.github.io/Simd/help/namespace_si
 Interaction with OpenCV
 =======================
 
-If you need use mutual conversion between Simd and OpenCV types you just have to define macro `SIMD_OPENCV_ENABLE` before including of Simd headers:
+If you need to use mutual conversion between Simd and OpenCV types you just have to define macro `SIMD_OPENCV_ENABLE` before including of Simd headers:
     
     #include <opencv2/core/core.hpp>
     #define SIMD_OPENCV_ENABLE
