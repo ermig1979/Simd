@@ -149,6 +149,8 @@ int main(int argc, char * argv[])
     options.ClassificationTimeMin = 0.01;
     options.DifferenceDxFeatureWeight = 0;
     options.DifferenceDyFeatureWeight = 0;
+    options.BackgroundStatUpdateTime = 0.2;
+
     detector.SetOptions(options);
 #endif
 

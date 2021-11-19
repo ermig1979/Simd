@@ -518,7 +518,8 @@ namespace Simd
             bool DifferenceRoiMaskEnable; /*!< \brief A flag to restrict difference estimation by ROI. By default it is true. */ 
 
             double BackgroundGrowTime; /*!< \brief Initial time (in seconds) of updated background in fast mode. By default it is equal to 1 second. */ 
-            double BackgroundIncrementTime; /*!< \brief Background update speed (in seconds) in normal mode. By default it is equal to 1 second. */ 
+            double BackgroundStatUpdateTime; /*!< \brief Collect background statistics update interval (in seconds) in normal mode. By default it is equal to 0.04 second. */
+            double BackgroundUpdateTime; /*!< \brief Background update speed (in seconds) in normal mode. By default it is equal to 1 second. */
             int BackgroundSabotageCountMax; /*!< \brief Maximal count of frame with sabotage without scene reinitialization. By default it is equal to 3. */
 
             double SegmentationCreateThreshold; /*!< \brief Threshold of segmentation to create motion region. It is restricted by range [0, 1]. By default it is equal to 0.5. */
@@ -554,7 +555,8 @@ namespace Simd
                 DifferenceRoiMaskEnable = true;
 
                 BackgroundGrowTime = 1.0;
-                BackgroundIncrementTime = 1.0;
+                BackgroundStatUpdateTime = 0.04;
+                BackgroundUpdateTime = 1.0;
                 BackgroundSabotageCountMax = 3;
 
                 SegmentationCreateThreshold = 0.5;
@@ -830,11 +832,12 @@ namespace Simd
                 };
 
                 State state;
-                int count;
+                int updateCounter;
                 int sabotageCounter;
                 Time growEndTime;
                 Time lastFrameTime;
-                Time incrementCounterTime;
+                Time statUpdateTime;
+                Time updateTime;
 
                 Background()
                     : state(Init)
@@ -1555,14 +1558,19 @@ namespace Simd
                     switch (stability)
                     {
                     case Stability::Stable:
-                        Apply(_scene.texture.features, IncrementCountUpdater());
-                        ++background.count;
-                        background.incrementCounterTime += time - background.lastFrameTime;
-                        if (background.count >= CHAR_MAX || (background.incrementCounterTime > _options.BackgroundIncrementTime && background.count >= 8))
+                        background.statUpdateTime += time - background.lastFrameTime;
+                        background.updateTime += time - background.lastFrameTime;
+                        if (background.statUpdateTime > _options.BackgroundStatUpdateTime)
                         {
-                            Apply(_scene.texture.features, AdjustRangeUpdater());
-                            background.incrementCounterTime = 0;
-                            background.count = 0;
+                            Apply(_scene.texture.features, IncrementCountUpdater());
+                            background.statUpdateTime = 0;
+                            ++background.updateCounter;
+                            if (background.updateCounter >= CHAR_MAX || (background.updateTime > _options.BackgroundUpdateTime && background.updateCounter >= 8))
+                            {
+                                Apply(_scene.texture.features, AdjustRangeUpdater());
+                                background.updateTime = 0;
+                                background.updateCounter = 0;
+                            }
                         }
                         break;
                     case Stability::Sabotage:
@@ -1587,7 +1595,7 @@ namespace Simd
                         if (background.growEndTime < time)
                         {
                             background.state = Background::Update;
-                            background.count = 0;
+                            background.updateCounter = 0;
                         }
                     }
                     break;
@@ -1606,8 +1614,9 @@ namespace Simd
                 Apply(_scene.texture.features, InitUpdater());
                 background.growEndTime = _scene.input.timestamp + _options.BackgroundGrowTime;
                 background.state = Background::Grow;
-                background.count = 0;
-                background.incrementCounterTime = 0;
+                background.updateCounter = 0;
+                background.statUpdateTime = 0;
+                background.updateTime = 0;
             }
 
             void SetMetadata()
