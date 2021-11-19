@@ -812,13 +812,19 @@ namespace Simd
                 void Create(const Size & size, size_t levelCount, const Options & options)
                 {
                     gray.Create(size, levelCount, options.DifferenceGrayFeatureWeight);
-                    dx.Create(size, levelCount, options.DifferenceDxFeatureWeight);
-                    dy.Create(size, levelCount, options.DifferenceDyFeatureWeight);
+                    if (options.DifferenceDxFeatureWeight || options.DifferenceDyFeatureWeight)
+                    {
+                        dx.Create(size, levelCount, options.DifferenceDxFeatureWeight);
+                        dy.Create(size, levelCount, options.DifferenceDyFeatureWeight);
+                    }
 
                     features.clear();
-                    features.push_back(&gray);
-                    features.push_back(&dx);
-                    features.push_back(&dy);
+                    if (options.DifferenceGrayFeatureWeight)
+                        features.push_back(&gray);
+                    if(options.DifferenceDxFeatureWeight)
+                        features.push_back(&dx);
+                    if (options.DifferenceDyFeatureWeight)
+                        features.push_back(&dy);
                 }
             };
 
@@ -1104,11 +1110,14 @@ namespace Simd
                 Texture & texture = _scene.texture;
                 Simd::Copy(_scene.scaled.Top(), texture.gray.value[0]);
                 Simd::Build(texture.gray.value, SimdReduce4x4);
-                for (size_t i = 0; i < texture.gray.value.Size(); ++i)
+                if (_options.DifferenceDxFeatureWeight || _options.DifferenceDyFeatureWeight)
                 {
-                    Simd::TextureBoostedSaturatedGradient(texture.gray.value[i],
-                        _options.TextureGradientSaturation, _options.TextureGradientBoost,
-                        texture.dx.value[i], texture.dy.value[i]);
+                    for (size_t i = 0; i < texture.gray.value.Size(); ++i)
+                    {
+                        Simd::TextureBoostedSaturatedGradient(texture.gray.value[i],
+                            _options.TextureGradientSaturation, _options.TextureGradientBoost,
+                            texture.dx.value[i], texture.dy.value[i]);
+                    }
                 }
             }
 
@@ -1669,14 +1678,16 @@ namespace Simd
                     if (_options.DebugDrawBottomRight)
                     {
                         View src;
+                        bool grad = _options.DifferenceDxFeatureWeight || _options.DifferenceDyFeatureWeight;
                         switch (_options.DebugDrawBottomRight)
                         {
                         case 1: src = _scene.difference[_options.DebugDrawLevel]; break;
                         case 2: src = _scene.texture.gray.value[_options.DebugDrawLevel]; break;
-                        case 3: src = _scene.texture.dx.value[_options.DebugDrawLevel]; break;
-                        case 4: src = _scene.texture.dy.value[_options.DebugDrawLevel]; break;
+                        case 3: if(grad) src = _scene.texture.dx.value[_options.DebugDrawLevel]; break;
+                        case 4: if(grad) src = _scene.texture.dy.value[_options.DebugDrawLevel]; break;
                         }
-                        Simd::GrayToBgr(src, canvas.Region(src.Size(), View::BottomRight).Ref());
+                        if(src.data)
+                            Simd::GrayToBgr(src, canvas.Region(src.Size(), View::BottomRight).Ref());
                     }
 
                     if (_options.DebugAnnotateModel)
