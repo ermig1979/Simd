@@ -27,6 +27,29 @@ namespace Simd
 {
     namespace Base
     {
+        SIMD_INLINE void UyvyToBgr(const uint8_t* uyvy, uint8_t* bgr)
+        {
+            uint8_t u = uyvy[0], v = uyvy[2];
+            YuvToBgr(uyvy[1], u, v, bgr + 0);
+            YuvToBgr(uyvy[3], u, v, bgr + 3);
+        }
+
+        void UyvyToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
+        {
+            assert((width % 2 == 0) && (width >= 2));
+
+            size_t sizeUyvy = width * 2;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t colUyvy = 0, colBgr = 0; colUyvy < sizeUyvy; colUyvy += 4, colBgr += 6)
+                    UyvyToBgr(uyvy + colUyvy, bgr + colBgr);
+                uyvy += uyvyStride;
+                bgr += bgrStride;
+            }
+        }
+
+        //---------------------------------------------------------------------
+
         SIMD_INLINE void Yuv422pToBgr(const uint8_t *y, int u, int v, uint8_t * bgr)
         {
             YuvToBgr(y[0], u, v, bgr);

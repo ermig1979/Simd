@@ -557,6 +557,8 @@ namespace Test
             return "_Rgb24";
         case View::Rgba32:
             return "_Rgba32";
+        case View::Uyvy32:
+            return "_Uyvy32";
         }
         assert(0);
         return "_Unknown";

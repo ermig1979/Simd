@@ -6548,7 +6548,7 @@ SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t w
 
 SIMD_API void SimdUyvyToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
 {
-
+    Base::UyvyToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride);
 }
 
 typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);

@@ -45,9 +45,26 @@ namespace Test
                 func(src.data, src.width, src.height, src.stride, dst.data, dst.stride);
             }
         };
+
+        struct FuncN
+        {
+            typedef void(*FuncPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+            FuncPtr func;
+            String description;
+
+            FuncN(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(src.data, src.stride, src.width, src.height, dst.data, dst.stride);
+            }
+        };
     }
 
 #define FUNC_O(func) FuncO(func, #func)
+
+#define FUNC_N(func) FuncN(func, #func)
 
     template<class Func> bool AnyToAnyAutoTest(int width, int height, View::Format srcType, View::Format dstType, const Func & f1, const Func & f2)
     {
@@ -410,6 +427,15 @@ namespace Test
         if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Neon::RgbaToGray), FUNC_O(SimdRgbaToGray));
 #endif
+
+        return result;
+    }
+
+    bool UyvyToBgrAutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToAnyAutoTest(View::Uyvy32, View::Bgr24, FUNC_N(Simd::Base::UyvyToBgr), FUNC_N(SimdUyvyToBgr));
 
         return result;
     }

@@ -346,6 +346,7 @@ namespace Simd
             case SimdConvolutionActivationElu: SetOutput<SimdConvolutionActivationElu>(p, output); break;
             case SimdConvolutionActivationHswish: SetOutput<SimdConvolutionActivationHswish>(p, output); break;
             case SimdConvolutionActivationMish: SetOutput<SimdConvolutionActivationMish>(p, output); break;
+            case SimdConvolutionActivationHardSigmoid: SetOutput<SimdConvolutionActivationHardSigmoid>(p, output); break;
             }
         }
     }
