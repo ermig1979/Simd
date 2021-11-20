@@ -435,7 +435,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && AnyToAnyAutoTest(View::Uyvy32, View::Bgr24, FUNC_N(Simd::Base::UyvyToBgr), FUNC_N(SimdUyvyToBgr));
+        result = result && AnyToAnyAutoTest(View::Uyvy16, View::Bgr24, FUNC_N(Simd::Base::UyvyToBgr), FUNC_N(SimdUyvyToBgr));
 
         return result;
     }

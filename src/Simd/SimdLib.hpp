@@ -4329,13 +4329,13 @@ namespace Simd
 
         \fn void UyvyToBgr(const View<A>& uyvy, View<A>& bgr);
 
-        \short Converts 32-bit UYVY image to 24-bit BGR image.
+        \short Converts 16-bit UYVY image to 24-bit BGR image.
 
-        The input and output images must have the same width and height.
+        The input and output images must have the same width and height. Width must be even number.
 
         \note This function is a C++ wrapper for function ::SimdUyvyToBgr.
 
-        \param [in] uyvy - an input 32-bit UYVY image.
+        \param [in] uyvy - an input 16-bit UYVY image.
         \param [out] bgr - an output 24-bit BGR image.
     */
     template<template<class> class A> SIMD_INLINE void UyvyToBgr(const View<A>& uyvy, View<A>& bgr)
