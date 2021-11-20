@@ -4327,6 +4327,26 @@ namespace Simd
 
     /*! @ingroup yuv_conversion
 
+        \fn void UyvyToBgr(const View<A>& uyvy, View<A>& bgr);
+
+        \short Converts 32-bit UYVY image to 24-bit BGR image.
+
+        The input and output images must have the same width and height.
+
+        \note This function is a C++ wrapper for function ::SimdUyvyToBgr.
+
+        \param [in] uyvy - an input 32-bit UYVY image.
+        \param [out] bgr - an output 24-bit BGR image.
+    */
+    template<template<class> class A> SIMD_INLINE void UyvyToBgr(const View<A>& uyvy, View<A>& bgr)
+    {
+        assert(EqualSize(uyvy, bgr) && uyvy.format == View<A>::Uyvy32 && bgr.format == View<A>::Bgr24);
+
+        SimdUyvyToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, bgr.data, bgr.stride);
+    }
+
+    /*! @ingroup yuv_conversion
+
         \fn void Yuva420pToBgra(const View<A>& y, const View<A>& u, const View<A>& v, const View<A>& a, View<A>& bgra)
 
         \short Converts YUVA420P image to 32-bit BGRA image.

@@ -324,6 +324,8 @@ typedef enum
     SimdPixelFormatRgb24,
     /*! A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
     SimdPixelFormatRgba32,
+    /*! A 32-bit (4 8-bit channels) UYVY pixel format. */
+    SimdPixelFormatUyvy32,
 } SimdPixelFormatType;
 
 /*! @ingroup c_types
@@ -7614,6 +7616,25 @@ extern "C"
         \param [in] dstStride - a row size of output image.
     */
     SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
+
+    /*! @ingroup yuv_conversion
+
+        \fn void SimdUyvyToBgr(const uint8_t * uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
+
+        \short Converts 32-bit UYVY image to 24-bit BGR image.
+
+        The input and output images must have the same width and height.
+
+        \note This function has a C++ wrappers: Simd::UyvyToBgr(const View<A>& uyvy, View<A>& bgr);
+
+        \param [in] uyvy - a pointer to pixels data of input 32-bit UYVY image.
+        \param [in] uyvyStride - a row size of the UYVY image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
+        \param [in] bgrStride - a row size of the bgr image.
+    */
+    SIMD_API void SimdUyvyToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride);
 
     /*! @ingroup synet_winograd
 
