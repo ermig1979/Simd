@@ -537,6 +537,48 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        template<bool align, bool mask> SIMD_INLINE void SynetSwish32f(const float* src, const Avx512f::Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
+        {
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _dst = exp.Swish(_src);
+            Store<align, mask>(dst + offset, _dst, tail);
+        }
+
+        template<bool align> void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (align)
+                assert(Aligned(src) && Aligned(dst));
+
+            Exp exp(-slope[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSwish32f<align, false>(src, exp, dst, i + 0 * F);
+                SynetSwish32f<align, false>(src, exp, dst, i + 1 * F);
+                SynetSwish32f<align, false>(src, exp, dst, i + 2 * F);
+                SynetSwish32f<align, false>(src, exp, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSwish32f<align, false>(src, exp, dst, i);
+            if (i < size)
+            {
+                __mmask16 tail = TailMask16(size - i);
+                SynetSwish32f<align, true>(src, exp, dst, i, tail);
+            }
+        }
+
+        void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSwish32f<true>(src, size, slope, dst);
+            else
+                SynetSwish32f<false>(src, size, slope, dst);
+        }
+
+        //---------------------------------------------------------------------
+
         template<bool align, bool mask> SIMD_INLINE void SynetTanh32f(const float* src, const Avx512f::Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
         {
             __m512 _src = Load<align, mask>(src + offset, tail);

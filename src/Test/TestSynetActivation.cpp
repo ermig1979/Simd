@@ -793,6 +793,11 @@ namespace Test
             result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Avx2::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
 #endif 
 
+#ifdef SIMD_AVX512F_ENABLE
+        if (Simd::Avx512f::Enable)
+            result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Avx512f::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
+#endif 
+
         return result;
     }
 

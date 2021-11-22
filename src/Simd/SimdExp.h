@@ -432,6 +432,12 @@ namespace Simd
                 __mmask16 mask = _mm512_cmp_ps_mask(_mm512_setzero_ps(), value, _CMP_GT_OS);
                 return _mm512_mask_blend_ps(mask, value, neg);
             }
+
+            SIMD_INLINE __m512 Swish(__m512 value) const
+            {
+                __m512 exp = Exp2(_mm512_mul_ps(_k, value));
+                return _mm512_div_ps(value, _mm512_add_ps(_1_0, exp));
+            }
         };
 
         namespace Detail
