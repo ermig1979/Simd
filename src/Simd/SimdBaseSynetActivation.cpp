@@ -234,6 +234,24 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
+        void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            float _slope = slope[0];
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size4; i += 4)
+            {
+                dst[i + 0] = SynetSwish32f(src[i + 0], _slope);
+                dst[i + 1] = SynetSwish32f(src[i + 1], _slope);
+                dst[i + 2] = SynetSwish32f(src[i + 2], _slope);
+                dst[i + 3] = SynetSwish32f(src[i + 3], _slope);
+            }
+            for (; i < size; ++i)
+                dst[i] = SynetSwish32f(src[i], _slope);
+        }
+
+        //---------------------------------------------------------------------
+
         void SynetSoftplus32f(const float* src, size_t size, const float * beta, const float * threshold, float* dst)
         {
             float _beta = beta[0];

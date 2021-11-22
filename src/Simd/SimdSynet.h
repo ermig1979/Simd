@@ -239,6 +239,11 @@ namespace Simd
             return value > threshold ? value : ::log(1.0f + ::exp(value * beta)) / beta;
         }
 
+        SIMD_INLINE float SynetSwish32f(float value, float slope)
+        {
+            return value / (1.0f + ::exp(-value * slope));
+        }
+
         SIMD_INLINE float SynetTanh32f(float value, float slope)
         {
             return ::tanh(value*slope);

@@ -114,6 +114,12 @@ namespace Simd
                 __m128 mask = _mm_cmpgt_ps(_mm_setzero_ps(), value);
                 return Combine(mask, neg, value);
             }
+
+            SIMD_INLINE __m128 Swish(__m128 value) const
+            {
+                __m128 exp = Exp2(_mm_mul_ps(_k, value));
+                return _mm_div_ps(value, _mm_add_ps(_1_0, exp));
+            }
         };
 
         namespace Detail
@@ -266,6 +272,12 @@ namespace Simd
                 __m256 neg = _mm256_mul_ps(alpha, _mm256_sub_ps(exp, _1_0));
                 __m256 mask = _mm256_cmp_ps(_mm256_setzero_ps(), value, _CMP_GT_OS);
                 return _mm256_blendv_ps(value, neg, mask);
+            }
+
+            SIMD_INLINE __m256 Swish(__m256 value) const
+            {
+                __m256 exp = Exp2(_mm256_mul_ps(_k, value));
+                return _mm256_div_ps(value, _mm256_add_ps(_1_0, exp));
             }
         };
 

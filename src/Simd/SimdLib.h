@@ -7431,6 +7431,27 @@ extern "C"
 
     /*! @ingroup synet_activation
 
+        \fn void SimdSynetSwish32f(const float * src, size_t size, const float * slope, float * dst);
+
+        \short This function is used for forward propagation of SwishLayer.
+
+        Algorithm's details:
+        \verbatim
+        for(i = 0; i < size; ++i)
+            dst[i] = src[i]/(1 + exp(-slope*src[i]));
+        \endverbatim
+
+        \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
+
+        \param [in] src - a pointer to the 32-bit float array.
+        \param [in] size - a size of input and output arrays.
+        \param [in] slope - a pointer to the 'slope' parameter.
+        \param [out] dst - a pointer to output 32-bit float array.
+    */
+    SIMD_API void SimdSynetSwish32f(const float* src, size_t size, const float* slope, float* dst);
+
+    /*! @ingroup synet_activation
+
         \fn void SimdSynetTanh32f(const float * src, size_t size, const float * slope, float * dst);
 
         \short Calculates hyperbolic tangent for 32-bit float array.

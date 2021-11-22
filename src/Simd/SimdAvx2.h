@@ -500,6 +500,8 @@ namespace Simd
 
         void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst);
 
+        void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst);
+
         void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
 
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);

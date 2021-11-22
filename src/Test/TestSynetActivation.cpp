@@ -727,6 +727,79 @@ namespace Test
 
     namespace
     {
+        struct FuncSW
+        {
+            typedef void(*FuncPtr)(const float* src, size_t size, const float* slope, float* dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncSW(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, float slope, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((float*)src.data, src.width, &slope, (float*)dst.data);
+            }
+        };
+    }
+#define FUNC_SW(function) FuncSW(function, #function)
+
+    bool SynetSwish32fAutoTest(int size, const FuncSW& f1, const FuncSW& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View src(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        const float lo = -10.0f, hi = 10.0f, slope = 1.1f;
+        FillRandom32f(src, lo, hi);
+
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(size));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(size));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, slope, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, slope, dst2));
+
+        result = Compare(dst1, dst2, EPS, true, 32, false);
+
+        return result;
+    }
+
+    bool SynetSwish32fAutoTest(const FuncSW& f1, const FuncSW& f2)
+    {
+        bool result = true;
+
+        result = result && SynetSwish32fAutoTest(W * H, f1, f2);
+        result = result && SynetSwish32fAutoTest(W * H + O, f1, f2);
+
+        return result;
+    }
+
+    bool SynetSwish32fAutoTest()
+    {
+        bool result = true;
+
+        result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Base::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
+
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Sse2::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
+#endif 
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Avx2::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
+#endif 
+
+        return result;
+    }
+
+    //-------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncSP
         {
             typedef void(*FuncPtr)(const float* src, size_t size, const float* beta, const float* threshold, float* dst);

@@ -634,6 +634,8 @@ namespace Simd
 
         SimdTensorFormatType SynetSpecifyTensorFormat(SimdTensorFormatType format);
 
+        void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst);
+
         void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst);
         
         size_t SynetTensorAlignment(SimdTensorFormatType format);

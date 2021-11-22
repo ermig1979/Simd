@@ -369,6 +369,7 @@ namespace Test
     TEST_ADD_GROUP_A00(SynetRestrictRange32f);
     TEST_ADD_GROUP_A00(SynetSigmoid32f);
     TEST_ADD_GROUP_A00(SynetSoftplus32f);
+    TEST_ADD_GROUP_A00(SynetSwish32f);
     TEST_ADD_GROUP_A00(SynetTanh32f);
 
     TEST_ADD_GROUP_A00(SynetConvert32fTo8u);

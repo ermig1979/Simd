@@ -6357,6 +6357,18 @@ SIMD_API SimdTensorFormatType SimdSynetSpecifyTensorFormat(SimdTensorFormatType 
 #endif
 }
 
+SIMD_API void SimdSynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+{
+#if defined(SIMD_SYNET_ENABLE)
+    typedef void(*SimdSynetSwish32fPtr) (const float* src, size_t size, const float* slope, float* dst);
+    const static SimdSynetSwish32fPtr simdSynetSwish32f = SIMD_FUNC2(SynetSwish32f, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC);// , SIMD_AVX512F_FUNC, SIMD_NEON_FUNC);
+
+    simdSynetSwish32f(src, size, slope, dst);
+#else
+    assert(0);
+#endif
+}
+
 SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope, float* dst)
 {
 #if defined(SIMD_SYNET_ENABLE)
