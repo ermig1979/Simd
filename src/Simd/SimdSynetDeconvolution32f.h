@@ -114,7 +114,7 @@ namespace Simd
             , _nhwcRun(0)
             , _nhwcReorderB(0)
             , _biasAndActivation(0)
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             , _perf(NULL)
 #endif
         {
@@ -160,7 +160,7 @@ namespace Simd
             }
         }
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer* Perf(const String& func);
 #endif
 
@@ -185,7 +185,7 @@ namespace Simd
         NhwcRun _nhwcRun;
         NhwcReorderB _nhwcReorderB;
         BiasAndActivation _biasAndActivation;
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer * _perf;
 #endif
         mutable String _info;

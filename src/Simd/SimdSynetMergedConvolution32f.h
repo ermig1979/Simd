@@ -151,7 +151,7 @@ namespace Simd
 
         virtual void Forward(const float * src, float * buf, float * dst) = 0;
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         virtual Base::PerformanceMeasurer* Perf(const char* func) = 0;
 #endif
 
@@ -173,7 +173,7 @@ namespace Simd
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params);
             virtual void Forward(const float* src, float* buf, float* dst);
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             virtual Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
@@ -202,7 +202,7 @@ namespace Simd
             size_t _miC, _maC, _yStep[2], _bufH[2], _dp[2], _dw[3];
 
         private:
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             Base::PerformanceMeasurer * _perf;
 #endif        
             mutable String _info;

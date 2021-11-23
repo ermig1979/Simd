@@ -31,7 +31,7 @@ namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
     Base::PerformanceMeasurer * SynetConvolution32f::Perf(const char* func)
     {
         if (_perf == NULL)

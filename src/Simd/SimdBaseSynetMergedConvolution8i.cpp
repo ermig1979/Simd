@@ -60,7 +60,7 @@ namespace Simd
 
         SynetMergedConvolution8i::SynetMergedConvolution8i(const MergConvParam8i& p)
            :  _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
            , _perf(NULL)
 #endif        
         {
@@ -279,7 +279,7 @@ namespace Simd
             }
         }
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer* SynetMergedConvolution8i::Perf(const char* func)
         {
             if (_perf == NULL)

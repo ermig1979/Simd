@@ -115,7 +115,7 @@ namespace Simd
 
         SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f& p)
            :  _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
            , _perf(NULL)
 #endif        
         {
@@ -140,6 +140,7 @@ namespace Simd
                 case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(_param, i, _convolution); break;
                 case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(_param, i, _convolution); break;
                 case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(_param, i, _convolution); break;
+                case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(_param, i, _convolution); break;
                 default: assert(0);
                 }
             }
@@ -228,6 +229,9 @@ namespace Simd
                         _rParams[i].data[0] = params[i][0];
                         _rParams[i].data[1] = params[i][1];
                         break;                    
+                    case SimdConvolutionActivationSwish:
+                        _rParams[i].data[0] = params[i][0];
+                        break;
                     default:
                         assert(0);
                     }
@@ -258,7 +262,7 @@ namespace Simd
             }
         }
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer* SynetMergedConvolution32f::Perf(const char* func)
         {
             if (_perf == NULL)

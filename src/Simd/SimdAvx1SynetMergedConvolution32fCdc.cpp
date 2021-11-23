@@ -1476,7 +1476,9 @@ namespace Simd
 		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
 		{
 			for (size_t i = 0; i < count; ++i)
-				if (convs[i].activation == SimdConvolutionActivationElu || convs[i].activation == SimdConvolutionActivationMish)
+				if (convs[i].activation == SimdConvolutionActivationElu ||
+					convs[i].activation == SimdConvolutionActivationMish ||
+					convs[i].activation == SimdConvolutionActivationSwish)
 					return Sse2::SynetMergedConvolution32fInit(batch, convs, count, add);
 			MergConvParam32f param(batch, convs, count, add);
 			if (!param.Valid())

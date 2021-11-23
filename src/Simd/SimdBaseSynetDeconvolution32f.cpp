@@ -31,7 +31,7 @@ namespace Simd
 {
 #if defined(SIMD_SYNET_ENABLE)
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
     Base::PerformanceMeasurer * SynetDeconvolution32f::Perf(const String& func)
     {
         if (_perf == NULL)
@@ -405,6 +405,9 @@ namespace Simd
                 case SimdConvolutionActivationHardSigmoid:
                     _rParams.data[0] = params[0];
                     _rParams.data[1] = params[1];
+                    break;
+                case SimdConvolutionActivationSwish:
+                    _rParams.data[0] = params[0];
                     break;
                 default:
                     assert(0);

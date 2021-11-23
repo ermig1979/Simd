@@ -170,7 +170,7 @@ namespace Simd
 
         virtual void Forward(const uint8_t * src, uint8_t * buf, uint8_t * dst);
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
@@ -187,7 +187,7 @@ namespace Simd
 
         ConvParam8i _param;
         Array8u _buffer;
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         Base::PerformanceMeasurer * _perf;
 #endif
         mutable String _info;

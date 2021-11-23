@@ -136,7 +136,7 @@ namespace Simd
 
         virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst) = 0;
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
         virtual Base::PerformanceMeasurer* Perf(const char *func) = 0;
 #endif
 
@@ -158,7 +158,7 @@ namespace Simd
             virtual void SetParams(const float * const * weight, SimdBool * internal, const float * const * bias, const float * const * params, const float* const* stats);
             virtual void Forward(const uint8_t* src, uint8_t* buf, uint8_t* dst);
 
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             virtual Base::PerformanceMeasurer* Perf(const char* func);
 #endif
 
@@ -212,7 +212,7 @@ namespace Simd
             OutputConvolutionPtr _output[2];
 
         private:
-#if defined(SIMD_PERFORMANCE_STATISTIC)
+#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
             Base::PerformanceMeasurer * _perf;
 #endif        
             mutable String _info;
