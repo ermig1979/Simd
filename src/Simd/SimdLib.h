@@ -183,6 +183,14 @@ typedef enum
         \endverbatim
     */
     SimdConvolutionActivationHardSigmoid,
+    /*!
+        Swish (https://en.wikipedia.org/wiki/Swish_function) activation function.
+        It has one parameter: slope (params[0]).
+        \verbatim
+        dst[i] = src[i]/(1 + Exp(-slope*src[i]));
+        \endverbatim
+    */
+    SimdConvolutionActivationSwish,
 } SimdConvolutionActivationType;
 
 /*! @ingroup c_types

@@ -191,6 +191,12 @@ namespace Simd
             return Combine(mask, _mm_div_ps(log, beta), value);
         }
 
+        SIMD_INLINE __m128 Swish(__m128 value, __m128 slope)
+        {
+            __m128 exp = Exponent(_mm_sub_ps(_mm_setzero_ps(), _mm_mul_ps(value, slope)));
+            return _mm_div_ps(value, _mm_add_ps(_mm_set1_ps(1.0f), exp));
+        }
+
         SIMD_INLINE __m128 Tanh(__m128 value)
         {
             __m128 _1 = _mm_set1_ps(1.0f);
@@ -350,6 +356,12 @@ namespace Simd
             return _mm256_blendv_ps(value, _mm256_div_ps(log, beta), mask);
         }
 
+        SIMD_INLINE __m256 Swish(__m256 value, __m256 slope)
+        {
+            __m256 exp = Exponent(_mm256_fnmadd_ps(value, slope, _mm256_setzero_ps()));
+            return _mm256_div_ps(value, _mm256_add_ps(_mm256_set1_ps(1.0f), exp));
+        }
+
         SIMD_INLINE __m256 Tanh(__m256 value)
         {
             __m256 _1 = _mm256_set1_ps(1.0f);
@@ -507,6 +519,12 @@ namespace Simd
             __m512 log = Logarithm(_mm512_add_ps(_mm512_set1_ps(1.0f), exp));
             __mmask16 mask = _mm512_cmp_ps_mask(threshold, value, _CMP_GT_OS);
             return _mm512_mask_blend_ps(mask, value, _mm512_div_ps(log, beta));
+        }
+
+        SIMD_INLINE __m512 Swish(__m512 value, __m512 slope)
+        {
+            __m512 exp = Exponent(_mm512_fnmadd_ps(value, slope, _mm512_setzero_ps()));
+            return _mm512_div_ps(value, _mm512_add_ps(_mm512_set1_ps(1.0f), exp));
         }
 
         SIMD_INLINE __m512 Tanh(__m512 value)

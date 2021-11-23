@@ -120,6 +120,47 @@ namespace Simd
                 else
                     SynetMish32f(dst, size * count, &threshold, dst);
             }
+            else if (activation == ::SimdConvolutionActivationSwish)
+            {
+                float slope = params[0];
+                if (bias)
+                {
+                    __m256 _slope = _mm256_set1_ps(slope);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + i), _mm256_loadu_ps(bias + i));
+                                _mm256_storeu_ps(dst + i, Avx2::Swish(value, _slope));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetSwish32f(dst[i] + bias[i], slope);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m256 _bias = _mm256_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m256 value = _mm256_add_ps(_mm256_loadu_ps(dst + j), _bias);
+                                _mm256_storeu_ps(dst + j, Avx2::Swish(value, _slope));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetSwish32f(dst[j] + bias[i], slope);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetSwish32f(dst, size * count, &slope, dst);
+            }
             else
                 Avx::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
         }

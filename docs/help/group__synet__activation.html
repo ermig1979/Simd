@@ -76,6 +76,9 @@ Functions</h2></td></tr>
 <tr class="memitem:gab53f12c34df51ecd854e69cc101ac439"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">SimdSynetSoftplus32f</a> (const float *src, size_t size, const float *beta, const float *threshold, float *dst)</td></tr>
 <tr class="memdesc:gab53f12c34df51ecd854e69cc101ac439"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SoftplusLayer.  <a href="group__synet__activation.html#gab53f12c34df51ecd854e69cc101ac439">More...</a><br /></td></tr>
 <tr class="separator:gab53f12c34df51ecd854e69cc101ac439"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga26308695caa93ead7cde6e40c1dc3706"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga26308695caa93ead7cde6e40c1dc3706">SimdSynetSwish32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
+<tr class="memdesc:ga26308695caa93ead7cde6e40c1dc3706"><td class="mdescLeft">&#160;</td><td class="mdescRight">This function is used for forward propagation of SwishLayer.  <a href="group__synet__activation.html#ga26308695caa93ead7cde6e40c1dc3706">More...</a><br /></td></tr>
+<tr class="separator:ga26308695caa93ead7cde6e40c1dc3706"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__activation.html#ga41c6d86b05a8533de31f028d9b1bf70e">SimdSynetTanh32f</a> (const float *src, size_t size, const float *slope, float *dst)</td></tr>
 <tr class="memdesc:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Calculates hyperbolic tangent for 32-bit float array.  <a href="group__synet__activation.html#ga41c6d86b05a8533de31f028d9b1bf70e">More...</a><br /></td></tr>
 <tr class="separator:ga41c6d86b05a8533de31f028d9b1bf70e"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -608,6 +611,60 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">beta</td><td>- a pointer to 'beta' parameter. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">threshold</td><td>- a pointer to 'threshold' parameter. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output 32-bit float array. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<a id="ga26308695caa93ead7cde6e40c1dc3706" name="ga26308695caa93ead7cde6e40c1dc3706"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga26308695caa93ead7cde6e40c1dc3706">&#9670;&nbsp;</a></span>SimdSynetSwish32f()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdSynetSwish32f </td>
+          <td>(</td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>size</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">const float *&#160;</td>
+          <td class="paramname"><em>slope</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">float *&#160;</td>
+          <td class="paramname"><em>dst</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>This function is used for forward propagation of SwishLayer. </p>
+<p >Algorithm's details: </p><pre class="fragment">for(i = 0; i &lt; size; ++i)
+    dst[i] = src[i]/(1 + exp(-slope*src[i]));
+</pre><dl class="section note"><dt>Note</dt><dd>This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to the 32-bit float array. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a size of input and output arrays. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">slope</td><td>- a pointer to the 'slope' parameter. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output 32-bit float array. </td></tr>
   </table>
   </dd>
 </dl>

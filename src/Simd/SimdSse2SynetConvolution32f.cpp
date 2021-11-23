@@ -378,6 +378,47 @@ namespace Simd
                 else
                     SynetHardSigmoid32f(dst, count * size, &scale, &shift, dst);
             }
+            else if (activation == ::SimdConvolutionActivationSwish)
+            {
+                float slope = params[0];
+                if (bias)
+                {
+                    __m128 _slope = _mm_set1_ps(slope);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Swish(value, _slope));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetSwish32f(dst[i] + bias[i], slope);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m128 _bias = _mm_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Swish(value, _slope));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetSwish32f(dst[j] + bias[i], slope);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetSwish32f(dst, count * size, &slope, dst);
+            }
             else
             {
                 Base::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);

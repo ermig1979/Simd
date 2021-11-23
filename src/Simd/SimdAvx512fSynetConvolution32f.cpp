@@ -490,8 +490,57 @@ namespace Simd
                         }
                     }
                 }
-                else
+                else 
                     SynetHardSigmoid32f(dst, size * count, &scale, &shift, dst);
+            }
+            else if (activation == ::SimdConvolutionActivationSwish)
+            {
+                float slope = params[0];
+                if (bias)
+                {
+                    __m512 _slope = _mm512_set1_ps(slope);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                __m512 _dst = _mm512_loadu_ps(dst + i);
+                                __m512 _bias = _mm512_loadu_ps(bias + i);
+                                _mm512_storeu_ps(dst + i, Avx512f::Swish(_mm512_add_ps(_dst, _bias), _slope));
+                            }
+                            if (i < count)
+                            {
+                                __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
+                                __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
+                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::Swish(_mm512_add_ps(_dst, _bias), _slope));
+                            }
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            __m512 _bias = _mm512_set1_ps(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
+                                _mm512_storeu_ps(dst + j, Avx512f::Swish(value, _slope));
+                            }
+                            if (j < size)
+                            {
+                                __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
+                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::Swish(value, _slope));
+                            }
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    SynetSwish32f(dst, size * count, &slope, dst);
             }
             else
                 assert(0);
