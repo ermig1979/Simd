@@ -40,6 +40,7 @@ $(function() {
 </div><!-- top -->
 <div class="header">
   <div class="summary">
+<a href="#enum-members">Enumerations</a> &#124;
 <a href="#func-members">Functions</a>  </div>
   <div class="headertitle"><div class="title">YUV<div class="ingroups"><a class="el" href="group__functions.html">Functions</a> &raquo; <a class="el" href="group__conversion.html">Conversion</a></div></div></div>
 </div><!--header-->
@@ -48,6 +49,20 @@ $(function() {
 <p>Functions for YUV image conversions.  
 <a href="#details">More...</a></p>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="enum-members" name="enum-members"></a>
+Enumerations</h2></td></tr>
+<tr class="memitem:gad247235213be1a24330e4ad8616d1224"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a> { <br />
+&#160;&#160;<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370">SimdYuvBt601</a>
+, <br />
+&#160;&#160;<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36">SimdYuvBt709</a>
+, <br />
+&#160;&#160;<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6">SimdYuvBt2020</a>
+, <br />
+&#160;&#160;<a class="el" href="group__yuv__conversion.html#ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d">SimdYuvTrect871</a>
+<br />
+ }</td></tr>
+<tr class="separator:gad247235213be1a24330e4ad8616d1224"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
 <tr class="memitem:ga0728ab835c4c3e44747ade08c9423ce5"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__yuv__conversion.html#ga0728ab835c4c3e44747ade08c9423ce5">SimdUyvyToBgr</a> (const uint8_t *uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t *bgr, size_t bgrStride)</td></tr>
@@ -158,6 +173,32 @@ Functions</h2></td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for YUV image conversions. </p>
+<h2 class="groupheader">Enumeration Type Documentation</h2>
+<a id="gad247235213be1a24330e4ad8616d1224" name="gad247235213be1a24330e4ad8616d1224"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gad247235213be1a24330e4ad8616d1224">&#9670;&nbsp;</a></span>SimdYuvType</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="group__yuv__conversion.html#gad247235213be1a24330e4ad8616d1224">SimdYuvType</a></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<p >Describes YUV format type. It is uses in YUV to BGR forward and backward conversions. </p>
+<table class="fieldtable">
+<tr><th colspan="2">Enumerator</th></tr><tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370" name="ggad247235213be1a24330e4ad8616d1224aa5b3e950219cca3a1864340c45cc2370"></a>SimdYuvBt601&#160;</td><td class="fielddoc"><p >Corresponds to BT.601 standard. Uses Kr=0.299, Kb=0.114. Restricts Y to range [16..235], U and V to [16..240]. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36" name="ggad247235213be1a24330e4ad8616d1224a26e2fd142e3db10933c1764da47f7d36"></a>SimdYuvBt709&#160;</td><td class="fielddoc"><p >Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240]. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6" name="ggad247235213be1a24330e4ad8616d1224ab94d911475e4357980b60e196ee1eeb6"></a>SimdYuvBt2020&#160;</td><td class="fielddoc"><p >Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. </p>
+</td></tr>
+<tr><td class="fieldname"><a id="ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d" name="ggad247235213be1a24330e4ad8616d1224aab96371d6d2dded571fa14eee525982d"></a>SimdYuvTrect871&#160;</td><td class="fielddoc"><p >Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. </p>
+</td></tr>
+</table>
+
+</div>
+</div>
 <h2 class="groupheader">Function Documentation</h2>
 <a id="ga0728ab835c4c3e44747ade08c9423ce5" name="ga0728ab835c4c3e44747ade08c9423ce5"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#ga0728ab835c4c3e44747ade08c9423ce5">&#9670;&nbsp;</a></span>SimdUyvyToBgr()</h2>

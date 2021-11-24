@@ -477,6 +477,17 @@ typedef enum
     SimdTransformTransposeRotate270, /*!< Image transposed and rotated 270 degrees counterclockwise. It is equal to vertical mirroring of image. The output image has the same size as input image.*/
 } SimdTransformType;
 
+/*! @ingroup yuv_conversion
+    Describes YUV format type. It is uses in YUV to BGR forward and backward conversions.
+*/
+typedef enum
+{
+    SimdYuvBt601, /*!< Corresponds to BT.601 standard. Uses Kr=0.299, Kb=0.114. Restricts Y to range [16..235], U and V to [16..240]. */
+    SimdYuvBt709, /*!< Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240]. */
+    SimdYuvBt2020, /*!< Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. */
+    SimdYuvTrect871, /*!< Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. */
+} SimdYuvType;
+
 /*! @ingroup synet
     \brief Callback function type "SimdGemm32fNNPtr";
 
