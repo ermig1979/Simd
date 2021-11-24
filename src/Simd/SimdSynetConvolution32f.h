@@ -142,11 +142,12 @@ namespace Simd
             return ss.str();
         }
 
+#endif
+
         SIMD_INLINE int64_t Flop() const
         {
             return int64_t(batch) * kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
-        }
-#endif
+        }    
     };
 
     class SynetConvolution32f : public Deletable

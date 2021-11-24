@@ -528,6 +528,7 @@ namespace Simd
 			case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, d); break;
 			case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, d); break;
 			case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, d); break;
+			case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(p, d); break;
 			default: assert(0);
 			}
 		}

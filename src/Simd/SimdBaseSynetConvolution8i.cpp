@@ -229,6 +229,9 @@ namespace Simd
             _params[0] = params[0];
             _params[1] = params[1];
             break;
+        case SimdConvolutionActivationSwish:
+            _params[0] = params[0];
+            break;
         default:
             assert(0);
         }
@@ -373,6 +376,9 @@ namespace Simd
                 break;
             case SimdConvolutionActivationHardSigmoid:
                 SynetHardSigmoid32f(dst32f, _merge * _sizeD, _params.data, _params.data + 1, dst32f);
+                break;
+            case SimdConvolutionActivationSwish:
+                SynetSwish32f(dst32f, _merge * _sizeD, _params.data, dst32f);
                 break;
             default:
                 assert(0);
