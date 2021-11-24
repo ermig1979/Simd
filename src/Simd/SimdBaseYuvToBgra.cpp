@@ -111,5 +111,13 @@ namespace Simd
                 bgra += bgraStride;
             }
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            assert(0);
+        }
     }
 }

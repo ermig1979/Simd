@@ -118,6 +118,8 @@ namespace Test
         return result;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncYuv
@@ -281,7 +283,80 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncYuv2
+        {
+            typedef void(*FuncPtr)(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+                size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
+
+            FuncPtr func;
+            String description;
+
+            FuncYuv2(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& y, const View& u, const View& v, View& bgra, uint8_t alpha, SimdYuvType yuvType) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, bgra.data, bgra.stride, alpha, yuvType);
+            }
+        };
+    }
+
+#define FUNC_YUV2(function) FuncYuv2(function, #function)
+
+    bool YuvToBgra2AutoTest(int width, int height, const FuncYuv2& f1, const FuncYuv2& f2, int dx, int dy, SimdYuvType yuvType)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << width << ", " << height << "].");
+
+        const int uvWidth = width / dx;
+        const int uvHeight = height / dy;
+
+        View y(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(y);
+        View u(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
+        FillRandom(u);
+        View v(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
+        FillRandom(v);
+
+        View bgra1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        View bgra2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
+        const uint8_t alpha = 0xFE;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(y, u, v, bgra1, alpha, yuvType));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(y, u, v, bgra2, alpha, yuvType));
+
+        result = result && Compare(bgra1, bgra2, 0, true, 64);
+
+        return result;
+    }
+
+    bool YuvToBgra2AutoTest(const FuncYuv2& f1, const FuncYuv2& f2, int dx, int dy)
+    {
+        bool result = true;
+
+        result = result && YuvToBgra2AutoTest(W, H, f1, f2, dx, dy, SimdYuvBt601);
+        result = result && YuvToBgra2AutoTest(W + O * dx, H - O * dy, f1, f2, dx, dy, SimdYuvBt601);
+        result = result && YuvToBgra2AutoTest(W - O * dx, H + O * dy, f1, f2, dx, dy, SimdYuvBt601);
+
+        return result;
+    }
+
+    bool Yuv444pToBgraV2AutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
 
     bool YuvToBgraDataTest(bool create, int width, int height, const FuncYuv & f, int dx, int dy)
     {

@@ -460,6 +460,7 @@ namespace Test
 
     TEST_ADD_GROUP_A00(Yuva420pToBgra);
     TEST_ADD_GROUP_AD0(Yuv444pToBgra);
+    TEST_ADD_GROUP_AD0(Yuv444pToBgraV2);
     TEST_ADD_GROUP_AD0(Yuv422pToBgra);
     TEST_ADD_GROUP_AD0(Yuv420pToBgra);
 
