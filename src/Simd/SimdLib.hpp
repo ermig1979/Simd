@@ -3164,7 +3164,7 @@ namespace Simd
     */
     template<template<class> class A> SIMD_INLINE void Resize(const View<A> & src, View<A> & dst, ::SimdResizeMethodType method = ::SimdResizeMethodBilinear)
     {
-        assert(src.format == dst.format && (src.format == View<A>::Float || src.ChannelSize() == 1));
+        assert(src.format == dst.format && (src.format == View<A>::Float || src.ChannelSize() == 1 || src.ChannelSize() == 2));
 
         if (EqualSize(src, dst))
         {
@@ -3172,7 +3172,7 @@ namespace Simd
         }
         else
         {
-            SimdResizeChannelType type = src.format == View<A>::Float ? SimdResizeChannelFloat : SimdResizeChannelByte;
+            SimdResizeChannelType type = src.format == View<A>::Float ? SimdResizeChannelFloat : (src.ChannelSize() == 2 ? SimdResizeChannelShort : SimdResizeChannelByte);
             void * resizer = SimdResizerInit(src.width, src.height, dst.width, dst.height, src.ChannelCount(), type, method);
             if (resizer)
             {
