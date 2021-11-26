@@ -358,6 +358,11 @@ namespace Test
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse2::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
+#endif 
+
         return result;
     }
 
