@@ -145,139 +145,36 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-#define YUV2BGR_VER 0
-
-#if YUV2BGR_VER == 0
-        class YuvToBgr
-        {
-            int SHIFT;
-            __m128i Y_LO, UV_Z, YA_RT, VR_0, UG_VG, UB_0;
-
-            template<class T> void Init()
-            {
-                SHIFT = T::F_SHIFT;
-                Y_LO = _mm_set1_epi16(T::Y_LO);
-                UV_Z = _mm_set1_epi16(T::UV_Z);
-                YA_RT = SetInt16(T::Y_2_A, T::F_ROUND);
-                VR_0 = SetInt16(T::V_2_R, 0);
-                UG_VG = SetInt16(T::U_2_G, T::V_2_G);
-                UB_0 = SetInt16(T::U_2_B, 0);
-            };
-
-            SIMD_INLINE __m128i ToRed32(__m128i y16_1, __m128i v16_0) const
-            {
-                return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(y16_1, YA_RT), _mm_madd_epi16(v16_0, VR_0)), SHIFT);
-            }
-
-            SIMD_INLINE __m128i ToGreen32(__m128i y16_1, __m128i u16_v16) const
-            {
-                return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(y16_1, YA_RT), _mm_madd_epi16(u16_v16, UG_VG)), SHIFT);
-            }
-
-            SIMD_INLINE __m128i ToBlue32(__m128i y16_1, __m128i u16_0) const
-            {
-                return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(y16_1, YA_RT), _mm_madd_epi16(u16_0, UB_0)), SHIFT);
-            }
-
-        public:
-
-            YuvToBgr(SimdYuvType type)
-            {
-                switch (type)
-                {
-                case SimdYuvBt601: Init<Base::Bt601>(); break;
-                case SimdYuvBt709: Init<Base::Bt709>(); break;
-                case SimdYuvBt2020: Init<Base::Bt2020>(); break;
-                case SimdYuvTrect871: Init<Base::Trect871>(); break;
-                default:
-                    assert(0);
-                }
-            }
-
-            template <int part> SIMD_INLINE __m128i UnpackY(__m128i y) const
-            {
-                return _mm_subs_epi16(Sse2::UnpackU8<part>(y, K_ZERO), Y_LO);
-            }
-
-            template <int part> SIMD_INLINE __m128i UnpackUV(__m128i uv) const
-            {
-                return _mm_subs_epi16(Sse2::UnpackU8<part>(uv, K_ZERO), UV_Z);
-            }
-
-            SIMD_INLINE __m128i ToRed16(__m128i y16, __m128i v16) const
-            {
-                return SaturateI16ToU8(_mm_packs_epi32(
-                    ToRed32(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(v16, K_ZERO)),
-                    ToRed32(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(v16, K_ZERO))));
-            }
-
-            SIMD_INLINE __m128i ToGreen16(__m128i y16, __m128i u16, __m128i v16) const
-            {
-                return SaturateI16ToU8(_mm_packs_epi32(
-                    ToGreen32(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, v16)),
-                    ToGreen32(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, v16))));
-            }
-
-            SIMD_INLINE __m128i ToBlue16(__m128i y16, __m128i u16) const
-            {
-                return SaturateI16ToU8(_mm_packs_epi32(
-                    ToBlue32(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, K_ZERO)),
-                    ToBlue32(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, K_ZERO))));
-            }
-
-            SIMD_INLINE __m128i ToRed(__m128i y, __m128i v) const
-            {
-                __m128i lo = ToRed16(UnpackY<0>(y), UnpackUV<0>(v));
-                __m128i hi = ToRed16(UnpackY<1>(y), UnpackUV<1>(v));
-                return _mm_packus_epi16(lo, hi);
-            }
-
-            SIMD_INLINE __m128i ToGreen(__m128i y, __m128i u, __m128i v) const
-            {
-                __m128i lo = ToGreen16(UnpackY<0>(y), UnpackUV<0>(u), UnpackUV<0>(v));
-                __m128i hi = ToGreen16(UnpackY<1>(y), UnpackUV<1>(u), UnpackUV<1>(v));
-                return _mm_packus_epi16(lo, hi);
-            }
-
-            SIMD_INLINE __m128i ToBlue(__m128i y, __m128i u) const
-            {
-                __m128i lo = ToBlue16(UnpackY<0>(y), UnpackUV<0>(u));
-                __m128i hi = ToBlue16(UnpackY<1>(y), UnpackUV<1>(u));
-                return _mm_packus_epi16(lo, hi);
-            }
-        };
-#elif YUV2BGR_VER == 1
-
         template<class T> SIMD_INLINE __m128i YuvToRed32(__m128i y16_1, __m128i v16_0)
         {
-            static const __m128i YA_RT = SetInt16(T::Y_2_A, T::F_ROUND);
-            static const __m128i VR_0 = SetInt16(T::V_2_R, 0);
+            static const __m128i YA_RT = SIMD_MM_SET2_EPI16(T::Y_2_A, T::F_ROUND);
+            static const __m128i VR_0 = SIMD_MM_SET2_EPI16(T::V_2_R, 0);
             return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(y16_1, YA_RT), _mm_madd_epi16(v16_0, VR_0)), T::F_SHIFT);
         }
 
         template<class T> SIMD_INLINE __m128i YuvToGreen32(__m128i y16_1, __m128i u16_v16)
         {
-            static const __m128i YA_RT = SetInt16(T::Y_2_A, T::F_ROUND);
-            static const __m128i UG_VG = SetInt16(T::U_2_G, T::V_2_G);
+            static const __m128i YA_RT = SIMD_MM_SET2_EPI16(T::Y_2_A, T::F_ROUND);
+            static const __m128i UG_VG = SIMD_MM_SET2_EPI16(T::U_2_G, T::V_2_G);
             return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(y16_1, YA_RT), _mm_madd_epi16(u16_v16, UG_VG)), T::F_SHIFT);
         }
 
         template<class T> SIMD_INLINE __m128i YuvToBlue32(__m128i y16_1, __m128i u16_0)
         {
-            static const __m128i YA_RT = SetInt16(T::Y_2_A, T::F_ROUND);
-            static const __m128i UB_0 = SetInt16(T::U_2_B, 0);
+            static const __m128i YA_RT = SIMD_MM_SET2_EPI16(T::Y_2_A, T::F_ROUND);
+            static const __m128i UB_0 = SIMD_MM_SET2_EPI16(T::U_2_B, 0);
             return _mm_srai_epi32(_mm_add_epi32(_mm_madd_epi16(y16_1, YA_RT), _mm_madd_epi16(u16_0, UB_0)), T::F_SHIFT);
         }
 
         template <class T, int part> SIMD_INLINE __m128i UnpackY(__m128i y)
         {
-            static const __m128i Y_LO = _mm_set1_epi16(T::Y_LO);
+            static const __m128i Y_LO = SIMD_MM_SET1_EPI16(T::Y_LO);
             return _mm_subs_epi16(Sse2::UnpackU8<part>(y, K_ZERO), Y_LO);
         }
 
         template <class T, int part> SIMD_INLINE __m128i UnpackUV(__m128i uv)
         {
-            static const __m128i UV_Z = _mm_set1_epi16(T::UV_Z);
+            static const __m128i UV_Z = SIMD_MM_SET1_EPI16(T::UV_Z);
             return _mm_subs_epi16(Sse2::UnpackU8<part>(uv, K_ZERO), UV_Z);
         }
 
@@ -322,7 +219,6 @@ namespace Simd
             __m128i hi = YuvToBlue16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u));
             return _mm_packus_epi16(lo, hi);
         }
-#endif
     }
 #endif// SIMD_SSE2_ENABLE
 }

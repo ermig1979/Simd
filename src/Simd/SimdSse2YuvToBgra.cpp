@@ -266,70 +266,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-#if YUV2BGR_VER == 0
-        class YuvToBgra : public Sse2::YuvToBgr
-        {
-            template <bool align> SIMD_INLINE void ToBgra16(__m128i y16, __m128i u16, __m128i v16,  const __m128i& a_0, __m128i* bgra) const
-            {
-                const __m128i b16 = ToBlue16(y16, u16);
-                const __m128i g16 = ToGreen16(y16, u16, v16);
-                const __m128i r16 = ToRed16(y16, v16);
-                const __m128i bg8 = _mm_or_si128(b16, _mm_slli_si128(g16, 1));
-                const __m128i ra8 = _mm_or_si128(r16, a_0);
-                Store<align>(bgra + 0, _mm_unpacklo_epi16(bg8, ra8));
-                Store<align>(bgra + 1, _mm_unpackhi_epi16(bg8, ra8));
-            }
-
-        public:
-            YuvToBgra(SimdYuvType type)
-                :YuvToBgr(type)
-            {
-            }
-
-            template <bool align> SIMD_INLINE void ToBgra(__m128i y8, __m128i u8, __m128i v8, const __m128i& a_0, __m128i* bgra) const
-            {
-                ToBgra16<align>(UnpackY<0>(y8), UnpackUV<0>(u8), UnpackUV<0>(v8), a_0, bgra + 0);
-                ToBgra16<align>(UnpackY<1>(y8), UnpackUV<1>(u8), UnpackUV<1>(v8), a_0, bgra + 2);
-            }
-
-            template <bool align> SIMD_INLINE void ToBgra(const uint8_t* y, const uint8_t* u, const uint8_t* v, const __m128i& a_0, uint8_t* bgra) const
-            {
-                ToBgra<align>(Load<align>((__m128i*)y), Load<align>((__m128i*)u), Load<align>((__m128i*)v), a_0, (__m128i*)bgra);
-            }
-        };
-
-        template <bool align> void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
-        {
-            assert(width >= A);
-            if (align)
-            {
-                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
-                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
-            }
-
-            __m128i a_0 = _mm_slli_si128(_mm_set1_epi16(alpha), 1);
-            size_t bodyWidth = AlignLo(width, A);
-            size_t tail = width - bodyWidth;
-            YuvToBgra yuvToBgra(yuvType);
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t colYuv = 0, colBgra = 0; colYuv < bodyWidth; colYuv += A, colBgra += QA)
-                {
-                    yuvToBgra.ToBgra<align>(y + colYuv, u + colYuv, v + colYuv, a_0, bgra + colBgra);
-                }
-                if (tail)
-                {
-                    size_t col = width - A;
-                    yuvToBgra.ToBgra<false>(y + col, u + col, v + col, a_0, bgra + 4 * col);
-                }
-                y += yStride;
-                u += uStride;
-                v += vStride;
-                bgra += bgraStride;
-            }
-        }
-#elif YUV2BGR_VER == 1
         template <bool align, class T> SIMD_INLINE void YuvToBgra16(__m128i y16, __m128i u16, __m128i v16, const __m128i& a_0, __m128i* bgra)
         {
             const __m128i b16 = YuvToBlue16<T>(y16, u16);
@@ -382,7 +318,6 @@ namespace Simd
                 bgra += bgraStride;
             }
         }
-
         template <bool align> void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
         {
@@ -396,7 +331,7 @@ namespace Simd
                 assert(0);
             }
         }
-#endif
+
         void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
         {
