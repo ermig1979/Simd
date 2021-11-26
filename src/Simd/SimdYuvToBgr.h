@@ -169,34 +169,34 @@ namespace Simd
         template <class T, int part> SIMD_INLINE __m128i UnpackY(__m128i y)
         {
             static const __m128i Y_LO = SIMD_MM_SET1_EPI16(T::Y_LO);
-            return _mm_subs_epi16(Sse2::UnpackU8<part>(y, K_ZERO), Y_LO);
+            return _mm_subs_epi16(UnpackU8<part>(y, K_ZERO), Y_LO);
         }
 
         template <class T, int part> SIMD_INLINE __m128i UnpackUV(__m128i uv)
         {
             static const __m128i UV_Z = SIMD_MM_SET1_EPI16(T::UV_Z);
-            return _mm_subs_epi16(Sse2::UnpackU8<part>(uv, K_ZERO), UV_Z);
+            return _mm_subs_epi16(UnpackU8<part>(uv, K_ZERO), UV_Z);
         }
 
         template <class T> SIMD_INLINE __m128i YuvToRed16(__m128i y16, __m128i v16)
         {
-            return SaturateI16ToU8(_mm_packs_epi32(
-                YuvToRed32<T>(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(v16, K_ZERO)),
-                YuvToRed32<T>(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(v16, K_ZERO))));
+            __m128i lo = YuvToRed32<T>(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(v16, K_ZERO));
+            __m128i hi = YuvToRed32<T>(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(v16, K_ZERO));
+            return SaturateI16ToU8(_mm_packs_epi32(lo, hi));
         }
 
         template <class T> SIMD_INLINE __m128i YuvToGreen16(__m128i y16, __m128i u16, __m128i v16)
         {
-            return SaturateI16ToU8(_mm_packs_epi32(
-                YuvToGreen32<T>(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, v16)),
-                YuvToGreen32<T>(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, v16))));
+            __m128i lo = YuvToGreen32<T>(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, v16));
+            __m128i hi = YuvToGreen32<T>(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, v16));
+            return SaturateI16ToU8(_mm_packs_epi32(lo, hi));
         }
 
         template <class T> SIMD_INLINE __m128i YuvToBlue16(__m128i y16, __m128i u16)
         {
-            return SaturateI16ToU8(_mm_packs_epi32(
-                YuvToBlue32<T>(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, K_ZERO)),
-                YuvToBlue32<T>(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, K_ZERO))));
+            __m128i lo = YuvToBlue32<T>(_mm_unpacklo_epi16(y16, K16_0001), _mm_unpacklo_epi16(u16, K_ZERO));
+            __m128i hi = YuvToBlue32<T>(_mm_unpackhi_epi16(y16, K16_0001), _mm_unpackhi_epi16(u16, K_ZERO));
+            return SaturateI16ToU8(_mm_packs_epi32(lo, hi));
         }
 
         template <class T> SIMD_INLINE __m128i YuvToRed(__m128i y, __m128i v)
@@ -249,34 +249,34 @@ namespace Simd
         template <class T, int part> SIMD_INLINE __m256i UnpackY(__m256i y)
         {
             static const __m256i Y_LO = SIMD_MM256_SET1_EPI16(T::Y_LO);
-            return _mm256_subs_epi16(Avx2::UnpackU8<part>(y, K_ZERO), Y_LO);
+            return _mm256_subs_epi16(UnpackU8<part>(y, K_ZERO), Y_LO);
         }
 
         template <class T, int part> SIMD_INLINE __m256i UnpackUV(__m256i uv)
         {
             static const __m256i UV_Z = SIMD_MM256_SET1_EPI16(T::UV_Z);
-            return _mm256_subs_epi16(Avx2::UnpackU8<part>(uv, K_ZERO), UV_Z);
+            return _mm256_subs_epi16(UnpackU8<part>(uv, K_ZERO), UV_Z);
         }
 
         template <class T> SIMD_INLINE __m256i YuvToRed16(__m256i y16, __m256i v16)
         {
-            return SaturateI16ToU8(_mm256_packs_epi32(
-                YuvToRed32<T>(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(v16, K_ZERO)),
-                YuvToRed32<T>(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(v16, K_ZERO))));
+            __m256i lo = YuvToRed32<T>(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(v16, K_ZERO));
+            __m256i hi = YuvToRed32<T>(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(v16, K_ZERO));
+            return SaturateI16ToU8(_mm256_packs_epi32(lo, hi));
         }
 
         template <class T> SIMD_INLINE __m256i YuvToGreen16(__m256i y16, __m256i u16, __m256i v16)
         {
-            return SaturateI16ToU8(_mm256_packs_epi32(
-                YuvToGreen32<T>(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(u16, v16)),
-                YuvToGreen32<T>(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(u16, v16))));
+            __m256i lo = YuvToGreen32<T>(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(u16, v16));
+            __m256i hi = YuvToGreen32<T>(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(u16, v16));
+            return SaturateI16ToU8(_mm256_packs_epi32(lo, hi));
         }
 
         template <class T> SIMD_INLINE __m256i YuvToBlue16(__m256i y16, __m256i u16)
         {
-            return SaturateI16ToU8(_mm256_packs_epi32(
-                YuvToBlue32<T>(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(u16, K_ZERO)),
-                YuvToBlue32<T>(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(u16, K_ZERO))));
+            __m256i lo = YuvToBlue32<T>(_mm256_unpacklo_epi16(y16, K16_0001), _mm256_unpacklo_epi16(u16, K_ZERO));
+            __m256i hi = YuvToBlue32<T>(_mm256_unpackhi_epi16(y16, K16_0001), _mm256_unpackhi_epi16(u16, K_ZERO));
+            return SaturateI16ToU8(_mm256_packs_epi32(lo, hi));
         }
 
         template <class T> SIMD_INLINE __m256i YuvToRed(__m256i y, __m256i v)
@@ -298,6 +298,86 @@ namespace Simd
             __m256i lo = YuvToBlue16<T>(UnpackY<T, 0>(y), UnpackUV<T, 0>(u));
             __m256i hi = YuvToBlue16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u));
             return _mm256_packus_epi16(lo, hi);
+        }
+    }
+#endif
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        template<class T> SIMD_INLINE __m512i YuvToRed32(__m512i y16_1, __m512i v16_0)
+        {
+            static const __m512i YA_RT = SIMD_MM512_SET2_EPI16(T::Y_2_A, T::F_ROUND);
+            static const __m512i VR_0 = SIMD_MM512_SET2_EPI16(T::V_2_R, 0);
+            return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(y16_1, YA_RT), _mm512_madd_epi16(v16_0, VR_0)), T::F_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m512i YuvToGreen32(__m512i y16_1, __m512i u16_v16)
+        {
+            static const __m512i YA_RT = SIMD_MM512_SET2_EPI16(T::Y_2_A, T::F_ROUND);
+            static const __m512i UG_VG = SIMD_MM512_SET2_EPI16(T::U_2_G, T::V_2_G);
+            return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(y16_1, YA_RT), _mm512_madd_epi16(u16_v16, UG_VG)), T::F_SHIFT);
+        }
+
+        template<class T> SIMD_INLINE __m512i YuvToBlue32(__m512i y16_1, __m512i u16_0)
+        {
+            static const __m512i YA_RT = SIMD_MM512_SET2_EPI16(T::Y_2_A, T::F_ROUND);
+            static const __m512i UB_0 = SIMD_MM512_SET2_EPI16(T::U_2_B, 0);
+            return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(y16_1, YA_RT), _mm512_madd_epi16(u16_0, UB_0)), T::F_SHIFT);
+        }
+
+        template <class T, int part> SIMD_INLINE __m512i UnpackY(__m512i y)
+        {
+            static const __m512i Y_LO = SIMD_MM512_SET1_EPI16(T::Y_LO);
+            return _mm512_subs_epi16(UnpackU8<part>(y, K_ZERO), Y_LO);
+        }
+
+        template <class T, int part> SIMD_INLINE __m512i UnpackUV(__m512i uv)
+        {
+            static const __m512i UV_Z = SIMD_MM512_SET1_EPI16(T::UV_Z);
+            return _mm512_subs_epi16(UnpackU8<part>(uv, K_ZERO), UV_Z);
+        }
+
+        template <class T> SIMD_INLINE __m512i YuvToRed16(__m512i y16, __m512i v16)
+        {
+            __m512i lo = YuvToRed32<T>(_mm512_unpacklo_epi16(y16, K16_0001), _mm512_unpacklo_epi16(v16, K_ZERO));
+            __m512i hi = YuvToRed32<T>(_mm512_unpackhi_epi16(y16, K16_0001), _mm512_unpackhi_epi16(v16, K_ZERO));
+            return SaturateI16ToU8(_mm512_packs_epi32(lo, hi));
+        }
+
+        template <class T> SIMD_INLINE __m512i YuvToGreen16(__m512i y16, __m512i u16, __m512i v16)
+        {
+            __m512i lo = YuvToGreen32<T>(_mm512_unpacklo_epi16(y16, K16_0001), _mm512_unpacklo_epi16(u16, v16));
+            __m512i hi = YuvToGreen32<T>(_mm512_unpackhi_epi16(y16, K16_0001), _mm512_unpackhi_epi16(u16, v16));
+            return SaturateI16ToU8(_mm512_packs_epi32(lo, hi));
+        }
+
+        template <class T> SIMD_INLINE __m512i YuvToBlue16(__m512i y16, __m512i u16)
+        {
+            __m512i lo = YuvToBlue32<T>(_mm512_unpacklo_epi16(y16, K16_0001), _mm512_unpacklo_epi16(u16, K_ZERO));
+            __m512i hi = YuvToBlue32<T>(_mm512_unpackhi_epi16(y16, K16_0001), _mm512_unpackhi_epi16(u16, K_ZERO));
+            return SaturateI16ToU8(_mm512_packs_epi32(lo, hi));
+        }
+
+        template <class T> SIMD_INLINE __m512i YuvToRed(__m512i y, __m512i v)
+        {
+            __m512i lo = YuvToRed16<T>(UnpackY<T, 0>(y), UnpackUV<T, 0>(v));
+            __m512i hi = YuvToRed16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(v));
+            return _mm512_packus_epi16(lo, hi);
+        }
+
+        template <class T> SIMD_INLINE __m512i YuvToGreen(__m512i y, __m512i u, __m512i v)
+        {
+            __m512i lo = YuvToGreen16<T>(UnpackY<T, 0>(y), UnpackUV<T, 0>(u), UnpackUV<T, 0>(v));
+            __m512i hi = YuvToGreen16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u), UnpackUV<T, 1>(v));
+            return _mm512_packus_epi16(lo, hi);
+        }
+
+        template <class T> SIMD_INLINE __m512i YuvToBlue(__m512i y, __m512i u)
+        {
+            __m512i lo = YuvToBlue16<T>(UnpackY<T, 0>(y), UnpackUV<T, 0>(u));
+            __m512i hi = YuvToBlue16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u));
+            return _mm512_packus_epi16(lo, hi);
         }
     }
 #endif

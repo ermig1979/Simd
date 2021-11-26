@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdYuvToBgr.h"
 
 namespace Simd
 {
@@ -260,6 +261,86 @@ namespace Simd
                 Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
             else
                 Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align, bool mask, class T> SIMD_INLINE void YuvToBgra(const __m512i& y, const __m512i& u, 
+            const __m512i& v, const __m512i& a, uint8_t* bgra, const __mmask64* tails)
+        {
+            __m512i b = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToBlue<T>(y, u));
+            __m512i g = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToGreen<T>(y, u, v));
+            __m512i r = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToRed<T>(y, v));
+            __m512i bg0 = UnpackU8<0>(b, g);
+            __m512i bg1 = UnpackU8<1>(b, g);
+            __m512i ra0 = UnpackU8<0>(r, a);
+            __m512i ra1 = UnpackU8<1>(r, a);
+            Store<align, mask>(bgra + 0 * A, UnpackU16<0>(bg0, ra0), tails[0]);
+            Store<align, mask>(bgra + 1 * A, UnpackU16<1>(bg0, ra0), tails[1]);
+            Store<align, mask>(bgra + 2 * A, UnpackU16<0>(bg1, ra1), tails[2]);
+            Store<align, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
+        }
+
+        template <bool align, bool mask, class T> SIMD_INLINE void Yuv444pToBgraV2(const uint8_t* y, 
+            const uint8_t* u, const uint8_t* v, const __m512i& a, uint8_t* bgra, const __mmask64* tails)
+        {
+            YuvToBgra<align, mask, T>(Load<align, mask>(y, tails[0]), Load<align, mask>(u, tails[0]), Load<align, mask>(v, tails[0]), a, bgra, tails + 1);
+        }
+
+        template <bool align, class T> void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            __m512i a = _mm512_set1_epi8(alpha);
+            size_t alignedWidth = AlignLo(width, A);
+            size_t tail = width - alignedWidth;
+            __mmask64 tailMasks[5];
+            tailMasks[0] = TailMask64(tail);
+            for (size_t i = 0; i < 4; ++i)
+                tailMasks[1 + i] = TailMask64(tail * 4 - A * i);
+            for (size_t row = 0; row < height; ++row)
+            {
+                size_t col = 0;
+                for (; col < alignedWidth; col += A)
+                    Yuv444pToBgraV2<align, false, T>(y + col, u + col, v + col, a, bgra + col * 4, tailMasks);
+                if (col < width)
+                    Yuv444pToBgraV2<align, true, T>(y + col, u + col, v + col, a, bgra + col * 4, tailMasks);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+
+        }
+
+        template <bool align> void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv444pToBgraV2<align, Base::Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvBt709: Yuv444pToBgraV2<align, Base::Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvBt2020: Yuv444pToBgraV2<align, Base::Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvTrect871: Yuv444pToBgraV2<align, Base::Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                Yuv444pToBgraV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+            else
+                Yuv444pToBgraV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
         }
     }
 #endif// SIMD_AVX512BW_ENABLE
