@@ -353,6 +353,11 @@ namespace Test
 
         result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
 
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse2::Yuv444pToBgraV2), FUNC_YUV2(SimdYuv444pToBgraV2), 1, 1);
+#endif 
+
         return result;
     }
 
