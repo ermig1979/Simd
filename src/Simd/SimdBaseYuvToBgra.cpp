@@ -115,6 +115,49 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        template <class YuvType> SIMD_INLINE void Yuv422pToBgra(const uint8_t* y, int u, int v, int alpha, uint8_t* bgra)
+        {
+            YuvToBgra<YuvType>(y[0], u, v, alpha, bgra + 0);
+            YuvToBgra<YuvType>(y[1], u, v, alpha, bgra + 4);
+        }
+
+        template <class YuvType> void Yuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
+                {
+                    int _u = u[colUV];
+                    int _v = v[colUV];
+                    Yuv422pToBgra<YuvType>(y + colY, _u, _v, alpha, bgra + colBgra);
+                    Yuv422pToBgra<YuvType>(y + yStride + colY, _u, _v, alpha, bgra + bgraStride + colBgra);
+                }
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void Yuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuv420pToBgraV2<Bt601>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvBt709: Yuv420pToBgraV2<Bt709>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvBt2020: Yuv420pToBgraV2<Bt2020>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            case SimdYuvTrect871: Yuv420pToBgraV2<Trect871>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template <class YuvType> void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
             size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha)
         {

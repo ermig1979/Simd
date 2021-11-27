@@ -8197,6 +8197,31 @@ extern "C"
 
     /*! @ingroup yuv_conversion
 
+        \fn void SimdYuv420pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
+
+        \short Converts YUV420P image to 32-bit BGRA image.
+
+        The input Y and output BGRA images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] alpha - a value of alpha channel.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+    */
+    SIMD_API void SimdYuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
+
+    /*! @ingroup yuv_conversion
+
         \fn void SimdYuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
         \short Converts YUV422P image to 32-bit BGRA image.

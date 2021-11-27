@@ -341,8 +341,17 @@ namespace Test
         bool result = true;
 
         result = result && YuvToBgra2AutoTest(W, H, f1, f2, dx, dy, SimdYuvBt601);
-        result = result && YuvToBgra2AutoTest(W + O * dx, H - O * dy, f1, f2, dx, dy, SimdYuvBt601);
-        result = result && YuvToBgra2AutoTest(W - O * dx, H + O * dy, f1, f2, dx, dy, SimdYuvBt601);
+        result = result && YuvToBgra2AutoTest(W + O * dx, H - O * dy, f1, f2, dx, dy, SimdYuvBt709);
+        result = result && YuvToBgra2AutoTest(W - O * dx, H + O * dy, f1, f2, dx, dy, SimdYuvBt2020);
+
+        return result;
+    }
+
+    bool Yuv420pToBgraV2AutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 
         return result;
     }

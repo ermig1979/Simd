@@ -463,6 +463,7 @@ namespace Test
     TEST_ADD_GROUP_A00(Yuv444pToBgraV2);
     TEST_ADD_GROUP_AD0(Yuv422pToBgra);
     TEST_ADD_GROUP_AD0(Yuv420pToBgra);
+    TEST_ADD_GROUP_A00(Yuv420pToBgraV2);
 
     class Task
     {
