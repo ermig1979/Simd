@@ -6558,9 +6558,9 @@ SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t w
         Base::TransformImage(src, srcStride, width, height, pixelSize, transform, dst, dstStride);
 }
 
-SIMD_API void SimdUyvyToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
+SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
 {
-    Base::UyvyToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride);
+    Base::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
 }
 
 typedef void(*SimdWinogradSetFilterPtr) (const float * src, size_t size, float * dst, SimdBool trans);

@@ -332,7 +332,7 @@ typedef enum
     SimdPixelFormatRgb24,
     /*! A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
     SimdPixelFormatRgba32,
-    /*! A 16-bit (2 8-bit channels) UYVY pixel format. */
+    /*! A 16-bit (2 8-bit channels) UYVY422 pixel format. */
     SimdPixelFormatUyvy16,
 } SimdPixelFormatType;
 
@@ -7659,22 +7659,23 @@ extern "C"
 
     /*! @ingroup yuv_conversion
 
-        \fn void SimdUyvyToBgr(const uint8_t * uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride);
+        \fn void SimdUyvy422ToBgr(const uint8_t * uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride, SimdYuvType yuvType);
 
-        \short Converts 16-bit UYVY image to 24-bit BGR image.
+        \short Converts 16-bit UYVY422 image to 24-bit BGR image.
 
         The input and output images must have the same width and height. Width must be even number.
 
-        \note This function has a C++ wrappers: Simd::UyvyToBgr(const View<A>& uyvy, View<A>& bgr);
+        \note This function has a C++ wrappers: Simd::Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
-        \param [in] uyvy - a pointer to pixels data of input 16-bit UYVY image.
-        \param [in] uyvyStride - a row size of the UYVY image.
+        \param [in] uyvy - a pointer to pixels data of input 16-bit UYVY422 image.
+        \param [in] uyvyStride - a row size of the UYVY422 image.
         \param [in] width - an image width. Width must be even number.
         \param [in] height - an image height.
         \param [out] bgr - a pointer to pixels data of output 24-bit BGR image.
         \param [in] bgrStride - a row size of the bgr image.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
     */
-    SIMD_API void SimdUyvyToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride);
+    SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
 
     /*! @ingroup synet_winograd
 

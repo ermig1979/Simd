@@ -4327,22 +4327,23 @@ namespace Simd
 
     /*! @ingroup yuv_conversion
 
-        \fn void UyvyToBgr(const View<A>& uyvy, View<A>& bgr);
+        \fn void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
-        \short Converts 16-bit UYVY image to 24-bit BGR image.
+        \short Converts 16-bit UYVY422 image to 24-bit BGR image.
 
         The input and output images must have the same width and height. Width must be even number.
 
-        \note This function is a C++ wrapper for function ::SimdUyvyToBgr.
+        \note This function is a C++ wrapper for function ::SimdUyvy422ToBgr.
 
-        \param [in] uyvy - an input 16-bit UYVY image.
+        \param [in] uyvy - an input 16-bit UYVY422 image.
         \param [out] bgr - an output 24-bit BGR image.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType). By default is equal to ::SimdYuvBt601.
     */
-    template<template<class> class A> SIMD_INLINE void UyvyToBgr(const View<A>& uyvy, View<A>& bgr)
+    template<template<class> class A> SIMD_INLINE void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601)
     {
         assert(EqualSize(uyvy, bgr) && uyvy.format == View<A>::Uyvy32 && bgr.format == View<A>::Bgr24);
 
-        SimdUyvyToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, bgr.data, bgr.stride);
+        SimdUyvy422ToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, bgr.data, bgr.stride, yuvType);
     }
 
     /*! @ingroup yuv_conversion

@@ -106,7 +106,6 @@ namespace Test
     TEST_ADD_GROUP_AD0(Int16ToGray);
     TEST_ADD_GROUP_A00(RgbToGray);
     TEST_ADD_GROUP_A00(RgbaToGray);
-    TEST_ADD_GROUP_A00(UyvyToBgr);
     TEST_ADD_GROUP_00S(ConvertImage);
 
     TEST_ADD_GROUP_AD0(BgraToBayer);
@@ -414,6 +413,8 @@ namespace Test
     TEST_ADD_GROUP_AD0(TexturePerformCompensation);
 
     TEST_ADD_GROUP_A00(TransformImage);
+
+    TEST_ADD_GROUP_A00(Uyvy422ToBgr);
 
 #if defined(SIMD_SYNET_ENABLE)
     TEST_ADD_GROUP_A00(WinogradKernel1x3Block1x4SetFilter);

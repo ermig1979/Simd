@@ -111,7 +111,7 @@ namespace Simd
             Rgb24,
             /*! A 32-bit (4 8-bit channels) RGBA (Red, Green, Blue, Alpha) pixel format. */
             Rgba32,
-            /*! A 16-bit (2 8-bit channels) UYVY pixel format. */
+            /*! A 16-bit (2 8-bit channels) UYVY422 pixel format. */
             Uyvy16,
         };
 

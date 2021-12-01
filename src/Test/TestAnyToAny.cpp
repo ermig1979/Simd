@@ -431,15 +431,6 @@ namespace Test
         return result;
     }
 
-    bool UyvyToBgrAutoTest()
-    {
-        bool result = true;
-
-        result = result && AnyToAnyAutoTest(View::Uyvy16, View::Bgr24, FUNC_N(Simd::Base::UyvyToBgr), FUNC_N(SimdUyvyToBgr));
-
-        return result;
-    }
-
     //-----------------------------------------------------------------------
 
     template<class Func> bool AnyToAnyDataTest(bool create, int width, int height, View::Format srcType, View::Format dstType, const Func & f)
