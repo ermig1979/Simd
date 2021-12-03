@@ -166,6 +166,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseThread.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseTransform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseWinograd3.cpp" />

@@ -28,42 +28,6 @@ namespace Simd
 {
     namespace Base
     {
-        template <class YuvType> SIMD_INLINE void Uyvy422ToBgr(const uint8_t* uyvy, uint8_t* bgr)
-        {
-            uint8_t u = uyvy[0], v = uyvy[2];
-            YuvToBgr<YuvType>(uyvy[1], u, v, bgr + 0);
-            YuvToBgr<YuvType>(uyvy[3], u, v, bgr + 3);
-        }
-
-        template <class YuvType> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
-        {
-            assert((width % 2 == 0) && (width >= 2));
-
-            size_t sizeUyvy = width * 2;
-            for (size_t row = 0; row < height; ++row)
-            {
-                for (size_t colUyvy = 0, colBgr = 0; colUyvy < sizeUyvy; colUyvy += 4, colBgr += 6)
-                    Uyvy422ToBgr<YuvType>(uyvy + colUyvy, bgr + colBgr);
-                uyvy += uyvyStride;
-                bgr += bgrStride;
-            }            
-        }
-
-        void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
-        {
-            switch (yuvType)
-            {
-            case SimdYuvBt601: Uyvy422ToBgr<Bt601>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt709: Uyvy422ToBgr<Bt709>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvBt2020: Uyvy422ToBgr<Bt2020>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            case SimdYuvTrect871: Uyvy422ToBgr<Trect871>(uyvy, uyvyStride, width, height, bgr, bgrStride); break;
-            default:
-                assert(0);
-            }
-        }
-
-        //---------------------------------------------------------------------
-
         SIMD_INLINE void Yuv422pToBgr(const uint8_t *y, int u, int v, uint8_t * bgr)
         {
             YuvToBgr(y[0], u, v, bgr);

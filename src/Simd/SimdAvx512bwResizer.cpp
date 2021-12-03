@@ -936,7 +936,7 @@ namespace Simd
                         _ix32x2[block].src = srcIndex * (int)pixelSize;
                         _ix32x2[block].dst = dstIndex * (int)pixelSize;
                         dst = 0;
-                        src = srcIndex * pixelSize - _ix32x2[block].src;
+                        src = srcIndex * (int)pixelSize - _ix32x2[block].src;
                     }
                     for (size_t i = 0; i < pixelSize; i += 2)
                         _ix32x2[block].shuffle[(dst + i) / 2] = (src + i) /2;

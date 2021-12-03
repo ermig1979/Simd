@@ -77,7 +77,7 @@ namespace Test
         bool result = true;
 
         result = result && Uyvy422ToBgrAutoTest(W, H, SimdYuvBt601, f1, f2);
-        result = result && Uyvy422ToBgrAutoTest(W + O, H - O, SimdYuvBt709, f1, f2);
+        result = result && Uyvy422ToBgrAutoTest(W + E, H - E, SimdYuvBt709, f1, f2);
 
         return result;
     }
@@ -87,6 +87,11 @@ namespace Test
         bool result = true;
 
         result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Base::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Sse41::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
+#endif 
 
         return result;
     }

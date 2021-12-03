@@ -66,6 +66,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Transform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
   </ItemGroup>
   <ItemGroup>

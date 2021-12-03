@@ -26,6 +26,7 @@
 
 #include "Simd/SimdInit.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
