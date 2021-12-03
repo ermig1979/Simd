@@ -96,6 +96,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2SynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Transform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2UyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2YuvToHue.cpp" />

@@ -93,6 +93,11 @@ namespace Test
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Sse41::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Avx2::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
+#endif 
+
         return result;
     }
 }

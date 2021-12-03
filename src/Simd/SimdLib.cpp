@@ -6560,6 +6560,11 @@ SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t w
 
 SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType)
 {
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::DA)
+        Avx2::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
