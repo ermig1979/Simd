@@ -1046,11 +1046,32 @@ namespace Simd
             if (_pixelSize)
                 return;
             size_t pixelSize = _param.PixelSize();
-            if (pixelSize == 4 || pixelSize == 8)
+            if (pixelSize == 4 || pixelSize == 8 || (pixelSize == 3 && _param.dstW <= _param.srcW))
                 Base::ResizerNearest::EstimateParams();
         }
 
-        SIMD_INLINE void Gather4(const int32_t * src, const int32_t* idx, int32_t* dst)
+        SIMD_INLINE __m256i Gather8x3(const uint8_t* src, const int32_t* idx)
+        {
+            __m256i _idx = _mm256_loadu_si256((__m256i*)idx);
+            __m256i bgrx = _mm256_i32gather_epi32((int32_t*)src, _idx, 1);
+            return _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(bgrx, K8_SHUFFLE_BGRA_TO_BGR), K32_PERMUTE_BGRA_TO_BGR);
+        }
+
+        void ResizerNearest::Gather3(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t body = AlignLo(_param.dstW, 8);
+            size_t tail = _param.dstW - 8;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t* srcRow = src + _iy[dy] * srcStride;
+                for (size_t dx = 0, offs = 0; dx < body; dx +=8, offs += 24)
+                    _mm256_storeu_si256((__m256i*)(dst + offs), Gather8x3(srcRow, _ix.data + dx));
+                Store24<false>(dst + tail * 3, Gather8x3(srcRow, _ix.data + tail));
+                dst += dstStride;
+            }
+        }
+
+        SIMD_INLINE void Gather8x4(const int32_t * src, const int32_t* idx, int32_t* dst)
         {
             __m256i _idx = _mm256_loadu_si256((__m256i*)idx);
             __m256i val = _mm256_i32gather_epi32(src, _idx, 1);
@@ -1065,13 +1086,13 @@ namespace Simd
             {
                 const int32_t* srcRow = (int32_t*)(src + _iy[dy] * srcStride);
                 for (size_t dx = 0; dx < body; dx += 8)
-                    Avx2::Gather4(srcRow, _ix.data + dx, (int32_t*)dst + dx);
-                Avx2::Gather4(srcRow, _ix.data + tail, (int32_t*)dst + tail);
+                    Avx2::Gather8x4(srcRow, _ix.data + dx, (int32_t*)dst + dx);
+                Avx2::Gather8x4(srcRow, _ix.data + tail, (int32_t*)dst + tail);
                 dst += dstStride;
             }
         }
 
-        SIMD_INLINE void Gather8(const int64_t* src, const int32_t* idx, int64_t* dst)
+        SIMD_INLINE void Gather4x8(const int64_t* src, const int32_t* idx, int64_t* dst)
         {
             __m128i _idx = _mm_loadu_si128((__m128i*)idx);
             __m256i val = _mm256_i32gather_epi64((long long*)src, _idx, 1);
@@ -1086,8 +1107,8 @@ namespace Simd
             {
                 const int64_t* srcRow = (int64_t*)(src + _iy[dy] * srcStride);
                 for (size_t dx = 0; dx < body; dx += 4)
-                    Avx2::Gather8(srcRow, _ix.data + dx, (int64_t*)dst + dx);
-                Avx2::Gather8(srcRow, _ix.data + tail, (int64_t*)dst + tail);
+                    Avx2::Gather4x8(srcRow, _ix.data + dx, (int64_t*)dst + dx);
+                Avx2::Gather4x8(srcRow, _ix.data + tail, (int64_t*)dst + tail);
                 dst += dstStride;
             }
         }
@@ -1095,7 +1116,9 @@ namespace Simd
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             EstimateParams();
-            if (_pixelSize == 4)
+            if (_pixelSize == 3 && _param.dstW <= _param.srcW)
+                Gather3(src, srcStride, dst, dstStride);
+            else if (_pixelSize == 4)
                 Gather4(src, srcStride, dst, dstStride);
             else if (_pixelSize == 8)
                 Gather8(src, srcStride, dst, dstStride);

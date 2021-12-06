@@ -366,6 +366,7 @@ namespace Simd
         {
         protected:
             void EstimateParams();
+            void Gather3(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
             void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
             void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
