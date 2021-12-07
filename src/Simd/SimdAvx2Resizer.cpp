@@ -1046,8 +1046,38 @@ namespace Simd
             if (_pixelSize)
                 return;
             size_t pixelSize = _param.PixelSize();
-            if (pixelSize == 4 || pixelSize == 8 || (pixelSize == 3 && _param.dstW <= _param.srcW))
+            if (pixelSize == 4 || pixelSize == 8 || 
+                (pixelSize == 3 && _param.dstW <= _param.srcW) ||
+                (pixelSize == 2 && _param.dstW * 2 <= _param.srcW))
                 Base::ResizerNearest::EstimateParams();
+        }
+
+        const __m256i K8_SHUFFLE_UVXX_TO_UV = SIMD_MM256_SETR_EPI8(
+            0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1,
+            0x0, 0x1, 0x4, 0x5, 0x8, 0x9, 0xC, 0xD, -1, -1, -1, -1, -1, -1, -1, -1);
+
+        const __m256i K32_PERMUTE_UVXX_TO_UV = SIMD_MM256_SETR_EPI32(0x0, 0x1, 0x4, 0x5, -1, -1, -1, -1);
+
+        SIMD_INLINE void Gather8x2(const uint8_t* src, const int32_t* idx, uint8_t* dst)
+        {
+            __m256i _idx = _mm256_loadu_si256((__m256i*)idx);
+            __m256i uvxx = _mm256_i32gather_epi32((int32_t*)src, _idx, 1);
+            __m256i uv = _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(uvxx, K8_SHUFFLE_UVXX_TO_UV), K32_PERMUTE_UVXX_TO_UV);
+            _mm_storeu_si128((__m128i*)dst, _mm256_castsi256_si128(uv));
+        }
+
+        void ResizerNearest::Gather2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t body = AlignLo(_param.dstW, 8);
+            size_t tail = _param.dstW - 8;
+            for (size_t dy = 0; dy < _param.dstH; dy++)
+            {
+                const uint8_t* srcRow = src + _iy[dy] * srcStride;
+                for (size_t dx = 0, offs = 0; dx < body; dx += 8, offs += 16)
+                    Avx2::Gather8x2(srcRow, _ix.data + dx, dst + offs);
+                Avx2::Gather8x2(srcRow, _ix.data + tail, dst + tail * 2);
+                dst += dstStride;
+            }
         }
 
         SIMD_INLINE __m256i Gather8x3(const uint8_t* src, const int32_t* idx)
@@ -1116,7 +1146,9 @@ namespace Simd
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             EstimateParams();
-            if (_pixelSize == 3 && _param.dstW <= _param.srcW)
+            if (_pixelSize == 2 && _param.dstW * 2 <= _param.srcW)
+                Gather2(src, srcStride, dst, dstStride);
+            else if (_pixelSize == 3 && _param.dstW <= _param.srcW)
                 Gather3(src, srcStride, dst, dstStride);
             else if (_pixelSize == 4)
                 Gather4(src, srcStride, dst, dstStride);
