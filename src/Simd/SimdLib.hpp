@@ -4325,7 +4325,7 @@ namespace Simd
         SimdTransformImage(src.data, src.stride, src.width, src.height, src.PixelSize(), transform, dst.data, dst.stride);
     }
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup uyvy_conversion
 
         \fn void Uyvy422ToBgr(const View<A>& uyvy, View<A>& bgr, SimdYuvType yuvType = SimdYuvBt601);
 
@@ -4344,6 +4344,32 @@ namespace Simd
         assert(EqualSize(uyvy, bgr) && uyvy.format == View<A>::Uyvy32 && bgr.format == View<A>::Bgr24);
 
         SimdUyvy422ToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, bgr.data, bgr.stride, yuvType);
+    }
+
+    /*! @ingroup uyvy_conversion
+
+        \fn void Uyvy422ToYuv420p(const View<A>& uyvy, View<A>& y, View<A>& u, View<A>& v);
+
+        \short Converts 16-bit UYVY422 image to YUV420P.
+
+        The input UYVY422 and output Y images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function is a C++ wrapper for function ::SimdUyvy422ToYuv420p.
+
+        \param [in] uyvy - an input 16-bit UYVY422 image.
+        \param [out] y - an output 8-bit image with Y color plane.
+        \param [out] u - an output 8-bit image with U color plane.
+        \param [out] v - an output 8-bit image with V color plane.
+    */
+    template<template<class> class A> SIMD_INLINE void Uyvy422ToYuv420p(const View<A>& uyvy, View<A>& y, View<A>& u, View<A>& v)
+    {
+        assert(y.width == uyvy.width && y.height == uyvy.height);
+        assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
+        assert(y.width == 2 * v.width && y.height == 2 * v.height && y.format == v.format);
+        assert(uyvy.format == View<A>::Uyvy32 && y.format == View<A>::Gray8);
+
+        SimdUyvy422ToBgr(uyvy.data, uyvy.stride, uyvy.width, uyvy.height, y.data, y.stride, u.data, u.stride, v.data, v.stride);
     }
 
     /*! @ingroup yuv_conversion

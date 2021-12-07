@@ -7657,7 +7657,7 @@ extern "C"
     */
     SIMD_API void SimdTransformImage(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t pixelSize, SimdTransformType transform, uint8_t * dst, size_t dstStride);
 
-    /*! @ingroup yuv_conversion
+    /*! @ingroup uyvy_conversion
 
         \fn void SimdUyvy422ToBgr(const uint8_t * uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t * bgr, size_t bgrStride, SimdYuvType yuvType);
 
@@ -7676,6 +7676,31 @@ extern "C"
         \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
     */
     SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride, SimdYuvType yuvType);
+
+    /*! @ingroup uyvy_conversion
+
+        \fn void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
+
+        \short Converts 16-bit UYVY422 image to YUV420P.
+
+        The input UYVY422 and output Y images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function has a C++ wrapper Simd::Uyvy422ToYuv420p(const View<A>& uyvy, View<A>& y, View<A>& u, View<A>& v).
+
+        \param [in] uyvy - a pointer to pixels data of input 16-bit UYVY422 image.
+        \param [in] uyvyStride - a row size of the UYVY422 image.
+        \param [in] width - an image width. Width must be even number.
+        \param [in] height - an image height.
+        \param[out] y - a pointer to pixels data of output 8 - bit image with Y color plane.
+        \param[in] yStride - a row size of the y image.
+        \param[out] u - a pointer to pixels data of output 8 - bit image with U color plane.
+        \param[in] uStride - a row size of the u image.
+        \param[out] v - a pointer to pixels data of output 8 - bit image with V color plane.
+        \param[in] vStride - a row size of the v image.
+    */
+    SIMD_API void SimdUyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, 
+        uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
 
     /*! @ingroup synet_winograd
 

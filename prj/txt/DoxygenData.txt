@@ -371,6 +371,11 @@
 */
 
 /*! @ingroup conversion
+    @defgroup uyvy_conversion UYVY 
+    \short Functions for UYVY image conversions.
+*/
+
+/*! @ingroup conversion
     @defgroup other_conversion Other 
     \short Functions for other image format conversions.
 */
