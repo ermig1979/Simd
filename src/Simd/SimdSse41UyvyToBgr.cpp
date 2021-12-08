@@ -80,7 +80,7 @@ namespace Simd
 
         template <bool align, class T> void Uyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride)
         {
-            assert((width % 2 == 0) && (width >= 2 * A));
+            assert((width % 2 == 0) && (width >= A));
             if (align)
                 assert(Aligned(uyvy) && Aligned(uyvyStride) && Aligned(bgr) && Aligned(bgrStride));
 

@@ -67,6 +67,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Texture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Transform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -83,6 +84,7 @@
     <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />

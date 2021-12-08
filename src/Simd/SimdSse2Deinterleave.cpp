@@ -23,22 +23,13 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdDeinterleave.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        SIMD_INLINE __m128i DeinterleavedU(__m128i uv0, __m128i uv1)
-        {
-            return _mm_packus_epi16(_mm_and_si128(uv0, K16_00FF), _mm_and_si128(uv1, K16_00FF));
-        }
-
-        SIMD_INLINE __m128i DeinterleavedV(__m128i uv0, __m128i uv1)
-        {
-            return DeinterleavedU(_mm_srli_si128(uv0, 1), _mm_srli_si128(uv1, 1));
-        }
-
         template <bool align> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
@@ -56,8 +47,8 @@ namespace Simd
                 {
                     __m128i uv0 = Load<align>((__m128i*)(uv + offset));
                     __m128i uv1 = Load<align>((__m128i*)(uv + offset + A));
-                    Store<align>((__m128i*)(u + col), DeinterleavedU(uv0, uv1));
-                    Store<align>((__m128i*)(v + col), DeinterleavedV(uv0, uv1));
+                    Store<align>((__m128i*)(u + col), Deinterleave8<0>(uv0, uv1));
+                    Store<align>((__m128i*)(v + col), Deinterleave8<1>(uv0, uv1));
                 }
                 if (tail)
                 {
@@ -65,8 +56,8 @@ namespace Simd
                     size_t offset = 2 * col;
                     __m128i uv0 = Load<false>((__m128i*)(uv + offset));
                     __m128i uv1 = Load<false>((__m128i*)(uv + offset + A));
-                    Store<false>((__m128i*)(u + col), DeinterleavedU(uv0, uv1));
-                    Store<false>((__m128i*)(v + col), DeinterleavedV(uv0, uv1));
+                    Store<false>((__m128i*)(u + col), Deinterleave8<0>(uv0, uv1));
+                    Store<false>((__m128i*)(v + col), Deinterleave8<1>(uv0, uv1));
                 }
                 uv += uvStride;
                 u += uStride;

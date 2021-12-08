@@ -170,7 +170,7 @@ namespace Simd
             return v.f;
         }
     }
-#endif //SIMD_SSE2_ENABLE   
+#endif   
 }
 
 #endif//__SimdFloat16_h__
