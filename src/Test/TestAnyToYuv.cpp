@@ -82,7 +82,8 @@ namespace Test
         const int uvHeight = height / dy;
 
         View src(width, height, srcType, NULL, TEST_ALIGN(width));
-        FillRandom(src);
+        //FillRandom(src);
+        FillSequence(src);
 
         View y1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
         View u1(uvWidth, uvHeight, View::Gray8, NULL, TEST_ALIGN(uvWidth));
@@ -335,6 +336,11 @@ namespace Test
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
             result = result && AnyToYuvAutoTest(View::Uyvy16, 2, 2, FUNC_YUVN(Simd::Sse41::Uyvy422ToYuv420p), FUNC_YUVN(SimdUyvy422ToYuv420p));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
+            result = result && AnyToYuvAutoTest(View::Uyvy16, 2, 2, FUNC_YUVN(Simd::Avx2::Uyvy422ToYuv420p), FUNC_YUVN(SimdUyvy422ToYuv420p));
 #endif
 
         return result;

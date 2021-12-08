@@ -27,34 +27,34 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
+#ifdef SIMD_AVX2_ENABLE    
+    namespace Avx2
     {
         template<bool align> SIMD_INLINE void Uyvy422ToYuv420p(const uint8_t* uyvy0, size_t uyvyStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v)
         {
-            __m128i uyvy00 = Load<align>((__m128i*)uyvy0 + 0);
-            __m128i uyvy01 = Load<align>((__m128i*)uyvy0 + 1);
-            __m128i uyvy02 = Load<align>((__m128i*)uyvy0 + 2);
-            __m128i uyvy03 = Load<align>((__m128i*)uyvy0 + 3);
+            __m256i uyvy00 = Load<align>((__m256i*)uyvy0 + 0);
+            __m256i uyvy01 = Load<align>((__m256i*)uyvy0 + 1);
+            __m256i uyvy02 = Load<align>((__m256i*)uyvy0 + 2);
+            __m256i uyvy03 = Load<align>((__m256i*)uyvy0 + 3);
 
-            Store<align>((__m128i*)y0 + 0, Sse2::Deinterleave8<1>(uyvy00, uyvy01));
-            Store<align>((__m128i*)y0 + 1, Sse2::Deinterleave8<1>(uyvy02, uyvy03));
+            Store<align>((__m256i*)y0 + 0, Avx2::Deinterleave8<1>(uyvy00, uyvy01));
+            Store<align>((__m256i*)y0 + 1, Avx2::Deinterleave8<1>(uyvy02, uyvy03));
 
             const uint8_t* uyvy1 = uyvy0 + uyvyStride;
-            __m128i uyvy10 = Load<align>((__m128i*)uyvy1 + 0);
-            __m128i uyvy11 = Load<align>((__m128i*)uyvy1 + 1);
-            __m128i uyvy12 = Load<align>((__m128i*)uyvy1 + 2);
-            __m128i uyvy13 = Load<align>((__m128i*)uyvy1 + 3);
+            __m256i uyvy10 = Load<align>((__m256i*)uyvy1 + 0);
+            __m256i uyvy11 = Load<align>((__m256i*)uyvy1 + 1);
+            __m256i uyvy12 = Load<align>((__m256i*)uyvy1 + 2);
+            __m256i uyvy13 = Load<align>((__m256i*)uyvy1 + 3);
 
             uint8_t* y1 = y0 + yStride;
-            Store<align>((__m128i*)y1 + 0, Sse2::Deinterleave8<1>(uyvy10, uyvy11));
-            Store<align>((__m128i*)y1 + 1, Sse2::Deinterleave8<1>(uyvy12, uyvy13));
+            Store<align>((__m256i*)y1 + 0, Avx2::Deinterleave8<1>(uyvy10, uyvy11));
+            Store<align>((__m256i*)y1 + 1, Avx2::Deinterleave8<1>(uyvy12, uyvy13));
 
-            __m128i uv0 = _mm_avg_epu8(Deinterleave8<0>(uyvy00, uyvy01), Deinterleave8<0>(uyvy10, uyvy11));
-            __m128i uv1 = _mm_avg_epu8(Deinterleave8<0>(uyvy02, uyvy03), Deinterleave8<0>(uyvy12, uyvy13));
+            __m256i uv0 = Deinterleave8<0>(_mm256_avg_epu8(uyvy00, uyvy10), _mm256_avg_epu8(uyvy01, uyvy11));
+            __m256i uv1 = Deinterleave8<0>(_mm256_avg_epu8(uyvy02, uyvy12), _mm256_avg_epu8(uyvy03, uyvy13));
 
-            Store<align>((__m128i*)u, Sse2::Deinterleave8<0>(uv0, uv1));
-            Store<align>((__m128i*)v, Sse2::Deinterleave8<1>(uv0, uv1));
+            Store<align>((__m256i*)u, Avx2::Deinterleave8<0>(uv0, uv1));
+            Store<align>((__m256i*)v, Avx2::Deinterleave8<1>(uv0, uv1));
         }
 
         template<bool align> void Uyvy422ToYuv420p(const uint8_t* uyvy, size_t uyvyStride, size_t width, size_t height, uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)

@@ -24,22 +24,13 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdDeinterleave.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
-        SIMD_INLINE __m256i DeinterleavedU(__m256i uv0, __m256i uv1)
-        {
-            return PackI16ToU8(_mm256_and_si256(uv0, K16_00FF), _mm256_and_si256(uv1, K16_00FF));
-        }
-
-        SIMD_INLINE __m256i DeinterleavedV(__m256i uv0, __m256i uv1)
-        {
-            return DeinterleavedU(_mm256_srli_si256(uv0, 1), _mm256_srli_si256(uv1, 1));
-        }
-
         template <bool align> void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height,
             uint8_t * u, size_t uStride, uint8_t * v, size_t vStride)
         {
@@ -55,19 +46,19 @@ namespace Simd
             {
                 for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += DA)
                 {
-                    __m256i uv0 = Load<align>((__m256i*)(uv + offset));
-                    __m256i uv1 = Load<align>((__m256i*)(uv + offset + A));
-                    Store<align>((__m256i*)(u + col), DeinterleavedU(uv0, uv1));
-                    Store<align>((__m256i*)(v + col), DeinterleavedV(uv0, uv1));
+                    __m256i uv0 = Deinterleave8To64(Load<align>((__m256i*)(uv + offset)));
+                    __m256i uv1 = Deinterleave8To64(Load<align>((__m256i*)(uv + offset + A)));
+                    Store<align>((__m256i*)(u + col), Deinterleave64<0>(uv0, uv1));
+                    Store<align>((__m256i*)(v + col), Deinterleave64<1>(uv0, uv1));
                 }
                 if (tail)
                 {
                     size_t col = width - A;
                     size_t offset = 2 * col;
-                    __m256i uv0 = Load<false>((__m256i*)(uv + offset));
-                    __m256i uv1 = Load<false>((__m256i*)(uv + offset + A));
-                    Store<false>((__m256i*)(u + col), DeinterleavedU(uv0, uv1));
-                    Store<false>((__m256i*)(v + col), DeinterleavedV(uv0, uv1));
+                    __m256i uv0 = Deinterleave8To64(Load<false>((__m256i*)(uv + offset)));
+                    __m256i uv1 = Deinterleave8To64(Load<false>((__m256i*)(uv + offset + A)));
+                    Store<false>((__m256i*)(u + col), Deinterleave64<0>(uv0, uv1));
+                    Store<false>((__m256i*)(v + col), Deinterleave64<1>(uv0, uv1));
                 }
                 uv += uvStride;
                 u += uStride;
