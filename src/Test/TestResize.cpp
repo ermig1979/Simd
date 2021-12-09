@@ -145,11 +145,13 @@ namespace Test
     {
         switch (method)
         {
-        case SimdResizeMethodNearest: return "No";
-        case SimdResizeMethodBilinear: return "Bo";
-        case SimdResizeMethodBilinearCaffe: return "Bc";
-        case SimdResizeMethodBilinearPytorch: return "Bp";
-        case SimdResizeMethodArea: return "Ao";
+        case SimdResizeMethodNearest: return "NrO";
+        case SimdResizeMethodNearestPytorch: return "NrP";
+        case SimdResizeMethodBilinear: return "BlO";
+        case SimdResizeMethodBilinearCaffe: return "BlC";
+        case SimdResizeMethodBilinearPytorch: return "BlP";
+        case SimdResizeMethodBicubic: return "BcO";
+        case SimdResizeMethodArea: return "ArO";
         default: assert(0); return "";
         }
     }
@@ -314,7 +316,7 @@ namespace Test
         bool result = true;
 
 #if !defined(__aarch64__) || 1  
-        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest/*, SimdResizeMethodBilinear, SimdResizeMethodArea*/ };
+        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest/*, SimdResizeMethodBilinear, SimdResizeMethodBicubic, SimdResizeMethodArea*/ };
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);

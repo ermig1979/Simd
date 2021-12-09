@@ -129,6 +129,7 @@
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>

@@ -118,6 +118,7 @@
     <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h" />
     <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>

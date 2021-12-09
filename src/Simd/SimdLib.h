@@ -371,10 +371,12 @@ typedef enum
     SimdResizeMethodNearestPytorch,
     /*! Bilinear method. */
     SimdResizeMethodBilinear,
-    /*! Bilinear Caffe compatible method. */
+    /*! Bilinear Caffe compatible method. It is relevant only for ::SimdResizeChannelFloat (32-bit float channel type).*/
     SimdResizeMethodBilinearCaffe,
-    /*! Bilinear Pytorch compatible method. */
+    /*! Bilinear Pytorch compatible method. It is relevant only for ::SimdResizeChannelFloat (32-bit float channel type).*/
     SimdResizeMethodBilinearPytorch,
+    /*! Bicubic method. */
+    SimdResizeMethodBicubic,
     /*! Area method. */
     SimdResizeMethodArea,
 } SimdResizeMethodType;

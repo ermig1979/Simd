@@ -476,5 +476,11 @@
     <ClInclude Include="..\..\src\Simd\SimdTransform.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDeinterleave.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

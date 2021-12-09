@@ -68,6 +68,11 @@ namespace Simd
                 (method == SimdResizeMethodBilinear || method == SimdResizeMethodBilinearCaffe || method == SimdResizeMethodBilinearPytorch);
         }
 
+        bool IsByteBicubic() const
+        {
+            return type == SimdResizeChannelByte && method == SimdResizeMethodBicubic;
+        }
+
         bool IsByteArea() const
         {
             return type == SimdResizeChannelByte && method == SimdResizeMethodArea;

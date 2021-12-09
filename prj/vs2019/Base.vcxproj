@@ -61,6 +61,7 @@
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
@@ -143,6 +144,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSobel.cpp" />

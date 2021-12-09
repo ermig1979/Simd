@@ -286,6 +286,15 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseUyvyToYuv.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerArea.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerBilinear.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerNearest.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -460,6 +469,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>
