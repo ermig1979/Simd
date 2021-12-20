@@ -145,6 +145,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseResizerBicubic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseSegmentation.cpp" />

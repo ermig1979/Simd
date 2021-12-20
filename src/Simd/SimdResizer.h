@@ -90,6 +90,8 @@ namespace Simd
         }
     };
 
+    //---------------------------------------------------------------------------------------------
+
     class Resizer : Deletable
     {
     public:
@@ -104,8 +106,29 @@ namespace Simd
         ResParam _param;
     };
 
+    //---------------------------------------------------------------------------------------------
+
     namespace Base
     {
+        class ResizerNearest : public Resizer
+        {
+            void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<size_t N> void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        protected:
+            size_t _pixelSize;
+            Array32i _ix, _iy;
+
+            void EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices);
+
+            void EstimateParams();
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //---------------------------------------------------------------------------------------------
+
         class ResizerByteBilinear : public Resizer
         {
         protected:
@@ -118,23 +141,7 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
-        const int32_t AREA_SHIFT = 22;
-        const int32_t AREA_RANGE = 1 << 11;
-        const int32_t AREA_ROUND = 1 << 21;
-
-        class ResizerByteArea : public Resizer
-        {
-        protected:
-            Array32i _ax, _ix, _ay, _iy;
-
-            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        public:
-            ResizerByteArea(const ResParam & param);
-
-            void EstimateParams(size_t srcSize, size_t dstSize, size_t range, int32_t * alpha, int32_t * index);
-
-            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        };
+        //---------------------------------------------------------------------------------------------
 
         class ResizerShortBilinear : public Resizer
         {
@@ -155,6 +162,8 @@ namespace Simd
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
 
+        //---------------------------------------------------------------------------------------------
+
         class ResizerFloatBilinear : public Resizer
         {
         protected:
@@ -171,23 +180,46 @@ namespace Simd
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
 
-        class ResizerNearest : public Resizer
+        //---------------------------------------------------------------------------------------------
+
+        const int32_t BICUBIC_SHIFT = 12;
+        const int32_t BICUBIC_RANGE = 1 << 6;
+        const int32_t BICUBIC_ROUND = 1 << 11;
+
+        class ResizerByteBicubic : public Resizer
         {
-            void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            template<size_t N> void Resize(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         protected:
-            size_t _pixelSize;
-            Array32i _ix, _iy;
+            Array32i _ix, _iy, _ax[4], _ay[4], _bx[4];
 
-            void EstimateIndex(size_t srcSize, size_t dstSize, size_t channelSize, size_t channels, int32_t* indices);
-
-            void EstimateParams();
+            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, int32_t* indices, int32_t* alpha0);
         public:
-            ResizerNearest(const ResParam& param);
+            ResizerByteBicubic(const ResParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-        };        
+        };
+
+        //---------------------------------------------------------------------------------------------
+
+        const int32_t AREA_SHIFT = 22;
+        const int32_t AREA_RANGE = 1 << 11;
+        const int32_t AREA_ROUND = 1 << 21;
+
+        class ResizerByteArea : public Resizer
+        {
+        protected:
+            Array32i _ax, _ix, _ay, _iy;
+
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteArea(const ResParam& param);
+
+            void EstimateParams(size_t srcSize, size_t dstSize, size_t range, int32_t* alpha, int32_t* index);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
         
+        //---------------------------------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 

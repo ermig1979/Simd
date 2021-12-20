@@ -23,28 +23,29 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdCopyPixel.h"
 
 namespace Simd
 {
     namespace Base
     {
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
+        ResizerByteBicubic::ResizerByteBicubic(const ResParam & param)
+            : Resizer(param)
         {
-            ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(void*));
-            if (param.IsNearest())
-                return new ResizerNearest(param);
-            else if (param.IsByteBilinear())
-                return new ResizerByteBilinear(param);
-            else if (param.IsShortBilinear())
-                return new ResizerShortBilinear(param);
-            else if (param.IsFloatBilinear())
-                return new ResizerFloatBilinear(param);
-            else if (param.IsByteBicubic())
-                return NULL;
-            else if (param.IsByteArea())
-                return new ResizerByteArea(param);
-            else
-                return NULL;
+            //_ay.Resize(_param.dstH);
+            //_iy.Resize(_param.dstH);
+            //EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
+        }        
+        
+        void ResizerByteBicubic::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t * indices, int32_t * alphas)
+        {
+            float scale = (float)srcSize / dstSize;
+
+        }        
+
+        void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+
         }
     }
 }
