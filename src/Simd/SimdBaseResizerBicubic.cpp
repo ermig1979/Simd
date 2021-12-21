@@ -32,15 +32,40 @@ namespace Simd
         ResizerByteBicubic::ResizerByteBicubic(const ResParam & param)
             : Resizer(param)
         {
-            //_ay.Resize(_param.dstH);
-            //_iy.Resize(_param.dstH);
-            //EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy.data, _ay.data);
-        }        
+            float ky = float(BICUBIC_RANGE);
+            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, ky, _iy, _ay);
+            float kx = float(BICUBIC_LIMIT * BICUBIC_LIMIT) / float(BICUBIC_RANGE);
+            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, kx, _ix, _ax);
+        }
         
-        void ResizerByteBicubic::EstimateIndexAlpha(size_t srcSize, size_t dstSize, size_t channels, int32_t * indices, int32_t * alphas)
+        void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i& index, Array32i alpha[4])
         {
-            float scale = (float)srcSize / dstSize;
+            index.Resize(sizeD);
+            for (int i = 0; i < 4; ++i)
+                alpha[i].Resize(sizeD);
 
+            float scale = float(sizeS) / float(sizeD);
+            for (size_t i = 0; i < sizeD; ++i)
+            {
+                float pos = (float)((i + 0.5f) * scale - 0.5f);
+                int idx = (int)::floor(pos);
+                float d = pos - idx;
+                if (idx < 0)
+                {
+                    idx = 0;
+                    d = 0.0f;
+                }
+                if (idx > (int)sizeS - 2)
+                {
+                    idx = (int)sizeS - 2;
+                    d = 1.0f;
+                }
+                index[i] = idx * (int)N;
+                alpha[0][i] = - int(range * (2.0f - d) * (1.0f - d) * d / 6.0f);
+                alpha[1][i] = int(range * (2.0f - d) * (d + 1.0f) * (d - 1.0f) / 2.0f);
+                alpha[2][i] = int(range * (2.0f - d) * (d + 1.0f) * d / 2.0f);
+                alpha[3][i] = - int(range * (1.0f + d) * (d - 1.0f) * d / 6.0f);
+            }
         }        
 
         void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)

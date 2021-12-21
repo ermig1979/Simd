@@ -183,7 +183,8 @@ namespace Simd
         //---------------------------------------------------------------------------------------------
 
         const int32_t BICUBIC_SHIFT = 12;
-        const int32_t BICUBIC_RANGE = 1 << 6;
+        const int32_t BICUBIC_RANGE = 72;
+        const int32_t BICUBIC_LIMIT = 64;
         const int32_t BICUBIC_ROUND = 1 << 11;
 
         class ResizerByteBicubic : public Resizer
@@ -191,7 +192,7 @@ namespace Simd
         protected:
             Array32i _ix, _iy, _ax[4], _ay[4], _bx[4];
 
-            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, int32_t* indices, int32_t* alpha0);
+            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i & index, Array32i alpha[4]);
         public:
             ResizerByteBicubic(const ResParam& param);
 
