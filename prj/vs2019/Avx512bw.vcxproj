@@ -16,6 +16,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwAlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBase64.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBayer.cpp" />

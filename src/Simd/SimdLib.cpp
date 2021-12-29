@@ -857,7 +857,12 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 
 SIMD_API void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst)
 {
-    Base::Base64Encode(src, size, dst);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::Base64Encode(src, size, dst);
+    else
+#endif
+        Base::Base64Encode(src, size, dst);
 }
 
 SIMD_API void SimdBayerToBgr(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgr, size_t bgrStride)
