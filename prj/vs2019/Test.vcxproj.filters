@@ -226,6 +226,9 @@
     <ClCompile Include="..\..\src\Test\TestUyvyToBgr.cpp">
       <Filter>Test</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Test\TestBase64.cpp">
+      <Filter>Test</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Test\TestConfig.h">

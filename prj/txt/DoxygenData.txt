@@ -629,3 +629,8 @@
     @defgroup image_io Image IO
     \short Image IO (Save/Load) operations.
 */
+
+/*! @ingroup functions
+    @defgroup base64 Base64 Conversion
+    \short Functions for encoding/decoding of strings in Base64 format.
+*/

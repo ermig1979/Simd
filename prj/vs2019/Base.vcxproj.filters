@@ -298,6 +298,9 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseResizerBicubic.cpp">
       <Filter>Base</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdBaseBase64.cpp">
+      <Filter>Base</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdBase.h">
@@ -475,6 +478,9 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase64.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

@@ -668,6 +668,24 @@ namespace Simd
         SimdBackgroundInitMask(src.data, src.stride, src.width, src.height, index, value, dst.data, dst.stride);
     }
 
+    /*! @ingroup base64
+
+        \fn std::string Base64Encode(const std::string& src)
+
+        \short Encode string to Base64.
+
+        \note This function is a C++ wrapper for function ::SimdBase64Encode.
+
+        \param [in] src - an input original string.
+        \return the output Base64 encoded string.
+    */
+    SIMD_INLINE std::string Base64Encode(const std::string& src)
+    {
+        std::string dst((src.length() + 2) / 3 * 4, 0);
+        SimdBase64Encode((uint8_t*)src.c_str(), src.length(), (uint8_t*)dst.c_str());
+        return dst;
+    }
+
     /*! @ingroup bayer_conversion
 
         \fn void BayerToBgr(const View<A>& bayer, View<A>& bgr);

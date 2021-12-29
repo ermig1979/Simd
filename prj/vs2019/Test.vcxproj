@@ -70,6 +70,7 @@
     <ClCompile Include="..\..\src\Test\TestAnyToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestAnyToYuv.cpp" />
     <ClCompile Include="..\..\src\Test\TestBackground.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBase64.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp" />

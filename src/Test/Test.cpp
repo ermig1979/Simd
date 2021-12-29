@@ -133,6 +133,8 @@ namespace Test
     TEST_ADD_GROUP_AD0(BackgroundShiftRangeMasked);
     TEST_ADD_GROUP_AD0(BackgroundInitMask);
 
+    TEST_ADD_GROUP_A00(Base64Encode);
+
     TEST_ADD_GROUP_AD0(BayerToBgr);
 
     TEST_ADD_GROUP_AD0(BayerToBgra);
