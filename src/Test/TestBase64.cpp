@@ -56,7 +56,7 @@ namespace Test
         TEST_ALIGN(size);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size = " << size << ".");
-
+        srand(2);
         FillRandom(src.data(), src.size(), 0, 255);
         src[0] = 'M', src[1] = 'a', src[2] = 'n';
 
@@ -88,6 +88,11 @@ namespace Test
         bool result = true;
 
         result = result && Base64EncodeAutoTest(FUNC_E(Simd::Base::Base64Encode), FUNC_E(SimdBase64Encode));
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && Base64EncodeAutoTest(FUNC_E(Simd::Avx2::Base64Encode), FUNC_E(SimdBase64Encode));
+#endif  
 
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)

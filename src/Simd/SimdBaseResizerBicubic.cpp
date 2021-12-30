@@ -36,6 +36,8 @@ namespace Simd
             EstimateIndexAlpha(_param.srcH, _param.dstH, 1, ky, _iy, _ay);
             float kx = float(BICUBIC_LIMIT * BICUBIC_LIMIT) / float(BICUBIC_RANGE);
             EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, kx, _ix, _ax);
+            for (int i = 0; i < 4; ++i)
+                _bx[i].Resize(_param.dstW * _param.channels);
         }
         
         void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i& index, Array32i alpha[4])
@@ -43,7 +45,6 @@ namespace Simd
             index.Resize(sizeD);
             for (int i = 0; i < 4; ++i)
                 alpha[i].Resize(sizeD);
-
             float scale = float(sizeS) / float(sizeD);
             for (size_t i = 0; i < sizeD; ++i)
             {
@@ -70,7 +71,54 @@ namespace Simd
 
         void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
+            size_t cn = _param.channels;
+            size_t rs = _param.dstW * cn;
+            int32_t* pbx[4] = { _bx[0].data, _bx[1].data, _bx[2].data, _bx[3].data };
+            int32_t prev = -2;
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                //int32_t fy = _ay[dy];
+                //int32_t sy = _iy[dy];
+                //int32_t k = 0;
 
+                //if (sy == prev)
+                //    k = 2;
+                //else if (sy == prev + 1)
+                //{
+                //    Swap(pbx[0], pbx[1]);
+                //    k = 1;
+                //}
+
+                //prev = sy;
+
+                //for (; k < 2; k++)
+                //{
+                //    int32_t* pb = pbx[k];
+                //    const uint8_t* ps = src + (sy + k) * srcStride;
+                //    for (size_t dx = 0; dx < rs; dx++)
+                //    {
+                //        int32_t sx = _ix[dx];
+                //        int32_t fx = _ax[dx];
+                //        int32_t t = ps[sx];
+                //        pb[dx] = (t << LINEAR_SHIFT) + (ps[sx + cn] - t) * fx;
+                //    }
+                //}
+
+                //if (fy == 0)
+                //    for (size_t dx = 0; dx < rs; dx++)
+                //        dst[dx] = ((pbx[0][dx] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+                //else if (fy == FRACTION_RANGE)
+                //    for (size_t dx = 0; dx < rs; dx++)
+                //        dst[dx] = ((pbx[1][dx] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+                //else
+                //{
+                //    for (size_t dx = 0; dx < rs; dx++)
+                //    {
+                //        int32_t t = pbx[0][dx];
+                //        dst[dx] = ((t << LINEAR_SHIFT) + (pbx[1][dx] - t) * fy + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
+                //    }
+                //}
+            }
         }
     }
 }
