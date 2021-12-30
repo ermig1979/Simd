@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Base64.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BgraToBgr.cpp" />

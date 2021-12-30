@@ -33,7 +33,7 @@ namespace Simd
             const uint8_t* body = src + AlignLoAny(size, 3);
             const uint8_t* tail = src + size;
             for (; src < body; src += 3, dst += 4)
-                Base64Encode(src, dst);
+                Base64Encode3(src, dst);
             if(body < tail)
                 Base64EncodeTail(src, tail - body, dst);
         }

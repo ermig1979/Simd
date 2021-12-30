@@ -867,6 +867,11 @@ SIMD_API void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst)
         Avx2::Base64Encode(src, size, dst);
     else
 #endif
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::Base64Encode(src, size, dst);
+    else
+#endif
         Base::Base64Encode(src, size, dst);
 }
 

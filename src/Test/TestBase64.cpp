@@ -89,6 +89,11 @@ namespace Test
 
         result = result && Base64EncodeAutoTest(FUNC_E(Simd::Base::Base64Encode), FUNC_E(SimdBase64Encode));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Base64EncodeAutoTest(FUNC_E(Simd::Sse41::Base64Encode), FUNC_E(SimdBase64Encode));
+#endif  
+
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Avx2::Base64Encode), FUNC_E(SimdBase64Encode));

@@ -40,7 +40,7 @@ namespace Simd
             return toBase64[src];
         }
 
-        SIMD_INLINE void Base64Encode(const uint8_t* src, uint8_t* dst)
+        SIMD_INLINE void Base64Encode3(const uint8_t* src, uint8_t* dst)
         {
             dst[0] = ToBase64((src[0] & 0xfc) >> 2);
             dst[1] = ToBase64(((src[0] & 0x03) << 4) | ((src[1] & 0xf0) >> 4));

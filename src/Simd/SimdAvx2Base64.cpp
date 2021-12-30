@@ -73,7 +73,7 @@ namespace Simd
             for (const uint8_t* body24 = src + size24; src < body24; src += 24, dst += 32)
                 Base64Encode24(src, dst);
             for (const uint8_t* body3 = src + size3 - size24; src < body3; src += 3, dst += 4)
-                Base::Base64Encode(src, dst);
+                Base::Base64Encode3(src, dst);
             if(size - size3)
                 Base::Base64EncodeTail(src, size - size3, dst);
         }
