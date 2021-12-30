@@ -30,54 +30,65 @@ namespace Simd
     namespace Avx512bw
     {
         const __m512i K32_TO_BASE64_PERMUTE = SIMD_MM512_SETR_EPI32(
-            0x0, 0x1, -1, -1, 0x1, 0x2, -1, -1, 0x3, 0x4, -1, -1, 0x4, 0x5, -1, -1);
+            0x0, 0x1, 0x2, -1, 0x3, 0x4, 0x5, -1, 0x6, 0x7, 0x8, -1, 0x9, 0xA, 0xB, -1);
 
         const __m512i K8_TO_BASE64_SHUFFLE = SIMD_MM512_SETR_EPI8(
-            0x0, -1, 0x1, 0x0, 0x2, 0x1, 0x2, -1, 0x3, -1, 0x4, 0x3, 0x5, 0x4, 0x5, -1,
-            0x2, -1, 0x3, 0x2, 0x4, 0x3, 0x4, -1, 0x5, -1, 0x6, 0x5, 0x7, 0x6, 0x7, -1,
-            0x0, -1, 0x1, 0x0, 0x2, 0x1, 0x2, -1, 0x3, -1, 0x4, 0x3, 0x5, 0x4, 0x5, -1,
-            0x2, -1, 0x3, 0x2, 0x4, 0x3, 0x4, -1, 0x5, -1, 0x6, 0x5, 0x7, 0x6, 0x7, -1);
+            0x1, 0x0, 0x2, 0x1, 0x4, 0x3, 0x5, 0x4, 0x7, 0x6, 0x8, 0x7, 0xA, 0x9, 0xB, 0xA,
+            0x1, 0x0, 0x2, 0x1, 0x4, 0x3, 0x5, 0x4, 0x7, 0x6, 0x8, 0x7, 0xA, 0x9, 0xB, 0xA,
+            0x1, 0x0, 0x2, 0x1, 0x4, 0x3, 0x5, 0x4, 0x7, 0x6, 0x8, 0x7, 0xA, 0x9, 0xB, 0xA,
+            0x1, 0x0, 0x2, 0x1, 0x4, 0x3, 0x5, 0x4, 0x7, 0x6, 0x8, 0x7, 0xA, 0x9, 0xB, 0xA);
 
-        const __m512i K16_TO_BASE64_SHIFT = SIMD_MM512_SETR_EPI16(
-            0x2, 0x4, 0x6, 0x0, 0x2, 0x4, 0x6, 0x0, 0x2, 0x4, 0x6, 0x0, 0x2, 0x4, 0x6, 0x0,
-            0x2, 0x4, 0x6, 0x0, 0x2, 0x4, 0x6, 0x0, 0x2, 0x4, 0x6, 0x0, 0x2, 0x4, 0x6, 0x0);
+        const __m512i K16_TO_BASE64_MULLO = SIMD_MM512_SET2_EPI16(0x0010, 0x0100);
 
-        const __m512i K16_TO_BASE64_MASK = SIMD_MM512_SET1_EPI16(0x3F);
+        const __m512i K16_TO_BASE64_MULHI = SIMD_MM512_SET2_EPI16(0x0040, 0x0400);
 
-        const __m512i K16_TO_BASE64_0 = SIMD_MM512_SETR_EPI16(
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-            'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f');
-        const __m512i K16_TO_BASE64_1 = SIMD_MM512_SETR_EPI16(
-            'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-            'w', 'x', 'y', 'z', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/');
+        const __m512i K16_003F = SIMD_MM512_SET1_EPI16(0x003F);
+        const __m512i K16_3F00 = SIMD_MM512_SET1_EPI16(0x3F00);
 
-        void Base64Encode24(const uint8_t* src, __mmask32 srcMask, uint8_t* dst, __mmask32 dstMask)
+        const __m512i K8_UPP_ADD = SIMD_MM512_SET1_EPI8('A');
+        const __m512i K8_UPP_END = SIMD_MM512_SET1_EPI8(26);
+        const __m512i K8_LOW_ADD = SIMD_MM512_SET1_EPI8('a' - 26);
+        const __m512i K8_LOW_END = SIMD_MM512_SET1_EPI8(52);
+
+        const __m512i K8_DIG_SHUFFLE = SIMD_MM512_SETR_EPI8(
+            -1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
+            -1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
+            -1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/',
+            -1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/');
+
+        void Base64Encode48(const uint8_t* src, __mmask64 srcMask, uint8_t* dst, __mmask64 dstMask)
         {
-            __m512i _src = _mm512_castsi256_si512(_mm256_maskz_loadu_epi8(srcMask, src));
-            __m512i permuted = _mm512_permutexvar_epi32(K32_TO_BASE64_PERMUTE, _src);
-            __m512i shuffled = _mm512_shuffle_epi8(permuted, K8_TO_BASE64_SHUFFLE);
-            __m512i shifted = _mm512_srlv_epi16(shuffled, K16_TO_BASE64_SHIFT);
-            __m512i masked = _mm512_and_si512(shifted, K16_TO_BASE64_MASK);
-            __m512i _dst = _mm512_permutex2var_epi16(K16_TO_BASE64_0, masked, K16_TO_BASE64_1);
-            _mm256_mask_storeu_epi8(dst, dstMask, _mm512_cvtepi16_epi8(_dst));
+            __m512i _src = _mm512_maskz_loadu_epi8(srcMask, src);
+            __m512i permute = _mm512_permutexvar_epi32(K32_TO_BASE64_PERMUTE, _src);
+            __m512i shuffle = _mm512_shuffle_epi8(permute, K8_TO_BASE64_SHUFFLE);
+            __m512i mullo = _mm512_mullo_epi16(shuffle, K16_TO_BASE64_MULLO);
+            __m512i mulhi = _mm512_mulhi_epi16(shuffle, K16_TO_BASE64_MULHI);
+            __m512i index = _mm512_or_si512(_mm512_and_si512(mullo, K16_3F00), _mm512_and_si512(mulhi, K16_003F));
+            __mmask64 uppMask = _mm512_cmp_epi8_mask(K8_UPP_END, index, _MM_CMPINT_NLE);
+            __mmask64 letMask = _mm512_cmp_epi8_mask(K8_LOW_END, index, _MM_CMPINT_NLE);
+            __m512i uppValue = _mm512_maskz_add_epi8(uppMask, index, K8_UPP_ADD);
+            __m512i lowValue = _mm512_maskz_add_epi8((~uppMask)&letMask, index, K8_LOW_ADD);
+            __m512i digValue = _mm512_maskz_shuffle_epi8(~letMask, K8_DIG_SHUFFLE, index);
+            __m512i _dst = _mm512_or_si512(_mm512_or_si512(uppValue, lowValue), digValue);
+            _mm512_mask_storeu_epi8(dst, dstMask, _dst);
         }
 
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst)
         {
             size_t size3 = AlignLoAny(size, 3);
-            size_t size24 = AlignLoAny(size, 24);
-            for (const uint8_t* body24 = src + size24; src < body24; src += 24, dst += 32)
-                Base64Encode24(src, 0xFFFFFF, dst, 0xFFFFFFFF);
-            if (size24 < size3)
+            size_t size48 = AlignLoAny(size, 48);
+            for (const uint8_t* body48 = src + size48; src < body48; src += 48, dst += 64)
+                Base64Encode48(src, 0x0000FFFFFFFFFFFF, dst, 0xFFFFFFFFFFFFFFFF);
+            if (size48 < size3)
             {
-                size_t srcTail = size3 - size24, dstTail = (size3 - size24) / 3 * 4;
-                __mmask32 srcMask = __mmask32(-1) >> (32 - srcTail);
-                __mmask32 dstMask = __mmask32(-1) >> (32 - dstTail);
-                Base64Encode24(src, srcMask, dst, dstMask);
+                size_t srcTail = size3 - size48, dstTail = (size3 - size48) / 3 * 4;
+                __mmask64 srcMask = __mmask64(-1) >> (64 - srcTail);
+                __mmask64 dstMask = __mmask64(-1) >> (64 - dstTail);
+                Base64Encode48(src, srcMask, dst, dstMask);
                 src += srcTail;
                 dst += dstTail;
             }
-            if(size - size3)
+            if (size - size3)
                 Base::Base64EncodeTail(src, size - size3, dst);
         }
     }
