@@ -28,6 +28,16 @@ namespace Simd
 {
     namespace Base
     {
+        void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
+        {
+            assert(srcSize % 4 == 0 && srcSize >= 4);
+            for (const uint8_t * body = src + srcSize - 4; src < body; src += 4, dst += 3)
+                Base64Decode3(src, dst);
+            *dstSize = srcSize / 4 * 3 + Base64DecodeTail(src, dst) - 3;
+        }
+
+        //---------------------------------------------------------------------------------------------
+
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst)
         {
             const uint8_t* body = src + AlignLoAny(size, 3);

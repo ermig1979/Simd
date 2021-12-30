@@ -50,9 +50,15 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
+<tr class="memitem:ga05417cb74653e8fe362ed3486b701045"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__base64.html#ga05417cb74653e8fe362ed3486b701045">SimdBase64Decode</a> (const uint8_t *src, size_t srcSize, uint8_t *dst, size_t *dstSize)</td></tr>
+<tr class="memdesc:ga05417cb74653e8fe362ed3486b701045"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode string from Base64.  <a href="group__base64.html#ga05417cb74653e8fe362ed3486b701045">More...</a><br /></td></tr>
+<tr class="separator:ga05417cb74653e8fe362ed3486b701045"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gad80e63d4f34b464382a94a531dee18cd"><td class="memItemLeft" align="right" valign="top">SIMD_API void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__base64.html#gad80e63d4f34b464382a94a531dee18cd">SimdBase64Encode</a> (const uint8_t *src, size_t size, uint8_t *dst)</td></tr>
 <tr class="memdesc:gad80e63d4f34b464382a94a531dee18cd"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode string to Base64.  <a href="group__base64.html#gad80e63d4f34b464382a94a531dee18cd">More...</a><br /></td></tr>
 <tr class="separator:gad80e63d4f34b464382a94a531dee18cd"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ga2e64043e8f99aa14257249eacd7c811b"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__base64.html#ga2e64043e8f99aa14257249eacd7c811b">Base64Decode</a> (const std::string &amp;src)</td></tr>
+<tr class="memdesc:ga2e64043e8f99aa14257249eacd7c811b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Decode string to Base64.  <a href="group__base64.html#ga2e64043e8f99aa14257249eacd7c811b">More...</a><br /></td></tr>
+<tr class="separator:ga2e64043e8f99aa14257249eacd7c811b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:gafff853125884c535944898ee2c9ec231"><td class="memItemLeft" align="right" valign="top">SIMD_INLINE std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__base64.html#gafff853125884c535944898ee2c9ec231">Base64Encode</a> (const std::string &amp;src)</td></tr>
 <tr class="memdesc:gafff853125884c535944898ee2c9ec231"><td class="mdescLeft">&#160;</td><td class="mdescRight">Encode string to Base64.  <a href="group__base64.html#gafff853125884c535944898ee2c9ec231">More...</a><br /></td></tr>
 <tr class="separator:gafff853125884c535944898ee2c9ec231"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -60,6 +66,58 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >Functions for encoding/decoding of strings in Base64 format. </p>
 <h2 class="groupheader">Function Documentation</h2>
+<a id="ga05417cb74653e8fe362ed3486b701045" name="ga05417cb74653e8fe362ed3486b701045"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga05417cb74653e8fe362ed3486b701045">&#9670;&nbsp;</a></span>SimdBase64Decode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void SimdBase64Decode </td>
+          <td>(</td>
+          <td class="paramtype">const uint8_t *&#160;</td>
+          <td class="paramname"><em>src</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t&#160;</td>
+          <td class="paramname"><em>srcSize</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">uint8_t *&#160;</td>
+          <td class="paramname"><em>dst</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t *&#160;</td>
+          <td class="paramname"><em>dstSize</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Decode string from Base64. </p>
+<dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper std::string <a class="el" href="group__base64.html#ga2e64043e8f99aa14257249eacd7c811b" title="Decode string to Base64.">Simd::Base64Decode(const std::string &amp; src)</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to Base64 encoded input string. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">srcSize</td><td>- a length of input string. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output buffer with decoded string. The size of the buffer is must be at least srcSize / 4 * 3. </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dstSize</td><td>- a pointer to the value with lenght of decoded string. </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
 <a id="gad80e63d4f34b464382a94a531dee18cd" name="gad80e63d4f34b464382a94a531dee18cd"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#gad80e63d4f34b464382a94a531dee18cd">&#9670;&nbsp;</a></span>SimdBase64Encode()</h2>
 
@@ -93,16 +151,43 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Encode string to Base64. </p>
-<p >All images must have the same width and height. The width and the height must be even.</p>
 <dl class="section note"><dt>Note</dt><dd>This function has a C++ wrapper std::string <a class="el" href="group__base64.html#gafff853125884c535944898ee2c9ec231" title="Encode string to Base64.">Simd::Base64Encode(const std::string &amp; src)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to original string. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">size</td><td>- a length of input string. </td></tr>
-    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output buffer with Base64 encoded string. The size of the buffer is must be at least (size + 2) / 3 * 4; </td></tr>
+    <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to the output buffer with Base64 encoded string. The size of the buffer is must be at least (size + 2) / 3 * 4. </td></tr>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="ga2e64043e8f99aa14257249eacd7c811b" name="ga2e64043e8f99aa14257249eacd7c811b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ga2e64043e8f99aa14257249eacd7c811b">&#9670;&nbsp;</a></span>Base64Decode()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">std::string Base64Decode </td>
+          <td>(</td>
+          <td class="paramtype">const std::string &amp;&#160;</td>
+          <td class="paramname"><em>src</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Decode string to Base64. </p>
+<dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__base64.html#ga05417cb74653e8fe362ed3486b701045" title="Decode string from Base64.">SimdBase64Decode</a>.</dd></dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- an input Base64 encoded string. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>the output decoded string. </dd></dl>
 
 </div>
 </div>

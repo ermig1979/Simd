@@ -1431,6 +1431,20 @@ extern "C"
     SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
         uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
 
+    /*! @ingroup base64
+
+        \fn void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
+
+        \short Decode string from Base64.
+
+        \note This function has a C++ wrapper std::string Simd::Base64Decode(const std::string & src).
+
+        \param [in] src - a pointer to Base64 encoded input string.
+        \param [in] srcSize - a length of input string.
+        \param [out] dst - a pointer to the output buffer with decoded string. The size of the buffer is must be at least srcSize / 4 * 3.
+        \param [out] dstSize - a pointer to the value with lenght of decoded string. 
+    */
+    SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
 
     /*! @ingroup base64
 
@@ -1438,16 +1452,13 @@ extern "C"
 
         \short Encode string to Base64.
 
-        All images must have the same width and height. The width and the height must be even.
-
         \note This function has a C++ wrapper std::string Simd::Base64Encode(const std::string & src).
 
         \param [in] src - a pointer to original string.
         \param [in] size - a length of input string.
-        \param [out] dst - a pointer to the output buffer with Base64 encoded string. The size of the buffer is must be at least (size + 2) / 3 * 4;
+        \param [out] dst - a pointer to the output buffer with Base64 encoded string. The size of the buffer is must be at least (size + 2) / 3 * 4.
     */
     SIMD_API void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst);
-
 
     /*! @ingroup bayer_conversion
 

@@ -670,6 +670,26 @@ namespace Simd
 
     /*! @ingroup base64
 
+        \fn std::string Base64Decode(const std::string& src)
+
+        \short Decode string to Base64.
+
+        \note This function is a C++ wrapper for function ::SimdBase64Decode.
+
+        \param [in] src - an input Base64 encoded string.
+        \return the output decoded string.
+    */
+    SIMD_INLINE std::string Base64Decode(const std::string& src)
+    {
+        size_t dstSize = src.length() / 4 * 3;
+        std::string dst(dstSize, 0);
+        SimdBase64Decode((uint8_t*)src.c_str(), src.length(), (uint8_t*)dst.c_str(), &dstSize);
+        dst.resize(dstSize);
+        return dst;
+    }
+
+    /*! @ingroup base64
+
         \fn std::string Base64Encode(const std::string& src)
 
         \short Encode string to Base64.

@@ -29,6 +29,95 @@ namespace Test
 {
     namespace
     {
+        struct FuncD
+        {
+            typedef void(*FunkPtr)(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t *dstSize);
+
+            FunkPtr func;
+            String description;
+
+            FuncD(const FunkPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const Buffer8u& src, Buffer8u& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                size_t dstSize;
+                func(src.data(), src.size(), dst.data(), &dstSize);
+                dst.resize(dstSize);
+            }
+        };
+    }
+
+#define FUNC_D(func) FuncD(func, #func)
+
+    bool Base64DecodeAutoTest(size_t size, const FuncD& f1, const FuncD& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size = " << size << ".");
+        TEST_ALIGN(size);
+
+        Buffer8u orig(size);
+        srand(2);
+        FillRandom(orig.data(), orig.size(), 0, 255);
+        orig[0] = 'M', orig[1] = 'a', orig[2] = 'n';
+
+        Buffer8u src((size + 2) / 3 * 4);
+        SimdBase64Encode(orig.data(), orig.size(), src.data());
+
+        size_t dstS = src.size() / 4 * 3;
+        Buffer8u dst1(dstS), dst2(dstS);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+        result = result && Compare(dst1.data(), dst1.size(), dst2.data(), dst2.size(), 0, true, 32);
+
+        result = result && Compare(dst1.data(), dst1.size(), orig.data(), orig.size(), 0, true, 32);
+
+        return result;
+    }
+
+    bool Base64DecodeAutoTest(const FuncD& f1, const FuncD& f2)
+    {
+        bool result = true;
+
+        result = result && Base64DecodeAutoTest(W * H + 0, f1, f2);
+        result = result && Base64DecodeAutoTest(W * H + 1, f1, f2);
+        result = result && Base64DecodeAutoTest(W * H + 2, f1, f2);
+
+        return result;
+    }
+
+    bool Base64DecodeAutoTest()
+    {
+        bool result = true;
+
+        result = result && Base64DecodeAutoTest(FUNC_D(Simd::Base::Base64Decode), FUNC_D(SimdBase64Decode));
+
+/*#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Base64DecodeAutoTest(FUNC_D(Simd::Sse41::Base64Decode), FUNC_D(SimdBase64Decode));
+#endif  
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && Base64DecodeAutoTest(FUNC_D(Simd::Avx2::Base64Decode), FUNC_D(SimdBase64Decode));
+#endif  
+
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && Base64DecodeAutoTest(FUNC_D(Simd::Avx512bw::Base64Decode), FUNC_D(SimdBase64Decode));
+#endif */        
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    namespace
+    {
         struct FuncE
         {
             typedef void(*FunkPtr)(const uint8_t *src, size_t size, uint8_t* dst);
@@ -56,7 +145,7 @@ namespace Test
         TEST_ALIGN(size);
 
         TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size = " << size << ".");
-        srand(2);
+
         FillRandom(src.data(), src.size(), 0, 255);
         src[0] = 'M', src[1] = 'a', src[2] = 'n';
 
