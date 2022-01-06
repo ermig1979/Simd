@@ -193,6 +193,8 @@ namespace Simd
             Array32i _ix, _iy, _ax[4], _ay[4], _bx[4];
 
             void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i & index, Array32i alpha[4]);
+
+            void Init();
         public:
             ResizerByteBicubic(const ResParam& param);
 

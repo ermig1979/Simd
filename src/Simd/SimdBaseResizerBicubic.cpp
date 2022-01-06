@@ -32,12 +32,6 @@ namespace Simd
         ResizerByteBicubic::ResizerByteBicubic(const ResParam & param)
             : Resizer(param)
         {
-            float ky = float(BICUBIC_RANGE);
-            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, ky, _iy, _ay);
-            float kx = float(BICUBIC_LIMIT * BICUBIC_LIMIT) / float(BICUBIC_RANGE);
-            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, kx, _ix, _ax);
-            for (int i = 0; i < 4; ++i)
-                _bx[i].Resize(_param.dstW * _param.channels);
         }
         
         void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i& index, Array32i alpha[4])
@@ -67,57 +61,55 @@ namespace Simd
                 alpha[2][i] = int(range * (2.0f - d) * (d + 1.0f) * d / 2.0f);
                 alpha[3][i] = - int(range * (1.0f + d) * (d - 1.0f) * d / 6.0f);
             }
-        }        
+        } 
+
+        void ResizerByteBicubic::Init()
+        {
+            if (_iy.data)
+                return;
+            float ky = float(BICUBIC_RANGE);
+            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, ky, _iy, _ay);
+            float kx = float(BICUBIC_LIMIT * BICUBIC_LIMIT) / float(BICUBIC_RANGE);
+            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, kx, _ix, _ax);
+            for (int i = 0; i < 4; ++i)
+                _bx[i].Resize(_param.dstW * _param.channels);
+        }
 
         void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
+            Init();
             size_t cn = _param.channels;
-            size_t rs = _param.dstW * cn;
-            int32_t* pbx[4] = { _bx[0].data, _bx[1].data, _bx[2].data, _bx[3].data };
-            int32_t prev = -2;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
-                //int32_t fy = _ay[dy];
-                //int32_t sy = _iy[dy];
-                //int32_t k = 0;
-
-                //if (sy == prev)
-                //    k = 2;
-                //else if (sy == prev + 1)
-                //{
-                //    Swap(pbx[0], pbx[1]);
-                //    k = 1;
-                //}
-
-                //prev = sy;
-
-                //for (; k < 2; k++)
-                //{
-                //    int32_t* pb = pbx[k];
-                //    const uint8_t* ps = src + (sy + k) * srcStride;
-                //    for (size_t dx = 0; dx < rs; dx++)
-                //    {
-                //        int32_t sx = _ix[dx];
-                //        int32_t fx = _ax[dx];
-                //        int32_t t = ps[sx];
-                //        pb[dx] = (t << LINEAR_SHIFT) + (ps[sx + cn] - t) * fx;
-                //    }
-                //}
-
-                //if (fy == 0)
-                //    for (size_t dx = 0; dx < rs; dx++)
-                //        dst[dx] = ((pbx[0][dx] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
-                //else if (fy == FRACTION_RANGE)
-                //    for (size_t dx = 0; dx < rs; dx++)
-                //        dst[dx] = ((pbx[1][dx] << LINEAR_SHIFT) + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
-                //else
-                //{
-                //    for (size_t dx = 0; dx < rs; dx++)
-                //    {
-                //        int32_t t = pbx[0][dx];
-                //        dst[dx] = ((t << LINEAR_SHIFT) + (pbx[1][dx] - t) * fy + BILINEAR_ROUND_TERM) >> BILINEAR_SHIFT;
-                //    }
-                //}
+                size_t sy = _iy[dy];
+                const uint8_t* src1 = src + sy * srcStride;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src0 = sy ? src1 - srcStride : src1;
+                const uint8_t* src3 = sy < _param.srcH - 1 ? src2 + srcStride : src2;
+                int32_t ay0 = _ay[0][dy];
+                int32_t ay1 = _ay[1][dy];
+                int32_t ay2 = _ay[2][dy];
+                int32_t ay3 = _ay[3][dy];
+                for (size_t dx = 0; dx < _param.dstW; dx++)
+                {
+                    size_t sx1 = _ix[dx];
+                    size_t sx2 = sx1 + cn;
+                    size_t sx0 = sx1 ? sx1 - cn : sx1;
+                    size_t sx3 = sx1 < _param.srcW - 1 ? sx2 + cn : sx2;
+                    int32_t ax0 = _ax[0][dx];
+                    int32_t ax1 = _ax[1][dx];
+                    int32_t ax2 = _ax[2][dx];
+                    int32_t ax3 = _ax[3][dx];
+                    for (size_t c = 0; c < cn; ++c)
+                    {
+                        int32_t rs0 = ax0 * src0[sx0 + c] + ax1 * src0[sx1 + c] + ax2 * src0[sx2 + c] + ax3 * src0[sx3 + c];
+                        int32_t rs1 = ax0 * src1[sx0 + c] + ax1 * src1[sx1 + c] + ax2 * src1[sx2 + c] + ax3 * src1[sx3 + c];
+                        int32_t rs2 = ax0 * src2[sx0 + c] + ax1 * src2[sx1 + c] + ax2 * src2[sx2 + c] + ax3 * src2[sx3 + c];
+                        int32_t rs3 = ax0 * src3[sx0 + c] + ax1 * src3[sx1 + c] + ax2 * src3[sx2 + c] + ax3 * src3[sx3 + c];
+                        int32_t fs = ay0 * rs0 + ay1 * rs1 + ay2 * rs2 + ay3 * rs3;
+                        dst[dx * cn + c] = RestrictRange((fs + BICUBIC_ROUND) >> BICUBIC_SHIFT, 0, 255);
+                    }
+                }
             }
         }
     }
