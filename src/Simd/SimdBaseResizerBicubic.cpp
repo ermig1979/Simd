@@ -57,9 +57,9 @@ namespace Simd
                 }
                 index[i] = idx * (int)N;
                 alpha[0][i] = - int(range * (2.0f - d) * (1.0f - d) * d / 6.0f);
-                alpha[1][i] = int(range * (2.0f - d) * (d + 1.0f) * (d - 1.0f) / 2.0f);
+                alpha[1][i] = int(range * (2.0f - d) * (d + 1.0f) * (1.0f - d) / 2.0f);
                 alpha[2][i] = int(range * (2.0f - d) * (d + 1.0f) * d / 2.0f);
-                alpha[3][i] = - int(range * (1.0f + d) * (d - 1.0f) * d / 6.0f);
+                alpha[3][i] = - int(range * (1.0f + d) * (1.0f - d) * d / 6.0f);
             }
         } 
 
@@ -85,7 +85,7 @@ namespace Simd
                 const uint8_t* src1 = src + sy * srcStride;
                 const uint8_t* src2 = src1 + srcStride;
                 const uint8_t* src0 = sy ? src1 - srcStride : src1;
-                const uint8_t* src3 = sy < _param.srcH - 1 ? src2 + srcStride : src2;
+                const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
                 int32_t ay0 = _ay[0][dy];
                 int32_t ay1 = _ay[1][dy];
                 int32_t ay2 = _ay[2][dy];
@@ -95,7 +95,7 @@ namespace Simd
                     size_t sx1 = _ix[dx];
                     size_t sx2 = sx1 + cn;
                     size_t sx0 = sx1 ? sx1 - cn : sx1;
-                    size_t sx3 = sx1 < _param.srcW - 1 ? sx2 + cn : sx2;
+                    size_t sx3 = sx1 < _param.srcW - 2 ? sx2 + cn : sx2;
                     int32_t ax0 = _ax[0][dx];
                     int32_t ax1 = _ax[1][dx];
                     int32_t ax2 = _ax[2][dx];
