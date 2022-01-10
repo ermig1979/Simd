@@ -27,6 +27,8 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdMath.h"
 
+#define SIMD_RESIZER_BICUBIC_BITS 7 // 7, 11
+
 namespace Simd
 {
     struct ResParam
@@ -182,17 +184,16 @@ namespace Simd
 
         //---------------------------------------------------------------------------------------------
 
-        const int32_t BICUBIC_SHIFT = 12;
-        const int32_t BICUBIC_RANGE = 72;
-        const int32_t BICUBIC_LIMIT = 64;
-        const int32_t BICUBIC_ROUND = 1 << 11;
+        const int32_t BICUBIC_RANGE = 1 << SIMD_RESIZER_BICUBIC_BITS;
+        const int32_t BICUBIC_SHIFT = SIMD_RESIZER_BICUBIC_BITS * 2;
+        const int32_t BICUBIC_ROUND = 1 << (BICUBIC_SHIFT - 1);
 
         class ResizerByteBicubic : public Resizer
         {
         protected:
             Array32i _ix, _iy, _ax[4], _ay[4], _bx[4];
 
-            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i & index, Array32i alpha[4]);
+            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i & index, Array32i alpha[4]);
 
             void Init();
         public:

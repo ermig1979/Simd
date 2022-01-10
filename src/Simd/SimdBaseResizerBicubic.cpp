@@ -34,7 +34,7 @@ namespace Simd
         {
         }
         
-        void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, float range, Array32i& index, Array32i alpha[4])
+        void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i& index, Array32i alpha[4])
         {
             index.Resize(sizeD);
             for (int i = 0; i < 4; ++i)
@@ -56,10 +56,10 @@ namespace Simd
                     d = 1.0f;
                 }
                 index[i] = idx * (int)N;
-                alpha[0][i] = - int(range * (2.0f - d) * (1.0f - d) * d / 6.0f);
-                alpha[1][i] = int(range * (2.0f - d) * (d + 1.0f) * (1.0f - d) / 2.0f);
-                alpha[2][i] = int(range * (2.0f - d) * (d + 1.0f) * d / 2.0f);
-                alpha[3][i] = - int(range * (1.0f + d) * (1.0f - d) * d / 6.0f);
+                alpha[0][i] = Round(BICUBIC_RANGE * (2.0f - d) * (1.0f - d) * d / 6.0f);
+                alpha[1][i] = -Round(BICUBIC_RANGE * (2.0f - d) * (d + 1.0f) * (1.0f - d) / 2.0f);
+                alpha[2][i] = -Round(BICUBIC_RANGE * (2.0f - d) * (d + 1.0f) * d / 2.0f);
+                alpha[3][i] = Round(BICUBIC_RANGE * (1.0f + d) * (1.0f - d) * d / 6.0f);
             }
         } 
 
@@ -67,10 +67,8 @@ namespace Simd
         {
             if (_iy.data)
                 return;
-            float ky = float(BICUBIC_RANGE);
-            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, ky, _iy, _ay);
-            float kx = float(BICUBIC_LIMIT * BICUBIC_LIMIT) / float(BICUBIC_RANGE);
-            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, kx, _ix, _ax);
+            EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy, _ay);
+            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix, _ax);
             for (int i = 0; i < 4; ++i)
                 _bx[i].Resize(_param.dstW * _param.channels);
         }

@@ -208,7 +208,7 @@ namespace Test
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
 
-//#define TEST_RESIZE_REAL_IMAGE
+#define TEST_RESIZE_REAL_IMAGE
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH, FuncRS f1, FuncRS f2)
     {
@@ -255,6 +255,7 @@ namespace Test
         else
         {
 #ifdef TEST_RESIZE_REAL_IMAGE
+            ::srand(0);
             FillPicture(src);
 #else
             FillRandom(src);
@@ -283,15 +284,16 @@ namespace Test
             result = result && Compare(dst1, dst2, 0, true, 64);
 
 #ifdef TEST_RESIZE_REAL_IMAGE
+        String suffix = ToString(method) + "_" + ToString(method == SimdResizeMethodBicubic ? SIMD_RESIZER_BICUBIC_BITS : 4);
         if (format == View::Bgr24)
         {
-            src.Save("src.ppm");
-            dst1.Save("dst.ppm");
+            src.Save(String("src_") + suffix + ".ppm");
+            dst1.Save(String("dst_") + suffix + ".ppm");
         }
         if (format == View::Gray8)
         {
-            src.Save("src.pgm", SimdImageFilePgmTxt);
-            dst1.Save("dst.pgm", SimdImageFilePgmTxt);
+            src.Save(String("src_") + suffix + ".pgm", SimdImageFilePgmTxt);
+            dst1.Save(String("dst_") + suffix + ".pgm", SimdImageFilePgmTxt);
         }
 #endif
 
@@ -307,11 +309,11 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
 
         return result;
     }
@@ -325,9 +327,9 @@ namespace Test
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
-            result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
+            //result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 3, f1, f2);
-            result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
+            //result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
             if (methods[m] == SimdResizeMethodArea || 1)
                 continue;
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 1, f1, f2);
