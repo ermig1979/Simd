@@ -47,6 +47,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBicubic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp" />

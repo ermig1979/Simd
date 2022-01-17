@@ -50,6 +50,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Resizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Segmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Sobel.cpp" />

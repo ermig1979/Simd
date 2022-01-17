@@ -211,6 +211,12 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fDirectNhwc.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerArea.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerBilinear.cpp">
+      <Filter>Sse2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse2">
