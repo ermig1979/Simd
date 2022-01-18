@@ -48,27 +48,21 @@ namespace Simd
                 const uint8_t* src2 = src1 + srcStride;
                 const uint8_t* src0 = sy ? src1 - srcStride : src1;
                 const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
-                int32_t ay0 = _ay[0][dy];
-                int32_t ay1 = _ay[1][dy];
-                int32_t ay2 = _ay[2][dy];
-                int32_t ay3 = _ay[3][dy];
+                const int32_t* ay = _ay.data + dy * 4;
                 for (size_t dx = 0; dx < _param.dstW; dx++)
                 {
                     size_t sx1 = _ix[dx];
                     size_t sx2 = sx1 + cn;
                     size_t sx0 = sx1 ? sx1 - cn : sx1;
-                    size_t sx3 = sx1 < _param.srcW - 2 ? sx2 + cn : sx2;
-                    int32_t ax0 = _ax[0][dx];
-                    int32_t ax1 = _ax[1][dx];
-                    int32_t ax2 = _ax[2][dx];
-                    int32_t ax3 = _ax[3][dx];
+                    size_t sx3 = sx1 < _sxl ? sx2 + cn : sx2;
+                    const int32_t* ax = _ax.data + dx * 4;
                     for (size_t c = 0; c < cn; ++c)
                     {
-                        int32_t rs0 = ax0 * src0[sx0 + c] + ax1 * src0[sx1 + c] + ax2 * src0[sx2 + c] + ax3 * src0[sx3 + c];
-                        int32_t rs1 = ax0 * src1[sx0 + c] + ax1 * src1[sx1 + c] + ax2 * src1[sx2 + c] + ax3 * src1[sx3 + c];
-                        int32_t rs2 = ax0 * src2[sx0 + c] + ax1 * src2[sx1 + c] + ax2 * src2[sx2 + c] + ax3 * src2[sx3 + c];
-                        int32_t rs3 = ax0 * src3[sx0 + c] + ax1 * src3[sx1 + c] + ax2 * src3[sx2 + c] + ax3 * src3[sx3 + c];
-                        int32_t fs = ay0 * rs0 + ay1 * rs1 + ay2 * rs2 + ay3 * rs3;
+                        int32_t rs0 = ax[0] * src0[sx0 + c] + ax[1] * src0[sx1 + c] + ax[2] * src0[sx2 + c] + ax[3] * src0[sx3 + c];
+                        int32_t rs1 = ax[0] * src1[sx0 + c] + ax[1] * src1[sx1 + c] + ax[2] * src1[sx2 + c] + ax[3] * src1[sx3 + c];
+                        int32_t rs2 = ax[0] * src2[sx0 + c] + ax[1] * src2[sx1 + c] + ax[2] * src2[sx2 + c] + ax[3] * src2[sx3 + c];
+                        int32_t rs3 = ax[0] * src3[sx0 + c] + ax[1] * src3[sx1 + c] + ax[2] * src3[sx2 + c] + ax[3] * src3[sx3 + c];
+                        int32_t fs = ay[0] * rs0 + ay[1] * rs1 + ay[2] * rs2 + ay[3] * rs3;
                         dst[dx * cn + c] = Base::RestrictRange((fs + Base::BICUBIC_ROUND) >> Base::BICUBIC_SHIFT, 0, 255);
                     }
                 }

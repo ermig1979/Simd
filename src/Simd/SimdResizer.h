@@ -51,12 +51,13 @@ namespace Simd
 
         bool IsNearest() const
         {
-            return method == SimdResizeMethodNearest || method == SimdResizeMethodNearestPytorch;
+            return method == SimdResizeMethodNearest || method == SimdResizeMethodNearestPytorch || srcW == 1 || srcH == 1;
         }
 
         bool IsByteBilinear() const
         {
-            return type == SimdResizeChannelByte && method == SimdResizeMethodBilinear;
+            return type == SimdResizeChannelByte && (method == SimdResizeMethodBilinear || 
+                (method == SimdResizeMethodBicubic && (srcW == 2 || srcH == 2)));
         }
 
         bool IsShortBilinear() const
@@ -191,14 +192,15 @@ namespace Simd
         class ResizerByteBicubic : public Resizer
         {
         protected:
-            Array32i _ix, _iy, _ax[4], _ay[4], _bx[4];
+            Array32i _ix, _iy, _ax, _ay, _bx[4];
+            size_t _xn, _xt, _sxl;
 
-            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i & index, Array32i alpha[4]);
+            void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i& index, Array32i& alpha);
 
             void Init(bool sparse);
 
-            template<size_t N> void RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            template<size_t N> void RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<int N> void RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<int N> void RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
             ResizerByteBicubic(const ResParam& param);
 

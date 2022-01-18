@@ -34,11 +34,10 @@ namespace Simd
         {
         }
         
-        void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i& index, Array32i alpha[4])
+        void ResizerByteBicubic::EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i& index, Array32i& alpha)
         {
             index.Resize(sizeD);
-            for (int i = 0; i < 4; ++i)
-                alpha[i].Resize(sizeD);
+            alpha.Resize(sizeD * 4);
             float scale = float(sizeS) / float(sizeD);
             for (size_t i = 0; i < sizeD; ++i)
             {
@@ -56,10 +55,10 @@ namespace Simd
                     d = 1.0f;
                 }
                 index[i] = idx * (int)N;
-                alpha[0][i] = Round(BICUBIC_RANGE * (2.0f - d) * (1.0f - d) * d / 6.0f);
-                alpha[1][i] = -Round(BICUBIC_RANGE * (2.0f - d) * (d + 1.0f) * (1.0f - d) / 2.0f);
-                alpha[2][i] = -Round(BICUBIC_RANGE * (2.0f - d) * (d + 1.0f) * d / 2.0f);
-                alpha[3][i] = Round(BICUBIC_RANGE * (1.0f + d) * (1.0f - d) * d / 6.0f);
+                alpha[i * 4 + 0] = Round(BICUBIC_RANGE * (2.0f - d) * (1.0f - d) * d / 6.0f);
+                alpha[i * 4 + 1] = Round(BICUBIC_RANGE * (d - 2.0f) * (d + 1.0f) * (1.0f - d) / 2.0f);
+                alpha[i * 4 + 2] = Round(BICUBIC_RANGE * (d - 2.0f) * (d + 1.0f) * d / 2.0f);
+                alpha[i * 4 + 3] = Round(BICUBIC_RANGE * (1.0f + d) * (1.0f - d) * d / 6.0f);
             }
         } 
 
@@ -74,14 +73,31 @@ namespace Simd
                 for (int i = 0; i < 4; ++i)
                     _bx[i].Resize(_param.dstW * _param.channels);
             }
+            _sxl = (_param.srcW - 2) * _param.channels;
+            for (_xn = 0; _ix[_xn] == 0; _xn++);
+            for (_xt = _param.dstW; _ix[_xt - 1] == _sxl; _xt--);
         }
 
-        template<size_t N> void ResizerByteBicubic::RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        template<int N, int F, int L> SIMD_INLINE int32_t CubicSumX(const uint8_t* src, const int32_t* ax)
         {
-
+            return ax[0] * src[F * N] + ax[1] * src[0 * N] + ax[2] * src[1 * N] + ax[3] * src[L * N];
         }
 
-        template<size_t N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        template<int N, int F, int L> SIMD_INLINE void BicubicInt(const uint8_t* src0, const uint8_t* src1,
+            const uint8_t* src2, const uint8_t* src3, size_t sx, const int32_t* ax, const int32_t* ay, uint8_t * dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+            {
+                int32_t rs0 = CubicSumX<N, F, L>(src0 + sx + c, ax);
+                int32_t rs1 = CubicSumX<N, F, L>(src1 + sx + c, ax);
+                int32_t rs2 = CubicSumX<N, F, L>(src2 + sx + c, ax);
+                int32_t rs3 = CubicSumX<N, F, L>(src3 + sx + c, ax);
+                int32_t sum = ay[0] * rs0 + ay[1] * rs1 + ay[2] * rs2 + ay[3] * rs3;
+                dst[c] = RestrictRange((sum + BICUBIC_ROUND) >> BICUBIC_SHIFT, 0, 255);
+            }
+        }
+
+        template<int N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
@@ -90,31 +106,20 @@ namespace Simd
                 const uint8_t* src2 = src1 + srcStride;
                 const uint8_t* src0 = sy ? src1 - srcStride : src1;
                 const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
-                int32_t ay0 = _ay[0][dy];
-                int32_t ay1 = _ay[1][dy];
-                int32_t ay2 = _ay[2][dy];
-                int32_t ay3 = _ay[3][dy];
-                for (size_t dx = 0; dx < _param.dstW; dx++)
-                {
-                    size_t sx1 = _ix[dx];
-                    size_t sx2 = sx1 + N;
-                    size_t sx0 = sx1 ? sx1 - N : sx1;
-                    size_t sx3 = sx1 < _param.srcW - 2 ? sx2 + N : sx2;
-                    int32_t ax0 = _ax[0][dx];
-                    int32_t ax1 = _ax[1][dx];
-                    int32_t ax2 = _ax[2][dx];
-                    int32_t ax3 = _ax[3][dx];
-                    for (size_t c = 0; c < N; ++c)
-                    {
-                        int32_t rs0 = ax0 * src0[sx0 + c] + ax1 * src0[sx1 + c] + ax2 * src0[sx2 + c] + ax3 * src0[sx3 + c];
-                        int32_t rs1 = ax0 * src1[sx0 + c] + ax1 * src1[sx1 + c] + ax2 * src1[sx2 + c] + ax3 * src1[sx3 + c];
-                        int32_t rs2 = ax0 * src2[sx0 + c] + ax1 * src2[sx1 + c] + ax2 * src2[sx2 + c] + ax3 * src2[sx3 + c];
-                        int32_t rs3 = ax0 * src3[sx0 + c] + ax1 * src3[sx1 + c] + ax2 * src3[sx2 + c] + ax3 * src3[sx3 + c];
-                        int32_t fs = ay0 * rs0 + ay1 * rs1 + ay2 * rs2 + ay3 * rs3;
-                        dst[dx * N + c] = RestrictRange((fs + BICUBIC_ROUND) >> BICUBIC_SHIFT, 0, 255);
-                    }
-                }
+                const int32_t* ay = _ay.data + dy * 4;
+                size_t dx = 0;
+                for (; dx < _xn; dx++)
+                    BicubicInt<N, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
+                for (; dx < _xt; dx++)
+                    BicubicInt<N, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
+                for (; dx < _param.dstW; dx++)
+                    BicubicInt<N, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
             }
+        }
+
+        template<int N> void ResizerByteBicubic::RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+
         }
 
         void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
