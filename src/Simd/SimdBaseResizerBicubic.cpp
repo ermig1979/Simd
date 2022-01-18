@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -63,20 +63,26 @@ namespace Simd
             }
         } 
 
-        void ResizerByteBicubic::Init()
+        void ResizerByteBicubic::Init(bool sparse)
         {
             if (_iy.data)
                 return;
             EstimateIndexAlpha(_param.srcH, _param.dstH, 1, _iy, _ay);
             EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix, _ax);
-            for (int i = 0; i < 4; ++i)
-                _bx[i].Resize(_param.dstW * _param.channels);
+            if (!sparse)
+            {
+                for (int i = 0; i < 4; ++i)
+                    _bx[i].Resize(_param.dstW * _param.channels);
+            }
         }
 
-        void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        template<size_t N> void ResizerByteBicubic::RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            Init();
-            size_t cn = _param.channels;
+
+        }
+
+        template<size_t N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
@@ -91,23 +97,38 @@ namespace Simd
                 for (size_t dx = 0; dx < _param.dstW; dx++)
                 {
                     size_t sx1 = _ix[dx];
-                    size_t sx2 = sx1 + cn;
-                    size_t sx0 = sx1 ? sx1 - cn : sx1;
-                    size_t sx3 = sx1 < _param.srcW - 2 ? sx2 + cn : sx2;
+                    size_t sx2 = sx1 + N;
+                    size_t sx0 = sx1 ? sx1 - N : sx1;
+                    size_t sx3 = sx1 < _param.srcW - 2 ? sx2 + N : sx2;
                     int32_t ax0 = _ax[0][dx];
                     int32_t ax1 = _ax[1][dx];
                     int32_t ax2 = _ax[2][dx];
                     int32_t ax3 = _ax[3][dx];
-                    for (size_t c = 0; c < cn; ++c)
+                    for (size_t c = 0; c < N; ++c)
                     {
                         int32_t rs0 = ax0 * src0[sx0 + c] + ax1 * src0[sx1 + c] + ax2 * src0[sx2 + c] + ax3 * src0[sx3 + c];
                         int32_t rs1 = ax0 * src1[sx0 + c] + ax1 * src1[sx1 + c] + ax2 * src1[sx2 + c] + ax3 * src1[sx3 + c];
                         int32_t rs2 = ax0 * src2[sx0 + c] + ax1 * src2[sx1 + c] + ax2 * src2[sx2 + c] + ax3 * src2[sx3 + c];
                         int32_t rs3 = ax0 * src3[sx0 + c] + ax1 * src3[sx1 + c] + ax2 * src3[sx2 + c] + ax3 * src3[sx3 + c];
                         int32_t fs = ay0 * rs0 + ay1 * rs1 + ay2 * rs2 + ay3 * rs3;
-                        dst[dx * cn + c] = RestrictRange((fs + BICUBIC_ROUND) >> BICUBIC_SHIFT, 0, 255);
+                        dst[dx * N + c] = RestrictRange((fs + BICUBIC_ROUND) >> BICUBIC_SHIFT, 0, 255);
                     }
                 }
+            }
+        }
+
+        void ResizerByteBicubic::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            bool sparse = true;// _param.dstH * 2.0 <= _param.srcH;
+            Init(sparse);
+            switch (_param.channels)
+            {
+            case 1: sparse ? RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
+            case 2: sparse ? RunS<2>(src, srcStride, dst, dstStride) : RunB<2>(src, srcStride, dst, dstStride); return;
+            case 3: sparse ? RunS<3>(src, srcStride, dst, dstStride) : RunB<3>(src, srcStride, dst, dstStride); return;
+            case 4: sparse ? RunS<4>(src, srcStride, dst, dstStride) : RunB<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
             }
         }
     }

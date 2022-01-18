@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -195,7 +195,10 @@ namespace Simd
 
             void EstimateIndexAlpha(size_t sizeS, size_t sizeD, size_t N, Array32i & index, Array32i alpha[4]);
 
-            void Init();
+            void Init(bool sparse);
+
+            template<size_t N> void RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<size_t N> void RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
             ResizerByteBicubic(const ResParam& param);
 
