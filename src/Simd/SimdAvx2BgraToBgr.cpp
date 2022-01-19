@@ -42,15 +42,14 @@ namespace Simd
             if (align)
                 assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(bgr) && Aligned(bgrStride));
 
-            size_t widthF = AlignLo(width, F);
-            if (width == widthF)
-                widthF -= F;
+            size_t widthF = AlignLo(width, F) - F;
 
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < widthF; col += F)
                     Store<false>((__m256i*)(bgr + 3 * col), BgraToBgr<align>(bgra + 4 * col));
-                if (width != widthF)
+                Store24<false>(bgr + 3 * widthF, BgraToBgr<align>(bgra + 4 * widthF));
+                if (widthF + F != width)
                     Store24<false>(bgr + 3 * (width - F), BgraToBgr<false>(bgra + 4 * (width - F)));
                 bgra += bgraStride;
                 bgr += bgrStride;
@@ -83,16 +82,15 @@ namespace Simd
             if (align)
                 assert(Aligned(bgra) && Aligned(bgraStride) && Aligned(rgb) && Aligned(rgbStride));
 
-            size_t widthF = AlignLo(width, F);
-            if (width == widthF)
-                widthF -= F;
+            size_t widthF = AlignLo(width, F) - F;
 
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0; col < widthF; col += F)
-                    Store<false>((__m256i*)(rgb + 3 * col), BgraToRgb<align>(bgra + 4 * col));
-                if (width != widthF)
-                    Store24<false>(rgb + 3 * (width - F), BgraToRgb<false>(bgra + 4 * (width - F)));
+                    Store<false>((__m256i*)(rgb + 3 * col), BgraToBgr<align>(bgra + 4 * col));
+                Store24<false>(rgb + 3 * widthF, BgraToBgr<align>(bgra + 4 * widthF));
+                if (widthF + F != width)
+                    Store24<false>(rgb + 3 * (width - F), BgraToBgr<false>(bgra + 4 * (width - F)));
                 bgra += bgraStride;
                 rgb += rgbStride;
             }

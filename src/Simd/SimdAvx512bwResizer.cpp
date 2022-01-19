@@ -939,8 +939,8 @@ namespace Simd
                         src = srcIndex * (int)pixelSize - _ix32x2[block].src;
                     }
                     for (size_t i = 0; i < pixelSize; i += 2)
-                        _ix32x2[block].shuffle[(dst + i) / 2] = (src + i) /2;
-                    tail = (dst + pixelSize) / 2;
+                        _ix32x2[block].shuffle[(dst + i) / 2] = uint16_t((src + i) / 2);
+                    tail = (dst + (int)pixelSize) / 2;
                 }
                 _tail32x2 = TailMask32(tail);
                 _blocks = block + 1;

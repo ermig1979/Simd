@@ -963,7 +963,7 @@ SIMD_API void SimdBgraToBgr(const uint8_t * bgra, size_t width, size_t height, s
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
+    if (Avx2::Enable && width >= Avx2::F)
         Avx2::BgraToBgr(bgra, width, height, bgraStride, bgr, bgrStride);
     else
 #endif
@@ -1023,7 +1023,7 @@ SIMD_API void SimdBgraToRgb(const uint8_t* bgra, size_t width, size_t height, si
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::A)
+    if (Avx2::Enable && width >= Avx2::F)
         Avx2::BgraToRgb(bgra, width, height, bgraStride, rgb, rgbStride);
     else
 #endif
