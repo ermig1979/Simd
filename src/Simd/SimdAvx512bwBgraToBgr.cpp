@@ -173,7 +173,7 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 size_t i = 0;
-                for (; i < size; i += A)
+                for (; i < sizeA; i += A)
                     BgraToRgba<align, false>(bgra + i, rgba + i);
                 if (i < size)
                     BgraToRgba<align, true>(bgra + i, rgba + i, tail);
