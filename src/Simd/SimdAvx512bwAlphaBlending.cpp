@@ -404,7 +404,7 @@ namespace Simd
 
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
-            __m512 _255 = _mm512_set1_ps(255.0f);
+            __m512 _255 = _mm512_set1_ps(255.00001f);
             size_t size = width * 4;
             size_t sizeA = AlignLo(size, A);
             __mmask64 tail = TailMask64(size - sizeA);

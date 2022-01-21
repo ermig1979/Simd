@@ -355,6 +355,10 @@ namespace Test
         s.data[3] = 0;
         if (inv)
             Simd::AlphaPremultiply(s, s);
+        s.data[0] = 7;
+        s.data[1] = 7;
+        s.data[2] = 7;
+        s.data[3] = 7;
 
         View d1(width, height, View::Bgra32, NULL, TEST_ALIGN(width));
         View d2(width, height, View::Bgra32, NULL, TEST_ALIGN(width));

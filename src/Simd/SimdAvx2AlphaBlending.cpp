@@ -384,7 +384,7 @@ namespace Simd
 
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
-            __m256 _255 = _mm256_set1_ps(255.0f);
+            __m256 _255 = _mm256_set1_ps(255.00001f);
             size_t size = width * 4;
             size_t sizeA = AlignLo(size, A);
             for (size_t row = 0; row < height; ++row)
