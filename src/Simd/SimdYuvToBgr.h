@@ -50,6 +50,22 @@ namespace Simd
             static const int U_2_G = -int(2.0f * 0.114f * (1.0f - 0.114f) / (1.0f - 0.299f - 0.114f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
             static const int V_2_G = -int(2.0f * 0.299f * (1.0f - 0.299f) / (1.0f - 0.299f - 0.114f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
             static const int V_2_R = int(2.0f * (1.0f - 0.299f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
+
+            //-------------------------------------------------------------------------------------
+
+            static const int B_SHIFT = 14;
+            static const int B_RANGE = 1 << B_SHIFT;
+            static const int B_ROUND = 1 << (B_SHIFT - 1);
+
+            static const int B_2_Y = int(0.114f * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_Y = int((1.0f - 0.299f - 0.114f) * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_Y = int(0.299f * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int B_2_U = int(0.5f * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_U = -int(0.5f * (1.0f - 0.299f - 0.114f) / (1 - 0.114f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_U = -int(0.5f * 0.299f / (1 - 0.114f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int B_2_V = -int(0.5f * 0.114f / (1 - 0.299f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_V = -int(0.5f * (1.0f - 0.299f - 0.114f) / (1 - 0.299f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_V = int(0.5f * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
         };
 
         /* Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240]. */
@@ -70,6 +86,22 @@ namespace Simd
             static const int U_2_G = -int(2.0f * 0.0722f * (1.0f - 0.0722f) / (1.0f - 0.2126f - 0.0722f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
             static const int V_2_G = -int(2.0f * 0.2126f * (1.0f - 0.2126f) / (1.0f - 0.2126f - 0.0722f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
             static const int V_2_R = int(2.0f * (1.0f - 0.2126f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
+
+            //-------------------------------------------------------------------------------------
+
+            static const int B_SHIFT = 14;
+            static const int B_RANGE = 1 << B_SHIFT;
+            static const int B_ROUND = 1 << (B_SHIFT - 1);
+
+            static const int B_2_Y = int(0.0722f * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_Y = int((1.0f - 0.2126f - 0.0722f) * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_Y = int(0.2126f * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int B_2_U = int(0.5f * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_U = -int(0.5f * (1.0f - 0.2126f - 0.0722f) / (1 - 0.0722f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_U = -int(0.5f * 0.2126f / (1 - 0.0722f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int B_2_V = -int(0.5f * 0.0722f / (1 - 0.2126f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_V = -int(0.5f * (1.0f - 0.2126f - 0.0722f) / (1 - 0.2126f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_V = int(0.5f * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
         };
 
         /* Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. */
@@ -90,6 +122,22 @@ namespace Simd
             static const int U_2_G = -int(2.0f * 0.0593f * (1.0f - 0.0593f) / (1.0f - 0.2627f - 0.0593f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
             static const int V_2_G = -int(2.0f * 0.2627f * (1.0f - 0.2126f) / (1.0f - 0.2627f - 0.0593f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
             static const int V_2_R = int(2.0f * (1.0f - 0.2627f) * 255 / (UV_HI - UV_LO) * F_RANGE + 0.5f);
+
+            //-------------------------------------------------------------------------------------
+
+            static const int B_SHIFT = 14;
+            static const int B_RANGE = 1 << B_SHIFT;
+            static const int B_ROUND = 1 << (B_SHIFT - 1);
+
+            static const int B_2_Y = int(0.0593f * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_Y = int((1.0f - 0.2627f - 0.0593f) * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_Y = int(0.2627f * (Y_HI - Y_LO) / 255 * B_RANGE + 0.5f);
+            static const int B_2_U = int(0.5f * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_U = -int(0.5f * (1.0f - 0.2627f - 0.0593f) / (1 - 0.0593f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_U = -int(0.5f * 0.2627f / (1 - 0.0593f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int B_2_V = -int(0.5f * 0.0593f / (1 - 0.2627f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int G_2_V = -int(0.5f * (1.0f - 0.2627f - 0.0593f) / (1 - 0.2627f) * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
+            static const int R_2_V = int(0.5f * (UV_HI - UV_LO) / 255 * B_RANGE + 0.5f);
         };
 
         /* Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. */
@@ -110,7 +158,25 @@ namespace Simd
             static const int U_2_G = -int(2.0f * 0.114f * (1.0f - 0.114f) / (1.0f - 0.299f - 0.114f) * F_RANGE + 0.5f);
             static const int V_2_G = -int(2.0f * 0.299f * (1.0f - 0.299f) / (1.0f - 0.299f - 0.114f) * F_RANGE + 0.5f);
             static const int V_2_R = int(2.0f * (1.0f - 0.299f) * F_RANGE + 0.5f);
+
+            //-------------------------------------------------------------------------------------
+
+            static const int B_SHIFT = 14;
+            static const int B_RANGE = 1 << B_SHIFT;
+            static const int B_ROUND = 1 << (B_SHIFT - 1);
+
+            static const int B_2_Y = int(0.114f * B_RANGE + 0.5f);
+            static const int G_2_Y = int((1.0f - 0.299f - 0.114f) * B_RANGE + 0.5f);
+            static const int R_2_Y = int(0.299f * B_RANGE + 0.5f);
+            static const int B_2_U = int(0.5f * B_RANGE + 0.5f);
+            static const int G_2_U = -int(0.5f * (1.0f - 0.299f - 0.114f) / (1 - 0.114f) * B_RANGE + 0.5f);
+            static const int R_2_U = -int(0.5f * 0.299f / (1 - 0.114f) * B_RANGE + 0.5f);
+            static const int B_2_V = -int(0.5f * 0.114f / (1 - 0.299f) * B_RANGE + 0.5f);
+            static const int G_2_V = -int(0.5f * (1.0f - 0.299f - 0.114f) / (1 - 0.299f) * B_RANGE + 0.5f);
+            static const int R_2_V = int(0.5f * B_RANGE + 0.5f);
         };
+
+        //-----------------------------------------------------------------------------------------
 
         template<class T> SIMD_INLINE int YuvToBlue(int y, int u)
         {
@@ -140,6 +206,23 @@ namespace Simd
             bgra[1] = YuvToGreen<T>(y, u, v);
             bgra[2] = YuvToRed<T>(y, v);
             bgra[3] = alpha;
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<class T> SIMD_INLINE int BgrToY(int blue, int green, int red)
+        {
+            return RestrictRange(((T::B_2_Y * blue + T::G_2_Y * green + T::R_2_Y * red + T::B_ROUND) >> T::B_SHIFT) + T::Y_LO);
+        }
+
+        template<class T> SIMD_INLINE int BgrToU(int blue, int green, int red)
+        {
+            return RestrictRange(((T::B_2_U * blue + T::G_2_U * green + T::R_2_U * red + T::B_ROUND) >> T::B_SHIFT) + T::UV_Z);
+        }
+
+        template<class T> SIMD_INLINE int BgrToV(int blue, int green, int red)
+        {
+            return RestrictRange(((T::B_2_V * blue + T::G_2_V * green + T::R_2_V * red + T::B_ROUND) >> T::B_SHIFT) + T::UV_Z);
         }
     }
 
