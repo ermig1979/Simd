@@ -127,6 +127,27 @@ namespace Simd
             }
         }
 
+        SIMD_INLINE int UvSize(int ySize)
+        {
+            return (ySize + 1) >> 1;
+        }
+
+        SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, int width, float* u, float* v)
+        {
+            for (int row = 0; row < 8;)
+            {
+                for (int col = 0; col < 8; col += 1)
+                {
+                    int offs = (col < width ? col : width) << 1;
+                    u[col] = uvSrc[offs + 0] - 128.000f;
+                    v[col] = uvSrc[offs + 1] - 128.000f;
+                }
+                if (++row < height)
+                    uvSrc += uvStride;
+                u += 8, v += 8;
+            }
+        }
+
         SIMD_INLINE void JpegProcessDuGrayUv(BitBuf & bitBuf)
         {
             bitBuf.Push(Base::HuffmanUVdc[0]);

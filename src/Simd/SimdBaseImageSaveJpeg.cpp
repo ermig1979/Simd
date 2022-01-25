@@ -294,32 +294,114 @@ namespace Simd
             bitBuf.Clear();
         }
 
+        void JpegWriteBlockNv12(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
+            const uint8_t* uvSrc, int uvStride, const float* fY, const float* fUv, int dc[3])
+        {
+            int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
+            float Y[256], U[64], V[64];
+            bool gray = (uvSrc == NULL);
+            Base::BitBuf bitBuf;
+            for (int y = 0; y < height; y += 16)
+            {
+                for (int x = 0; x < width; x += 16)
+                {
+                    Base::GrayToY(ySrc + x, yStride, height - y, width - x, Y, 16);
+                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    if (gray)
+                        Base::JpegProcessDuGrayUv(bitBuf);
+                    else
+                    {
+                        Nv12ToUv(uvSrc + x, uvStride, UvSize(height - y), UvSize(width - x), U, V);
+                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    }
+                    if (bitBuf.Full())
+                    {
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        bitBuf.Clear();
+                    }
+                }
+            }
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+            bitBuf.Clear();
+        }
+
+        void JpegWriteBlockYuv420p(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
+            const uint8_t* uSrc, int uStride, const uint8_t* vSrc, int vStride, const float* fY, const float* fUv, int dc[3])
+        {
+            int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
+            float Y[256], U[64], V[64];
+            bool gray = (uSrc == NULL || vSrc == NULL);
+            Base::BitBuf bitBuf;
+            for (int y = 0; y < height; y += 16)
+            {
+                for (int x = 0; x < width; x += 16)
+                {
+                    Base::GrayToY(ySrc + x, yStride, height - y, width - x, Y, 16);
+                    DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    DCY = JpegProcessDu(bitBuf, Y + 136, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
+                    if(gray)
+                        Base::JpegProcessDuGrayUv(bitBuf);
+                    else
+                    {
+                        Base::GrayToY(uSrc + UvSize(x), uStride, UvSize(height - y), UvSize(width - x), U, 8);
+                        Base::GrayToY(vSrc + UvSize(x), vStride, UvSize(height - y), UvSize(width - x), V, 8);
+                        DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
+                        DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
+                    }
+                    if (bitBuf.Full())
+                    {
+                        Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+                        bitBuf.Clear();
+                    }
+                }
+            }
+            Base::WriteBits(stream, bitBuf.data, bitBuf.size);
+            bitBuf.Clear();
+        }
+
         //---------------------------------------------------------------------
 
         ImageJpegSaver::ImageJpegSaver(const ImageSaverParam& param)
             : ImageSaver(param)
             , _deintBgra(NULL)
             , _deintBgr(NULL)
+            , _writeBlock(NULL)
+            , _writeNv12Block(NULL)
+            , _writeYuv420pBlock(NULL)
         {
         }
 
         void ImageJpegSaver::Init()
         {
             InitParams(false);
-            switch (_param.format)
+            if (_param.yuvType == SimdYuvUnknown)
             {
-            case SimdPixelFormatBgr24:
-            case SimdPixelFormatRgb24:
-                _deintBgr = Base::DeinterleaveBgr;
-                break;
-            case SimdPixelFormatBgra32:
-            case SimdPixelFormatRgba32:
-                _deintBgra = Base::DeinterleaveBgra;
-                break;
-            default: 
-                break;
+                switch (_param.format)
+                {
+                case SimdPixelFormatBgr24:
+                case SimdPixelFormatRgb24:
+                    _deintBgr = Base::DeinterleaveBgr;
+                    break;
+                case SimdPixelFormatBgra32:
+                case SimdPixelFormatRgba32:
+                    _deintBgra = Base::DeinterleaveBgra;
+                    break;
+                default:
+                    break;
+                }
+                _writeBlock = _subSample ? JpegWriteBlockSubs : JpegWriteBlockFull;
             }
-            _writeBlock = _subSample ? JpegWriteBlockSubs : JpegWriteBlockFull;
+            else
+            {
+                _writeNv12Block = JpegWriteBlockNv12;
+                _writeYuv420pBlock = JpegWriteBlockYuv420p;
+            }
         }
 
         void ImageJpegSaver::InitParams(bool trans)
@@ -335,7 +417,7 @@ namespace Simd
                 0.785694958f * 2.828427125f, 0.541196100f * 2.828427125f, 0.275899379f * 2.828427125f };
             _quality = _param.quality;
             _quality = _quality ? _quality : 90;
-            _subSample = _quality <= 90 ? 1 : 0;
+            _subSample = (_quality <= 90 || _param.yuvType != SimdYuvUnknown) ? 1 : 0;
             _quality = _quality < 1 ? 1 : _quality > 100 ? 100 : _quality;
             _quality = _quality < 50 ? 5000 / _quality : 200 - _quality * 2;
             for (size_t i = 0; i < 64; ++i)
@@ -356,7 +438,7 @@ namespace Simd
             }
             _block = _subSample ? 16 : 8;
             _width = (int)AlignHi(_param.width, _block);
-            if (_param.format != SimdPixelFormatGray8)
+            if (_param.format != SimdPixelFormatGray8 && _param.yuvType == SimdYuvUnknown)
                 _buffer.Resize(_width * _block * 3);
         }
 
@@ -446,6 +528,77 @@ namespace Simd
             _stream.Write8u(0xFF);
             _stream.Write8u(0xD9);
             return true;
+        }
+
+        bool ImageJpegSaver::ToStream(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride)
+        {
+            Init();
+            WriteHeader();
+            int dc[3] = { 0, 0, 0 };
+            for (int row = 0; row < (int)_param.height; row += _block)
+            {
+                int block = Simd::Min(row + _block, (int)_param.height) - row;
+                _writeNv12Block(_stream, (int)_param.width, block, y, yStride, uv, uvStride, _fY, _fUv, dc);
+                y += block * yStride;
+                uv += (block / 2) * uvStride;
+            }
+            static const uint16_t FILL_BITS[] = { 0x7F, 7 };
+            Base::WriteBits(_stream, FILL_BITS);
+            _stream.Write8u(0xFF);
+            _stream.Write8u(0xD9);
+            return true;
+        }
+
+        bool ImageJpegSaver::ToStream(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride)
+        {
+            Init();
+            WriteHeader();
+            int dc[3] = { 0, 0, 0 };
+            for (int row = 0; row < (int)_param.height; row += _block)
+            {
+                int block = Simd::Min(row + _block, (int)_param.height) - row;
+                _writeYuv420pBlock(_stream, (int)_param.width, block, y, yStride, u, uStride, v, vStride, _fY, _fUv, dc);
+                y += block * yStride;
+                u += (block / 2) * uStride;
+                v += (block / 2) * vStride;
+            }
+            static const uint16_t FILL_BITS[] = { 0x7F, 7 };
+            Base::WriteBits(_stream, FILL_BITS);
+            _stream.Write8u(0xFF);
+            _stream.Write8u(0xD9);
+            return true;
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        uint8_t* Nv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size)
+        {
+            ImageSaverParam param(width, height, quality, yuvType);
+            if (param.Validate())
+            {
+                Holder<ImageJpegSaver> saver(new ImageJpegSaver(param));
+                if (saver)
+                {
+                    if (saver->ToStream(y, yStride, uv, uvStride))
+                        return saver->Release(size);
+                }
+            }
+            return NULL;
+        }
+
+        uint8_t* Yuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size)
+        {
+            ImageSaverParam param(width, height, quality, yuvType);
+            if (param.Validate())
+            {
+                Holder<ImageJpegSaver> saver(new ImageJpegSaver(param));
+                if (saver)
+                {
+                    if (saver->ToStream(y, yStride, u, uStride, v, vStride))
+                        return saver->Release(size);
+                }
+            }
+            return NULL;
         }
     }
 }

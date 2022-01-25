@@ -222,6 +222,8 @@ namespace Test
     TEST_ADD_GROUP_A00(Gemm32fNT);
 
     TEST_ADD_GROUP_A00(ImageSaveToMemory);
+    TEST_ADD_GROUP_A00(Nv12SaveAsJpegToMemory);
+    TEST_ADD_GROUP_A00(Yuv420pSaveAsJpegToMemory);
     TEST_ADD_GROUP_A0S(ImageLoadFromMemory);
 
     TEST_ADD_GROUP_AD0(MeanFilter3x3);

@@ -271,15 +271,16 @@ namespace Test
     {
         bool result = true;
 
-        View::Format formats[5] = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
-        for (int format = 0; format < 5; format++)
+        std::vector<View::Format> formats({ /*View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, */View::Rgba32 });
+        for (int format = 0; format < formats.size(); format++)
         {
-            for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFileJpeg; file++)
+            for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
             {
                 if (file == SimdImageFileJpeg)
                 {
                     result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 100, f1, f2);
                     result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 95, f1, f2);
+                    result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 85, f1, f2);
                     result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 10, f1, f2);
                 }
                 result = result && ImageSaveToMemoryAutoTest(formats[format], (SimdImageFileType)file, 65, f1, f2);
@@ -314,6 +315,245 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && ImageSaveToMemoryAutoTest(FUNC_SM(Simd::Neon::ImageSaveToMemory), FUNC_SM(SimdImageSaveToMemory));
 #endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncSNJM
+        {
+            typedef uint8_t* (*FuncPtr)(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride,
+                size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSNJM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(int quality, SimdYuvType yuvType)
+            {
+                desc = desc + "[" + ToString(quality) + "]";
+            }
+
+            void Call(const View& y, const View& uv, SimdYuvType yuvType, int quality, uint8_t** data, size_t* size) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                *data = func(y.data, y.stride, uv.data, uv.stride, y.width, y.height, yuvType, quality, size);
+            }
+        };
+    }
+
+#define FUNC_SNJM(func) \
+    FuncSNJM(func, std::string(#func))
+
+    bool Nv12SaveAsJpegToMemoryAutoTest(size_t width, size_t height, SimdYuvType yuvType, int quality, FuncSNJM f1, FuncSNJM f2)
+    {
+        bool result = true;
+
+        f1.Update(quality, yuvType);
+        f2.Update(quality, yuvType);
+
+        View bgra;
+        if (!GetTestImage(bgra, width, height, View::Bgra32, f1.desc, f2.desc, SimdImageFileJpeg, quality, NULL, NULL))
+            return false;
+
+        View y(width, height, View::Gray8);
+        View u(width / 2, height / 2, View::Gray8);
+        View v(width / 2, height / 2, View::Gray8);
+        Simd::BgraToYuv420p(bgra, y, u, v);
+
+        View uv(width / 2, height / 2, View::Uv16);
+        Simd::InterleaveUv(u, v, uv);
+
+        uint8_t* data1 = NULL, * data2 = NULL;
+        size_t size1 = 0, size2 = 0;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data1) Simd::Free(data1); f1.Call(y, uv, yuvType, quality, &data1, &size1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data2) SimdFree(data2); f2.Call(y, uv, yuvType, quality, &data2, &size2));
+
+        View dst1, dst2;
+        if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
+        {
+            int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
+            result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
+            if (!result)
+            {
+                SaveTestImage(dst1, SimdImageFileJpeg, quality, "_1");
+                SaveTestImage(dst2, SimdImageFileJpeg, quality, "_2");
+                SaveTestImage(bgra, SimdImageFilePpmBin, 100, "_error");
+            }
+        }
+        else
+        {
+            TEST_LOG_SS(Error, "Can't load images from memory!");
+            result = false;
+        }
+
+        if (data1)
+            Simd::Free(data1);
+        if (data2)
+            SimdFree(data2);
+
+        SaveTestImage(bgra, SimdImageFileJpeg, quality, "_src");
+        SaveTestImage(dst1, SimdImageFileJpeg, quality, "_nv12");
+
+        return result;
+    }
+
+    bool Nv12SaveAsJpegToMemoryAutoTest(const FuncSNJM& f1, const FuncSNJM& f2)
+    {
+        bool result = true;
+
+        Ints qualities({ 100, 95, 85, 65, 10 });
+        std::vector<SimdYuvType> yuvTypes({ SimdYuvTrect871 });
+
+        for (size_t t = 0; t < yuvTypes.size() && result; ++t)
+        {
+            for (size_t q = 0; q < qualities.size() && result; ++q)
+            {
+                result = result && Nv12SaveAsJpegToMemoryAutoTest(W, H, yuvTypes[t], qualities[q], f1, f2);
+#if !defined(TEST_REAL_IMAGE)
+                result = result && Nv12SaveAsJpegToMemoryAutoTest(W + E, H - E, yuvTypes[t], qualities[q], f1, f2);
+#endif
+            }
+        }
+
+        return result;
+    }
+
+    bool Nv12SaveAsJpegToMemoryAutoTest()
+    {
+        bool result = true;
+
+        result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Base::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+
+        //#ifdef SIMD_SSE41_ENABLE
+        //        if (Simd::Sse41::Enable)
+        //            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sse41::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+        //#endif 
+
+        return result;
+    }
+
+    //-----------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncSYJM
+        {
+            typedef uint8_t* (*FuncPtr)(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+                size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
+
+            FuncPtr func;
+            String desc;
+
+            FuncSYJM(const FuncPtr& f, const String& d) : func(f), desc(d) {}
+
+            void Update(int quality, SimdYuvType yuvType)
+            {
+                desc = desc + "[" + ToString(quality) + "]";
+            }
+
+            void Call(const View& y, const View& u, const View& v, SimdYuvType yuvType, int quality, uint8_t** data, size_t* size) const
+            {
+                TEST_PERFORMANCE_TEST(desc);
+                *data = func(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, yuvType, quality, size);
+            }
+        };
+    }
+
+#define FUNC_SYJM(func) \
+    FuncSYJM(func, std::string(#func))
+
+    bool Yuv420pSaveAsJpegToMemoryAutoTest(size_t width, size_t height, SimdYuvType yuvType, int quality, FuncSYJM f1, FuncSYJM f2)
+    {
+        bool result = true;
+
+        assert(width % 2 == 0 && height % 2 == 0);
+
+        f1.Update(quality, yuvType);
+        f2.Update(quality, yuvType);
+
+        View bgra;
+        if (!GetTestImage(bgra, width, height, View::Bgra32, f1.desc, f2.desc, SimdImageFileJpeg, quality, NULL, NULL))
+            return false;
+
+        View y(width, height, View::Gray8);
+        View u(width / 2, height / 2, View::Gray8);
+        View v(width / 2, height / 2, View::Gray8);
+        Simd::BgraToYuv420p(bgra, y, u, v);
+
+        uint8_t* data1 = NULL, * data2 = NULL;
+        size_t size1 = 0, size2 = 0;
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data1) Simd::Free(data1); f1.Call(y, u, v, yuvType, quality, &data1, &size1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(if (data2) SimdFree(data2); f2.Call(y, u, v, yuvType, quality, &data2, &size2));
+
+        View dst1, dst2;
+        if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
+        {
+            int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
+            result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
+            if (!result)
+            {
+                SaveTestImage(dst1, SimdImageFileJpeg, quality, "_1");
+                SaveTestImage(dst2, SimdImageFileJpeg, quality, "_2");
+                SaveTestImage(bgra, SimdImageFilePpmBin, 100, "_error");
+            }
+        }
+        else
+        {
+            TEST_LOG_SS(Error, "Can't load images from memory!");
+            result = false;
+        }
+
+        if (data1)
+            Simd::Free(data1);
+        if (data2)
+            SimdFree(data2);
+
+        SaveTestImage(bgra, SimdImageFileJpeg, quality, "_src");
+        SaveTestImage(dst1, SimdImageFileJpeg, quality, "_yuv420p");
+
+        return result;
+    }
+
+    bool Yuv420pSaveAsJpegToMemoryAutoTest(const FuncSYJM& f1, const FuncSYJM& f2)
+    {
+        bool result = true;
+
+        Ints qualities({100, 95, 85, 65, 10});
+        std::vector<SimdYuvType> yuvTypes({ SimdYuvTrect871 });
+
+        for (size_t t = 0; t < yuvTypes.size() && result; ++t)
+        {
+            for (size_t q = 0; q < qualities.size() && result; ++q)
+            {
+                result = result && Yuv420pSaveAsJpegToMemoryAutoTest(W, H, yuvTypes[t], qualities[q], f1, f2);
+#if !defined(TEST_REAL_IMAGE)
+                result = result && Yuv420pSaveAsJpegToMemoryAutoTest(W + E, H - E, yuvTypes[t], qualities[q], f1, f2);
+#endif
+            }
+        }
+
+        return result;
+    }
+
+    bool Yuv420pSaveAsJpegToMemoryAutoTest()
+    {
+        bool result = true;
+
+        result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Base::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable)
+//            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sse41::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+//#endif 
 
         return result;
     }

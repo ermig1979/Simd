@@ -484,6 +484,7 @@ typedef enum
 */
 typedef enum
 {
+    SimdYuvUnknown = -1, /*!< Unknown YUV standard. */
     SimdYuvBt601, /*!< Corresponds to BT.601 standard. Uses Kr=0.299, Kb=0.114. Restricts Y to range [16..235], U and V to [16..240]. */
     SimdYuvBt709, /*!< Corresponds to BT.709 standard. Uses Kr=0.2126, Kb=0.0722. Restricts Y to range [16..235], U and V to [16..240]. */
     SimdYuvBt2020, /*!< Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. */
@@ -3780,6 +3781,49 @@ extern "C"
         \return result of the operation.
     */
     SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t width, size_t height, SimdPixelFormatType format, SimdImageFileType file, int quality, const char * path);
+
+    /*! @ingroup image_io
+
+        \fn uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
+
+        \short Saves image in NV12 format to memory as JPEG.
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] uv - a pointer to pixels data of input 8-bit image with UV color plane.
+        \param [in] uvStride - a row size of the uv image.
+        \param [in] width - a width of input image. It must be even number.
+        \param [in] height - a height of input image. It must be even number.
+        \param [in] yuvType - a type of input YUV image(see descriprion of::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
+        \param [in] quality - a parameter of compression quality.
+        \param [out] size - a pointer to the size of output image file in bytes.
+        \return a pointer to memory buffer with output image file.
+            It has to be deleted after use by function ::SimdFree. On error it returns NULL.
+    */
+    SIMD_API uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
+
+    /*! @ingroup image_io
+
+        \fn uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
+
+        \short Saves image in YUV420P format to memory as JPEG.
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] width - a width of input image. It must be even number.
+        \param [in] height - a height of input image. It must be even number.
+        \param [in] yuvType - a type of input YUV image(see descriprion of::SimdYuvType). Now only ::SimdYuvTrect871 (T-REC-T.871 format) is supported.
+        \param [in] quality - a parameter of compression quality.
+        \param [out] size - a pointer to the size of output image file in bytes.
+        \return a pointer to memory buffer with output image file.
+            It has to be deleted after use by function ::SimdFree. On error it returns NULL.
+    */
+    SIMD_API uint8_t* SimdYuv420pSaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, 
+        size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
 
     /*! @ingroup image_io
 
