@@ -271,7 +271,7 @@ namespace Test
     {
         bool result = true;
 
-        std::vector<View::Format> formats({ /*View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, */View::Rgba32 });
+        std::vector<View::Format> formats({ /*View::Gray8, View::Bgr24, View::Bgra32, */View::Rgb24/*, View::Rgba32*/});
         for (int format = 0; format < formats.size(); format++)
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
@@ -363,7 +363,7 @@ namespace Test
         View y(width, height, View::Gray8);
         View u(width / 2, height / 2, View::Gray8);
         View v(width / 2, height / 2, View::Gray8);
-        Simd::BgraToYuv420p(bgra, y, u, v);
+        SimdBgraToYuv420pV2(bgra.data, bgra.stride, bgra.width, bgra.height, y.data, y.stride, u.data, u.stride, v.data, v.stride, yuvType);
 
         View uv(width / 2, height / 2, View::Uv16);
         Simd::InterleaveUv(u, v, uv);
@@ -485,7 +485,7 @@ namespace Test
         View y(width, height, View::Gray8);
         View u(width / 2, height / 2, View::Gray8);
         View v(width / 2, height / 2, View::Gray8);
-        Simd::BgraToYuv420p(bgra, y, u, v);
+        SimdBgraToYuv420pV2(bgra.data, bgra.stride, bgra.width, bgra.height, y.data, y.stride, u.data, u.stride, v.data, v.stride, yuvType);
 
         uint8_t* data1 = NULL, * data2 = NULL;
         size_t size1 = 0, size2 = 0;

@@ -116,6 +116,7 @@ namespace Test
     TEST_ADD_GROUP_A00(RgbToBgra);
 
     TEST_ADD_GROUP_AD0(BgraToYuv420p);
+    TEST_ADD_GROUP_A00(BgraToYuv420pV2);
     TEST_ADD_GROUP_AD0(BgraToYuv422p);
     TEST_ADD_GROUP_AD0(BgraToYuv444p);
     TEST_ADD_GROUP_A00(BgraToYuv444pV2);

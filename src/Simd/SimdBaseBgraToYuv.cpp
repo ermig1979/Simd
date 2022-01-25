@@ -157,7 +157,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <class YuvType> SIMD_INLINE void BgraToYuv444p(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
+        template <class YuvType> SIMD_INLINE void BgraToYuv444pV2(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
         {
             const int blue = bgra[0], green = bgra[1], red = bgra[2];
             y[0] = BgrToY<YuvType>(blue, green, red);
@@ -171,7 +171,7 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t col = 0, colBgra = 0; col < width; ++col, colBgra += 4)
-                    BgraToYuv444p<YuvType>(bgra + colBgra, y + col, u + col, v + col);
+                    BgraToYuv444pV2<YuvType>(bgra + colBgra, y + col, u + col, v + col);
                 bgra += bgraStride;
                 y += yStride;
                 u += uStride;
@@ -188,6 +188,56 @@ namespace Simd
             case SimdYuvBt709: BgraToYuv444pV2<Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
             case SimdYuvBt2020: BgraToYuv444pV2<Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
             case SimdYuvTrect871: BgraToYuv444pV2<Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <class YuvType> SIMD_INLINE void BgraToYuv420pV2(const uint8_t* bgra0, size_t bgraStride, uint8_t* y0, size_t yStride, uint8_t* u, uint8_t* v)
+        {
+            const uint8_t* bgra1 = bgra0 + bgraStride;
+            uint8_t* y1 = y0 + yStride;
+
+            y0[0] = BgrToY<YuvType>(bgra0[0], bgra0[1], bgra0[2]);
+            y0[1] = BgrToY<YuvType>(bgra0[4], bgra0[5], bgra0[6]);
+            y1[0] = BgrToY<YuvType>(bgra1[0], bgra1[1], bgra1[2]);
+            y1[1] = BgrToY<YuvType>(bgra1[4], bgra1[5], bgra1[6]);
+
+            int blue = Average(bgra0[0], bgra0[4], bgra1[0], bgra1[4]);
+            int green = Average(bgra0[1], bgra0[5], bgra1[1], bgra1[5]);
+            int red = Average(bgra0[2], bgra0[6], bgra1[2], bgra1[6]);
+
+            u[0] = BgrToU<YuvType>(blue, green, red);
+            v[0] = BgrToV<YuvType>(blue, green, red);
+        }
+
+        template <class YuvType> void BgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert((width % 2 == 0) && (height % 2 == 0) && (width >= 2) && (height >= 2));
+
+            for (size_t row = 0; row < height; row += 2)
+            {
+                for (size_t colUV = 0, colY = 0, colBgra = 0; colY < width; colY += 2, colUV++, colBgra += 8)
+                    BgraToYuv420pV2<YuvType>(bgra + colBgra, bgraStride, y + colY, yStride, u + colUV, v + colUV);
+                y += 2 * yStride;
+                u += uStride;
+                v += vStride;
+                bgra += 2 * bgraStride;
+            }
+        }
+
+        void BgraToYuv420pV2(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height,
+            uint8_t* y, size_t yStride, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: BgraToYuv420pV2<Bt601>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt709: BgraToYuv420pV2<Bt709>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvBt2020: BgraToYuv420pV2<Bt2020>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
+            case SimdYuvTrect871: BgraToYuv420pV2<Trect871>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride); break;
             default:
                 assert(0);
             }

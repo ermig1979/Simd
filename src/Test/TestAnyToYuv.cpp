@@ -412,6 +412,30 @@ namespace Test
         return result;
     }
 
+    bool BgraToYuv420pV2AutoTest()
+    {
+        bool result = true;
+
+        result = result && AnyToYuvV2AutoTest(View::Bgra32, 2, 2, FUNC_YUV2(Simd::Base::BgraToYuv420pV2), FUNC_YUV2(SimdBgraToYuv420pV2));
+
+        //#ifdef SIMD_SSE2_ENABLE
+        //        if (Simd::Sse2::Enable)
+        //            result = result && AnyToYuvV2AutoTest(View::Bgra32, 2, 2, FUNC_YUV2(Simd::Sse2::BgraToYuv420pV2), FUNC_YUV2(SimdBgraToYuv420pV2));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX2_ENABLE
+        //        if (Simd::Avx2::Enable)
+        //            result = result && AnyToYuvV2AutoTest(View::Bgra32, 2, 2, FUNC_YUV2(Simd::Avx2::BgraToYuv420pV2), FUNC_YUV2(SimdBgraToYuv420pV2));
+        //#endif 
+        //
+        //#ifdef SIMD_AVX512BW_ENABLE
+        //        if (Simd::Avx512bw::Enable)
+        //            result = result && AnyToYuvV2AutoTest(View::Bgra32, 2, 2, FUNC_YUV2(Simd::Avx512bw::BgraToYuv420pV2), FUNC_YUV2(SimdBgraToYuv420pV2));
+        //#endif 
+
+        return result;
+    }
+
     bool BgraToYuv444pV2AutoTest()
     {
         bool result = true;
