@@ -61,6 +61,11 @@ namespace Simd
         {
             return _mm256_insertf128_ps(_mm256_castps128_ps256(a0), a1, 1);
         }
+
+        SIMD_INLINE __m256 Set(__m128 a)
+        {
+            return _mm256_insertf128_ps(_mm256_castps128_ps256(a), a, 1);
+        }
     }
 #endif// SIMD_AVX_ENABLE
 
@@ -85,6 +90,16 @@ namespace Simd
         SIMD_INLINE __m256 SetFloat(float a0, float a1)
         {
             return _mm256_unpacklo_ps(_mm256_set1_ps(a0), _mm256_set1_ps(a1));
+        }
+
+        SIMD_INLINE __m256i Set(__m128i a0, __m128i a1)
+        {
+            return _mm256_inserti128_si256(_mm256_castsi128_si256(a0), a1, 1);
+        }
+
+        SIMD_INLINE __m256i Set(__m128i a)
+        {
+            return _mm256_inserti128_si256(_mm256_castsi128_si256(a), a, 1);
         }
 
         template <class T> SIMD_INLINE __m256i SetMask(T first, size_t position, T second)
