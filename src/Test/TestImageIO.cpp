@@ -434,7 +434,7 @@ namespace Test
     {
         bool result = true;
 
-        Ints qualities({ /*100, 95, */85/*, 65, 10*/ });
+        Ints qualities({ 100, 95, 85, 65, 10 });
         std::vector<SimdYuvType> yuvTypes({ SimdYuvTrect871 });
 
         for (size_t t = 0; t < yuvTypes.size() && result; ++t)
@@ -457,10 +457,10 @@ namespace Test
 
         result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Base::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
 
-        //#ifdef SIMD_SSE41_ENABLE
-        //        if (Simd::Sse41::Enable)
-        //            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sse41::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
-        //#endif 
+        #ifdef SIMD_SSE41_ENABLE
+                if (Simd::Sse41::Enable)
+                    result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Sse41::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+        #endif 
 
         return result;
     }
@@ -587,10 +587,10 @@ namespace Test
 
         result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Base::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sse41::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
-//#endif 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Yuv420pSaveAsJpegToMemoryAutoTest(FUNC_SYJM(Simd::Sse41::Yuv420pSaveAsJpegToMemory), FUNC_SYJM(SimdYuv420pSaveAsJpegToMemory));
+#endif 
 
         return result;
     }
