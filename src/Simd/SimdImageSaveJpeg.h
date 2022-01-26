@@ -138,7 +138,7 @@ namespace Simd
             {
                 for (int col = 0; col < 8; col += 1)
                 {
-                    int offs = (col < width ? col : width) << 1;
+                    int offs = (col < width ? col : width - 1) << 1;
                     u[col] = uvSrc[offs + 0] - 128.000f;
                     v[col] = uvSrc[offs + 1] - 128.000f;
                 }

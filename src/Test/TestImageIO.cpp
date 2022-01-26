@@ -35,6 +35,8 @@
 
 namespace Test
 {
+    const int DebugImageSave = 1;
+
     template<class Color> Color GetColor(uint8_t b, uint8_t g, uint8_t r)
     {
         return Color(b, g, r);
@@ -113,6 +115,18 @@ namespace Test
             *data = (uint8_t*)SimdAllocate(*size, SimdAlignment());
             ::fseek(file, 0, SEEK_SET);
             result = ::fread(*data, 1, *size, file) == *size;
+            ::fclose(file);
+        }
+        return result;
+    }
+
+    bool FileSave(const uint8_t* data, size_t size, const char *path)
+    {
+        bool result = false;
+        ::FILE* file = ::fopen(path, "wb");
+        if (file)
+        {
+            result = ::fwrite(data, 1, size, file) == size;
             ::fclose(file);
         }
         return result;
@@ -251,7 +265,8 @@ namespace Test
         if (data2)
             SimdFree(data2);
 
-        SaveTestImage(src, file, quality);
+        if(DebugImageSave)
+            SaveTestImage(src, file, quality);
 
         return result;
     }
@@ -394,12 +409,23 @@ namespace Test
         }
 
         if (data1)
+        {
+            if (DebugImageSave)
+            {
+                const String dir = "_out";
+                if (CreatePathIfNotExist(dir, false))
+                {
+                    String path = MakePath(dir, String("Bgra32_") + ToString(quality) + "_nv12.jpg");
+                    FileSave(data1, size1, path.c_str());
+                }
+            }
             Simd::Free(data1);
+        }
         if (data2)
             SimdFree(data2);
 
-        SaveTestImage(bgra, SimdImageFileJpeg, quality, "_src");
-        SaveTestImage(dst1, SimdImageFileJpeg, quality, "_nv12");
+        if(DebugImageSave)
+            SaveTestImage(bgra, SimdImageFileJpeg, quality, "_src");
 
         return result;
     }
@@ -408,7 +434,7 @@ namespace Test
     {
         bool result = true;
 
-        Ints qualities({ 100, 95, 85, 65, 10 });
+        Ints qualities({ /*100, 95, */85/*, 65, 10*/ });
         std::vector<SimdYuvType> yuvTypes({ SimdYuvTrect871 });
 
         for (size_t t = 0; t < yuvTypes.size() && result; ++t)
@@ -513,12 +539,23 @@ namespace Test
         }
 
         if (data1)
+        {
+            if (DebugImageSave)
+            {
+                const String dir = "_out";
+                if (CreatePathIfNotExist(dir, false))
+                {
+                    String path = MakePath(dir, String("Bgra32_") + ToString(quality) + "_yuv420p.jpg");
+                    FileSave(data1, size1, path.c_str());
+                }
+            }
             Simd::Free(data1);
+        }
         if (data2)
             SimdFree(data2);
 
-        SaveTestImage(bgra, SimdImageFileJpeg, quality, "_src");
-        SaveTestImage(dst1, SimdImageFileJpeg, quality, "_yuv420p");
+        if(DebugImageSave)
+            SaveTestImage(bgra, SimdImageFileJpeg, quality, "_src");
 
         return result;
     }
