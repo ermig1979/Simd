@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -253,14 +253,15 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void GrayToY(const uint8_t* g, int stride, int height, const __m128 k[10], float* y, int size)
+        SIMD_INLINE void GrayToY(const uint8_t* g, int stride, int height, float* y, int size)
         {
+            __m128 k = _mm_set1_ps(-128.000f);
             for (int row = 0; row < size;)
             {
                 for (int col = 0; col < size; col += 4)
                 {
                     __m128 _g = _mm_cvtepi32_ps(_mm_cvtepu8_epi32(_mm_cvtsi32_si128(*(int32_t*)(g + col))));
-                    _mm_storeu_ps(y + col, _mm_add_ps(_g, k[3]));
+                    _mm_storeu_ps(y + col, _mm_add_ps(_g, k));
                 }
                 if (++row < height)
                     g += stride;
@@ -289,15 +290,16 @@ namespace Simd
         const __m128i K8_SHUFFLE_UV_V0 = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x3, -1, -1, -1, 0x5, -1, -1, -1, 0x7, -1, -1, -1);
         const __m128i K8_SHUFFLE_UV_V1 = SIMD_MM_SETR_EPI8(0x9, -1, -1, -1, 0xB, -1, -1, -1, 0xD, -1, -1, -1, 0xF, -1, -1, -1);
 
-        SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, const __m128 k[10], float* u, float* v)
+        SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, float* u, float* v)
         {
+            __m128 k = _mm_set1_ps(-128.000f);
             for (int row = 0; row < 8;)
             {
                 __m128i _uv = _mm_loadu_si128((__m128i*)uvSrc);
-                _mm_storeu_ps(u + 0 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_U0)), k[3]));
-                _mm_storeu_ps(u + 1 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_U1)), k[3]));
-                _mm_storeu_ps(v + 0 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_V0)), k[3]));
-                _mm_storeu_ps(v + 1 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_V1)), k[3]));
+                _mm_storeu_ps(u + 0 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_U0)), k));
+                _mm_storeu_ps(u + 1 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_U1)), k));
+                _mm_storeu_ps(v + 0 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_V0)), k));
+                _mm_storeu_ps(v + 1 * F, _mm_add_ps(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_V1)), k));
                 if (++row < height)
                     uvSrc += uvStride;
                 u += 8, v += 8;
@@ -307,11 +309,12 @@ namespace Simd
         void JpegWriteBlockSubs(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
             const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
+            bool gray = red == green && red == blue;
             __m128 k[10];
-            RgbToYuvInit(k);
+            if(!gray)
+                RgbToYuvInit(k);
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width16 = width& (~15);
-            bool gray = red == green && red == blue;
             Base::BitBuf bitBuf;
             for (int y = 0; y < height; y += 16)
             {
@@ -321,7 +324,7 @@ namespace Simd
                 for (; x < width16; x += 16)
                 {
                     if (gray)
-                        GrayToY(red + x, stride, height - y, k, Y, 16);
+                        GrayToY(red + x, stride, height - y, Y, 16);
                     else
                         RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V, 16);
                     DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -371,11 +374,12 @@ namespace Simd
         void JpegWriteBlockFull(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
             const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
+            bool gray = red == green && red == blue;
             __m128 k[10];
-            RgbToYuvInit(k);
+            if(!gray)
+                RgbToYuvInit(k);
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width8 = width & (~7);
-            bool gray = red == green && red == blue;
             Base::BitBuf bitBuf;
             for (int y = 0; y < height; y += 8)
             {
@@ -384,7 +388,7 @@ namespace Simd
                 for (; x < width8; x += 8)
                 {
                     if (gray)
-                        GrayToY(red + x, stride, height - y, k, Y, 8);
+                        GrayToY(red + x, stride, height - y, Y, 8);
                     else
                         RgbToYuv(red + x, green + x, blue + x, stride, height - y, k, Y, U, V, 8);
                     DCY = JpegProcessDu(bitBuf, Y, 8, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -424,8 +428,6 @@ namespace Simd
         void JpegWriteBlockNv12(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
             const uint8_t* uvSrc, int uvStride, const float* fY, const float* fUv, int dc[3])
         {
-            __m128 k[10];
-            RgbToYuvInit(k);
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width16 = width & (~15);
             SIMD_ALIGNED(16) float Y[256], U[64], V[64];
@@ -436,7 +438,7 @@ namespace Simd
                 int x = 0;
                 for (; x < width16; x += 16)
                 {
-                    GrayToY(ySrc + x, yStride, height - y, k, Y, 16);
+                    GrayToY(ySrc + x, yStride, height - y, Y, 16);
                     DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -445,7 +447,7 @@ namespace Simd
                         Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
-                        Nv12ToUv(uvSrc + x, uvStride, Base::UvSize(height - y), k, U, V);
+                        Nv12ToUv(uvSrc + x, uvStride, Base::UvSize(height - y), U, V);
                         DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
                         DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }
@@ -479,8 +481,6 @@ namespace Simd
         void JpegWriteBlockYuv420p(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
             const uint8_t* uSrc, int uStride, const uint8_t* vSrc, int vStride, const float* fY, const float* fUv, int dc[3])
         {
-            __m128 k[10];
-            RgbToYuvInit(k);
             int& DCY = dc[0], & DCU = dc[1], & DCV = dc[2];
             int width16 = width & (~15);
             SIMD_ALIGNED(16) float Y[256], U[64], V[64];
@@ -491,7 +491,7 @@ namespace Simd
                 int x = 0;
                 for (; x < width16; x += 16)
                 {
-                    GrayToY(ySrc + x, yStride, height - y, k, Y, 16);
+                    GrayToY(ySrc + x, yStride, height - y, Y, 16);
                     DCY = JpegProcessDu(bitBuf, Y + 0, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(bitBuf, Y + 8, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
                     DCY = JpegProcessDu(bitBuf, Y + 128, 16, fY, DCY, Base::HuffmanYdc, Base::HuffmanYac);
@@ -500,8 +500,8 @@ namespace Simd
                         Base::JpegProcessDuGrayUv(bitBuf);
                     else
                     {
-                        GrayToY(uSrc + Base::UvSize(x), uStride, Base::UvSize(height - y), k, U, 8);
-                        GrayToY(vSrc + Base::UvSize(x), vStride, Base::UvSize(height - y), k, V, 8);
+                        GrayToY(uSrc + Base::UvSize(x), uStride, Base::UvSize(height - y), U, 8);
+                        GrayToY(vSrc + Base::UvSize(x), vStride, Base::UvSize(height - y), V, 8);
                         DCU = JpegProcessDu(bitBuf, U, 8, fUv, DCU, Base::HuffmanUVdc, Base::HuffmanUVac);
                         DCV = JpegProcessDu(bitBuf, V, 8, fUv, DCV, Base::HuffmanUVdc, Base::HuffmanUVac);
                     }

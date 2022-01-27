@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
 
 #include "Simd/SimdImageSave.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdSet.h"
 
 #define SIMD_JPEG_CALC_BITS_TABLE
 
@@ -270,6 +271,27 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        const __m256i K8_SHUFFLE_UV_U = SIMD_MM256_SETR_EPI8(
+            0x0, -1, -1, -1, 0x2, -1, -1, -1, 0x4, -1, -1, -1, 0x6, -1, -1, -1,
+            0x8, -1, -1, -1, 0xA, -1, -1, -1, 0xC, -1, -1, -1, 0xE, -1, -1, -1);
+        const __m256i K8_SHUFFLE_UV_V = SIMD_MM256_SETR_EPI8(
+            0x1, -1, -1, -1, 0x3, -1, -1, -1, 0x5, -1, -1, -1, 0x7, -1, -1, -1,
+            0x9, -1, -1, -1, 0xB, -1, -1, -1, 0xD, -1, -1, -1, 0xF, -1, -1, -1);
+
+        SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, float* u, float* v)
+        {
+            __m256 k = _mm256_set1_ps(-128.000f);
+            for (int row = 0; row < 8;)
+            {
+                __m256i _uv = Set(_mm_loadu_si128((__m128i*)uvSrc));
+                _mm256_storeu_ps(u, _mm256_add_ps(_mm256_cvtepi32_ps(_mm256_shuffle_epi8(_uv, K8_SHUFFLE_UV_U)), k));
+                _mm256_storeu_ps(v, _mm256_add_ps(_mm256_cvtepi32_ps(_mm256_shuffle_epi8(_uv, K8_SHUFFLE_UV_V)), k));
+                if (++row < height)
+                    uvSrc += uvStride;
+                u += 8, v += 8;
+            }
+        }
+
         extern const uint32_t JpegZigZagTi32[64];
 
         SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float* dst, size_t dstStride)
