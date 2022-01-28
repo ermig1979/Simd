@@ -37,6 +37,97 @@ namespace Simd
         {
         }
 
+        void ResizerByteBicubic::EstimateIndexAlphaY()
+        {
+            size_t sizeD = _param.dstH, sizeS = _param.srcH;
+            _iy.Resize(sizeD);
+            _ay.Resize(sizeD * 4);
+            float scale = float(sizeS) / float(_param.dstH);
+            size_t i = 0, sizeDF = AlignLo(sizeD, F);
+            int32_t* ay = _ay.data;
+            if (sizeDF)
+            {
+                __m128i _i = _mm_setr_epi32(0, 1, 2, 3);
+                __m128 _scale = _mm_set1_ps(scale);
+                __m128 _0 = _mm_set1_ps(0.0f);
+                __m128 _05 = _mm_set1_ps(0.5f);
+                __m128 _1 = _mm_set1_ps(1.0f);
+                __m128 _2 = _mm_set1_ps(2.0f);
+                __m128 _1_6 = _mm_set1_ps(1.0f / 6.0f);
+                __m128 _max = _mm_set1_ps(float(sizeS - 2));
+                __m128 _range = _mm_set1_ps(float(Base::BICUBIC_RANGE));
+
+                for (; i < sizeDF; i += F, ay += 4 * F)
+                {
+                    __m128 _pos = _mm_sub_ps(_mm_mul_ps(_mm_add_ps(_mm_cvtepi32_ps(_i), _05), _scale), _05);
+                    __m128 idx = _mm_round_ps(_pos, _MM_FROUND_FLOOR);
+                    __m128 d = _mm_sub_ps(_pos, idx);
+
+                    __m128 minMask = _mm_cmplt_ps(d, _0);
+                    idx = _mm_blendv_ps(idx, _0, minMask);
+                    d = _mm_blendv_ps(d, _0, minMask);
+
+                    __m128 maxMask = _mm_cmpgt_ps(d, _max);
+                    idx = _mm_blendv_ps(idx, _max, maxMask);
+                    d = _mm_blendv_ps(d, _1, maxMask);
+
+                    _mm_storeu_si128((__m128i*)(_iy.data + i), _mm_cvtps_epi32(idx));
+
+                    __m128i a0 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(_2, d), _mm_sub_ps(_1, d)), _mm_mul_ps(d, _1_6))));
+                    __m128i a1 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(d, _2), _mm_add_ps(_1, d)), _mm_mul_ps(_mm_sub_ps(_1, d), _05))));
+                    __m128i a2 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(d, _2), _mm_add_ps(_1, d)), _mm_mul_ps(d, _05))));
+                    __m128i a3 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_add_ps(_1, d), _mm_sub_ps(_1, d)), _mm_mul_ps(d, _1_6))));
+                    __m128i a00 = _mm_unpacklo_epi32(a0, a2);
+                    __m128i a01 = _mm_unpacklo_epi32(a1, a3);
+                    __m128i a10 = _mm_unpackhi_epi32(a0, a2);
+                    __m128i a11 = _mm_unpackhi_epi32(a1, a3);
+                    _mm_storeu_si128((__m128i*)ay + 0, _mm_unpacklo_epi32(a00, a01));
+                    _mm_storeu_si128((__m128i*)ay + 1, _mm_unpackhi_epi32(a00, a01));
+                    _mm_storeu_si128((__m128i*)ay + 2, _mm_unpacklo_epi32(a10, a11));
+                    _mm_storeu_si128((__m128i*)ay + 3, _mm_unpackhi_epi32(a10, a11));
+
+                    _i = _mm_add_epi32(_i, K32_00000004);
+                }
+            }
+            for (; i < sizeD; ++i, ay += 4)
+            {
+                float pos = (float)((i + 0.5f) * scale - 0.5f);
+                int idx = (int)::floor(pos);
+                float d = pos - idx;
+                if (idx < 0)
+                {
+                    idx = 0;
+                    d = 0.0f;
+                }
+                if (idx > (int)sizeS - 2)
+                {
+                    idx = (int)sizeS - 2;
+                    d = 1.0f;
+                }
+                _iy[i] = idx;
+                ay[0] = Round(Base::BICUBIC_RANGE * (2.0f - d) * (1.0f - d) * d / 6.0f);
+                ay[1] = Round(Base::BICUBIC_RANGE * (d - 2.0f) * (d + 1.0f) * (1.0f - d) / 2.0f);
+                ay[2] = Round(Base::BICUBIC_RANGE * (d - 2.0f) * (d + 1.0f) * d / 2.0f);
+                ay[3] = Round(Base::BICUBIC_RANGE * (1.0f + d) * (1.0f - d) * d / 6.0f);
+            }
+        }
+
+        void ResizerByteBicubic::ResizerByteBicubic::Init(bool sparse)
+        {
+            if (_iy.data)
+                return;
+            EstimateIndexAlphaY();
+            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix, _ax);
+            if (!sparse)
+            {
+                for (int i = 0; i < 4; ++i)
+                    _bx[i].Resize(_param.dstW * _param.channels);
+            }
+            _sxl = (_param.srcW - 2) * _param.channels;
+            for (_xn = 0; _ix[_xn] == 0; _xn++);
+            for (_xt = _param.dstW; _ix[_xt - 1] == _sxl; _xt--);
+        }
+
         template<int N, int F, int L> SIMD_INLINE int32_t CubicSumX(const uint8_t* src, const int32_t* ax)
         {
             return ax[0] * src[F * N] + ax[1] * src[0 * N] + ax[2] * src[1 * N] + ax[3] * src[L * N];

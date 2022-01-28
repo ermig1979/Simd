@@ -345,6 +345,11 @@ namespace Simd
         class ResizerByteBicubic : public Base::ResizerByteBicubic
         {
         protected:
+            void EstimateIndexAlphaY();
+            void EstimateIndexAlphaX();
+
+            void Init(bool sparse);
+
             template<int N> void RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
             template<int N> void RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
