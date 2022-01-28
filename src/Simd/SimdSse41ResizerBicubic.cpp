@@ -42,7 +42,7 @@ namespace Simd
             size_t sizeD = _param.dstH, sizeS = _param.srcH;
             _iy.Resize(sizeD);
             _ay.Resize(sizeD * 4);
-            float scale = float(sizeS) / float(_param.dstH);
+            float scale = float(sizeS) / float(sizeD);
             size_t i = 0, sizeDF = AlignLo(sizeD, F);
             int32_t* ay = _ay.data;
             if (sizeDF)
@@ -63,11 +63,11 @@ namespace Simd
                     __m128 idx = _mm_round_ps(_pos, _MM_FROUND_FLOOR);
                     __m128 d = _mm_sub_ps(_pos, idx);
 
-                    __m128 minMask = _mm_cmplt_ps(d, _0);
+                    __m128 minMask = _mm_cmplt_ps(idx, _0);
                     idx = _mm_blendv_ps(idx, _0, minMask);
                     d = _mm_blendv_ps(d, _0, minMask);
 
-                    __m128 maxMask = _mm_cmpgt_ps(d, _max);
+                    __m128 maxMask = _mm_cmpgt_ps(idx, _max);
                     idx = _mm_blendv_ps(idx, _max, maxMask);
                     d = _mm_blendv_ps(d, _1, maxMask);
 
@@ -112,12 +112,82 @@ namespace Simd
             }
         }
 
+        void ResizerByteBicubic::EstimateIndexAlphaX()
+        {
+            size_t sizeD = _param.dstW, sizeS = _param.srcW;
+            _ix.Resize(sizeD);
+            _ax.Resize(sizeD * 4);
+            float scale = float(sizeS) / float(sizeD);
+            size_t i = 0, sizeDF = AlignLo(sizeD, F);
+            int8_t* ax = _ax.data;
+            if (sizeDF)
+            {
+                static const __m128i _SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
+                __m128i _i = _mm_setr_epi32(0, 1, 2, 3);
+                __m128 _scale = _mm_set1_ps(scale);
+                __m128 _0 = _mm_set1_ps(0.0f);
+                __m128 _05 = _mm_set1_ps(0.5f);
+                __m128 _1 = _mm_set1_ps(1.0f);
+                __m128 _2 = _mm_set1_ps(2.0f);
+                __m128 _1_6 = _mm_set1_ps(1.0f / 6.0f);
+                __m128 _max = _mm_set1_ps(float(sizeS - 2));
+                __m128 _range = _mm_set1_ps(float(Base::BICUBIC_RANGE));
+                __m128i _channels = _mm_set1_epi32((int)_param.channels);
+
+                for (; i < sizeDF; i += F, ax += 4 * F)
+                {
+                    __m128 _pos = _mm_sub_ps(_mm_mul_ps(_mm_add_ps(_mm_cvtepi32_ps(_i), _05), _scale), _05);
+                    __m128 idx = _mm_round_ps(_pos, _MM_FROUND_FLOOR);
+                    __m128 d = _mm_sub_ps(_pos, idx);
+
+                    __m128 minMask = _mm_cmplt_ps(idx, _0);
+                    idx = _mm_blendv_ps(idx, _0, minMask);
+                    d = _mm_blendv_ps(d, _0, minMask);
+
+                    __m128 maxMask = _mm_cmpgt_ps(idx, _max);
+                    idx = _mm_blendv_ps(idx, _max, maxMask);
+                    d = _mm_blendv_ps(d, _1, maxMask);
+
+                    _mm_storeu_si128((__m128i*)(_ix.data + i), _mm_mullo_epi32(_mm_cvtps_epi32(idx), _channels));
+
+                    __m128i a0 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(_2, d), _mm_sub_ps(_1, d)), _mm_mul_ps(d, _1_6))));
+                    __m128i a1 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(d, _2), _mm_add_ps(_1, d)), _mm_mul_ps(_mm_sub_ps(_1, d), _05))));
+                    __m128i a2 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_sub_ps(d, _2), _mm_add_ps(_1, d)), _mm_mul_ps(d, _05))));
+                    __m128i a3 = _mm_cvtps_epi32(_mm_mul_ps(_range, _mm_mul_ps(_mm_mul_ps(_mm_add_ps(_1, d), _mm_sub_ps(_1, d)), _mm_mul_ps(d, _1_6))));
+                    _mm_storeu_si128((__m128i*)ax, _mm_shuffle_epi8(_mm_packs_epi16(_mm_packs_epi32(a0, a1), _mm_packs_epi32(a2, a3)), _SHUFFLE));
+
+                    _i = _mm_add_epi32(_i, K32_00000004);
+                }
+            }
+            for (; i < sizeD; ++i, ax += 4)
+            {
+                float pos = (float)((i + 0.5f) * scale - 0.5f);
+                int idx = (int)::floor(pos);
+                float d = pos - idx;
+                if (idx < 0)
+                {
+                    idx = 0;
+                    d = 0.0f;
+                }
+                if (idx > (int)sizeS - 2)
+                {
+                    idx = (int)sizeS - 2;
+                    d = 1.0f;
+                }
+                _ix[i] = idx * (int)_param.channels;
+                ax[0] = (int8_t)Round(Base::BICUBIC_RANGE * (2.0f - d) * (1.0f - d) * d / 6.0f);
+                ax[1] = (int8_t)Round(Base::BICUBIC_RANGE * (d - 2.0f) * (d + 1.0f) * (1.0f - d) / 2.0f);
+                ax[2] = (int8_t)Round(Base::BICUBIC_RANGE * (d - 2.0f) * (d + 1.0f) * d / 2.0f);
+                ax[3] = (int8_t)Round(Base::BICUBIC_RANGE * (1.0f + d) * (1.0f - d) * d / 6.0f);
+            }
+        }
+
         void ResizerByteBicubic::ResizerByteBicubic::Init(bool sparse)
         {
             if (_iy.data)
                 return;
             EstimateIndexAlphaY();
-            EstimateIndexAlpha(_param.srcW, _param.dstW, _param.channels, _ix, _ax);
+            EstimateIndexAlphaX();
             if (!sparse)
             {
                 for (int i = 0; i < 4; ++i)
@@ -128,13 +198,13 @@ namespace Simd
             for (_xt = _param.dstW; _ix[_xt - 1] == _sxl; _xt--);
         }
 
-        template<int N, int F, int L> SIMD_INLINE int32_t CubicSumX(const uint8_t* src, const int32_t* ax)
+        template<int N, int F, int L> SIMD_INLINE int32_t CubicSumX(const uint8_t* src, const int8_t* ax)
         {
-            return ax[0] * src[F * N] + ax[1] * src[0 * N] + ax[2] * src[1 * N] + ax[3] * src[L * N];
+            return (int)ax[0] * src[F * N] + (int)ax[1] * src[0 * N] + (int)ax[2] * src[1 * N] + (int)ax[3] * src[L * N];
         }
 
         template<int N, int F, int L> SIMD_INLINE void BicubicInt(const uint8_t* src0, const uint8_t* src1,
-            const uint8_t* src2, const uint8_t* src3, size_t sx, const int32_t* ax, const int32_t* ay, uint8_t* dst)
+            const uint8_t* src2, const uint8_t* src3, size_t sx, const int8_t* ax, const int32_t* ay, uint8_t* dst)
         {
             for (size_t c = 0; c < N; ++c)
             {
@@ -167,13 +237,13 @@ namespace Simd
             }
         }
 
-        template<int N, int F, int L> SIMD_INLINE void PixelCubicSumX(const uint8_t* src, const int32_t* ax, int32_t* dst)
+        template<int N, int F, int L> SIMD_INLINE void PixelCubicSumX(const uint8_t* src, const int8_t* ax, int32_t* dst)
         {
             for (size_t c = 0; c < N; ++c)
                 dst[c] = CubicSumX<N, F, L>(src + c, ax);
         }
 
-        template<int N> SIMD_INLINE void RowCubicSumX(const uint8_t* src, size_t nose, size_t body, size_t tail, const int32_t* ix, const int32_t* ax, int32_t* dst)
+        template<int N> SIMD_INLINE void RowCubicSumX(const uint8_t* src, size_t nose, size_t body, size_t tail, const int32_t* ix, const int8_t* ax, int32_t* dst)
         {
             size_t dx = 0;
             for (; dx < nose; dx++, ax += 4, dst += N)
@@ -223,7 +293,7 @@ namespace Simd
                 {
                     if (curr < prev)
                         continue;
-                    const uint8_t* ps = src + Base::RestrictRange(curr, 0, _param.srcH - 1) * srcStride;
+                    const uint8_t* ps = src + RestrictRange<size_t>(curr, 0, _param.srcH - 1) * srcStride;
                     int32_t* pb = _bx[(curr + 1) & 3].data;
                     RowCubicSumX<N>(ps, _xn, _xt, _param.dstW, _ix.data, _ax.data, pb);
                     next++;

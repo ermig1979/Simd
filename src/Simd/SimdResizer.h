@@ -345,6 +345,8 @@ namespace Simd
         class ResizerByteBicubic : public Base::ResizerByteBicubic
         {
         protected:
+            Array8i _ax;
+
             void EstimateIndexAlphaY();
             void EstimateIndexAlphaX();
 
