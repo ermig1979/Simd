@@ -237,6 +237,54 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m128i CubicSumX1x4(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        {
+            __m128i _src = _mm_setr_epi32(*(int32_t*)(src + ix[0]), *(int32_t*)(src + ix[1]), *(int32_t*)(src + ix[2]), *(int32_t*)(src + ix[3]));
+            return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
+        }
+
+        SIMD_INLINE void BicubicInt1x4(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const int32_t* ix, const int8_t* ax, const __m128i* ay, uint8_t* dst)
+        {
+            static const __m128i ROUND = SIMD_MM_SET1_EPI32(Base::BICUBIC_ROUND);
+            __m128i _ax = _mm_loadu_si128((__m128i*)ax);
+            __m128i say0 = CubicSumX1x4(src0 - 1, ix, _ax, ay[0]);
+            __m128i say1 = CubicSumX1x4(src1 - 1, ix, _ax, ay[1]);
+            __m128i say2 = CubicSumX1x4(src2 - 1, ix, _ax, ay[2]);
+            __m128i say3 = CubicSumX1x4(src3 - 1, ix, _ax, ay[3]);
+            __m128i sum = _mm_add_epi32(_mm_add_epi32(say0, say1), _mm_add_epi32(say2, say3));
+            __m128i dst0 = _mm_srai_epi32(_mm_add_epi32(sum, ROUND), Base::BICUBIC_SHIFT);
+            *((int32_t*)(dst)) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(dst0, K_ZERO), K_ZERO));
+        }
+
+        template<> void ResizerByteBicubic::RunS<1>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_xn == 0 && _xt == _param.dstW);
+            size_t dstW4 = AlignLo(_param.dstW, 4);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                size_t sy = _iy[dy];
+                const uint8_t* src1 = src + sy * srcStride;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src0 = sy ? src1 - srcStride : src1;
+                const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
+                const int32_t* ay = _ay.data + dy * 4;
+                __m128i ay128[4];
+                ay128[0] = _mm_set1_epi16(ay[0]);
+                ay128[1] = _mm_set1_epi16(ay[1]);
+                ay128[2] = _mm_set1_epi16(ay[2]);
+                ay128[3] = _mm_set1_epi16(ay[3]);
+                size_t dx = 0;
+                for (; dx < dstW4; dx += 4)
+                    BicubicInt1x4(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ay128, dst + dx * 1);
+                for (; dx < _param.dstW; dx++)
+                    BicubicInt<1, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 1);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template<int N, int F, int L> SIMD_INLINE void PixelCubicSumX(const uint8_t* src, const int8_t* ax, int32_t* dst)
         {
             for (size_t c = 0; c < N; ++c)
