@@ -232,6 +232,11 @@ namespace Simd
             return _mm_shuffle_epi32(_mm_loadl_epi64((__m128i*)ax), 0x50);
         }
 
+        template<> SIMD_INLINE __m128i LoadAx<3>(const int8_t* ax)
+        {
+            return _mm_shuffle_epi32(_mm_loadl_epi64((__m128i*)ax), 0x00);
+        }
+
         template<int N> SIMD_INLINE __m128i CubicSumX(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
         {
             return _mm_setzero_si128();
@@ -247,6 +252,13 @@ namespace Simd
         {
             static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF);
             __m128i _src = _mm_shuffle_epi8(Load((__m128i*)(src + ix[0]), (__m128i*)(src + ix[1])), SHUFFLE);
+            return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
+        }
+
+        template<> SIMD_INLINE __m128i CubicSumX<3>(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        {
+            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1);
+            __m128i _src = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + ix[0])), SHUFFLE);
             return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
         }
 
@@ -267,7 +279,7 @@ namespace Simd
         {
             assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4 / N;
-            size_t body = N < 3 ? AlignLoAny(_param.dstW, step) : 0;
+            size_t body = N < 4 ? AlignLoAny(_param.dstW, step) : 0;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
