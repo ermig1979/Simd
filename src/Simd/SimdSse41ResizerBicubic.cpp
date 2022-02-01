@@ -217,10 +217,7 @@ namespace Simd
             }
         }
 
-        template<int N> SIMD_INLINE __m128i LoadAx(const int8_t* ax)
-        {
-            return _mm_setzero_si128();
-        }
+        template<int N> __m128i LoadAx(const int8_t* ax);
 
         template<> SIMD_INLINE __m128i LoadAx<1>(const int8_t* ax)
         {
@@ -234,13 +231,15 @@ namespace Simd
 
         template<> SIMD_INLINE __m128i LoadAx<3>(const int8_t* ax)
         {
-            return _mm_shuffle_epi32(_mm_loadl_epi64((__m128i*)ax), 0x00);
+            return _mm_set1_epi32(*(int32_t*)ax);
         }
 
-        template<int N> SIMD_INLINE __m128i CubicSumX(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        template<> SIMD_INLINE __m128i LoadAx<4>(const int8_t* ax)
         {
-            return _mm_setzero_si128();
+            return _mm_set1_epi32(*(int32_t*)ax);
         }
+
+        template<int N> __m128i CubicSumX(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay);
 
         template<> SIMD_INLINE __m128i CubicSumX<1>(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
         {
@@ -262,6 +261,13 @@ namespace Simd
             return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
         }
 
+        template<> SIMD_INLINE __m128i CubicSumX<4>(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        {
+            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
+            __m128i _src = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + ix[0])), SHUFFLE);
+            return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
+        }
+
         template <int N> SIMD_INLINE void BicubicInt(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const int32_t* ix, const int8_t* ax, const __m128i* ay, uint8_t* dst)
         {
             static const __m128i ROUND = SIMD_MM_SET1_EPI32(Base::BICUBIC_ROUND);
@@ -279,7 +285,7 @@ namespace Simd
         {
             assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4 / N;
-            size_t body = N < 4 ? AlignLoAny(_param.dstW, step) : 0;
+            size_t body = AlignLoAny(_param.dstW, step);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
