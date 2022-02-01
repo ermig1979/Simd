@@ -217,51 +217,57 @@ namespace Simd
             }
         }
 
-        template<int N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        template<int N> SIMD_INLINE __m128i LoadAx(const int8_t* ax)
         {
-            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
-            {
-                size_t sy = _iy[dy];
-                const uint8_t* src1 = src + sy * srcStride;
-                const uint8_t* src2 = src1 + srcStride;
-                const uint8_t* src0 = sy ? src1 - srcStride : src1;
-                const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
-                const int32_t* ay = _ay.data + dy * 4;
-                size_t dx = 0;
-                for (; dx < _xn; dx++)
-                    BicubicInt<N, 0, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
-                for (; dx < _xt; dx++)
-                    BicubicInt<N, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
-                for (; dx < _param.dstW; dx++)
-                    BicubicInt<N, -1, 1>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
-            }
+            return _mm_setzero_si128();
         }
 
-        //-----------------------------------------------------------------------------------------
+        template<> SIMD_INLINE __m128i LoadAx<1>(const int8_t* ax)
+        {
+            return _mm_loadu_si128((__m128i*)ax);
+        }
 
-        SIMD_INLINE __m128i CubicSumX1x4(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        template<> SIMD_INLINE __m128i LoadAx<2>(const int8_t* ax)
+        {
+            return _mm_shuffle_epi32(_mm_loadl_epi64((__m128i*)ax), 0x50);
+        }
+
+        template<int N> SIMD_INLINE __m128i CubicSumX(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        {
+            return _mm_setzero_si128();
+        }
+
+        template<> SIMD_INLINE __m128i CubicSumX<1>(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
         {
             __m128i _src = _mm_setr_epi32(*(int32_t*)(src + ix[0]), *(int32_t*)(src + ix[1]), *(int32_t*)(src + ix[2]), *(int32_t*)(src + ix[3]));
             return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
         }
 
-        SIMD_INLINE void BicubicInt1x4(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const int32_t* ix, const int8_t* ax, const __m128i* ay, uint8_t* dst)
+        template<> SIMD_INLINE __m128i CubicSumX<2>(const uint8_t* src, const int32_t* ix, __m128i ax, __m128i ay)
+        {
+            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF);
+            __m128i _src = _mm_shuffle_epi8(Load((__m128i*)(src + ix[0]), (__m128i*)(src + ix[1])), SHUFFLE);
+            return _mm_madd_epi16(_mm_maddubs_epi16(_src, ax), ay);
+        }
+
+        template <int N> SIMD_INLINE void BicubicInt(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const int32_t* ix, const int8_t* ax, const __m128i* ay, uint8_t* dst)
         {
             static const __m128i ROUND = SIMD_MM_SET1_EPI32(Base::BICUBIC_ROUND);
-            __m128i _ax = _mm_loadu_si128((__m128i*)ax);
-            __m128i say0 = CubicSumX1x4(src0 - 1, ix, _ax, ay[0]);
-            __m128i say1 = CubicSumX1x4(src1 - 1, ix, _ax, ay[1]);
-            __m128i say2 = CubicSumX1x4(src2 - 1, ix, _ax, ay[2]);
-            __m128i say3 = CubicSumX1x4(src3 - 1, ix, _ax, ay[3]);
+            __m128i _ax = LoadAx<N>(ax);
+            __m128i say0 = CubicSumX<N>(src0 - N, ix, _ax, ay[0]);
+            __m128i say1 = CubicSumX<N>(src1 - N, ix, _ax, ay[1]);
+            __m128i say2 = CubicSumX<N>(src2 - N, ix, _ax, ay[2]);
+            __m128i say3 = CubicSumX<N>(src3 - N, ix, _ax, ay[3]);
             __m128i sum = _mm_add_epi32(_mm_add_epi32(say0, say1), _mm_add_epi32(say2, say3));
             __m128i dst0 = _mm_srai_epi32(_mm_add_epi32(sum, ROUND), Base::BICUBIC_SHIFT);
             *((int32_t*)(dst)) = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packs_epi32(dst0, K_ZERO), K_ZERO));
         }
 
-        template<> void ResizerByteBicubic::RunS<1>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        template<int N> void ResizerByteBicubic::RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             assert(_xn == 0 && _xt == _param.dstW);
-            size_t dstW4 = AlignLo(_param.dstW, 4);
+            size_t step = 4 / N;
+            size_t body = N < 3 ? AlignLoAny(_param.dstW, step) : 0;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];
@@ -276,14 +282,12 @@ namespace Simd
                 ay128[2] = _mm_set1_epi16(ay[2]);
                 ay128[3] = _mm_set1_epi16(ay[3]);
                 size_t dx = 0;
-                for (; dx < dstW4; dx += 4)
-                    BicubicInt1x4(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ay128, dst + dx * 1);
+                for (; dx < body; dx += step)
+                    BicubicInt<N>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ay128, dst + dx * N);
                 for (; dx < _param.dstW; dx++)
-                    BicubicInt<1, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * 1);
+                    BicubicInt<N, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
             }
         }
-
-        //-----------------------------------------------------------------------------------------
 
         template<int N, int F, int L> SIMD_INLINE void PixelCubicSumX(const uint8_t* src, const int8_t* ax, int32_t* dst)
         {
@@ -341,7 +345,7 @@ namespace Simd
                 {
                     if (curr < prev)
                         continue;
-                    const uint8_t* ps = src + RestrictRange<size_t>(curr, 0, _param.srcH - 1) * srcStride;
+                    const uint8_t* ps = src + RestrictRange(curr, 0, (int)_param.srcH - 1) * srcStride;
                     int32_t* pb = _bx[(curr + 1) & 3].data;
                     RowCubicSumX<N>(ps, _xn, _xt, _param.dstW, _ix.data, _ax.data, pb);
                     next++;
