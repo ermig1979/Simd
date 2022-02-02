@@ -65,6 +65,12 @@ namespace Simd
 
         template<int N> __m256i CubicSumX(const uint8_t* src, const int32_t* ix, __m256i ax, __m256i ay);
 
+        template<> SIMD_INLINE __m256i CubicSumX<1>(const uint8_t* src, const int32_t* ix, __m256i ax, __m256i ay)
+        {
+            __m256i _src = _mm256_i32gather_epi32((int32_t*)src, _mm256_loadu_si256((__m256i*)ix), 1);
+            return _mm256_madd_epi16(_mm256_maddubs_epi16(_src, ax), ay);
+        }
+
         template<> SIMD_INLINE __m256i CubicSumX<2>(const uint8_t* src, const int32_t* ix, __m256i ax, __m256i ay)
         {
             static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
@@ -167,38 +173,54 @@ namespace Simd
 
         template<> SIMD_INLINE void PixelCubicSumX<1>(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst)
         {
-            __m128i _src = _mm_setr_epi32(*(int32_t*)(src + ix[0]), *(int32_t*)(src + ix[1]), *(int32_t*)(src + ix[2]), *(int32_t*)(src + ix[3]));
-            __m128i _ax = _mm_loadu_si128((__m128i*)ax);
-            _mm_storeu_si128((__m128i*)dst, _mm_madd_epi16(_mm_maddubs_epi16(_src, _ax), Sse2::K16_0001));
+#if 1
+            __m128i src0 = _mm_setr_epi32(*(int32_t*)(src + ix[0]), *(int32_t*)(src + ix[1]), *(int32_t*)(src + ix[2]), *(int32_t*)(src + ix[3]));
+            __m128i src1 = _mm_setr_epi32(*(int32_t*)(src + ix[4]), *(int32_t*)(src + ix[5]), *(int32_t*)(src + ix[6]), *(int32_t*)(src + ix[7]));
+            __m256i _src = Set(src0, src1);
+#else
+            __m256i _src = _mm256_i32gather_epi32((int32_t*)src, _mm256_loadu_si256((__m256i*)ix), 1);
+#endif
+            __m256i _ax = _mm256_loadu_si256((__m256i*)ax);
+            _mm256_storeu_si256((__m256i*)dst, _mm256_madd_epi16(_mm256_maddubs_epi16(_src, _ax), K16_0001));
         }
 
         template<> SIMD_INLINE void PixelCubicSumX<2>(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst)
         {
-            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF);
-            __m128i _src = _mm_shuffle_epi8(Sse2::Load((__m128i*)(src + ix[0]), (__m128i*)(src + ix[1])), SHUFFLE);
-            __m128i _ax = _mm_shuffle_epi32(_mm_loadl_epi64((__m128i*)ax), 0x50);
-            _mm_storeu_si128((__m128i*)dst, _mm_madd_epi16(_mm_maddubs_epi16(_src, _ax), Sse2::K16_0001));
+            static const __m256i PERMUTE = SIMD_MM256_SETR_EPI32(0, 0, 1, 1, 2, 2, 3, 3);
+            __m256i _ax = _mm256_permutevar8x32_epi32(_mm256_castsi128_si256(_mm_loadu_si128((__m128i*)ax)), PERMUTE);
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF);
+            __m256i _src = _mm256_shuffle_epi8(_mm256_i32gather_epi64((long long*)src, _mm_loadu_si128((__m128i*)ix), 1), SHUFFLE);
+            _mm256_storeu_si256((__m256i*)dst, _mm256_madd_epi16(_mm256_maddubs_epi16(_src, _ax), K16_0001));
         }
 
         template<> SIMD_INLINE void PixelCubicSumX<3>(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst)
         {
-            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1);
-            __m128i _src = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + ix[0])), SHUFFLE);
-            __m128i _ax = _mm_set1_epi32(*(int32_t*)ax);
-            _mm_storeu_si128((__m128i*)dst, _mm_madd_epi16(_mm_maddubs_epi16(_src, _ax), Sse2::K16_0001));
+            static const __m256i PERM_A = SIMD_MM256_SETR_EPI32(0, 0, 0, 1, 1, 1, 0, 0);
+            __m256i _ax = _mm256_permutevar8x32_epi32(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)ax)), PERM_A);
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+                0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1);
+            static const __m256i PERM_B = SIMD_MM256_SETR_EPI32(0, 1, 2, 4, 5, 6, 0, 0);
+            __m256i _src = _mm256_permutevar8x32_epi32(_mm256_shuffle_epi8(Load<false>((__m128i*)(src + ix[0]), (__m128i*)(src + ix[1])), SHUFFLE), PERM_B);
+            _mm256_storeu_si256((__m256i*)dst, _mm256_madd_epi16(_mm256_maddubs_epi16(_src, _ax), K16_0001));
         }
 
         template<> SIMD_INLINE void PixelCubicSumX<4>(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst)
         {
-            static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
-            __m128i _src = _mm_shuffle_epi8(_mm_loadu_si128((__m128i*)(src + ix[0])), SHUFFLE);
-            __m128i _ax = _mm_set1_epi32(*(int32_t*)ax);
-            _mm_storeu_si128((__m128i*)dst, _mm_madd_epi16(_mm_maddubs_epi16(_src, _ax), Sse2::K16_0001));
+            static const __m256i PERMUTE = SIMD_MM256_SETR_EPI32(0, 0, 0, 0, 1, 1, 1, 1);
+            __m256i _ax = _mm256_permutevar8x32_epi32(_mm256_castsi128_si256(_mm_loadl_epi64((__m128i*)ax)), PERMUTE);
+            static const __m256i SHUFFLE = SIMD_MM256_SETR_EPI8(
+                0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF,
+                0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
+            __m256i _src = _mm256_shuffle_epi8(Load<false>((__m128i*)(src + ix[0]), (__m128i*)(src + ix[1])), SHUFFLE);
+            _mm256_storeu_si256((__m256i*)dst, _mm256_madd_epi16(_mm256_maddubs_epi16(_src, _ax), K16_0001));
         }
 
         template<int N> SIMD_INLINE void RowCubicSumX(const uint8_t* src, size_t nose, size_t body, size_t tail, const int32_t* ix, const int8_t* ax, int32_t* dst)
         {
-            size_t step = 4 / N;
+            size_t step = 4 / N * 2;
             size_t bodyS = nose + AlignLoAny(body - nose, step);
 
             size_t dx = 0;
@@ -273,7 +295,7 @@ namespace Simd
             Init(sparse);
             switch (_param.channels)
             {
-            case 1: sparse ? RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
+            case 1: sparse ? Sse41::ResizerByteBicubic::RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
             case 2: sparse ? RunS<2>(src, srcStride, dst, dstStride) : RunB<2>(src, srcStride, dst, dstStride); return;
             case 3: sparse ? RunS<3>(src, srcStride, dst, dstStride) : RunB<3>(src, srcStride, dst, dstStride); return;
             case 4: sparse ? RunS<4>(src, srcStride, dst, dstStride) : RunB<4>(src, srcStride, dst, dstStride); return;
