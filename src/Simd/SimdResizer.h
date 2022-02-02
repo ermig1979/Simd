@@ -388,6 +388,8 @@ namespace Simd
             ResizerFloatBilinear(const ResParam & param);
         };
 
+        //---------------------------------------------------------------------------------------------
+
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 #endif //SIMD_AVX_ENABLE 
@@ -395,6 +397,22 @@ namespace Simd
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
     {
+        class ResizerNearest : public Sse41::ResizerNearest
+        {
+        protected:
+            void EstimateParams();
+            void Gather2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather3(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerNearest(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //---------------------------------------------------------------------------------------------
+
         class ResizerByteBilinear : public Sse41::ResizerByteBilinear
         {
         protected:
@@ -410,16 +428,6 @@ namespace Simd
             void RunG(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         public:
             ResizerByteBilinear(const ResParam & param);
-
-            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        };
-
-        class ResizerByteArea : public Sse41::ResizerByteArea
-        {
-        protected:
-            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        public:
-            ResizerByteArea(const ResParam & param);
 
             virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
         };
@@ -442,19 +450,32 @@ namespace Simd
             ResizerFloatBilinear(const ResParam & param);
         };
 
-        class ResizerNearest : public Sse41::ResizerNearest
+        //---------------------------------------------------------------------------------------------
+
+        class ResizerByteBicubic : public Sse41::ResizerByteBicubic
         {
         protected:
-            void EstimateParams();
-            void Gather2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            void Gather3(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<int N> void RunS(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            template<int N> void RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
-            ResizerNearest(const ResParam& param);
+            ResizerByteBicubic(const ResParam& param);
 
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
+
+        //---------------------------------------------------------------------------------------------
+
+        class ResizerByteArea : public Sse41::ResizerByteArea
+        {
+        protected:
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteArea(const ResParam& param);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
+        //---------------------------------------------------------------------------------------------
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }

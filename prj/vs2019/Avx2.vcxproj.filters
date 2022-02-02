@@ -277,6 +277,18 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2Base64.cpp">
       <Filter>Avx2</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerArea.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerBicubic.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerBilinear.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx2ResizerNearest.cpp">
+      <Filter>Avx2</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx2">

@@ -28,6 +28,34 @@
 
 namespace Simd
 {
+    namespace Base
+    {
+        template<int N, int F, int L> SIMD_INLINE int32_t CubicSumX(const uint8_t* src, const int8_t* ax)
+        {
+            return (int)ax[0] * src[F * N] + (int)ax[1] * src[0 * N] + (int)ax[2] * src[1 * N] + (int)ax[3] * src[L * N];
+        }
+
+        template<int N, int F, int L> SIMD_INLINE void BicubicInt(const uint8_t* src0, const uint8_t* src1,
+            const uint8_t* src2, const uint8_t* src3, size_t sx, const int8_t* ax, const int32_t* ay, uint8_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+            {
+                int32_t rs0 = CubicSumX<N, F, L>(src0 + sx + c, ax);
+                int32_t rs1 = CubicSumX<N, F, L>(src1 + sx + c, ax);
+                int32_t rs2 = CubicSumX<N, F, L>(src2 + sx + c, ax);
+                int32_t rs3 = CubicSumX<N, F, L>(src3 + sx + c, ax);
+                int32_t sum = ay[0] * rs0 + ay[1] * rs1 + ay[2] * rs2 + ay[3] * rs3;
+                dst[c] = Base::RestrictRange((sum + Base::BICUBIC_ROUND) >> Base::BICUBIC_SHIFT, 0, 255);
+            }
+        }
+
+        template<int N, int F, int L> SIMD_INLINE void PixelCubicSumX(const uint8_t* src, const int8_t* ax, int32_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] = CubicSumX<N, F, L>(src + c, ax);
+        }
+    }
+
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
