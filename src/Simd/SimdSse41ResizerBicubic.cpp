@@ -275,14 +275,14 @@ namespace Simd
                 const uint8_t* src0 = sy ? src1 - srcStride : src1;
                 const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
                 const int32_t* ay = _ay.data + dy * 4;
-                __m128i ay128[4];
-                ay128[0] = _mm_set1_epi16(ay[0]);
-                ay128[1] = _mm_set1_epi16(ay[1]);
-                ay128[2] = _mm_set1_epi16(ay[2]);
-                ay128[3] = _mm_set1_epi16(ay[3]);
+                __m128i ays[4];
+                ays[0] = _mm_set1_epi16(ay[0]);
+                ays[1] = _mm_set1_epi16(ay[1]);
+                ays[2] = _mm_set1_epi16(ay[2]);
+                ays[3] = _mm_set1_epi16(ay[3]);
                 size_t dx = 0;
                 for (; dx < body; dx += step)
-                    BicubicInt<N>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ay128, dst + dx * N);
+                    BicubicInt<N>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * N);
                 for (; dx < _param.dstW; dx++)
                     Base::BicubicInt<N, -1, 2>(src0, src1, src2, src3, _ix[dx], _ax.data + dx * 4, ay, dst + dx * N);
             }

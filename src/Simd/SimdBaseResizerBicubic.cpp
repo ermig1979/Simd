@@ -153,7 +153,7 @@ namespace Simd
                 {
                     if (curr < prev)
                         continue;
-                    const uint8_t* ps = src + RestrictRange(curr, 0, _param.srcH - 1) * srcStride;
+                    const uint8_t* ps = src + RestrictRange(curr, 0, (int)_param.srcH - 1) * srcStride;
                     int32_t* pb = _bx[(curr + 1) & 3].data;
                     RowCubicSumX<N>(ps, _xn, _xt, _param.dstW, _ix.data, _ax.data, pb);
                     next++;
