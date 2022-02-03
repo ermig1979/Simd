@@ -65,6 +65,10 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBicubic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSegmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSobel.cpp" />

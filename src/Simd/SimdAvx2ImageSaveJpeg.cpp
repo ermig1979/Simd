@@ -26,7 +26,6 @@
 #include "Simd/SimdImageSaveJpeg.h"
 #include "Simd/SimdLoad.h"
 #include "Simd/SimdAvx2.h"
-#include "Simd/SimdSet.h"
 
 namespace Simd
 {

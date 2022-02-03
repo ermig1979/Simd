@@ -88,6 +88,12 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd3.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerBilinear.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerNearest.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512f">
