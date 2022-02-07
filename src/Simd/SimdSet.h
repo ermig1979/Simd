@@ -138,6 +138,11 @@ namespace Simd
         {
             return _mm512_inserti32x8(_mm512_castsi256_si512(a0), a1, 1);
         }
+
+        SIMD_INLINE __m512i Set(const __m128i& a0, const __m128i& a1, const __m128i& a2, const __m128i& a3)
+        {
+            return _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(a0), a1, 1), a2, 2), a3, 3);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 
