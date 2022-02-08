@@ -269,6 +269,77 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+        SIMD_INLINE __m512i LoadAx3(const int8_t* ax, __mmask8 srcMask = __mmask8(0xF))
+        {
+            static const __m512i PERMUTE = SIMD_MM512_SETR_EPI32(0, 0, 0, 1, 1, 1, 2, 2, 2, 3, 3, 3, 0, 0, 0, 0);
+            return _mm512_permutexvar_epi32(PERMUTE, _mm512_castsi128_si512(_mm_maskz_loadu_epi32(srcMask, ax)));
+        }
+
+        SIMD_INLINE __m512i CubicSumX3(const uint8_t* src, const int32_t* ix, __m512i ax, __m512i ay, __mmask8 * srcMask)
+        {
+            static const __m512i SHUFFLE = SIMD_MM512_SETR_EPI8(
+                0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+                0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+                0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1,
+                0x0, 0x3, 0x6, 0x9, 0x1, 0x4, 0x7, 0xA, 0x2, 0x5, 0x8, 0xB, -1, -1, -1, -1);
+            static const __m512i PERMUTE = SIMD_MM512_SETR_EPI32(0, 1, 2, 4, 5, 6, 8, 9, 10, 12, 13, 14, 0, 0, 0, 0);
+            __m128i src0 = _mm_maskz_loadu_epi32(srcMask[0], src + ix[0]);
+            __m128i src1 = _mm_maskz_loadu_epi32(srcMask[1], src + ix[1]);
+            __m128i src2 = _mm_maskz_loadu_epi32(srcMask[2], src + ix[2]);
+            __m128i src3 = _mm_maskz_loadu_epi32(srcMask[3], src + ix[3]);
+            __m512i _src = _mm512_permutexvar_epi32(PERMUTE, _mm512_shuffle_epi8(Set(src0, src1, src2, src3), SHUFFLE));
+            return _mm512_madd_epi16(_mm512_maddubs_epi16(_src, ax), ay);
+        }
+
+        SIMD_INLINE void BicubicInt3(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, 
+            const int32_t* ix, const int8_t* ax, const __m512i* ay, uint8_t* dst, __mmask8 srcMask[5], __mmask16 dstMask)
+        {
+            static const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::BICUBIC_ROUND);
+            __m512i _ax = LoadAx3(ax, srcMask[4]);
+            __m512i say0 = CubicSumX3(src0 - 3, ix, _ax, ay[0], srcMask);
+            __m512i say1 = CubicSumX3(src1 - 3, ix, _ax, ay[1], srcMask);
+            __m512i say2 = CubicSumX3(src2 - 3, ix, _ax, ay[2], srcMask);
+            __m512i say3 = CubicSumX3(src3 - 3, ix, _ax, ay[3], srcMask);
+            __m512i sum = _mm512_add_epi32(_mm512_add_epi32(say0, say1), _mm512_add_epi32(say2, say3));
+            __m512i dst0 = _mm512_srai_epi32(_mm512_add_epi32(sum, ROUND), Base::BICUBIC_SHIFT);
+            _mm_mask_storeu_epi8(dst, dstMask, _mm512_cvtusepi32_epi8(_mm512_max_epi32(dst0, _mm512_setzero_si512())));
+        }
+
+        template<> void ResizerByteBicubic::RunS<3>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_xn == 0 && _xt == _param.dstW);
+            size_t step = 4;
+            size_t body = AlignLoAny(_param.dstW, step), tail = _param.dstW - body;
+            __mmask8 srcMaskTail[5];
+            srcMaskTail[0] = tail > 0 ? 0x7 : 0x0;
+            srcMaskTail[1] = tail > 1 ? 0x7 : 0x0;
+            srcMaskTail[2] = tail > 2 ? 0x7 : 0x0;
+            srcMaskTail[3] = tail > 3 ? 0x7 : 0x0;
+            srcMaskTail[4] = TailMask8(tail);
+            __mmask16 dstMaskTail = TailMask16(tail * 3);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                size_t sy = _iy[dy];
+                const uint8_t* src1 = src + sy * srcStride;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src0 = sy ? src1 - srcStride : src1;
+                const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
+                const int32_t* ay = _ay.data + dy * 4;
+                __m512i ays[4];
+                ays[0] = _mm512_set1_epi16(ay[0]);
+                ays[1] = _mm512_set1_epi16(ay[1]);
+                ays[2] = _mm512_set1_epi16(ay[2]);
+                ays[3] = _mm512_set1_epi16(ay[3]);
+                size_t dx = 0;
+                for (; dx < body; dx += step)
+                    BicubicInt<3>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 3);
+                if (tail)
+                    BicubicInt3(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 3, srcMaskTail, dstMaskTail);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template<int F> SIMD_INLINE void PixelCubicSumX(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst);
 
         template<> SIMD_INLINE void PixelCubicSumX<1>(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst)
