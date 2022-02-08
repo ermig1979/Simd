@@ -476,16 +476,15 @@ namespace Simd
                 Base::PixelCubicSumX<N, -1, 1>(src + ix[dx], ax, dst);
         }
 
-        SIMD_INLINE void BicubicRowInt(const int32_t* src0, const int32_t* src1, const int32_t* src2, const int32_t* src3, size_t n, const int32_t* ay, uint8_t* dst)
+        SIMD_INLINE void BicubicRowInt(const int32_t* src0, const int32_t* src1, const int32_t* src2, const int32_t* src3, const int32_t* ay, size_t body, __mmask16 tail, uint8_t* dst)
         {
-            size_t nF = AlignLo(n, F);
             static const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::BICUBIC_ROUND);
             __m512i ay0 = _mm512_set1_epi32(ay[0]);
             __m512i ay1 = _mm512_set1_epi32(ay[1]);
             __m512i ay2 = _mm512_set1_epi32(ay[2]);
             __m512i ay3 = _mm512_set1_epi32(ay[3]);
             size_t i = 0;
-            for (; i < nF; i += F)
+            for (; i < body; i += F)
             {
                 __m512i say0 = _mm512_mullo_epi32(_mm512_loadu_si512((__m512i*)(src0 + i)), ay0);
                 __m512i say1 = _mm512_mullo_epi32(_mm512_loadu_si512((__m512i*)(src1 + i)), ay1);
@@ -495,9 +494,8 @@ namespace Simd
                 __m512i dst0 = _mm512_srai_epi32(_mm512_add_epi32(sum, ROUND), Base::BICUBIC_SHIFT);
                 _mm_storeu_si128((__m128i*)(dst + i), _mm512_cvtusepi32_epi8(_mm512_max_epi32(dst0, _mm512_setzero_si512())));
             }
-            if (i < n)
+            if (tail)
             {
-                __mmask16 tail = TailMask16(n - i);
                 __m512i say0 = _mm512_mullo_epi32(_mm512_maskz_loadu_epi32(tail, src0 + i), ay0);
                 __m512i say1 = _mm512_mullo_epi32(_mm512_maskz_loadu_epi32(tail, src1 + i), ay1);
                 __m512i say2 = _mm512_mullo_epi32(_mm512_maskz_loadu_epi32(tail, src2 + i), ay2);
@@ -510,6 +508,9 @@ namespace Simd
 
         template<int N> void ResizerByteBicubic::RunB(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
+            size_t rowBody = AlignLo(_bx[0].size, F);
+            __mmask16 rowTail = TailMask16(_bx[0].size - rowBody);
+
             int32_t prev = -1;
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
@@ -530,9 +531,66 @@ namespace Simd
                 int32_t* pb1 = _bx[(sy + 1) & 3].data;
                 int32_t* pb2 = _bx[(sy + 2) & 3].data;
                 int32_t* pb3 = _bx[(sy + 3) & 3].data;
-                BicubicRowInt(pb0, pb1, pb2, pb3, _bx[0].size, ay, dst);
+                BicubicRowInt(pb0, pb1, pb2, pb3, ay, rowBody, rowTail, dst);
             }
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE void PixelCubicSumX1(const uint8_t* src, const int32_t* ix, const int8_t* ax, int32_t* dst, __mmask16 mask)
+        {
+            __m512i _src = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _mm512_maskz_loadu_epi32(mask, ix), (int32_t*)src, 1);
+            __m512i _ax = _mm512_maskz_loadu_epi32(mask, ax);
+            _mm512_mask_storeu_epi32(dst, mask, _mm512_madd_epi16(_mm512_maddubs_epi16(_src, _ax), K16_0001));
+        }
+
+        SIMD_INLINE void RowCubicSumX1(const uint8_t* src, size_t nose, size_t body, size_t tail, const int32_t* ix, const int8_t* ax, int32_t* dst)
+        {
+            size_t bodyS = nose + AlignLoAny(body - nose, 16);
+            size_t bodyTail = body - bodyS;
+            __mmask16 bodyTailMask = TailMask16(bodyTail);
+
+            size_t dx = 0;
+            for (; dx < nose; dx++, ax += 4, dst += 1)
+                Base::PixelCubicSumX<1, 0, 2>(src + ix[dx], ax, dst);
+            for (; dx < bodyS; dx += 16, ax += 64, dst += 16)
+                PixelCubicSumX<1>(src - 1, ix + dx, ax, dst);
+            for (; dx < body; dx += bodyTail, ax += 4 * bodyTail, dst += bodyTail)
+                PixelCubicSumX1(src - 1, ix + dx, ax, dst, bodyTailMask);
+            for (; dx < tail; dx++, ax += 4, dst += 1)
+                Base::PixelCubicSumX<1, -1, 1>(src + ix[dx], ax, dst);
+        }
+
+        template<> void ResizerByteBicubic::RunB<1>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t rowBody = AlignLo(_bx[0].size, F);
+            __mmask16 rowTail = TailMask16(_bx[0].size - rowBody);
+
+            int32_t prev = -1;
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                int32_t sy = _iy[dy], next = prev;
+                for (int32_t curr = sy - 1, end = sy + 3; curr < end; ++curr)
+                {
+                    if (curr < prev)
+                        continue;
+                    const uint8_t* ps = src + RestrictRange(curr, 0, (int)_param.srcH - 1) * srcStride;
+                    int32_t* pb = _bx[(curr + 1) & 3].data;
+                    RowCubicSumX1(ps, _xn, _xt, _param.dstW, _ix.data, _ax.data, pb);
+                    next++;
+                }
+                prev = next;
+
+                const int32_t* ay = _ay.data + dy * 4;
+                int32_t* pb0 = _bx[(sy + 0) & 3].data;
+                int32_t* pb1 = _bx[(sy + 1) & 3].data;
+                int32_t* pb2 = _bx[(sy + 2) & 3].data;
+                int32_t* pb3 = _bx[(sy + 3) & 3].data;
+                BicubicRowInt(pb0, pb1, pb2, pb3, ay, rowBody, rowTail, dst);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         void ResizerByteBicubic::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
