@@ -166,7 +166,8 @@ namespace Simd
             return  _mm512_madd_epi16(_mm512_maddubs_epi16(_src, ax), ay);
         }
 
-        SIMD_INLINE void BicubicInt1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const int32_t* ix, const int8_t* ax, const __m512i* ay, uint8_t* dst, __mmask16 mask = __mmask16(-1))
+        SIMD_INLINE void BicubicInt1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, 
+            const int32_t* ix, const int8_t* ax, const __m512i* ay, uint8_t* dst, __mmask16 mask = __mmask16(-1))
         {
             static const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::BICUBIC_ROUND);
             __m512i _ax = LoadAx1(ax, mask);
@@ -203,6 +204,66 @@ namespace Simd
                     BicubicInt1(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx);
                 if(tail)
                     BicubicInt1(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx, tail);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m512i LoadAx2(const int8_t* ax, __mmask8 mask = __mmask8(-1))
+        {
+            static const __m512i PERMUTE = SIMD_MM512_SETR_EPI32(0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7);
+            return _mm512_permutexvar_epi32(PERMUTE, _mm512_castsi256_si512(_mm256_maskz_loadu_epi32(mask, ax)));
+        }
+
+        SIMD_INLINE __m512i CubicSumX2(const uint8_t* src, const int32_t* ix, __m512i ax, __m512i ay, __mmask8 mask = __mmask8(-1))
+        {
+            static const __m512i SHUFFLE = SIMD_MM512_SETR_EPI8(
+                0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF,
+                0x0, 0x2, 0x4, 0x6, 0x1, 0x3, 0x5, 0x7, 0x8, 0xA, 0xC, 0xE, 0x9, 0xB, 0xD, 0xF);
+            __m512i _src = _mm512_mask_i32gather_epi64(_mm512_setzero_si512(), mask, _mm256_maskz_loadu_epi32(mask, ix), (long long*)src, 1);
+            return _mm512_madd_epi16(_mm512_maddubs_epi16(_mm512_shuffle_epi8(_src, SHUFFLE), ax), ay);
+        }
+
+        SIMD_INLINE void BicubicInt2(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, 
+            const int32_t* ix, const int8_t* ax, const __m512i* ay, uint8_t* dst, __mmask8 mask = __mmask8(-1))
+        {
+            static const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::BICUBIC_ROUND);
+            __m512i _ax = LoadAx2(ax, mask);
+            __m512i say0 = CubicSumX2(src0 - 2, ix, _ax, ay[0], mask);
+            __m512i say1 = CubicSumX2(src1 - 2, ix, _ax, ay[1], mask);
+            __m512i say2 = CubicSumX2(src2 - 2, ix, _ax, ay[2], mask);
+            __m512i say3 = CubicSumX2(src3 - 2, ix, _ax, ay[3], mask);
+            __m512i sum = _mm512_add_epi32(_mm512_add_epi32(say0, say1), _mm512_add_epi32(say2, say3));
+            __m512i dst0 = _mm512_srai_epi32(_mm512_add_epi32(sum, ROUND), Base::BICUBIC_SHIFT);
+            _mm_mask_storeu_epi16((int16_t*)dst, mask, _mm512_cvtusepi32_epi8(_mm512_max_epi32(dst0, _mm512_setzero_si512())));
+        }
+
+        template<> void ResizerByteBicubic::RunS<2>(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            assert(_xn == 0 && _xt == _param.dstW);
+            size_t step = 8;
+            size_t body = AlignLoAny(_param.dstW, step);
+            __mmask8 tail = TailMask8(_param.dstW - body);
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
+            {
+                size_t sy = _iy[dy];
+                const uint8_t* src1 = src + sy * srcStride;
+                const uint8_t* src2 = src1 + srcStride;
+                const uint8_t* src0 = sy ? src1 - srcStride : src1;
+                const uint8_t* src3 = sy < _param.srcH - 2 ? src2 + srcStride : src2;
+                const int32_t* ay = _ay.data + dy * 4;
+                __m512i ays[4];
+                ays[0] = _mm512_set1_epi16(ay[0]);
+                ays[1] = _mm512_set1_epi16(ay[1]);
+                ays[2] = _mm512_set1_epi16(ay[2]);
+                ays[3] = _mm512_set1_epi16(ay[3]);
+                size_t dx = 0;
+                for (; dx < body; dx += step)
+                    BicubicInt2(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 2);
+                if (tail)
+                    BicubicInt2(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 2, tail);
             }
         }
 
@@ -338,7 +399,7 @@ namespace Simd
             Init(sparse);
             switch (_param.channels)
             {
-            case 1: sparse ? /*Sse41::ResizerByteBicubic::*/RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
+            case 1: sparse ? RunS<1>(src, srcStride, dst, dstStride) : RunB<1>(src, srcStride, dst, dstStride); return;
             case 2: sparse ? RunS<2>(src, srcStride, dst, dstStride) : RunB<2>(src, srcStride, dst, dstStride); return;
             case 3: sparse ? RunS<3>(src, srcStride, dst, dstStride) : RunB<3>(src, srcStride, dst, dstStride); return;
             case 4: sparse ? RunS<4>(src, srcStride, dst, dstStride) : RunB<4>(src, srcStride, dst, dstStride); return;

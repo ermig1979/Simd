@@ -829,7 +829,17 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE
     namespace Avx512f
     {
-        __mmask16 SIMD_INLINE TailMask16(ptrdiff_t tail)
+        SIMD_INLINE __mmask8 TailMask8(ptrdiff_t tail)
+        {
+            return tail <= 0 ? __mmask8(0) : (tail >= 8 ? __mmask8(-1) : __mmask8(-1) >> (8 - tail));
+        }
+
+        SIMD_INLINE __mmask8 NoseMask8(ptrdiff_t nose)
+        {
+            return nose <= 0 ? __mmask8(0) : (nose >= 8 ? __mmask8(-1) : __mmask8(-1) << (8 - nose));
+        }
+
+        SIMD_INLINE __mmask16 TailMask16(ptrdiff_t tail)
         {
             return tail <= 0 ? __mmask16(0) : (tail >= 16 ? __mmask16(-1) : __mmask16(-1) >> (16 - tail));
         }
