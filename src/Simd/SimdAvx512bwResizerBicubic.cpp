@@ -155,19 +155,20 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        SIMD_INLINE __m512i LoadAx1(const int8_t* ax, __mmask16 mask = __mmask16(-1))
+#if !(defined(_MSC_VER) || defined(NDEBUG))
+        SIMD_INLINE __m512i LoadAx1(const int8_t* ax, __mmask16 mask)
         {
             return _mm512_maskz_loadu_epi32(mask, ax);
         }
 
-        SIMD_INLINE __m512i CubicSumX1(const uint8_t* src, const int32_t* ix, __m512i ax, __m512i ay, __mmask16 mask = __mmask16(-1))
+        SIMD_INLINE __m512i CubicSumX1(const uint8_t* src, const int32_t* ix, __m512i ax, __m512i ay, __mmask16 mask)
         {
             __m512i _src = _mm512_mask_i32gather_epi32(_mm512_setzero_si512(), mask, _mm512_maskz_loadu_epi32(mask, ix), (int32_t*)src, 1);
             return  _mm512_madd_epi16(_mm512_maddubs_epi16(_src, ax), ay);
         }
 
         SIMD_INLINE void BicubicInt1(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, 
-            const int32_t* ix, const int8_t* ax, const __m512i* ay, uint8_t* dst, __mmask16 mask = __mmask16(-1))
+            const int32_t* ix, const int8_t* ax, const __m512i* ay, uint8_t* dst, __mmask16 mask)
         {
             static const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::BICUBIC_ROUND);
             __m512i _ax = LoadAx1(ax, mask);
@@ -201,7 +202,7 @@ namespace Simd
                 ays[3] = _mm512_set1_epi16(ay[3]);
                 size_t dx = 0;
                 for (; dx < body; dx += step)
-                    BicubicInt1(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx);
+                    BicubicInt<1>(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx);
                 if(tail)
                     BicubicInt1(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx, tail);
             }
@@ -266,7 +267,7 @@ namespace Simd
                     BicubicInt2(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 2, tail);
             }
         }
-
+#endif
         //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m512i LoadAx3(const int8_t* ax, __mmask8 srcMask)

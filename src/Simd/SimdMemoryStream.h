@@ -231,14 +231,29 @@ namespace Simd
         {
             return _bitBuffer;
         }
+
+        SIMD_INLINE const uint64_t& BitBuffer() const
+        {
+            return _bitBuffer;
+        }
 #else
         SIMD_INLINE uint32_t& BitBuffer()
+        {
+            return _bitBuffer;
+        }
+
+        SIMD_INLINE const uint32_t& BitBuffer() const
         {
             return _bitBuffer;
         }
 #endif
 
         SIMD_INLINE size_t& BitCount()
+        {
+            return _bitCount;
+        }
+
+        SIMD_INLINE const size_t& BitCount() const
         {
             return _bitCount;
         }
