@@ -290,7 +290,7 @@ namespace Simd
                 }
             };
 
-            SIMD_INLINE static int BitRev16(int n)
+            static SIMD_INLINE int BitRev16(int n)
             {
                 n = ((n & 0xAAAA) >> 1) | ((n & 0x5555) << 1);
                 n = ((n & 0xCCCC) >> 2) | ((n & 0x3333) << 2);
@@ -299,7 +299,7 @@ namespace Simd
                 return n;
             }
 
-            static int ZhuffmanDecode(InputMemoryStream& is, const Zhuffman& z)
+            static SIMD_INLINE int ZhuffmanDecode(InputMemoryStream& is, const Zhuffman& z)
             {
                 int b, s;
                 if (is.BitCount() < 16)
@@ -339,10 +339,12 @@ namespace Simd
                 static const int zdistBase[32] = { 1,2,3,4,5,7,9,13,17,25,33,49,65,97,129,193, 257,385,513,769,1025,1537,2049,3073,4097,6145,8193,12289,16385,24577,0,0 };
                 static const int zdistExtra[32] = { 0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13 };
 
+                SIMD_PERF_FUNC();
+
                 uint8_t* beg = os.Data(), * dst = os.Current(), * end = beg + os.Capacity();
                 for (;;)
                 {
-                    ptrdiff_t z = ZhuffmanDecode(is, zLength);
+                    int z = ZhuffmanDecode(is, zLength);
                     if (z < 256)
                     {
                         if (z < 0)
@@ -359,7 +361,7 @@ namespace Simd
                     else
                     {
                         uint8_t* p;
-                        ptrdiff_t len, dist;
+                        int len, dist;
                         if (z == 256)
                         {
                             os.Seek(dst - beg);
@@ -387,8 +389,11 @@ namespace Simd
                         uint8_t* src = dst - dist;
                         if (dist == 1)
                         {
-                            memset(dst, *src, len);
-                            dst += len;
+                            uint8_t v = *src;
+                            if (len) { do *dst++ = v; while (--len); }
+
+                            //memset(dst, *src, len);
+                            //dst += len;
                         }
                         else if (dist < len || len < 16)
                         {

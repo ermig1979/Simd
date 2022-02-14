@@ -96,12 +96,12 @@ namespace Test
 
         result = result && Base64DecodeAutoTest(FUNC_D(Simd::Base::Base64Decode), FUNC_D(SimdBase64Decode));
 
-/*#ifdef SIMD_SSE41_ENABLE
+#ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Sse41::Base64Decode), FUNC_D(SimdBase64Decode));
 #endif  
 
-#ifdef SIMD_AVX2_ENABLE
+/*#ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && Base64DecodeAutoTest(FUNC_D(Simd::Avx2::Base64Decode), FUNC_D(SimdBase64Decode));
 #endif  

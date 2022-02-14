@@ -857,7 +857,12 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 
 SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
 {
-    Base::Base64Decode(src, srcSize, dst, dstSize);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::Base64Decode(src, srcSize, dst, dstSize);
+    else
+#endif
+        Base::Base64Decode(src, srcSize, dst, dstSize);
 }
 
 SIMD_API void SimdBase64Encode(const uint8_t* src, size_t size, uint8_t* dst)

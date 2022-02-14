@@ -41,6 +41,8 @@ namespace Simd
 
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
+        void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
+            
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst);
 
         void BayerToBgr(const uint8_t* bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t* bgr, size_t bgrStride);

@@ -29,6 +29,16 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
+        {
+            assert(srcSize % 4 == 0 && srcSize >= 4);
+            for (const uint8_t* body = src + srcSize - 4; src < body; src += 4, dst += 3)
+                Base::Base64Decode3(src, dst);
+            *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
+        }
+
+        //---------------------------------------------------------------------------------------------
+
         const __m128i K8_TO_BASE64_SHUFFLE = SIMD_MM_SETR_EPI8(0x1, 0x0, 0x2, 0x1, 0x4, 0x3, 0x5, 0x4, 0x7, 0x6, 0x8, 0x7, 0xA, 0x9, 0xB, 0xA);
 
         const __m128i K16_TO_BASE64_MULLO = SIMD_MM_SET2_EPI16(0x0010, 0x0100);

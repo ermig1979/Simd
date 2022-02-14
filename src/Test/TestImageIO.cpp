@@ -286,7 +286,7 @@ namespace Test
     {
         bool result = true;
 
-        std::vector<View::Format> formats({ /*View::Gray8, View::Bgr24, View::Bgra32, */View::Rgb24/*, View::Rgba32*/});
+        std::vector<View::Format> formats({ View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32});
         for (int format = 0; format < formats.size(); format++)
         {
             for (int file = (int)SimdImageFileJpeg; file <= (int)SimdImageFileJpeg; file++)
@@ -718,7 +718,7 @@ namespace Test
     {
         bool result = true;
 
-        std::vector<View::Format> formats = { View::Gray8, View::Bgr24, View::Bgra32, View::Rgb24, View::Rgba32 };
+        std::vector<View::Format> formats = { /*View::Gray8, View::Bgr24, View::Bgra32,*/ View::Rgb24/*, View::Rgba32*/ };
         for (size_t format = 0; format < formats.size(); format++)
         {
             for (int file = (int)SimdImageFilePng; file <= (int)SimdImageFilePng; file++)
@@ -747,15 +747,15 @@ namespace Test
             result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Sse41::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
 #endif 
 
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
-#endif 
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx512bw::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
-#endif 
+//#ifdef SIMD_AVX2_ENABLE
+//        if (Simd::Avx2::Enable)
+//            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx2::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+//#endif 
+//
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && ImageLoadFromMemoryAutoTest(FUNC_LM(Simd::Avx512bw::ImageLoadFromMemory), FUNC_LM(SimdImageLoadFromMemory));
+//#endif 
 
 #ifdef SIMD_NEON_ENABLE
         if (Simd::Neon::Enable)
