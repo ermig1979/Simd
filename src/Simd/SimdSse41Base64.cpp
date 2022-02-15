@@ -23,16 +23,62 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase64.h"
+#include "Simd/SimdCompare.h"
+#include "Simd/SimdMath.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
+        const __m128i K16_003F = SIMD_MM_SET1_EPI16(0x003F);
+        const __m128i K16_3F00 = SIMD_MM_SET1_EPI16(0x3F00);
+
+        const __m128i K16_FROM_BASE64_MULLO = SIMD_MM_SET2_EPI16(0x0400, 0x0040);
+        const __m128i K16_FROM_BASE64_MULHI = SIMD_MM_SET2_EPI16(0x1000, 0x0100);
+
+        const __m128i K8_FROM_BASE64_SHUFFLE_LO = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x2, 0x5, 0x7, 0x6, 0x9, 0xB, 0xA, 0xD, 0xF, 0xE, -1, -1, -1, -1);
+        const __m128i K8_FROM_BASE64_SHUFFLE_HI = SIMD_MM_SETR_EPI8(0x1, 0x0, 0x2, 0x5, 0x4, 0x6, 0x9, 0x8, 0xA, 0xD, 0xC, 0xE, -1, -1, -1, -1);
+
+        SIMD_INLINE void Base64Decode12(const uint8_t* src, uint8_t* dst)
+        {
+            __m128i _src = _mm_loadu_si128((__m128i*)src);
+
+            uint8_t buf[16];
+            buf[0x0] = Base::FromBase64Table(src[0x0]);
+            buf[0x1] = Base::FromBase64Table(src[0x1]);
+            buf[0x2] = Base::FromBase64Table(src[0x2]);
+            buf[0x3] = Base::FromBase64Table(src[0x3]);
+            buf[0x4] = Base::FromBase64Table(src[0x4]);
+            buf[0x5] = Base::FromBase64Table(src[0x5]);
+            buf[0x6] = Base::FromBase64Table(src[0x6]);
+            buf[0x7] = Base::FromBase64Table(src[0x7]);
+            buf[0x8] = Base::FromBase64Table(src[0x8]);
+            buf[0x9] = Base::FromBase64Table(src[0x9]);
+            buf[0xA] = Base::FromBase64Table(src[0xA]);
+            buf[0xB] = Base::FromBase64Table(src[0xB]);
+            buf[0xC] = Base::FromBase64Table(src[0xC]);
+            buf[0xD] = Base::FromBase64Table(src[0xD]);
+            buf[0xE] = Base::FromBase64Table(src[0xE]);
+            buf[0xF] = Base::FromBase64Table(src[0xF]);
+            __m128i from = _mm_loadu_si128((__m128i*)buf);
+
+            assert(TestZ(GreaterOrEqual8u(from, _mm_set1_epi8(64))));
+            __m128i mullo = _mm_mullo_epi16(_mm_and_si128(from, K16_003F), K16_FROM_BASE64_MULLO);
+            __m128i mulhi = _mm_mulhi_epi16(_mm_and_si128(from, K16_3F00), K16_FROM_BASE64_MULHI);
+            __m128i shuffleHi = _mm_shuffle_epi8(mullo, K8_FROM_BASE64_SHUFFLE_LO);
+            __m128i shuffleLo = _mm_shuffle_epi8(mulhi, K8_FROM_BASE64_SHUFFLE_HI);
+            __m128i _dst = _mm_or_si128(shuffleLo, shuffleHi);
+            _mm_storeu_si128((__m128i*)dst, _dst);
+        }
+
         void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
         {
             assert(srcSize % 4 == 0 && srcSize >= 4);
-            for (const uint8_t* body = src + srcSize - 4; src < body; src += 4, dst += 3)
+            size_t srcSize16 = srcSize >= 15 ? AlignLoAny(srcSize - 15, 16) : 0;
+            for (const uint8_t* body16 = src + srcSize16; src < body16; src += 16, dst += 12)
+                Base64Decode12(src, dst);
+            for (const uint8_t* body = src + srcSize - srcSize16 - 4; src < body; src += 4, dst += 3)
                 Base::Base64Decode3(src, dst);
             *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
         }
@@ -45,9 +91,6 @@ namespace Simd
 
         const __m128i K16_TO_BASE64_MULHI = SIMD_MM_SET2_EPI16(0x0040, 0x0400);
 
-        const __m128i K16_003F = SIMD_MM_SET1_EPI16(0x003F);
-        const __m128i K16_3F00 = SIMD_MM_SET1_EPI16(0x3F00);
-
         const __m128i K8_UPP_ADD = SIMD_MM_SET1_EPI8('A');
         const __m128i K8_UPP_END = SIMD_MM_SET1_EPI8(26);
         const __m128i K8_LOW_ADD = SIMD_MM_SET1_EPI8('a' - 26);
@@ -55,7 +98,7 @@ namespace Simd
 
         const __m128i K8_DIG_SHUFFLE = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/');
 
-        void Base64Encode12(const uint8_t* src, uint8_t* dst)
+        SIMD_INLINE void Base64Encode12(const uint8_t* src, uint8_t* dst)
         {
             __m128i _src = _mm_loadu_si128((__m128i*)src);
             __m128i shuffle = _mm_shuffle_epi8(_src, K8_TO_BASE64_SHUFFLE);
@@ -74,7 +117,7 @@ namespace Simd
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst)
         {
             size_t size3 = AlignLoAny(size, 3);
-            size_t size12 = AlignLoAny(size - 11, 12);
+            size_t size12 = size >= 11 ? AlignLoAny(size - 11, 12) : 0;
             for (const uint8_t* body12 = src + size12; src < body12; src += 12, dst += 16)
                 Base64Encode12(src, dst);
             for (const uint8_t* body3 = src + size3 - size12; src < body3; src += 3, dst += 4)
