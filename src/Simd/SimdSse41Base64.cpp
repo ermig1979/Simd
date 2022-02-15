@@ -34,35 +34,31 @@ namespace Simd
         const __m128i K16_003F = SIMD_MM_SET1_EPI16(0x003F);
         const __m128i K16_3F00 = SIMD_MM_SET1_EPI16(0x3F00);
 
+        const __m128i K8_UPP_ADD = SIMD_MM_SET1_EPI8('A');
+        const __m128i K8_LOW_ADD = SIMD_MM_SET1_EPI8('a' - 26);
+
+        const __m128i K8_9 = SIMD_MM_SET1_EPI8('9');
+        const __m128i K8_Z = SIMD_MM_SET1_EPI8('Z');
+
+        const __m128i K8_PLUS = SIMD_MM_SET1_EPI8('+');
+
         const __m128i K16_FROM_BASE64_MULLO = SIMD_MM_SET2_EPI16(0x0400, 0x0040);
         const __m128i K16_FROM_BASE64_MULHI = SIMD_MM_SET2_EPI16(0x1000, 0x0100);
 
         const __m128i K8_FROM_BASE64_SHUFFLE_LO = SIMD_MM_SETR_EPI8(0x1, 0x3, 0x2, 0x5, 0x7, 0x6, 0x9, 0xB, 0xA, 0xD, 0xF, 0xE, -1, -1, -1, -1);
         const __m128i K8_FROM_BASE64_SHUFFLE_HI = SIMD_MM_SETR_EPI8(0x1, 0x0, 0x2, 0x5, 0x4, 0x6, 0x9, 0x8, 0xA, 0xD, 0xC, 0xE, -1, -1, -1, -1);
 
+        const __m128i K8_FROM_BASE_DIG_SHUFFLE = SIMD_MM_SETR_EPI8(62, -1, -1, -1, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1);
+
         SIMD_INLINE void Base64Decode12(const uint8_t* src, uint8_t* dst)
         {
             __m128i _src = _mm_loadu_si128((__m128i*)src);
-
-            uint8_t buf[16];
-            buf[0x0] = Base::FromBase64Table(src[0x0]);
-            buf[0x1] = Base::FromBase64Table(src[0x1]);
-            buf[0x2] = Base::FromBase64Table(src[0x2]);
-            buf[0x3] = Base::FromBase64Table(src[0x3]);
-            buf[0x4] = Base::FromBase64Table(src[0x4]);
-            buf[0x5] = Base::FromBase64Table(src[0x5]);
-            buf[0x6] = Base::FromBase64Table(src[0x6]);
-            buf[0x7] = Base::FromBase64Table(src[0x7]);
-            buf[0x8] = Base::FromBase64Table(src[0x8]);
-            buf[0x9] = Base::FromBase64Table(src[0x9]);
-            buf[0xA] = Base::FromBase64Table(src[0xA]);
-            buf[0xB] = Base::FromBase64Table(src[0xB]);
-            buf[0xC] = Base::FromBase64Table(src[0xC]);
-            buf[0xD] = Base::FromBase64Table(src[0xD]);
-            buf[0xE] = Base::FromBase64Table(src[0xE]);
-            buf[0xF] = Base::FromBase64Table(src[0xF]);
-            __m128i from = _mm_loadu_si128((__m128i*)buf);
-
+            __m128i letMask = _mm_cmpgt_epi8(_src, K8_9);
+            __m128i lowMask = _mm_cmpgt_epi8(_src, K8_Z);
+            __m128i lowValue = _mm_and_si128(lowMask, _mm_sub_epi8(_src, K8_LOW_ADD));
+            __m128i uppValue = _mm_and_si128(_mm_andnot_si128(lowMask, letMask), _mm_sub_epi8(_src, K8_UPP_ADD));
+            __m128i digValue = _mm_andnot_si128(letMask, _mm_shuffle_epi8(K8_FROM_BASE_DIG_SHUFFLE, _mm_sub_epi8(_src, K8_PLUS)));
+            __m128i from = _mm_or_si128(_mm_or_si128(uppValue, lowValue), digValue);
             assert(TestZ(GreaterOrEqual8u(from, _mm_set1_epi8(64))));
             __m128i mullo = _mm_mullo_epi16(_mm_and_si128(from, K16_003F), K16_FROM_BASE64_MULLO);
             __m128i mulhi = _mm_mulhi_epi16(_mm_and_si128(from, K16_3F00), K16_FROM_BASE64_MULHI);
@@ -91,12 +87,10 @@ namespace Simd
 
         const __m128i K16_TO_BASE64_MULHI = SIMD_MM_SET2_EPI16(0x0040, 0x0400);
 
-        const __m128i K8_UPP_ADD = SIMD_MM_SET1_EPI8('A');
         const __m128i K8_UPP_END = SIMD_MM_SET1_EPI8(26);
-        const __m128i K8_LOW_ADD = SIMD_MM_SET1_EPI8('a' - 26);
         const __m128i K8_LOW_END = SIMD_MM_SET1_EPI8(52);
 
-        const __m128i K8_DIG_SHUFFLE = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/');
+        const __m128i K8_TO_BASE_DIG_SHUFFLE = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/');
 
         SIMD_INLINE void Base64Encode12(const uint8_t* src, uint8_t* dst)
         {
@@ -109,7 +103,7 @@ namespace Simd
             __m128i letMask = _mm_cmpgt_epi8(K8_LOW_END, index);
             __m128i uppValue = _mm_and_si128(_mm_add_epi8(index, K8_UPP_ADD), uppMask);
             __m128i lowValue = _mm_and_si128(_mm_add_epi8(index, K8_LOW_ADD), _mm_andnot_si128(uppMask, letMask));
-            __m128i digValue = _mm_shuffle_epi8(K8_DIG_SHUFFLE, index);
+            __m128i digValue = _mm_shuffle_epi8(K8_TO_BASE_DIG_SHUFFLE, index);
             __m128i _dst = _mm_or_si128(_mm_or_si128(uppValue, lowValue), _mm_andnot_si128(letMask, digValue));
             _mm_storeu_si128((__m128i*)dst, _dst);
         }
