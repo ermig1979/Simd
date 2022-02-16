@@ -31,9 +31,9 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template<size_t N> void TransformImageRotate90(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        template<size_t N> void TransformImageRotate90(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
-        template<> void TransformImageRotate90<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate90<1>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride;
             size_t width16 = AlignLo(width, 16);
@@ -83,7 +83,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate90<2>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate90<2>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride;
             size_t width8 = AlignLo(width, 8);
@@ -136,7 +136,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate90<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate90<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride;
             size_t width4 = AlignLo(width - 5, 4);
@@ -192,7 +192,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate90<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate90<4>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride;
             size_t width4 = AlignLo(width, 4);
@@ -256,9 +256,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageRotate180(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        template<size_t N> void TransformImageRotate180(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
-        template<> void TransformImageRotate180<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate180<1>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * dstStride + (width - 64) * 1;
             size_t width64= AlignLo(width, 64);
@@ -278,7 +278,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate180<2>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate180<2>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * dstStride + (width - 32) * 2;
             size_t width32 = AlignLo(width, 32);
@@ -298,7 +298,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate180<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * dstStride + (width - 16) * 3;
             size_t width16 = AlignLo(width, 16);
@@ -318,7 +318,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate180<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate180<4>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * dstStride + (width - 16) * 4;
             size_t width16 = AlignLo(width, 16);
@@ -340,9 +340,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageRotate270(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        template<size_t N> void TransformImageRotate270(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
-        template<> void TransformImageRotate270<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate270<1>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * 1;
             size_t width16 = AlignLo(width, 16);
@@ -392,7 +392,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate270<2>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate270<2>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * 2;
             size_t width8 = AlignLo(width, 8);
@@ -445,7 +445,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate270<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate270<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             src += (height - 1) * srcStride;
             size_t width4 = AlignLo(width - 5, 4);
@@ -501,7 +501,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageRotate270<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageRotate270<4>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (height - 1) * 4;
             size_t width4 = AlignLo(width, 4);
@@ -565,9 +565,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageTransposeRotate0(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        template<size_t N> void TransformImageTransposeRotate0(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
-        template<> void TransformImageTransposeRotate0<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate0<1>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             size_t width16 = AlignLo(width, 16);
             size_t height8 = AlignLo(height, 8);
@@ -616,7 +616,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate0<2>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate0<2>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             size_t width8 = AlignLo(width, 8);
             size_t width16 = AlignLo(width, 16);
@@ -670,7 +670,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate0<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate0<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             size_t width4 = AlignLo(width - 5, 4);
             size_t width8 = AlignLo(width - 9, 8);
@@ -725,7 +725,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate0<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate0<4>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             size_t width4 = AlignLo(width, 4);
             size_t width8 = AlignLo(width, 8);
@@ -789,9 +789,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageTransposeRotate90(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        template<size_t N> void TransformImageTransposeRotate90(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
-        template<> void TransformImageTransposeRotate90<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate90<1>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 64) * 1;
             size_t width64 = AlignLo(width, 64);
@@ -811,7 +811,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate90<2>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate90<2>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 32) * 2;
             size_t width32 = AlignLo(width, 32);
@@ -831,7 +831,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate90<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate90<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 16) * 3;
             size_t width16 = AlignLo(width, 16);
@@ -851,7 +851,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate90<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate90<4>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 16) * 4;
             size_t width16 = AlignLo(width, 16);
@@ -873,9 +873,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<size_t N> void TransformImageTransposeRotate180(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+        template<size_t N> void TransformImageTransposeRotate180(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
-        template<> void TransformImageTransposeRotate180<1>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate180<1>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride + (height - 1) * 1;
             size_t width16 = AlignLo(width, 16);
@@ -925,7 +925,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate180<2>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate180<2>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride + (height - 1) * 2;
             size_t width8 = AlignLo(width, 8);
@@ -978,7 +978,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate180<3>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate180<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             src += (height - 1) * srcStride + (width - 1) * 3;
             size_t width4 = AlignLo(width - 5, 4);
@@ -1034,7 +1034,7 @@ namespace Simd
             }
         }
 
-        template<> void TransformImageTransposeRotate180<4>(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        template<> void TransformImageTransposeRotate180<4>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
             dst += (width - 1) * dstStride + (height - 1) * 4;
             size_t width4 = AlignLo(width, 4);

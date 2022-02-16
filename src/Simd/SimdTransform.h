@@ -34,7 +34,7 @@ namespace Simd
     {
         struct ImageTransforms
         {
-            typedef void(*TransformPtr)(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
+            typedef void(*TransformPtr)(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride);
 
             TransformPtr transforms[4][8];
 
