@@ -857,6 +857,11 @@ SIMD_API void SimdBackgroundInitMask(const uint8_t * src, size_t srcStride, size
 
 SIMD_API void SimdBase64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::Base64Decode(src, srcSize, dst, dstSize);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
         Avx2::Base64Decode(src, srcSize, dst, dstSize);

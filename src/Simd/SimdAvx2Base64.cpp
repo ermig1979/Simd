@@ -57,7 +57,7 @@ namespace Simd
 
         const __m256i K32_FROM_PERMUTE = SIMD_MM256_SETR_EPI32(0, 1, 2, 4, 5, 6, 0, 0);
 
-        SIMD_INLINE void Base64Decode12(const uint8_t* src, uint8_t* dst)
+        SIMD_INLINE void Base64Decode24(const uint8_t* src, uint8_t* dst)
         {
             __m256i _src = _mm256_loadu_si256((__m256i*)src);
             __m256i letMask = _mm256_cmpgt_epi8(_src, K8_9);
@@ -80,7 +80,7 @@ namespace Simd
             assert(srcSize % 4 == 0 && srcSize >= 4);
             size_t srcSize32 = srcSize >= 31 ? AlignLoAny(srcSize - 31, 32) : 0;
             for (const uint8_t* body32 = src + srcSize32; src < body32; src += 32, dst += 24)
-                Base64Decode12(src, dst);
+                Base64Decode24(src, dst);
             for (const uint8_t* body = src + srcSize - srcSize32 - 4; src < body; src += 4, dst += 3)
                 Base::Base64Decode3(src, dst);
             *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
