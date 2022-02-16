@@ -29,6 +29,10 @@
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdExtract.h"
 
+#if defined(_MSC_VER) && defined(NDEBUG)
+#define SIMD_AVX512BW_RESIZER_BYTE_BICUBIC_MSVS_COMPER_ERROR
+#endif
+
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE 
@@ -39,6 +43,7 @@ namespace Simd
         {
         }
 
+#ifndef SIMD_AVX512BW_RESIZER_BYTE_BICUBIC_MSVS_COMPER_ERROR
         template<int N> __m512i LoadAx(const int8_t* ax);
 
         template<> SIMD_INLINE __m512i LoadAx<1>(const int8_t* ax)
@@ -155,7 +160,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-#if !(defined(_MSC_VER) || defined(NDEBUG))
         SIMD_INLINE __m512i LoadAx1(const int8_t* ax, __mmask16 mask)
         {
             return _mm512_maskz_loadu_epi32(mask, ax);
@@ -267,7 +271,7 @@ namespace Simd
                     BicubicInt2(src0, src1, src2, src3, _ix.data + dx, _ax.data + dx * 4, ays, dst + dx * 2, tail);
             }
         }
-#endif
+
         //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m512i LoadAx3(const int8_t* ax, __mmask8 srcMask)
@@ -503,7 +507,7 @@ namespace Simd
                 __m512i say3 = _mm512_mullo_epi32(_mm512_maskz_loadu_epi32(tail, src3 + i), ay3);
                 __m512i sum = _mm512_add_epi32(_mm512_add_epi32(say0, say1), _mm512_add_epi32(say2, say3));
                 __m512i dst0 = _mm512_srai_epi32(_mm512_add_epi32(sum, ROUND), Base::BICUBIC_SHIFT);
-                _mm_mask_storeu_epi32(dst + i, tail, _mm512_cvtusepi32_epi8(_mm512_max_epi32(dst0, _mm512_setzero_si512())));
+                _mm_mask_storeu_epi8(dst + i, tail, _mm512_cvtusepi32_epi8(_mm512_max_epi32(dst0, _mm512_setzero_si512())));
             }
         }
 
@@ -607,6 +611,12 @@ namespace Simd
                 assert(0);
             }
         }
+#else // SIMD_AVX512BW_RESIZER_BYTE_BICUBIC_MSVS_COMPER_ERROR
+        void ResizerByteBicubic::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            Avx2::ResizerByteBicubic::Run(src, srcStride, dst, dstStride);
+        }
+#endif // SIMD_AVX512BW_RESIZER_BYTE_BICUBIC_MSVS_COMPER_ERROR
     }
 #endif //SIMD_AVX512BW_ENABLE 
 }

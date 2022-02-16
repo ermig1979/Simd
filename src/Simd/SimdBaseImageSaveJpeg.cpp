@@ -538,7 +538,7 @@ namespace Simd
             for (int row = 0; row < (int)_param.height; row += _block)
             {
                 int block = Simd::Min(row + _block, (int)_param.height) - row;
-                _writeNv12Block(_stream, (int)_param.width, block, y, yStride, uv, uvStride, _fY, _fUv, dc);
+                _writeNv12Block(_stream, (int)_param.width, block, y, (int)yStride, uv, (int)uvStride, _fY, _fUv, dc);
                 y += block * yStride;
                 uv += (block / 2) * uvStride;
             }
@@ -557,7 +557,7 @@ namespace Simd
             for (int row = 0; row < (int)_param.height; row += _block)
             {
                 int block = Simd::Min(row + _block, (int)_param.height) - row;
-                _writeYuv420pBlock(_stream, (int)_param.width, block, y, yStride, u, uStride, v, vStride, _fY, _fUv, dc);
+                _writeYuv420pBlock(_stream, (int)_param.width, block, y, (int)yStride, u, (int)uStride, v, (int)vStride, _fY, _fUv, dc);
                 y += block * yStride;
                 u += (block / 2) * uStride;
                 v += (block / 2) * vStride;
