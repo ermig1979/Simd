@@ -31,196 +31,15 @@ namespace Simd
 {
     namespace Base
     {
-#define PNG_MALLOC(sz)           malloc(sz)
-#define PNG_REALLOC(p,newsz)     realloc(p,newsz)
-#define PNG_FREE(p)              free(p)
-
-#define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
-
         SIMD_INLINE int PngError(const char* str, const char* stub)
         {
             std::cout << "PNG load error: " << str << ", " << stub << "!" << std::endl;
             return 0;
         }
 
-        SIMD_INLINE uint8_t * PngErrorPtr(const char* str, const char* stub)
+        SIMD_INLINE uint8_t* PngErrorPtr(const char* str, const char* stub)
         {
             return (uint8_t*)(size_t)(PngError(str, stub) ? NULL : NULL);
-        }
-
-        static void* png__malloc(size_t size)
-        {
-            return PNG_MALLOC(size);
-        }
-
-        struct PngContext
-        {
-            uint32_t img_x, img_y;
-            int img_n, img_out_n;
-        };
-
-        static int png__addsizes_valid(int a, int b)
-        {
-            if (b < 0) return 0;
-            // now 0 <= b <= INT_MAX, hence also
-            // 0 <= INT_MAX - b <= INTMAX.
-            // And "a + b <= INT_MAX" (which might overflow) is the
-            // same as a <= INT_MAX - b (no overflow)
-            return a <= INT_MAX - b;
-        }
-
-        // returns 1 if the product is valid, 0 on overflow.
-        // negative factors are considered invalid.
-        static int png__mul2sizes_valid(int a, int b)
-        {
-            if (a < 0 || b < 0) return 0;
-            if (b == 0) return 1; // mul-by-0 is always safe
-            // portable way to check for no overflows in a*b
-            return a <= INT_MAX / b;
-        }
-
-        // returns 1 if "a*b + add" has no negative terms/factors and doesn't overflow
-        static int png__mad2sizes_valid(int a, int b, int add)
-        {
-            return png__mul2sizes_valid(a, b) && png__addsizes_valid(a * b, add);
-        }
-
-        // returns 1 if "a*b*c + add" has no negative terms/factors and doesn't overflow
-        static int png__mad3sizes_valid(int a, int b, int c, int add)
-        {
-            return png__mul2sizes_valid(a, b) && png__mul2sizes_valid(a * b, c) &&
-                png__addsizes_valid(a * b * c, add);
-        }
-
-        // returns 1 if "a*b*c*d + add" has no negative terms/factors and doesn't overflow
-        static int png__mad4sizes_valid(int a, int b, int c, int d, int add)
-        {
-            return png__mul2sizes_valid(a, b) && png__mul2sizes_valid(a * b, c) &&
-                png__mul2sizes_valid(a * b * c, d) && png__addsizes_valid(a * b * c * d, add);
-        }
-
-        // mallocs with size overflow checking
-        static void* png__malloc_mad2(int a, int b, int add)
-        {
-            if (!png__mad2sizes_valid(a, b, add)) return NULL;
-            return png__malloc(a * b + add);
-        }
-
-        static void* png__malloc_mad3(int a, int b, int c, int add)
-        {
-            if (!png__mad3sizes_valid(a, b, c, add)) return NULL;
-            return png__malloc(a * b * c + add);
-        }
-
-        static void* png__malloc_mad4(int a, int b, int c, int d, int add)
-        {
-            if (!png__mad4sizes_valid(a, b, c, d, add)) return NULL;
-            return png__malloc(a * b * c * d + add);
-        }
-
-        static uint8_t png__compute_y(int r, int g, int b)
-        {
-            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
-        }
-
-        static uint8_t* png__convert_format(uint8_t* data, int img_n, int req_comp, unsigned int x, unsigned int y)
-        {
-            int i, j;
-            uint8_t* good;
-
-            if (req_comp == img_n) 
-                return data;
-            assert(req_comp >= 1 && req_comp <= 4);
-
-            good = (uint8_t*)png__malloc_mad3(req_comp, x, y, 0);
-            if (good == NULL) 
-            {
-                PNG_FREE(data);
-                return PngErrorPtr("outofmem", "Out of memory");
-            }
-
-            for (j = 0; j < (int)y; ++j) 
-            {
-                uint8_t* src = data + j * x * img_n;
-                uint8_t* dest = good + j * x * req_comp;
-
-#define PNG__COMBO(a,b)  ((a)*8+(b))
-#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(i=x-1; i >= 0; --i, src += a, dest += b)
-                // convert source image with img_n components to one with req_comp components;
-                // avoid switch per pixel, so use switch per scanline and massive macros
-                switch (PNG__COMBO(img_n, req_comp)) 
-                {
-                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 255; } break;
-                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 255; } break;
-                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
-                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
-                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 255; } break;
-                    PNG__CASE(3, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
-                    PNG__CASE(3, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = 255; } break;
-                    PNG__CASE(4, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
-                    PNG__CASE(4, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = src[3]; } break;
-                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
-                default: assert(0); PNG_FREE(data); PNG_FREE(good); return PngErrorPtr("unsupported", "Unsupported format conversion");
-                }
-#undef PNG__CASE
-            }
-
-            PNG_FREE(data);
-            return good;
-        }
-
-        static uint16_t png__compute_y_16(int r, int g, int b)
-        {
-            return (uint16_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
-        }
-
-        static uint16_t* png__convert_format16(uint16_t* data, int img_n, int req_comp, unsigned int x, unsigned int y)
-        {
-            int i, j;
-            uint16_t* good;
-
-            if (req_comp == img_n) 
-                return data;
-            assert(req_comp >= 1 && req_comp <= 4);
-
-            good = (uint16_t*)png__malloc(req_comp * x * y * 2);
-            if (good == NULL) 
-            {
-                PNG_FREE(data);
-                return (uint16_t*)PngErrorPtr("outofmem", "Out of memory");
-            }
-
-            for (j = 0; j < (int)y; ++j) 
-            {
-                uint16_t* src = data + j * x * img_n;
-                uint16_t* dest = good + j * x * req_comp;
-
-#define PNG__COMBO(a,b)  ((a)*8+(b))
-#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(i=x-1; i >= 0; --i, src += a, dest += b)
-                // convert source image with img_n components to one with req_comp components;
-                // avoid switch per pixel, so use switch per scanline and massive macros
-                switch (PNG__COMBO(img_n, req_comp)) {
-                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 0xffff; } break;
-                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 0xffff; } break;
-                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
-                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
-                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
-                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 0xffff; } break;
-                    PNG__CASE(3, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
-                    PNG__CASE(3, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = 0xffff; } break;
-                    PNG__CASE(4, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
-                    PNG__CASE(4, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = src[3]; } break;
-                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
-                default: assert(0); PNG_FREE(data); PNG_FREE(good); return (uint16_t*)PngErrorPtr("unsupported", "Unsupported format conversion");
-                }
-#undef PNG__CASE
-            }
-
-            PNG_FREE(data);
-            return good;
         }
 
         namespace Zlib
@@ -381,29 +200,38 @@ namespace Simd
                             return PngError("bad dist", "Corrupt PNG");
                         if (dst + len > end)
                         {
-                            os.Reserve(end - beg + 1);
+                            os.Reserve(dst - beg + len);
                             beg = os.Data();
                             dst = os.Current();
                             end = beg + os.Capacity();
                         }
-                        uint8_t* src = dst - dist;
                         if (dist == 1)
                         {
-                            uint8_t v = *src;
-                            if (len) { do *dst++ = v; while (--len); }
-
-                            //memset(dst, *src, len);
-                            //dst += len;
-                        }
-                        else if (dist < len || len < 16)
-                        {
-                            for (; len; len--)
-                                *dst++ = *src++;
+                            uint8_t val = dst[-dist];
+                            if (len < 16)
+                            {
+                                while (len--)
+                                    *dst++ = val;
+                            }
+                            else
+                            {
+                                memset(dst, val, len);
+                                dst += len;
+                            }
                         }
                         else
                         {
-                            memcpy(dst, src, len);
-                            dst += len;
+                            uint8_t* src = dst - dist;
+                            if (dist < len || len < 16)
+                            {
+                                while(len--)
+                                    *dst++ = *src++;
+                            }
+                            else
+                            {
+                                memcpy(dst, src, len);
+                                dst += len;
+                            }                        
                         }
                     }
                 }
@@ -550,12 +378,193 @@ namespace Simd
             }
         }
 
-        typedef struct
+#define PNG_MALLOC(sz)           malloc(sz)
+#define PNG_REALLOC(p,newsz)     realloc(p,newsz)
+#define PNG_FREE(p)              free(p)
+
+#define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
+
+        static void* png__malloc(size_t size)
+        {
+            return PNG_MALLOC(size);
+        }
+
+        struct PngContext
+        {
+            uint32_t width, height;
+            int channels, img_out_n;
+        };
+
+        static int png__addsizes_valid(int a, int b)
+        {
+            if (b < 0) return 0;
+            // now 0 <= b <= INT_MAX, hence also
+            // 0 <= INT_MAX - b <= INTMAX.
+            // And "a + b <= INT_MAX" (which might overflow) is the
+            // same as a <= INT_MAX - b (no overflow)
+            return a <= INT_MAX - b;
+        }
+
+        // returns 1 if the product is valid, 0 on overflow.
+        // negative factors are considered invalid.
+        static int png__mul2sizes_valid(int a, int b)
+        {
+            if (a < 0 || b < 0) return 0;
+            if (b == 0) return 1; // mul-by-0 is always safe
+            // portable way to check for no overflows in a*b
+            return a <= INT_MAX / b;
+        }
+
+        // returns 1 if "a*b + add" has no negative terms/factors and doesn't overflow
+        static int png__mad2sizes_valid(int a, int b, int add)
+        {
+            return png__mul2sizes_valid(a, b) && png__addsizes_valid(a * b, add);
+        }
+
+        // returns 1 if "a*b*c + add" has no negative terms/factors and doesn't overflow
+        static int png__mad3sizes_valid(int a, int b, int c, int add)
+        {
+            return png__mul2sizes_valid(a, b) && png__mul2sizes_valid(a * b, c) &&
+                png__addsizes_valid(a * b * c, add);
+        }
+
+        // returns 1 if "a*b*c*d + add" has no negative terms/factors and doesn't overflow
+        static int png__mad4sizes_valid(int a, int b, int c, int d, int add)
+        {
+            return png__mul2sizes_valid(a, b) && png__mul2sizes_valid(a * b, c) &&
+                png__mul2sizes_valid(a * b * c, d) && png__addsizes_valid(a * b * c * d, add);
+        }
+
+        // mallocs with size overflow checking
+        static void* png__malloc_mad2(int a, int b, int add)
+        {
+            if (!png__mad2sizes_valid(a, b, add)) return NULL;
+            return png__malloc(a * b + add);
+        }
+
+        static void* png__malloc_mad3(int a, int b, int c, int add)
+        {
+            if (!png__mad3sizes_valid(a, b, c, add)) return NULL;
+            return png__malloc(a * b * c + add);
+        }
+
+        static void* png__malloc_mad4(int a, int b, int c, int d, int add)
+        {
+            if (!png__mad4sizes_valid(a, b, c, d, add)) return NULL;
+            return png__malloc(a * b * c * d + add);
+        }
+
+        static uint8_t png__compute_y(int r, int g, int b)
+        {
+            return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+        }
+
+        static uint8_t* png__convert_format(uint8_t* data, int img_n, int req_comp, unsigned int x, unsigned int y)
+        {
+            int i, j;
+            uint8_t* good;
+
+            if (req_comp == img_n)
+                return data;
+            assert(req_comp >= 1 && req_comp <= 4);
+
+            good = (uint8_t*)png__malloc_mad3(req_comp, x, y, 0);
+            if (good == NULL)
+            {
+                PNG_FREE(data);
+                return PngErrorPtr("outofmem", "Out of memory");
+            }
+
+            for (j = 0; j < (int)y; ++j)
+            {
+                uint8_t* src = data + j * x * img_n;
+                uint8_t* dest = good + j * x * req_comp;
+
+#define PNG__COMBO(a,b)  ((a)*8+(b))
+#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(i=x-1; i >= 0; --i, src += a, dest += b)
+                // convert source image with img_n components to one with req_comp components;
+                // avoid switch per pixel, so use switch per scanline and massive macros
+                switch (PNG__COMBO(img_n, req_comp))
+                {
+                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 255; } break;
+                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 255; } break;
+                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
+                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
+                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 255; } break;
+                    PNG__CASE(3, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
+                    PNG__CASE(3, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = 255; } break;
+                    PNG__CASE(4, 1) { dest[0] = png__compute_y(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 2) { dest[0] = png__compute_y(src[0], src[1], src[2]); dest[1] = src[3]; } break;
+                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
+                default: assert(0); PNG_FREE(data); PNG_FREE(good); return PngErrorPtr("unsupported", "Unsupported format conversion");
+                }
+#undef PNG__CASE
+            }
+
+            PNG_FREE(data);
+            return good;
+        }
+
+        static uint16_t png__compute_y_16(int r, int g, int b)
+        {
+            return (uint16_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
+        }
+
+        static uint16_t* png__convert_format16(uint16_t* data, int img_n, int req_comp, unsigned int x, unsigned int y)
+        {
+            int i, j;
+            uint16_t* good;
+
+            if (req_comp == img_n)
+                return data;
+            assert(req_comp >= 1 && req_comp <= 4);
+
+            good = (uint16_t*)png__malloc(req_comp * x * y * 2);
+            if (good == NULL)
+            {
+                PNG_FREE(data);
+                return (uint16_t*)PngErrorPtr("outofmem", "Out of memory");
+            }
+
+            for (j = 0; j < (int)y; ++j)
+            {
+                uint16_t* src = data + j * x * img_n;
+                uint16_t* dest = good + j * x * req_comp;
+
+#define PNG__COMBO(a,b)  ((a)*8+(b))
+#define PNG__CASE(a,b)   case PNG__COMBO(a,b): for(i=x-1; i >= 0; --i, src += a, dest += b)
+                // convert source image with img_n components to one with req_comp components;
+                // avoid switch per pixel, so use switch per scanline and massive macros
+                switch (PNG__COMBO(img_n, req_comp)) {
+                    PNG__CASE(1, 2) { dest[0] = src[0]; dest[1] = 0xffff; } break;
+                    PNG__CASE(1, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(1, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = 0xffff; } break;
+                    PNG__CASE(2, 1) { dest[0] = src[0]; } break;
+                    PNG__CASE(2, 3) { dest[0] = dest[1] = dest[2] = src[0]; } break;
+                    PNG__CASE(2, 4) { dest[0] = dest[1] = dest[2] = src[0]; dest[3] = src[1]; } break;
+                    PNG__CASE(3, 4) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; dest[3] = 0xffff; } break;
+                    PNG__CASE(3, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
+                    PNG__CASE(3, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = 0xffff; } break;
+                    PNG__CASE(4, 1) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); } break;
+                    PNG__CASE(4, 2) { dest[0] = png__compute_y_16(src[0], src[1], src[2]); dest[1] = src[3]; } break;
+                    PNG__CASE(4, 3) { dest[0] = src[0]; dest[1] = src[1]; dest[2] = src[2]; } break;
+                default: assert(0); PNG_FREE(data); PNG_FREE(good); return (uint16_t*)PngErrorPtr("unsupported", "Unsupported format conversion");
+                }
+#undef PNG__CASE
+            }
+
+            PNG_FREE(data);
+            return good;
+        }
+
+        struct Png
         {
             PngContext* s;
             uint8_t * out;
             uint8_t depth;
-        } png__png;
+        };
 
         enum 
         {
@@ -564,7 +573,6 @@ namespace Simd
             PNG__F_up = 2,
             PNG__F_avg = 3,
             PNG__F_paeth = 4,
-            // synthetic filters used for first scanline to avoid needing a dummy row of 0s
             PNG__F_avg_first,
             PNG__F_paeth_first
         };
@@ -592,20 +600,20 @@ namespace Simd
         static const uint8_t png__depth_scale_table[9] = { 0, 0xff, 0x55, 0, 0x11, 0,0,0, 0x01 };
 
         // create the png data from post-deflated data
-        static int png__create_png_image_raw(png__png* a, uint8_t* raw, uint32_t raw_len, int out_n, uint32_t x, uint32_t y, int depth, int color)
+        static int png__create_png_image_raw(Png* a, uint8_t* raw, uint32_t raw_len, int out_n, uint32_t x, uint32_t y, int depth, int color)
         {
             int bytes = (depth == 16 ? 2 : 1);
             PngContext* s = a->s;
             uint32_t i, j, stride = x * out_n * bytes;
             uint32_t img_len, img_width_bytes;
             int k;
-            int img_n = s->img_n; // copy it into a local for later
+            int img_n = s->channels; // copy it into a local for later
 
             int output_bytes = out_n * bytes;
             int filter_bytes = img_n * bytes;
             int width = x;
 
-            assert(out_n == s->img_n || out_n == s->img_n + 1);
+            assert(out_n == s->channels || out_n == s->channels + 1);
             a->out = (uint8_t*)png__malloc_mad3(x, y, output_bytes, 0); // extra bytes to write off the end into
             if (!a->out) return PngError("outofmem", "Out of memory");
 
@@ -839,17 +847,17 @@ namespace Simd
             return 1;
         }
 
-        static int png__create_png_image(png__png* a, uint8_t* image_data, uint32_t image_data_len, int out_n, int depth, int color, int interlaced)
+        static int png__create_png_image(Png* a, uint8_t* image_data, uint32_t image_data_len, int out_n, int depth, int color, int interlaced)
         {
             int bytes = (depth == 16 ? 2 : 1);
             int out_bytes = out_n * bytes;
             uint8_t* final;
             int p;
             if (!interlaced)
-                return png__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->img_x, a->s->img_y, depth, color);
+                return png__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->width, a->s->height, depth, color);
 
             // de-interlacing
-            final = (uint8_t*)png__malloc_mad3(a->s->img_x, a->s->img_y, out_bytes, 0);
+            final = (uint8_t*)png__malloc_mad3(a->s->width, a->s->height, out_bytes, 0);
             for (p = 0; p < 7; ++p) 
             {
                 int xorig[] = { 0,4,0,2,0,1,0 };
@@ -858,11 +866,11 @@ namespace Simd
                 int yspc[] = { 8,8,8,4,4,2,2 };
                 int i, j, x, y;
                 // pass1_x[4] = 0, pass1_x[5] = 1, pass1_x[12] = 1
-                x = (a->s->img_x - xorig[p] + xspc[p] - 1) / xspc[p];
-                y = (a->s->img_y - yorig[p] + yspc[p] - 1) / yspc[p];
+                x = (a->s->width - xorig[p] + xspc[p] - 1) / xspc[p];
+                y = (a->s->height - yorig[p] + yspc[p] - 1) / yspc[p];
                 if (x && y) 
                 {
-                    uint32_t img_len = ((((a->s->img_n * x * depth) + 7) >> 3) + 1) * y;
+                    uint32_t img_len = ((((a->s->channels * x * depth) + 7) >> 3) + 1) * y;
                     if (!png__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color))
                     {
                         PNG_FREE(final);
@@ -874,7 +882,7 @@ namespace Simd
                         {
                             int out_y = j * yspc[p] + yorig[p];
                             int out_x = i * xspc[p] + xorig[p];
-                            memcpy(final + out_y * a->s->img_x * out_bytes + out_x * out_bytes,
+                            memcpy(final + out_y * a->s->width * out_bytes + out_x * out_bytes,
                                 a->out + (j * x + i) * out_bytes, out_bytes);
                         }
                     }
@@ -888,10 +896,10 @@ namespace Simd
             return 1;
         }
 
-        static int png__compute_transparency(png__png* z, uint8_t tc[3], int out_n)
+        static int png__compute_transparency(Png* z, uint8_t tc[3], int out_n)
         {
             PngContext* s = z->s;
-            uint32_t i, pixel_count = s->img_x * s->img_y;
+            uint32_t i, pixel_count = s->width * s->height;
             uint8_t* p = z->out;
 
             // compute color-based transparency, assuming we've
@@ -918,10 +926,10 @@ namespace Simd
             return 1;
         }
 
-        static int png__compute_transparency16(png__png* z, uint16_t tc[3], int out_n)
+        static int png__compute_transparency16(Png* z, uint16_t tc[3], int out_n)
         {
             PngContext* s = z->s;
-            uint32_t i, pixel_count = s->img_x * s->img_y;
+            uint32_t i, pixel_count = s->width * s->height;
             uint16_t* p = (uint16_t*)z->out;
 
             // compute color-based transparency, assuming we've
@@ -948,9 +956,9 @@ namespace Simd
             return 1;
         }
 
-        static int png__expand_png_palette(png__png* a, uint8_t* palette, int len, int pal_img_n)
+        static int png__expand_png_palette(Png* a, uint8_t* palette, int len, int pal_img_n)
         {
-            uint32_t i, pixel_count = a->s->img_x * a->s->img_y;
+            uint32_t i, pixel_count = a->s->width * a->s->height;
             uint8_t* p, * temp_out, * orig = a->out;
 
             p = (uint8_t*)png__malloc_mad2(pixel_count, pal_img_n, 0);
@@ -1016,9 +1024,9 @@ namespace Simd
         {
             const int req_comp = 4;
             PngContext context;
-            png__png p;
+            Png p;
             p.s = &context;
-            png__png* z = &p;
+            Png* z = &p;
 
             PngContext* s = z->s;
 
@@ -1027,20 +1035,20 @@ namespace Simd
             if (!ParseFile())
                 return false;
 
-            s->img_x = _width;
-            s->img_y = _height;
+            s->width = _width;
+            s->height = _height;
+            s->channels = _channels;
             z->depth = _depth;
-            s->img_n = _channels;
 
             InputMemoryStream zSrc = MergedDataStream();
             OutputMemoryStream zDst(AlignHi(size_t(_width) * _depth, 8) * _height * _channels + _height);
             if(!Zlib::Decode(zSrc, zDst, !_iPhone))
                 return false;
 
-            if ((req_comp == s->img_n + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
-                s->img_out_n = s->img_n + 1;
+            if ((req_comp == s->channels + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
+                s->img_out_n = s->channels + 1;
             else
-                s->img_out_n = s->img_n;
+                s->img_out_n = s->channels;
             if (!png__create_png_image(z, zDst.Data(), zDst.Size(), s->img_out_n, z->depth, _color, _interlace))
                 return 0;
             if (_hasTrans) 
@@ -1058,7 +1066,7 @@ namespace Simd
             }
             if (_paletteChannels)
             {
-                s->img_n = _paletteChannels; // record the actual colors we had
+                s->channels = _paletteChannels; // record the actual colors we had
                 s->img_out_n = _paletteChannels;
                 if (req_comp >= 3) 
                     s->img_out_n = req_comp;
@@ -1066,7 +1074,7 @@ namespace Simd
                     return false;
             }
             else if (_hasTrans)
-                ++s->img_n;
+                ++s->channels;
 
             if (!(p.depth <= 8 || p.depth == 16))
                 return false;
@@ -1084,7 +1092,7 @@ namespace Simd
             }
             if (p.depth == 16)
             {
-                size_t size = context.img_x * context.img_y * req_comp;
+                size_t size = context.width * context.height * req_comp;
                 const uint16_t* src = (uint16_t*)data;
                 uint8_t* dst = (uint8_t*)PNG_MALLOC(size);
                 for (size_t i = 0; i < size; ++i)
@@ -1095,24 +1103,24 @@ namespace Simd
             PNG_FREE(p.out);
             if (data)
             {
-                size_t stride = 4 * context.img_x;
-                _image.Recreate(context.img_x, context.img_y, (Image::Format)_param.format);
+                size_t stride = 4 * context.width;
+                _image.Recreate(context.width, context.height, (Image::Format)_param.format);
                 switch (_param.format)
                 {
                 case SimdPixelFormatGray8:
-                    Base::RgbaToGray(data, context.img_x, context.img_y, stride, _image.data, _image.stride);
+                    Base::RgbaToGray(data, context.width, context.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgr24:
-                    Base::BgraToRgb(data, context.img_x, context.img_y, stride, _image.data, _image.stride);
+                    Base::BgraToRgb(data, context.width, context.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgra32:
-                    Base::BgraToRgba(data, context.img_x, context.img_y, stride, _image.data, _image.stride);
+                    Base::BgraToRgba(data, context.width, context.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgb24:
-                    Base::BgraToBgr(data, context.img_x, context.img_y, stride, _image.data, _image.stride);
+                    Base::BgraToBgr(data, context.width, context.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgba32:
-                    Base::Copy(data, stride, context.img_x, context.img_y, 4, _image.data, _image.stride);
+                    Base::Copy(data, stride, context.width, context.height, 4, _image.data, _image.stride);
                     break;
                 default: 
                     break;
