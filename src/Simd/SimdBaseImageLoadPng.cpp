@@ -138,7 +138,7 @@ namespace Simd
                 else
                 {
                     int k;
-                    k = BitRev16(is.BitBuffer());
+                    k = BitRev16((int)is.BitBuffer());
                     for (s = ZFAST_BITS + 1; k >= z.maxCode[s]; ++s);
                     if (s >= 16)
                         return -1;
@@ -179,7 +179,6 @@ namespace Simd
                     }
                     else
                     {
-                        uint8_t* p;
                         int len, dist;
                         if (z == 256)
                         {
@@ -189,13 +188,13 @@ namespace Simd
                         z -= 257;
                         len = zlengthBase[z];
                         if (zlengthExtra[z])
-                            len += is.ReadBits(zlengthExtra[z]);
+                            len += (int)is.ReadBits(zlengthExtra[z]);
                         z = ZhuffmanDecode(is, zDistance);
                         if (z < 0)
                             return PngError("bad huffman code", "Corrupt PNG");
                         dist = zdistBase[z];
                         if (zdistExtra[z])
-                            dist += is.ReadBits(zdistExtra[z]);
+                            dist += (int)is.ReadBits(zdistExtra[z]);
                         if (dst - beg < dist)
                             return PngError("bad dist", "Corrupt PNG");
                         if (dst + len > end)
@@ -245,15 +244,15 @@ namespace Simd
                 uint8_t codelength_sizes[19];
                 int i, n;
 
-                int hlit = is.ReadBits(5) + 257;
-                int hdist = is.ReadBits(5) + 1;
-                int hclen = is.ReadBits(4) + 4;
+                int hlit = (int)is.ReadBits(5) + 257;
+                int hdist = (int)is.ReadBits(5) + 1;
+                int hclen = (int)is.ReadBits(4) + 4;
                 int ntot = hlit + hdist;
 
                 memset(codelength_sizes, 0, sizeof(codelength_sizes));
                 for (i = 0; i < hclen; ++i)
                 {
-                    int s = is.ReadBits(3);
+                    int s = (int)is.ReadBits(3);
                     codelength_sizes[length_dezigzag[i]] = (uint8_t)s;
                 }
                 if (!z_codelength.Build(codelength_sizes, 19))
@@ -271,14 +270,14 @@ namespace Simd
                         uint8_t fill = 0;
                         if (c == 16)
                         {
-                            c = is.ReadBits(2) + 3;
+                            c = (int)is.ReadBits(2) + 3;
                             if (n == 0) return PngError("bad codelengths", "Corrupt PNG");
                             fill = lencodes[n - 1];
                         }
                         else if (c == 17)
-                            c = is.ReadBits(3) + 3;
+                            c = (int)is.ReadBits(3) + 3;
                         else if (c == 18)
-                            c = is.ReadBits(7) + 11;
+                            c = (int)is.ReadBits(7) + 11;
                         else
                             return PngError("bad codelengths", "Corrupt PNG");
                         if (ntot - n < c)
@@ -347,8 +346,8 @@ namespace Simd
                 }
                 do
                 {
-                    final = is.ReadBits(1);
-                    type = is.ReadBits(2);
+                    final = (int)is.ReadBits(1);
+                    type = (int)is.ReadBits(2);
                     if (type == 0)
                     {
                         if (!ParseUncompressedBlock(is, os))
@@ -379,7 +378,6 @@ namespace Simd
         }
 
 #define PNG_MALLOC(sz)           malloc(sz)
-#define PNG_REALLOC(p,newsz)     realloc(p,newsz)
 #define PNG_FREE(p)              free(p)
 
 #define PNG__BYTECAST(x)  ((uint8_t) ((x) & 255))  // truncate int to byte without warnings
@@ -395,65 +393,6 @@ namespace Simd
             int channels, img_out_n;
         };
 
-        static int png__addsizes_valid(int a, int b)
-        {
-            if (b < 0) return 0;
-            // now 0 <= b <= INT_MAX, hence also
-            // 0 <= INT_MAX - b <= INTMAX.
-            // And "a + b <= INT_MAX" (which might overflow) is the
-            // same as a <= INT_MAX - b (no overflow)
-            return a <= INT_MAX - b;
-        }
-
-        // returns 1 if the product is valid, 0 on overflow.
-        // negative factors are considered invalid.
-        static int png__mul2sizes_valid(int a, int b)
-        {
-            if (a < 0 || b < 0) return 0;
-            if (b == 0) return 1; // mul-by-0 is always safe
-            // portable way to check for no overflows in a*b
-            return a <= INT_MAX / b;
-        }
-
-        // returns 1 if "a*b + add" has no negative terms/factors and doesn't overflow
-        static int png__mad2sizes_valid(int a, int b, int add)
-        {
-            return png__mul2sizes_valid(a, b) && png__addsizes_valid(a * b, add);
-        }
-
-        // returns 1 if "a*b*c + add" has no negative terms/factors and doesn't overflow
-        static int png__mad3sizes_valid(int a, int b, int c, int add)
-        {
-            return png__mul2sizes_valid(a, b) && png__mul2sizes_valid(a * b, c) &&
-                png__addsizes_valid(a * b * c, add);
-        }
-
-        // returns 1 if "a*b*c*d + add" has no negative terms/factors and doesn't overflow
-        static int png__mad4sizes_valid(int a, int b, int c, int d, int add)
-        {
-            return png__mul2sizes_valid(a, b) && png__mul2sizes_valid(a * b, c) &&
-                png__mul2sizes_valid(a * b * c, d) && png__addsizes_valid(a * b * c * d, add);
-        }
-
-        // mallocs with size overflow checking
-        static void* png__malloc_mad2(int a, int b, int add)
-        {
-            if (!png__mad2sizes_valid(a, b, add)) return NULL;
-            return png__malloc(a * b + add);
-        }
-
-        static void* png__malloc_mad3(int a, int b, int c, int add)
-        {
-            if (!png__mad3sizes_valid(a, b, c, add)) return NULL;
-            return png__malloc(a * b * c + add);
-        }
-
-        static void* png__malloc_mad4(int a, int b, int c, int d, int add)
-        {
-            if (!png__mad4sizes_valid(a, b, c, d, add)) return NULL;
-            return png__malloc(a * b * c * d + add);
-        }
-
         static uint8_t png__compute_y(int r, int g, int b)
         {
             return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
@@ -468,7 +407,7 @@ namespace Simd
                 return data;
             assert(req_comp >= 1 && req_comp <= 4);
 
-            good = (uint8_t*)png__malloc_mad3(req_comp, x, y, 0);
+            good = (uint8_t*)png__malloc(req_comp * x * y * 1);
             if (good == NULL)
             {
                 PNG_FREE(data);
@@ -614,10 +553,10 @@ namespace Simd
             int width = x;
 
             assert(out_n == s->channels || out_n == s->channels + 1);
-            a->out = (uint8_t*)png__malloc_mad3(x, y, output_bytes, 0); // extra bytes to write off the end into
+            a->out = (uint8_t*)png__malloc(x*y*output_bytes); // extra bytes to write off the end into
             if (!a->out) return PngError("outofmem", "Out of memory");
 
-            if (!png__mad3sizes_valid(img_n, x, depth, 7)) return PngError("too large", "Corrupt PNG");
+            if (!png__malloc(img_n* x*depth + 7)) return PngError("too large", "Corrupt PNG");
             img_width_bytes = (((img_n * x * depth) + 7) >> 3);
             img_len = (img_width_bytes + 1) * y;
 
@@ -857,7 +796,7 @@ namespace Simd
                 return png__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->width, a->s->height, depth, color);
 
             // de-interlacing
-            final = (uint8_t*)png__malloc_mad3(a->s->width, a->s->height, out_bytes, 0);
+            final = (uint8_t*)png__malloc(a->s->width * a->s->height * out_bytes);
             for (p = 0; p < 7; ++p) 
             {
                 int xorig[] = { 0,4,0,2,0,1,0 };
@@ -961,7 +900,7 @@ namespace Simd
             uint32_t i, pixel_count = a->s->width * a->s->height;
             uint8_t* p, * temp_out, * orig = a->out;
 
-            p = (uint8_t*)png__malloc_mad2(pixel_count, pal_img_n, 0);
+            p = (uint8_t*)png__malloc(pixel_count*pal_img_n);
             if (p == NULL) 
                 return PngError("outofmem", "Out of memory");
 
@@ -1049,7 +988,7 @@ namespace Simd
                 s->img_out_n = s->channels + 1;
             else
                 s->img_out_n = s->channels;
-            if (!png__create_png_image(z, zDst.Data(), zDst.Size(), s->img_out_n, z->depth, _color, _interlace))
+            if (!png__create_png_image(z, zDst.Data(), (int)zDst.Size(), s->img_out_n, z->depth, _color, _interlace))
                 return 0;
             if (_hasTrans) 
             {
