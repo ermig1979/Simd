@@ -825,6 +825,11 @@ namespace Simd
             return Neon::SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
+        template<> SIMD_INLINE float32x4_t Activate<::SimdConvolutionActivationSwish>(float32x4_t value, const float32x4_t* params, size_t index)
+        {
+            return Neon::Swish<1>(value, params[0]);
+        }
+
         template <TermType term> struct Term
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(float * ptr, float32x4_t value, const float32x4_t * bias, const float32x4_t * params);

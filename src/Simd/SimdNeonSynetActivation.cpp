@@ -455,6 +455,41 @@ namespace Simd
                 SynetSoftplus32f<false>(src, size, beta, threshold, dst);
         }
 
+        //-------------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void SynetSwish32f(const float* src, float32x4_t slope, float* dst, size_t offset)
+        {
+            float32x4_t _src = Load<align>(src + offset);
+            Store<align>(dst + offset, Swish<1>(_src, slope));
+        }
+
+        template<bool align> void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            float32x4_t _slope = vdupq_n_f32(slope[0]);
+            size_t sizeF = AlignLo(size, F);
+            size_t sizeQF = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < sizeQF; i += QF)
+            {
+                SynetSwish32f<align>(src, _slope, dst, i + 0 * F);
+                SynetSwish32f<align>(src, _slope, dst, i + 1 * F);
+                SynetSwish32f<align>(src, _slope, dst, i + 2 * F);
+                SynetSwish32f<align>(src, _slope, dst, i + 3 * F);
+            }
+            for (; i < sizeF; i += F)
+                SynetSwish32f<align>(src, _slope, dst, i);
+            for (; i < size; ++i)
+                dst[i] = Base::SynetSwish32f(src[i], slope[0]);
+        }
+
+        void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
+        {
+            if (Aligned(src) && Aligned(dst))
+                SynetSwish32f<true>(src, size, slope, dst);
+            else
+                SynetSwish32f<false>(src, size, slope, dst);
+        }
+        
         //---------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Neon::Exp& exp, float* dst, size_t offset)

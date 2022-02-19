@@ -380,6 +380,47 @@ namespace Simd
                 else
                     Neon::SynetHardSigmoid32f(dst, size * count, &scale, &shift, dst);
             }
+            else if (activation == ::SimdConvolutionActivationSwish)
+            {
+                float threshold = params[0];
+                if (bias)
+                {
+                    float32x4_t _threshold = vdupq_n_f32(threshold);
+                    if (trans)
+                    {
+                        for (size_t j = 0; j < size; ++j)
+                        {
+                            size_t i = 0;
+                            for (; i < aligned; i += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + i), Load<false>(bias + i));
+                                Store<false>(dst + i, Neon::Swish<1>(value, _threshold));
+                            }
+                            for (; i < count; ++i)
+                                dst[i] = Base::SynetSwish32f(dst[i] + bias[i], threshold);
+                            dst += count;
+                        }
+                    }
+                    else
+                    {
+                        for (size_t i = 0; i < count; ++i)
+                        {
+                            float32x4_t _bias = vdupq_n_f32(bias[i]);
+                            size_t j = 0;
+                            for (; j < aligned; j += F)
+                            {
+                                float32x4_t value = vaddq_f32(Load<false>(dst + j), _bias);
+                                Store<false>(dst + j, Neon::Swish<1>(value, _threshold));
+                            }
+                            for (; j < size; ++j)
+                                dst[j] = Base::SynetSwish32f(dst[j] + bias[i], threshold);
+                            dst += size;
+                        }
+                    }
+                }
+                else
+                    Neon::SynetSwish32f(dst, size * count, &threshold, dst);
+            }
             else
                 assert(0);
         }

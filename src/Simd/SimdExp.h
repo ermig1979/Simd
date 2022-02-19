@@ -609,6 +609,12 @@ namespace Simd
                 uint32x4_t mask = vcgtq_f32(vdupq_n_f32(0.0f), value);
                 return vbslq_f32(mask, neg, value);
             }
+
+            template<int iter> SIMD_INLINE float32x4_t Swish(float32x4_t value) const
+            {
+                float32x4_t exp = Exp2(vmulq_f32(_k, value));
+                return Div<iter>(value, vaddq_f32(_1_0, exp));
+            }
         };
 
         namespace Detail
@@ -678,6 +684,12 @@ namespace Simd
             float32x4_t log = Logarithm(vaddq_f32(vdupq_n_f32(1.0f), exp));
             uint32x4_t mask = vcgtq_f32(threshold, value);
             return vbslq_f32(mask, Div<iter>(log, beta), value);
+        }
+
+        template<int iter> SIMD_INLINE float32x4_t Swish(float32x4_t value, float32x4_t slope)
+        {
+            float32x4_t exp = Exponent(vsubq_f32(vdupq_n_f32(0.0f), vmulq_f32(value, slope)));
+            return Div<iter>(value, vaddq_f32(vdupq_n_f32(1.0f), exp));
         }
 
         template<int iter> SIMD_INLINE float32x4_t Tanh(float32x4_t value)

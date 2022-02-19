@@ -798,6 +798,11 @@ namespace Test
             result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Avx512f::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && SynetSwish32fAutoTest(FUNC_SW(Simd::Neon::SynetSwish32f), FUNC_SW(SimdSynetSwish32f));
+#endif 
+
         return result;
     }
 
