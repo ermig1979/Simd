@@ -465,6 +465,24 @@ namespace Simd
         }
     }
 #endif
+
+#ifdef SIMD_NEON_ENABLE
+    namespace Neon
+    {
+        template <class T, int part> SIMD_INLINE int32x4_t YuvToRed(int16x8_t y, int16x8_t v)
+        {
+            static const int16x4_t YA = SIMD_VEC_SET1_PI16(T::Y_2_A);
+            static const int16x4_t VR = SIMD_VEC_SET1_PI16(T::V_2_R);
+            static const int32x4_t RT = SIMD_VEC_SET1_PI16(T::F_ROUND);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(RT, Half<part>(y), YA), Half<part>(v), VR), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t YuvToRed(int16x8_t y, int16x8_t v)
+        {
+            return PackI32(YuvToRed<T, 0>(y, v), YuvToRed<T, 1>(y, v));
+        }
+    }
+#endif
 }
 
 #endif//__SimdYuvToBgr_h__
