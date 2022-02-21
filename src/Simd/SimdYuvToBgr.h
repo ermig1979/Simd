@@ -474,12 +474,60 @@ namespace Simd
             static const int16x4_t YA = SIMD_VEC_SET1_PI16(T::Y_2_A);
             static const int16x4_t VR = SIMD_VEC_SET1_PI16(T::V_2_R);
             static const int32x4_t RT = SIMD_VEC_SET1_PI16(T::F_ROUND);
-            return vshrq_n_s32(vmlal_s16(vmlal_s16(RT, Half<part>(y), YA), Half<part>(v), VR), Base::YUV_TO_BGR_AVERAGING_SHIFT);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(RT, Half<part>(y), YA), Half<part>(v), VR), T::F_SHIFT);
         }
 
         template <class T> SIMD_INLINE int16x8_t YuvToRed(int16x8_t y, int16x8_t v)
         {
             return PackI32(YuvToRed<T, 0>(y, v), YuvToRed<T, 1>(y, v));
+        }
+
+        template <class T, int part> SIMD_INLINE int32x4_t YuvToGreen(int16x8_t y, int16x8_t u, int16x8_t v)
+        {
+            static const int16x4_t YA = SIMD_VEC_SET1_PI16(T::Y_2_A);
+            static const int16x4_t UG = SIMD_VEC_SET1_PI16(T::U_2_G);
+            static const int16x4_t VG = SIMD_VEC_SET1_PI16(T::V_2_G);
+            static const int32x4_t RT = SIMD_VEC_SET1_PI16(T::F_ROUND);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(vmlal_s16(RT, Half<part>(y), YA), Half<part>(u), UG), Half<part>(v), VG), T::F_SHIFT);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t YuvToGreen(int16x8_t y, int16x8_t u, int16x8_t v)
+        {
+            return PackI32(YuvToGreen<T, 0>(y, u, v), YuvToGreen<T, 1>(y, u, v));
+        }
+
+        template <class T, int part> SIMD_INLINE int32x4_t YuvToBlue(int16x8_t y, int16x8_t u)
+        {
+            static const int16x4_t YA = SIMD_VEC_SET1_PI16(T::Y_2_A);
+            static const int16x4_t UB = SIMD_VEC_SET1_PI16(T::U_2_B);
+            static const int32x4_t RT = SIMD_VEC_SET1_PI16(T::F_ROUND);
+            return vshrq_n_s32(vmlal_s16(vmlal_s16(RT, Half<part>(y), YA), Half<part>(u), UB), T::F_SHIFT);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t YuvToBlue(int16x8_t y, int16x8_t u)
+        {
+            return PackI32(YuvToBlue<T, 0>(y, u), YuvToBlue<T, 1>(y, u));
+        }
+
+        template <class T, int part> SIMD_INLINE int16x8_t UnpackY(uint8x16_t y)
+        {
+            static const int16x8_t Y_LO = SIMD_VEC_SET1_EPI16(T::Y_LO);
+            return vsubq_s16(vreinterpretq_s16_u16(UnpackU8<part>(y)), Y_LO);
+        }
+
+        template <class T, int part> SIMD_INLINE int16x8_t UnpackUV(uint8x16_t uv)
+        {
+            static const int16x8_t UV_Z = SIMD_VEC_SET1_EPI16(T::UV_Z);
+            return vsubq_s16(vreinterpretq_s16_u16(UnpackU8<part>(uv)), UV_Z);
+        }
+
+        template <class T> SIMD_INLINE void YuvToBgr(uint8x16_t y, uint8x16_t u, uint8x16_t v, uint8x16x3_t& bgr)
+        {
+            int16x8_t yLo = UnpackY<T, 0>(y), uLo = UnpackUV<T, 0>(u), vLo = UnpackUV<T, 0>(v);
+            int16x8_t yHi = UnpackY<T, 1>(y), uHi = UnpackUV<T, 1>(u), vHi = UnpackUV<T, 1>(v);
+            bgr.val[0] = PackSaturatedI16(YuvToBlue<T>(yLo, uLo), YuvToBlue<T>(yHi, uHi));
+            bgr.val[1] = PackSaturatedI16(YuvToGreen<T>(yLo, uLo, vLo), YuvToGreen<T>(yHi, uHi, vHi));
+            bgr.val[2] = PackSaturatedI16(YuvToRed<T>(yLo, vLo), YuvToRed<T>(yHi, vHi));
         }
     }
 #endif
