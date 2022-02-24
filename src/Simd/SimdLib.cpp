@@ -7053,8 +7053,13 @@ SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t
 SIMD_API void SimdYuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
     size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType)
 {
+#ifdef SIMD_AVX2_ENABLE
+    if (Avx2::Enable && width >= Avx2::DA)
+        Avx2::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+    else
+#endif
 #ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
+    if (Sse2::Enable && width >= Sse2::DA)
         Sse2::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
