@@ -353,14 +353,19 @@ namespace Test
 
         result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Base::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 
+#ifdef SIMD_SSE2_ENABLE
+        if (Simd::Sse2::Enable)
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse2::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
+#endif 
+
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx2::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 #endif 
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Sse2::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && YuvToBgra2AutoTest(FUNC_YUV2(Simd::Avx512bw::Yuv420pToBgraV2), FUNC_YUV2(SimdYuv420pToBgraV2), 2, 2);
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
