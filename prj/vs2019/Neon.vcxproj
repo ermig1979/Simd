@@ -27,6 +27,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonAlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBase64.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBayerToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBayer.cpp" />
@@ -148,6 +149,7 @@
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />

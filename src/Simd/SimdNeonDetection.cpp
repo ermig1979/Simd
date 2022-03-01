@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdDetection.h"
+#include "Simd/SimdShuffle.h"
 
 namespace Simd
 {
@@ -342,16 +343,6 @@ namespace Simd
         }
 
         const uint8x16_t K8_TBL_BITS = SIMD_VEC_SETR_EPI8(0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
-
-        SIMD_INLINE uint8x16_t Shuffle(const uint8x16_t & src, const uint8x16_t & shuffle)
-        {
-            return vcombine_u8(vtbl2_u8((const uint8x8x2_t &)src, vget_low_u8(shuffle)), vtbl2_u8((const uint8x8x2_t &)src, vget_high_u8(shuffle)));
-        }
-
-        SIMD_INLINE uint8x16_t Shuffle(const uint8x16x2_t & src, const uint8x16_t & shuffle)
-        {
-            return vcombine_u8(vtbl4_u8((const uint8x8x4_t &)src, vget_low_u8(shuffle)), vtbl4_u8((const uint8x8x4_t &)src, vget_high_u8(shuffle)));
-        }
 
         SIMD_INLINE uint32x4_t IntegralSum32i(const uint32x4_t & s0, const uint32x4_t & s1, const uint32x4_t & s2, const uint32x4_t & s3)
         {
