@@ -38,6 +38,8 @@
 #include <dirent.h>
 #endif
 
+#include <bitset>
+
 namespace Test
 {
     void FillSequence(View & view)
@@ -644,6 +646,22 @@ namespace Test
         return false;
     }
 
+    template <class T> String Print(const T & a, const T & b)
+    {
+        std::stringstream ss;
+        ss << a << " != " << b << ".";
+        return ss.str();
+    }
+
+    template <> String Print<uint8_t>(const uint8_t& a, const uint8_t& b)
+    {
+        std::stringstream ss;
+        ss << a << " != " << b << " | ";
+        ss << std::bitset<8>(a) << " != " << std::bitset<8>(b) << " | ";
+        ss << (int)a << " != " << (int)b << " | ";
+        return ss.str();
+    }
+
     template <class T> bool Compare(const T * a, const T * b, size_t size, int64_t differenceMax, bool printError, int errorCountMax, const String & description)
     {
         std::stringstream message;
@@ -663,7 +681,7 @@ namespace Test
                 {
                     if (errorCount == 1)
                         message << std::endl << "Fail comparison: " << description << std::endl;
-                    message << "Error at [" << i << "] : " << a[i] << " != " << b[i] << "." << std::endl;
+                    message << "Error at [" << i << "] : " << Print(a[i], b[i]) << std::endl;
                 }
                 if (errorCount > errorCountMax)
                 {

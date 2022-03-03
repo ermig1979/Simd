@@ -275,7 +275,7 @@ namespace Simd
             if (align)
             {
                 assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
-                assert(Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+                assert(Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t bodyWidth = AlignLo(width, DA);
