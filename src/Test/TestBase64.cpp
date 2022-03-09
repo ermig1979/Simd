@@ -196,7 +196,12 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && Base64EncodeAutoTest(FUNC_E(Simd::Avx512bw::Base64Encode), FUNC_E(SimdBase64Encode));
-#endif         
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Base64EncodeAutoTest(FUNC_E(Simd::Neon::Base64Encode), FUNC_E(SimdBase64Encode));
+#endif 
         
         return result;
     }

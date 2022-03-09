@@ -43,8 +43,8 @@ namespace Simd
 
         const uint8x16_t K8_FROM_DIG_SHUFFLE = SIMD_VEC_SETR_EPI8(62, 0xFF, 0xFF, 0xFF, 63, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 0xFF);
 
-        const uint8x16_t K8_30 = SIMD_VEC_SET1_EPI8(0x30);
         const uint8x16_t K8_0F = SIMD_VEC_SET1_EPI8(0x0F);
+        const uint8x16_t K8_30 = SIMD_VEC_SET1_EPI8(0x30);
         const uint8x16_t K8_3C = SIMD_VEC_SET1_EPI8(0x3C);
         const uint8x16_t K8_3F = SIMD_VEC_SET1_EPI8(0x3F);
 
@@ -83,6 +83,54 @@ namespace Simd
             for (const uint8_t* body = src + srcSize - srcSize64 - 4; src < body; src += 4, dst += 3)
                 Base::Base64Decode3(src, dst);
             *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
+        }
+
+        //---------------------------------------------------------------------------------------------
+
+        const uint8x16_t K8_C0 = SIMD_VEC_SET1_EPI8(0xC0);
+        const uint8x16_t K8_F0 = SIMD_VEC_SET1_EPI8(0xF0);
+        const uint8x16_t K8_FC = SIMD_VEC_SET1_EPI8(0xFC);
+
+        const uint8x16_t K8_UPP_END = SIMD_VEC_SET1_EPI8(26);
+        const uint8x16_t K8_LOW_END = SIMD_VEC_SET1_EPI8(52);
+
+        const uint8x16_t K8_TO_DIG_SHUFFLE = SIMD_VEC_SETR_EPI8('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/', 0xFF, 0xFF, 0xFF, 0xFF);
+
+        SIMD_INLINE uint8x16_t ToBase64(uint8x16_t src)
+        {
+            uint8x16_t uppMask = vcgtq_u8(K8_UPP_END, src);
+            uint8x16_t letMask = vcgtq_u8(K8_LOW_END, src);
+            uint8x16_t uppValue = vandq_u8(vaddq_u8(src, K8_UPP_ADD), uppMask);
+            uint8x16_t lowValue = vandq_u8(vaddq_u8(src, K8_LOW_ADD), vandq_u8(vmvnq_u8(uppMask), letMask));
+            uint8x16_t digValue = Shuffle(K8_TO_DIG_SHUFFLE, vsubq_u8(src, K8_LOW_END));
+            return vorrq_u8(vorrq_u8(uppValue, lowValue), vandq_u8(vmvnq_u8(letMask), digValue));
+        }
+
+        SIMD_INLINE void Base64Encode48(const uint8_t* src, uint8_t* dst)
+        {
+            uint8x16x3_t _src = Load3<false>(src);
+            uint8x16x4_t _dst;
+            _dst.val[0] = vshrq_n_u8(vandq_u8(_src.val[0], K8_FC), 2);
+            _dst.val[1] = vorrq_u8(vshlq_n_u8(vandq_u8(_src.val[0], K8_03), 4), vshrq_n_u8(vandq_u8(_src.val[1], K8_F0), 4));
+            _dst.val[2] = vorrq_u8(vshlq_n_u8(vandq_u8(_src.val[1], K8_0F), 2), vshrq_n_u8(vandq_u8(_src.val[2], K8_C0), 6));
+            _dst.val[3] = vandq_u8(_src.val[2], K8_3F);
+            _dst.val[0] = ToBase64(_dst.val[0]);
+            _dst.val[1] = ToBase64(_dst.val[1]);
+            _dst.val[2] = ToBase64(_dst.val[2]);
+            _dst.val[3] = ToBase64(_dst.val[3]);
+            Store4<false>(dst, _dst);
+        }
+
+        void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst)
+        {
+            size_t size3 = AlignLoAny(size, 3);
+            size_t size48 = size >= 47 ? AlignLoAny(size - 47, 48) : 0;
+            for (const uint8_t* body48 = src + size48; src < body48; src += 48, dst += 64)
+                Base64Encode48(src, dst);
+            for (const uint8_t* body3 = src + size3 - size48; src < body3; src += 3, dst += 4)
+                Base::Base64Encode3(src, dst);
+            if (size - size3)
+                Base::Base64EncodeTail(src, size - size3, dst);
         }
     }
 #endif
