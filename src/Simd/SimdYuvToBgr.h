@@ -463,6 +463,22 @@ namespace Simd
             __m512i hi = YuvToBlue16<T>(UnpackY<T, 1>(y), UnpackUV<T, 1>(u));
             return _mm512_packus_epi16(lo, hi);
         }
+
+        template <bool align, bool mask, class T> SIMD_INLINE void YuvToBgra(const __m512i& y, const __m512i& u,
+            const __m512i& v, const __m512i& a, uint8_t* bgra, const __mmask64* tails)
+        {
+            __m512i b = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToBlue<T>(y, u));
+            __m512i g = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToGreen<T>(y, u, v));
+            __m512i r = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, YuvToRed<T>(y, v));
+            __m512i bg0 = UnpackU8<0>(b, g);
+            __m512i bg1 = UnpackU8<1>(b, g);
+            __m512i ra0 = UnpackU8<0>(r, a);
+            __m512i ra1 = UnpackU8<1>(r, a);
+            Store<align, mask>(bgra + 0 * A, UnpackU16<0>(bg0, ra0), tails[0]);
+            Store<align, mask>(bgra + 1 * A, UnpackU16<1>(bg0, ra0), tails[1]);
+            Store<align, mask>(bgra + 2 * A, UnpackU16<0>(bg1, ra1), tails[2]);
+            Store<align, mask>(bgra + 3 * A, UnpackU16<1>(bg1, ra1), tails[3]);
+        }
     }
 #endif
 
