@@ -25,10 +25,6 @@ if(NOT ${SIMD_TARGET} STREQUAL "")
     set(CMAKE_SYSTEM_PROCESSOR ${SIMD_TARGET})
 endif()
 
-if(NOT SIMD_SYNET)
-	add_definitions(-DSIMD_SYNET_DISABLE)
-endif()	
-
 if(SIMD_HIDE AND SIMD_TEST)
 	message("Test framework requires access to internal functions! Parameter SIMD_HIDE is ignored!")
 	set(SIMD_HIDE OFF)

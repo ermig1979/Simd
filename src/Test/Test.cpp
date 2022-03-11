@@ -818,7 +818,11 @@ namespace Test
         return 0;
     }
 
+#if defined(_MSC_VER)
     String ROOT_PATH = "../..";
+#else
+    String ROOT_PATH = "..";
+#endif
     String SOURCE = "";
     String OUTPUT = "";
     String REAL_IMAGE = "";
