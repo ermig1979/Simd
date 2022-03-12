@@ -27,6 +27,8 @@
 #include "Test/TestTensor.h"
 #include "Test/TestString.h"
 
+#include "Simd/SimdSynet.h"
+
 namespace Test
 {
 #if defined(SIMD_SYNET_ENABLE)
@@ -81,7 +83,7 @@ namespace Test
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, scale, shift, dst2, comp));
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
-        int differenceMax = (comp == SimdSynetCompatibilityFmaAvoid ? 0 : 1);
+        int differenceMax = (Simd::Base::FmaAvoid(comp) ? 0 : 1);
 #else
         int differenceMax = 1;
 #endif
