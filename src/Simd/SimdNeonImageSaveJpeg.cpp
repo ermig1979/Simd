@@ -459,7 +459,7 @@ namespace Simd
             Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
-
+#endif
         void JpegWriteBlockYuv420p(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
             const uint8_t* uSrc, int uStride, const uint8_t* vSrc, int vStride, const float* fY, const float* fUv, int dc[3])
         {
@@ -514,7 +514,7 @@ namespace Simd
             Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
-#endif
+
         //---------------------------------------------------------------------
 
         ImageJpegSaver::ImageJpegSaver(const ImageSaverParam& param)
@@ -545,7 +545,7 @@ namespace Simd
             else
             {
                 //_writeNv12Block = JpegWriteBlockNv12;
-                //_writeYuv420pBlock = JpegWriteBlockYuv420p;
+                _writeYuv420pBlock = JpegWriteBlockYuv420p;
             }
         }
 
