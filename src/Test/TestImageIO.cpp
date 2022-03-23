@@ -472,6 +472,11 @@ namespace Test
             result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Avx512bw::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
 #endif 
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable)
+            result = result && Nv12SaveAsJpegToMemoryAutoTest(FUNC_SNJM(Simd::Neon::Nv12SaveAsJpegToMemory), FUNC_SNJM(SimdNv12SaveAsJpegToMemory));
+#endif 
+
         return result;
     }
 

@@ -3074,7 +3074,7 @@ SIMD_API SimdBool SimdImageSaveToFile(const uint8_t* src, size_t stride, size_t 
 SIMD_API uint8_t* SimdNv12SaveAsJpegToMemory(const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size)
 {
     typedef uint8_t*(*SimdNv12SaveAsJpegToMemoryPtr) (const uint8_t* y, size_t yStride, const uint8_t* uv, size_t uvStride, size_t width, size_t height, SimdYuvType yuvType, int quality, size_t* size);
-    const static SimdNv12SaveAsJpegToMemoryPtr simdNv12SaveAsJpegToMemory = SIMD_FUNC3(Nv12SaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC);// , SIMD_NEON_FUNC);
+    const static SimdNv12SaveAsJpegToMemoryPtr simdNv12SaveAsJpegToMemory = SIMD_FUNC4(Nv12SaveAsJpegToMemory, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdNv12SaveAsJpegToMemory(y, yStride, uv, uvStride, width, height, yuvType, quality, size);
 }

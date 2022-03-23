@@ -266,28 +266,23 @@ namespace Simd
                 dst += 8;
             }
         }
-#if 0
-        const __m128i K8_SHUFFLE_UV_U0 = SIMD_VEC_SETR_EPI8(0x0, -1, -1, -1, 0x2, -1, -1, -1, 0x4, -1, -1, -1, 0x6, -1, -1, -1);
-        const __m128i K8_SHUFFLE_UV_U1 = SIMD_VEC_SETR_EPI8(0x8, -1, -1, -1, 0xA, -1, -1, -1, 0xC, -1, -1, -1, 0xE, -1, -1, -1);
-        const __m128i K8_SHUFFLE_UV_V0 = SIMD_VEC_SETR_EPI8(0x1, -1, -1, -1, 0x3, -1, -1, -1, 0x5, -1, -1, -1, 0x7, -1, -1, -1);
-        const __m128i K8_SHUFFLE_UV_V1 = SIMD_VEC_SETR_EPI8(0x9, -1, -1, -1, 0xB, -1, -1, -1, 0xD, -1, -1, -1, 0xF, -1, -1, -1);
 
         SIMD_INLINE void Nv12ToUv(const uint8_t* uvSrc, int uvStride, int height, float* u, float* v)
         {
             float32x4_t k = vdupq_n_f32(-128.000f);
             for (int row = 0; row < 8;)
             {
-                __m128i _uv = _mm_loadu_si128((__m128i*)uvSrc);
-                Store<false>(u + 0 * F, vaddq_f32(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_U0)), k));
-                Store<false>(u + 1 * F, vaddq_f32(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_U1)), k));
-                Store<false>(v + 0 * F, vaddq_f32(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_V0)), k));
-                Store<false>(v + 1 * F, vaddq_f32(_mm_cvtepi32_ps(_mm_shuffle_epi8(_uv, K8_SHUFFLE_UV_V1)), k));
+                uint8x8x2_t _uv = LoadHalf2<false>(uvSrc);
+                Store<false>(u + 0 * F, vaddq_f32(vcvtq_f32_u32(vmovl_u16(Half<0>(vmovl_u8(_uv.val[0])))), k));
+                Store<false>(u + 1 * F, vaddq_f32(vcvtq_f32_u32(vmovl_u16(Half<1>(vmovl_u8(_uv.val[0])))), k));
+                Store<false>(v + 0 * F, vaddq_f32(vcvtq_f32_u32(vmovl_u16(Half<0>(vmovl_u8(_uv.val[1])))), k));
+                Store<false>(v + 1 * F, vaddq_f32(vcvtq_f32_u32(vmovl_u16(Half<1>(vmovl_u8(_uv.val[1])))), k));
                 if (++row < height)
                     uvSrc += uvStride;
                 u += 8, v += 8;
             }
         }
-#endif
+
         void JpegWriteBlockSubs(OutputMemoryStream& stream, int width, int height, const uint8_t* red,
             const uint8_t* green, const uint8_t* blue, int stride, const float* fY, const float* fUv, int dc[3])
         {
@@ -406,7 +401,7 @@ namespace Simd
             Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
-#if 0
+
         void JpegWriteBlockNv12(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
             const uint8_t* uvSrc, int uvStride, const float* fY, const float* fUv, int dc[3])
         {
@@ -459,7 +454,7 @@ namespace Simd
             Base::WriteBits(stream, bitBuf.data, bitBuf.size);
             bitBuf.Clear();
         }
-#endif
+
         void JpegWriteBlockYuv420p(OutputMemoryStream& stream, int width, int height, const uint8_t* ySrc, int yStride,
             const uint8_t* uSrc, int uStride, const uint8_t* vSrc, int vStride, const float* fY, const float* fUv, int dc[3])
         {
@@ -544,7 +539,7 @@ namespace Simd
             }
             else
             {
-                //_writeNv12Block = JpegWriteBlockNv12;
+                _writeNv12Block = JpegWriteBlockNv12;
                 _writeYuv420pBlock = JpegWriteBlockYuv420p;
             }
         }
