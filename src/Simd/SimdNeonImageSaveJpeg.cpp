@@ -33,9 +33,11 @@ namespace Simd
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
+#define SIMD_NEON_JPEG_DVT_VER 1
+
         SIMD_INLINE void JpegDctV(const float* src, size_t srcStride, float *dst, size_t dstStride)
         {
-            for (int i = 0; i < 2; i++, src += 4, dst += 4)
+            for (int i = 0; i < 2; i++, src += 4)
             {
                 float32x4_t d0 = Load<false>(src + 0 * srcStride);
                 float32x4_t d1 = Load<false>(src + 1 * srcStride);
@@ -59,7 +61,7 @@ namespace Simd
                 float32x4_t tmp13 = vsubq_f32(tmp0, tmp3);
                 float32x4_t tmp11 = vaddq_f32(tmp1, tmp2);
                 float32x4_t tmp12 = vsubq_f32(tmp1, tmp2);
-
+#if SIMD_NEON_JPEG_DVT_VER == 1
                 d0 = vaddq_f32(tmp10, tmp11);
                 d4 = vsubq_f32(tmp10, tmp11);
 
@@ -87,14 +89,47 @@ namespace Simd
                 Store<false>(dst + 5 * dstStride, vaddq_f32(z13, z2));
                 Store<false>(dst + 6 * dstStride, d6);
                 Store<false>(dst + 7 * dstStride, vsubq_f32(z11, z4));
+                dst += 4;
+#else
+                float32x4x4_t dst0, dst1;
+                dst0.val[0] = vaddq_f32(tmp10, tmp11);
+                dst1.val[0] = vsubq_f32(tmp10, tmp11);
+
+                float32x4_t z1 = vmulq_f32(vaddq_f32(tmp12, tmp13), vdupq_n_f32(0.707106781f));
+                dst0.val[2] = vaddq_f32(tmp13, z1);
+                dst1.val[2] = vsubq_f32(tmp13, z1);
+
+                tmp10 = vaddq_f32(tmp4, tmp5);
+                tmp11 = vaddq_f32(tmp5, tmp6);
+                tmp12 = vaddq_f32(tmp6, tmp7);
+
+                float32x4_t z5 = vmulq_f32(vsubq_f32(tmp10, tmp12), vdupq_n_f32(0.382683433f));
+                float32x4_t z2 = vaddq_f32(vmulq_f32(tmp10, vdupq_n_f32(0.541196100f)), z5);
+                float32x4_t z4 = vaddq_f32(vmulq_f32(tmp12, vdupq_n_f32(1.306562965f)), z5);
+                float32x4_t z3 = vmulq_f32(tmp11, vdupq_n_f32(0.707106781f));
+
+                float32x4_t z11 = vaddq_f32(tmp7, z3);
+                float32x4_t z13 = vsubq_f32(tmp7, z3);
+
+                dst0.val[1] = vaddq_f32(z11, z4);
+                dst0.val[3] = vsubq_f32(z13, z2);
+
+                dst1.val[1] = vaddq_f32(z13, z2);
+                dst1.val[3] = vsubq_f32(z11, z4);
+
+                Store4<false>(dst + 0 * F, dst0);
+                Store4<false>(dst + 8 * F, dst1);
+                dst += 4 * F;
+#endif
             }
         }
 
         SIMD_INLINE void JpegDctH(const float* src, size_t srcStride, const float * fdt, int* dst)
         {
-            for (int i = 0; i < 2; i++, src += 4 * srcStride, fdt += 4, dst += 4)
+            for (int i = 0; i < 2; i++, fdt += 4, dst += 4)
             {
                 float32x4x2_t d0, d1, d2, d3, t0, t1;
+#if SIMD_NEON_JPEG_DVT_VER == 1
                 t0 = vzipq_f32(Load<false>(src + 0 * srcStride), Load<false>(src + 2 * srcStride));
                 t1 = vzipq_f32(Load<false>(src + 1 * srcStride), Load<false>(src + 3 * srcStride));
                 d0 = vzipq_f32(t0.val[0], t1.val[0]);
@@ -104,6 +139,19 @@ namespace Simd
                 t1 = vzipq_f32(Load<false>(src + 1 * srcStride + 4), Load<false>(src + 3 * srcStride + 4));
                 d2 = vzipq_f32(t0.val[0], t1.val[0]);
                 d3 = vzipq_f32(t0.val[1], t1.val[1]);
+                src += 4 * srcStride;
+#else
+                d0.val[0] = Load<false>(src + 0 * F);
+                d0.val[1] = Load<false>(src + 1 * F);
+                d1.val[0] = Load<false>(src + 2 * F);
+                d1.val[1] = Load<false>(src + 3 * F);
+
+                d2.val[0] = Load<false>(src + 4 * F);
+                d2.val[1] = Load<false>(src + 5 * F);
+                d3.val[0] = Load<false>(src + 6 * F);
+                d3.val[1] = Load<false>(src + 7 * F);
+                src += 8 * F;
+#endif
 
                 t0.val[0] = vaddq_f32(d0.val[0], d3.val[1]);
                 t0.val[1] = vaddq_f32(d0.val[1], d3.val[0]);
@@ -156,9 +204,10 @@ namespace Simd
 
         static int JpegProcessDu(Base::BitBuf& bitBuf, float* CDU, int stride, const float* fdtbl, int DC, const uint16_t HTDC[256][2], const uint16_t HTAC[256][2])
         {
-            JpegDctV(CDU, stride, CDU, stride);
+            SIMD_ALIGNED(16) float BUF[64];
+            JpegDctV(CDU, stride, BUF, 8);
             SIMD_ALIGNED(16) int DUO[64], DU[64];
-            JpegDctH(CDU, stride, fdtbl, DUO);
+            JpegDctH(BUF, 8, fdtbl, DUO);
             for (int i = 0; i < 64; ++i)
                 DU[Base::JpegZigZagT[i]] = DUO[i];
             int diff = DU[0] - DC;
