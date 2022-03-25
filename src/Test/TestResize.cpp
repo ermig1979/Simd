@@ -141,6 +141,8 @@ namespace Test
         return result;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     String ToString(SimdResizeMethodType method)
     {
         switch (method)
@@ -208,7 +210,7 @@ namespace Test
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
 
-//#define TEST_RESIZE_REAL_IMAGE
+#define TEST_RESIZE_REAL_IMAGE
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH, FuncRS f1, FuncRS f2)
     {
@@ -388,7 +390,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     bool ResizeDataTest(bool create, int width, int height, View::Format format, const FuncRB & f)
     {
@@ -443,7 +445,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     bool ResizeSpecialTest(View::Format format, const Size & src, const Size & dst, const FuncRB & f1, const FuncRB & f2)
     {
@@ -515,6 +517,57 @@ namespace Test
         if (Simd::Neon::Enable)
             result = result && ResizeSpecialTest(FUNC_RB(Simd::Neon::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    bool ResizeYuv420pSpecialTest()
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "ResizeYuv420pSpecialTest.");
+
+        View bgraSrc(W, H, View::Bgra32);
+#ifdef TEST_RESIZE_REAL_IMAGE
+        ::srand(0);
+        FillPicture(bgraSrc);
+#else
+        FillRandom(bgraSrc);
+#endif
+        View yuvSrc(W, H * 3 / 2, View::Gray8, NULL, 1);
+        View ySrc(W, H, W, View::Gray8, yuvSrc.data);
+        View uSrc(W / 2, H / 2, W / 2, View::Gray8, yuvSrc.data + H * W);
+        View vSrc(W / 2, H / 2, W / 2, View::Gray8, yuvSrc.data + H * W * 5 / 4);
+        Simd::BgraToYuv420p(bgraSrc, ySrc, uSrc, vSrc);
+
+        View yuvDst(W, H * 3 / 2, View::Gray8, NULL, 1);
+        View yDst(W, H, W, View::Gray8, yuvDst.data);
+        View uDst(W / 2, H / 2, W / 2, View::Gray8, yuvDst.data + H * W);
+        View vDst(W / 2, H / 2, W / 2, View::Gray8, yuvDst.data + H * W * 5 / 4);
+        Simd::Fill(yuvDst, 0);
+
+        Rect ySrcRect(0, 0, W, H), uvSrcRect = ySrcRect / 2;
+        Rect yDstRect(0, 0, W / 2, H / 2), uvDstRect = yDstRect / 2;
+
+        void* yRezizer = SimdResizerInit(ySrcRect.Width(), ySrcRect.Height(), 
+            yDstRect.Width(), yDstRect.Height(), 1, SimdResizeChannelByte, SimdResizeMethodNearest);
+        void* uvRezizer = SimdResizerInit(uvSrcRect.Width(), uvSrcRect.Height(),
+            uvDstRect.Width(), uvDstRect.Height(), 1, SimdResizeChannelByte, SimdResizeMethodNearest);
+
+        //SimdResizerRun(yRezizer, ySrc.Region(ySrcRect).data, ySrc.stride, yDst.Region(yDstRect).data, yDst.stride);
+        //SimdResizerRun(uvRezizer, uSrc.Region(uvSrcRect).data, uSrc.stride, uDst.Region(uvDstRect).data, uDst.stride);
+        //SimdResizerRun(uvRezizer, vSrc.Region(uvSrcRect).data, vSrc.stride, vDst.Region(uvDstRect).data, vDst.stride);
+
+        SimdRelease(yRezizer);
+        SimdRelease(uvRezizer);
+
+        View bgraDst(W, H, View::Bgra32);
+        Simd::Yuv420pToBgra(yDst, uDst, vDst, bgraDst);
+
+        bgraSrc.Save("src.jpg", SimdImageFileJpeg, 85);
+        bgraDst.Save("dst.jpg", SimdImageFileJpeg, 85);
 
         return result;
     }

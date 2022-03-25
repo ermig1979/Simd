@@ -328,6 +328,7 @@ namespace Test
 
     TEST_ADD_GROUP_ADS(ResizeBilinear);
     TEST_ADD_GROUP_A00(Resizer);
+    TEST_ADD_GROUP_00S(ResizeYuv420p);
 
     TEST_ADD_GROUP_AD0(SegmentationShrinkRegion);
     TEST_ADD_GROUP_AD0(SegmentationFillSingleHoles);
