@@ -556,9 +556,9 @@ namespace Test
         void* uvRezizer = SimdResizerInit(uvSrcRect.Width(), uvSrcRect.Height(),
             uvDstRect.Width(), uvDstRect.Height(), 1, SimdResizeChannelByte, SimdResizeMethodNearest);
 
-        //SimdResizerRun(yRezizer, ySrc.Region(ySrcRect).data, ySrc.stride, yDst.Region(yDstRect).data, yDst.stride);
-        //SimdResizerRun(uvRezizer, uSrc.Region(uvSrcRect).data, uSrc.stride, uDst.Region(uvDstRect).data, uDst.stride);
-        //SimdResizerRun(uvRezizer, vSrc.Region(uvSrcRect).data, vSrc.stride, vDst.Region(uvDstRect).data, vDst.stride);
+        SimdResizerRun(yRezizer, ySrc.Region(ySrcRect).data, ySrc.stride, yDst.Region(yDstRect).data, yDst.stride);
+        SimdResizerRun(uvRezizer, uSrc.Region(uvSrcRect).data, uSrc.stride, uDst.Region(uvDstRect).data, uDst.stride);
+        SimdResizerRun(uvRezizer, vSrc.Region(uvSrcRect).data, vSrc.stride, vDst.Region(uvDstRect).data, vDst.stride);
 
         SimdRelease(yRezizer);
         SimdRelease(uvRezizer);
