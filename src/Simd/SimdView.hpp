@@ -582,6 +582,12 @@ namespace Simd
         */
         uint8_t* Release(size_t* size = NULL);
 
+        /*!
+            Gets owner flag: is this View owner of the image?
+            \return - an owner flag.
+        */
+        bool Owner() const;
+
     private:
         bool _owner;
     };
@@ -1289,6 +1295,11 @@ namespace Simd
         _owner = false;
         Clear();
         return released;
+    }
+
+    template <template<class> class A> SIMD_INLINE bool View<A>::Owner() const
+    {
+        return _owner;
     }
 
     // View utilities implementation:
