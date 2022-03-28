@@ -95,8 +95,8 @@ namespace Simd
             assert(width >= A);
             if (align)
             {
-                assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride));
-                assert(Aligned(r) && Aligned(rStride) && Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
+                assert(Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride));
+                assert(Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride));
             }
 
             size_t alignedWidth = AlignLo(width, A);
@@ -117,8 +117,8 @@ namespace Simd
 
         void InterleaveBgra(const uint8_t * b, size_t bStride, const uint8_t * g, size_t gStride, const uint8_t * r, size_t rStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride)
         {
-            if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride)
-                && Aligned(r) && Aligned(rStride) && Aligned(bgra) && Aligned(bgraStride))
+            if (Aligned(b) && Aligned(bStride) && Aligned(g) && Aligned(gStride) && Aligned(r) && Aligned(rStride) &&
+                Aligned(a) && Aligned(aStride) && Aligned(bgra) && Aligned(bgraStride))
                 InterleaveBgra<true>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
             else
                 InterleaveBgra<false>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
