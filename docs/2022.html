@@ -43,12 +43,15 @@
  <li>NEON optimizations of function Nv12SaveAsJpegToMemory.</li>
  <li>Owner method in View structure.</li>
  <li>Owner method in Frame structure.</li>
+ <li>Capture method in View structure.</li>
 </ul>
 <h5>Bug fixing</h5>
 <ul>
  <li>MSVS compiler error in AVX-512BW optimizations of function Yuv420pToBgraV2.</li>
  <li>Error in AVX2 optimizations of function BgraToRgb.</li>
  <li>Error (aligned reading of unaligned memory) in SSE4.1, AVX2, AVX-512BW optimizations of function InterleaveBgra.</li>
+ <li>Error in function View::ToOcv.</li>
+ <li>Error in View copy constructor (from OpenCV Mat).</li>
 </ul>
 
 <h4>Test framework</h4>

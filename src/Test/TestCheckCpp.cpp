@@ -95,6 +95,9 @@ namespace Test
         cm = sv;
 #endif
         sv.Swap(vs);
+
+        View cp = sv;
+        cp.Capture();
     }
 
     static void TestFrame()

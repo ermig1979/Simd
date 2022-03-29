@@ -588,6 +588,11 @@ namespace Simd
         */
         bool Owner() const;
 
+        /*!
+            Captures image (copies to internal buffer) if View is not owner of current image.
+        */
+        void Capture();
+
     private:
         bool _owner;
     };
@@ -755,7 +760,7 @@ namespace Simd
         : width(mat.cols)
         , height(mat.rows)
         , stride(mat.step[0])
-        , format(OcvTo(mat.type()))
+        , format(mat.data ? OcvTo(mat.type()) : None)
         , data(mat.data)
         , _owner(false)
     {
@@ -1207,6 +1212,7 @@ namespace Simd
     {
         switch (format)
         {
+        case None:      return CV_8UC1;
         case Gray8:     return CV_8UC1;
         case Uv16:      return CV_8UC2;
         case Bgr24:     return CV_8UC3;
@@ -1300,6 +1306,18 @@ namespace Simd
     template <template<class> class A> SIMD_INLINE bool View<A>::Owner() const
     {
         return _owner;
+    }
+
+    template <template<class> class A> SIMD_INLINE void View<A>::Capture()
+    {
+        if (data && _owner == false)
+        {
+            View<A> copy(width, height, format);
+            size_t size = width * PixelSize();
+            for (size_t row = 0; row < height; ++row)
+                memcpy(copy.data + copy.stride * row, data + stride * row, size);
+            Swap(copy);
+        }
     }
 
     // View utilities implementation:
