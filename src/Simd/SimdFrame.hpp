@@ -337,6 +337,12 @@ namespace Simd
             \param [in] other - an other frame.
         */
         void Swap(Frame& other);
+
+        /*!
+            Gets owner flag: Do its planes own their images?
+            \return - an owner flag.
+        */
+        bool Owner() const;
     };
 
     /*! @ingroup cpp_frame_functions
@@ -775,6 +781,15 @@ namespace Simd
         std::swap((Format&)format, (Format&)other.format);
         std::swap(flipped, other.flipped);
         std::swap(timestamp, other.timestamp);
+    }
+
+    template <template<class> class A> SIMD_INLINE bool Frame<A>::Owner() const
+    {
+        size_t n = PlaneCount();
+        bool owner = n > 0;
+        for (size_t i = 0; i < n; ++i)
+            owner = owner && planes[i].Owner();
+        return owner;
     }
 
     // View utilities implementation:
