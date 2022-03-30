@@ -523,11 +523,11 @@ namespace Test
 
     //---------------------------------------------------------------------------------------------
 
-    bool ResizeYuv420pSpecialTest()
+    bool ResizeYuv420pSpecialTest(SimdResizeMethodType method)
     {
         bool result = true;
 
-        TEST_LOG_SS(Info, "ResizeYuv420pSpecialTest.");
+        TEST_LOG_SS(Info, "ResizeYuv420pSpecialTest for " << ToString(method) << " .");
 
         View bgraSrc(W, H, View::Bgra32);
 #ifdef TEST_RESIZE_REAL_IMAGE
@@ -551,23 +551,64 @@ namespace Test
         Rect ySrcRect(0, 0, W, H), uvSrcRect = ySrcRect / 2;
         Rect yDstRect(0, 0, W / 2, H / 2), uvDstRect = yDstRect / 2;
 
-        void* yRezizer = SimdResizerInit(ySrcRect.Width(), ySrcRect.Height(), 
-            yDstRect.Width(), yDstRect.Height(), 1, SimdResizeChannelByte, SimdResizeMethodNearest);
-        void* uvRezizer = SimdResizerInit(uvSrcRect.Width(), uvSrcRect.Height(),
-            uvDstRect.Width(), uvDstRect.Height(), 1, SimdResizeChannelByte, SimdResizeMethodNearest);
+#if 0
+        void* yResizer = SimdResizerInit(ySrcRect.Width(), ySrcRect.Height(), 
+            yDstRect.Width(), yDstRect.Height(), 1, SimdResizeChannelByte, method);
+        void* uvResizer = SimdResizerInit(uvSrcRect.Width(), uvSrcRect.Height(),
+            uvDstRect.Width(), uvDstRect.Height(), 1, SimdResizeChannelByte, method);
 
-        SimdResizerRun(yRezizer, ySrc.Region(ySrcRect).data, ySrc.stride, yDst.Region(yDstRect).data, yDst.stride);
-        SimdResizerRun(uvRezizer, uSrc.Region(uvSrcRect).data, uSrc.stride, uDst.Region(uvDstRect).data, uDst.stride);
-        SimdResizerRun(uvRezizer, vSrc.Region(uvSrcRect).data, vSrc.stride, vDst.Region(uvDstRect).data, vDst.stride);
+        SimdResizerRun(yResizer, ySrc.Region(ySrcRect).data, ySrc.stride, yDst.Region(yDstRect).data, yDst.stride);
+        SimdResizerRun(uvResizer, uSrc.Region(uvSrcRect).data, uSrc.stride, uDst.Region(uvDstRect).data, uDst.stride);
+        SimdResizerRun(uvResizer, vSrc.Region(uvSrcRect).data, vSrc.stride, vDst.Region(uvDstRect).data, vDst.stride);
 
-        SimdRelease(yRezizer);
-        SimdRelease(uvRezizer);
+        SimdRelease(yResizer);
+        SimdRelease(uvResizer);
+#else
+        uint8_t* syuv = yuvSrc.data, * tyuv = yuvDst.data;
+        size_t sw = W, tw = W, sh = H, th = H;
+        Rect sr = ySrcRect, tr = yDstRect;
+
+        void* rcy, * rcu, * rcv;
+        rcy = SimdResizerInit(sr.Width(), sr.Height(), tr.Width(), tr.Height(), 1, SimdResizeChannelByte, method);
+        if (rcy) 
+        {
+            SimdResizerRun(rcy, syuv + sr.Left() + sr.Top() * sw, sw, tyuv + tr.Left() + tr.Top() * tw, tw);
+            SimdRelease(rcy);
+        }
+        rcu = SimdResizerInit(sr.Width() / 2, sr.Height() / 2, tr.Width() / 2, tr.Height() / 2, 1, SimdResizeChannelByte, method);
+        if (rcu)
+        {
+            SimdResizerRun(rcu, syuv + sw * sh + sr.Left() / 2 + sr.Top() * sw / 2, sw / 2, tyuv + tw * th + tr.Left() / 2 + tr.Top() / 2 * tw / 2, tw / 2);
+            SimdRelease(rcu);
+        }
+        rcv = SimdResizerInit(sr.Width() / 2, sr.Height() / 2, tr.Width() / 2, tr.Height() / 2, 1, SimdResizeChannelByte, method);
+        if (rcv) 
+        {
+            SimdResizerRun(rcv, syuv + sw * sh * 5 / 4 + sr.Left() / 2 + sr.Top() * sw / 2, sw / 2, tyuv + tw * th * 5 / 4 + tr.Left() / 2 + tr.Top() / 2 * tw / 2, tw / 2);
+            SimdRelease(rcv);
+        }
+#endif
 
         View bgraDst(W, H, View::Bgra32);
         Simd::Yuv420pToBgra(yDst, uDst, vDst, bgraDst);
 
         bgraSrc.Save("src.jpg", SimdImageFileJpeg, 85);
-        bgraDst.Save("dst.jpg", SimdImageFileJpeg, 85);
+        bgraDst.Region(yDstRect).Save(String("dst_") + ToString(method) + ".jpg", SimdImageFileJpeg, 85);
+
+        return result;
+    }
+
+    bool ResizeYuv420pSpecialTest()
+    {
+        bool result = true;
+
+        result = result && ResizeYuv420pSpecialTest(SimdResizeMethodNearest);
+
+        result = result && ResizeYuv420pSpecialTest(SimdResizeMethodBilinear);
+
+        result = result && ResizeYuv420pSpecialTest(SimdResizeMethodBicubic);
+
+        result = result && ResizeYuv420pSpecialTest(SimdResizeMethodArea);
 
         return result;
     }
