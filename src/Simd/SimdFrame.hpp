@@ -343,6 +343,11 @@ namespace Simd
             \return - an owner flag.
         */
         bool Owner() const;
+
+        /*!
+            Captures image planes (copies to internal buffers) if this Frame is not owner of current image planes.
+        */
+        void Capture();
     };
 
     /*! @ingroup cpp_frame_functions
@@ -790,6 +795,12 @@ namespace Simd
         for (size_t i = 0; i < n; ++i)
             owner = owner && planes[i].Owner();
         return owner;
+    }
+
+    template <template<class> class A> SIMD_INLINE void Frame<A>::Capture()
+    {
+        for (size_t i = 0, n = PlaneCount(); i < n; ++i)
+            planes[i].Capture();
     }
 
     // View utilities implementation:

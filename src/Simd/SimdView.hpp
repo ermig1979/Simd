@@ -589,7 +589,7 @@ namespace Simd
         bool Owner() const;
 
         /*!
-            Captures image (copies to internal buffer) if View is not owner of current image.
+            Captures image (copies to internal buffer) if this View is not owner of current image.
         */
         void Capture();
 
