@@ -45,6 +45,18 @@ namespace Simd
         {
             *p += a;
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <UpdateType update> SIMD_INLINE void Update(int32_t* p, int32_t a)
+        {
+            *p = a;
+        }
+
+        template <> SIMD_INLINE void Update<UpdateAdd>(int32_t* p, int32_t a)
+        {
+            *p += a;
+        }
     }
 
 #ifdef SIMD_SSE2_ENABLE

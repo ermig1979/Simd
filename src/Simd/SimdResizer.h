@@ -78,12 +78,13 @@ namespace Simd
 
         bool IsByteArea() const
         {
-            return type == SimdResizeChannelByte && (method == SimdResizeMethodArea || method == SimdResizeMethodAreaReduced2x2);
+            return type == SimdResizeChannelByte && method == SimdResizeMethodArea;
         }
 
         bool IsByteAreaReduced2x2() const
         {
-            return type == SimdResizeChannelByte && method == SimdResizeMethodAreaReduced2x2;
+            return type == SimdResizeChannelByte && method == SimdResizeMethodAreaReduced2x2 &&
+                DivHi(srcW, 2) >= dstW && DivHi(srcH, 2) >= dstH;
         }
 
         size_t ChannelSize() const
