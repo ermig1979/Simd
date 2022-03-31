@@ -379,6 +379,8 @@ typedef enum
     SimdResizeMethodBicubic,
     /*! Area method. */
     SimdResizeMethodArea,
+    /*! Area method for previously reduced in 2 times image. */
+    SimdResizeMethodAreaReduced2x2,
 } SimdResizeMethodType;
 
 /*! @ingroup synet

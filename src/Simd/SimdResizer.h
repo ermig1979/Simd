@@ -78,7 +78,12 @@ namespace Simd
 
         bool IsByteArea() const
         {
-            return type == SimdResizeChannelByte && method == SimdResizeMethodArea;
+            return type == SimdResizeChannelByte && (method == SimdResizeMethodArea || method == SimdResizeMethodAreaReduced2x2);
+        }
+
+        bool IsByteAreaReduced2x2() const
+        {
+            return type == SimdResizeChannelByte && method == SimdResizeMethodAreaReduced2x2;
         }
 
         size_t ChannelSize() const
@@ -227,6 +232,22 @@ namespace Simd
             virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         };
         
+        //---------------------------------------------------------------------------------------------
+
+        class ResizerByteAreaReduced2x2 : public Resizer
+        {
+        protected:
+            Array32i _ax, _ix, _ay, _iy, _by;
+
+            template<size_t N> void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        public:
+            ResizerByteAreaReduced2x2(const ResParam& param);
+
+            void EstimateParams(size_t srcSize, size_t dstSize, size_t range, int32_t* alpha, int32_t* index);
+
+            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+        };
+
         //---------------------------------------------------------------------------------------------
 
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);

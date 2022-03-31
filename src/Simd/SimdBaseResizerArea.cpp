@@ -129,6 +129,58 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //---------------------------------------------------------------------------------------------
+
+        ResizerByteAreaReduced2x2::ResizerByteAreaReduced2x2(const ResParam& param)
+            : Resizer(param)
+        {
+            _ay.Resize(_param.dstH + 1);
+            _iy.Resize(_param.dstH + 1);
+            EstimateParams(_param.srcH, _param.dstH, Base::AREA_RANGE, _ay.data, _iy.data);
+
+            _ax.Resize(_param.dstW + 1);
+            _ix.Resize(_param.dstW + 1);
+            EstimateParams(_param.srcW, _param.dstW, Base::AREA_RANGE, _ax.data, _ix.data);
+
+            _by.Resize(AlignHi(DivHi(_param.srcW, 2) * _param.channels, _param.align), false, _param.align);
+        }
+
+        void ResizerByteAreaReduced2x2::EstimateParams(size_t srcSize, size_t dstSize, size_t range, int32_t* alpha, int32_t* index)
+        {
+            float scale = (float)srcSize / dstSize;
+
+            for (size_t ds = 0; ds <= dstSize; ++ds)
+            {
+                float a = (float)ds * scale;
+                size_t i = (size_t)::floor(a);
+                a -= i;
+                if (i == srcSize)
+                {
+                    i--;
+                    a = 1.0f;
+                }
+                alpha[ds] = int32_t(range * (1.0f - a) / scale);
+                index[ds] = int32_t(i);
+            }
+        }
+
+        template<size_t N> void ResizerByteAreaReduced2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+        }
+
+        void ResizerByteAreaReduced2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            switch (_param.channels)
+            {
+            case 1: Run<1>(src, srcStride, dst, dstStride); return;
+            case 2: Run<2>(src, srcStride, dst, dstStride); return;
+            case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 4: Run<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
+            }
+        }
     }
 }
 
