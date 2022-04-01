@@ -166,44 +166,58 @@ namespace Simd
             }
         }
 
-        template<class T, size_t N, size_t S, UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const T* src0, const T* src1, int32_t value, int32_t* dst)
+        template<class T, size_t N, size_t S, UpdateType update> SIMD_INLINE void ResizerByteAreaReduced2x2RowUpdate(const T* src0, const T* src1, int32_t value, int32_t* dst)
         {
             for (size_t c = 0; c < N; ++c)
-                Update<update>(dst[c], ((int)src0[0 + c] + (int)src0[S + c] + (int)src1[0 + c] + (int)src1[S + c]) * value);
+                Update<update>(dst + c, ((int)src0[0 + c] + (int)src0[S + c] + (int)src1[0 + c] + (int)src1[S + c]) * value);
         }
 
-        template<size_t N, UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t a, int32_t* dst)
+        template<size_t N, UpdateType update> SIMD_INLINE void ResizerByteAreaReduced2x2RowUpdate(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t a, int32_t* dst)
         {
             size_t size2N = AlignLoAny(size, 2 * N);
             size_t i = 0;
             for (; i < size2N; i += 2 * N, dst += N)
-                ResizerByteAreaRowUpdate<uint8_t, N, N, update>(src0 + i, src1 + i, a, dst);
+                ResizerByteAreaReduced2x2RowUpdate<uint8_t, N, N, update>(src0 + i, src1 + i, a, dst);
             if(i < size)
-                ResizerByteAreaRowUpdate<uint8_t, N, 0, update>(src0 + i, src1 + i, a, dst);
+                ResizerByteAreaReduced2x2RowUpdate<uint8_t, N, 0, update>(src0 + i, src1 + i, a, dst);
         }
 
-        template<size_t N> SIMD_INLINE void ResizerByteAreaRowSum(const uint8_t* src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t* dst)
+        template<size_t N> SIMD_INLINE void ResizerByteAreaReduced2x2RowSum(const uint8_t* src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t* dst)
         {
             size_t c = 0, count2 = AlignLo(count, 2);
-            ResizerByteAreaRowUpdate<N, UpdateSet>(src, src + stride, size, curr, dst), src += 2 * stride, c += 2;
+            ResizerByteAreaReduced2x2RowUpdate<N, UpdateSet>(src, src + stride, size, curr, dst), src += 2 * stride, c += 2;
             for (; c < count2; c += 2, src += 2 * stride)
-                ResizerByteAreaRowUpdate<N, UpdateAdd>(src, src + stride, size, c >= count - 2 ? zero - next : zero, dst);
+                ResizerByteAreaReduced2x2RowUpdate<N, UpdateAdd>(src, src + stride, size, c >= count - 2 ? zero - next : zero, dst);
             if (c < count)
-                ResizerByteAreaRowUpdate<N, UpdateAdd>(src, src, size, zero - next, dst);
+                ResizerByteAreaReduced2x2RowUpdate<N, UpdateAdd>(src, src, size, zero - next, dst);
         }
 
         template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t* src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t* dst)
         {
             int32_t sum[N];
-            ResizerByteAreaSet<N>(src, curr, sum);
+            ResizerByteAreaSet<int32_t, N>(src, curr, sum);
             for (size_t i = 0; i < count; ++i)
-                src += N, ResizerByteAreaAdd<N>(src, zero, sum);
-            ResizerByteAreaAdd<N>(src, -next, sum);
+                src += N, ResizerByteAreaAdd<int32_t, N>(src, zero, sum);
+            ResizerByteAreaAdd<int32_t, N>(src, -next, sum);
             ResizerByteAreaRes<N>(sum, dst);
         }
 
         template<size_t N> void ResizerByteAreaReduced2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
+            size_t dstW = _param.dstW, rowSize = _param.srcW * N, rowRest = dstStride - dstW * N;
+            const int32_t* iy = _iy.data, * ix = _ix.data, * ay = _ay.data, * ax = _ax.data;
+            int32_t ay0 = ay[0], ax0 = ax[0];
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
+            {
+                int32_t* buf = _by.data;
+                size_t yn = Min(iy[dy + 1] * 2, _param.srcH - 1) - iy[dy] * 2;
+                ResizerByteAreaReduced2x2RowSum<N>(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], buf), src += yn * srcStride;
+                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                }
+            }
         }
 
         void ResizerByteAreaReduced2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)

@@ -620,6 +620,8 @@ namespace Test
 
         result = result && ResizeYuv420pSpecialTest(SimdResizeMethodArea);
 
+        result = result && ResizeYuv420pSpecialTest(SimdResizeMethodAreaReduced2x2);
+
         return result;
     }
 }
