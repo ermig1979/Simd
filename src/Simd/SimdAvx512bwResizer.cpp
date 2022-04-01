@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdResizer.h"
-#include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
@@ -44,8 +43,8 @@ namespace Simd
                 return new ResizerShortBilinear(param);
             else if (param.IsByteBicubic())
                 return new ResizerByteBicubic(param);
-            else if (param.IsByteArea())
-                return new ResizerByteArea(param);
+            else if (param.IsByteArea1x1())
+                return new ResizerByteArea1x1(param);
             else
                 return Avx512f::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }

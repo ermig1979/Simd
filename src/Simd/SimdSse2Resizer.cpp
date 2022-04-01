@@ -35,8 +35,8 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m128i));
             if (param.IsByteBilinear() && (channels == 1 || channels == 2) && dstX >= A)
                 return new ResizerByteBilinear(param);
-            else if (param.IsByteArea())
-                return new ResizerByteArea(param);
+            else if (param.IsByteArea1x1())
+                return new ResizerByteArea1x1(param);
             else if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
             else

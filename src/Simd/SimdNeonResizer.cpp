@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdResizer.h"
+#include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdUpdate.h"
 
 namespace Simd
@@ -358,13 +359,12 @@ namespace Simd
         }
         //---------------------------------------------------------------------
 
-        ResizerByteArea::ResizerByteArea(const ResParam & param)
-            : Base::ResizerByteArea(param)
+        ResizerByteArea1x1::ResizerByteArea1x1(const ResParam & param)
+            : Base::ResizerByteArea1x1(param)
         {
-            _by.Resize(AlignHi(_param.srcW*_param.channels, _param.align), false, _param.align);
         }
 
-        template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, size_t size, int32_t a0, int32_t * dst)
+        template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1RowUpdate(const uint8_t * src0, size_t size, int32_t a0, int32_t * dst)
         {
             int16x4_t _a0 = vdup_n_s16(a0);
             for (size_t i = 0; i < size; i += A, dst += A, src0 += A)
@@ -379,7 +379,7 @@ namespace Simd
             }
         }
 
-        template<UpdateType update> SIMD_INLINE void ResizerByteAreaRowUpdate(const uint8_t * src0, size_t stride, size_t size, int32_t a0, int32_t a1, int32_t * dst)
+        template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1RowUpdate(const uint8_t * src0, size_t stride, size_t size, int32_t a0, int32_t a1, int32_t * dst)
         {
             int16x4_t _a0 = vdup_n_s16(a0);
             int16x4_t _a1 = vdup_n_s16(a1);
@@ -399,47 +399,29 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void ResizerByteAreaRowSum(const uint8_t * src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t * dst)
+        SIMD_INLINE void ResizerByteArea1x1RowSum(const uint8_t * src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, int32_t * dst)
         {
             if (count)
             {
                 size_t i = 0;
-                ResizerByteAreaRowUpdate<UpdateSet>(src, stride, size, curr, count == 1 ? zero - next : zero, dst), src += 2 * stride, i += 2;
+                ResizerByteArea1x1RowUpdate<UpdateSet>(src, stride, size, curr, count == 1 ? zero - next : zero, dst), src += 2 * stride, i += 2;
                 for (; i < count; i += 2, src += 2 * stride)
-                    ResizerByteAreaRowUpdate<UpdateAdd>(src, stride, size, zero, i == count - 1 ? zero - next : zero, dst);
+                    ResizerByteArea1x1RowUpdate<UpdateAdd>(src, stride, size, zero, i == count - 1 ? zero - next : zero, dst);
                 if (i == count)
-                    ResizerByteAreaRowUpdate<UpdateAdd>(src, size, zero - next, dst);
+                    ResizerByteArea1x1RowUpdate<UpdateAdd>(src, size, zero - next, dst);
             }
             else
-                ResizerByteAreaRowUpdate<UpdateSet>(src, size, curr - next, dst);
-        }
-
-        template<size_t N> SIMD_INLINE void ResizerByteAreaSet(const int32_t * src, int32_t value, int32_t * dst)
-        {
-            for (size_t c = 0; c < N; ++c)
-                dst[c] = src[c] * value;
-        }
-
-        template<size_t N> SIMD_INLINE void ResizerByteAreaAdd(const int32_t * src, int32_t value, int32_t * dst)
-        {
-            for (size_t c = 0; c < N; ++c)
-                dst[c] += src[c] * value;
-        }
-
-        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t * src, uint8_t * dst)
-        {
-            for (size_t c = 0; c < N; ++c)
-                dst[c] = uint8_t((src[c] + Base::AREA_ROUND) >> Base::AREA_SHIFT);
+                ResizerByteArea1x1RowUpdate<UpdateSet>(src, size, curr - next, dst);
         }
 
         template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
         {
             int32_t sum[N];
-            ResizerByteAreaSet<N>(src, curr, sum);
+            Base::ResizerByteAreaSet<N>(src, curr, sum);
             for (size_t i = 0; i < count; ++i)
-                src += N, ResizerByteAreaAdd<N>(src, zero, sum);
-            ResizerByteAreaAdd<N>(src, -next, sum);
-            ResizerByteAreaRes<N>(sum, dst);
+                src += N, Base::ResizerByteAreaAdd<N>(src, zero, sum);
+            Base::ResizerByteAreaAdd<N>(src, -next, sum);
+            Base::ResizerByteAreaRes<N>(sum, dst);
         }
 
         template<size_t N> SIMD_INLINE void ResizerByteAreaResult34(const int32_t * src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t * dst)
@@ -462,7 +444,7 @@ namespace Simd
             ResizerByteAreaResult34<3>(src, count, curr, zero, next, dst);
         }
 
-        template<size_t N> void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        template<size_t N> void ResizerByteArea1x1::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW * N;
             const int32_t * iy = _iy.data, *ix = _ix.data, *ay = _ay.data, *ax = _ax.data;
@@ -471,16 +453,16 @@ namespace Simd
             {
                 int32_t * buf = _by.data;
                 size_t yn = iy[dy + 1] - iy[dy];
-                ResizerByteAreaRowSum(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], buf), src += yn * srcStride;
+                ResizerByteArea1x1RowSum(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], buf), src += yn * srcStride;
                 for (size_t dx = 0; dx < dstW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
-                    ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                    Neon::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }
 
-        void ResizerByteArea::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        void ResizerByteArea1x1::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
             switch (_param.channels)
             {
@@ -855,8 +837,8 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(float32x4_t));
             if (param.IsByteBilinear() && dstX >= A)
                 return new ResizerByteBilinear(param);
-            else if (param.IsByteArea())
-                return new ResizerByteArea(param);
+            else if (param.IsByteArea1x1())
+                return new ResizerByteArea1x1(param);
             else if (param.IsShortBilinear() && channels == 1)
                 return new ResizerShortBilinear(param);
             else if (param.IsFloatBilinear())

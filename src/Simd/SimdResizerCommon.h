@@ -54,6 +54,36 @@ namespace Simd
             for (size_t c = 0; c < N; ++c)
                 dst[c] = CubicSumX<N, F, L>(src + c, ax);
         }
+
+        //---------------------------------------------------------------------------------------------
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaSet(const int32_t* src, int32_t value, int32_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] = src[c] * value;
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaAdd(const int32_t* src, int32_t value, int32_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] += src[c] * value;
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaRes(const int32_t* src, uint8_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                dst[c] = uint8_t((src[c] + Base::AREA_ROUND) >> Base::AREA_SHIFT);
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t* src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t* dst)
+        {
+            int32_t sum[N];
+            ResizerByteAreaSet<N>(src, curr, sum);
+            for (size_t i = 0; i < count; ++i)
+                src += N, ResizerByteAreaAdd<N>(src, zero, sum);
+            ResizerByteAreaAdd<N>(src, -next, sum);
+            ResizerByteAreaRes<N>(sum, dst);
+        }
     }
 
 #ifdef SIMD_SSE41_ENABLE    
@@ -106,6 +136,38 @@ namespace Simd
         }
 
         const __m128i RSB_3_P = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x8, 0x9, 0xA, 0xB, 0xC, 0xD, -1, -1, -1, -1);
+
+        //---------------------------------------------------------------------------------------------
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult(const int32_t* src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t* dst)
+        {
+            int32_t sum[N];
+            Base::ResizerByteAreaSet<N>(src, curr, sum);
+            for (size_t i = 0; i < count; ++i)
+                src += N, Base::ResizerByteAreaAdd<N>(src, zero, sum);
+            Base::ResizerByteAreaAdd<N>(src, -next, sum);
+            Base::ResizerByteAreaRes<N>(sum, dst);
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteAreaResult34(const int32_t* src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t* dst)
+        {
+            __m128i sum = _mm_mullo_epi32(_mm_loadu_si128((__m128i*)src), _mm_set1_epi32(curr));
+            for (size_t i = 0; i < count; ++i)
+                src += N, sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_loadu_si128((__m128i*)src), _mm_set1_epi32(zero)));
+            sum = _mm_add_epi32(sum, _mm_mullo_epi32(_mm_loadu_si128((__m128i*)src), _mm_set1_epi32(-next)));
+            __m128i res = _mm_srai_epi32(_mm_add_epi32(sum, _mm_set1_epi32(Base::AREA_ROUND)), Base::AREA_SHIFT);
+            *(int32_t*)dst = _mm_cvtsi128_si32(_mm_packus_epi16(_mm_packus_epi32(res, K_ZERO), K_ZERO));
+        }
+
+        template<> SIMD_INLINE void ResizerByteAreaResult<4>(const int32_t* src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t* dst)
+        {
+            ResizerByteAreaResult34<4>(src, count, curr, zero, next, dst);
+        }
+
+        template<> SIMD_INLINE void ResizerByteAreaResult<3>(const int32_t* src, size_t count, int32_t curr, int32_t zero, int32_t next, uint8_t* dst)
+        {
+            ResizerByteAreaResult34<3>(src, count, curr, zero, next, dst);
+        }
     }
 #endif //SIMD_SSE41_ENABLE
 
