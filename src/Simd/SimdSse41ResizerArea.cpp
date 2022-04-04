@@ -47,6 +47,8 @@ namespace Simd
 
         template<UpdateType update> SIMD_INLINE void ResizerByteArea1x1RowUpdate(const uint8_t * src0, size_t size, int32_t a, int32_t * dst)
         {
+            if (update == UpdateAdd && a == 0)
+                return;
             __m128i alpha = SetInt16(a, a);
             size_t sizeA = AlignLo(size, A);
             size_t i = 0;
@@ -136,6 +138,77 @@ namespace Simd
         }
 
         void ResizerByteArea1x1::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
+        {
+            switch (_param.channels)
+            {
+            case 1: Run<1>(src, srcStride, dst, dstStride); return;
+            case 2: Run<2>(src, srcStride, dst, dstStride); return;
+            case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 4: Run<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------
+
+        ResizerByteArea2x2::ResizerByteArea2x2(const ResParam& param)
+            : Base::ResizerByteArea2x2(param)
+        {
+        }
+
+        template<size_t N, size_t S, UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdate(const uint8_t* src0, const uint8_t* src1, int32_t val, int32_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                Base::Update<update>(dst + c, ((int)src0[0 + c] + (int)src0[S + c] + (int)src1[0 + c] + (int)src1[S + c]) * val);
+        }
+
+        template<size_t N, UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdate(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t val, int32_t* dst)
+        {
+            if (update == UpdateAdd && val == 0)
+                return;
+            size_t size2N = AlignLoAny(size, 2 * N);
+            size_t i = 0;
+            for (; i < size2N; i += 2 * N, dst += N)
+                ResizerByteArea2x2RowUpdate<N, N, update>(src0 + i, src1 + i, val, dst);
+            if (i < size)
+                ResizerByteArea2x2RowUpdate<N, 0, update>(src0 + i, src1 + i, val, dst);
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteArea2x2RowSum(const uint8_t* src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, bool tail, int32_t* dst)
+        {
+            size_t c = 0;
+            if (count)
+            {
+                ResizerByteArea2x2RowUpdate<N, UpdateSet>(src, src + stride, size, curr, dst), src += 2 * stride, c += 2;
+                for (; c < count; c += 2, src += 2 * stride)
+                    ResizerByteArea2x2RowUpdate<N, UpdateAdd>(src, src + stride, size, zero, dst);
+                ResizerByteArea2x2RowUpdate<N, UpdateAdd>(src, tail ? src : src + stride, size, zero - next, dst);
+            }
+            else
+                ResizerByteArea2x2RowUpdate<N, UpdateSet>(src, tail ? src : src + stride, size, curr - next, dst);
+        }
+
+        template<size_t N> void ResizerByteArea2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t dstW = _param.dstW, rowSize = _param.srcW * N, rowRest = dstStride - dstW * N;
+            const int32_t* iy = _iy.data, * ix = _ix.data, * ay = _ay.data, * ax = _ax.data;
+            int32_t ay0 = ay[0], ax0 = ax[0];
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
+            {
+                int32_t* buf = _by.data;
+                size_t yn = (iy[dy + 1] - iy[dy]) * 2;
+                bool tail = (dy == _param.dstH - 1) && (_param.srcH & 1);
+                ResizerByteArea2x2RowSum<N>(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], tail, buf), src += yn * srcStride;
+                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    Sse41::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                }
+            }
+        }
+
+        void ResizerByteArea2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
             switch (_param.channels)
             {
