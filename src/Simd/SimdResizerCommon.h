@@ -25,6 +25,7 @@
 #define __SimdResizerCommon_h__
 
 #include "Simd/SimdLoad.h"
+#include "Simd/SimdUpdate.h"
 
 namespace Simd
 {
@@ -83,6 +84,14 @@ namespace Simd
                 src += N, ResizerByteAreaAdd<N>(src, zero, sum);
             ResizerByteAreaAdd<N>(src, -next, sum);
             ResizerByteAreaRes<N>(sum, dst);
+        }
+
+        //---------------------------------------------------------------------------------------------
+
+        template<size_t N, size_t S, UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdate(const uint8_t* src0, const uint8_t* src1, int32_t val, int32_t* dst)
+        {
+            for (size_t c = 0; c < N; ++c)
+                Update<update>(dst + c, ((int)src0[0 + c] + (int)src0[S + c] + (int)src1[0 + c] + (int)src1[S + c]) * val);
         }
     }
 

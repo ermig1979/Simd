@@ -138,12 +138,6 @@ namespace Simd
             _by.Resize(AlignHi(DivHi(_param.srcW, 2) * _param.channels, _param.align), false, _param.align);
         }
 
-        template<size_t N, size_t S, UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdate(const uint8_t* src0, const uint8_t* src1, int32_t val, int32_t* dst)
-        {
-            for (size_t c = 0; c < N; ++c)
-                Update<update>(dst + c, ((int)src0[0 + c] + (int)src0[S + c] + (int)src1[0 + c] + (int)src1[S + c]) * val);
-        }
-
         template<size_t N, UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdate(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t val, int32_t* dst)
         {
             if (update == UpdateAdd && val == 0)
