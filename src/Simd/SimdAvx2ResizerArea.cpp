@@ -217,21 +217,28 @@ namespace Simd
                 return;
             size_t size6 = AlignLoAny(size, 6);
             size_t i = 0;
-            __m128i _val = _mm_set1_epi32(val);
-            static const __m128i K8_BGR0 = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, -1, -1, -1, -1, 0x7, 0xA, 0x8, 0xB);
-            static const __m128i K8_BGR1 = SIMD_MM_SETR_EPI8(0x4, 0x7, 0x5, 0x8, -1, -1, -1, -1, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
-            size_t size24 = AlignLoAny(size, 24);
-            for (; i < size24; i += 24, dst += 12)
+            static const __m256i K32_PRM0 = SIMD_MM256_SETR_EPI32(0x0, 0x1, 0x2, 0x0, 0x3, 0x4, 0x5, 0x0);
+            static const __m256i K32_PRM1 = SIMD_MM256_SETR_EPI32(0x2, 0x3, 0x4, 0x0, 0x5, 0x6, 0x7, 0x0);
+            static const __m256i K8_SHFL = SIMD_MM256_SETR_EPI8(
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, -1, -1, -1, -1,
+                0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, 0x7, 0xA, 0x8, 0xB, -1, -1, -1, -1);
+            static const __m256i K32_PRM2 = SIMD_MM256_SETR_EPI32(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, 0x3, 0x7);
+            static const __m256i K32_PRM3 = SIMD_MM256_SETR_EPI32(0x2, 0x4, 0x5, 0x6, 0x3, 0x7, 0x0, 0x1);
+            __m256i _val = _mm256_set1_epi32(val);
+            size_t size48 = AlignLoAny(size, 48);
+            for (; i < size48; i += 48, dst += 24)
             {
-                __m128i s00 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src0 + i + 0)), K8_BGR0), Sse2::K8_01);
-                __m128i s01 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src0 + i + 8)), K8_BGR1), Sse2::K8_01);
-                __m128i s10 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src1 + i + 0)), K8_BGR0), Sse2::K8_01);
-                __m128i s11 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src1 + i + 8)), K8_BGR1), Sse2::K8_01);
-                __m128i s0 = _mm_add_epi16(s00, s10);
-                __m128i s1 = _mm_add_epi16(s01, s11);
-                Sse2::Update<update, false>(dst + 0 * Sse2::F, _mm_madd_epi16(_mm_cvtepi16_epi32(s0), _val));
-                Sse2::Update<update, false>(dst + 1 * Sse2::F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_alignr_epi8(s1, s0, 12)), _val));
-                Sse2::Update<update, false>(dst + 2 * Sse2::F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_srli_si128(s1, 8)), _val));
+                __m256i s00 = _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(Load<false>((__m256i*)(src0 + i + 0 * F)), K32_PRM0), K8_SHFL);
+                __m256i s01 = _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(Load<false>((__m256i*)(src0 + i + 2 * F)), K32_PRM1), K8_SHFL);
+                __m256i s10 = _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(Load<false>((__m256i*)(src1 + i + 0 * F)), K32_PRM0), K8_SHFL);
+                __m256i s11 = _mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(Load<false>((__m256i*)(src1 + i + 2 * F)), K32_PRM1), K8_SHFL);
+                __m256i s0 = _mm256_add_epi16(_mm256_maddubs_epi16(s00, K8_01), _mm256_maddubs_epi16(s10, K8_01));
+                __m256i s1 = _mm256_add_epi16(_mm256_maddubs_epi16(s01, K8_01), _mm256_maddubs_epi16(s11, K8_01));
+                __m256i d0 = _mm256_permutevar8x32_epi32(s0, K32_PRM2);
+                __m256i d2 = _mm256_permutevar8x32_epi32(s1, K32_PRM3);
+                Update<update, false>(dst + 0 * F, _mm256_madd_epi16(_mm256_cvtepi16_epi32(_mm256_castsi256_si128(d0)), _val));
+                Update<update, false>(dst + 1 * F, _mm256_madd_epi16(_mm256_cvtepi16_epi32(_mm256_extracti128_si256(_mm256_or_si256(d0, d2), 1)), _val));
+                Update<update, false>(dst + 2 * F, _mm256_madd_epi16(_mm256_cvtepi16_epi32(_mm256_castsi256_si128(d2)), _val));
             }
             for (; i < size6; i += 6, dst += 3)
                 Base::ResizerByteArea2x2RowUpdate<3, 3, update>(src0 + i, src1 + i, val, dst);
