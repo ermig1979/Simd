@@ -147,6 +147,143 @@ namespace Simd
                 assert(0);
             }
         }
+
+        //---------------------------------------------------------------------------------------------
+
+        ResizerByteArea2x2::ResizerByteArea2x2(const ResParam& param)
+            : Sse41::ResizerByteArea2x2(param)
+        {
+        }
+
+        template<size_t N> SIMD_INLINE __m256i ShuffleColor(__m256i val)
+        {
+            return val;
+        }
+
+        template<> SIMD_INLINE __m256i ShuffleColor<2>(__m256i val)
+        {
+            static const __m256i IDX = SIMD_MM256_SETR_EPI8(
+                0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF,
+                0x0, 0x2, 0x1, 0x3, 0x4, 0x6, 0x5, 0x7, 0x8, 0xA, 0x9, 0xB, 0xC, 0xE, 0xD, 0xF);
+            return _mm256_shuffle_epi8(val, IDX);
+        }
+
+        template<> SIMD_INLINE __m256i ShuffleColor<4>(__m256i val)
+        {
+            static const __m256i IDX = SIMD_MM256_SETR_EPI8(
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF,
+                0x0, 0x4, 0x1, 0x5, 0x2, 0x6, 0x3, 0x7, 0x8, 0xC, 0x9, 0xD, 0xA, 0xE, 0xB, 0xF);
+            return _mm256_shuffle_epi8(val, IDX);
+        }
+
+        template<size_t N, UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdateColor(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t val, int32_t* dst)
+        {
+            if (update == UpdateAdd && val == 0)
+                return;
+            size_t size2N = AlignLoAny(size, 2 * N);
+            size_t i = 0;
+            size_t size4F = AlignLoAny(size, 4 * F);
+            __m256i _val = _mm256_set1_epi16(val);
+            for (; i < size4F; i += 4 * F, dst += 2 * F)
+            {
+                __m256i s0 = _mm256_maddubs_epi16(ShuffleColor<N>(LoadPermuted<false>((__m256i*)(src0 + i))), K8_01);
+                __m256i s1 = _mm256_maddubs_epi16(ShuffleColor<N>(LoadPermuted<false>((__m256i*)(src1 + i))), K8_01);
+                Update<update, false>(dst + 0, _mm256_madd_epi16(_mm256_unpacklo_epi16(s0, s1), _val));
+                Update<update, false>(dst + F, _mm256_madd_epi16(_mm256_unpackhi_epi16(s0, s1), _val));
+            }
+            for (; i < size2N; i += 2 * N, dst += N)
+                Base::ResizerByteArea2x2RowUpdate<N, N, update>(src0 + i, src1 + i, val, dst);
+            if (i < size)
+                Base::ResizerByteArea2x2RowUpdate<N, 0, update>(src0 + i, src1 + i, val, dst);
+        }
+
+        template<size_t N> SIMD_INLINE void ResizerByteArea2x2RowSum(const uint8_t* src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, bool tail, int32_t* dst)
+        {
+            size_t c = 0;
+            if (count)
+            {
+                ResizerByteArea2x2RowUpdateColor<N, UpdateSet>(src, src + stride, size, curr, dst), src += 2 * stride, c += 2;
+                for (; c < count; c += 2, src += 2 * stride)
+                    ResizerByteArea2x2RowUpdateColor<N, UpdateAdd>(src, src + stride, size, zero, dst);
+                ResizerByteArea2x2RowUpdateColor<N, UpdateAdd>(src, tail ? src : src + stride, size, zero - next, dst);
+            }
+            else
+                ResizerByteArea2x2RowUpdateColor<N, UpdateSet>(src, tail ? src : src + stride, size, curr - next, dst);
+        }
+
+        template<UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdateBgr(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t val, int32_t* dst)
+        {
+            if (update == UpdateAdd && val == 0)
+                return;
+            size_t size6 = AlignLoAny(size, 6);
+            size_t i = 0;
+            __m128i _val = _mm_set1_epi32(val);
+            static const __m128i K8_BGR0 = SIMD_MM_SETR_EPI8(0x0, 0x3, 0x1, 0x4, 0x2, 0x5, 0x6, 0x9, -1, -1, -1, -1, 0x7, 0xA, 0x8, 0xB);
+            static const __m128i K8_BGR1 = SIMD_MM_SETR_EPI8(0x4, 0x7, 0x5, 0x8, -1, -1, -1, -1, 0x6, 0x9, 0xA, 0xD, 0xB, 0xE, 0xC, 0xF);
+            size_t size24 = AlignLoAny(size, 24);
+            for (; i < size24; i += 24, dst += 12)
+            {
+                __m128i s00 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src0 + i + 0)), K8_BGR0), Sse2::K8_01);
+                __m128i s01 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src0 + i + 8)), K8_BGR1), Sse2::K8_01);
+                __m128i s10 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src1 + i + 0)), K8_BGR0), Sse2::K8_01);
+                __m128i s11 = _mm_maddubs_epi16(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src1 + i + 8)), K8_BGR1), Sse2::K8_01);
+                __m128i s0 = _mm_add_epi16(s00, s10);
+                __m128i s1 = _mm_add_epi16(s01, s11);
+                Sse2::Update<update, false>(dst + 0 * Sse2::F, _mm_madd_epi16(_mm_cvtepi16_epi32(s0), _val));
+                Sse2::Update<update, false>(dst + 1 * Sse2::F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_alignr_epi8(s1, s0, 12)), _val));
+                Sse2::Update<update, false>(dst + 2 * Sse2::F, _mm_madd_epi16(_mm_cvtepi16_epi32(_mm_srli_si128(s1, 8)), _val));
+            }
+            for (; i < size6; i += 6, dst += 3)
+                Base::ResizerByteArea2x2RowUpdate<3, 3, update>(src0 + i, src1 + i, val, dst);
+            if (i < size)
+                Base::ResizerByteArea2x2RowUpdate<3, 0, update>(src0 + i, src1 + i, val, dst);
+        }
+
+        template<> SIMD_INLINE void ResizerByteArea2x2RowSum<3>(const uint8_t* src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, bool tail, int32_t* dst)
+        {
+            size_t c = 0;
+            if (count)
+            {
+                ResizerByteArea2x2RowUpdateBgr<UpdateSet>(src, src + stride, size, curr, dst), src += 2 * stride, c += 2;
+                for (; c < count; c += 2, src += 2 * stride)
+                    ResizerByteArea2x2RowUpdateBgr<UpdateAdd>(src, src + stride, size, zero, dst);
+                ResizerByteArea2x2RowUpdateBgr<UpdateAdd>(src, tail ? src : src + stride, size, zero - next, dst);
+            }
+            else
+                ResizerByteArea2x2RowUpdateBgr<UpdateSet>(src, tail ? src : src + stride, size, curr - next, dst);
+        }
+
+        template<size_t N> void ResizerByteArea2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            size_t dstW = _param.dstW, rowSize = _param.srcW * N, rowRest = dstStride - dstW * N;
+            const int32_t* iy = _iy.data, * ix = _ix.data, * ay = _ay.data, * ax = _ax.data;
+            int32_t ay0 = ay[0], ax0 = ax[0];
+            for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
+            {
+                int32_t* buf = _by.data;
+                size_t yn = (iy[dy + 1] - iy[dy]) * 2;
+                bool tail = (dy == _param.dstH - 1) && (_param.srcH & 1);
+                ResizerByteArea2x2RowSum<N>(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], tail, buf), src += yn * srcStride;
+                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    Sse41::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                }
+            }
+        }
+
+        void ResizerByteArea2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
+        {
+            switch (_param.channels)
+            {
+            case 1: Run<1>(src, srcStride, dst, dstStride); return;
+            case 2: Run<2>(src, srcStride, dst, dstStride); return;
+            case 3: Run<3>(src, srcStride, dst, dstStride); return;
+            case 4: Run<4>(src, srcStride, dst, dstStride); return;
+            default:
+                assert(0);
+            }
+        }
     }
 #endif //SIMD_AVX2_ENABLE 
 }
