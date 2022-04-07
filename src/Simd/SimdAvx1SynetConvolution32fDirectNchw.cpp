@@ -262,7 +262,6 @@ namespace Simd
             case ::SimdConvolutionActivationHswish: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHswish>;
             case ::SimdConvolutionActivationHardSigmoid: return ConvolutionBiasActivation<kernel, stride, ::SimdConvolutionActivationHardSigmoid>;
             default:
-                assert(0);
                 return NULL;
             }
         }
@@ -270,20 +269,22 @@ namespace Simd
         SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr SynetConvolution32fDirectNchw::SetConvolutionBiasActivation()
         {
             const ConvParam32f & p = _param;
-            if (p.dstW < F)
-                return Sse2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
-            switch (p.strideX)
+            SynetConvolution32fDirectNchw::ConvolutionBiasActivationPtr func = NULL;
+            if (p.dstW >= F)
             {
-            case 1:
-                if (p.kernelX == 1)
-                    return Avx::SetConvolutionBiasActivation<1, 1>(p.activation);
-                if (p.kernelX == 2)
-                    return Avx::SetConvolutionBiasActivation<2, 1>(p.activation);
-                if (p.kernelX == 3)
-                    return Avx::SetConvolutionBiasActivation<3, 1>(p.activation);
-                break;
+                switch (p.strideX)
+                {
+                case 1:
+                    if (p.kernelX == 1)
+                        func = Avx::SetConvolutionBiasActivation<1, 1>(p.activation);
+                    if (p.kernelX == 2)
+                        func = Avx::SetConvolutionBiasActivation<2, 1>(p.activation);
+                    if (p.kernelX == 3)
+                        func = Avx::SetConvolutionBiasActivation<3, 1>(p.activation);
+                    break;
+                }
             }
-            return Sse2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
+            return func ? func : Sse2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
         }
     }
 #endif//SIMD_AVX_ENABLE

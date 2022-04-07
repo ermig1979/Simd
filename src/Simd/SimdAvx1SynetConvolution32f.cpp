@@ -770,7 +770,7 @@ namespace Simd
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
         {
-            if (conv->activation == SimdConvolutionActivationElu)
+            if (conv->activation == SimdConvolutionActivationElu || conv->activation == SimdConvolutionActivationSwish)
                 return Sse2::SynetConvolution32fInit(batch, conv, gemm);
             ConvParam32f param(batch, conv, gemm);
             if (!param.Valid())
