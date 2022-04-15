@@ -184,8 +184,13 @@ namespace Test
             void Update(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH)
             {
                 std::stringstream ss;
+#if 0
                 ss << description <<  "[" << ToString(method) << "-" << ToString(type) << "-" << channels;
                 ss << ":" << srcW << "x" << srcH << "->" << dstW << "x" << dstH << "]";
+#else
+                ss << description << "[" << channels << ":" << srcW << "x" << srcH << "->" << dstW << "x" << dstH;
+                ss << ":" << ToString(method) << "-" << ToString(type) << "]";
+#endif
                 description = ss.str();
             }
 
@@ -335,7 +340,7 @@ namespace Test
         bool result = true;
 
 #if !defined(__aarch64__) || 1  
-        std::vector<SimdResizeMethodType> methods = { /*SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBicubic, */ SimdResizeMethodArea, SimdResizeMethodAreaFast };
+        std::vector<SimdResizeMethodType> methods = { /*SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBicubic,*/  SimdResizeMethodArea, SimdResizeMethodAreaFast };
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
