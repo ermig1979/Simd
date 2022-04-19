@@ -397,7 +397,6 @@ typedef enum
     SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit integer overflow. */
     SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to awoid 16-bit integer overflow. */
     SimdSynetCompatibility8iMask = 12, /*!< Bit mask of options of 8-bit integer multiplication. */
-    SimdSynetCompatibilityFloatZero = 16, /*!< Bit flag of asymmetric 8-bit integer quantization. */
 } SimdSynetCompatibilityType;
 
 /*! @ingroup synet
