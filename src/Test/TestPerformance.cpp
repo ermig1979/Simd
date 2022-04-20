@@ -433,12 +433,26 @@ namespace Test
         return table;
     }
 
+    static String TestTitle()
+    {
+        return "Simd Library Performance Report:";
+    }
+
+    static String TestInfo()
+    {
+        std::stringstream info;
+        info << "Test execution time: " + GetCurrentDateTimeString();
+        info << ". Simd Library version: " << SimdVersion() << ".";
+        return info.str();
+    }
+
     String PerformanceMeasurerStorage::ConsoleReport(bool align, bool raw) const
     {
         std::stringstream report;
-        report << std::endl << std::endl << "Simd Library Performance Report:" << std::endl << std::endl;
 
-        report << "Test generation time: " + GetCurrentDateTimeString() << std::endl << std::endl;
+        report << std::endl << std::endl << TestTitle() << std::endl << std::endl;
+
+        report << TestInfo() << std::endl << std::endl;
 
         if (raw)
         {
@@ -462,9 +476,9 @@ namespace Test
         if (!file.is_open())
             return false;
 
-        file << "Simd Library Performance Report:" << std::endl << std::endl;
+        file << TestTitle() << std::endl << std::endl;
 
-        file << "Test generation time: " + GetCurrentDateTimeString() << std::endl << std::endl;
+        file << TestInfo() << std::endl << std::endl;
 
         file << GenerateTable(align)->GenerateText();
 
@@ -483,13 +497,12 @@ namespace Test
         Html html(file);
 
         html.WriteBegin("html", Html::Attr(), true, true);
-        html.WriteValue("title", Html::Attr(), "Simd Library Performance Report", true);
+        html.WriteValue("title", Html::Attr(), TestTitle(), true);
         html.WriteBegin("body", Html::Attr(), true, true);
 
-        html.WriteValue("h1", Html::Attr("id", "home"), "Simd Library Performance Report", true);
+        html.WriteValue("h1", Html::Attr("id", "home"), TestTitle(), true);
 
-        html.WriteText("Test generation time: " + GetCurrentDateTimeString(), true, true);
-        html.WriteValue("br", Html::Attr(), "", true);
+        html.WriteValue("h4", Html::Attr(), TestInfo(), true);
 
         html.WriteText(GenerateTable(align)->GenerateHtml(html.Indent()), false, false);
 

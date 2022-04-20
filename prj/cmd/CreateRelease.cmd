@@ -6,7 +6,7 @@ echo Execution file "%ARCHIVER%" is not exists!
 exit 1
 )
 
-call .\GetVersion.cmd ..\..
+call .\GetVersion.cmd ..\.. 1
 
 call .\GenerateHelp.cmd
 
@@ -54,5 +54,5 @@ rmdir %TMP_DIR%\prj\vs2019\.vs /q /s
 erase %TMP_DIR%\docs\*.tmp /q /s /f
 
 echo Create ZIP archive:
-%ARCHIVER% a -tzip -r %OUT_DIR%\simd.%FULL_VERSION%.zip %TMP_DIR%
+%ARCHIVER% a -tzip -r %OUT_DIR%\simd.%USER_VERSION%.zip %TMP_DIR%
 
