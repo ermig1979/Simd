@@ -20,7 +20,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PreBuildEvent>
-      <Command>"$(ProjectDir)..\cmd\GetVersion.cmd" "$(ProjectDir)..\.. 1"</Command>
+      <Command>"$(ProjectDir)..\cmd\GetVersion.cmd" "$(ProjectDir)..\.." "1"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>

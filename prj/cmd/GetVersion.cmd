@@ -27,7 +27,9 @@ if not errorlevel 1 (
 	if not errorlevel 1 (
 		git -C %TRUNK_DIR% rev-parse --short HEAD>%FULL_VERSION_TXT%
 		set /p GIT_REVISION=<%FULL_VERSION_TXT%
-		echo %USER_VERSION%.%GIT_REVISION%>%FULL_VERSION_TXT%
+		git -C %TRUNK_DIR% rev-parse --abbrev-ref HEAD>%FULL_VERSION_TXT%
+		set /p GIT_BRANCH=<%FULL_VERSION_TXT%
+		echo %USER_VERSION%.%GIT_BRANCH%-%GIT_REVISION%>%FULL_VERSION_TXT%
 	)
 )
 set /p FULL_VERSION=<%FULL_VERSION_TXT%

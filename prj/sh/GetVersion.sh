@@ -20,8 +20,9 @@ echo $FULL_VERSION>$FULL_VERSION_TXT
 if [ -x "$(command -v git)" ]; then
 	git -C $TRUNK_DIR rev-parse 2>/dev/null
 	if [ "$?" == "0" ]; then
-		GIT_REVISION="$(git -C $TRUNK_DIR rev-parse --short HEAD | cut -c 1-8)"
-		echo "${USER_VERSION}.${GIT_REVISION}">$FULL_VERSION_TXT
+		GIT_REVISION="$(git -C $TRUNK_DIR rev-parse --short HEAD)"
+		GIT_BRANCH="$(git -C $TRUNK_DIR rev-parse --abbrev-ref HEAD)"
+		echo "${USER_VERSION}.${GIT_BRANCH}-${GIT_REVISION}">$FULL_VERSION_TXT
 	fi
 fi
 FULL_VERSION=`cat $FULL_VERSION_TXT`
