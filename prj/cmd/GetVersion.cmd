@@ -20,7 +20,6 @@ if exist %FULL_VERSION_TXT% (
 
 set LAST_VERSION=%FULL_VERSION%
 
-echo %USER_VERSION%>%FULL_VERSION_TXT%
 where /Q git > nul
 if not errorlevel 1 (
 	git -C %TRUNK_DIR% rev-parse 2>nul
@@ -29,9 +28,14 @@ if not errorlevel 1 (
 		set /p GIT_REVISION=<%FULL_VERSION_TXT%
 		git -C %TRUNK_DIR% rev-parse --abbrev-ref HEAD>%FULL_VERSION_TXT%
 		set /p GIT_BRANCH=<%FULL_VERSION_TXT%
-		echo %USER_VERSION%.%GIT_BRANCH%-%GIT_REVISION%>%FULL_VERSION_TXT%
 	)
 )
+
+echo %USER_VERSION%>%FULL_VERSION_TXT%
+if not "%GIT_BRANCH%" == "" if not "%GIT_REVISION%" == "" (	
+	echo %USER_VERSION%.%GIT_BRANCH%-%GIT_REVISION%>%FULL_VERSION_TXT%
+)
+
 set /p FULL_VERSION=<%FULL_VERSION_TXT%
 
 set NEED_TO_UPDATE=0
@@ -49,5 +53,4 @@ if %NEED_TO_UPDATE% == 1 (
 ) else (
 	if not "%PRINT_INFO%" == "0" ( echo Skip updating of file '%SIMD_VERSION_H%' because there are not any changes. )
 )
-
 
