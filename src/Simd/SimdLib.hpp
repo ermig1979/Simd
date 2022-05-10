@@ -4391,7 +4391,7 @@ namespace Simd
         \short Converts 16-bit UYVY422 image to YUV420P.
 
         The input UYVY422 and output Y images must have the same width and height.
-        The input U and V images must have the same width and height (half size relative to Y component).
+        The output U and V images must have the same width and height (half size relative to Y component).
 
         \note This function is a C++ wrapper for function ::SimdUyvy422ToYuv420p.
 
@@ -4751,6 +4751,32 @@ namespace Simd
         assert(Compatible(y, u, v) && EqualSize(y, rgb) && y.format == View<A>::Gray8 && rgb.format == View<A>::Rgb24);
 
         SimdYuv444pToRgb(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, rgb.data, rgb.stride);
+    }
+
+    /*! @ingroup yuv_conversion
+
+        \fn void Yuv420pToUyvy422(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& uyvy);
+
+        \short Converts YUV420P to 16-bit UYVY422 image.
+
+        The input Y and output UYVY422 images must have the same width and height.
+        The input U and V images must have the same width and height (half size relative to Y component).
+
+        \note This function is a C++ wrapper for function ::SimdYuv420pToUyvy422.
+
+        \param [in] y - an input 8-bit image with Y color plane.
+        \param [in] u - an input 8-bit image with U color plane.
+        \param [in] v - an input 8-bit image with V color plane.
+        \param [out] uyvy - an output 16-bit UYVY422 image.
+    */
+    template<template<class> class A> SIMD_INLINE void Yuv420pToUyvy422(const View<A>& y, const View<A>& u, const View<A>& v, View<A>& uyvy)
+    {
+        assert(y.width == uyvy.width && y.height == uyvy.height);
+        assert(y.width == 2 * u.width && y.height == 2 * u.height && y.format == u.format);
+        assert(y.width == 2 * v.width && y.height == 2 * v.height && y.format == v.format);
+        assert(uyvy.format == View<A>::Uyvy32 && y.format == View<A>::Gray8);
+
+        SimdYuv420pToUyvy422(y.data, y.stride, u.data, u.stride, v.data, v.stride, y.width, y.height, uyvy.data, uyvy.stride);
     }
 
     /*! @ingroup universal_conversion

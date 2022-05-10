@@ -7326,5 +7326,12 @@ SIMD_API void SimdYuv444pToRgb(const uint8_t* y, size_t yStride, const uint8_t* 
         Base::Yuv444pToRgb(y, yStride, u, uStride, v, vStride, width, height, rgb, rgbStride);
 }
 
+SIMD_API void SimdYuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+    size_t width, size_t height, uint8_t* uyvy, size_t uyvyStride)
+{
+    Base::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
+}
+
+
 
 

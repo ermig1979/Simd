@@ -467,6 +467,7 @@ namespace Test
     TEST_ADD_GROUP_A00(Yuv444pToRgb);
     TEST_ADD_GROUP_A00(Yuv422pToRgb);
     TEST_ADD_GROUP_A00(Yuv420pToRgb);
+    TEST_ADD_GROUP_A00(Yuv420pToUyvy422);
 
     TEST_ADD_GROUP_A00(Yuva420pToBgra);
     TEST_ADD_GROUP_AD0(Yuv444pToBgra);

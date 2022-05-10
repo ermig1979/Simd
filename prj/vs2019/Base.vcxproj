@@ -183,6 +183,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHsl.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHsv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseYuvToHue.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseYuvToUyvy.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

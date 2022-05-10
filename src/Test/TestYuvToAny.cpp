@@ -369,6 +369,15 @@ namespace Test
         return result;
     }
 
+    bool Yuv420pToUyvy422AutoTest()
+    {
+        bool result = true;
+
+        result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Base::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
+
+        return result;
+    }
+
     //-----------------------------------------------------------------------
 
     bool YuvToAnyDataTest(bool create, int width, int height, int dx, int dy, View::Format dstType, const Func & f, int maxDifference = 0)
