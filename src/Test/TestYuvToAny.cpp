@@ -375,6 +375,11 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Base::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
 
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Sse41::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
+#endif 
+
         return result;
     }
 
