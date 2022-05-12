@@ -38,9 +38,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam32f param(batch, conv, gemm);
+            ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
             else if (Sse2::SynetConvolution32fDepthwiseDotProduct::Preferable(param))

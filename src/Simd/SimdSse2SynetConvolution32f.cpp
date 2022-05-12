@@ -430,7 +430,7 @@ namespace Simd
         SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
             : Base::SynetConvolution32fGemmNN(p)
         {
-            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2"));
             if (_param.trans && _param.group == 1)
             {
                 if (GemmRuntime())
@@ -513,7 +513,7 @@ namespace Simd
             }
             else
                 assert(0);
-            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2"));
             if (_param.trans)
             {
                 if (NHWC_GEMM_RUNTIME)
@@ -650,9 +650,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam32f param(batch, conv, gemm);
+            ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
             else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))

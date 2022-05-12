@@ -39,7 +39,7 @@ namespace Simd
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
             : Avx::SynetDeconvolution32fGemmNN(p)
         {
-            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2"));
             if (_param.trans && _param.group == 1)
             {
                 if (NHWC_GEMM_RUNTIME)
@@ -234,9 +234,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            DeconvParam32f param(batch, conv, gemm);
+            DeconvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
             if (SynetDeconvolution32fNhwcDirect2x2::Preferable(param))

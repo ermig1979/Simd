@@ -38,7 +38,7 @@ namespace Test
 
         struct FuncD
         {
-            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
             FuncPtr func;
             String description;
@@ -52,7 +52,7 @@ namespace Test
 
             void Call(const Param & p, const Tensor32f & weight, const Tensor32f & bias, const Tensor32f & params, const Tensor32f & src, Tensor32f & buf, Tensor32f & dst) const
             {
-                void * context = func(p.batch, &p.conv, NULL);
+                void * context = func(p.batch, &p.conv, SimdSynetCompatibilityDefault);
                 buf.Extend({ ::SimdSynetDeconvolution32fExternalBufferSize(context) });
                 ::SimdSynetDeconvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
                 {

@@ -384,11 +384,13 @@ typedef enum
 } SimdResizeMethodType;
 
 /*! @ingroup synet
-    Describes Synet compatibility flags. This type used in functions ::SimdSynetScaleLayerForward, ::SimdSynetConvert32fTo8u, 
-    ::SimdSynetConvolution8iInit, and ::SimdSynetMergedConvolution8iInit.
+    Describes Synet calculation compatibility flags. This type used in functions ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward, 
+    ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i, ::SimdSynetScale8iInit,
+    ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, and ::SimdSynetMergedConvolution8iInit.
 */
 typedef enum
 {
+    SimdSynetCompatibilityDefault = 0, /*!< Default compatibility value. */
     SimdSynetCompatibilityFmaUse = 0, /*!< Fast (No compatibility for fast code). */
     SimdSynetCompatibilityFmaNoTail = 1, /*!< Not use FMA instructions at row tail. */
     SimdSynetCompatibilityFmaAvoid = 2, /*!< Not use FMA instructions. */
@@ -397,6 +399,10 @@ typedef enum
     SimdSynetCompatibility8iOverflow = 4, /*!< Allow 16-bit integer overflow. */
     SimdSynetCompatibility8iNarrowed = 8, /*!< Using of narrowed range (signed: [-90 .. 90], unsigned: [0 .. 180]) to awoid 16-bit integer overflow. */
     SimdSynetCompatibility8iMask = 12, /*!< Bit mask of options of 8-bit integer multiplication. */
+    SimdSynetCompatibility16bfAvoid = 0, /*!< Not use BFloat16 (Brain Floating Point) format. */
+    SimdSynetCompatibility16bfHard = 16, /*!< Use BFloat16 (Brain Floating Point) format only if hardware support exists. */
+    SimdSynetCompatibility16bfSoft = 32, /*!< Use BFloat16 (Brain Floating Point) format always (in mode of software emulation if hardware support does not exist). */
+    SimdSynetCompatibility16bfMask = 48, /*!< Bit mask of options of BFloat16 (Brain Floating Point) format. */
 } SimdSynetCompatibilityType;
 
 /*! @ingroup synet
@@ -491,29 +497,6 @@ typedef enum
     SimdYuvBt2020, /*!< Corresponds to BT.2020 standard. Uses Kr=0.2627, Kb=0.0593. Restricts Y to range [16..235], U and V to [16..240]. */
     SimdYuvTrect871, /*!< Corresponds to T-REC-T.871 standard. Uses Kr=0.299, Kb=0.114. Y, U and V use full range [0..255]. */
 } SimdYuvType;
-
-/*! @ingroup synet
-    \brief Callback function type "SimdGemm32fNNPtr";
-
-    The function has to perform general matrix multiplication (for 32-bit float numbers).
-
-    \verbatim
-    C(M, N) = alpha*A(M, K)*B(K, N) + beta*C(M, N);
-    \endverbatim
-
-    \param [in] M - a height of A and height of C matrices.
-    \param [in] N - a width of B and width of C matrices.
-    \param [in] K - a width of A and height of B matrices.
-    \param [in] alpha - a pointer to multiplier of the first term.
-    \param [in] A - a pointer to input A matrix.
-    \param [in] lda - a leading dimension of A matrix.
-    \param [in] B - a pointer to input B matrix.
-    \param [in] ldb - a leading dimension of B matrix.
-    \param [in] beta - a pointer to multiplier of the second term.
-    \param [out] C - a pointer to output C matrix.
-    \param [in] ldc - a leading dimension of C matrix.
-*/
-typedef void(*SimdGemm32fNNPtr)(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
 /*! @ingroup synet
     Describes convolution (deconvolution) parameters. It is used in ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, 
@@ -6254,7 +6237,7 @@ extern "C"
         \param [in] channels - a number of channels in input and output image tensors.
         \param [in] spatial - a spatial size of input and output image tensors.
         \param [in] format - a format of input and output image tensors.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
     */
     SIMD_API void SimdSynetAdd8i(const uint8_t * aData, const float * aScale, const float* aShift, const uint8_t* bData, const float* bScale, const float* bShift,
         uint8_t* cData, const float* cScale, const float* cShift, size_t batch, size_t channels, size_t spatial, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
@@ -6276,7 +6259,7 @@ extern "C"
         \param [in] scale - a pointer to the 32-bit float array with scale coefficients. 
         \param [in] shift - a pointer to the 32-bit float array with shift coefficients. 
         \param [out] dst - a pointer to the 8-bit unsigned integer array with output image tensor. 
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
     */
     SIMD_API void SimdSynetConvert32fTo8u(const float * src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float * shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
 
@@ -6297,24 +6280,24 @@ extern "C"
         \param [in] scale - a pointer to the 32-bit float array with scale coefficients.
         \param [in] shift - a pointer to the 32-bit float array with shift coefficients.
         \param [out] dst - a pointer to the array with 32-bit float output image tensor.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
     */
     SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, float* dst, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_convolution_fp32
 
-        \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        \fn void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
         \short Initilizes FP32 convolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
-        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
+        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to FP32 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution32fExternalBufferSize, ::SimdSynetConvolution32fInternalBufferSize, 
             ::SimdSynetConvolution32fInfo, ::SimdSynetConvolution32fSetParams and ::SimdSynetConvolution32fForward.
     */
-    SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_convolution_fp32
 
@@ -6384,7 +6367,7 @@ extern "C"
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to convolution parameters.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to INT8 convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetConvolution8iExternalBufferSize, ::SimdSynetConvolution8iInternalBufferSize, 
             ::SimdSynetConvolution8iInfo, ::SimdSynetConvolution8iSetParams and ::SimdSynetConvolution8iForward.
@@ -6453,18 +6436,18 @@ extern "C"
 
     /*! @ingroup synet_deconvolution_fp32
 
-        \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        \fn void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
         \short Initilizes FP32 deconvolution algorithm.
 
         \param [in] batch - a batch size.
         \param [in] conv - a pointer to deconvolution parameters.
-        \param [in] gemm - a pointer to external function of matrix multiplication. Can be NULL.
+        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to FP32 deconvolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetDeconvolution32fExternalBufferSize, ::SimdSynetDeconvolution32fInternalBufferSize, 
             ::SimdSynetDeconvolution32fInfo, ::SimdSynetDeconvolution32fSetParams and ::SimdSynetDeconvolution32fForward.
     */
-    SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+    SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_deconvolution_fp32
 
@@ -6973,7 +6956,7 @@ extern "C"
         \param [in] src - a pointer to the input 8-bit unsigned integer array. The size of the array must be equal to M*K.
         \param [in] weight - a pointer to the 8-bit signed integer array with weight. The size of the array must be equal to N*K.
         \param [out] dst - a pointer to the output 32-bit integer array. The size of the array must be equal to M*N.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
     */
     SIMD_API void SimdSynetInnerProduct8i(size_t M, size_t N, size_t K, const uint8_t * src, const int8_t * weight, int32_t * dst, SimdSynetCompatibilityType compatibility);
 
@@ -7094,7 +7077,7 @@ extern "C"
         \param [in] batch - a batch size.
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to INT8 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution8iExternalBufferSize, ::SimdSynetMergedConvolution8iInternalBufferSize, 
             ::SimdSynetMergedConvolution8iInfo, ::SimdSynetMergedConvolution8iSetParams and ::SimdSynetMergedConvolution8iForward.
@@ -7390,7 +7373,7 @@ extern "C"
         \param [in] width - a width of (input/output) image tensor.
         \param [out] dst - a pointer to the 32-bit float array with output image tensor. The size of the array is ::SimdAlign (channels, ::SimdSynetTensorAlignment (format)) * spatial.
         \param [in] format - a format of (input/output) image tensor.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
     */
     SIMD_API void SimdSynetScaleLayerForward(const float * src, const float * scale, const float * bias, size_t channels, size_t height, size_t width, float * dst, SimdTensorFormatType format, SimdSynetCompatibilityType compatibility);
 
@@ -7406,7 +7389,7 @@ extern "C"
         \param [in] srcType - an input data type (SimdTensorData32f or SimdTensorData8u).
         \param [in] dstType - an output data type (SimdTensorData32f or SimdTensorData8u).
         \param [in] format - a format of (input/output) image tensor.
-        \param [in] compatibility - a flags of bitwise compatibility.
+        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to INT8 scale context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetScale8iInternalBufferSize, ::SimdSynetScale8iSetParams and ::SimdSynetScale8iForward.
     */

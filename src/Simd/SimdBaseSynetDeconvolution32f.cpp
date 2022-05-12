@@ -88,7 +88,7 @@ namespace Simd
             }
             else
                 _weightT.Resize(p.srcC * p.kernelY * p.kernelX * p.dstC / p.group);
-            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base"));
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
@@ -434,9 +434,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            DeconvParam32f param(batch, conv, gemm);
+            DeconvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
             if (SynetDeconvolution32fNhwcDirect2x2::Preferable(param))

@@ -38,7 +38,7 @@ namespace Test
 
         struct FuncC
         {
-            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+            typedef void*(*FuncPtr)(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
 
             FuncPtr func;
             String desc;
@@ -110,8 +110,8 @@ namespace Test
         ::SimdFill32f(dst1.Data(), dst1.Size(), params.Data() + 0);
         ::SimdFill32f(dst2.Data(), dst2.Size(), params.Data() + 1);
 
-        void * context1 = f1.func(p.batch, &p.conv, NULL);
-        void * context2 = f2.func(p.batch, &p.conv, NULL);
+        void * context1 = f1.func(p.batch, &p.conv, SimdSynetCompatibilityDefault);
+        void * context2 = f2.func(p.batch, &p.conv, SimdSynetCompatibilityDefault);
 
         buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context1) });
         buf.Extend({ ::SimdSynetConvolution32fExternalBufferSize(context2) });

@@ -68,7 +68,7 @@ namespace Test
     {
         p.conv.srcT = SimdTensorData32f;
         p.conv.dstT = SimdTensorData32f;
-        void * context = SimdSynetConvolution32fInit(p.batch, &p.conv, NULL);
+        void * context = SimdSynetConvolution32fInit(p.batch, &p.conv, SimdSynetCompatibilityDefault);
         buf.Extend({ SimdSynetConvolution32fExternalBufferSize(context) });
         SimdSynetConvolution32fSetParams(context, weight.Data(), NULL, bias.Data(), params.Data());
         SimdSynetConvolution32fForward(context, src.Data(), buf.Data(), dst.Data());

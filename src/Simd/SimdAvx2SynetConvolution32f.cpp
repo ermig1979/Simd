@@ -192,7 +192,7 @@ namespace Simd
                 }
                 _start[kx] = int(kx * p.dilationX - p.padX + _nose[kx] * p.strideX);
             }
-            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2"));
             if (_param.trans && _param.group == 1)
             {
                 if (GemmRuntime())
@@ -346,7 +346,7 @@ namespace Simd
             }
             else
                 assert(0);
-            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Avx2::Gemm32fNN, "Avx2"));
             if (_param.trans)
             {
                 if (NHWC_GEMM_RUNTIME)
@@ -403,9 +403,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam32f param(batch, conv, gemm);
+            ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
             else if (Avx::SynetConvolution32fDepthwiseDotProduct::Preferable(param))

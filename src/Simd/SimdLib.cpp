@@ -5656,13 +5656,13 @@ SIMD_API void SimdSynetConvert8uTo32f(const uint8_t* src, size_t batch, size_t c
 #endif
 }
 
-SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
+SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility)
 {
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
+    typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
     const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC6(SynetConvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
-    return simdSynetConvolution32fInit(batch, params, gemm);
+    return simdSynetConvolution32fInit(batch, params, compatibility);
 #else
     assert(0);
     return 0;
@@ -5782,13 +5782,13 @@ SIMD_API void SimdSynetConvolution8iForward(void* context, const uint8_t* src, u
 #endif
 }
 
-SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm)
+SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility)
 {
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdGemm32fNNPtr gemm);
+    typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
     const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
     
-    return simdSynetDeconvolution32fInit(batch, params, gemm);
+    return simdSynetDeconvolution32fInit(batch, params, compatibility);
 #else
     assert(0);
     return 0;

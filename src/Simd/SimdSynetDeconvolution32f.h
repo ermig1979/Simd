@@ -39,14 +39,14 @@ namespace Simd
     {
         SimdBool trans;
         size_t batch;
-        SimdGemm32fNNPtr gemm;
+        SimdSynetCompatibilityType compatibility;
 
-        DeconvParam32f(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        DeconvParam32f(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
             *((SimdConvolutionParameters*)this) = *conv;
             this->trans = (srcF == SimdTensorFormatNhwc ? SimdTrue : SimdFalse);
             this->batch = batch;
-            this->gemm = gemm;
+            this->compatibility = compatibility;
         }
 
         bool Valid()
@@ -239,7 +239,7 @@ namespace Simd
             DeconvolutionPtr _deconvolution;
         };
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 
 #ifdef SIMD_SSE2_ENABLE    
@@ -261,7 +261,7 @@ namespace Simd
             static bool Preferable(const DeconvParam32f & p);
         };
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_SSE2_ENABLE
 
@@ -282,7 +282,7 @@ namespace Simd
             virtual String Ext() const { return "Avx"; }
         };
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX_ENABLE
 
@@ -303,7 +303,7 @@ namespace Simd
             virtual String Ext() const { return "Avx2"; }
         };
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX2_ENABLE
 
@@ -324,7 +324,7 @@ namespace Simd
             virtual String Ext() const { return "Avx512f"; }
         };
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX512F_ENABLE
 
@@ -347,7 +347,7 @@ namespace Simd
             static bool Preferable(const DeconvParam32f & p);
         };
 
-        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm);
+        void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_NEON_ENABLE
 }

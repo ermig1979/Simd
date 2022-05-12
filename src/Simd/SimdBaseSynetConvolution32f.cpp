@@ -344,7 +344,7 @@ namespace Simd
                     if (_batch%merge == 0 && _M*merge*_K*sizeof(float) <= Base::AlgCacheL2())
                         _merge = merge;
             }
-            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base"));
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
@@ -799,7 +799,7 @@ namespace Simd
             }
             else
                 assert(0);
-            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base", p.gemm, "Ext"));
+            _gemm.Init(InitGemmFuncs(Base::Gemm32fNN, "Base"));
             _biasAndActivation = Base::ConvolutionBiasAndActivation;
         }
 
@@ -1660,9 +1660,9 @@ namespace Simd
 
 //#define SIMD_BASE_ONLY_GEMM_NN
 
-        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdGemm32fNNPtr gemm)
+        void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
-            ConvParam32f param(batch, conv, gemm);
+            ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
 #if !defined(SIMD_BASE_ONLY_GEMM_NN)
