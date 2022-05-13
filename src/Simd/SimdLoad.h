@@ -453,6 +453,11 @@ namespace Simd
             return _mm512_inserti32x8(_mm512_castsi256_si512(Avx2::Load<align>(p0)), Avx2::Load<align>(p1), 1);
         }
 
+        SIMD_INLINE __m512i Load(const uint8_t * p0, const uint8_t * p1, __mmask32 mask)
+        {
+            return _mm512_inserti32x8(_mm512_castsi256_si512(_mm256_maskz_loadu_epi8(mask, p0)), _mm256_maskz_loadu_epi8(mask, p1), 1);
+        }
+
         template<bool align> SIMD_INLINE __m512i Load(const __m128i* p0, const __m128i* p1, const __m128i* p2, const __m128i* p3)
         {
             return _mm512_inserti32x4(_mm512_inserti32x4(_mm512_inserti32x4(_mm512_castsi128_si512(Sse2::Load<align>(p0)), Sse2::Load<align>(p1), 1), Sse2::Load<align>(p2), 2), Sse2::Load<align>(p3), 3);

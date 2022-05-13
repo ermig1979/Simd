@@ -95,6 +95,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToUyvy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
