@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv420pToBgraV2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv444pToBgraV2.cpp" />
