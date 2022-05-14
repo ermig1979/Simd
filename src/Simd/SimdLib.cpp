@@ -7349,6 +7349,11 @@ SIMD_API void SimdYuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8
         Sse41::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::DA)
+        Neon::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
+    else
+#endif
         Base::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
 }
 

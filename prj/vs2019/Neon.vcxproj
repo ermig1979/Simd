@@ -112,6 +112,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToUyvy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />

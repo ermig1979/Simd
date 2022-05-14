@@ -274,6 +274,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonImageSaveJpeg.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToUyvy.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">
