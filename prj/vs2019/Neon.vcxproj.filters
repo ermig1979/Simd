@@ -280,6 +280,9 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToYuv.cpp">
       <Filter>Neon</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToBgr.cpp">
+      <Filter>Neon</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Neon">

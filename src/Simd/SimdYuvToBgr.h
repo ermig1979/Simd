@@ -525,16 +525,26 @@ namespace Simd
             return PackI32(YuvToBlue<T, 0>(y, u), YuvToBlue<T, 1>(y, u));
         }
 
-        template <class T, int part> SIMD_INLINE int16x8_t UnpackY(uint8x16_t y)
+        template <class T> SIMD_INLINE int16x8_t AdjustY(uint8x8_t y)
         {
             static const int16x8_t Y_LO = SIMD_VEC_SET1_EPI16(T::Y_LO);
-            return vsubq_s16(vreinterpretq_s16_u16(UnpackU8<part>(y)), Y_LO);
+            return vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(y)), Y_LO);
+        }
+
+        template <class T> SIMD_INLINE int16x8_t AdjustUV(uint8x8_t uv)
+        {
+            static const int16x8_t UV_Z = SIMD_VEC_SET1_EPI16(T::UV_Z);
+            return vsubq_s16(vreinterpretq_s16_u16(vmovl_u8(uv)), UV_Z);
+        }
+
+        template <class T, int part> SIMD_INLINE int16x8_t UnpackY(uint8x16_t y)
+        {
+            return AdjustY<T>(Half<part>(y));
         }
 
         template <class T, int part> SIMD_INLINE int16x8_t UnpackUV(uint8x16_t uv)
         {
-            static const int16x8_t UV_Z = SIMD_VEC_SET1_EPI16(T::UV_Z);
-            return vsubq_s16(vreinterpretq_s16_u16(UnpackU8<part>(uv)), UV_Z);
+            return AdjustUV<T>(Half<part>(uv));
         }
 
         template <class T> SIMD_INLINE void YuvToBgr(uint8x16_t y, uint8x16_t u, uint8x16_t v, uint8x16x3_t& bgr)

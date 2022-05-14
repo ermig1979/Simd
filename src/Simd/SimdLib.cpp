@@ -6650,6 +6650,11 @@ SIMD_API void SimdUyvy422ToBgr(const uint8_t* uyvy, size_t uyvyStride, size_t wi
         Sse41::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
     else
 #endif
+#ifdef SIMD_NEON_ENABLE
+    if (Neon::Enable && width >= Neon::DA)
+        Neon::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
+    else
+#endif
         Base::Uyvy422ToBgr(uyvy, uyvyStride, width, height, bgr, bgrStride, yuvType);
 }
 

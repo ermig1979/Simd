@@ -1712,6 +1712,11 @@ namespace Simd
         {
             return vaddq_f32(vmlaq_f32(vdupq_n_f32(0), a, b), c);
         }
+
+        SIMD_INLINE uint8x16_t Combine(const uint8x8x2_t& a)
+        {
+            return vcombine_u8(a.val[0], a.val[1]);
+        }
     }
 #endif//SIMD_NEON_ENABLE
 }

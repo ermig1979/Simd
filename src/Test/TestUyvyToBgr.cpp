@@ -89,13 +89,18 @@ namespace Test
         result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Base::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::DA)
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Sse41::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::DA)
             result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Avx2::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
+#endif 
+
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
+            result = result && Uyvy422ToBgrAutoTest(FUNC_0(Simd::Neon::Uyvy422ToBgr), FUNC_0(SimdUyvy422ToBgr));
 #endif 
 
         return result;
