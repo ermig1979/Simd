@@ -106,6 +106,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />

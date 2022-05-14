@@ -348,6 +348,11 @@ namespace Test
             result = result && AnyToYuvAutoTest(View::Uyvy16, 2, 2, FUNC_YUVN(Simd::Avx512bw::Uyvy422ToYuv420p), FUNC_YUVN(SimdUyvy422ToYuv420p));
 #endif
 
+#ifdef SIMD_NEON_ENABLE
+        if (Simd::Neon::Enable && W >= Simd::Neon::DA)
+            result = result && AnyToYuvAutoTest(View::Uyvy16, 2, 2, FUNC_YUVN(Simd::Neon::Uyvy422ToYuv420p), FUNC_YUVN(SimdUyvy422ToYuv420p));
+#endif
+
         return result;
     }
 
