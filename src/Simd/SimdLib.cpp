@@ -2313,6 +2313,11 @@ SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
 
 SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst)
 {
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable)
+        Avx512bw::Float32ToBFloat16(src, size, dst);
+    else
+#endif
 #ifdef SIMD_AVX2_ENABLE
     if (Avx2::Enable)
         Avx2::Float32ToBFloat16(src, size, dst);

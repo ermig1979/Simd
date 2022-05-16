@@ -94,6 +94,22 @@ namespace Simd
         }
     }
 #endif  
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        namespace Bf16
+        {
+            const __m512i ROUND = SIMD_MM512_SET1_EPI32(Base::Bf16::ROUND);
+            const __m512i MASK = SIMD_MM512_SET1_EPI32(Base::Bf16::MASK);
+        }
+
+        SIMD_INLINE __m512i Float32ToBFloat16(__m512 value)
+        {
+            return _mm512_srli_epi32(_mm512_add_epi32(_mm512_castps_si512(value), Bf16::ROUND), Base::Bf16::SHIFT);
+        }
+    }
+#endif 
 }
 
 #endif//__SimdBFloat16_h__
