@@ -104,4 +104,84 @@ namespace Test
 
         return result;
     }
+
+    //---------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncBS
+        {
+            typedef void(*FuncPtr)(const uint16_t* src, size_t size, float* dst);
+
+            FuncPtr func;
+            String description;
+
+            FuncBS(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src, View& dst) const
+            {
+                TEST_PERFORMANCE_TEST(description);
+                func((const uint16_t*)src.data, src.width, (float*)dst.data);
+            }
+        };
+    }
+
+#define FUNC_BS(function) FuncBS(function, #function)
+
+    bool BFloat16ToFloat32AutoTest(size_t size, const FuncBS& f1, const FuncBS& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " [" << size << "].");
+
+        View origin(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View src(size, 1, View::Int16, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst1(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+        View dst2(size, 1, View::Float, NULL, TEST_ALIGN(SIMD_ALIGN));
+
+        FillRandom32f(origin, -10.0, 10.0);
+        ::SimdFloat32ToBFloat16((const float*)origin.data, size, (uint16_t*)src.data);
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(src, dst1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(src, dst2));
+
+        result = result && Compare(dst1, dst2, EPS, true, 32);
+
+        return result;
+    }
+
+    bool BFloat16ToFloat32AutoTest(const FuncBS& f1, const FuncBS& f2)
+    {
+        bool result = true;
+
+        result = result && BFloat16ToFloat32AutoTest(W * H, f1, f2);
+        result = result && BFloat16ToFloat32AutoTest(W * H - 1, f1, f2);
+
+        return result;
+    }
+
+    bool BFloat16ToFloat32AutoTest()
+    {
+        bool result = true;
+
+        result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Base::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
+
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Sse41::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
+#endif
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Avx2::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
+#endif
+
+//#ifdef SIMD_AVX512BW_ENABLE
+//        if (Simd::Avx512bw::Enable)
+//            result = result && BFloat16ToFloat32AutoTest(FUNC_BS(Simd::Avx512bw::BFloat16ToFloat32), FUNC_BS(SimdBFloat16ToFloat32));
+//#endif 
+
+        return result;
+    }
 }

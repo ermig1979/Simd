@@ -2920,6 +2920,18 @@ extern "C"
     */
     SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 
+    /*! @ingroup bfloat16
+
+        \fn void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float  * dst);
+
+        \short Converts numbers in the array from 16-bit bfloat to 32-bit float format.
+
+        \param [in] src - a pointer to the input array with 16-bit bfloat point numbers.
+        \param [in] size - a size of input and output array.
+        \param [out] dst - a pointer to the output array with 32-bit float point numbers.
+    */
+    SIMD_API void SimdBFloat16ToFloat32(const uint16_t* src, size_t size, float* dst);
+
     /*! @ingroup float16
 
         \fn void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst);

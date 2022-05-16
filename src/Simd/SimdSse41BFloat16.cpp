@@ -49,6 +49,28 @@ namespace Simd
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToBFloat16(src[i]);
         }
+
+        //---------------------------------------------------------------------------------------------
+
+        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
+        {
+            size_t size8 = Simd::AlignLo(size, 8);
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size8; i += 8)
+            {
+                __m128i s = _mm_loadu_si128((__m128i*)(src + i));
+                _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
+                _mm_storeu_ps(dst + i + 4, BFloat16ToFloat32(UnpackU16<1>(s)));
+            }
+            for (; i < size4; i += 4)
+            {
+                __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
+                _mm_storeu_ps(dst + i + 0, BFloat16ToFloat32(UnpackU16<0>(s)));
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::BFloat16ToFloat32(src[i]);
+        }
     }
 #endif
 }

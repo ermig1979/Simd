@@ -143,6 +143,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(BayerToBgra);
 
     TEST_ADD_GROUP_A00(Float32ToBFloat16);
+    TEST_ADD_GROUP_A00(BFloat16ToFloat32);
 
     TEST_ADD_GROUP_AD0(Bgr48pToBgra32);
 

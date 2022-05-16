@@ -76,6 +76,11 @@ namespace Simd
         {
             return _mm_srli_epi32(_mm_add_epi32(_mm_castps_si128(value), Bf16::ROUND), Base::Bf16::SHIFT);
         }
+
+        SIMD_INLINE __m128 BFloat16ToFloat32(__m128i value)
+        {
+            return _mm_castsi128_ps(_mm_slli_epi32(value, Base::Bf16::SHIFT));
+        }
     }
 #endif   
 
@@ -91,6 +96,11 @@ namespace Simd
         SIMD_INLINE __m256i Float32ToBFloat16(__m256 value)
         {
             return _mm256_srli_epi32(_mm256_add_epi32(_mm256_castps_si256(value), Bf16::ROUND), Base::Bf16::SHIFT);
+        }
+
+        SIMD_INLINE __m256 BFloat16ToFloat32(__m256i value)
+        {
+            return _mm256_castsi256_ps(_mm256_slli_epi32(value, Base::Bf16::SHIFT));
         }
     }
 #endif  

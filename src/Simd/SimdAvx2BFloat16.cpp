@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdMath.h"
 #include "Simd/SimdBFloat16.h"
 
 namespace Simd
@@ -55,6 +56,36 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToBFloat16(src[i]);
+        }
+
+        //---------------------------------------------------------------------------------------------
+
+        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
+        {
+            size_t size16 = Simd::AlignLo(size, 16);
+            size_t size8 = Simd::AlignLo(size, 8);
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size16; i += 16)
+            {
+                __m256 d0 = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)(src + i) + 0)));
+                __m256 d1 = BFloat16ToFloat32(_mm256_cvtepu16_epi32(_mm_loadu_si128((__m128i*)(src + i) + 1)));
+                _mm256_storeu_ps(dst + i + 0, d0);
+                _mm256_storeu_ps(dst + i + F, d1);
+            }
+            for (; i < size8; i += 8)
+            {
+                __m128i s = _mm_loadu_si128((__m128i*)(src + i));
+                _mm_storeu_ps(dst + i + 0, Sse41::BFloat16ToFloat32(Sse2::UnpackU16<0>(s)));
+                _mm_storeu_ps(dst + i + 4, Sse41::BFloat16ToFloat32(Sse2::UnpackU16<1>(s)));
+            }
+            for (; i < size4; i += 4)
+            {
+                __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
+                _mm_storeu_ps(dst + i + 0, Sse41::BFloat16ToFloat32(Sse2::UnpackU16<0>(s)));
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::BFloat16ToFloat32(src[i]);
         }
     }
 #endif
