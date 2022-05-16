@@ -92,11 +92,11 @@ namespace Test
             result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Sse41::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 #endif 
 
-//#ifdef SIMD_AVX2_ENABLE
-//        if (Simd::Avx2::Enable)
-//            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx2::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
-//#endif 
-//
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx2::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
+#endif 
+
 //#ifdef SIMD_AVX512BW_ENABLE
 //        if (Simd::Avx512bw::Enable)
 //            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx512bw::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
