@@ -2313,7 +2313,12 @@ SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
 
 SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst)
 {
-    Base::Float32ToBFloat16(src, size, dst);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::Float32ToBFloat16(src, size, dst);
+    else
+#endif
+        Base::Float32ToBFloat16(src, size, dst);
 }
 
 SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)

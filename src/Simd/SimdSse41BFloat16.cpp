@@ -21,40 +21,34 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdDefs.h"
+#include "Simd/SimdMemory.h"
+#include "Simd/SimdStore.h"
+#include "Simd/SimdBFloat16.h"
 
 namespace Simd
 {
-    namespace Base
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
-        SIMD_INLINE void Yuv420pToUyvy422(const uint8_t* y0, size_t yStride, const uint8_t* u, const uint8_t* v, uint8_t* uyvy0, size_t uyvyStride)
+        void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
         {
-            const uint8_t* y1 = y0 + yStride;
-            uint8_t* uyvy1 = uyvy0 + uyvyStride;
-            uyvy0[1] = y0[0];
-            uyvy0[3] = y0[1];
-            uyvy1[1] = y1[0];
-            uyvy1[3] = y1[1];
-            uyvy0[0] = u[0];
-            uyvy1[0] = u[0];
-            uyvy0[2] = v[0];
-            uyvy1[2] = v[0];
-        }
-
-        void Yuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, 
-            size_t width, size_t height, uint8_t* uyvy, size_t uyvyStride)
-        {
-            assert((width % 2 == 0) && (height % 2 == 0));
-
-            for (size_t row = 0; row < height; row += 2)
+            size_t size8 = Simd::AlignLo(size, 8);
+            size_t size4 = Simd::AlignLo(size, 4);
+            size_t i = 0;
+            for (; i < size8; i += 8)
             {
-                for (size_t colY = 0, colUV = 0, colUyvy = 0; colY < width; colY += 2, colUV += 1, colUyvy += 4)
-                    Yuv420pToUyvy422(y + colY, yStride, u + colUV, v + colUV, uyvy + colUyvy, uyvyStride);
-                y += 2 * yStride;
-                u += uStride;
-                v += vStride;
-                uyvy += 2 * uyvyStride;
+                __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + i + 0));
+                __m128i d1 = Float32ToBFloat16(_mm_loadu_ps(src + i + 4));
+                _mm_storeu_si128((__m128i*)(dst + i), _mm_packus_epi32(d0, d1));
             }
+            for (; i < size4; i += 4)
+            {
+                __m128i d0 = Float32ToBFloat16(_mm_loadu_ps(src + i + 0));
+                _mm_storel_epi64((__m128i*)(dst + i), _mm_packus_epi32(d0, K_ZERO));
+            }
+            for (; i < size; ++i)
+                dst[i] = Base::Float32ToBFloat16(src[i]);
         }
     }
+#endif
 }

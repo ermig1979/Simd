@@ -1,7 +1,7 @@
 /*
 * Tests for Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -87,11 +87,11 @@ namespace Test
 
         result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Base::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
 
-//#ifdef SIMD_SSE41_ENABLE
-//        if (Simd::Sse41::Enable)
-//            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Sse41::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
-//#endif 
-//
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Sse41::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));
+#endif 
+
 //#ifdef SIMD_AVX2_ENABLE
 //        if (Simd::Avx2::Enable)
 //            result = result && Float32ToBFloat16AutoTest(FUNC_SB(Simd::Avx2::Float32ToBFloat16), FUNC_SB(SimdFloat32ToBFloat16));

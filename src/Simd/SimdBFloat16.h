@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@
 #ifndef __SimdBFloat16_h__
 #define __SimdBFloat16_h__
 
+#include "Simd/SimdInit.h"
 #include "Simd/SimdInit.h"
 
 namespace Simd
@@ -65,6 +66,16 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        namespace Bf16
+        {
+            const __m128i ROUND = SIMD_MM_SET1_EPI32(Base::Bf16::ROUND);
+            const __m128i MASK = SIMD_MM_SET1_EPI32(Base::Bf16::MASK);
+        }
+
+        SIMD_INLINE __m128i Float32ToBFloat16(__m128 value)
+        {
+            return _mm_srli_epi32(_mm_add_epi32(_mm_castps_si128(value), Bf16::ROUND), Base::Bf16::SHIFT);
+        }
     }
 #endif   
 }
