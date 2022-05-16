@@ -2311,6 +2311,11 @@ SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
     simdFill32f(dst, size, value);
 }
 
+SIMD_API void SimdFloat32ToBFloat16(const float* src, size_t size, uint16_t* dst)
+{
+    Base::Float32ToBFloat16(src, size, dst);
+}
+
 SIMD_API void SimdFloat32ToFloat16(const float * src, size_t size, uint16_t * dst)
 {
 #ifdef SIMD_AVX512BW_ENABLE

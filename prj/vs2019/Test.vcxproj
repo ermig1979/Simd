@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\src\Test\TestBase64.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Test\TestBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Test\TestBFloat16.cpp" />
     <ClCompile Include="..\..\src\Test\TestBgr48pToBgra32.cpp" />
     <ClCompile Include="..\..\src\Test\TestBinarization.cpp" />
     <ClCompile Include="..\..\src\Test\TestCheckC.c" />

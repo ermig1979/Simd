@@ -92,6 +92,7 @@
     <ClCompile Include="..\..\src\Simd\SimdBaseBase64.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdBaseBFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgraToBayer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgraToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdBaseBgraToGray.cpp" />

@@ -556,6 +556,11 @@
 */
 
 /*! @ingroup functions
+    @defgroup bfloat16 Brain Floating Point (16-bit) Numbers
+    \short Functions for conversion between BFloat16 (16-bit Brain Floating Point) and 32-bit Floating Point numbers and other.
+*/
+
+/*! @ingroup functions
     @defgroup float16 Half-Precision (16-bit) Float Point Numbers
     \short Functions for conversion between 16-bit and 32-bit float numbers and other.
 */
