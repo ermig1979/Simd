@@ -150,6 +150,8 @@ namespace Simd
         }    
     };
 
+    //---------------------------------------------------------------------------------------------
+
     class SynetConvolution32f : public Deletable
     {
     public:
@@ -236,6 +238,8 @@ namespace Simd
 #endif
         mutable String _info;
     };
+
+    //---------------------------------------------------------------------------------------------
 
     namespace Base
     {
@@ -449,6 +453,36 @@ namespace Simd
             void SetAlgParam(size_t F, size_t N, AlgParam & alg);
             void ReorderWeight(const float* src, float* dst);
         };
+
+        //-----------------------------------------------------------------------------------------
+
+        class SynetConvolution32fBf16Gemm : public SynetConvolution32f
+        {
+        public:
+            SynetConvolution32fBf16Gemm(const ConvParam32f& p);
+            virtual String Ext() const { return "Base"; }
+            virtual String Desc() const { return Ext() + "::Bf16Gemm" + (_merge > 1 ? "-" + ToStr(_merge) : (_ref ? "-ref" : "")); }
+            virtual size_t ExternalBufferSize() const;
+            virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
+            virtual void Forward(const float* src, float* buf, float* dst);
+
+        protected:
+            void Init(bool ref);
+            virtual void ImgToCol(const float* src, uint16_t* dst);
+            virtual void ImgToRow(const float* src, uint16_t* dst);
+
+            void InitRef();
+            void ForwardRef(const float* src, uint16_t* buf, float* dst);
+            void ImgToColRef(const float* src, uint16_t* dst);
+            void ImgToRowRef(const float* src, uint16_t* dst);
+            void GemmRef(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc);
+
+            bool _ref;
+            Array16u _bf16Weight;
+            size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD, _merge;
+        };
+
+        //-----------------------------------------------------------------------------------------
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }

@@ -802,6 +802,10 @@ namespace Simd
             ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
+            else if (Base::Bf16Soft(compatibility))
+            {
+                return new Base::SynetConvolution32fBf16Gemm(param);
+            }
             else if (Avx::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new Avx::SynetConvolution32fDepthwiseDotProduct(param);
             else if (SynetConvolution32fWinograd::Preferable(param))

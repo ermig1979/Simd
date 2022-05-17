@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
+#include "Simd/SimdSynet.h"
 #include "Simd/SimdSse41.h"
 
 namespace Simd
@@ -43,6 +44,10 @@ namespace Simd
             ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
+            else if (Base::Bf16Soft(compatibility))
+            {
+                return new Base::SynetConvolution32fBf16Gemm(param);
+            }
             else if (Sse2::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new Sse2::SynetConvolution32fDepthwiseDotProduct(param);
             else if (SynetConvolution32fWinograd::Preferable(param))

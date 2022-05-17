@@ -1665,10 +1665,14 @@ namespace Simd
             ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
+            else if (Bf16Soft(compatibility))
+            {
+                return new SynetConvolution32fBf16Gemm(param);
+            }
 #if !defined(SIMD_BASE_ONLY_GEMM_NN)
             else if (SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new SynetConvolution32fDepthwiseDotProduct(param);
-            else if(SynetConvolution32fWinograd::Preferable(param))
+            else if (SynetConvolution32fWinograd::Preferable(param))
                 return new SynetConvolution32fWinograd(param);
             else if (SynetConvolution32fGemmNT::Preferable(param))
                 return new SynetConvolution32fGemmNT(param);
