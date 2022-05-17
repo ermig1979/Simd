@@ -55,6 +55,34 @@ namespace Simd
                 Float32ToBFloat16<false, true>(src + i, dst + i, srcMask, dstMask);
             }
         }
+
+        //---------------------------------------------------------------------------------------------
+
+        template<bool align, bool mask> SIMD_INLINE void BFloat16ToFloat32(const uint16_t* src, float* dst, __mmask32 srcMask[1], __mmask16 dstMask[2])
+        {
+            __m512i _src = Load<align, mask>(src, srcMask[0]);
+            __m512i s0 = _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 0));
+            __m512i s1 = _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 1));
+            Avx512f::Store<align, mask>(dst + 0, BFloat16ToFloat32(s0), dstMask[0]);
+            Avx512f::Store<align, mask>(dst + F, BFloat16ToFloat32(s1), dstMask[1]);
+        }
+
+        void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)
+        {
+            size_t size32 = AlignLo(size, 32);
+            __mmask32 srcMask[1];
+            __mmask16 dstMask[2];
+            size_t i = 0;
+            for (; i < size32; i += 32)
+                BFloat16ToFloat32<false, false>(src + i, dst + i, srcMask, dstMask);
+            if (size32 < size)
+            {
+                srcMask[0] = TailMask32(size - size32);
+                dstMask[0] = TailMask16(size - size32 - F * 0);
+                dstMask[1] = TailMask16(size - size32 - F * 1);
+                BFloat16ToFloat32<false, true>(src + i, dst + i, srcMask, dstMask);
+            }
+        }
     }
 #endif
 }

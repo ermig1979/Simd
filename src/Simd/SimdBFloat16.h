@@ -118,6 +118,11 @@ namespace Simd
         {
             return _mm512_srli_epi32(_mm512_add_epi32(_mm512_castps_si512(value), Bf16::ROUND), Base::Bf16::SHIFT);
         }
+
+        SIMD_INLINE __m512 BFloat16ToFloat32(__m512i value)
+        {
+            return _mm512_castsi512_ps(_mm512_slli_epi32(value, Base::Bf16::SHIFT));
+        }
     }
 #endif 
 }
