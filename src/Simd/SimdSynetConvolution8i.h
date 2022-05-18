@@ -249,7 +249,7 @@ namespace Simd
             AlgParam _alg;
             size_t _sizeP;
             ConvParam8i _paramP;
-            ConvolutionPtr _convolutions[6];
+            ConvolutionPtr _convolutions[3];
         };
 
         class SynetConvolution8iNhwcDepthwise : public SynetConvolution8i

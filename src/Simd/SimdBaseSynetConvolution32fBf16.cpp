@@ -36,55 +36,6 @@ namespace Simd
         SynetConvolution32fBf16Gemm::SynetConvolution32fBf16Gemm(const ConvParam32f & p)
             : SynetConvolution32f(p)
         {
-            Init(true);
-            _biasAndActivation = Base::ConvolutionBiasAndActivation;
-        }
-
-        void SynetConvolution32fBf16Gemm::Init(bool ref)
-        {
-            _ref = ref;
-            const ConvParam32f& p = _param;
-            if (_ref)
-                InitRef();
-            else
-            {
-                assert(0);
-            }
-        }
-
-        size_t SynetConvolution32fBf16Gemm::ExternalBufferSize() const
-        {
-            return _sizeB*_merge;
-        };
-
-        void SynetConvolution32fBf16Gemm::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
-        {
-            Simd::SynetConvolution32f::SetParams(weight, internal, bias, params);
-            if (_ref)
-                Float32ToBFloat16(_weight, _bf16Weight.size, _bf16Weight.data);
-            else
-            {
-                assert(0);
-            }
-            if (internal)
-                *internal = SimdTrue;
-        }
-
-        void SynetConvolution32fBf16Gemm::Forward(const float * src, float * buf_, float * dst)
-        {
-            const ConvParam32f & p = _param;
-            uint16_t * buf = (uint16_t*)Buffer(buf_);
-            if (_ref)
-                ForwardRef(src, buf, dst);
-            else
-            {
-                assert(0);
-            }
-        }
-
-        void SynetConvolution32fBf16Gemm::InitRef()
-        {
-            const ConvParam32f& p = _param;
             if (p.trans)
             {
                 _M = p.dstH * p.dstW;
@@ -115,34 +66,47 @@ namespace Simd
             _sizeS = p.srcC * p.srcH * p.srcW;
             _sizeB = p.srcC * p.kernelY * p.kernelX * p.dstH * p.dstW;
             _sizeD = p.dstC * p.dstH * p.dstW;
-            _merge = 1;
         }
 
-        void SynetConvolution32fBf16Gemm::ForwardRef(const float* src, uint16_t* buf, float* dst)
+        size_t SynetConvolution32fBf16Gemm::ExternalBufferSize() const
         {
-            const ConvParam32f& p = _param;
+            return _sizeB;
+        };
+
+        void SynetConvolution32fBf16Gemm::SetParams(const float * weight, SimdBool * internal, const float * bias, const float * params)
+        {
+            Simd::SynetConvolution32f::SetParams(weight, internal, bias, params);
+            Float32ToBFloat16(_weight, _bf16Weight.size, _bf16Weight.data);
+            if (internal)
+                *internal = SimdTrue;
+        }
+
+        void SynetConvolution32fBf16Gemm::Forward(const float * src, float * buf_, float * dst)
+        {
+            const ConvParam32f & p = _param;
+            uint16_t * buf = (uint16_t*)Buffer(buf_);
             const uint16_t* wgt = _bf16Weight.data;
             for (size_t b = 0; b < _batch; ++b)
             {
                 if (_param.trans)
                 {
-                    ImgToRowRef(src, buf);
+                    ImgToRow(src, buf);
                     for (size_t g = 0; g < p.group; ++g)
-                        GemmRef(_M, _N, _K, buf + _grS * g, _ldS, wgt + _grW * g, _ldW, dst + _grD * g, _ldD);
+                        GemmNN(_M, _N, _K, buf + _grS * g, _ldS, wgt + _grW * g, _ldW, dst + _grD * g, _ldD);
                 }
                 else
                 {
-                    ImgToColRef(src, buf);
+                    ImgToCol(src, buf);
                     for (size_t g = 0; g < p.group; ++g)
-                        GemmRef(_M, _N, _K, wgt + _grW * g, _ldW, buf + _grS * g, _ldS, dst + _grD * g, _ldD);
+                        GemmNN(_M, _N, _K, wgt + _grW * g, _ldW, buf + _grS * g, _ldS, dst + _grD * g, _ldD);
                 }
-                _biasAndActivation(_bias, p.dstC, p.dstH * p.dstW, p.activation, _params, p.trans, dst);
+                ConvolutionBiasAndActivation(_bias, p.dstC, p.dstH * p.dstW, p.activation, _params, p.trans, dst);
                 src += _sizeS;
                 dst += _sizeD;
             }
         }
 
-        void SynetConvolution32fBf16Gemm::ImgToColRef(const float* src, uint16_t* dst)
+        void SynetConvolution32fBf16Gemm::ImgToCol(const float* src, uint16_t* dst)
         {
             const ConvParam32f& p = _param;
             assert(!p.trans);
@@ -181,7 +145,7 @@ namespace Simd
             }
         }
 
-        void SynetConvolution32fBf16Gemm::ImgToRowRef(const float* src, uint16_t* dst)
+        void SynetConvolution32fBf16Gemm::ImgToRow(const float* src, uint16_t* dst)
         {
             const ConvParam32f& p = _param;
             assert(p.trans);
@@ -224,7 +188,7 @@ namespace Simd
             }
         }
 
-        void SynetConvolution32fBf16Gemm::GemmRef(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc)
+        void SynetConvolution32fBf16Gemm::GemmNN(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc)
         {
             for (size_t i = 0; i < M; ++i)
             {
@@ -241,19 +205,8 @@ namespace Simd
             }
         }
 
-        void SynetConvolution32fBf16Gemm::ImgToCol(const float * src, uint16_t* dst)
-        {
-            const ConvParam32f & p = _param;
-            assert(!p.trans);
-            assert(0);
-        }
+        //-----------------------------------------------------------------------------------------
 
-        void SynetConvolution32fBf16Gemm::ImgToRow(const float * src, uint16_t* dst)
-        {
-            const ConvParam32f & p = _param;
-            assert(p.trans);
-            assert(0);
-        }
     }
 #endif
 }
