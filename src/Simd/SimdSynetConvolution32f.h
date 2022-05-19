@@ -471,7 +471,7 @@ namespace Simd
             void ImgToRow(const float* src, uint16_t* dst);
             void GemmNN(size_t M, size_t N, size_t K, const uint16_t* A, size_t lda, const uint16_t* B, size_t ldb, float* C, size_t ldc);
 
-            Array16u _bf16Weight;
+            Array16u _weight;
             size_t _M, _N, _K, _ldW, _ldS, _ldD, _grW, _grS, _grD, _batch, _sizeS, _sizeB, _sizeD;
         };
 
@@ -480,28 +480,33 @@ namespace Simd
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::Bf16Nhwc"; }
+            virtual String Desc() const { return Ext() + "::Bf16Nhwc-direct"; }
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
 
             struct AlgParam
             {
-                size_t F, microD, macroH, macroC, macroD, bufH;
+                size_t F, microD, macroH, macroC, macroD;
+                size_t batch, srcH, srcW, srcC, kernelY, kernelX;
             };
 
             typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t dstC, size_t yBeg, 
-                size_t yEnd, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t dstC, size_t srcH, 
+                size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
             void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC);
+            void SetWeight(const float* weight);
+            void SetBias(const float* bias);
+            void SetParams(const float* params);
+            void ForwardDirect(const float* src, uint16_t* buf, float* dst);
+            size_t OffsetDirect(size_t yBeg, size_t cBeg);
 
             Array16u _weight;
+            Array32f _bias, _params;
             AlgParam _alg;
-            size_t _sizeP;
-            ConvParam32f _paramP;
             ConvertPtr _convert;
             ConvolutionPtr _convolutions[2];
         };
