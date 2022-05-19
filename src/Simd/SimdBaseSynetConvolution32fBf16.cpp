@@ -210,22 +210,19 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f& p)
             : SynetConvolution32f(p)
         {
-            _convert = NULL;
-            _convolutions[0] = NULL;
-            _convolutions[1] = NULL;
+            SetAlgParam(2, 3, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
         }
 
-        void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC)
+        void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam32f& p = _param;
             AlgParam& a = _alg;
-            _alg.batch = 1;
+            a.batch = 1;
             a.srcH = p.srcH + p.padY + p.padH;
             a.srcW = p.srcW + p.padX + p.padW;
             a.srcC = AlignHi(p.srcC, 2);
             a.kernelY = p.kernelY;
             a.kernelX = p.kernelX;
-            a.F = F;
             a.microD = microD;
             a.macroC = Simd::Min(AlignLo(L1 / a.kernelY / a.kernelX / microD / 2, 2), a.srcC);
             for (size_t macroH = p.dstH; macroH >= 1; macroH--)

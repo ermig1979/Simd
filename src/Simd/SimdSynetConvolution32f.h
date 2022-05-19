@@ -487,17 +487,17 @@ namespace Simd
 
             struct AlgParam
             {
-                size_t F, microD, macroH, macroC, macroD;
+                size_t microD, macroH, macroC, macroD;
                 size_t batch, srcH, srcW, srcC, kernelY, kernelX;
             };
 
             typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t dstC, size_t srcH, 
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t dstC, size_t dstH, 
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
-            void SetAlgParam(size_t F, size_t microD, size_t L1, size_t L2, size_t L3, size_t microC);
+            void SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3);
             void SetWeight(const float* weight);
             void SetBias(const float* bias);
             void SetParams(const float* params);
@@ -592,8 +592,18 @@ namespace Simd
         public:
             SynetConvolution32fGemmNT(const ConvParam32f & p);
             virtual String Ext() const { return "Sse41"; }
-
         };
+
+        //-----------------------------------------------------------------------------------------
+
+        class SynetConvolution32fBf16Nhwc : public Base::SynetConvolution32fBf16Nhwc
+        {
+        public:
+            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }

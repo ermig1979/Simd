@@ -583,7 +583,7 @@ namespace Test
         //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationHardSigmoid, SimdFalse, fp32, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationHardSigmoid, SimdTrue, fp32, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationSwish, SimdFalse, fp32, f1, f2);
-        result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationSwish, SimdTrue, fp32, f1, f2);
+        //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationSwish, SimdTrue, fp32, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationSwish, SimdFalse, bf16, f1, f2);
         result = result && SynetConvolution32fForwardAutoTest(eps, SimdConvolutionActivationSwish, SimdTrue, bf16, f1, f2);
 
