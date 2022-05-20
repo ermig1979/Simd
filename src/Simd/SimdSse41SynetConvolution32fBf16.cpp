@@ -45,7 +45,7 @@ namespace Simd
 
             ptrdiff_t beg = yBeg * p.strideY - p.padY;
             ptrdiff_t end = yEnd * p.strideY - p.padY + p.kernelY * p.dilationY - 1;
-            src += (beg + p.padY) * p.srcW * p.srcC;
+            src += std::max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
             for (ptrdiff_t sy = beg; sy < end; ++sy)
             {
                 if ((size_t)sy >= p.srcH)

@@ -502,7 +502,7 @@ namespace Simd
             void SetBias(const float* bias);
             void SetParams(const float* params);
             void ForwardDirect(const float* src, uint16_t* buf, float* dst);
-            size_t OffsetDirect(size_t yBeg, size_t cBeg);
+            size_t OffsetDirect(size_t yBeg, size_t cBeg, size_t cEnd);
 
             Array16u _weight;
             Array32f _bias, _params;

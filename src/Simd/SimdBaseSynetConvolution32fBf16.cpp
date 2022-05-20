@@ -380,7 +380,7 @@ namespace Simd
                     for (size_t yBeg = 0; yBeg < p.dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, p.dstH);
-                        size_t offs = OffsetDirect(yBeg, sc);
+                        size_t offs = OffsetDirect(yBeg, sc, sc + macroC);
                         if (dc == 0)
                             _convert(src + sc, p, a, yBeg, yEnd, macroC, buf + offs);
                         if (sc + macroC == p.srcC)
@@ -400,12 +400,11 @@ namespace Simd
             }
         }
 
-        size_t SynetConvolution32fBf16Nhwc::OffsetDirect(size_t yBeg, size_t cBeg)
+        size_t SynetConvolution32fBf16Nhwc::OffsetDirect(size_t yBeg, size_t cBeg, size_t cEnd)
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            //size_t sy = yBeg * p.strideY;
-            return a.kernelY*a.kernelX*a.macroC*a.srcW * yBeg * p.strideY;
+            return a.srcW * (a.srcH * cBeg +  (cEnd - cBeg) * p.strideY * yBeg);
         }
     }
 #endif
