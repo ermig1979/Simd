@@ -267,17 +267,19 @@ namespace Simd
                         {
                             for (size_t c = 0; c < macroC; c += 2)
                             {
-                                const float* src = weight + ((ky * a.kernelX + kx) * p.srcC + c) * p.dstC + dc;
+                                const float* src = weight + ((ky * a.kernelX + kx) * p.srcC + sc + c) * p.dstC + dc;
                                 for (size_t d = 0; d < a.microD; ++d)
                                 {
-                                    for (size_t i = 0; i < 2; ++i)
+                                    if (dc + d < p.dstC)
                                     {
-                                        if (dc + d < p.dstC && sc + c + i < p.srcC)
-                                            *(dst++) = Float32ToBFloat16(src[i * p.dstC]);
-                                        else
-                                            *(dst++) = 0;
+                                        *(dst++) = Float32ToBFloat16(src[d]);
+                                        *(dst++) = sc + c + 1 < p.srcC ? Float32ToBFloat16(src[p.dstC + d]) : 0;
                                     }
-                                    src++;
+                                    else
+                                    {
+                                        *(dst++) = 0;
+                                        *(dst++) = 0;
+                                    }
                                 }
                             }
                         }

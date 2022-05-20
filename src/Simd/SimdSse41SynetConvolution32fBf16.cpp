@@ -41,9 +41,43 @@ namespace Simd
 
         void ConvolutionBf16NhwcDirectConvert(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
-            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            ptrdiff_t beg = yBeg * p.strideY - p.padY;
+            ptrdiff_t end = yEnd * p.strideY - p.padY + p.kernelY * p.dilationY - 1;
+            for (ptrdiff_t sy = beg; sy < end; ++sy)
             {
-                //if(dy < p.padY || dy > p.dstY)
+                if ((size_t)sy > p.srcH)
+                {
+                    memset(dst, 0, a.srcW * srcC * 2);
+                    dst += a.srcW * srcC;
+                }
+                else
+                {
+                    if (p.padX)
+                    {
+                        memset(dst, 0, p.padX * srcC);
+                        dst += p.padX * srcC;
+                    }
+                    if (p.srcC == srcC)
+                    {
+                        Float32ToBFloat16(src, srcC * p.srcW, dst);
+                        src += srcC * p.srcW;
+                        dst += srcC * p.srcW;
+                    }
+                    else
+                    {
+                        for (size_t sx = 0; sx < p.srcW; ++sx)
+                        {
+                            Float32ToBFloat16(src, srcC, dst);
+                            src += p.srcC;
+                            dst += srcC;
+                        }
+                    }
+                    if (p.padW)
+                    {
+                        memset(dst, 0, p.padW * p.srcC);
+                        dst += p.padW * srcC;
+                    }
+                }
             }
         }
 
@@ -117,7 +151,7 @@ namespace Simd
                             if (M > 2) s0 = SetBf16(src2[offs + 0]), s1 = SetBf16(src2[offs + 1]), Madd1(d20, s0, w00, s1, w01), Madd1(d21, s0, w10, s1, w11);
                             if (M > 3) s0 = SetBf16(src3[offs + 0]), s1 = SetBf16(src3[offs + 1]), Madd1(d30, s0, w00, s1, w01), Madd1(d31, s0, w10, s1, w11);
                             if (M > 4) s0 = SetBf16(src4[offs + 0]), s1 = SetBf16(src4[offs + 1]), Madd1(d40, s0, w00, s1, w01), Madd1(d41, s0, w10, s1, w11);
-                            weight += DF;
+                            weight += QF;
                         }
                     }
                 }
@@ -169,7 +203,7 @@ namespace Simd
                             if (M > 2) s0 = SetBf16(src2[offs + 0]), Madd1(d20, s0, w00, s1, w01);
                             if (M > 3) s0 = SetBf16(src3[offs + 0]), Madd1(d30, s0, w00, s1, w01);
                             if (M > 4) s0 = SetBf16(src4[offs + 0]), Madd1(d40, s0, w00, s1, w01);
-                            weight += DF;
+                            weight += QF;
                         }
                     }
                 }
@@ -268,7 +302,7 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
             : Base::SynetConvolution32fBf16Nhwc(p)
         {
-            SetAlgParam(F * 2, 6, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
+            SetAlgParam(F * 2, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
             const AlgParam& a = _alg;
             switch (p.activation)
             {
