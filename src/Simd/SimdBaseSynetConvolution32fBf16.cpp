@@ -210,7 +210,7 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f& p)
             : SynetConvolution32f(p)
         {
-            SetAlgParam(2, 3, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
+            //SetAlgParam(2, 3, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
         }
 
         void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
@@ -255,30 +255,33 @@ namespace Simd
             const AlgParam& a = _alg;
             _weight.Resize(a.kernelY * a.kernelX * a.srcC * AlignHiAny(p.dstC , a.microD));
             uint16_t * dst = _weight.data;
-            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
+            for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
-                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                for (size_t sc = 0; sc < a.srcC; sc += a.macroC)
+                size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
+                for (size_t mac = 0; mac < a.srcC; mac += a.macroC)
                 {
-                    size_t macroC = Simd::Min(a.srcC, sc + a.macroC) - sc;
-                    for (size_t ky = 0; ky < a.kernelY; ++ky)
+                    size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
+                    for (size_t mid = 0; mid < macroD; mid += a.microD)
                     {
-                        for (size_t kx = 0; kx < a.kernelX; ++kx)
+                        for (size_t ky = 0; ky < a.kernelY; ++ky)
                         {
-                            for (size_t c = 0; c < macroC; c += 2)
+                            for (size_t kx = 0; kx < a.kernelX; ++kx)
                             {
-                                const float* src = weight + ((ky * a.kernelX + kx) * p.srcC + sc + c) * p.dstC + dc;
-                                for (size_t d = 0; d < a.microD; ++d)
+                                for (size_t c = 0; c < macroC; c += 2)
                                 {
-                                    if (dc + d < p.dstC)
+                                    const float* src = weight + ((ky * a.kernelX + kx) * p.srcC + mac + c) * p.dstC + mad + mid;
+                                    for (size_t d = 0; d < a.microD; ++d)
                                     {
-                                        *(dst++) = Float32ToBFloat16(src[d]);
-                                        *(dst++) = sc + c + 1 < p.srcC ? Float32ToBFloat16(src[p.dstC + d]) : 0;
-                                    }
-                                    else
-                                    {
-                                        *(dst++) = 0;
-                                        *(dst++) = 0;
+                                        if (mad + mid + d < p.dstC)
+                                        {
+                                            *(dst++) = Float32ToBFloat16(src[d]);
+                                            *(dst++) = mac + c + 1 < p.srcC ? Float32ToBFloat16(src[p.dstC + d]) : 0;
+                                        }
+                                        else
+                                        {
+                                            *(dst++) = 0;
+                                            *(dst++) = 0;
+                                        }
                                     }
                                 }
                             }
@@ -399,7 +402,10 @@ namespace Simd
 
         size_t SynetConvolution32fBf16Nhwc::OffsetDirect(size_t yBeg, size_t cBeg)
         {
-            return 0;
+            const ConvParam32f& p = _param;
+            const AlgParam& a = _alg;
+            //size_t sy = yBeg * p.strideY;
+            return a.kernelY*a.kernelX*a.macroC*a.srcW * yBeg * p.strideY;
         }
     }
 #endif

@@ -41,11 +41,14 @@ namespace Simd
 
         void ConvolutionBf16NhwcDirectConvert(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
+            SIMD_PERF_FUNC();
+
             ptrdiff_t beg = yBeg * p.strideY - p.padY;
             ptrdiff_t end = yEnd * p.strideY - p.padY + p.kernelY * p.dilationY - 1;
+            src += (beg + p.padY) * p.srcW * p.srcC;
             for (ptrdiff_t sy = beg; sy < end; ++sy)
             {
-                if ((size_t)sy > p.srcH)
+                if ((size_t)sy >= p.srcH)
                 {
                     memset(dst, 0, a.srcW * srcC * 2);
                     dst += a.srcW * srcC;
@@ -302,7 +305,7 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
             : Base::SynetConvolution32fBf16Nhwc(p)
         {
-            SetAlgParam(F * 2, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
+            SetAlgParam(F * 2, 5, Base::AlgCacheL1(), Base::AlgCacheL2()/2, Base::AlgCacheL3());
             const AlgParam& a = _alg;
             switch (p.activation)
             {
