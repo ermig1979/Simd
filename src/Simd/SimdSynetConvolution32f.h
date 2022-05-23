@@ -745,6 +745,17 @@ namespace Simd
             static bool Set3r(const ConvParam32f& p, AlgParam& a);
         };
 
+        //-----------------------------------------------------------------------------------------
+
+        class SynetConvolution32fBf16Nhwc : public Sse41::SynetConvolution32fBf16Nhwc
+        {
+        public:
+            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
+
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 #endif//SIMD_AVX2_ENABLE
