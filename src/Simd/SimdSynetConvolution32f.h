@@ -485,6 +485,8 @@ namespace Simd
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
 
+            static bool Preferable(const ConvParam32f& p);
+
             struct AlgParam
             {
                 size_t microD, macroH, macroC, macroD;

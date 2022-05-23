@@ -41,11 +41,9 @@ namespace Simd
 
         void ConvolutionBf16NhwcDirectConvert(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
-            SIMD_PERF_FUNC();
-
             ptrdiff_t beg = yBeg * p.strideY - p.padY;
-            ptrdiff_t end = yEnd * p.strideY - p.padY + p.kernelY * p.dilationY - 1;
-            src += std::max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
+            ptrdiff_t end = (yEnd - 1) * p.strideY - p.padY + p.kernelY * p.dilationY;
+            src += Max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
             for (ptrdiff_t sy = beg; sy < end; ++sy)
             {
                 if ((size_t)sy >= p.srcH)
@@ -57,7 +55,7 @@ namespace Simd
                 {
                     if (p.padX)
                     {
-                        memset(dst, 0, p.padX * srcC);
+                        memset(dst, 0, p.padX * srcC * 2);
                         dst += p.padX * srcC;
                     }
                     if (p.srcC == srcC)
@@ -77,7 +75,7 @@ namespace Simd
                     }
                     if (p.padW)
                     {
-                        memset(dst, 0, p.padW * p.srcC);
+                        memset(dst, 0, p.padW * p.srcC * 2);
                         dst += p.padW * srcC;
                     }
                 }
@@ -114,10 +112,17 @@ namespace Simd
             w1 = Get1(w);
         }
 
+#define BF16_CONV_VER 1
+
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionBf16NhwcDirect_2xM(const uint16_t* src0, const ConvParam32f& p,
             const AlgParam& a, size_t srcC, size_t dstC, int zero, const uint16_t* weight, const __m128* bias, const __m128* params, float* dst)
         {
-            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, s1, w00, w01, w10, w11;
+            __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11;
+#if BF16_CONV_VER
+            __m128 m = _mm_castsi128_ps(_mm_set1_epi32(0xFFFF0000));
+#else
+            __m128 s1; 
+#endif
             size_t dS = srcC * p.strideX, dY = a.srcW * srcC * p.dilationY, dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
             const uint16_t* src1 = src0 + 1 * dS;
             const uint16_t* src2 = src0 + 2 * dS;
@@ -147,6 +152,59 @@ namespace Simd
                     {
                         for (size_t offs = ky * dY + kx * dX, end = offs + srcC; offs < end; offs += 2)
                         {
+#if BF16_CONV_VER == 1
+                            w01 = _mm_loadu_ps((float*)weight + 0);
+                            w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
+                            w01 = _mm_and_ps(w01, m);
+                            w11 = _mm_loadu_ps((float*)weight + F);
+                            w10 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w11), Base::Bf16::SHIFT));
+                            w11 = _mm_and_ps(w11, m);
+                            if (M > 0)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 1)), m); 
+                                d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
+                                d01 = _mm_add_ps(_mm_mul_ps(s0, w10), d01);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
+                                d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
+                                d01 = _mm_add_ps(_mm_mul_ps(s0, w11), d01);
+                            }
+                            if (M > 1)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 1)), m);
+                                d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
+                                d11 = _mm_add_ps(_mm_mul_ps(s0, w10), d11);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 0)), m);
+                                d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
+                                d11 = _mm_add_ps(_mm_mul_ps(s0, w11), d11);
+                            }
+                            if (M > 2)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 1)), m);
+                                d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
+                                d21 = _mm_add_ps(_mm_mul_ps(s0, w10), d21);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 0)), m);
+                                d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
+                                d21 = _mm_add_ps(_mm_mul_ps(s0, w11), d21);
+                            }
+                            if (M > 3)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 1)), m);
+                                d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
+                                d31 = _mm_add_ps(_mm_mul_ps(s0, w10), d31);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 0)), m);
+                                d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
+                                d31 = _mm_add_ps(_mm_mul_ps(s0, w11), d31);
+                            }
+                            if (M > 4)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 1)), m);
+                                d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
+                                d41 = _mm_add_ps(_mm_mul_ps(s0, w10), d41);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
+                                d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
+                                d41 = _mm_add_ps(_mm_mul_ps(s0, w11), d41);
+                            }
+#else
                             Load1(weight + 0 * DF, w00, w01);
                             Load1(weight + 1 * DF, w10, w11);
                             if (M > 0) s0 = SetBf16(src0[offs + 0]), s1 = SetBf16(src0[offs + 1]), Madd1(d00, s0, w00, s1, w01), Madd1(d01, s0, w10, s1, w11);
@@ -154,6 +212,7 @@ namespace Simd
                             if (M > 2) s0 = SetBf16(src2[offs + 0]), s1 = SetBf16(src2[offs + 1]), Madd1(d20, s0, w00, s1, w01), Madd1(d21, s0, w10, s1, w11);
                             if (M > 3) s0 = SetBf16(src3[offs + 0]), s1 = SetBf16(src3[offs + 1]), Madd1(d30, s0, w00, s1, w01), Madd1(d31, s0, w10, s1, w11);
                             if (M > 4) s0 = SetBf16(src4[offs + 0]), s1 = SetBf16(src4[offs + 1]), Madd1(d40, s0, w00, s1, w01), Madd1(d41, s0, w10, s1, w11);
+#endif
                             weight += QF;
                         }
                     }
@@ -200,12 +259,53 @@ namespace Simd
                     {
                         for (size_t offs = ky * dY + kx * dX, end = offs + srcC; offs < end; offs += 2)
                         {
+#if BF16_CONV_VER
+                            w01 = _mm_loadu_ps((float*)weight + 0);
+                            w00 = _mm_castsi128_ps(_mm_slli_epi32(_mm_castps_si128(w01), Base::Bf16::SHIFT));
+                            w01 = _mm_and_ps(w01, m);
+                            if (M > 0)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 1)), m);
+                                d00 = _mm_add_ps(_mm_mul_ps(s0, w00), d00);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
+                                d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
+                            }
+                            if (M > 1)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 1)), m);
+                                d10 = _mm_add_ps(_mm_mul_ps(s0, w00), d10);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src1 + offs - 0)), m);
+                                d10 = _mm_add_ps(_mm_mul_ps(s0, w01), d10);
+                            }
+                            if (M > 2)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 1)), m);
+                                d20 = _mm_add_ps(_mm_mul_ps(s0, w00), d20);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src2 + offs - 0)), m);
+                                d20 = _mm_add_ps(_mm_mul_ps(s0, w01), d20);
+                            }
+                            if (M > 3)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 1)), m);
+                                d30 = _mm_add_ps(_mm_mul_ps(s0, w00), d30);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src3 + offs - 0)), m);
+                                d30 = _mm_add_ps(_mm_mul_ps(s0, w01), d30);
+                            }
+                            if (M > 4)
+                            {
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 1)), m);
+                                d40 = _mm_add_ps(_mm_mul_ps(s0, w00), d40);
+                                s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src4 + offs - 0)), m);
+                                d40 = _mm_add_ps(_mm_mul_ps(s0, w01), d40);
+                            }
+#else
                             Load1(weight + 0 * DF, w00, w01);
                             if (M > 0) s0 = SetBf16(src0[offs + 0]), Madd1(d00, s0, w00, s1, w01);
                             if (M > 1) s0 = SetBf16(src1[offs + 0]), Madd1(d10, s0, w00, s1, w01);
                             if (M > 2) s0 = SetBf16(src2[offs + 0]), Madd1(d20, s0, w00, s1, w01);
                             if (M > 3) s0 = SetBf16(src3[offs + 0]), Madd1(d30, s0, w00, s1, w01);
                             if (M > 4) s0 = SetBf16(src4[offs + 0]), Madd1(d40, s0, w00, s1, w01);
+#endif
                             weight += QF;
                         }
                     }
@@ -242,6 +342,7 @@ namespace Simd
             case 3: return ConvolutionBf16NhwcDirect_2xM<term, type, 3>;
             case 4: return ConvolutionBf16NhwcDirect_2xM<term, type, 4>;
             case 5: return ConvolutionBf16NhwcDirect_2xM<term, type, 5>;
+            case 6: return ConvolutionBf16NhwcDirect_2xM<term, type, 6>;
             }
             assert(0);
             return NULL;

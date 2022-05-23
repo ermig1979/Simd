@@ -210,7 +210,6 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f& p)
             : SynetConvolution32f(p)
         {
-            //SetAlgParam(2, 3, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL2());
         }
 
         void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
@@ -363,6 +362,11 @@ namespace Simd
                 src += p.srcH * p.srcW * p.srcC * a.batch;
                 dst += p.dstH * p.dstW * p.dstC * a.batch;
             }
+        }
+
+        bool SynetConvolution32fBf16Nhwc::Preferable(const ConvParam32f& p)
+        {
+            return p.trans != 0;
         }
 
         void SynetConvolution32fBf16Nhwc::ForwardDirect(const float* src, uint16_t* buf, float* dst)
