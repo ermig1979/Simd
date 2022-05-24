@@ -828,6 +828,22 @@ namespace Simd
     }
 #endif//SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        class SynetConvolution32fBf16Nhwc : public Avx2::SynetConvolution32fBf16Nhwc
+        {
+        public:
+            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
+
+        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif//SIMD_AVX512F_ENABLE
+
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {

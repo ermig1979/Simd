@@ -804,7 +804,10 @@ namespace Simd
                 return NULL;
             else if (Base::Bf16Soft(compatibility))
             {
-                return new Base::SynetConvolution32fBf16Gemm(param);
+                if (Base::SynetConvolution32fBf16Nhwc::Preferable(param))
+                    return new Avx2::SynetConvolution32fBf16Nhwc(param);
+                else
+                    return new Base::SynetConvolution32fBf16Gemm(param);
             }
             else if (Avx::SynetConvolution32fDepthwiseDotProduct::Preferable(param))
                 return new Avx::SynetConvolution32fDepthwiseDotProduct(param);

@@ -75,7 +75,7 @@ namespace Simd
                     }
                     if (p.padW)
                     {
-                        memset(dst, 0, p.padW * p.srcC * 2);
+                        memset(dst, 0, p.padW * srcC * 2);
                         dst += p.padW * srcC;
                     }
                 }
