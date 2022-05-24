@@ -235,8 +235,9 @@ namespace Simd
 
         size_t SynetConvolution32fBf16Nhwc::ExternalBufferSize() const
         {
+            const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            return a.batch * a.srcW * a.srcH * a.srcC / 2;
+            return p.dstC <= a.macroD ? Base::AlgCacheL2() / 4 : a.batch * a.srcW * a.srcH * a.srcC / 2;
         }
 
         void SynetConvolution32fBf16Nhwc::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
@@ -252,7 +253,7 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            _weight.Resize(a.kernelY * a.kernelX * a.srcC * AlignHiAny(p.dstC , a.microD));
+            _weight.Resize(a.kernelY * a.kernelX * a.srcC * AlignHiAny(p.dstC, a.microD));
             uint16_t * dst = _weight.data;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
@@ -395,7 +396,7 @@ namespace Simd
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         yBeg = yEnd;
                     }
-                    weight += p.kernelY * p.kernelY * macroC * macroD;
+                    weight += p.kernelY * p.kernelY * AlignHi(macroC, 2) * AlignHiAny(macroD, a.microD);
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -408,7 +409,7 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            return a.srcW * (a.srcH * cBeg +  (cEnd - cBeg) * p.strideY * yBeg);
+            return p.dstC <= a.macroD ? 0 : a.srcW * (a.srcH * cBeg +  (cEnd - cBeg) * p.strideY * yBeg);
         }
     }
 #endif

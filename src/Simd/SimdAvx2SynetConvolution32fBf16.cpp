@@ -319,7 +319,7 @@ namespace Simd
             const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t n = 5;
-            size_t dstWn = AlignLoAny(p.dstW, n);
+            size_t dstWn = AlignLoAny(p.dstW, n), dW = p.kernelY * p.kernelX * AlignHi(srcC, 2) * DF;
             size_t m = p.dstW - dstWn;
             ConvolutionBf16NhwcConv_2xM_Ptr convolution_2xN = GetConvolutionBf16NhwcConv_2xM<term, type>(n);
             ConvolutionBf16NhwcConv_2xM_Ptr convolution_2xM = GetConvolutionBf16NhwcConv_2xM<term, type>(m);
@@ -351,7 +351,7 @@ namespace Simd
                     for (; dx < p.dstW; dx += m, d += m * p.dstC, s += m * p.strideX * srcC)
                         convolution_2xM(s, p, a, srcC, dC, zero, weight, _bias, _params, d);
                 }
-                weight += p.kernelY * p.kernelX * srcC * DF;
+                weight += dW;
                 dst += DF;
             }
         }
@@ -559,7 +559,7 @@ namespace Simd
             const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t n1 = dstH * p.dstW, n = 5;
-            size_t nn = AlignLoAny(n1, n), m = n1 - nn;
+            size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 2) * DF;
             ConvolutionBf16NhwcGemm_2xM_Ptr convolution_2xN = GetConvolutionBf16NhwcGemm_2xM<term, type>(n);
             ConvolutionBf16NhwcGemm_2xM_Ptr convolution_2xM = GetConvolutionBf16NhwcGemm_2xM<term, type>(m);
 
@@ -587,7 +587,7 @@ namespace Simd
                     convolution_2xN(s, p, srcC, dC, zero, weight, _bias, _params, d);
                 for (; i < n1; i += m, s += m * srcC, d += m * p.dstC)
                     convolution_2xM(s, p, srcC, dC, zero, weight, _bias, _params, d);
-                weight += srcC * DF;
+                weight += dW;
                 dst += DF;
             }
         }
