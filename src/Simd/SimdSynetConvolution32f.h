@@ -480,7 +480,7 @@ namespace Simd
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::Bf16Nhwc-direct"; }
+            virtual String Desc() const { return Ext() + "::Bf16Nhwc-conv"; }
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);

@@ -30,15 +30,6 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        template <bool align, bool mask> SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t* dst, __mmask16 srcMask[2],  __mmask32 dstMask[1])
-        {
-            __m512 s0 = Avx512f::Load<align, mask>(src + 0 * F, srcMask[0]);
-            __m512 s1 = Avx512f::Load<align, mask>(src + 1 * F, srcMask[1]);
-            __m512i d0 = Float32ToBFloat16(s0);
-            __m512i d1 = Float32ToBFloat16(s1);
-            Store<align, mask>(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)), dstMask[0]);
-        }
-
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst)
         {
             size_t size32 = AlignLo(size, 32);
