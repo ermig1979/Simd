@@ -824,12 +824,14 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
+#define GEMM_VER 1
+
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionBf16NhwcGemm_3xM(const uint16_t* src0, const ConvParam32f& p,
             size_t srcC, int zero, const uint16_t* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[3])
         {
             __m512 d00, d01, d02, d10, d11, d12, d20, d21, d22, d30, d31, d32, 
                 d40, d41, d42, d50, d51, d52, d60, d61, d62, d70, d71, d72,
-                s0, w00, w01, w10, w11, w20, w21, m = _mm512_castsi512_ps(Bf16::MASK);
+                s0, s1, w00, w01, w10, w11, w20, w21, m = _mm512_castsi512_ps(Bf16::MASK);
             size_t dD = p.dstC;
             const uint16_t* src1 = src0 + 1 * srcC;
             const uint16_t* src2 = src0 + 2 * srcC;
@@ -866,68 +868,122 @@ namespace Simd
                 {
                     w01 = _mm512_loadu_ps((float*)weight + 0 * F);
                     w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
+#if GEMM_VER == 0
                     w01 = _mm512_and_ps(w01, m);
+#else
+                    w01 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(w01)));
+#endif
+
                     w11 = _mm512_loadu_ps((float*)weight + 1 * F);
                     w10 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w11), Base::Bf16::SHIFT));
+#if GEMM_VER == 0
                     w11 = _mm512_and_ps(w11, m);
+#else
+                    w11 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(w11)));
+#endif 
+
                     w21 = _mm512_loadu_ps((float*)weight + 2 * F);
                     w20 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w21), Base::Bf16::SHIFT));
+#if GEMM_VER == 0
                     w21 = _mm512_and_ps(w21, m);
+#else
+                    w21 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(w21)));
+#endif
                     if (M > 0x0)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
                         d00 = _mm512_fmadd_ps(s0, w00, d00); d01 = _mm512_fmadd_ps(s0, w10, d01); d02 = _mm512_fmadd_ps(s0, w20, d02);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
                         d00 = _mm512_fmadd_ps(s0, w01, d00); d01 = _mm512_fmadd_ps(s0, w11, d01); d02 = _mm512_fmadd_ps(s0, w21, d02);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src0 + offs0)))));
+                        d00 = _mm512_fmadd_ps(s1, w01, d00); d01 = _mm512_fmadd_ps(s1, w11, d01); d02 = _mm512_fmadd_ps(s1, w21, d02);
+#endif
                     }
                     if (M > 0x1)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
                         d10 = _mm512_fmadd_ps(s0, w00, d10); d11 = _mm512_fmadd_ps(s0, w10, d11); d12 = _mm512_fmadd_ps(s0, w20, d12);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
                         d10 = _mm512_fmadd_ps(s0, w01, d10); d11 = _mm512_fmadd_ps(s0, w11, d11); d12 = _mm512_fmadd_ps(s0, w21, d12);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src1 + offs0)))));
+                        d10 = _mm512_fmadd_ps(s1, w01, d10); d11 = _mm512_fmadd_ps(s1, w11, d11); d12 = _mm512_fmadd_ps(s1, w21, d12);
+#endif
                     }
                     if (M > 0x2)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
                         d20 = _mm512_fmadd_ps(s0, w00, d20); d21 = _mm512_fmadd_ps(s0, w10, d21); d22 = _mm512_fmadd_ps(s0, w20, d22);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
                         d20 = _mm512_fmadd_ps(s0, w01, d20); d21 = _mm512_fmadd_ps(s0, w11, d21); d22 = _mm512_fmadd_ps(s0, w21, d22);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src2 + offs0)))));
+                        d20 = _mm512_fmadd_ps(s1, w01, d20); d21 = _mm512_fmadd_ps(s1, w11, d21); d22 = _mm512_fmadd_ps(s1, w21, d22);
+#endif
                     }
                     if (M > 0x3)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
                         d30 = _mm512_fmadd_ps(s0, w00, d30); d31 = _mm512_fmadd_ps(s0, w10, d31); d32 = _mm512_fmadd_ps(s0, w20, d32);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
                         d30 = _mm512_fmadd_ps(s0, w01, d30); d31 = _mm512_fmadd_ps(s0, w11, d31); d32 = _mm512_fmadd_ps(s0, w21, d32);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src3 + offs0)))));
+                        d30 = _mm512_fmadd_ps(s1, w01, d30); d31 = _mm512_fmadd_ps(s1, w11, d31); d32 = _mm512_fmadd_ps(s1, w21, d32);
+#endif
                     }
                     if (M > 0x4)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
                         d40 = _mm512_fmadd_ps(s0, w00, d40); d41 = _mm512_fmadd_ps(s0, w10, d41); d42 = _mm512_fmadd_ps(s0, w20, d42);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
                         d40 = _mm512_fmadd_ps(s0, w01, d40); d41 = _mm512_fmadd_ps(s0, w11, d41); d42 = _mm512_fmadd_ps(s0, w21, d42);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src4 + offs0)))));
+                        d40 = _mm512_fmadd_ps(s1, w01, d40); d41 = _mm512_fmadd_ps(s1, w11, d41); d42 = _mm512_fmadd_ps(s1, w21, d42);
+#endif
                     }
                     if (M > 0x5)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
                         d50 = _mm512_fmadd_ps(s0, w00, d50); d51 = _mm512_fmadd_ps(s0, w10, d51); d52 = _mm512_fmadd_ps(s0, w20, d52);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
                         d50 = _mm512_fmadd_ps(s0, w01, d50); d51 = _mm512_fmadd_ps(s0, w11, d51); d52 = _mm512_fmadd_ps(s0, w21, d52);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src5 + offs0)))));
+                        d50 = _mm512_fmadd_ps(s1, w01, d50); d51 = _mm512_fmadd_ps(s1, w11, d51); d52 = _mm512_fmadd_ps(s1, w21, d52);
+#endif
                     }
                     if (M > 0x6)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src6[offs0]));
                         d60 = _mm512_fmadd_ps(s0, w00, d60); d61 = _mm512_fmadd_ps(s0, w10, d61); d62 = _mm512_fmadd_ps(s0, w20, d62);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src6 + offs0)), m);
                         d60 = _mm512_fmadd_ps(s0, w01, d60); d61 = _mm512_fmadd_ps(s0, w11, d61); d62 = _mm512_fmadd_ps(s0, w21, d62);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src6 + offs0)))));
+                        d60 = _mm512_fmadd_ps(s1, w01, d60); d61 = _mm512_fmadd_ps(s1, w11, d61); d62 = _mm512_fmadd_ps(s1, w21, d62);
+#endif
                     }
                     if (M > 0x7)
                     {
                         s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src7[offs0]));
                         d70 = _mm512_fmadd_ps(s0, w00, d70); d71 = _mm512_fmadd_ps(s0, w10, d71); d72 = _mm512_fmadd_ps(s0, w20, d72);
+#if GEMM_VER == 0
                         s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src7 + offs0)), m);
                         d70 = _mm512_fmadd_ps(s0, w01, d70); d71 = _mm512_fmadd_ps(s0, w11, d71); d72 = _mm512_fmadd_ps(s0, w21, d72);
+#else
+                        s1 = _mm512_castsi512_ps(_mm512_maskz_mov_epi16(0xAAAAAAAA, _mm512_castps_si512(_mm512_set1_ps(*(float*)(src7 + offs0)))));
+                        d70 = _mm512_fmadd_ps(s1, w01, d70); d71 = _mm512_fmadd_ps(s1, w11, d71); d72 = _mm512_fmadd_ps(s1, w21, d72);
+#endif
                     }
                     weight += 6 * F;
                 }
@@ -1198,20 +1254,38 @@ namespace Simd
             }
         }
 
-        //-----------------------------------------------------------------------------------------
-
-
-        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, const AlgParam& a, Convert& convert, Convolution* convolutions)
+        static SIMD_INLINE bool UseF3(const ConvParam32f& p)
         {
             if (p.Is1x1())
             {
-                convert = ConvolutionBf16NhwcConvertConv;
-                convolutions[TermLast] = ConvolutionBf16NhwcGemm_3<TermLast, type>;
-                convolutions[TermInterim] = ConvolutionBf16NhwcGemm_3<TermInterim, type>;
+                if (p.dstC <= 2 * F || (p.dstC > 3 * F && p.dstC <= 4 * F))
+                    return false;
+                return true;
+            }
+            else
+                return false;
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, const AlgParam& a, Convert& convert, Convolution* convolutions)
+        {
+            convert = ConvolutionBf16NhwcConvertConv;
+            if (p.Is1x1())
+            {
+                if (UseF3(p))
+                {
+                    convolutions[TermLast] = ConvolutionBf16NhwcGemm_3<TermLast, type>;
+                    convolutions[TermInterim] = ConvolutionBf16NhwcGemm_3<TermInterim, type>;
+                }
+                else
+                {
+                    convolutions[TermLast] = ConvolutionBf16NhwcGemm_2<TermLast, type>;
+                    convolutions[TermInterim] = ConvolutionBf16NhwcGemm_2<TermInterim, type>;
+                }
             }
             else
             {
-                convert = ConvolutionBf16NhwcConvertConv;
                 convolutions[TermLast] = ConvolutionBf16NhwcConv_2<TermLast, type>;
                 convolutions[TermInterim] = ConvolutionBf16NhwcConv_2<TermInterim, type>;
             }
@@ -1220,7 +1294,9 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
             : Avx2::SynetConvolution32fBf16Nhwc(p)
         {
-            SetAlgParam(p.Is1x1() ? F * 3 : F * 2, p.Is1x1() ? 8 : 12, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            size_t microD = F * (UseF3(p) ? 3 : 2);
+            size_t microC = UseF3(p) ? 8 : 12;
+            SetAlgParam(microD, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             const AlgParam& a = _alg;
             switch (p.activation)
             {
