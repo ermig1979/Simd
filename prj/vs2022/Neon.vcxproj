@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{271C2D02-B19D-4193-8D83-CC0F06E75F3D}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Neon</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonAbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonAlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBase64.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBayer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgraToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBayer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToRgb.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBgrToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonConditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonCpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonDetection.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonFill.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonFloat16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonFloat32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGaussianBlur.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fNT.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGemm32fPack.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonHistogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonHog.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonHogLite.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonImageLoad.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonImageSaveJpeg.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonImageSavePng.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonInt16ToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonInterference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonInterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonLaplace.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduce.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonReorder.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonResizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSegmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonShiftBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonStatistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonStatisticMoments.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonStretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSvm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynet.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetActivation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConversion.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNchw.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fDirectNhwc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect2r.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect3r.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution32fNhwcDirect4r.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetFused.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetInnerProduct32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fCdc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetMergedConvolution32fDc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonTransform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonUyvyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonWinograd3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToHue.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonYuvToUyvy.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExp.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoadBlock.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h" />
+    <ClInclude Include="..\..\src\Simd\SimdNeon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdPow.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdShuffle.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
+    <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

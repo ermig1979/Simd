@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVsxHog.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxNeural.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxSvm.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxYuvToHue.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdVsxCpu.cpp">
+      <Filter>Vsx</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdVsx.h">
+      <Filter>Vsx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Vsx">
+      <UniqueIdentifier>{7ffc695c-2ab7-4225-b69e-8d4ae3fe3b2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{0996852c-0163-4037-bea2-3f36d46d1e3a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

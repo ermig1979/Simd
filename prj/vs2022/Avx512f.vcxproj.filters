@@ -1,0 +1,228 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fFill.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fNeural.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizer.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSquaredDifferenceSum.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSvm.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConversion.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32f.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect2f.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect2r.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect3r.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetDeconvolution32f.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetFused.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetPooling.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetScale.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fCdc.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fCd.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fDc.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNN.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNT.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetInnerProduct32f.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNchw.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNhwc.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd1.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd2.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd3.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerBilinear.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerNearest.cpp">
+      <Filter>Avx512f</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Avx512f">
+      <UniqueIdentifier>{beb8718a-05f3-4410-81c5-c99a8ba4948f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{2c2adfce-5e1a-4262-b985-daa3cb998619}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAvx512f.h">
+      <Filter>Avx512f</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx1.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx2.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExp.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdNeural.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPow.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStream.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTranspose.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPrefetch.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

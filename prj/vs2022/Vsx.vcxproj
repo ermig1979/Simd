@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E3BE9FD8-D69D-4B04-B719-C475D868C5EB}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Vsx</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdVsxCpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxHog.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxNeural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxSquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxSvm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdVsxYuvToHue.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdVsx.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

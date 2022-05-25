@@ -25,6 +25,7 @@ The Simd Library has next folder's structure:
 * `simd/prj/vs2015/` - contains project files of Microsoft Visual Studio 2015.
 * `simd/prj/vs2017/` - contains project files of Microsoft Visual Studio 2017.
 * `simd/prj/vs2019/` - contains project files of Microsoft Visual Studio 2019.
+* `simd/prj/vs2022/` - contains project files of Microsoft Visual Studio 2022.
 * `simd/prj/cmd/` - contains additional scripts needed for building of the library in Windows.
 * `simd/prj/cmake/` - contains files of CMake build systems.
 * `simd/prj/sh/` - contains additional scripts needed for building of the library in Linux.
@@ -37,10 +38,10 @@ The Simd Library has next folder's structure:
 Building the library for Windows
 ================================
 
-To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2019 (or 2015/2017). 
+To build the library and test application for Windows 32/64 you need to use Microsoft Visual Studio 2022 (or 2015/2017/2019). 
 The project files are in the directory: 
 
-`simd/prj/vs2019/`
+`simd/prj/vs2022/`
 
 By default the library is built as a DLL (Dynamic Linked Library).
 You also may build it as a static library. 

@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D6E29B9B-EE2D-4339-8417-DCADC283884F}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Avx1</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Cpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Fill.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Float32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Gemm32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1HogLite.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Neural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Resizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1ResizerBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Svm.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Synet.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetActivation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConversion.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNchw.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fDirectNhwc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect2r.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetConvolution32fNhwcDirect3r.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetDeconvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetFused.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetInnerProduct32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCd.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fCdc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetMergedConvolution32fDc.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1SynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1Winograd3.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx1.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExp.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPrefetch.h" />
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse2.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse3.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

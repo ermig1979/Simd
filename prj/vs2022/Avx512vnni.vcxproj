@@ -1,0 +1,64 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E89969DE-D5F1-44C5-81AF-A4283851090B}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Avx512vnni</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512vnni.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExp.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTime.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniCpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect1x1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirectAny.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iOutput.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>

@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Avx512vnni">
+      <UniqueIdentifier>{caa88b94-eaf3-477c-bbfe-b544c73751d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{72188850-ff72-458f-a213-aebed33115b1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAvx512vnni.h">
+      <Filter>Avx512vnni</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdArray.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdBase.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdConst.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExp.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInit.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLib.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdLog.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMath.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStore.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDepthwise.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8i.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniCpu.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirect1x1.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetConvolution8iDirectAny.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iDepthwise.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iInput.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512vnniSynetMergedConvolution8iOutput.cpp">
+      <Filter>Avx512vnni</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

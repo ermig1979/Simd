@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="Prop.props" />
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3E24DA78-24E3-41D2-9066-54C75BE13B90}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectName>Avx512bw</ProjectName>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAddFeatureDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwAlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBase64.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBayerToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBFloat16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBayer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgraToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBayer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToRgb.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBgrToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwBinarization.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwConditional.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwCpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDeinterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwDetection.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwEdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFill.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHog.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwHogLite.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageLoad.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSaveJpeg.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwImageSavePng.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInt16ToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwIntegral.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwInterleave.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwLaplace.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwLbp.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwOperation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduce.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray3x3.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray5x5.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwReorder.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizeBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizer.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerArea.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBicubic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwResizerNearest.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSegmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwShiftBilinear.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSobel.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSquaredDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStatisticMoments.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwStretchGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynet.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fBf16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirect1x1.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution8iDirectAny.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8i.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iDepthwise.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iInput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetMergedConvolution8iOutput.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToYuv.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv420pToBgraV2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuv444pToBgraV2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToHue.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwYuvToUyvy.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />
+    <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512f.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBase.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConst.h" />
+    <ClInclude Include="..\..\src\Simd\SimdConversion.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCopyPixel.h" />
+    <ClInclude Include="..\..\src\Simd\SimdCpu.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
+    <ClInclude Include="..\..\src\Simd\SimdDetection.h" />
+    <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExp.h" />
+    <ClInclude Include="..\..\src\Simd\SimdExtract.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGaussianBlur.h" />
+    <ClInclude Include="..\..\src\Simd\SimdGemm.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSave.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSaveJpeg.h" />
+    <ClInclude Include="..\..\src\Simd\SimdImageSavePng.h" />
+    <ClInclude Include="..\..\src\Simd\SimdInit.h" />
+    <ClInclude Include="..\..\src\Simd\SimdIntegral.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLib.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoad.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLoadBlock.h" />
+    <ClInclude Include="..\..\src\Simd\SimdLog.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMath.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
+    <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h" />
+    <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
+    <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStore.h" />
+    <ClInclude Include="..\..\src\Simd\SimdStream.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynet.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution8iCommon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdSynetScale8i.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTime.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
+    <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions512</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
