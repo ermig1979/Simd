@@ -147,7 +147,7 @@ namespace Simd
         SIMD_INLINE int64_t Flop() const
         {
             return int64_t(batch) * kernelY * kernelX * srcC * dstH * dstW * dstC / group * 2;
-        }    
+        } 
     };
 
     //---------------------------------------------------------------------------------------------
@@ -480,7 +480,7 @@ namespace Simd
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
             virtual String Ext() const { return "Base"; }
-            virtual String Desc() const { return Ext() + "::Bf16Nhwc-conv"; }
+            virtual String Desc() const { return Ext() + "::Bf16Nhwc-" + (_alg.mode ? "gemm" : "conv"); }
             virtual size_t ExternalBufferSize() const;
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
@@ -489,13 +489,14 @@ namespace Simd
 
             struct AlgParam
             {
+                int mode;
                 size_t microD, macroH, macroC, macroD;
-                size_t batch, srcH, srcW, srcC, kernelY, kernelX;
+                size_t batch, srcH, srcW, srcC, kX, kY;
             };
 
-            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
 
-            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t dstC, size_t dstH, 
+            typedef void(*ConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, size_t dstC, size_t dstH, 
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
@@ -503,8 +504,9 @@ namespace Simd
             void SetWeight(const float* weight);
             void SetBias(const float* bias);
             void SetParams(const float* params);
-            void ForwardDirect(const float* src, uint16_t* buf, float* dst);
-            size_t OffsetDirect(size_t yBeg, size_t cBeg, size_t cEnd);
+            void ForwardConv(const float* src, uint16_t* buf, float* dst);
+            void ForwardGemm(const float* src, uint16_t* buf, float* dst);
+            size_t Offset(size_t yBeg, size_t cBeg, size_t cEnd);
 
             Array16u _weight;
             Array32f _bias, _params;

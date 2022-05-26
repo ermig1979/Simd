@@ -40,7 +40,7 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, const AlgParam& a, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
+        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
             SIMD_PERF_FUNC();
 
@@ -48,6 +48,7 @@ namespace Simd
             ptrdiff_t end = (yEnd - 1) * p.strideY - p.padY + p.kernelY * p.dilationY;
             src += Max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
             size_t srcC32 = AlignLo(srcC, 32);
+            size_t srcW = p.srcW + p.padX + p.padW;
             __mmask16 srcMask[2];
             __mmask32 dstMask[1];
             if (srcC32 < srcC)
@@ -60,8 +61,8 @@ namespace Simd
             {
                 if ((size_t)sy >= p.srcH)
                 {
-                    memset(dst, 0, a.srcW * srcC * 2);
-                    dst += a.srcW * srcC;
+                    memset(dst, 0, srcW * srcC * 2);
+                    dst += srcW * srcC;
                 }
                 else
                 {
@@ -101,12 +102,12 @@ namespace Simd
         //-----------------------------------------------------------------------------------------
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionBf16NhwcConv_2xM(const uint16_t* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t srcC, int zero, const uint16_t* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2])
+            size_t srcC, int zero, const uint16_t* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2])
         {
             __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51,
                 d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1,
                 s0, w00, w01, w10, w11, m = _mm512_castsi512_ps(Bf16::MASK);
-            size_t dS = srcC * p.strideX, dY = a.srcW * srcC * p.dilationY, dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
+            size_t dS = srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * srcC * p.dilationY, dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
             const uint16_t* src1 = src0 + 1 * dS;
             const uint16_t* src2 = src0 + 2 * dS;
             const uint16_t* src3 = src0 + 3 * dS;
@@ -401,7 +402,7 @@ namespace Simd
             }
         }
 
-        typedef void(*ConvolutionBf16NhwcConv_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t srcC, 
+        typedef void(*ConvolutionBf16NhwcConv_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, size_t srcC, 
             int zero, const uint16_t* weight, const __m512* bias, const __m512* params, float* dst, const __mmask16 tails[2]);
 
         template<TermType term, SimdConvolutionActivationType type> ConvolutionBf16NhwcConv_2xM_Ptr GetConvolutionBf16NhwcConv_2xM(size_t M)
@@ -427,11 +428,11 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionBf16NhwcConv_2(const uint16_t* src, const ConvParam32f& p,
-            const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
-            size_t n = 12;
-            size_t dstWn = AlignLoAny(p.dstW, n), dW = p.kernelY * p.kernelX * AlignHi(srcC, 2) * DF;
-            size_t m = p.dstW - dstWn;
+            size_t n = 12, dstWn = AlignLoAny(p.dstW, n), m = p.dstW - dstWn;
+            size_t dW = p.kernelY * p.kernelX * AlignHi(srcC, 2) * DF, dD = p.dstW * p.dstC;
+            size_t dS = p.strideY * (p.srcW + p.padX + p.padW) * srcC;
             ConvolutionBf16NhwcConv_2xM_Ptr convolution_2xN = GetConvolutionBf16NhwcConv_2xM<term, type>(n);
             ConvolutionBf16NhwcConv_2xM_Ptr convolution_2xM = GetConvolutionBf16NhwcConv_2xM<term, type>(m);
 
@@ -455,13 +456,13 @@ namespace Simd
                 }
                 for (size_t dy = 0; dy < dstH; dy++)
                 {
-                    float* d = dst + dy * p.dstW * p.dstC;
-                    const uint16_t* s = src + dy * p.strideY * a.srcW * srcC;
+                    float* d = dst + dy * dD;
+                    const uint16_t* s = src + dy * dS;
                     size_t dx = 0;
                     for (; dx < dstWn; dx += n, d += n * p.dstC, s += n * p.strideX * srcC)
-                        convolution_2xN(s, p, a, srcC, zero, weight, _bias, _params, d, tails);
+                        convolution_2xN(s, p, srcC, zero, weight, _bias, _params, d, tails);
                     for (; dx < p.dstW; dx += m, d += m * p.dstC, s += m * p.strideX * srcC)
-                        convolution_2xM(s, p, a, srcC, zero, weight, _bias, _params, d, tails);
+                        convolution_2xM(s, p, srcC, zero, weight, _bias, _params, d, tails);
                 }
                 weight += dW;
                 dst += DF;
@@ -785,7 +786,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionBf16NhwcGemm_2(const uint16_t* src, const ConvParam32f& p,
-            const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t n1 = dstH * p.dstW, n = 12;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 2) * DF;
@@ -1215,7 +1216,7 @@ namespace Simd
         }
 
         template<TermType term, SimdConvolutionActivationType type> void ConvolutionBf16NhwcGemm_3(const uint16_t* src, const ConvParam32f& p,
-            const AlgParam& a, size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
+            size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t n1 = dstH * p.dstW, n = 8;
             size_t nn = AlignLoAny(n1, n), m = n1 - nn, dW = AlignHi(srcC, 2) * 3 * F;
@@ -1268,9 +1269,8 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, const AlgParam& a, Convert& convert, Convolution* convolutions)
+        template <SimdConvolutionActivationType type> SIMD_INLINE void SetConv(const ConvParam32f& p, Convolution* convolutions)
         {
-            convert = ConvolutionBf16NhwcConvertConv;
             if (p.Is1x1())
             {
                 if (UseF3(p))
@@ -1297,19 +1297,19 @@ namespace Simd
             size_t microD = F * (UseF3(p) ? 3 : 2);
             size_t microC = UseF3(p) ? 8 : 12;
             SetAlgParam(microD, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            const AlgParam& a = _alg;
+            _convert = ConvolutionBf16NhwcConvertConv;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRestrictRange>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationPrelu>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, a, _convert, _convolutions); break;
-            case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(p, a, _convert, _convolutions); break;
+            case SimdConvolutionActivationIdentity: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
+            case SimdConvolutionActivationRelu: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
+            case SimdConvolutionActivationLeakyRelu: SetConv<SimdConvolutionActivationPrelu>(p, _convolutions); break;
+            case SimdConvolutionActivationRestrictRange: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
+            case SimdConvolutionActivationPrelu: SetConv<SimdConvolutionActivationPrelu>(p, _convolutions); break;
+            case SimdConvolutionActivationElu: SetConv<SimdConvolutionActivationElu>(p, _convolutions); break;
+            case SimdConvolutionActivationHswish: SetConv<SimdConvolutionActivationHswish>(p, _convolutions); break;
+            case SimdConvolutionActivationMish: SetConv<SimdConvolutionActivationMish>(p, _convolutions); break;
+            case SimdConvolutionActivationHardSigmoid: SetConv<SimdConvolutionActivationHardSigmoid>(p, _convolutions); break;
+            case SimdConvolutionActivationSwish: SetConv<SimdConvolutionActivationSwish>(p, _convolutions); break;
             default: assert(0);
             }
         }
