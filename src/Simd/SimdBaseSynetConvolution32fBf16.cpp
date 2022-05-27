@@ -216,7 +216,18 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             AlgParam& a = _alg;
+
             a.mode = 0;
+            //if (p.Is1x1())
+            //    a.mode = 1;
+            //float convArea = float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX);
+            //if (convArea <= 1.0f)
+            //    a.mode = 1;
+            //if (p.srcW * p.srcH < 25)
+            //    a.mode = 1;
+            //if ((p.strideY > 1 && p.strideX > 1) && p.srcC > 32 && convArea < 3.0f)
+            //    a.mode = 1;
+
             a.batch = 1;
             if (a.mode)
             {
@@ -435,7 +446,48 @@ namespace Simd
 
         void SynetConvolution32fBf16Nhwc::ForwardGemm(const float* src, uint16_t* buf, float* dst)
         {
-
+            const ConvParam32f& p = _param;
+            const AlgParam& a = _alg;
+            const uint16_t* weight = _weight.data;
+            const float* bias = _bias.data, * params = _params.data;
+            size_t dstH = a.srcH * a.batch;
+            for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
+            {
+                size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
+                for (size_t sc = 0; sc < a.srcC; sc += a.macroC)
+                {
+                    size_t macroC = Simd::Min(a.srcC, sc + a.macroC) - sc;
+                    for (size_t yBeg = 0; yBeg < dstH;)
+                    {
+                        size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
+                        size_t offs = Offset(yBeg, sc, sc + macroC);
+                        if (dc == 0)
+                        {
+                            if (a.batch > 1)
+                            {
+                                size_t dS = p.srcH * p.srcW * p.srcC;
+                                size_t dB = p.dstH * p.dstW * macroC;
+                                for (size_t b = 0; b < a.batch; ++b)
+                                    _convert(src + sc + b * dS, p, 0, p.dstH, macroC, buf + offs + b * dB);
+                            }
+                            else
+                                _convert(src + sc, p, yBeg, yEnd, macroC, buf + offs);
+                        }
+                        if (sc + macroC == a.srcC)
+                            _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroC, macroC == a.srcC ? 1 : 0,
+                                weight, bias, params, dst + yBeg * p.dstW * p.dstC);
+                        else
+                            _convolutions[TermInterim](buf + offs, p, macroD, yEnd - yBeg, macroC, sc == 0 ? 1 : 0,
+                                weight, bias, params, dst + yBeg * p.dstW * p.dstC);
+                        yBeg = yEnd;
+                    }
+                    weight += AlignHi(macroC, 2) * AlignHiAny(macroD, a.microD);
+                }
+                bias += macroD;
+                if (p.activation == ::SimdConvolutionActivationPrelu)
+                    params += macroD;
+                dst += macroD;
+            }
         }
 
         size_t SynetConvolution32fBf16Nhwc::Offset(size_t yBeg, size_t cBeg, size_t cEnd)
@@ -446,7 +498,7 @@ namespace Simd
             if (p.dstC <= a.macroD)
                 return 0;
             else
-                return a.srcW * (a.srcH * cBeg + (cEnd - cBeg) * step * yBeg);
+                return a.srcW * (a.srcH * a.batch * cBeg + (cEnd - cBeg) * step * yBeg);
         }
     }
 #endif

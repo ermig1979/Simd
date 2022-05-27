@@ -99,6 +99,56 @@ namespace Simd
             }
         }
 
+        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
+        {
+            size_t srcC32 = AlignLo(srcC, 32);
+            __mmask16 srcMask[2];
+            __mmask32 dstMask[1];
+            if (srcC32 < srcC)
+            {
+                srcMask[0] = TailMask16(srcC - srcC32 - F * 0);
+                srcMask[1] = TailMask16(srcC - srcC32 - F * 1);
+                dstMask[0] = TailMask32(srcC - srcC32);
+            }
+            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ky++)
+                    {
+                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (size_t kx = 0; kx < p.kernelX; kx++)
+                            {
+                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                if (sx < p.srcW)
+                                {
+                                    const float* ps = src + (sy * p.srcW + sx) * p.srcC;
+                                    size_t sc = 0;
+                                    for (; sc < srcC32; sc += 32)
+                                        Float32ToBFloat16<false, false>(ps + sc, dst + sc, srcMask, dstMask);
+                                    if (srcC32 < srcC)
+                                        Float32ToBFloat16<false, true>(ps + sc, dst + sc, srcMask, dstMask);
+                                    dst += srcC;
+                                }
+                                else
+                                {
+                                    memset(dst, 0, srcC * 2);
+                                    dst += srcC;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            memset(dst, 0, p.kernelX * srcC * 2);
+                            dst += p.kernelX * srcC;
+                        }
+                    }
+                }
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionBf16NhwcConv_2xM(const uint16_t* src0, const ConvParam32f& p,
@@ -1269,9 +1319,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <SimdConvolutionActivationType type> SIMD_INLINE void SetConv(const ConvParam32f& p, Convolution* convolutions)
+        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, const AlgParam& a, Convolution* convolutions)
         {
-            if (p.Is1x1())
+            if (p.Is1x1() || a.mode)
             {
                 if (UseF3(p))
                 {
@@ -1297,19 +1347,22 @@ namespace Simd
             size_t microD = F * (UseF3(p) ? 3 : 2);
             size_t microC = UseF3(p) ? 8 : 12;
             SetAlgParam(microD, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _convert = ConvolutionBf16NhwcConvertConv;
+            if (_alg.mode)
+                _convert = ConvolutionBf16NhwcConvertGemm;
+            else
+                _convert = ConvolutionBf16NhwcConvertConv;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
-            case SimdConvolutionActivationRelu: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
-            case SimdConvolutionActivationLeakyRelu: SetConv<SimdConvolutionActivationPrelu>(p, _convolutions); break;
-            case SimdConvolutionActivationRestrictRange: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
-            case SimdConvolutionActivationPrelu: SetConv<SimdConvolutionActivationPrelu>(p, _convolutions); break;
-            case SimdConvolutionActivationElu: SetConv<SimdConvolutionActivationElu>(p, _convolutions); break;
-            case SimdConvolutionActivationHswish: SetConv<SimdConvolutionActivationHswish>(p, _convolutions); break;
-            case SimdConvolutionActivationMish: SetConv<SimdConvolutionActivationMish>(p, _convolutions); break;
-            case SimdConvolutionActivationHardSigmoid: SetConv<SimdConvolutionActivationHardSigmoid>(p, _convolutions); break;
-            case SimdConvolutionActivationSwish: SetConv<SimdConvolutionActivationSwish>(p, _convolutions); break;
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(p, _alg, _convolutions); break;
             default: assert(0);
             }
         }

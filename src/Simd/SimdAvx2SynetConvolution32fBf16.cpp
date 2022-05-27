@@ -105,6 +105,65 @@ namespace Simd
             }
         }
 
+        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
+        {
+            size_t srcC16 = Simd::AlignLo(srcC, 16);
+            size_t srcC8 = Simd::AlignLo(srcC, 8);
+            size_t srcC4 = Simd::AlignLo(srcC, 4);
+            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            {
+                for (size_t dx = 0; dx < p.dstW; ++dx)
+                {
+                    for (size_t ky = 0; ky < p.kernelY; ky++)
+                    {
+                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
+                        if (sy < p.srcH)
+                        {
+                            for (size_t kx = 0; kx < p.kernelX; kx++)
+                            {
+                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
+                                if (sx < p.srcW)
+                                {
+                                    const float* ps = src + (sy * p.srcW + sx) * p.srcC;
+                                    size_t sc = 0;
+                                    for (; sc < srcC16; sc += 16)
+                                    {
+                                        __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(src + sc + 0));
+                                        __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(src + sc + 8));
+                                        _mm256_storeu_si256((__m256i*)(dst + sc), _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
+                                    }
+                                    for (; sc < srcC8; sc += 8)
+                                    {
+                                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 0));
+                                        __m128i d1 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 4));
+                                        _mm_storeu_si128((__m128i*)(dst + sc), _mm_packus_epi32(d0, d1));
+                                    }
+                                    for (; sc < srcC4; sc += 4)
+                                    {
+                                        __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 0));
+                                        _mm_storel_epi64((__m128i*)(dst + sc), _mm_packus_epi32(d0, Sse2::K_ZERO));
+                                    }
+                                    for (; sc < srcC; ++sc)
+                                        dst[sc] = Base::Float32ToBFloat16(ps[sc]);
+                                    dst += srcC;
+                                }
+                                else
+                                {
+                                    memset(dst, 0, srcC * 2);
+                                    dst += srcC;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            memset(dst, 0, p.kernelX * srcC * 2);
+                            dst += p.kernelX * srcC;
+                        }
+                    }
+                }
+            }
+        }
+
         //-----------------------------------------------------------------------------------------
 
         template<TermType term, SimdConvolutionActivationType type, int M> void ConvolutionBf16NhwcConv_2xM(const uint16_t* src0, const ConvParam32f& p,
@@ -595,9 +654,9 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template <SimdConvolutionActivationType type> SIMD_INLINE void SetConv(const ConvParam32f& p, Convolution* convolutions)
+        template <SimdConvolutionActivationType type> SIMD_INLINE void Set(const ConvParam32f& p, const AlgParam& a, Convolution* convolutions)
         {
-            if (p.Is1x1())
+            if (p.Is1x1() || a.mode)
             {
                 convolutions[TermLast] = ConvolutionBf16NhwcGemm_2<TermLast, type>;
                 convolutions[TermInterim] = ConvolutionBf16NhwcGemm_2<TermInterim, type>;
@@ -613,19 +672,22 @@ namespace Simd
             : Sse41::SynetConvolution32fBf16Nhwc(p)
         {
             SetAlgParam(F * 2, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
-            _convert = ConvolutionBf16NhwcConvertConv;
+            if (_alg.mode)
+                _convert = ConvolutionBf16NhwcConvertGemm;
+            else
+                _convert = ConvolutionBf16NhwcConvertConv;
             switch (p.activation)
             {
-            case SimdConvolutionActivationIdentity: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
-            case SimdConvolutionActivationRelu: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
-            case SimdConvolutionActivationLeakyRelu: SetConv<SimdConvolutionActivationPrelu>(p, _convolutions); break;
-            case SimdConvolutionActivationRestrictRange: SetConv<SimdConvolutionActivationRestrictRange>(p, _convolutions); break;
-            case SimdConvolutionActivationPrelu: SetConv<SimdConvolutionActivationPrelu>(p, _convolutions); break;
-            case SimdConvolutionActivationElu: SetConv<SimdConvolutionActivationElu>(p, _convolutions); break;
-            case SimdConvolutionActivationHswish: SetConv<SimdConvolutionActivationHswish>(p, _convolutions); break;
-            case SimdConvolutionActivationMish: SetConv<SimdConvolutionActivationMish>(p, _convolutions); break;
-            case SimdConvolutionActivationHardSigmoid: SetConv<SimdConvolutionActivationHardSigmoid>(p, _convolutions); break;
-            case SimdConvolutionActivationSwish: SetConv<SimdConvolutionActivationSwish>(p, _convolutions); break;
+            case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(p, _alg, _convolutions); break;
+            case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(p, _alg, _convolutions); break;
             default: assert(0);
             }
         }
