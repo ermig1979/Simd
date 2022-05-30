@@ -212,50 +212,59 @@ namespace Simd
         {
         }
 
+        String SynetConvolution32fBf16Nhwc::Desc() const 
+        {
+            std::stringstream desc;
+            desc << Ext() << "::Bf16Nhwc-";
+            if (_alg.mode)
+            {
+                desc << "gemm";
+                if (_alg.batch > 1)
+                    desc << "-" << _alg.batch;
+            }
+            else
+                desc << "conv";
+            return desc.str();
+        }
+
+
         void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam32f& p = _param;
             AlgParam& a = _alg;
 
             a.mode = 0;
-            //if (p.Is1x1())
-            //    a.mode = 1;
-            //float convArea = float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX);
-            //if (convArea <= 1.0f)
-            //    a.mode = 1;
-            //if (p.srcW * p.srcH < 25)
-            //    a.mode = 1;
-            //if ((p.strideY > 1 && p.strideX > 1) && p.srcC > 32 && convArea < 3.0f)
-            //    a.mode = 1;
+            if (p.Is1x1())
+                a.mode = 1;
+            float convArea = float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX);
+            if (convArea <= 1.5f)
+                a.mode = 1;
+            if (p.dstW * p.dstH < 25)
+                a.mode = 1;
 
             a.batch = 1;
             if (a.mode)
             {
                 a.srcH = p.dstH;
                 a.srcW = p.dstW;
-                a.srcC = p.srcC * p.kernelY * p.kernelX;
-                a.kY = 1;
-                a.kX = 1;
                 a.microD = microD;
-                a.macroC = Simd::Min(AlignLo(L1 / microD / 2, 2), a.srcC);
-                if (a.srcC * a.srcW * a.srcH * 4 >= L2 && p.batch > 1)
+                a.macroC = Simd::Min(AlignLo(L1 / p.kernelY / p.kernelX / microD / 2, 2), p.srcC);
+                size_t matSize = p.srcC * p.dstW * p.dstH * p.kernelY * p.kernelX * 2;
+                if (matSize * 2 <= L2 && p.batch > 1)
                 {
                     for (size_t batch = 1; batch <= p.batch; ++batch)
-                        if (p.batch % batch == 0 && batch * a.srcC * a.srcW * a.srcH * 2 <= L2)
+                        if (p.batch % batch == 0 && batch * matSize <= L2)
                             a.batch = batch;
                 }
-                a.macroH = Simd::RestrictRange(L2 / 2 / a.macroC * p.dstW, size_t(1), p.dstH * a.batch);
+                a.macroH = Simd::RestrictRange(L2 / 2 / a.macroC / p.kernelY / p.kernelX / p.dstW, size_t(1), p.dstH * a.batch);
                 a.macroD = Simd::RestrictRange(AlignLoAny(L3 / a.macroC / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             }
             else
             {
                 a.srcH = p.srcH + p.padY + p.padH;
                 a.srcW = p.srcW + p.padX + p.padW;
-                a.srcC = p.srcC;
-                a.kY = p.kernelY;
-                a.kX = p.kernelX;
                 a.microD = microD;
-                a.macroC = Simd::Min(AlignLo(L1 / p.kernelY / p.kernelX / microD / 2, 2), a.srcC);
+                a.macroC = Simd::Min(AlignLo(L1 / p.kernelY / p.kernelX / microD / 2, 2), p.srcC);
                 for (size_t macroH = p.dstH; macroH >= 1; macroH--)
                 {
                     a.macroH = macroH;
@@ -273,7 +282,12 @@ namespace Simd
             if (p.dstC <= a.macroD)
                 return Base::AlgCacheL2() / 4;
             else
-                return a.batch * a.srcW * a.srcH * a.srcC / 2;
+            {
+                if (a.mode)
+                    return a.batch * p.srcC * p.dstW * p.dstH * p.kernelY * p.kernelX / 2;
+                else
+                    return a.srcH * a.srcW * AlignHi(p.srcC, 2) / 2;
+            }
         }
 
         void SynetConvolution32fBf16Nhwc::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
@@ -289,29 +303,29 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            _weight.Resize(a.kY * a.kX * AlignHi(a.srcC, 2) * AlignHiAny(p.dstC, a.microD));
+            _weight.Resize(p.kernelY * p.kernelX * AlignHi(p.srcC, 2) * AlignHiAny(p.dstC, a.microD));
             uint16_t * dst = _weight.data;
             for (size_t mad = 0; mad < p.dstC; mad += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, mad + a.macroD) - mad;
-                for (size_t mac = 0; mac < a.srcC; mac += a.macroC)
+                for (size_t mac = 0; mac < p.srcC; mac += a.macroC)
                 {
-                    size_t macroC = Simd::Min(a.srcC, mac + a.macroC) - mac;
+                    size_t macroC = Simd::Min(p.srcC, mac + a.macroC) - mac;
                     for (size_t mid = 0; mid < macroD; mid += a.microD)
                     {
-                        for (size_t ky = 0; ky < a.kY; ++ky)
+                        for (size_t ky = 0; ky < p.kernelY; ++ky)
                         {
-                            for (size_t kx = 0; kx < a.kX; ++kx)
+                            for (size_t kx = 0; kx < p.kernelX; ++kx)
                             {
                                 for (size_t c = 0; c < macroC; c += 2)
                                 {
-                                    const float* src = weight + ((ky * a.kX + kx) * a.srcC + mac + c) * p.dstC + mad + mid;
+                                    const float* src = weight + ((ky * p.kernelX + kx) * p.srcC + mac + c) * p.dstC + mad + mid;
                                     for (size_t d = 0; d < a.microD; ++d)
                                     {
                                         if (mad + mid + d < p.dstC)
                                         {
                                             *(dst++) = Float32ToBFloat16(src[d]);
-                                            *(dst++) = mac + c + 1 < a.srcC ? Float32ToBFloat16(src[p.dstC + d]) : 0;
+                                            *(dst++) = mac + c + 1 < p.srcC ? Float32ToBFloat16(src[p.dstC + d]) : 0;
                                         }
                                         else
                                         {
@@ -450,13 +464,14 @@ namespace Simd
             const AlgParam& a = _alg;
             const uint16_t* weight = _weight.data;
             const float* bias = _bias.data, * params = _params.data;
-            size_t dstH = a.srcH * a.batch;
+            size_t dstH = p.dstH * a.batch;
             for (size_t dc = 0; dc < p.dstC; dc += a.macroD)
             {
                 size_t macroD = Simd::Min(p.dstC, dc + a.macroD) - dc;
-                for (size_t sc = 0; sc < a.srcC; sc += a.macroC)
+                for (size_t sc = 0; sc < p.srcC; sc += a.macroC)
                 {
-                    size_t macroC = Simd::Min(a.srcC, sc + a.macroC) - sc;
+                    size_t macroC = Simd::Min(p.srcC, sc + a.macroC) - sc;
+                    size_t macroK = macroC * p.kernelY * p.kernelX;
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
@@ -466,22 +481,22 @@ namespace Simd
                             if (a.batch > 1)
                             {
                                 size_t dS = p.srcH * p.srcW * p.srcC;
-                                size_t dB = p.dstH * p.dstW * macroC;
+                                size_t dB = p.dstH * p.dstW * p.kernelY * p.kernelX * macroC;
                                 for (size_t b = 0; b < a.batch; ++b)
                                     _convert(src + sc + b * dS, p, 0, p.dstH, macroC, buf + offs + b * dB);
                             }
                             else
                                 _convert(src + sc, p, yBeg, yEnd, macroC, buf + offs);
                         }
-                        if (sc + macroC == a.srcC)
-                            _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroC, macroC == a.srcC ? 1 : 0,
+                        if (sc + macroC == p.srcC)
+                            _convolutions[TermLast](buf + offs, p, macroD, yEnd - yBeg, macroK, macroC == p.srcC ? 1 : 0,
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         else
-                            _convolutions[TermInterim](buf + offs, p, macroD, yEnd - yBeg, macroC, sc == 0 ? 1 : 0,
+                            _convolutions[TermInterim](buf + offs, p, macroD, yEnd - yBeg, macroK, sc == 0 ? 1 : 0,
                                 weight, bias, params, dst + yBeg * p.dstW * p.dstC);
                         yBeg = yEnd;
                     }
-                    weight += AlignHi(macroC, 2) * AlignHiAny(macroD, a.microD);
+                    weight += AlignHi(macroC, 2) * p.kernelY * p.kernelX * AlignHiAny(macroD, a.microD);
                 }
                 bias += macroD;
                 if (p.activation == ::SimdConvolutionActivationPrelu)
@@ -494,11 +509,15 @@ namespace Simd
         {
             const ConvParam32f& p = _param;
             const AlgParam& a = _alg;
-            size_t step = _alg.mode ? 1 : p.strideY;
             if (p.dstC <= a.macroD)
                 return 0;
             else
-                return a.srcW * (a.srcH * a.batch * cBeg + (cEnd - cBeg) * step * yBeg);
+            {
+                if (a.mode)
+                    return p.dstW * (p.dstH * a.batch * cBeg + (cEnd - cBeg) * yBeg);
+                else
+                    return a.srcW * (a.srcH * cBeg + (cEnd - cBeg) * p.strideY * yBeg);
+            }
         }
     }
 #endif

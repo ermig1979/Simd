@@ -128,8 +128,8 @@ namespace Simd
                                     size_t sc = 0;
                                     for (; sc < srcC16; sc += 16)
                                     {
-                                        __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(src + sc + 0));
-                                        __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(src + sc + 8));
+                                        __m256i d0 = Float32ToBFloat16(_mm256_loadu_ps(ps + sc + 0));
+                                        __m256i d1 = Float32ToBFloat16(_mm256_loadu_ps(ps + sc + 8));
                                         _mm256_storeu_si256((__m256i*)(dst + sc), _mm256_permute4x64_epi64(_mm256_packus_epi32(d0, d1), 0xD8));
                                     }
                                     for (; sc < srcC8; sc += 8)
