@@ -283,7 +283,6 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-#if 1
         class SynetMergedConvolution32fBf16 : public Simd::SynetMergedConvolution32f
         {
         public:
@@ -304,7 +303,7 @@ namespace Simd
             typedef void(*ConvertPtr)(const float* src, const SimdConvolutionParameters& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH);
 
             typedef void(*InputConvolutionPtr)(const uint16_t* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
-                const uint32_t* weight, const float* bias, const float* params, float* dst);
+                const uint16_t* weight, const float* bias, const float* params, float* dst);
 
             typedef void(*DepthwiseConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, uint16_t* dst);
@@ -329,7 +328,6 @@ namespace Simd
             Array16u _weightI, _weightO;
             Array32f _weightD, _bias[3], _params[3];
         };
-#endif
 
         //-----------------------------------------------------------------------------------------
 

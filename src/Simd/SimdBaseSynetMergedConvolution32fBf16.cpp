@@ -26,6 +26,7 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
 #include "Simd/SimdSynet.h"
+#include "Simd/SimdBFloat16.h"
 #include "Simd/SimdBase.h"
 
 namespace Simd
@@ -33,13 +34,21 @@ namespace Simd
 #if defined(SIMD_SYNET_ENABLE)
     namespace Base
     {
-        template<SimdConvolutionActivationType type, UpdateType update> void DirectConvolution(const float* src, const SimdConvolutionParameters& p,
-            size_t maC, size_t yBeg, size_t yEnd, const size_t bufH[2], const float* weight, const float* bias, const float* params, float* dst, int first)
+        typedef SynetMergedConvolution32fBf16::AlgParam AlgParam;
+        typedef SynetMergedConvolution32fBf16::ConvertPtr ConvertPtr;
+        typedef SynetMergedConvolution32fBf16::InputConvolutionPtr InputPtr;
+        typedef SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr DepthwisePtr;
+        typedef SynetMergedConvolution32fBf16::OutputConvolutionPtr OutputPtr;
+
+        //---------------------------------------------------------------------
+
+        template<SimdConvolutionActivationType type, UpdateType update> void DirectConvolutionBf16(const float* src, 
+            const SimdConvolutionParameters& p, const uint16_t * weight, const float* bias, const float* params, float* dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
             Array32f buf(dstC);
-            for (size_t dy = yBeg; dy < yEnd; ++dy)
+            for (size_t dy = 0; dy < p.dstH; ++dy)
             {
                 for (size_t dx = 0; dx < dstW; ++dx)
                 {
@@ -57,12 +66,13 @@ namespace Simd
                                 size_t sx = dx * strideX + kx - padX;
                                 if (sx < p.srcW)
                                 {
-                                    const float* pw = weight + (ky * kernelX + kx) * srcC * dstC;
+                                    const uint16_t* pw = weight + (ky * kernelX + kx) * srcC * dstC;
                                     const float* ps = src + (sy * srcW + sx) * srcC;
                                     for (size_t sc = 0; sc < srcC; ++sc)
                                     {
+                                        float s = RoundToBFloat16(ps[sc]);
                                         for (size_t dc = 0; dc < dstC; ++dc)
-                                            buf[dc] += ps[sc] * pw[dc];
+                                            buf[dc] += s * BFloat16ToFloat32(pw[dc]);
                                         pw += dstC;
                                     }
                                 }
@@ -84,27 +94,45 @@ namespace Simd
             }
         }
 
-        template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t index, SynetMergedConvolution32fCdc::ConvolutionPtr * convolution)
+        template<SimdConvolutionActivationType type, UpdateType update> void InputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
+            const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
+        {
+            DirectConvolutionBf16<type, update>((const float*)src, p, weight, bias, params, dst);
+        }
+
+        template<SimdConvolutionActivationType type> void DepthwiseConvolutionBf16(const float* src, const SimdConvolutionParameters& p,
+            const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
+        {
+            DepthwiseConvolution<type>(src, p, maC, yBeg, yEnd, a.bufH, weight, bias, params, (float*)dst, 0);
+        }
+
+        template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
+            const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst, int zero)
+        {
+            DirectConvolutionBf16<type, update>((const float*)src, p, weight, bias, params, dst);
+        }
+
+        template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t index, InputPtr & input, DepthwisePtr & depthwise, OutputPtr & output)
         {
             switch (index)
             {
             case 0:
-                if(p.conv[0].group == 1)
-                    convolution[0] = DirectConvolution<type, UpdateSet>;
+                if (p.conv[0].group == 1)
+                    input = InputConvolutionBf16<type, UpdateSet>;
                 else
-                    convolution[0] = DepthwiseConvolution<type>;
+                    depthwise = DepthwiseConvolutionBf16<type>;
                 break;
             case 1:
                 if (p.conv[1].group == 1)
-                    convolution[1] = DirectConvolution<type, UpdateSet>;
+                    output = OutputConvolutionBf16<type, UpdateSet>;
                 else
-                    convolution[1] = DepthwiseConvolution<type>;
+                    depthwise = DepthwiseConvolutionBf16<type>;
                 break;
             case 2:
                 if (p.add)
-                    convolution[2] = DirectConvolution<type, UpdateAdd>;
+                    output = OutputConvolutionBf16<type, UpdateAdd>;
                 else
-                    convolution[2] = DirectConvolution<type, UpdateSet>;
+                    output = OutputConvolutionBf16<type, UpdateSet>;
                 break;
             default:
                 assert(0);
@@ -116,6 +144,7 @@ namespace Simd
         SynetMergedConvolution32fBf16::SynetMergedConvolution32fBf16(const MergConvParam32f& p)
            : Simd::SynetMergedConvolution32f(p)
         {
+            memset(&_alg, 0, sizeof(_alg));
             _convert = NULL, _input = NULL, _depthwise = NULL, _output[0] = NULL, _output[1] = NULL;
             _sizeB[0] = 0, _sizeB[1] = 0, _sizeB[2] = 0;
             const SimdConvolutionParameters& beg = p.conv[0];
@@ -126,6 +155,23 @@ namespace Simd
             size_t size1 = p.count == 3 ? p.conv[1].dstH * p.conv[1].dstW * p.conv[1].dstC : 0;
             _dw0 = beg.group != 1;
             _1x1 = beg.kernelY == 1 && beg.strideY == 1;
+            for (size_t i = 0; i < p.count; ++i)
+            {
+                switch (p.conv[i].activation)
+                {
+                case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationIdentity>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationRelu: Set<SimdConvolutionActivationRelu>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationLeakyRelu: Set<SimdConvolutionActivationLeakyRelu>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationRestrictRange: Set<SimdConvolutionActivationRestrictRange>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationPrelu: Set<SimdConvolutionActivationPrelu>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationElu: Set<SimdConvolutionActivationElu>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationHswish: Set<SimdConvolutionActivationHswish>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationMish: Set<SimdConvolutionActivationMish>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationHardSigmoid: Set<SimdConvolutionActivationHardSigmoid>(_param, i, _input, _depthwise, _output[0]); break;
+                case SimdConvolutionActivationSwish: Set<SimdConvolutionActivationSwish>(_param, i, _input, _depthwise, _output[0]); break;
+                default: assert(0);
+                }
+            }
         }
 
         size_t SynetMergedConvolution32fBf16::ExternalBufferSize() const
@@ -168,17 +214,103 @@ namespace Simd
 
         void SynetMergedConvolution32fBf16::SetInputWeight(const float* src, const SimdConvolutionParameters& p)
         {
-
+            assert(p.group == 1);
+            if (_alg.miC)
+            {
+                size_t F = _alg.miC * 2, C = DivHi(p.srcC, 2), D = DivHi(p.dstC, F), K = p.kernelY * p.kernelX;
+                _weightI.Resize(K * C * D * F * 2, true);
+                uint16_t* dst = _weightI.data;
+                for (size_t d = 0; d < D; d++)
+                {
+                    for (size_t k = 0; k < K; ++k)
+                    {
+                        for (size_t c = 0; c < C; ++c)
+                        {
+                            const float* ps = src + (k * p.srcC + c * 2) * p.dstC + d * F;
+                            for (size_t f = 0; f < F; ++f)
+                            {
+                                for (size_t i = 0; i < 2; ++i)
+                                {
+                                    if (d * F + f < p.dstC && c * 2 + i < p.srcC)
+                                        *(dst++) = Float32ToBFloat16(ps[i * p.dstC]);
+                                    else
+                                        *(dst++) = 0;
+                                }
+                                ps++;
+                            }
+                        }
+                    }
+                }            
+            }
+            else
+            {
+                _weightI.Resize(p.kernelY * p.kernelX * p.srcC * p.dstC, true);
+                Float32ToBFloat16(src, _weightI.size, _weightI.data);
+            }
         }
 
         void SynetMergedConvolution32fBf16::SetDepthwiseWeight(const float* src, const SimdConvolutionParameters& p)
         {
-
+            assert(p.srcC == p.dstC && p.srcC == p.group);
+            if (_alg.miC)
+            {
+                size_t D = p.dstC, K = p.kernelY * p.kernelX, F = _alg.miC;
+                _weightD.Resize(AlignHiAny(D, F) * K);
+                float* dst = _weightD.data;
+                for (size_t d = 0; d < D; d += F)
+                {
+                    size_t n = Simd::Min(F, D - d);
+                    for (size_t k = 0; k < K; k++)
+                    {
+                        size_t i = 0;
+                        for (; i < n; ++i)
+                            dst[i] = src[k * D + d + i];
+                        for (; i < F; ++i)
+                            dst[i] = 0;
+                        dst += F;
+                    }
+                }
+            }
+            else
+                _weightD.Assign(src, p.kernelY * p.kernelX * p.srcC * p.dstC / p.group);
         }
 
         void SynetMergedConvolution32fBf16::SetOutputWeight(const float* src, const SimdConvolutionParameters& p)
         {
-
+            assert(p.group == 1 && p.kernelX == 1 && p.kernelY == 1 && p.strideX == 1 && p.strideY == 1);
+            if (_alg.miC)
+            {
+                size_t F = _alg.miC * 2, C = DivHi(p.srcC, 2), D = DivHi(p.dstC, F), M = DivHi(_alg.maC, 2);
+                _weightO.Resize(C * D * F * 2, true);
+                uint16_t* dst = _weightO.data;
+                for (size_t cB = 0; cB < C; cB += M)
+                {
+                    size_t cE = Simd::Min(C, cB + M);
+                    for (size_t d = 0; d < D; d++)
+                    {
+                        for (size_t c = cB; c < cE; ++c)
+                        {
+                            const float* ps = src + c * 2 * p.dstC + d * F;
+                            for (size_t f = 0; f < F; ++f)
+                            {
+                                for (size_t i = 0; i < 2; ++i)
+                                {
+                                    if (d * F + f < p.dstC && c * 2 + i < p.srcC)
+                                        *(dst++) = Float32ToBFloat16(ps[i * p.dstC]);
+                                    else
+                                        *(dst++) = 0;
+                                }
+                                ps++;
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                _weightO.Resize(p.kernelY * p.kernelX * p.srcC * p.dstC, true);
+                Float32ToBFloat16(src, _weightO.size, _weightO.data);
+            }
         }
 
         void SynetMergedConvolution32fBf16::SetBias(const float* src, const SimdConvolutionParameters& p, Array32f& dst)
@@ -239,6 +371,11 @@ namespace Simd
                 assert(0);
             }
         }
+
+        void SynetMergedConvolution32fBf16::Forward(const float* src, float* buf, float* dst)
+        {
+
+        };
     }
 #endif
 }
