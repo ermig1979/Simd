@@ -290,6 +290,11 @@ namespace Simd
             }
         }
 
+        size_t SynetConvolution32fBf16Nhwc::InternalBufferSize() const
+        {
+            return _buffer.size + _weight.size / 2 + _bias.size + _params.size;
+        }
+
         void SynetConvolution32fBf16Nhwc::SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params)
         {
             SetWeight(weight);

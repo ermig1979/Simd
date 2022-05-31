@@ -114,10 +114,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetMergedConvolution32f::SynetMergedConvolution32f(const MergConvParam32f& p)
-           :  _param(p)
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-           , _perf(NULL)
-#endif        
+           : Simd::SynetMergedConvolution32f(p)
         {
             for (size_t i = 0; i < 4; ++i)
                 _convolution[i] = NULL;
@@ -259,26 +256,6 @@ namespace Simd
                 }
                 src += _sizeS;
                 dst += _sizeD;
-            }
-        }
-
-#if defined(SIMD_PERFORMANCE_STATISTIC) && (defined(NDEBUG) || defined(SIMD_PERF_STAT_IN_DEBUG))
-        Base::PerformanceMeasurer* SynetMergedConvolution32f::Perf(const char* func)
-        {
-            if (_perf == NULL)
-                _perf = Simd::Base::PerformanceMeasurerStorage::s_storage.Get(func, Param().Info() + " " + Desc(), Param().Flop());
-            return _perf;
-        }
-#endif
-
-        float* SynetMergedConvolution32f::GetBuffer(float* buffer)
-        {
-            if (buffer)
-                return buffer;
-            else
-            {
-                _buffer.Resize(ExternalBufferSize());
-                return _buffer.data;
             }
         }
 
@@ -667,9 +644,9 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add)
+        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
         {
-            MergConvParam32f param(batch, convs, count, add);
+            MergConvParam32f param(batch, convs, count, add, compatibility);
             if (!param.Valid())
                 return NULL;
             return new Base::SynetMergedConvolution32f(param);

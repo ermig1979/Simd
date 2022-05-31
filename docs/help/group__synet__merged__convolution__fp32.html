@@ -50,9 +50,9 @@ $(function() {
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="func-members" name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:gaed6b10310042f327ae9763e621dcfb1b"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b">SimdSynetMergedConvolution32fInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> add)</td></tr>
-<tr class="memdesc:gaed6b10310042f327ae9763e621dcfb1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 merged convolution algorithm.  <a href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b">More...</a><br /></td></tr>
-<tr class="separator:gaed6b10310042f327ae9763e621dcfb1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gacd13d1f3e706143de34a17cd04c27a1b"><td class="memItemLeft" align="right" valign="top">SIMD_API void *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b">SimdSynetMergedConvolution32fInit</a> (size_t batch, const <a class="el" href="struct_simd_convolution_parameters.html">SimdConvolutionParameters</a> *convs, size_t count, <a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a> add, <a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a> compatibility)</td></tr>
+<tr class="memdesc:gacd13d1f3e706143de34a17cd04c27a1b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Initilizes FP32 merged convolution algorithm.  <a href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b">More...</a><br /></td></tr>
+<tr class="separator:gacd13d1f3e706143de34a17cd04c27a1b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga884e019594562cb69235ad8c61fdc6f5"><td class="memItemLeft" align="right" valign="top">SIMD_API size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__synet__merged__convolution__fp32.html#ga884e019594562cb69235ad8c61fdc6f5">SimdSynetMergedConvolution32fExternalBufferSize</a> (const void *context)</td></tr>
 <tr class="memdesc:ga884e019594562cb69235ad8c61fdc6f5"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets size of external temporary buffer required for FP32 merged convolution algorithm.  <a href="group__synet__merged__convolution__fp32.html#ga884e019594562cb69235ad8c61fdc6f5">More...</a><br /></td></tr>
 <tr class="separator:ga884e019594562cb69235ad8c61fdc6f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -72,8 +72,8 @@ Functions</h2></td></tr>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <p >A framework to accelerate FP32 merged convolution in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>. </p>
 <h2 class="groupheader">Function Documentation</h2>
-<a id="gaed6b10310042f327ae9763e621dcfb1b" name="gaed6b10310042f327ae9763e621dcfb1b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#gaed6b10310042f327ae9763e621dcfb1b">&#9670;&nbsp;</a></span>SimdSynetMergedConvolution32fInit()</h2>
+<a id="gacd13d1f3e706143de34a17cd04c27a1b" name="gacd13d1f3e706143de34a17cd04c27a1b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gacd13d1f3e706143de34a17cd04c27a1b">&#9670;&nbsp;</a></span>SimdSynetMergedConvolution32fInit()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -100,7 +100,13 @@ Functions</h2></td></tr>
           <td class="paramkey"></td>
           <td></td>
           <td class="paramtype"><a class="el" href="group__c__types.html#ga128437633efebd89ca4bde565dcf5627">SimdBool</a>&#160;</td>
-          <td class="paramname"><em>add</em>&#160;</td>
+          <td class="paramname"><em>add</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype"><a class="el" href="group__synet.html#ga3c885cc5d2f09e6d18834f67d91f168d">SimdSynetCompatibilityType</a>&#160;</td>
+          <td class="paramname"><em>compatibility</em>&#160;</td>
         </tr>
         <tr>
           <td></td>
@@ -117,6 +123,7 @@ Functions</h2></td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">convs</td><td>- an array with convolutions parameters. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">count</td><td>- a number of merged convolutions. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">add</td><td>- a flag that signilizes if we need to add output to source value. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">compatibility</td><td>- a flags of calculation compatibility. </td></tr>
   </table>
   </dd>
 </dl>
@@ -143,7 +150,7 @@ Functions</h2></td></tr>
 <p>Gets size of external temporary buffer required for FP32 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -170,7 +177,7 @@ Functions</h2></td></tr>
 <p>Gets size of internal buffer used inside FP32 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -197,7 +204,7 @@ Functions</h2></td></tr>
 <p>Gets description of internal implementation of FP32 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
   </table>
   </dd>
 </dl>
@@ -252,7 +259,7 @@ Functions</h2></td></tr>
 <p>Sets weights, beases and parameters of activation function required for FP32 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in,out]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">weight</td><td>- a pointer to the array with pointers to convolution weights. The array size is determined by number of merged convolutions. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">internal</td><td>- a ponter to the array of flags signalized that weights are stored in the internal buffer. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">bias</td><td>- a pointer to the array with pointers to bias. The array size is determined by number of merged convolutions. Can be NULL. </td></tr>
@@ -304,7 +311,7 @@ Functions</h2></td></tr>
 <p>Performs forward propagation of FP32 merged convolution algorithm. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gaed6b10310042f327ae9763e621dcfb1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
+    <tr><td class="paramdir">[in]</td><td class="paramname">context</td><td>- a pointer to FP32 merged convolution context. It must be created by function <a class="el" href="group__synet__merged__convolution__fp32.html#gacd13d1f3e706143de34a17cd04c27a1b" title="Initilizes FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fInit</a> and released by function <a class="el" href="group__memory.html#ga4e38dedd9f946265c9762858a71aa4cf" title="Releases context created with using of Simd Library API.">SimdRelease</a>. </td></tr>
     <tr><td class="paramdir">[in]</td><td class="paramname">src</td><td>- a pointer to input image. </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">buf</td><td>- a pointer to external temporary buffer. The size of the external temporary buffer is determined by function <a class="el" href="group__synet__merged__convolution__fp32.html#ga884e019594562cb69235ad8c61fdc6f5" title="Gets size of external temporary buffer required for FP32 merged convolution algorithm.">SimdSynetMergedConvolution32fExternalBufferSize</a>. Can be NULL (it causes usage of internal buffer). </td></tr>
     <tr><td class="paramdir">[out]</td><td class="paramname">dst</td><td>- a pointer to output image. </td></tr>

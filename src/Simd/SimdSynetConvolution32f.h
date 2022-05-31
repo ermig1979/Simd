@@ -482,6 +482,7 @@ namespace Simd
             virtual String Ext() const { return "Base"; }
             virtual String Desc() const;
             virtual size_t ExternalBufferSize() const;
+            virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float* weight, SimdBool* internal, const float* bias, const float* params);
             virtual void Forward(const float* src, float* buf, float* dst);
 

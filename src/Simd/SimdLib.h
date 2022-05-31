@@ -7018,7 +7018,7 @@ extern "C"
 
     /*! @ingroup synet_merged_convolution_fp32
 
-        \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+        \fn void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
 
         \short Initilizes FP32 merged convolution algorithm.
 
@@ -7026,11 +7026,13 @@ extern "C"
         \param [in] convs - an array with convolutions parameters.
         \param [in] count - a number of merged convolutions.
         \param [in] add - a flag that signilizes if we need to add output to source value.
+        \param [in] compatibility - a flags of calculation compatibility.
         \return a pointer to FP32 merged convolution context. On error it returns NULL. It must be released with using of function ::SimdRelease.
             This pointer is used in functions ::SimdSynetMergedConvolution32fExternalBufferSize, ::SimdSynetMergedConvolution32fInternalBufferSize, 
             ::SimdSynetMergedConvolution32fInfo, ::SimdSynetMergedConvolution32fSetParams and ::SimdSynetMergedConvolution32fForward.
     */
-    SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add);
+    SIMD_API void * SimdSynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, 
+        size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
 
     /*! @ingroup synet_merged_convolution_fp32
 

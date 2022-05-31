@@ -1147,9 +1147,9 @@ namespace Simd
 
 		//---------------------------------------------------------------------
 
-		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add)
+		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
 		{
-			MergConvParam32f param(batch, convs, count, add);
+			MergConvParam32f param(batch, convs, count, add, compatibility);
 			if (!param.Valid())
 				return NULL;
 			if (SynetMergedConvolution32fCdc::Preferable(param))
