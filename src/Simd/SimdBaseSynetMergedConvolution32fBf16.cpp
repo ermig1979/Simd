@@ -146,15 +146,15 @@ namespace Simd
         {
             memset(&_alg, 0, sizeof(_alg));
             _convert = NULL, _input = NULL, _depthwise = NULL, _output[0] = NULL, _output[1] = NULL;
-            _sizeB[0] = 0, _sizeB[1] = 0, _sizeB[2] = 0;
             const SimdConvolutionParameters& beg = p.conv[0];
             const SimdConvolutionParameters& end = p.conv[p.count - 1];
             _sizeS = beg.srcH * beg.srcW * beg.srcC;
             _sizeD = end.dstH * end.dstW * end.dstC;
-            size_t size0 = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
-            size_t size1 = p.count == 3 ? p.conv[1].dstH * p.conv[1].dstW * p.conv[1].dstC : 0;
             _dw0 = beg.group != 1;
             _1x1 = beg.kernelY == 1 && beg.strideY == 1;
+            _sizeB[0] = p.conv[1].srcH * p.conv[1].srcW * p.conv[1].srcC;
+            _sizeB[1] = p.count == 3 ? p.conv[1].dstH * p.conv[1].dstW * p.conv[1].dstC : 0;
+            _sizeB[2] = 0;
             for (size_t i = 0; i < p.count; ++i)
             {
                 switch (p.conv[i].activation)
@@ -176,7 +176,10 @@ namespace Simd
 
         size_t SynetMergedConvolution32fBf16::ExternalBufferSize() const
         {
-            return _sizeB[1] + (_sizeB[0] + _sizeB[2]) / 2;
+            if (_alg.miC)
+                return _sizeB[1] + (_sizeB[0] + _sizeB[2]) / 2;
+            else
+                return _sizeB[1] + _sizeB[0];
         }
 
         size_t SynetMergedConvolution32fBf16::InternalBufferSize() const
@@ -316,7 +319,7 @@ namespace Simd
         void SynetMergedConvolution32fBf16::SetBias(const float* src, const SimdConvolutionParameters& p, Array32f& dst)
         {
             const AlgParam& a = _alg;
-            dst.Resize(AlignHiAny(p.dstC, a.miC), true);
+            dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC)), true);
             if (src)
                 memcpy(dst.data, src, p.dstC * sizeof(float));
         }
@@ -325,7 +328,7 @@ namespace Simd
         {
             const AlgParam& a = _alg;
             if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
-                dst.Resize(AlignHiAny(p.dstC, a.miC), true);
+                dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC)), true);
             else
                 dst.Resize(2, true);
             switch (p.activation)
@@ -374,7 +377,35 @@ namespace Simd
 
         void SynetMergedConvolution32fBf16::Forward(const float* src, float* buf, float* dst)
         {
-
+            uint8_t* buffer = (uint8_t*)Buffer(buf);
+            float* buf0 = Allocate<float>(buffer, _sizeB[0]);
+            float* buf1 = Allocate<float>(buffer, _sizeB[1]);
+            const MergConvParam32f& p = _param;
+            const SimdConvolutionParameters& c0 = p.conv[0];
+            const SimdConvolutionParameters& c1 = p.conv[1];
+            const SimdConvolutionParameters& c2 = p.conv[2];
+            const AlgParam& a = _alg;
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                if (_dw0)
+                {
+                    _depthwise(src, c0, a, 0, 0, c0.dstH, _weightD.data, _bias[0].data, _params[0].data, (uint16_t*)buf0);
+                    _output[0]((uint16_t*)buf0, c1, a, 0, 0, c1.dstH, _weightO.data, _bias[1].data, _params[1].data, dst, 0);
+                }
+                else
+                {
+                    _input((uint16_t*)src, c0, a, 0, 0, c0.dstH, _weightI.data, _bias[0].data, _params[0].data, buf0);
+                    if (p.count > 2)
+                    {
+                        _depthwise(buf0, c1, a, 0, 0, c1.dstH, _weightD.data, _bias[1].data, _params[1].data, (uint16_t*)buf1);
+                        _output[0]((uint16_t*)buf1, c2, a, 0, 0, c2.dstH, _weightO.data, _bias[2].data, _params[2].data, dst, 0);
+                    }
+                    else
+                        _depthwise(buf0, c1, a, 0, 0, c1.dstH, _weightD.data, _bias[1].data, _params[1].data, (uint16_t*)dst);
+                }
+                src += _sizeS;
+                dst += _sizeD;
+            }
         };
     }
 #endif

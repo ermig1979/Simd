@@ -1478,7 +1478,11 @@ namespace Simd
 			MergConvParam32f param(batch, convs, count, add, compatibility);
 			if (!param.Valid())
 				return NULL;
-			if (SynetMergedConvolution32fCdc::Preferable(param))
+			if (Base::Bf16Soft(compatibility))
+			{
+				return new Base::SynetMergedConvolution32fBf16(param);
+			}
+			else if (SynetMergedConvolution32fCdc::Preferable(param))
 				return new Neon::SynetMergedConvolution32fCdc(param);
 			else if (SynetMergedConvolution32fCd::Preferable(param))
 				return new Neon::SynetMergedConvolution32fCd(param);

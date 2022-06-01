@@ -242,7 +242,7 @@ namespace Simd
         void SynetMergedConvolution32f::Forward(const float* src, float* buf, float* dst)
         {
             const MergConvParam32f& p = _param;
-            float* buf0 = GetBuffer(buf);
+            float* buf0 = Buffer(buf);
             float* buf1 = buf0 + _sizeB[0];
             for (size_t b = 0; b < p.batch; ++b)
             {
@@ -373,7 +373,7 @@ namespace Simd
                 return;
             }
             const MergConvParam32f & p = _param;
-            float * buf0 = GetBuffer(buf);
+            float * buf0 = Buffer(buf);
             float * buf1 = buf0 + _sizeB[0];
             for (size_t b = 0; b < p.batch; ++b)
             {
@@ -497,7 +497,7 @@ namespace Simd
                 return;
             }
             const MergConvParam32f& p = _param;
-            float* buf0 = GetBuffer(buf);
+            float* buf0 = Buffer(buf);
             for (size_t b = 0; b < p.batch; ++b)
             {
                 for (size_t c = 0, C = p.conv[1].dstC; c < C; c += _maC)
@@ -615,7 +615,7 @@ namespace Simd
                 return;
             }
             const MergConvParam32f& p = _param;
-            float* buf0 = GetBuffer(buf);
+            float* buf0 = Buffer(buf);
             for (size_t b = 0; b < p.batch; ++b)
             {
                 for (size_t c = 0, C = p.conv[0].dstC; c < C; c += _maC)
@@ -649,7 +649,12 @@ namespace Simd
             MergConvParam32f param(batch, convs, count, add, compatibility);
             if (!param.Valid())
                 return NULL;
-            return new Base::SynetMergedConvolution32f(param);
+            if (Base::Bf16Soft(compatibility))
+            {
+                return new Base::SynetMergedConvolution32fBf16(param);
+            }
+            else
+                return new Base::SynetMergedConvolution32f(param);
         }
     }
 #endif

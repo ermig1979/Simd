@@ -187,7 +187,7 @@ namespace Simd
         MergConvParam32f _param;
         Array32f _buffer;
 
-        float* GetBuffer(float* buffer)
+        float* Buffer(float* buffer)
         {
             if (buffer)
                 return buffer;
@@ -293,7 +293,7 @@ namespace Simd
             virtual size_t ExternalBufferSize() const;
             virtual size_t InternalBufferSize() const;
             virtual void SetParams(const float* const* weight, SimdBool* internal, const float* const* bias, const float* const* params);
-            virtual void Forward(const float* src, float* buf, float* dst) = 0;
+            virtual void Forward(const float* src, float* buf, float* dst);
 
             struct AlgParam
             {
