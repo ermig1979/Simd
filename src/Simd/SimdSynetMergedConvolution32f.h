@@ -381,6 +381,27 @@ namespace Simd
     }
 #endif//SIMD_SSE2_ENABLE
 
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
+    {
+        void SetInput(const SimdConvolutionParameters& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+
+        void SetDepthwise(const SimdConvolutionParameters& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const SimdConvolutionParameters& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+
+        class SynetMergedConvolution32fBf16Cdc : public Base::SynetMergedConvolution32fBf16Cdc
+        {
+        public:
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+    }
+#endif//SIMD_SSE41_ENABLE
+
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {

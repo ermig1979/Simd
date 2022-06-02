@@ -38,6 +38,60 @@ namespace Simd
     const bool NHWC_GEMM_COMPATIBLE = false;
     const bool NHWC_GEMM_RUNTIME = true;
 
+    //---------------------------------------------------------------------------------------------
+
+    SIMD_INLINE bool IsKernel(const SimdConvolutionParameters& p, size_t value)
+    {
+        return p.kernelY == value && p.kernelX == value;
+    }
+
+    SIMD_INLINE bool IsDilation(const SimdConvolutionParameters& p, size_t value)
+    {
+        return p.dilationY == value && p.dilationX == value;
+    }
+
+    SIMD_INLINE bool IsStride(const SimdConvolutionParameters& p, size_t value)
+    {
+        return p.strideY == value && p.strideX == value;
+    }
+
+    SIMD_INLINE bool IsPad(const SimdConvolutionParameters& p, size_t value)
+    {
+        return p.padY == value && p.padX == value && p.padH == value && p.padW == value;
+    }
+
+    SIMD_INLINE bool IsDepthwise(const SimdConvolutionParameters& p)
+    {
+        return p.srcC == p.group && p.dstC == p.group;
+    }
+
+    SIMD_INLINE bool Is1x1(const SimdConvolutionParameters& p)
+    {
+        return IsKernel(p, 1) && IsDilation(p, 1) && IsStride(p, 1) && IsPad(p, 0);
+    }
+
+    SIMD_INLINE size_t NoseH(const SimdConvolutionParameters & p)
+    {
+        return DivHi(p.padY, p.strideY);
+    }
+
+    SIMD_INLINE size_t NoseW(const SimdConvolutionParameters& p)
+    {
+        return DivHi(p.padX, p.strideX);
+    }
+
+    SIMD_INLINE size_t BodyH(const SimdConvolutionParameters& p)
+    {
+        return (p.padY + p.srcH - (p.kernelY - 1) * p.dilationY - 1) / p.strideY + 1;
+    }
+
+    SIMD_INLINE size_t BodyW(const SimdConvolutionParameters& p)
+    {
+        return (p.padX + p.srcW - (p.kernelX - 1) * p.dilationX - 1) / p.strideX + 1;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
     struct ConvParam32f : public SimdConvolutionParameters
     {
         SimdBool trans;
@@ -87,32 +141,32 @@ namespace Simd
 
         SIMD_INLINE bool IsDepthwise() const
         {
-            return srcC == group && dstC == group;
+            return Simd::IsDepthwise(*this);
         }
 
         SIMD_INLINE bool Is1x1() const
         {
-            return IsKernel(1) && IsDilation(1) && IsStride(1) && IsPad(0);
+            return Simd::Is1x1(*this);
         }
 
         SIMD_INLINE size_t NoseH() const
         {
-            return DivHi(padY, strideY);
+            return Simd::NoseH(*this);
         }
 
         SIMD_INLINE size_t NoseW() const
         {
-            return DivHi(padX, strideX);
+            return Simd::NoseW(*this);
         }
 
         SIMD_INLINE size_t BodyH() const
         {
-            return (padY + srcH - (kernelY - 1) * dilationY - 1) / strideY + 1;
+            return Simd::BodyH(*this);
         }
 
         SIMD_INLINE size_t BodyW() const
         {
-            return (padX + srcW - (kernelX - 1) * dilationX - 1) / strideX + 1;
+            return Simd::BodyW(*this);
         }
 
         SIMD_INLINE size_t SizeS() const
