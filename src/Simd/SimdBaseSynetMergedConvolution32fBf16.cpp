@@ -28,6 +28,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBFloat16.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -407,6 +408,107 @@ namespace Simd
                 dst += _sizeD;
             }
         };
+
+        //-----------------------------------------------------------------------------------------
+
+        SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
+            : SynetMergedConvolution32fBf16(p)
+        {
+        }
+
+        void SynetMergedConvolution32fBf16Cdc::Forward(const float* src, float* buf, float* dst)
+        {
+            const MergConvParam32f& p = _param;
+            const SimdConvolutionParameters& c0 = p.conv[0];
+            const SimdConvolutionParameters& c1 = p.conv[1];
+            const SimdConvolutionParameters& c2 = p.conv[2];
+            const AlgParam& a = _alg;
+
+            uint8_t* buffer = (uint8_t*)Buffer(buf);
+            uint16_t* buf0 = Allocate<uint16_t>(buffer, _sizeB[0]);
+            float* buf1 = Allocate<float>(buffer, _sizeB[1]);
+            uint16_t* buf2 = Allocate<uint16_t>(buffer, _sizeB[2]);
+
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                for (size_t c = 0, C = c1.dstC; c < C; c += a.maC)
+                {
+                    size_t maC = Simd::Min(C, c + a.maC) - c;
+                    for (size_t yBeg2 = 0, yBeg1 = 0, yBeg0 = 0; yBeg2 < c1.dstH;)
+                    {
+                        size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c1.dstH);
+                        size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c1.srcH);
+                        size_t yEnd0 = Simd::RestrictRange(yBeg0 + a.yStep[0], a.yStart[0], c0.srcH);
+                        _convert(src, c0, yBeg0, yEnd0, buf0, a.bufH[0]);
+                        _input(buf0, c0, a, maC, yBeg1, yEnd1, _weightI.data + c * a.dw[0], 
+                            _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
+                        _depthwise(buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1], 
+                            _bias[1].data + c, _params[1].data + c * a.dp[1], buf2);
+                        if (c + maC == C)
+                            _output[0](buf2, c2, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[2], 
+                                _bias[2].data, _params[2].data, dst, maC == C ? 1 : 0);
+                        else
+                            _output[1](buf2, c2, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[2], 
+                                _bias[2].data, _params[2].data, dst, c == 0 ? 1 : 0);
+                        yBeg2 = yEnd2;
+                        yBeg1 = yEnd1;
+                        yBeg0 = yEnd0;
+                    }
+                }
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+        bool SynetMergedConvolution32fBf16Cdc::Preferable(const MergConvParam32f& p)
+        {
+            return p.count == 3;
+        }
+
+        void SynetMergedConvolution32fBf16Cdc::SetSize(size_t F)
+        {
+            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const MergConvParam32f& p = _param;
+            const SimdConvolutionParameters& c0 = p.conv[0];
+            const SimdConvolutionParameters& c1 = p.conv[1];
+            const SimdConvolutionParameters& c2 = p.conv[2];
+            AlgParam& a = _alg;
+
+            a.miC = F;
+            size_t size = 0;
+            for (size_t i = 0; i < 3; ++i)
+            {
+                const SimdConvolutionParameters& c = p.conv[i];
+                size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
+            }
+            size_t count = size / (L3 / 2) + 1;
+            a.maC = AlignHiAny(c0.dstC / count, 2 * a.miC);
+            for (size_t yStep = c1.dstH; yStep >= 1; yStep--)
+            {
+                a.yStep[2] = Simd::Max<size_t>(1, yStep);
+                a.yStart[2] = a.yStep[2];
+                a.bufH[2] = Pow2Hi(a.yStep[2]);
+
+                a.yStep[1] = a.yStep[2] * c1.strideY;
+                a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c1.strideY + c1.kernelY - c1.padY, c1.srcH);
+                a.bufH[1] = Pow2Hi(Simd::Max((a.yStep[2] - 1) * c1.strideY + c1.kernelY, a.yStart[1]));
+
+                a.yStep[0] = a.yStep[1] * c0.strideY;
+                a.yStart[0] = Simd::Min((a.yStart[1] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
+                a.bufH[0] = Pow2Hi(Simd::Max((a.yStep[1] - 1) * c0.strideY + c0.kernelY, a.yStart[0]));
+
+                _sizeB[0] = a.bufH[0] * p.conv[0].srcW * p.conv[0].srcC;
+                _sizeB[1] = a.bufH[1] * p.conv[1].srcW * a.maC;
+                _sizeB[2] = a.bufH[2] * p.conv[1].dstW * a.maC;
+                if (_sizeB[0] * 2 + _sizeB[1] * 4 + _sizeB[2] * 2 <= L2)
+                    break;
+            }
+            a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dw[0] = c0.kernelY * c0.kernelX * c0.srcC;
+            a.dw[1] = c1.kernelY * c1.kernelX;
+            a.dw[2] = AlignHiAny(c2.dstC, 2 * a.miC);
+        }
     }
 #endif
 }
