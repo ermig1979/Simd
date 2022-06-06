@@ -50,13 +50,15 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params)
             {
-                _mm_storel_epi64((__m128i*)ptr, Float32ToBFloat16(Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index)));
+                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index);
+                _mm_storel_epi64((__m128i*)ptr, _mm_packus_epi32(Float32ToBFloat16(f32), Sse2::K_ZERO));
             }
 
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params, size_t tail)
             {
+                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index);
                 uint16_t tmp[F];
-                _mm_storel_epi64((__m128i*)tmp, Float32ToBFloat16(Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index)));
+                _mm_storel_epi64((__m128i*)tmp, _mm_packus_epi32(Float32ToBFloat16(f32), Sse2::K_ZERO));
                 for (size_t i = 0; i < tail; ++i)
                     ptr[i] = tmp[i];
             }
@@ -106,14 +108,14 @@ namespace Simd
 
         template<TermBf16Type term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint16_t* dst, __m128 val0, __m128 val1, const __m128* bias, const __m128* params)
         {
-            TermBf16<term>::template Save<type, 0>(dst + 0, val0, bias, params);
-            TermBf16<term>::template Save<type, 1>(dst + F, val1, bias, params);
+            TermBf16<term>::template Save<type, 0>(dst + 0 * DF, val0, bias, params);
+            TermBf16<term>::template Save<type, 1>(dst + 1 * DF, val1, bias, params);
         }
 
         template<TermBf16Type term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint16_t* dst, __m128 val0, __m128 val1, const __m128* bias, const __m128* params, size_t tail)
         {
-            TermBf16<term>::template Save<type, 0>(dst + 0, val0, bias, params);
-            TermBf16<term>::template Save<type, 1>(dst + F, val1, bias, params, tail);
+            TermBf16<term>::template Save<type, 0>(dst + 0 * DF, val0, bias, params);
+            TermBf16<term>::template Save<type, 1>(dst + 1 * DF, val1, bias, params, tail);
         }
     }
 #endif

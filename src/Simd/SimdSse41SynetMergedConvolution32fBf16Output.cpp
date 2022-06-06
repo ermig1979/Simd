@@ -253,7 +253,7 @@ namespace Simd
                     outputConvolution1x1_2xN(s, p, a, maC, dC, weight, _bias, _params, d, zero);
                 for (; i < n1; i += m, s += a.maC * m, d += p.dstC * m)
                     outputConvolution1x1_2xM(s, p, a, maC, dC, weight, _bias, _params, d, zero);
-                weight += DivHi(maC, 2) * QA;
+                weight += DivHi(maC, 2) * QF;
             }
         }
 

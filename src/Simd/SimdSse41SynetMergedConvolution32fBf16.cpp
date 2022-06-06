@@ -63,7 +63,7 @@ namespace Simd
 				return NULL;
 			if (Base::Bf16Soft(compatibility))
 			{
-                if (SynetMergedConvolution32fBf16Cdc::Preferable(param) && 0)
+                if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
                     return new Sse41::SynetMergedConvolution32fBf16Cdc(param);
                 else
 				    return new Base::SynetMergedConvolution32fBf16(param);

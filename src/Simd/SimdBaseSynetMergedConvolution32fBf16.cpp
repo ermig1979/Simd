@@ -508,6 +508,9 @@ namespace Simd
             a.dw[0] = c0.kernelY * c0.kernelX * c0.srcC;
             a.dw[1] = c1.kernelY * c1.kernelX;
             a.dw[2] = AlignHiAny(c2.dstC, 2 * a.miC);
+            
+            ((SimdConvolutionParameters&)c1).dstT = SimdTensorData16b;
+            ((SimdConvolutionParameters&)c2).srcT = SimdTensorData16b;
         }
     }
 #endif

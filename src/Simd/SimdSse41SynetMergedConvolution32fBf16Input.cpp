@@ -339,7 +339,7 @@ namespace Simd
                         inputConvolution_2x1(src, p, a, dy, dx, dC, weight, _bias, _params, dst0, dst1);
                 }
                 dst += a.bufH[1] * p.dstW * DF;
-                weight += p.kernelY * p.kernelX * DivHi(p.srcC, 2) * QA;
+                weight += p.kernelY * p.kernelX * DivHi(p.srcC, 2) * QF;
             }
         }
 
@@ -530,7 +530,7 @@ namespace Simd
                             inputConvolution1x1_2xE(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                     }
                     dst += a.bufH[1] * p.dstW * DF;
-                    weight += DivHi(p.srcC, 2) * QA;
+                    weight += DivHi(p.srcC, 2) * QF;
                 }
             }
             else
@@ -559,7 +559,7 @@ namespace Simd
                             inputConvolution1x1_2xM(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
                     }
                     dst += a.bufH[1] * p.dstW * DF;
-                    weight += DivHi(p.srcC, 2) * QA;
+                    weight += DivHi(p.srcC, 2) * QF;
                 }
             }
         }
