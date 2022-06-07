@@ -43,18 +43,18 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, UpdateType update> void DirectConvolutionBf16(const float* src, 
+        template<SimdConvolutionActivationType type, UpdateType update> void DirectBf16(const float* src, 
             const SimdConvolutionParameters& p, const uint16_t * weight, const float* bias, const float* params, float* dst)
         {
-            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC;
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC, srcC2 = AlignLo(srcC, 2);
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
             Array32f buf(dstC);
             for (size_t dy = 0; dy < p.dstH; ++dy)
             {
                 for (size_t dx = 0; dx < dstW; ++dx)
                 {
-                    if (bias)
-                        memcpy(buf.data, bias, dstC * sizeof(float));
+                    if (update == UpdateAdd)
+                        memcpy(buf.data, dst, dstC * sizeof(float));
                     else
                         memset(buf.data, 0, dstC * sizeof(float));
                     for (size_t ky = 0; ky < kernelY; ++ky)
@@ -80,37 +80,66 @@ namespace Simd
                             }
                         }
                     }
-                    if (update == UpdateAdd)
-                    {
-                        for (size_t dc = 0; dc < dstC; ++dc)
-                            dst[dc] = Activate<type>(dst[dc] + buf[dc], params, dc);
-                    }
-                    else
-                    {
-                        for (size_t dc = 0; dc < dstC; ++dc)
-                            dst[dc] = Activate<type>(buf[dc], params, dc);
-                    }
+                    for (size_t dc = 0; dc < dstC; ++dc)
+                        dst[dc] = Activate<type>(buf[dc] + bias[dc], params, dc);
                     dst += p.dstC;
                 }
             }
         }
 
-        template<SimdConvolutionActivationType type, UpdateType update> void InputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
+        template<SimdConvolutionActivationType type> void DepthwiseBf16(const float* src, 
+            const SimdConvolutionParameters& p, const float* weight, const float* bias, const float* params, float* dst)
+        {
+            assert(p.group == p.srcC && p.group == p.dstC);
+            size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
+            size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
+            for (size_t dy = 0; dy < p.dstH; ++dy)
+            {
+                for (size_t dx = 0; dx < dstW; ++dx)
+                {
+                    for (size_t c = 0; c < srcC; ++c)
+                    {
+                        float sum = 0; 
+                        for (size_t ky = 0; ky < kernelY; ++ky)
+                        {
+                            size_t sy = dy * strideY + ky - padY;
+                            if (sy < srcH)
+                            {
+                                for (size_t kx = 0; kx < kernelX; ++kx)
+                                {
+                                    size_t sx = dx * strideX + kx - padX;
+                                    if (sx < srcW)
+                                    {
+                                        const float* pw = weight + (ky * kernelX + kx) * srcC + c;
+                                        const float* ps = src + (sy * srcW + sx) * srcC + c;
+                                        sum += ps[0] * pw[0];
+                                    }
+                                }
+                            }
+                        }
+                        dst[c] = Activate<type>(sum + bias[c], params, c);
+                    }
+                    dst += srcC;
+                }
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void InputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
-            DirectConvolutionBf16<type, update>((const float*)src, p, weight, bias, params, dst);
+            DirectBf16<type, UpdateSet>((const float*)src, p, weight, bias, params, dst);
         }
 
         template<SimdConvolutionActivationType type> void DepthwiseConvolutionBf16(const float* src, const SimdConvolutionParameters& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
         {
-            DepthwiseConvolution<type>(src, p, maC, yBeg, yEnd, a.bufH, weight, bias, params, (float*)dst, 0);
+            DepthwiseBf16<type>(src, p, weight, bias, params, (float*)dst);
         }
 
         template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst, int zero)
         {
-            DirectConvolutionBf16<type, update>((const float*)src, p, weight, bias, params, dst);
+            DirectBf16<type, update>((const float*)src, p, weight, bias, params, dst);
         }
 
         template <SimdConvolutionActivationType type> void Set(const MergConvParam32f& p, size_t index, InputPtr & input, DepthwisePtr & depthwise, OutputPtr & output)
@@ -119,7 +148,7 @@ namespace Simd
             {
             case 0:
                 if (p.conv[0].group == 1)
-                    input = InputConvolutionBf16<type, UpdateSet>;
+                    input = InputConvolutionBf16<type>;
                 else
                     depthwise = DepthwiseConvolutionBf16<type>;
                 break;
@@ -446,10 +475,10 @@ namespace Simd
                             _bias[1].data + c, _params[1].data + c * a.dp[1], buf2);
                         if (c + maC == C)
                             _output[0](buf2, c2, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[2], 
-                                _bias[2].data, _params[2].data, dst, maC == C ? 1 : 0);
+                                _bias[2].data, _params[2].data, dst, (maC != C || p.add) ? 0 : 1);
                         else
                             _output[1](buf2, c2, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[2], 
-                                _bias[2].data, _params[2].data, dst, c == 0 ? 1 : 0);
+                                _bias[2].data, _params[2].data, dst, (c != 0 || p.add) ? 0 : 1);
                         yBeg2 = yEnd2;
                         yBeg1 = yEnd1;
                         yBeg0 = yEnd0;

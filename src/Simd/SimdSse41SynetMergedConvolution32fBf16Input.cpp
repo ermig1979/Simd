@@ -60,7 +60,7 @@ namespace Simd
             const __m128* bias, const __m128* params, float* dst0, float* dst1)
         {
             __m128 d00, d01, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
-            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(p.srcC, 2) * QA, sM = a.bufH[0] - 1;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dWz = DivHi(p.srcC, 2) * QF, sM = a.bufH[0] - 1;
             size_t sy = dy * p.strideY - p.padY;
             size_t sx = dx * p.strideX - p.padX;
             size_t kY = p.kernelY * p.dilationY;
@@ -89,7 +89,7 @@ namespace Simd
                                 s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
                                 d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00); d01 = _mm_add_ps(_mm_mul_ps(s0, w11), d01);
 
-                                weight += QA;
+                                weight += QF;
                             }
                         }
                         else
@@ -119,7 +119,7 @@ namespace Simd
                                 s0 = _mm_and_ps(_mm_set1_ps(*(float*)(src0 + offs - 0)), m);
                                 d00 = _mm_add_ps(_mm_mul_ps(s0, w01), d00);
 
-                                weight += QA;
+                                weight += QF;
                             }
                         }
                         else
@@ -135,7 +135,7 @@ namespace Simd
             const uint16_t* weight, const __m128* bias, const __m128* params, float* dst0, float* dst1)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
-            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC, dWz = DivHi(p.srcC, 2) * QA * p.kernelX, sM = a.bufH[0] - 1;
+            size_t dY = p.srcW * p.srcC, dX = p.srcC, dS = p.srcC * p.strideX, dD = p.dstC, dWz = DivHi(p.srcC, 2) * QF * p.kernelX, sM = a.bufH[0] - 1;
             const uint16_t* src1 = src0 + 1 * dS;
             const uint16_t* src2 = src0 + 2 * dS;
             const uint16_t* src3 = src0 + 3 * dS;
@@ -574,7 +574,7 @@ namespace Simd
                 input = InputConvolution_2<type>;
         }
 
-        void SetInput(const SimdConvolutionParameters& p, InputPtr& input)
+        void SetInput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, InputPtr& input)
         {
             switch (p.activation)
             {

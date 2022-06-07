@@ -384,11 +384,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        void SetInput(const SimdConvolutionParameters& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+        void SetInput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
-        void SetDepthwise(const SimdConvolutionParameters& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const SimdConvolutionParameters& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+        void SetOutput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution32fBf16Cdc : public Base::SynetMergedConvolution32fBf16Cdc
         {

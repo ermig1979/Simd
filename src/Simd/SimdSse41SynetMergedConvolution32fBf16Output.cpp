@@ -265,7 +265,7 @@ namespace Simd
             output[1] = OutputConvolution1x1_2<TermBf16Interim, SimdConvolutionActivationIdentity>;
         }
 
-        void SetOutput(const SimdConvolutionParameters& p, OutputPtr* output)
+        void SetOutput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, OutputPtr* output)
         {
             switch (p.activation)
             {

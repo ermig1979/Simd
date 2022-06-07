@@ -49,9 +49,9 @@ namespace Simd
         {
             SetSize(Sse2::F);
             _convert = ConvertFp32ToBf16;
-            SetInput(_param.conv[0], _input);
-            SetDepthwise(_param.conv[1], _depthwise);
-            SetOutput(_param.conv[2], _output);
+            SetInput(_param.conv[0], _param.compatibility, _input);
+            SetDepthwise(_param.conv[1], _param.compatibility, _depthwise);
+            SetOutput(_param.conv[2], _param.compatibility, _output);
         }
 
 		//---------------------------------------------------------------------
