@@ -633,6 +633,98 @@ namespace Simd
             a.bufH[2] = 0;
             _sizeB[2] = 0;
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
+            : SynetMergedConvolution32fBf16(p)
+        {
+        }
+
+        void SynetMergedConvolution32fBf16Dc::Forward(const float* src, float* buf, float* dst)
+        {
+            const MergConvParam32f& p = _param;
+            const SimdConvolutionParameters& c0 = p.conv[0];
+            const SimdConvolutionParameters& c1 = p.conv[1];
+            const AlgParam& a = _alg;
+
+            uint8_t* buffer = (uint8_t*)Buffer(buf);
+            uint16_t* buf2 = Allocate<uint16_t>(buffer, _sizeB[2]);
+
+            for (size_t b = 0; b < p.batch; ++b)
+            {
+                for (size_t c = 0, C = c0.dstC; c < C; c += a.maC)
+                {
+                    size_t maC = Simd::Min(C, c + a.maC) - c;
+                    for (size_t yBeg2 = 0, yBeg1 = 0, yBeg0 = 0; yBeg2 < c1.dstH;)
+                    {
+                        size_t yEnd2 = Simd::RestrictRange(yBeg2 + a.yStep[2], a.yStart[2], c0.dstH);
+                        size_t yEnd1 = Simd::RestrictRange(yBeg1 + a.yStep[1], a.yStart[1], c0.srcH);
+                        _depthwise(src + c, c0, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[0], _bias[0].data + c,
+                            _params[0].data + c * a.dp[0], buf2);
+                        if (c + maC == C)
+                            _output[0](buf2, c1, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[1],
+                                _bias[1].data, _params[1].data, dst, maC != C ? 0 : 1);
+                        else
+                            _output[1](buf2, c1, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[1],
+                                _bias[1].data, _params[1].data, dst, c != 0 ? 0 : 1);
+                        yBeg2 = yEnd2;
+                        yBeg1 = yEnd1;
+                    }
+                }
+                src += _sizeS;
+                dst += _sizeD;
+            }
+        }
+
+        bool SynetMergedConvolution32fBf16Dc::Preferable(const MergConvParam32f& p)
+        {
+            return p.count == 2 && p.conv[1].group == 1;
+        }
+
+        void SynetMergedConvolution32fBf16Dc::SetSize(size_t F)
+        {
+            const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
+            const MergConvParam32f& p = _param;
+            const SimdConvolutionParameters& c0 = p.conv[0];
+            const SimdConvolutionParameters& c1 = p.conv[1];
+            AlgParam& a = _alg;
+
+            a.miC = F;
+            size_t size = 0;
+            for (size_t i = 0; i < 2; ++i)
+            {
+                const SimdConvolutionParameters& c = p.conv[i];
+                size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
+            }
+            size_t count = size / (L3 / 2) + 1;
+            a.maC = AlignHiAny(c0.srcC / count, 2 * a.miC);
+
+            for (size_t yStep = c0.dstH; yStep >= 1; yStep--)
+            {
+                a.yStep[2] = Simd::Max<size_t>(1, yStep);
+                a.yStart[2] = a.yStep[2];
+                a.bufH[2] = Pow2Hi(a.yStep[2]);
+
+                a.yStep[1] = a.yStep[2] * c0.strideY;
+                a.yStart[1] = Simd::Min((a.yStart[2] - 1) * c0.strideY + c0.kernelY - c0.padY, c0.srcH);
+
+                _sizeB[2] = a.bufH[2] * p.conv[1].srcW * a.maC;
+                if (_sizeB[2] * 2 <= L2)
+                    break;
+            }
+            a.bufH[0] = 0;
+            a.bufH[1] = 0;
+            _sizeB[0] = 0;
+            _sizeB[1] = 0;
+            a.dp[0] = c0.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dp[1] = c1.activation == ::SimdConvolutionActivationPrelu ? 1 : 0;
+            a.dw[0] = c0.kernelY * c0.kernelX;
+            a.dw[1] = AlignHiAny(c1.dstC, 2 * a.miC);
+
+            ((SimdConvolutionParameters&)c0).dstT = SimdTensorData16b;
+            ((SimdConvolutionParameters&)c1).srcT = SimdTensorData16b;
+        }
     }
 #endif
 }
