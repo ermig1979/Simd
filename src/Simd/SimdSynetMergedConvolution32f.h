@@ -342,6 +342,19 @@ namespace Simd
             void SetSize(size_t F);
         };
 
+        class SynetMergedConvolution32fBf16Cd : public SynetMergedConvolution32fBf16
+        {
+        public:
+            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+
+            virtual void Forward(const float* src, float* buf, float* dst);
+
+            static bool Preferable(const MergConvParam32f& p);
+
+        protected:
+            void SetSize(size_t F);
+        };
+
         //-----------------------------------------------------------------------------------------
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
@@ -394,6 +407,14 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Sse41"; }
+        };
+
+        class SynetMergedConvolution32fBf16Cd : public Base::SynetMergedConvolution32fBf16Cd
+        {
+        public:
+            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
 
             virtual String Ext() const { return "Sse41"; }
         };

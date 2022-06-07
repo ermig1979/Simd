@@ -1156,6 +1156,8 @@ namespace Simd
 			{
 				if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
 					return new Sse41::SynetMergedConvolution32fBf16Cdc(param);
+				else if (Base::SynetMergedConvolution32fBf16Cd::Preferable(param))
+					return new Sse41::SynetMergedConvolution32fBf16Cd(param);
 				else
 					return new Base::SynetMergedConvolution32fBf16(param);
 			}
