@@ -672,7 +672,6 @@ namespace Simd
             return Avx512f::SynetHardSigmoid32f(value, _mm512_set1_ps(params[0]), _mm512_set1_ps(params[1]));
         }
 
-
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationSwish>(__m512 value, const float* params, size_t offset, __mmask16 tail)
         {
             return Avx512f::Swish(value, _mm512_set1_ps(params[0]));

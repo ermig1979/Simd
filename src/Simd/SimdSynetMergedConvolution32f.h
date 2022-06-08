@@ -580,6 +580,45 @@ namespace Simd
     }
 #endif//SIMD_AVX512F_ENABLE
 
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+
+        class SynetMergedConvolution32fBf16Cdc : public Avx2::SynetMergedConvolution32fBf16Cdc
+        {
+        public:
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        class SynetMergedConvolution32fBf16Cd : public Avx2::SynetMergedConvolution32fBf16Cd
+        {
+        public:
+            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        class SynetMergedConvolution32fBf16Dc : public Avx2::SynetMergedConvolution32fBf16Dc
+        {
+        public:
+            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
+
+        void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
+    }
+#endif//SIMD_AVX512BW_ENABLE
+
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
     {
