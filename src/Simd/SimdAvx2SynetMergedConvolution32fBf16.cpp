@@ -24,13 +24,13 @@
 #include "Simd/SimdSynetMergedConvolution32f.h"
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdUpdate.h"
-#include "Simd/SimdSse41.h"
+#include "Simd/SimdAvx2.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-	namespace Sse41
+#if defined(SIMD_AVX2_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+	namespace Avx2
 	{
         void ConvertFp32ToBf16(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH)
         {
@@ -45,9 +45,9 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
-            : Base::SynetMergedConvolution32fBf16Cdc(p)
+            : Sse41::SynetMergedConvolution32fBf16Cdc(p)
         {
-            SetSize(Sse2::F);
+            SetSize(Avx::F);
             _convert = ConvertFp32ToBf16;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
@@ -57,9 +57,9 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
-            : Base::SynetMergedConvolution32fBf16Cd(p)
+            : Sse41::SynetMergedConvolution32fBf16Cd(p)
         {
-            SetSize(Sse2::F);
+            SetSize(Avx::F);
             _convert = ConvertFp32ToBf16;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
@@ -68,34 +68,12 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
-            : Base::SynetMergedConvolution32fBf16Dc(p)
+            : Sse41::SynetMergedConvolution32fBf16Dc(p)
         {
-            SetSize(Sse2::F);
+            SetSize(Avx::F);
             SetDepthwise(_param.conv[0], _depthwise);
             SetOutput(_param.conv[1], _output);
         }
-
-		//---------------------------------------------------------------------
-
-		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
-		{
-			MergConvParam32f param(batch, convs, count, add, compatibility);
-			if (!param.Valid())
-				return NULL;
-			if (Base::Bf16Soft(compatibility))
-			{
-                if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
-                    return new Sse41::SynetMergedConvolution32fBf16Cdc(param);
-                else if (Base::SynetMergedConvolution32fBf16Cd::Preferable(param))
-                    return new Sse41::SynetMergedConvolution32fBf16Cd(param);
-                else if (Base::SynetMergedConvolution32fBf16Dc::Preferable(param))
-                    return new Sse41::SynetMergedConvolution32fBf16Dc(param);
-                else
-				    return new Base::SynetMergedConvolution32fBf16(param);
-			}
-			else
-				return Sse2::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
-		}
 	}
 #endif
 }

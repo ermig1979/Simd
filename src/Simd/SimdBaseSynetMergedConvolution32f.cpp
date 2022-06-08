@@ -244,7 +244,7 @@ namespace Simd
             const MergConvParam32f& p = _param;
             float* buf0 = Buffer(buf);
             float* buf1 = buf0 + _sizeB[0];
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < p.conv[0].batch; ++b)
             {
                 _convolution[0](src, p.conv[0], 0, 0, p.conv[0].dstH, NULL, _weight[0], _bias[0], _params[0], buf0, 1);
                 _convolution[1](buf0, p.conv[1], 0, 0, p.conv[1].dstH, NULL, _weight[1], _bias[1], _params[1], (p.count == 3 ? buf1 : dst), 1);
@@ -375,7 +375,7 @@ namespace Simd
             const MergConvParam32f & p = _param;
             float * buf0 = Buffer(buf);
             float * buf1 = buf0 + _sizeB[0];
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < p.conv[0].batch; ++b)
             {
                 for (size_t c = 0, C = p.conv[1].dstC; c < C; c += _maC)
                 {
@@ -498,7 +498,7 @@ namespace Simd
             }
             const MergConvParam32f& p = _param;
             float* buf0 = Buffer(buf);
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < p.conv[0].batch; ++b)
             {
                 for (size_t c = 0, C = p.conv[1].dstC; c < C; c += _maC)
                 {
@@ -616,7 +616,7 @@ namespace Simd
             }
             const MergConvParam32f& p = _param;
             float* buf0 = Buffer(buf);
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < p.conv[0].batch; ++b)
             {
                 for (size_t c = 0, C = p.conv[0].dstC; c < C; c += _maC)
                 {

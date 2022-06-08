@@ -98,6 +98,10 @@ namespace Simd
         size_t batch;
         SimdSynetCompatibilityType compatibility;
 
+        ConvParam32f()
+        {
+        }
+
         ConvParam32f(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
             *((SimdConvolutionParameters*)this) = *conv;

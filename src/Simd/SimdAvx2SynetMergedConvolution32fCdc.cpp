@@ -1155,11 +1155,11 @@ namespace Simd
 			if (Base::Bf16Soft(compatibility))
 			{
 				if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
-					return new Sse41::SynetMergedConvolution32fBf16Cdc(param);
+					return new Avx2::SynetMergedConvolution32fBf16Cdc(param);
 				else if (Base::SynetMergedConvolution32fBf16Cd::Preferable(param))
-					return new Sse41::SynetMergedConvolution32fBf16Cd(param);
+					return new Avx2::SynetMergedConvolution32fBf16Cd(param);
 				else if (Base::SynetMergedConvolution32fBf16Dc::Preferable(param))
-					return new Sse41::SynetMergedConvolution32fBf16Dc(param);
+					return new Avx2::SynetMergedConvolution32fBf16Dc(param);
 				else
 					return new Base::SynetMergedConvolution32fBf16(param);
 			}

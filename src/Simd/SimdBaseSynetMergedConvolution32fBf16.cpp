@@ -44,7 +44,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, UpdateType update> void DirectBf16(const float* src, 
-            const SimdConvolutionParameters& p, const uint16_t * weight, const float* bias, const float* params, float* dst)
+            const ConvParam32f& p, const uint16_t * weight, const float* bias, const float* params, float* dst)
         {
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW, dstC = p.dstC, srcC2 = AlignLo(srcC, 2);
             size_t kernelY = p.kernelY, kernelX = p.kernelX, strideY = p.strideY, strideX = p.strideX, padY = p.padY, padX = p.padX;
@@ -88,7 +88,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void DepthwiseBf16(const float* src, 
-            const SimdConvolutionParameters& p, const float* weight, const float* bias, const float* params, float* dst)
+            const ConvParam32f& p, const float* weight, const float* bias, const float* params, float* dst)
         {
             assert(p.group == p.srcC && p.group == p.dstC);
             size_t srcH = p.srcH, srcW = p.srcW, srcC = p.srcC, dstW = p.dstW;
@@ -124,19 +124,19 @@ namespace Simd
             }
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
+        template<SimdConvolutionActivationType type> void InputConvolutionBf16(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             DirectBf16<type, UpdateSet>((const float*)src, p, weight, bias, params, dst);
         }
 
-        template<SimdConvolutionActivationType type> void DepthwiseConvolutionBf16(const float* src, const SimdConvolutionParameters& p,
+        template<SimdConvolutionActivationType type> void DepthwiseConvolutionBf16(const float* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const float* weight, const float* bias, const float* params, uint16_t* dst)
         {
             DepthwiseBf16<type>(src, p, weight, bias, params, (float*)dst);
         }
 
-        template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolutionBf16(const uint16_t* src, const SimdConvolutionParameters& p, 
+        template<SimdConvolutionActivationType type, UpdateType update> void OutputConvolutionBf16(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst, int zero)
         {
             DirectBf16<type, update>((const float*)src, p, weight, bias, params, dst);
@@ -176,8 +176,8 @@ namespace Simd
         {
             memset(&_alg, 0, sizeof(_alg));
             _convert = NULL, _input = NULL, _depthwise = NULL, _output[0] = NULL, _output[1] = NULL;
-            const SimdConvolutionParameters& beg = p.conv[0];
-            const SimdConvolutionParameters& end = p.conv[p.count - 1];
+            const ConvParam32f& beg = p.conv[0];
+            const ConvParam32f& end = p.conv[p.count - 1];
             _sizeS = beg.srcH * beg.srcW * beg.srcC;
             _sizeD = end.dstH * end.dstW * end.dstC;
             _dw0 = beg.group != 1;
@@ -245,7 +245,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32fBf16::SetInputWeight(const float* src, const SimdConvolutionParameters& p)
+        void SynetMergedConvolution32fBf16::SetInputWeight(const float* src, const ConvParam32f& p)
         {
             assert(p.group == 1);
             if (_alg.miC)
@@ -282,7 +282,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32fBf16::SetDepthwiseWeight(const float* src, const SimdConvolutionParameters& p)
+        void SynetMergedConvolution32fBf16::SetDepthwiseWeight(const float* src, const ConvParam32f& p)
         {
             assert(p.srcC == p.dstC && p.srcC == p.group);
             if (_alg.miC)
@@ -308,7 +308,7 @@ namespace Simd
                 _weightD.Assign(src, p.kernelY * p.kernelX * p.srcC * p.dstC / p.group);
         }
 
-        void SynetMergedConvolution32fBf16::SetOutputWeight(const float* src, const SimdConvolutionParameters& p)
+        void SynetMergedConvolution32fBf16::SetOutputWeight(const float* src, const ConvParam32f& p)
         {
             assert(p.group == 1 && p.kernelX == 1 && p.kernelY == 1 && p.strideX == 1 && p.strideY == 1);
             if (_alg.miC)
@@ -346,7 +346,7 @@ namespace Simd
             }
         }
 
-        void SynetMergedConvolution32fBf16::SetBias(const float* src, const SimdConvolutionParameters& p, Array32f& dst)
+        void SynetMergedConvolution32fBf16::SetBias(const float* src, const ConvParam32f& p, Array32f& dst)
         {
             const AlgParam& a = _alg;
             dst.Resize(AlignHiAny(p.dstC, Simd::Max(size_t(1), a.miC)), true);
@@ -354,7 +354,7 @@ namespace Simd
                 memcpy(dst.data, src, p.dstC * sizeof(float));
         }
 
-        void SynetMergedConvolution32fBf16::SetParams(const float* src, const SimdConvolutionParameters& p, Array32f& dst)
+        void SynetMergedConvolution32fBf16::SetParams(const float* src, const ConvParam32f& p, Array32f& dst)
         {
             const AlgParam& a = _alg;
             if (p.activation == SimdConvolutionActivationLeakyRelu || p.activation == SimdConvolutionActivationPrelu)
@@ -411,11 +411,11 @@ namespace Simd
             float* buf0 = Allocate<float>(buffer, _sizeB[0]);
             float* buf1 = Allocate<float>(buffer, _sizeB[1]);
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
-            const SimdConvolutionParameters& c2 = p.conv[2];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
+            const ConvParam32f& c2 = p.conv[2];
             const AlgParam& a = _alg;
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < c0.batch; ++b)
             {
                 if (_dw0)
                 {
@@ -448,9 +448,9 @@ namespace Simd
         void SynetMergedConvolution32fBf16Cdc::Forward(const float* src, float* buf, float* dst)
         {
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
-            const SimdConvolutionParameters& c2 = p.conv[2];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
+            const ConvParam32f& c2 = p.conv[2];
             const AlgParam& a = _alg;
 
             uint8_t* buffer = (uint8_t*)Buffer(buf);
@@ -458,7 +458,7 @@ namespace Simd
             float* buf1 = Allocate<float>(buffer, _sizeB[1]);
             uint16_t* buf2 = Allocate<uint16_t>(buffer, _sizeB[2]);
 
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < c0.batch; ++b)
             {
                 for (size_t c = 0, C = c1.dstC; c < C; c += a.maC)
                 {
@@ -498,16 +498,16 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
-            const SimdConvolutionParameters& c2 = p.conv[2];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
+            const ConvParam32f& c2 = p.conv[2];
             AlgParam& a = _alg;
 
             a.miC = F;
             size_t size = 0;
             for (size_t i = 0; i < 3; ++i)
             {
-                const SimdConvolutionParameters& c = p.conv[i];
+                const ConvParam32f& c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
             }
             size_t count = size / (L3 / 2) + 1;
@@ -538,8 +538,8 @@ namespace Simd
             a.dw[1] = c1.kernelY * c1.kernelX;
             a.dw[2] = AlignHiAny(c2.dstC, 2 * a.miC);
             
-            ((SimdConvolutionParameters&)c1).dstT = SimdTensorData16b;
-            ((SimdConvolutionParameters&)c2).srcT = SimdTensorData16b;
+            ((ConvParam32f&)c1).dstT = SimdTensorData16b;
+            ((ConvParam32f&)c2).srcT = SimdTensorData16b;
         }
 
         //-----------------------------------------------------------------------------------------
@@ -552,15 +552,15 @@ namespace Simd
         void SynetMergedConvolution32fBf16Cd::Forward(const float* src, float* buf, float* dst)
         {
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
             const AlgParam& a = _alg;
 
             uint8_t* buffer = (uint8_t*)Buffer(buf);
             uint16_t* buf0 = Allocate<uint16_t>(buffer, _sizeB[0]);
             float* buf1 = Allocate<float>(buffer, _sizeB[1]);
 
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < c0.batch; ++b)
             {
                 for (size_t c = 0, C = c1.dstC; c < C; c += a.maC)
                 {
@@ -594,15 +594,15 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
             AlgParam& a = _alg;
 
             a.miC = F;
             size_t size = 0;
             for (size_t i = 0; i < 2; ++i)
             {
-                const SimdConvolutionParameters& c = p.conv[i];
+                const ConvParam32f& c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
             }
             size_t count = size / (L3 / 2) + 1;
@@ -644,14 +644,14 @@ namespace Simd
         void SynetMergedConvolution32fBf16Dc::Forward(const float* src, float* buf, float* dst)
         {
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
             const AlgParam& a = _alg;
 
             uint8_t* buffer = (uint8_t*)Buffer(buf);
             uint16_t* buf2 = Allocate<uint16_t>(buffer, _sizeB[2]);
 
-            for (size_t b = 0; b < p.batch; ++b)
+            for (size_t b = 0; b < c0.batch; ++b)
             {
                 for (size_t c = 0, C = c0.dstC; c < C; c += a.maC)
                 {
@@ -686,15 +686,15 @@ namespace Simd
         {
             const size_t L1 = Base::AlgCacheL1(), L2 = Base::AlgCacheL2(), L3 = Base::AlgCacheL3();
             const MergConvParam32f& p = _param;
-            const SimdConvolutionParameters& c0 = p.conv[0];
-            const SimdConvolutionParameters& c1 = p.conv[1];
+            const ConvParam32f& c0 = p.conv[0];
+            const ConvParam32f& c1 = p.conv[1];
             AlgParam& a = _alg;
 
             a.miC = F;
             size_t size = 0;
             for (size_t i = 0; i < 2; ++i)
             {
-                const SimdConvolutionParameters& c = p.conv[i];
+                const ConvParam32f& c = p.conv[i];
                 size += c.kernelY * c.kernelX * c.srcC * (c.group == 1 ? c.dstC * 2 : 4);
             }
             size_t count = size / (L3 / 2) + 1;
@@ -722,8 +722,8 @@ namespace Simd
             a.dw[0] = c0.kernelY * c0.kernelX;
             a.dw[1] = AlignHiAny(c1.dstC, 2 * a.miC);
 
-            ((SimdConvolutionParameters&)c0).dstT = SimdTensorData16b;
-            ((SimdConvolutionParameters&)c1).srcT = SimdTensorData16b;
+            ((ConvParam32f&)c0).dstT = SimdTensorData16b;
+            ((ConvParam32f&)c1).srcT = SimdTensorData16b;
         }
     }
 #endif

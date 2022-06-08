@@ -56,7 +56,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution_2x1(const uint16_t* src0,
-            const SimdConvolutionParameters& p, const AlgParam& a, size_t dy, size_t dx, size_t dstC, const uint16_t* weight,
+            const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t dstC, const uint16_t* weight,
             const __m128* bias, const __m128* params, float* dst0, float* dst1)
         {
             __m128 d00, d01, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
@@ -131,7 +131,7 @@ namespace Simd
         }
 
         template<SimdConvolutionActivationType type, int M> void InputConvolution_2xM(const uint16_t* src0, 
-            const SimdConvolutionParameters& p, const AlgParam& a, size_t dy, size_t dx, size_t dstC, 
+            const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t dstC,
             const uint16_t* weight, const __m128* bias, const __m128* params, float* dst0, float* dst1)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
@@ -285,7 +285,7 @@ namespace Simd
             }
         }
 
-        typedef void(*InputConvolution_2xM_Ptr)(const uint16_t* src0, const SimdConvolutionParameters& p, const AlgParam& a, size_t dy, size_t dx,
+        typedef void(*InputConvolution_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx,
             size_t dstC, const uint16_t* weight, const __m128* bias, const __m128* params, float* dst0, float* dst1);
 
         template<SimdConvolutionActivationType type> InputConvolution_2xM_Ptr GetInputConvolution_2xM(size_t M)
@@ -303,7 +303,7 @@ namespace Simd
             return NULL;
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution_2(const uint16_t* src, const SimdConvolutionParameters& p, 
+        template<SimdConvolutionActivationType type> void InputConvolution_2(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t noseW = NoseW(p), bodyW = BodyW(p), tailW = p.dstW;
@@ -345,7 +345,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int M> void InputConvolution1x1_2xM(const uint16_t* src0, const SimdConvolutionParameters& p,
+        template<SimdConvolutionActivationType type, int M> void InputConvolution1x1_2xM(const uint16_t* src0, const ConvParam32f& p,
             const AlgParam& a, size_t dstC, const uint16_t* weight, const __m128* bias, const __m128* params, float* dst0, float* dst1)
         {
             __m128 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, s0, w00, w01, w10, w11, m = _mm_castsi128_ps(Bf16::MASK);
@@ -468,7 +468,7 @@ namespace Simd
             }
         }
 
-        typedef void(*InputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const SimdConvolutionParameters& p, const AlgParam& a, size_t dstC,
+        typedef void(*InputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t dstC,
             const uint16_t* weight, const __m128* bias, const __m128* params, float* dst0, float* dst1);
 
         template<SimdConvolutionActivationType type> InputConvolution1x1_2xM_Ptr GetInputConvolution1x1_2xM(size_t M)
@@ -486,7 +486,7 @@ namespace Simd
             return NULL;
         }
 
-        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const SimdConvolutionParameters& p, 
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
             size_t dstM = a.bufH[1] - 1, dstS = a.bufH[1] * p.dstW * F, srcM = a.bufH[0] - 1;
@@ -566,7 +566,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> static void SetInput(const SimdConvolutionParameters& p, InputPtr& input)
+        template<SimdConvolutionActivationType type> static void SetInput(const ConvParam32f& p, InputPtr& input)
         {
             if (Is1x1(p))
                 input = InputConvolution1x1_2<type>;
@@ -574,7 +574,7 @@ namespace Simd
                 input = InputConvolution_2<type>;
         }
 
-        void SetInput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, InputPtr& input)
+        void SetInput(const ConvParam32f& p, InputPtr& input)
         {
             switch (p.activation)
             {

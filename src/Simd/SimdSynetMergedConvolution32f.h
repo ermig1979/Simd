@@ -24,6 +24,7 @@
 #ifndef __SimdSynetMergedConvolution32f_h__
 #define __SimdSynetMergedConvolution32f_h__
 
+#include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdArray.h"
 #include "Simd/SimdPerformance.h"
 #include "Simd/SimdRuntime.h"
@@ -36,20 +37,17 @@ namespace Simd
 {
     struct MergConvParam32f
     {
-        SimdBool trans, add;
-        size_t batch, count;
-        SimdConvolutionParameters conv[3];
-        SimdSynetCompatibilityType compatibility;
+        SimdBool add;
+        size_t count;
+        ConvParam32f conv[3];
 
         MergConvParam32f(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
         {
             assert(count <= 3);
             this->add = add;
-            this->batch = batch;
             this->count = count;
             for (size_t i = 0; i < count; ++i)
-                this->conv[i] = convs[i];
-            this->compatibility = compatibility;
+                this->conv[i] = ConvParam32f(batch, convs + i, compatibility);
         }
 
         bool Valid()
@@ -119,7 +117,7 @@ namespace Simd
         String Info() const
         {
             std::stringstream ss;
-            ss << count << ":" << batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
+            ss << count << ":" << conv[0].batch << "x" << conv[0].srcC << "x" << conv[0].srcH << "x" << conv[0].srcW;
             for (size_t i = 0; i < count; ++i)
                 ss << "-" << (conv[i].group != 1 ? String("") : ToStr(conv[i].dstC) + "x") << conv[i].kernelY << "x" << conv[i].strideY;
             return ss.str();
@@ -127,7 +125,7 @@ namespace Simd
 
         int64_t Flop(size_t i) const
         {
-            return int64_t(batch) * conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
+            return int64_t(conv[i].batch) * conv[i].kernelY * conv[i].kernelX * conv[i].srcC * conv[i].dstH * conv[i].dstW * conv[i].dstC / conv[i].group * 2;
         }
 
         int64_t Flop() const
@@ -300,23 +298,23 @@ namespace Simd
                 size_t miC, maC, yStep[3], yStart[3], bufH[3], dp[2], dw[3];
             };
 
-            typedef void(*ConvertPtr)(const float* src, const SimdConvolutionParameters& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH);
+            typedef void(*ConvertPtr)(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, uint16_t* dst, size_t bufH);
 
-            typedef void(*InputConvolutionPtr)(const uint16_t* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*InputConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const uint16_t* weight, const float* bias, const float* params, float* dst);
 
-            typedef void(*DepthwiseConvolutionPtr)(const float* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*DepthwiseConvolutionPtr)(const float* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const float* weight, const float* bias, const float* params, uint16_t* dst);
 
-            typedef void(*OutputConvolutionPtr)(const uint16_t* src, const SimdConvolutionParameters& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
+            typedef void(*OutputConvolutionPtr)(const uint16_t* src, const ConvParam32f& p, const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd,
                 const uint16_t* weight, const float* bias, const float* params, float* dst, int zero);
 
         protected:
-            void SetInputWeight(const float* src, const SimdConvolutionParameters& p);
-            void SetDepthwiseWeight(const float* src, const SimdConvolutionParameters& p);
-            void SetOutputWeight(const float* src, const SimdConvolutionParameters& p);
-            void SetBias(const float* src, const SimdConvolutionParameters& p, Array32f & dst);
-            void SetParams(const float* src, const SimdConvolutionParameters& p, Array32f& dst);
+            void SetInputWeight(const float* src, const ConvParam32f& p);
+            void SetDepthwiseWeight(const float* src, const ConvParam32f& p);
+            void SetOutputWeight(const float* src, const ConvParam32f& p);
+            void SetBias(const float* src, const ConvParam32f& p, Array32f & dst);
+            void SetParams(const float* src, const ConvParam32f& p, Array32f& dst);
 
             bool _dw0, _1x1;
             ConvertPtr _convert;
@@ -410,11 +408,11 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        void SetInput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
-        void SetDepthwise(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
 
-        void SetOutput(const SimdConvolutionParameters& p, SimdSynetCompatibilityType c, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
 
         class SynetMergedConvolution32fBf16Cdc : public Base::SynetMergedConvolution32fBf16Cdc
         {
@@ -439,6 +437,8 @@ namespace Simd
 
             virtual String Ext() const { return "Sse41"; }
         };
+
+        //-----------------------------------------------------------------------------------------
 
         void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
     }
@@ -507,6 +507,40 @@ namespace Simd
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
+
+        //-----------------------------------------------------------------------------------------
+
+        void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
+
+        void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
+
+        void SetOutput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::OutputConvolutionPtr* output);
+
+        class SynetMergedConvolution32fBf16Cdc : public Sse41::SynetMergedConvolution32fBf16Cdc
+        {
+        public:
+            SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        class SynetMergedConvolution32fBf16Cd : public Sse41::SynetMergedConvolution32fBf16Cd
+        {
+        public:
+            SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        class SynetMergedConvolution32fBf16Dc : public Sse41::SynetMergedConvolution32fBf16Dc
+        {
+        public:
+            SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p);
+
+            virtual String Ext() const { return "Avx2"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
 
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
     }
