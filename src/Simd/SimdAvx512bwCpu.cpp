@@ -36,11 +36,11 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512F) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512CD) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512DQ) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512BW) &&
-                Base::CheckBit(Cpuid::Extended, Cpuid::Ebx, Cpuid::AVX512VL);
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_F) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_CD) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_DQ) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_BW) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_VL);
         }
 
         SIMD_INLINE bool SupportedByOS()

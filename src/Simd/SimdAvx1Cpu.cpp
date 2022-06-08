@@ -36,8 +36,8 @@ namespace Simd
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::OSXSAVE) &&
-                Base::CheckBit(Cpuid::Ordinary, Cpuid::Ecx, Cpuid::AVX);
+                Base::CheckBit(1, 0, Cpuid::Ecx, Cpuid::OSXSAVE) &&
+                Base::CheckBit(1, 0, Cpuid::Ecx, Cpuid::AVX);
         }
 
         SIMD_INLINE bool SupportedByOS()

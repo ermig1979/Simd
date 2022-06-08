@@ -208,7 +208,7 @@ namespace Test
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
         float epsilon = (Simd::Base::FmaAvoid(c) ? eps * eps : 0.07f);
 #else
-        float epsilon = eps * eps;
+        float epsilon = eps;
 #endif
         result = result && Compare(dst1, dst2, epsilon, true, 64, DifferenceBoth);
 

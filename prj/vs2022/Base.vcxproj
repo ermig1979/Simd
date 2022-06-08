@@ -28,6 +28,7 @@
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase64.h" />
     <ClInclude Include="..\..\src\Simd\SimdBayer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdBFloat16.h" />
     <ClInclude Include="..\..\src\Simd\SimdCompare.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />
     <ClInclude Include="..\..\src\Simd\SimdConst.h" />
@@ -61,6 +62,7 @@
     <ClInclude Include="..\..\src\Simd\SimdPow.h" />
     <ClInclude Include="..\..\src\Simd\SimdRectangle.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
+    <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdSet.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />

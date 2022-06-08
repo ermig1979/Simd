@@ -62,15 +62,15 @@ namespace Simd
     namespace Base
     {
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
-        bool CheckBit(Cpuid::Level level, Cpuid::Register index, Cpuid::Bit bit)
+        bool CheckBit(int eax, int ecx, Cpuid::Register index, Cpuid::Bit bit)
         {
             unsigned int registers[4] = { 0, 0, 0, 0 };
 #if defined(_MSC_VER)
-            __cpuid((int*)registers, level);
+            __cpuidex((int*)registers, eax, ecx);
 #elif (defined __GNUC__)
-            if (__get_cpuid_max(0, NULL) < level)
+            if (__get_cpuid_max(0, NULL) < eax)
                 return false;
-            __cpuid_count(level, 0, 
+            __cpuid_count(eax, ecx, 
                 registers[Cpuid::Eax], 
                 registers[Cpuid::Ebx], 
                 registers[Cpuid::Ecx], 

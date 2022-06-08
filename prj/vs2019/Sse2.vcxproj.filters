@@ -359,5 +359,8 @@
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdResizerCommon.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
