@@ -30,14 +30,13 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_AVX512BF16_ENABLE
+    namespace Avx512bf16
     {
         SIMD_INLINE bool SupportedByCPU()
         {
-            return 
-                Base::CheckBit(1, 0, Cpuid::Edx, Cpuid::SSE) &&
-                Base::CheckBit(1, 0, Cpuid::Edx, Cpuid::SSE2);
+            return
+                Base::CheckBit(7, 1, Cpuid::Eax, Cpuid::AVX512_BF16);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -45,7 +44,8 @@ namespace Simd
 #if defined(_MSC_VER)
             __try
             {
-                __m128d value = _mm_set1_pd(1.0);// try to execute of SSE2 instructions;
+                __m512bh src = _mm512_cvtne2ps_pbh(_mm512_set1_ps(1.0f), _mm512_set1_ps(1.0f)); // try to execute of AVX-512BF16 instructions;
+                __m512 dst = _mm512_dpbf16_ps(_mm512_setzero_ps(), src, src);
                 return true;
             }
             __except (EXCEPTION_EXECUTE_HANDLER)

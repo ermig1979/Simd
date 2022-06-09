@@ -91,6 +91,15 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_AVX512BF16_ENABLE
+    namespace Avx512bf16
+    {
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
+    }
+#endif
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
@@ -163,6 +172,12 @@ namespace Simd
 #define SIMD_AVX512VNNI_FUNC(func)
 #endif
 
+#ifdef SIMD_AVX512BF16_ENABLE
+#define SIMD_AVX512BF16_FUNC(func) Simd::Avx512bf16::Enable ? Simd::Avx512bf16::func : 
+#else
+#define SIMD_AVX512BF16_FUNC(func)
+#endif
+
 #ifdef SIMD_VMX_ENABLE
 #define SIMD_VMX_FUNC(func) Simd::Vmx::Enable ? Simd::Vmx::func : 
 #else
@@ -189,5 +204,7 @@ namespace Simd
 #define SIMD_FUNC5(func, EXT1, EXT2, EXT3, EXT4, EXT5) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) SIMD_BASE_FUNC(func)
 #define SIMD_FUNC6(func, EXT1, EXT2, EXT3, EXT4, EXT5, EXT6) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) EXT6(func) SIMD_BASE_FUNC(func)
 #define SIMD_FUNC7(func, EXT1, EXT2, EXT3, EXT4, EXT5, EXT6, EXT7) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) EXT6(func) EXT7(func) SIMD_BASE_FUNC(func)
+#define SIMD_FUNC8(func, EXT1, EXT2, EXT3, EXT4, EXT5, EXT6, EXT7, EXT8) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) EXT6(func) EXT7(func) EXT8(func) SIMD_BASE_FUNC(func)
+#define SIMD_FUNC9(func, EXT1, EXT2, EXT3, EXT4, EXT5, EXT6, EXT7, EXT8, EXT9) EXT1(func) EXT2(func) EXT3(func) EXT4(func) EXT5(func) EXT6(func) EXT7(func) EXT8(func) EXT9(func) SIMD_BASE_FUNC(func)
 
 #endif//__SimdEnable_h__

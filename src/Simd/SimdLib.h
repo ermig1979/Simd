@@ -211,6 +211,7 @@ typedef enum
     SimdCpuInfoAvx512f, /*!< Availability of AVX-512F (x86). */
     SimdCpuInfoAvx512bw, /*!< Availability of AVX-512BW (x86). */
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
+    SimdCpuInfoAvx512bf16, /*!< Availability of AVX-512BF16 (x86). */
     SimdCpuInfoVmx, /*!< Availability of VMX or Altivec (PowerPC). */
     SimdCpuInfoVsx, /*!< Availability of VSX (PowerPC). */
     SimdCpuInfoNeon, /*!< Availability of NEON (ARM). */
@@ -386,7 +387,7 @@ typedef enum
 /*! @ingroup synet
     Describes Synet calculation compatibility flags. This type used in functions ::SimdSynetAdd8i, ::SimdSynetScaleLayerForward, 
     ::SimdSynetConvert32fTo8u, ::SimdSynetConvert8uTo32f, ::SimdSynetInnerProduct8i, ::SimdSynetScale8iInit,
-    ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, and ::SimdSynetMergedConvolution8iInit.
+    ::SimdSynetConvolution32fInit, ::SimdSynetConvolution8iInit, ::SimdSynetMergedConvolution32fInit, ::SimdSynetMergedConvolution8iInit.
 */
 typedef enum
 {
