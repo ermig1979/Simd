@@ -24,7 +24,7 @@
 #ifndef __SimdBFloat16_h__
 #define __SimdBFloat16_h__
 
-#include "Simd/SimdConst.h"
+#include "Simd/SimdStore.h"
 
 namespace Simd
 {
@@ -130,6 +130,18 @@ namespace Simd
             __m512i d0 = Float32ToBFloat16(s0);
             __m512i d1 = Float32ToBFloat16(s1);
             Store<align, mask>(dst, _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_packus_epi32(d0, d1)), dstMask[0]);
+        }
+    }
+#endif 
+
+#ifdef SIMD_AVX512BF16_ENABLE    
+    namespace Avx512bf16
+    {
+        template <bool align, bool mask> SIMD_INLINE void Float32ToBFloat16(const float* src, uint16_t * dst, __mmask16 srcMask[2], __mmask32 dstMask[1])
+        {
+            __m512 s0 = Avx512f::Load<align, mask>(src + 0 * F, srcMask[0]);
+            __m512 s1 = Avx512f::Load<align, mask>(src + 1 * F, srcMask[1]);
+            Avx512bw::Store<align, mask>(dst, (__m512i)_mm512_cvtne2ps_pbh(s0, s1), dstMask[0]);
         }
     }
 #endif 
