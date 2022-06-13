@@ -442,7 +442,7 @@ namespace Simd
             i32 = _mm512_add_epi32(i32, Hadd32(lo, hi));
         }
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE
     namespace Avx512vnni
@@ -459,7 +459,17 @@ namespace Simd
             i32 = _mm512_dpbusd_epi32(i32, u8, i8);
         }
     }
-#endif//SIMD_AVX512VNNI_ENABLE
+#endif
+
+#ifdef SIMD_AVX512BF16_ENABLE
+    namespace Avx512bf16
+    {
+        SIMD_INLINE __m512bh Set2(const uint16_t* src)
+        {
+            return (__m512bh)_mm512_set1_epi32(*(int32_t*)src);
+        }
+    }
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon

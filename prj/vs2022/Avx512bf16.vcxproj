@@ -29,6 +29,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16BFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16Cpu.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution32fBf16.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ItemDefinitionGroup>

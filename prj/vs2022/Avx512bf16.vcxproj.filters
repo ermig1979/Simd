@@ -62,5 +62,8 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bf16BFloat16.cpp">
       <Filter>Avx512bf16</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bf16SynetConvolution32fBf16.cpp">
+      <Filter>Avx512bf16</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

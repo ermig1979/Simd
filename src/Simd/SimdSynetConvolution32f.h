@@ -663,6 +663,7 @@ namespace Simd
         {
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+
             virtual String Ext() const { return "Sse41"; }
         };
 
@@ -812,6 +813,7 @@ namespace Simd
         {
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+
             virtual String Ext() const { return "Avx2"; }
         };
 
@@ -887,7 +889,7 @@ namespace Simd
 
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -896,6 +898,7 @@ namespace Simd
         {
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+
             virtual String Ext() const { return "Avx512bw"; }
         };
 
@@ -903,7 +906,24 @@ namespace Simd
 
         void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
+
+#ifdef SIMD_AVX512BF16_ENABLE    
+    namespace Avx512bf16
+    {
+        class SynetConvolution32fBf16Nhwc : public Avx512bw::SynetConvolution32fBf16Nhwc
+        {
+        public:
+            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+
+            virtual String Ext() const { return "Avx512bf16"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
+
+        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
