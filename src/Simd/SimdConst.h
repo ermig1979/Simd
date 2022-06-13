@@ -150,7 +150,7 @@ namespace Simd
 
         const __m128i K16_DIVISION_BY_9_FACTOR = SIMD_MM_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
@@ -190,7 +190,7 @@ namespace Simd
         const __m128i K8_SHUFFLE_BGR1_TO_RED = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, 0x1, 0x4, 0x7, 0xA, 0xD, -1, -1, -1, -1, -1, -1);
         const __m128i K8_SHUFFLE_BGR2_TO_RED = SIMD_MM_SETR_EPI8(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0x0, 0x3, 0x6, 0x9, 0xC, 0xF);
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
@@ -200,7 +200,7 @@ namespace Simd
         const size_t QF = 4 * F;
         const size_t HF = F / 2;
     }
-#endif// SIMD_AVX_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2
@@ -373,7 +373,7 @@ namespace Simd
 
         const __m256i K32_PERMUTE_BGRA_TO_BGR = SIMD_MM256_SETR_EPI32(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, -1, -1);
     }
-#endif// SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
@@ -395,7 +395,7 @@ namespace Simd
         const __m512i K64_INTERLEAVE_0 = SIMD_MM512_SETR_EPI64(0x0, 0x8, 0x01, 0x9, 0x2, 0xa, 0x3, 0xb);
         const __m512i K64_INTERLEAVE_1 = SIMD_MM512_SETR_EPI64(0x4, 0xc, 0x05, 0xd, 0x6, 0xe, 0x7, 0xf);
     }
-#endif// SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -587,21 +587,28 @@ namespace Simd
             0x10, 0x30, 0x11, 0x31, 0x12, 0x32, 0x13, 0x33, 0x14, 0x34, 0x15, 0x35, 0x16, 0x36, 0x17, 0x37,
             0x18, 0x38, 0x19, 0x39, 0x1A, 0x3A, 0x1B, 0x3B, 0x1C, 0x3C, 0x1D, 0x3D, 0x1E, 0x3E, 0x1F, 0x3F);
     }
-#endif// SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_AVX512VNNI_ENABLE    
     namespace Avx512vnni
     {
         using namespace Avx512bw;
     }
-#endif//SIMD_AVX512VNNI_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BF16_ENABLE    
     namespace Avx512bf16
     {
         using namespace Avx512bw;
     }
-#endif//SIMD_AVX512BF16_ENABLE
+#endif
+
+#ifdef SIMD_AMX_ENABLE    
+    namespace Amx
+    {
+        using namespace Avx512bf16;
+    }
+#endif
 
 #ifdef SIMD_VMX_ENABLE    
     namespace Vmx
@@ -710,7 +717,7 @@ namespace Simd
         const v128_u8 K8_PERM_GRAY_TO_BGR_1 = SIMD_VEC_SETR_EPI8(0x05, 0x05, 0x06, 0x06, 0x06, 0x07, 0x07, 0x07, 0x08, 0x08, 0x08, 0x09, 0x09, 0x09, 0x0A, 0x0A);
         const v128_u8 K8_PERM_GRAY_TO_BGR_2 = SIMD_VEC_SETR_EPI8(0x0A, 0x0B, 0x0B, 0x0B, 0x0C, 0x0C, 0x0C, 0x0D, 0x0D, 0x0D, 0x0E, 0x0E, 0x0E, 0x0F, 0x0F, 0x0F);
     }
-#endif//SIMD_VMX_ENABLE
+#endif
 
 #ifdef SIMD_VSX_ENABLE    
     namespace Vsx
@@ -719,7 +726,7 @@ namespace Simd
 
         const v128_f32 K_0_0f = SIMD_VEC_SET1_PS(0.0f);
     }
-#endif//SIMD_VSX_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon
@@ -817,6 +824,6 @@ namespace Simd
 
         const int32x4_t K32_YUV_TO_BGR_ROUND_TERM = SIMD_VEC_SET1_EPI32(Base::YUV_TO_BGR_ROUND_TERM);
     }
-#endif//SIMD_NEON_ENABLE
+#endif
 }
-#endif//__SimdConst_h__
+#endif

@@ -66,6 +66,10 @@
 #define SIMD_AVX512BF16_DISABLE
 #endif
 
+#if defined(SIMD_AVX512BF16_DISABLE) && !defined(SIMD_AMX_DISABLE)
+#define SIMD_AMX_DISABLE
+#endif
+
 #if defined(SIMD_VMX_DISABLE) && !defined(SIMD_VSX_DISABLE)
 #define SIMD_VSX_DISABLE
 #endif
@@ -132,6 +136,10 @@
 
 #if !defined(SIMD_AVX512BF16_DISABLE) && _MSC_VER >= 1933
 #define SIMD_AVX512BF16_ENABLE
+#endif
+
+#if !defined(SIMD_AMX_DISABLE) && _MSC_VER >= 1933
+#define SIMD_AMX_ENABLE
 #endif
 
 #if defined(NDEBUG) && _MSC_VER == 1914
@@ -230,6 +238,10 @@
 #if !defined(SIMD_AVX512BF16_DISABLE) && defined(__AVX512BF16__)
 #define SIMD_AVX512BF16_ENABLE
 #endif
+
+#if !defined(SIMD_AMX_DISABLE) && defined(__AMX_TILE__) && defined(__AMX_INT8__) && defined(__AMX_BF16__)
+#define SIMD_AMX_ENABLE
+#endif
 #endif
 
 #endif//defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
@@ -295,7 +307,8 @@
 #endif
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE) \
-    || defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE)
+    || defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) \
+    || defined(SIMD_AMX_ENABLE)
 #include <immintrin.h>
 #endif
 

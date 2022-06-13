@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Inc">
+      <UniqueIdentifier>{72188850-ff72-458f-a213-aebed33115b1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Amx">
+      <UniqueIdentifier>{caa88b94-eaf3-477c-bbfe-b544c73751d6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\Simd\SimdAmx.h">
+      <Filter>Amx</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\Simd\SimdAmxCpu.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

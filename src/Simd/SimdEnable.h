@@ -100,6 +100,15 @@ namespace Simd
     }
 #endif
 
+#ifdef SIMD_AMX_ENABLE
+    namespace Amx
+    {
+        bool GetEnable();
+
+        const bool Enable = GetEnable();
+    }
+#endif
+
 #ifdef SIMD_VMX_ENABLE
     namespace Vmx
     {
@@ -176,6 +185,12 @@ namespace Simd
 #define SIMD_AVX512BF16_FUNC(func) Simd::Avx512bf16::Enable ? Simd::Avx512bf16::func : 
 #else
 #define SIMD_AVX512BF16_FUNC(func)
+#endif
+
+#ifdef SIMD_AMX_ENABLE
+#define SIMD_AMX_FUNC(func) Simd::Amx::Enable ? Simd::Amx::func : 
+#else
+#define SIMD_AMX_FUNC(func)
 #endif
 
 #ifdef SIMD_VMX_ENABLE

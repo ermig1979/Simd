@@ -8,7 +8,7 @@ object detection (HAAR and LBP classifier cascades) and classification, neural n
 
 The algorithms are optimized with using of different SIMD CPU extensions. 
 In particular the library supports following CPU extensions: 
-SSE, AVX and AVX-512 for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC (big-endian), NEON for ARM.
+SSE, AVX, AVX-512 and AMX for x86/x64, VMX(Altivec) and VSX(Power7) for PowerPC (big-endian), NEON for ARM.
 
 The Simd Library has C API and also contains useful C++ classes and functions to facilitate access to C API. 
 The library supports dynamic and static linking, 32-bit and 64-bit Windows and Linux, 
@@ -100,13 +100,15 @@ There are addition build parameters:
 
 * `SIMD_AVX512` - Enable of AVX-512 (AVX-512F, AVX-512CD, AVX-512VL, AVX-512DQ, AVX-512BW) CPU extensions. It is switched on by default.
 * `SIMD_AVX512VNNI` - Enable of AVX-512-VNNI CPU extensions. It is switched on by default.
+* `SIMD_AVX512BF16` - Enable of AVX-512-BF16 CPU extensions. It is switched off by default.
+* `SIMD_AMX` - Enable of AMX CPU extensions. It is switched off by default.
 * `SIMD_TEST` - Build test framework. It is switched on by default.
 * `SIMD_INFO` - Print build information. It is switched on by default.
 * `SIMD_PERF` - Enable of internal performance statistic. It is switched off by default.
 * `SIMD_SHARED` - Build as SHARED library. It is switched off by default.
 * `SIMD_GET_VERSION` - Call scipt to get Simd Library version. It is switched on by default.
 * `SIMD_SYNET` - Enable optimizations for Synet framework. It is switched on by default.
-* `SIMD_SINT8_DEBUG` - Enable debug INT8 capabilities for Synet framework. It is switched on by default.
+* `SIMD_SINT8_DEBUG` - Enable debug INT8 capabilities for Synet framework. It is switched off by default.
 * `SIMD_HIDE` - Hide internal functions of Simd Library. It is switched off by default.
 * `SIMD_TEST_FLAGS` - Addition compiler flags to build test framework.
 

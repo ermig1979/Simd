@@ -30,13 +30,15 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512BF16_ENABLE
-    namespace Avx512bf16
+#ifdef SIMD_AMX_ENABLE
+    namespace Amx
     {
         SIMD_INLINE bool SupportedByCPU()
         {
             return
-                Base::CheckBit(7, 1, Cpuid::Eax, Cpuid::AVX512_BF16);
+                Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_TILE) &&
+                Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_INT8) &&
+                Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_BF16);
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -44,7 +46,7 @@ namespace Simd
 #if defined(_MSC_VER)
             __try
             {
-                __m512bh src = _mm512_cvtne2ps_pbh(_mm512_set1_ps(1.0f), _mm512_set1_ps(1.0f)); // try to execute of AVX-512BF16 instructions;
+                _tile_zero(0);// try to execute of AMX instructions;
                 return true;
             }
             __except (EXCEPTION_EXECUTE_HANDLER)

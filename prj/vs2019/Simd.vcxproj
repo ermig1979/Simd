@@ -95,6 +95,9 @@
     <ClInclude Include="..\..\src\Simd\SimdXml.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Amx.vcxproj">
+      <Project>{3e68d81a-dbc0-47b4-912b-7c9efce28b6f}</Project>
+    </ProjectReference>
     <ProjectReference Include="Avx1.vcxproj">
       <Project>{d6e29b9b-ee2d-4339-8417-dcadc283884f}</Project>
     </ProjectReference>

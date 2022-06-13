@@ -54,6 +54,7 @@ namespace Simd
         os << ", L2: " << SimdCpuInfo(SimdCpuInfoCacheL2) / 1024 << " KB";
         os << ", L3: " << SimdCpuInfo(SimdCpuInfoCacheL3) / 1024 << " KB";
         os << "; Available SIMD:";
+        os << (SimdCpuInfo(SimdCpuInfoAmx) ? " AMX" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? " AVX-512BF16" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? " AVX-512VNNI" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW" : "");
