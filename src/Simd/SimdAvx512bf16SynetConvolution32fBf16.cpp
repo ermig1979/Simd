@@ -42,8 +42,6 @@ namespace Simd
 
         void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
-            SIMD_PERF_FUNC();
-
             ptrdiff_t beg = yBeg * p.strideY - p.padY;
             ptrdiff_t end = (yEnd - 1) * p.strideY - p.padY + p.kernelY * p.dilationY;
             src += Max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
@@ -675,6 +673,7 @@ namespace Simd
                 if (M > 0x5) Avx512f::Save3<term, type>(dst, d50, d51, d52, bias, params, tails), dst += dD;
                 if (M > 0x6) Avx512f::Save3<term, type>(dst, d60, d61, d62, bias, params, tails), dst += dD;
                 if (M > 0x7) Avx512f::Save3<term, type>(dst, d70, d71, d72, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512f::Save3<term, type>(dst, d80, d81, d82, bias, params, tails), dst += dD;
             }
             else if (tails[1])
             {

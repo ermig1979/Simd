@@ -203,7 +203,7 @@ namespace Simd
             TermBf16<term>::template Save<type, 1>(dst + 1 * DF, val1, bias, params, tail);
         }
     }
-#endif//SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
@@ -249,6 +249,52 @@ namespace Simd
             TermBf16<term>::template Save<type, 1>(dst + 1 * DF, val1, bias, params, tail);
         }
     }
-#endif//SIMD_AVX512BW_ENABLE
+#endif
+
+#ifdef SIMD_AVX512BF16_ENABLE    
+    namespace Avx512bf16
+    {
+        template <TermBf16Type term> struct TermBf16
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));
+        };
+
+        template <> struct TermBf16<TermBf16Last16b>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+            {
+                __m512 f32 = Avx512f::Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
+                _mm256_mask_storeu_epi16(ptr, tail, (__m256i)_mm512_cvtneps_pbh(f32));
+            }
+        };
+
+        template <> struct TermBf16<TermBf16Last32f>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+            {
+                _mm512_mask_storeu_ps((float*)ptr, tail, Avx512f::Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
+            }
+        };
+
+        template <> struct TermBf16<TermBf16Interim>
+        {
+            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+            {
+                _mm512_mask_storeu_ps((float*)ptr, tail, value);
+            }
+        };
+
+        template<TermBf16Type term, SimdConvolutionActivationType type> SIMD_INLINE void Save1(uint16_t* dst, __m512 val0, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+        {
+            TermBf16<term>::template Save<type, 0>(dst, val0, bias, params, tail);
+        }
+
+        template<TermBf16Type term, SimdConvolutionActivationType type> SIMD_INLINE void Save2(uint16_t* dst, __m512 val0, __m512 val1, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
+        {
+            TermBf16<term>::template Save<type, 0>(dst + 0 * DF, val0, bias, params);
+            TermBf16<term>::template Save<type, 1>(dst + 1 * DF, val1, bias, params, tail);
+        }
+    }
+#endif
 }
 #endif//__SimdSynetConvolution32fBf16Common_h__

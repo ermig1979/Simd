@@ -109,6 +109,11 @@ namespace Simd
             return (compatibility & SimdSynetCompatibility16bfMask) == SimdSynetCompatibility16bfSoft;
         }
 
+        SIMD_INLINE bool Bf16Hard(SimdSynetCompatibilityType compatibility)
+        {
+            return (compatibility & SimdSynetCompatibility16bfMask) == SimdSynetCompatibility16bfHard;
+        }
+
         //---------------------------------------------------------------------
 
         SIMD_INLINE uint8_t SynetConvert32fTo8u(float value, float scale, float shift, int lower, int upper)

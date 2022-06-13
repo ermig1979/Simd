@@ -42,8 +42,6 @@ namespace Simd
 
         void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
-            SIMD_PERF_FUNC();
-
             ptrdiff_t beg = yBeg * p.strideY - p.padY;
             ptrdiff_t end = (yEnd - 1) * p.strideY - p.padY + p.kernelY * p.dilationY;
             src += Max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
