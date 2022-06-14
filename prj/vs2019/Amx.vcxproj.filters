@@ -12,6 +12,9 @@
     <ClInclude Include="..\..\src\Simd\SimdAmx.h">
       <Filter>Amx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdTile.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxCpu.cpp">

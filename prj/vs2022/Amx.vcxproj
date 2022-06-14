@@ -11,6 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAmx.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTile.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxCpu.cpp" />

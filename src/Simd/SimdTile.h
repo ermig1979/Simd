@@ -31,6 +31,31 @@ namespace Simd
 #ifdef SIMD_AMX_ENABLE    
     namespace Amx
     {
+        struct TileConfig
+        {
+            uint8_t paletteId;
+            uint8_t startRow;
+            uint8_t reserved[14];
+            uint16_t colb[16];
+            uint8_t rows[16];
+
+            SIMD_INLINE TileConfig(uint8_t paletteId = 1, uint8_t startRow = 0)
+            {
+                memset(this, 0, sizeof(TileConfig));
+                this->paletteId = paletteId;
+                this->startRow = startRow;
+            }
+
+            SIMD_INLINE void Set() const
+            {
+                _tile_loadconfig(this);
+            }
+
+            SIMD_INLINE void Get()
+            {
+                _tile_storeconfig(this);
+            }
+        };
     }
 #endif
 }
