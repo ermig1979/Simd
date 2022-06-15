@@ -7195,9 +7195,9 @@ extern "C"
     */
     SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* threshold, float* dst);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_pooling
 
-        \fn void SimdSynetPoolingForwardAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
+        \fn void SimdSynetPoolingAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of PoolingLayer (AveragePooling).
 
@@ -7219,12 +7219,12 @@ extern "C"
         \param [in] excludePad - a flag of exclude pad from average value calculation.
         \param [in] format - a format of (input/output) image tensor.
     */
-    SIMD_API void SimdSynetPoolingForwardAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    SIMD_API void SimdSynetPoolingAverage(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdBool excludePad, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_pooling
 
-        \fn void SimdSynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+        \fn void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float).
 
@@ -7245,12 +7245,12 @@ extern "C"
         \param [in] dstW - an output width.
         \param [in] format - a format of (input/output) image tensor.
     */
-    SIMD_API void SimdSynetPoolingForwardMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
+    SIMD_API void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
         size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
-    /*! @ingroup synet
+    /*! @ingroup synet_pooling
 
-        \fn void SimdSynetPoolingForwardMax8u(const uint8_t * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+        \fn void SimdSynetPoolingMax8u(const uint8_t * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of PoolingLayer (MaxPooling, 8-bit unsigned integer).
 
@@ -7271,7 +7271,7 @@ extern "C"
         \param [in] dstW - an output width.
         \param [in] format - a format of (input/output) image tensor.
     */
-    SIMD_API void SimdSynetPoolingForwardMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
+    SIMD_API void SimdSynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
         size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
 

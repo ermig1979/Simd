@@ -411,9 +411,9 @@ namespace Test
 
     TEST_ADD_GROUP_A00(SynetMergedConvolution32fForward);
 
-    TEST_ADD_GROUP_A00(SynetPoolingForwardAverage);
-    TEST_ADD_GROUP_A00(SynetPoolingForwardMax32f);
-    TEST_ADD_GROUP_A00(SynetPoolingForwardMax8u);
+    TEST_ADD_GROUP_A00(SynetPoolingAverage);
+    TEST_ADD_GROUP_A00(SynetPoolingMax32f);
+    TEST_ADD_GROUP_A00(SynetPoolingMax8u);
 
     TEST_ADD_GROUP_A00(SynetScaleLayerForward);
     TEST_ADD_GROUP_A00(SynetScale8iForward);
