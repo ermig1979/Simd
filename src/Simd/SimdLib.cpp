@@ -6232,15 +6232,17 @@ void SimdSynetPoolingAverage(const float* src, size_t srcC, size_t srcH, size_t 
 #endif
 }
 
-SIMD_API void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-    size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format)
+SIMD_API void SimdSynetPoolingMax32f(const float* src, size_t srcC, size_t srcH, size_t srcW,
+    size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX,
+    size_t padC, size_t padY, size_t padX, float* dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format)
 {
 #if defined(SIMD_SYNET_ENABLE)
-    typedef void(*SimdSynetPoolingMax32fPtr) (const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
-        size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-    const static SimdSynetPoolingMax32fPtr simdSynetPoolingMax32f = SIMD_FUNC5(SynetPoolingMax32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    typedef void(*SimdSynetPoolingMax32fPtr) (const float* src, size_t srcC, size_t srcH, size_t srcW,
+        size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX,
+        size_t padC, size_t padY, size_t padX, float* dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);
+    const static SimdSynetPoolingMax32fPtr simdSynetPoolingMax32f = SIMD_FUNC4(SynetPoolingMax32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
-    simdSynetPoolingMax32f(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, format);
+    simdSynetPoolingMax32f(src, srcC, srcH, srcW, kernelC, kernelY, kernelX, strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
 #else
     assert(0);
 #endif

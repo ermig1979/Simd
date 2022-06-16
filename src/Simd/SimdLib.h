@@ -7224,29 +7224,34 @@ extern "C"
 
     /*! @ingroup synet_pooling
 
-        \fn void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+        \fn void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, size_t padC, size_t padY, size_t padX, float * dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format));
 
-        \short This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float).
+        \short This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float). It supports 2D and 3D pooling.
 
         \note This function is used in <a href="http://github.com/ermig1979/Synet">Synet Framework</a>.
 
         \param [in] src - a pointer to the input 32-bit float array. The size of the array must be equal to srcC*srcH*srcW.
-        \param [in] srcC - a number of input and output channels.
+        \param [in] srcC - a number of input channels.
         \param [in] srcH - an input height.
         \param [in] srcW - an input width.
+        \param [in] kernelC - a channel size of the pooling kernel in 3D case. In 2D case it must be equal to 1.
         \param [in] kernelY - a height of the pooling kernel.
         \param [in] kernelX - a width of the pooling kernel.
+        \param [in] strideC - a ñ-stride of the pooling in 3D case. In 2D case it must be equal to 1.
         \param [in] strideY - a y-stride of the pooling.
         \param [in] strideX - a x-stride of the pooling.
+        \param [in] padC - a channel pad to the begin of the input image.
         \param [in] padY - a pad to the top of the input image.
         \param [in] padX - a pad to the left of the input image.
         \param [out] dst - a pointer to the output 32-bit float array. The size of the array must be equal to srcC*dstH*dstW.
+        \param [in] dstC - a number of output channels.
         \param [in] dstH - an output height.
         \param [in] dstW - an output width.
         \param [in] format - a format of (input/output) image tensor.
     */
-    SIMD_API void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX, 
-        size_t strideY, size_t strideX, size_t padY, size_t padX, float * dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
+    SIMD_API void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, 
+        size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, 
+        size_t padC, size_t padY, size_t padX, float * dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
     /*! @ingroup synet_pooling
 
