@@ -234,8 +234,8 @@ namespace Test
         Tensor32f src(ToShape(p.srcC, p.srcH, p.srcW, p.format));
         FillRandom(src.Data(), src.Size(), -1.0, 1.0f);
 
-        Tensor32f dst1(ToShape(p.srcC, p.dstH, p.dstW, p.format));
-        Tensor32f dst2(ToShape(p.srcC, p.dstH, p.dstW, p.format));
+        Tensor32f dst1(ToShape(p.dstC, p.dstH, p.dstW, p.format));
+        Tensor32f dst2(ToShape(p.dstC, p.dstH, p.dstW, p.format));
 
         TEST_ALIGN(SIMD_ALIGN);
 
@@ -279,7 +279,7 @@ namespace Test
     {
         bool result = true;
 
-        result = result && SynetPoolingMax32fAutoTest(::SimdTensorFormatNchw, f1, f2);
+        //result = result && SynetPoolingMax32fAutoTest(::SimdTensorFormatNchw, f1, f2);
         result = result && SynetPoolingMax32fAutoTest(::SimdTensorFormatNhwc, f1, f2);
 
         return result;

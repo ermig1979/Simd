@@ -195,7 +195,7 @@ namespace Simd
                 SynetPoolingMax32f2D(src, srcC, srcH, srcW, kernelY, kernelX,
                     strideY, strideX, padY, padX, dst, dstH, dstW, format);
             else
-                Base::SynetPoolingMax32f(src, srcC, srcH, srcW, kernelC, kernelY, kernelX,
+                Avx2::SynetPoolingMax32f(src, srcC, srcH, srcW, kernelC, kernelY, kernelX,
                     strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
         }
 
