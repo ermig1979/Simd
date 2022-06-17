@@ -20,7 +20,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSquaredDifferenceSum.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConversion.cpp" />

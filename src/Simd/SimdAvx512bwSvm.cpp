@@ -27,35 +27,12 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t count)
-                {
-                    size_t size = sizeof(float)*count;
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    sums = (float*)_p;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                float * sums;
-            private:
-                void *_p;
-            };
-        }
-
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
         {
-            Buffer buffer(count);
+            Array32f sums(count, true);
             size_t alignedCount = AlignLo(count, F);
             __mmask16 tailMask = TailMask16(count - alignedCount);
 
@@ -65,19 +42,27 @@ namespace Simd
                 float v = x[j];
                 __m512 _v = _mm512_set1_ps(v);
                 for (; i < alignedCount; i += F)
-                    Store<true>(buffer.sums + i, _mm512_fmadd_ps(_v, Load<false>(svs + i), Load<true>(buffer.sums + i)));
+                    _mm512_storeu_ps(sums.data + i, _mm512_fmadd_ps(_v, _mm512_loadu_ps(svs + i), _mm512_loadu_ps(sums.data + i)));
                 if (i < count)
-                    Store<true, true>(buffer.sums + i, _mm512_fmadd_ps(_v, (Load<false, true>(svs + i, tailMask)), (Load<true, true>(buffer.sums + i, tailMask))), tailMask);
+                {
+                    __m512 _svs = _mm512_maskz_loadu_ps(tailMask, svs + i);
+                    __m512 _sums = _mm512_maskz_loadu_ps(tailMask, sums.data + i);
+                    _mm512_mask_storeu_ps(sums.data + i, tailMask, _mm512_fmadd_ps(_v, _svs, _sums));
+                }
                 svs += count;
             }
 
             size_t i = 0;
             __m512 _sum = _mm512_setzero_ps();
             for (; i < alignedCount; i += F)
-                _sum = _mm512_fmadd_ps(Load<true>(buffer.sums + i), Load<false>(weights + i), _sum);
+                _sum = _mm512_fmadd_ps(Avx512f::Load<true>(sums.data + i), Avx512f::Load<false>(weights + i), _sum);
             if (i < count)
-                _sum = _mm512_fmadd_ps((Load<true, true>(buffer.sums + i, tailMask)), (Load<false, true>(weights + i, tailMask)), _sum);
-            *sum = ExtractSum(_sum);
+            {
+                __m512 _sums = _mm512_maskz_loadu_ps(tailMask, sums.data + i);
+                __m512 _weight = _mm512_maskz_loadu_ps(tailMask, weights + i);
+                _sum = _mm512_fmadd_ps(_sums, _weight, _sum);
+            }
+            *sum = Avx512f::ExtractSum(_sum);
         }
     }
 #endif// SIMD_AVX512F_ENABLE

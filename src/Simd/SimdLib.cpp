@@ -5602,32 +5602,10 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
 
 SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
 {
-#ifdef SIMD_AVX512F_ENABLE
-    if (Avx512f::Enable)
-        Avx512f::SvmSumLinear(x, svs, weights, length, count, sum);
-    else
-#endif
-#ifdef SIMD_AVX_ENABLE
-    if(Avx::Enable)
-        Avx::SvmSumLinear(x, svs, weights, length, count, sum);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable)
-        Sse2::SvmSumLinear(x, svs, weights, length, count, sum);
-    else
-#endif
-#ifdef SIMD_VSX_ENABLE
-    if(Vsx::Enable)
-        Vsx::SvmSumLinear(x, svs, weights, length, count, sum);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable)
-        Neon::SvmSumLinear(x, svs, weights, length, count, sum);
-    else
-#endif
-        Base::SvmSumLinear(x, svs, weights, length, count, sum);
+    typedef void(*SimdSvmSumLinearPtr) (const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
+    const static SimdSvmSumLinearPtr simdSvmSumLinear = SIMD_FUNC5(SvmSumLinear, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+
+    simdSvmSumLinear(x, svs, weights, length, count, sum);
 }
 
 SIMD_API void SimdSynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format)

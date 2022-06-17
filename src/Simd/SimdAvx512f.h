@@ -101,8 +101,6 @@ namespace Simd
 
         void SquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum);
 
-        void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum);
-
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);

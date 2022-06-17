@@ -100,9 +100,9 @@ namespace Test
             result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Avx::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Avx512f::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SvmSumLinearAutoTest(FUNC_SL(Simd::Avx512bw::SvmSumLinear), FUNC_SL(SimdSvmSumLinear));
 #endif
 
 #ifdef SIMD_VSX_ENABLE

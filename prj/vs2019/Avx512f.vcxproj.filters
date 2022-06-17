@@ -13,9 +13,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSquaredDifferenceSum.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSvm.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
