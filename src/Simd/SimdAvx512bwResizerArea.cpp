@@ -214,8 +214,8 @@ namespace Simd
             {
                 ptrdiff_t srcTail = size2N - size4F, dstTail = srcTail / 2;
                 __mmask64 srcMask = TailMask64(srcTail);
-                __m512i s0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<false, true>(src0 + i, srcMask));
-                __m512i s1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, Load<false, true>(src1 + i, srcMask));
+                __m512i s0 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, true>(src0 + i, srcMask)));
+                __m512i s1 = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_UNPACK, (Load<false, true>(src1 + i, srcMask)));
                 s0 = _mm512_maddubs_epi16(ShuffleColor<N>(s0), K8_01);
                 s1 = _mm512_maddubs_epi16(ShuffleColor<N>(s1), K8_01);
                 Update<update, false, true>(dst + 0, _mm512_madd_epi16(_mm512_unpacklo_epi16(s0, s1), _val), TailMask16(dstTail - 0));
