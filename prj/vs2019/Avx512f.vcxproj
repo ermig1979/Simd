@@ -11,7 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fFill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNN.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNT.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp" />

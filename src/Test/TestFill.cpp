@@ -98,6 +98,8 @@ namespace Test
         return result;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncF
@@ -172,6 +174,8 @@ namespace Test
 
         return result;
     }
+
+    //---------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -262,6 +266,8 @@ namespace Test
         return result;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncBgr
@@ -349,6 +355,8 @@ namespace Test
 
         return result;
     }
+
+    //---------------------------------------------------------------------------------------------
 
     namespace
     {
@@ -439,6 +447,8 @@ namespace Test
         return result;
     }
 
+    //---------------------------------------------------------------------------------------------
+
     namespace
     {
         struct FuncFill32f
@@ -506,9 +516,9 @@ namespace Test
             result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx::Fill32f), FUNC_32F(SimdFill32f));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx512f::Fill32f), FUNC_32F(SimdFill32f));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Avx512bw::Fill32f), FUNC_32F(SimdFill32f));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -519,7 +529,7 @@ namespace Test
         return result;
     }
 
-    //-----------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
 
     bool FillDataTest(bool create, View::Format format, int width, int height, const Func & f)
     {

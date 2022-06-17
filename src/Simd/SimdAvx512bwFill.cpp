@@ -23,12 +23,63 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdStream.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        void Fill32f(float* dst, size_t size, const float* value)
+        {
+            if (value == 0 || value[0] == 0)
+                memset(dst, 0, size * sizeof(float));
+            else
+            {
+                __m512 _value = _mm512_set1_ps(value[0]);
+                float* end = dst + size;
+                float* beg = Min((float*)AlignHi(dst, A), end);
+                if (dst < beg)
+                {
+                    __mmask16 nose = TailMask16(beg - dst);
+                    _mm512_mask_storeu_ps(dst, nose, _value);
+                    dst = beg;
+                }
+                float* endF = (float*)AlignLo(end, F);
+                float* endQF = (float*)AlignLo(end, QF);
+                if (size * sizeof(float) >= Base::AlgCacheL3())
+                {
+                    for (; dst < endQF; dst += QF)
+                    {
+                        _mm512_stream_ps(dst + 0 * F, _value);
+                        _mm512_stream_ps(dst + 1 * F, _value);
+                        _mm512_stream_ps(dst + 2 * F, _value);
+                        _mm512_stream_ps(dst + 3 * F, _value);
+                    }
+                }
+                else
+                {
+                    for (; dst < endQF; dst += QF)
+                    {
+                        _mm512_storeu_ps(dst + 0 * F, _value);
+                        _mm512_storeu_ps(dst + 1 * F, _value);
+                        _mm512_storeu_ps(dst + 2 * F, _value);
+                        _mm512_storeu_ps(dst + 3 * F, _value);
+                    }
+                }
+                for (; dst < endF; dst += F)
+                    _mm512_storeu_ps(dst, _value);
+                if (dst < end)
+                {
+                    __mmask16 tail = TailMask16(end - dst);
+                    _mm512_mask_storeu_ps(dst, tail, _value);
+                }            
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template <bool align, bool mask> SIMD_INLINE void FillBgr(uint8_t * dst, const __m512i bgrs[3], const __mmask64 * tails)
         {
             Store<align, mask>(dst + 0 * A, bgrs[0], tails[0]);
@@ -87,6 +138,8 @@ namespace Simd
                 FillBgr<false>(dst, stride, width, height, blue, green, red);
         }
 
+        //-----------------------------------------------------------------------------------------
+
         template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
             size_t size = width * 4;
@@ -122,6 +175,8 @@ namespace Simd
             else
                 FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m512i & pixel)
         {

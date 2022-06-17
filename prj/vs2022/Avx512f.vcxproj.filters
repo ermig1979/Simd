@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fFill.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fNeural.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>

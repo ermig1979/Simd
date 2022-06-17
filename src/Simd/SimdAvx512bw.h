@@ -195,6 +195,8 @@ namespace Simd
         void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
             uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
+        void Fill32f(float* dst, size_t size, const float* value);
+
         void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
 
         void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
