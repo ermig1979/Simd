@@ -533,21 +533,6 @@ namespace Simd
 #ifdef SIMD_AVX512F_ENABLE    
     namespace Avx512f
     {
-        class ResizerNearest : public Avx2::ResizerNearest
-        {
-        protected:
-            void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-            void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-        public:
-            ResizerNearest(const ResParam& param);
-
-            static bool Preferable(const ResParam& param);
-
-            virtual void Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
-        };
-
-        //---------------------------------------------------------------------------------------------
-
         class ResizerFloatBilinear : public Base::ResizerFloatBilinear
         {
             virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
@@ -564,7 +549,7 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
-        class ResizerNearest : public Avx512f::ResizerNearest
+        class ResizerNearest : public Avx2::ResizerNearest
         {
         protected:
             struct IndexShuffle32x2
@@ -577,6 +562,8 @@ namespace Simd
 
             void EstimateParams();
             void Shuffle32x2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather4(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
+            void Gather8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);
         public:
             ResizerNearest(const ResParam& param);
 

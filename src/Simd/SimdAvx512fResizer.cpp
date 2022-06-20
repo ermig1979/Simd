@@ -35,8 +35,6 @@ namespace Simd
             ResParam param(srcX, srcY, dstX, dstY, channels, type, method, sizeof(__m512));
             if (param.IsFloatBilinear())
                 return new ResizerFloatBilinear(param);
-            else if (param.IsNearest() && ResizerNearest::Preferable(param))
-                return new ResizerNearest(param);
             else
                 return Avx2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
