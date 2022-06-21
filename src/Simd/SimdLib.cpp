@@ -4566,42 +4566,10 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
 
 SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
 {
-#ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
-        return Avx512bw::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-#ifdef SIMD_AVX512F_ENABLE
-    if (Avx512f::Enable)
-        return Avx512f::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-#ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable)
-        return Avx2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-#ifdef SIMD_AVX_ENABLE
-    if (Avx::Enable)
-        return Avx::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-#ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable)
-        return Sse41::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable)
-        return Sse2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-#ifdef SIMD_NEON_ENABLE
-    if (Neon::Enable)
-        return Neon::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
-    else
-#endif
-        return Base::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+    typedef void*(*SimdResizerInitPtr) (size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
+    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC6(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+
+    return simdResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
 }
 
 SIMD_API void SimdResizerRun(const void * resizer, const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)

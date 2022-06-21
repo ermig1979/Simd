@@ -15,9 +15,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fNT.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fNeural.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizer.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerBilinear.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp" />

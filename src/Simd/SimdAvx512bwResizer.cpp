@@ -41,6 +41,8 @@ namespace Simd
                 return new ResizerByteBilinear(param);
             else if (param.IsShortBilinear() && dstX > F)
                 return new ResizerShortBilinear(param);
+            if (param.IsFloatBilinear())
+                return new ResizerFloatBilinear(param);
             else if (param.IsByteBicubic())
                 return new ResizerByteBicubic(param);
             else if (param.IsByteArea2x2())
@@ -48,7 +50,7 @@ namespace Simd
             else if (param.IsByteArea1x1())
                 return new ResizerByteArea1x1(param);
             else
-                return Avx512f::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
+                return Avx2::ResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
         }
     }
 #endif //SIMD_AVX512BW_ENABLE 

@@ -530,22 +530,6 @@ namespace Simd
     }
 #endif //SIMD_AVX2_ENABLE 
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
-    {
-        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
-        {
-            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
-        public:
-            ResizerFloatBilinear(const ResParam & param);
-        };
-
-        //---------------------------------------------------------------------------------------------
-
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    }
-#endif //SIMD_AVX512F_ENABLE 
-
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
@@ -594,6 +578,13 @@ namespace Simd
             virtual void Run(const uint16_t* src, size_t srcStride, uint16_t* dst, size_t dstStride);
         public:
             ResizerShortBilinear(const ResParam& param);
+        };
+
+        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
+        {
+            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
+        public:
+            ResizerFloatBilinear(const ResParam & param);
         };
 
         //---------------------------------------------------------------------------------------------

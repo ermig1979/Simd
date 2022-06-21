@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fNeural.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizer.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSquaredDifferenceSum.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
@@ -80,12 +77,6 @@
       <Filter>Avx512f</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd3.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerBilinear.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fResizerNearest.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
   </ItemGroup>

@@ -340,14 +340,14 @@ namespace Test
         bool result = true;
 
 #if !defined(__aarch64__) || 1  
-        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, /*SimdResizeMethodBilinear, SimdResizeMethodBicubic,  SimdResizeMethodArea, SimdResizeMethodAreaFast*/ };
+        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, /*SimdResizeMethodBicubic,  SimdResizeMethodArea, SimdResizeMethodAreaFast*/ };
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 3, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
-            if (methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast || 1)
+            if (methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast)// || 1)
                 continue;
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 2, f1, f2);
@@ -385,11 +385,6 @@ namespace Test
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
             result = result && ResizerAutoTest(FUNC_RS(Simd::Avx2::ResizerInit), FUNC_RS(SimdResizerInit));
-#endif
-
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && ResizerAutoTest(FUNC_RS(Simd::Avx512f::ResizerInit), FUNC_RS(SimdResizerInit));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
