@@ -5183,7 +5183,7 @@ SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size
 SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
 {
     typedef void (* SimdSquaredDifferenceKahanSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC5(SquaredDifferenceKahanSum32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC5(SquaredDifferenceKahanSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
     simdSquaredDifferenceKahanSum32f(a, b, size, sum);
 }

@@ -394,6 +394,8 @@ namespace Simd
 
         void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum);
 
+        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum);
+
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average);
 

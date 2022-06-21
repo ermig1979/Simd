@@ -451,9 +451,9 @@ namespace Test
             result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Avx::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Avx512f::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Avx512bw::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif
 
 #ifdef SIMD_VSX_ENABLE

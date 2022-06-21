@@ -220,6 +220,62 @@ namespace Simd
             else
                 SquaredDifferenceSum32f<false>(a, b, size, sum);
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align, bool mask> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t offset, __m512& sum, __m512& correction, __mmask16 tail = -1)
+        {
+            __m512 _a = Avx512f::Load<align, mask>(a + offset, tail);
+            __m512 _b = Avx512f::Load<align, mask>(b + offset, tail);
+            __m512 _d = _mm512_sub_ps(_a, _b);
+            __m512 term = _mm512_fmsub_ps(_d, _d, correction);
+            __m512 temp = _mm512_add_ps(sum, term);
+            correction = _mm512_sub_ps(_mm512_sub_ps(temp, sum), term);
+            sum = temp;
+        }
+
+        template <bool align> void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum)
+        {
+            if (align)
+                assert(Aligned(a) && Aligned(b));
+
+            size_t alignedSize = AlignLo(size, F);
+            __mmask16 tailMask = TailMask16(size - alignedSize);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            __m512 sums[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+            __m512 corrections[4] = { _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps(), _mm512_setzero_ps() };
+            if (fullAlignedSize)
+            {
+                for (; i < fullAlignedSize; i += QF)
+                {
+                    SquaredDifferenceKahanSum32f<align, false>(a, b, i + 0 * F, sums[0], corrections[0]);
+                    SquaredDifferenceKahanSum32f<align, false>(a, b, i + 1 * F, sums[1], corrections[1]);
+                    SquaredDifferenceKahanSum32f<align, false>(a, b, i + 2 * F, sums[2], corrections[2]);
+                    SquaredDifferenceKahanSum32f<align, false>(a, b, i + 3 * F, sums[3], corrections[3]);
+                }
+                sums[0] = _mm512_add_ps(_mm512_add_ps(sums[0], sums[1]), _mm512_add_ps(sums[2], sums[3]));
+            }
+            for (; i < alignedSize; i += F)
+                SquaredDifferenceKahanSum32f<align, false>(a, b, i, sums[0], corrections[0]);
+#if defined (NDEBUG) && defined(_MSC_VER)
+            *sum = ExtractSum(sums[0]);
+            for (; i < size; ++i)
+                *sum += Simd::Square(a[i] - b[i]);
+#else
+            if (i < size)
+                SquaredDifferenceKahanSum32f<align, true>(a, b, i, sums[0], corrections[0], tailMask);
+            *sum = Avx512f::ExtractSum(sums[0]);
+#endif
+        }
+
+        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum)
+        {
+            if (Aligned(a) && Aligned(b))
+                SquaredDifferenceKahanSum32f<true>(a, b, size, sum);
+            else
+                SquaredDifferenceKahanSum32f<false>(a, b, size, sum);
+        }
     }
 #endif// SIMD_AVX2_ENABLE
 }
