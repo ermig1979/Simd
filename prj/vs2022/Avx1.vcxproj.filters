@@ -91,6 +91,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1ResizerBilinear.cpp">
       <Filter>Avx1</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx1NeuralConvolution.cpp">
+      <Filter>Avx1</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx1">

@@ -16,6 +16,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx1Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Neural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx1NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1Resizer.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1ResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx1SquaredDifferenceSum.cpp" />

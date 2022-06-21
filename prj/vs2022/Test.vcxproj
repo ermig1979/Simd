@@ -113,6 +113,7 @@
     <ClCompile Include="..\..\src\Test\TestLog.cpp" />
     <ClCompile Include="..\..\src\Test\TestMotion.cpp" />
     <ClCompile Include="..\..\src\Test\TestNeural.cpp" />
+    <ClCompile Include="..\..\src\Test\TestNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Test\TestOperation.cpp" />
     <ClCompile Include="..\..\src\Test\TestPerformance.cpp" />
     <ClCompile Include="..\..\src\Test\TestReduce.cpp" />

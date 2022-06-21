@@ -41,6 +41,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Neural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse2NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Reduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray2x2.cpp" />

@@ -41,7 +41,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Reduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray4x4.cpp" />

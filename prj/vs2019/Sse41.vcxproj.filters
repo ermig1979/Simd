@@ -91,7 +91,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32f.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp">
+    <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp">

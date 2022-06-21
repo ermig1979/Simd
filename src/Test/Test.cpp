@@ -296,6 +296,12 @@ namespace Test
     TEST_ADD_GROUP_AD0(NeuralPow);
     TEST_ADD_GROUP_AD0(NeuralUpdateWeights);
     TEST_ADD_GROUP_AD0(NeuralAdaptiveGradientUpdate);
+    TEST_ADD_GROUP_AD0(NeuralPooling1x1Max3x3);
+    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max2x2);
+    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max3x3);
+    TEST_ADD_GROUP_00S(NeuralPredict);
+    TEST_ADD_GROUP_00S(NeuralTrain);
+
     TEST_ADD_GROUP_AD0(NeuralAddConvolution2x2Forward);
     TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Forward);
     TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Forward);
@@ -308,12 +314,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(NeuralAddConvolution3x3Sum);
     TEST_ADD_GROUP_AD0(NeuralAddConvolution4x4Sum);
     TEST_ADD_GROUP_AD0(NeuralAddConvolution5x5Sum);
-    TEST_ADD_GROUP_AD0(NeuralPooling1x1Max3x3);
-    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max2x2);
-    TEST_ADD_GROUP_AD0(NeuralPooling2x2Max3x3);
     TEST_ADD_GROUP_AD0(NeuralConvolutionForward);
-    TEST_ADD_GROUP_00S(NeuralPredict);
-    TEST_ADD_GROUP_00S(NeuralTrain);
 
     TEST_ADD_GROUP_AD0(OperationBinary8u);
     TEST_ADD_GROUP_AD0(OperationBinary16i);

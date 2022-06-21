@@ -56,6 +56,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx2MeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Neural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx2NeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2Reduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx2ReduceGray2x2.cpp" />
