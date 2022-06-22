@@ -211,9 +211,9 @@ namespace Test
             result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx2::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx512f::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralProductSumAutoTest(EPS, FUNC_PS(Simd::Avx512bw::NeuralProductSum), FUNC_PS(SimdNeuralProductSum));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
