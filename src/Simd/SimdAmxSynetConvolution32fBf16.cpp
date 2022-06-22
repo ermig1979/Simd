@@ -27,125 +27,17 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAvx512bf16.h"
+#include "Simd/SimdAmx.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX512BF16_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-    namespace Avx512bf16
+#if defined(SIMD_AMX_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+    namespace Amx
     {
         typedef Base::SynetConvolution32fBf16Nhwc::AlgParam AlgParam;
         typedef Base::SynetConvolution32fBf16Nhwc::ConvertPtr Convert;
         typedef Base::SynetConvolution32fBf16Nhwc::ConvolutionPtr Convolution;
-
-        //-----------------------------------------------------------------------------------------
-
-        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
-        {
-            ptrdiff_t beg = yBeg * p.strideY - p.padY;
-            ptrdiff_t end = (yEnd - 1) * p.strideY - p.padY + p.kernelY * p.dilationY;
-            src += Max<ptrdiff_t>(0, beg) * p.srcW * p.srcC;
-            size_t srcC32 = AlignLo(srcC, 32);
-            size_t srcW = p.srcW + p.padX + p.padW;
-            __mmask16 srcMask[2];
-            __mmask32 dstMask[1];
-            if (srcC32 < srcC)
-            {
-                srcMask[0] = TailMask16(srcC - srcC32 - F * 0);
-                srcMask[1] = TailMask16(srcC - srcC32 - F * 1);
-                dstMask[0] = TailMask32(srcC - srcC32);
-            }
-            for (ptrdiff_t sy = beg; sy < end; ++sy)
-            {
-                if ((size_t)sy >= p.srcH)
-                {
-                    memset(dst, 0, srcW * srcC * 2);
-                    dst += srcW * srcC;
-                }
-                else
-                {
-                    if (p.padX)
-                    {
-                        memset(dst, 0, p.padX * srcC * 2);
-                        dst += p.padX * srcC;
-                    }
-                    if (p.srcC == srcC)
-                    {
-                        Float32ToBFloat16(src, srcC * p.srcW, dst);
-                        src += srcC * p.srcW;
-                        dst += srcC * p.srcW;
-                    }
-                    else
-                    {
-                        for (size_t sx = 0; sx < p.srcW; ++sx)
-                        {
-                            size_t sc = 0;
-                            for (; sc < srcC32; sc += 32)
-                                Float32ToBFloat16<false, false>(src + sc, dst + sc, srcMask, dstMask);
-                            if (srcC32 < srcC)
-                                Float32ToBFloat16<false, true>(src + sc, dst + sc, srcMask, dstMask);
-                            src += p.srcC;
-                            dst += srcC;
-                        }
-                    }
-                    if (p.padW)
-                    {
-                        memset(dst, 0, p.padW * srcC * 2);
-                        dst += p.padW * srcC;
-                    }
-                }
-            }
-        }
-
-        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
-        {
-            size_t srcC32 = AlignLo(srcC, 32);
-            __mmask16 srcMask[2];
-            __mmask32 dstMask[1];
-            if (srcC32 < srcC)
-            {
-                srcMask[0] = TailMask16(srcC - srcC32 - F * 0);
-                srcMask[1] = TailMask16(srcC - srcC32 - F * 1);
-                dstMask[0] = TailMask32(srcC - srcC32);
-            }
-            for (size_t dy = yBeg; dy < yEnd; ++dy)
-            {
-                for (size_t dx = 0; dx < p.dstW; ++dx)
-                {
-                    for (size_t ky = 0; ky < p.kernelY; ky++)
-                    {
-                        size_t sy = dy * p.strideY + ky * p.dilationY - p.padY;
-                        if (sy < p.srcH)
-                        {
-                            for (size_t kx = 0; kx < p.kernelX; kx++)
-                            {
-                                size_t sx = dx * p.strideX + kx * p.dilationX - p.padX;
-                                if (sx < p.srcW)
-                                {
-                                    const float* ps = src + (sy * p.srcW + sx) * p.srcC;
-                                    size_t sc = 0;
-                                    for (; sc < srcC32; sc += 32)
-                                        Float32ToBFloat16<false, false>(ps + sc, dst + sc, srcMask, dstMask);
-                                    if (srcC32 < srcC)
-                                        Float32ToBFloat16<false, true>(ps + sc, dst + sc, srcMask, dstMask);
-                                    dst += srcC;
-                                }
-                                else
-                                {
-                                    memset(dst, 0, srcC * 2);
-                                    dst += srcC;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            memset(dst, 0, p.kernelX * srcC * 2);
-                            dst += p.kernelX * srcC;
-                        }
-                    }
-                }
-            }
-        }
 
         //-----------------------------------------------------------------------------------------
 
@@ -877,15 +769,15 @@ namespace Simd
         }
 
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
-            : Avx512bw::SynetConvolution32fBf16Nhwc(p)
+            : Avx512bf16::SynetConvolution32fBf16Nhwc(p)
         {
             size_t microD = F * (UseF3(p) ? 3 : 2);
             size_t microC = UseF3(p) ? 9 : 14;
             SetAlgParam(microD, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_alg.mode)
-                _convert = ConvolutionBf16NhwcConvertGemm;
+                _convert = Avx512bf16::ConvolutionBf16NhwcConvertGemm;
             else
-                _convert = ConvolutionBf16NhwcConvertConv;
+                _convert = Avx512bf16::ConvolutionBf16NhwcConvertConv;
             switch (p.activation)
             {
             case SimdConvolutionActivationIdentity: Set<SimdConvolutionActivationRestrictRange>(p, _alg, _convolutions); break;
@@ -912,11 +804,11 @@ namespace Simd
             else if (Base::Bf16Soft(compatibility))
             {
                 if (Base::SynetConvolution32fBf16Nhwc::Preferable(param))
-                    return new Avx512bf16::SynetConvolution32fBf16Nhwc(param);
+                    return new Amx::SynetConvolution32fBf16Nhwc(param);
                 else
                     return new Base::SynetConvolution32fBf16Gemm(param);
             }
-            return Avx512bw::SynetConvolution32fInit(batch, conv, compatibility);
+            return Avx512bf16::SynetConvolution32fInit(batch, conv, compatibility);
         }
     }
 #endif

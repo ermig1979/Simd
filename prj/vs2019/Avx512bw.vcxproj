@@ -57,6 +57,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwReduceGray2x2.cpp" />
@@ -97,6 +98,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetPooling.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetScale.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTexture.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwTile.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwTransform.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwUyvyToYuv.cpp" />

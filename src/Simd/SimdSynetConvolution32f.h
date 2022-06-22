@@ -911,12 +911,35 @@ namespace Simd
 #ifdef SIMD_AVX512BF16_ENABLE    
     namespace Avx512bf16
     {
+        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
+
+        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
+
+        //-----------------------------------------------------------------------------------------
+
         class SynetConvolution32fBf16Nhwc : public Avx512bw::SynetConvolution32fBf16Nhwc
         {
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
 
             virtual String Ext() const { return "Avx512bf16"; }
+        };
+
+        //-----------------------------------------------------------------------------------------
+
+        void* SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters* conv, SimdSynetCompatibilityType compatibility);
+    }
+#endif
+
+#ifdef SIMD_AMX_ENABLE    
+    namespace Amx
+    {
+        class SynetConvolution32fBf16Nhwc : public Avx512bf16::SynetConvolution32fBf16Nhwc
+        {
+        public:
+            SynetConvolution32fBf16Nhwc(const ConvParam32f& p);
+
+            virtual String Ext() const { return "Amx"; }
         };
 
         //-----------------------------------------------------------------------------------------

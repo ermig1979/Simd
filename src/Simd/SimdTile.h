@@ -21,41 +21,62 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef __SimdAmx_h__
-#define __SimdAmx_h__
+#ifndef __SimdTile_h__
+#define __SimdTile_h__
 
 #include "Simd/SimdDefs.h"
 
 namespace Simd
 {
+    struct TileConf
+    {
+        uint8_t paletteId;
+        uint8_t startRow;
+        uint8_t reserved[14];
+        uint16_t colsb[16];
+        uint8_t rows[16];
+
+        SIMD_INLINE TileConf(uint8_t paletteId = 1, uint8_t startRow = 0)
+        {
+            memset(this, 0, sizeof(TileConf));
+            this->paletteId = paletteId;
+            this->startRow = startRow;
+        }
+    };
+
+    union SIMD_ALIGNED(64) TileReg
+    {
+        int8_t i8[16][64];
+        uint8_t u8[16][64];
+        int16_t i16[16][32];
+        uint16_t u16[16][32];
+        int32_t i32[16][16];
+        uint32_t u32[16][16];
+        float f32[16][16];
+    };
+
+    const size_t TileRegCount = 8;
+
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
+    {
+        void TileLoadConfig(const TileConf* tileConf);
+
+        void TileStoreConfig(TileConf* tileConf);
+
+        void TileZero(int dst);
+
+        void TileLoad(int dst, const void* base, int stride);
+
+        void TileStore(int src, void* base, int stride);
+
+        void TileMatMulBf16(int dst, int a, int b);
+    }
+#endif
+
 #ifdef SIMD_AMX_ENABLE    
     namespace Amx
     {
-        struct TileConfig
-        {
-            uint8_t paletteId;
-            uint8_t startRow;
-            uint8_t reserved[14];
-            uint16_t colb[16];
-            uint8_t rows[16];
-
-            SIMD_INLINE TileConfig(uint8_t paletteId = 1, uint8_t startRow = 0)
-            {
-                memset(this, 0, sizeof(TileConfig));
-                this->paletteId = paletteId;
-                this->startRow = startRow;
-            }
-
-            SIMD_INLINE void Set() const
-            {
-                _tile_loadconfig(this);
-            }
-
-            SIMD_INLINE void Get()
-            {
-                _tile_storeconfig(this);
-            }
-        };
     }
 #endif
 }
