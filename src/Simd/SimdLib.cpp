@@ -4081,9 +4081,9 @@ SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride
 
 SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
-#ifdef SIMD_AVX512F_ENABLE
-    if (Avx512f::Enable && width > Avx512f::F)
-        Avx512f::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width > Avx512bw::F)
+        Avx512bw::NeuralPooling1x1Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
@@ -4106,9 +4106,9 @@ SIMD_API void SimdNeuralPooling1x1Max3x3(const float * src, size_t srcStride, si
 
 SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
-#ifdef SIMD_AVX512F_ENABLE
-    if (Avx512f::Enable && width >= Avx512f::DF)
-        Avx512f::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width >= Avx512bw::DF)
+        Avx512bw::NeuralPooling2x2Max2x2(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX_ENABLE
@@ -4131,9 +4131,9 @@ SIMD_API void SimdNeuralPooling2x2Max2x2(const float * src, size_t srcStride, si
 
 SIMD_API void SimdNeuralPooling2x2Max3x3(const float * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride)
 {
-#ifdef SIMD_AVX512F_ENABLE
-    if (Avx512f::Enable && width > Avx512f::DF)
-        Avx512f::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_AVX512BW_ENABLE
+    if (Avx512bw::Enable && width > Avx512bw::DF)
+        Avx512bw::NeuralPooling2x2Max3x3(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
