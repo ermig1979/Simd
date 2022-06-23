@@ -228,7 +228,7 @@ namespace Simd
         }
 
 
-        void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3)
+        void SynetConvolution32fBf16Nhwc::SetAlgParam(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3)
         {
             const ConvParam32f& p = _param;
             AlgParam& a = _alg;
@@ -248,7 +248,7 @@ namespace Simd
                 a.srcH = p.dstH;
                 a.srcW = p.dstW;
                 a.microD = microD;
-                a.macroC = Simd::Min(AlignLo(L1 / p.kernelY / p.kernelX / microD / 2, 2), p.srcC);
+                a.macroC = Simd::Min(AlignLoAny(L1 / p.kernelY / p.kernelX / microD / 2, microC), p.srcC);
                 size_t matSize = p.srcC * p.dstW * p.dstH * p.kernelY * p.kernelX * 2;
                 if (matSize * 2 <= L2 && p.batch > 1)
                 {
@@ -264,7 +264,7 @@ namespace Simd
                 a.srcH = p.srcH + p.padY + p.padH;
                 a.srcW = p.srcW + p.padX + p.padW;
                 a.microD = microD;
-                a.macroC = Simd::Min(AlignLo(L1 / p.kernelY / p.kernelX / microD / 2, 2), p.srcC);
+                a.macroC = Simd::Min(AlignLoAny(L1 / p.kernelY / p.kernelX / microD / 2, microC), p.srcC);
                 for (size_t macroH = p.dstH; macroH >= 1; macroH--)
                 {
                     a.macroH = macroH;

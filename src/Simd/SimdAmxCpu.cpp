@@ -35,10 +35,20 @@ namespace Simd
     {
         SIMD_INLINE bool SupportedByCPU()
         {
+#if defined(SIMD_AMX_EMULATE)
+            return 
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_F) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_CD) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_DQ) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_BW) &&
+                Base::CheckBit(7, 0, Cpuid::Ebx, Cpuid::AVX512_VL);
+#else
             return
+                Base::CheckBit(7, 1, Cpuid::Eax, Cpuid::AVX512_BF16) &&
                 Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_TILE) &&
                 Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_INT8) &&
                 Base::CheckBit(7, 0, Cpuid::Edx, Cpuid::AMX_BF16);
+#endif
         }
 
         SIMD_INLINE bool SupportedByOS()
@@ -46,7 +56,11 @@ namespace Simd
 #if defined(_MSC_VER)
             __try
             {
+#if defined(SIMD_AMX_EMULATE)
+                __m512i value = _mm512_abs_epi8(_mm512_set1_epi8(1));// try to execute of AVX-512BW instructions;
+#else
                 _tile_zero(0);// try to execute of AMX instructions;
+#endif
                 return true;
             }
             __except (EXCEPTION_EXECUTE_HANDLER)

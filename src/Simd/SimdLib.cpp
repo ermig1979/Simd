@@ -5630,7 +5630,7 @@ SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionP
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC7(SynetConvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC9(SynetConvolution32fInit, SIMD_AMX_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution32fInit(batch, params, compatibility);
 #else

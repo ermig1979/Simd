@@ -82,4 +82,6 @@
 
 //#define SIMD_HIDE_INTERNAL
 
+//#define SIMD_AMX_EMULATE
+
 #endif//__SimdConfig_h__

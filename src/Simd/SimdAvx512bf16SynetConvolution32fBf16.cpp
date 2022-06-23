@@ -880,8 +880,8 @@ namespace Simd
             : Avx512bw::SynetConvolution32fBf16Nhwc(p)
         {
             size_t microD = F * (UseF3(p) ? 3 : 2);
-            size_t microC = UseF3(p) ? 9 : 14;
-            SetAlgParam(microD, microC, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            size_t microHW = UseF3(p) ? 9 : 14;
+            SetAlgParam(microD, microHW, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_alg.mode)
                 _convert = ConvolutionBf16NhwcConvertGemm;
             else

@@ -559,7 +559,7 @@ namespace Simd
                 size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst);
 
         protected:
-            void SetAlgParam(size_t microD, size_t microC, size_t L1, size_t L2, size_t L3);
+            void SetAlgParam(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3);
             void SetWeight(const float* weight);
             void SetBias(const float* bias);
             void SetParams(const float* params);
@@ -894,6 +894,12 @@ namespace Simd
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
+        void ConvolutionBf16NhwcConvertConv(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
+
+        void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst);
+
+        //-----------------------------------------------------------------------------------------
+
         class SynetConvolution32fBf16Nhwc : public Avx2::SynetConvolution32fBf16Nhwc
         {
         public:
@@ -934,7 +940,11 @@ namespace Simd
 #ifdef SIMD_AMX_ENABLE    
     namespace Amx
     {
+#if defined(SIMD_AMX_EMULATE)
+        class SynetConvolution32fBf16Nhwc : public Avx512bw::SynetConvolution32fBf16Nhwc
+#else
         class SynetConvolution32fBf16Nhwc : public Avx512bf16::SynetConvolution32fBf16Nhwc
+#endif
         {
         public:
             SynetConvolution32fBf16Nhwc(const ConvParam32f& p);

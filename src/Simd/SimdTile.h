@@ -64,6 +64,8 @@ namespace Simd
 
         void TileStoreConfig(TileConf* tileConf);
 
+        void TileRelease();
+
         void TileZero(int dst);
 
         void TileLoad(int dst, const void* base, int stride);
@@ -80,4 +82,49 @@ namespace Simd
     }
 #endif
 }
+
+#if defined(SIMD_AMX_EMULATE)
+
+#ifdef _tile_loadconfig
+#undef _tile_loadconfig
+#endif
+#define _tile_loadconfig Simd::Avx512bw::TileLoadConfig
+
+#ifdef _tile_storeconfig
+#undef _tile_storeconfig
+#endif
+#define _tile_storeconfig Simd::Avx512bw::TileStoreConfig
+
+#ifdef _tile_release
+#undef _tile_release
+#endif
+#define _tile_release Simd::Avx512bw::TileRelease
+
+#ifdef _tile_loadd
+#undef _tile_loadd
+#endif
+#define _tile_loadd Simd::Avx512bw::TileLoad
+
+#ifdef _tile_stream_loadd
+#undef _tile_stream_loadd
+#endif
+#define _tile_stream_loadd Simd::Avx512bw::TileLoad
+
+#ifdef _tile_stored
+#undef _tile_stored
+#endif
+#define _tile_stored Simd::Avx512bw::TileStore
+
+#ifdef _tile_zero
+#undef _tile_zero
+#endif
+#define _tile_zero Simd::Avx512bw::TileZero
+
+#ifdef _tile_dpbf16ps
+#undef _tile_dpbf16ps
+#endif
+#define _tile_dpbf16ps Simd::Avx512bw::TileMatMulBf16
+
+#endif
+
 #endif

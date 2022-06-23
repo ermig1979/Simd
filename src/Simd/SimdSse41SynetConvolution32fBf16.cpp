@@ -657,7 +657,7 @@ namespace Simd
         SynetConvolution32fBf16Nhwc::SynetConvolution32fBf16Nhwc(const ConvParam32f & p)
             : Base::SynetConvolution32fBf16Nhwc(p)
         {
-            SetAlgParam(F * 2, 5, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
+            SetAlgParam(F * 2, 5, 2, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3());
             if (_alg.mode)
                 _convert = ConvolutionBf16NhwcConvertGemm;
             else

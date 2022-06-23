@@ -566,7 +566,7 @@ namespace Test
         //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 32, 104, 104, 16, _1, _1, _1, _0, _0, 1, a, t), c, f1, f2);
 #endif
 #else
-        result = result && SynetConvolution32fForwardAutoTest(eps, Param(10, 256, 64, 64, 256, _3, _1, _2, _1, _1, 1, a, t), c, f1, f2);
+        result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 64, 64, 128, _3, _1, _2, _1, _1, 1, a, t), c, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, Param(10, 128, 8, 8, 32, _3, _1, _2, _1, _1, 1, a, t), c, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, Param(10, 256, 8, 8, 256, _3, _1, _2, _1, _1, 1, a, t), c, f1, f2);
         //result = result && SynetConvolution32fForwardAutoTest(eps, Param(1, 128, 32, 32, 128, _1, _1, _1, _0, _0, 1, a, t), c, f1, f2);
@@ -640,6 +640,16 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bw::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
+#endif
+
+#ifdef SIMD_AVX512BF16_ENABLE
+        if (Simd::Avx512bf16::Enable)
+            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bf16::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
+#endif
+
+#ifdef SIMD_AMX_ENABLE
+        if (Simd::Amx::Enable)
+            result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Amx::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

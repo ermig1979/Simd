@@ -247,6 +247,8 @@ namespace Test
         T avx512f;
         T avx512bw;
         T avx512vnni;
+        T avx512bf16;
+        T amx;
         T vmx;
         T vsx;
         T neon;
@@ -297,6 +299,10 @@ namespace Test
             AddToFunction(src, dst.avx512bw, enable.avx512bw);
         if (desc.find("Simd::Avx512vnni::") != std::string::npos)
             AddToFunction(src, dst.avx512vnni, enable.avx512vnni);
+        if (desc.find("Simd::Avx512bf16::") != std::string::npos)
+            AddToFunction(src, dst.avx512bf16, enable.avx512bf16);
+        if (desc.find("Simd::Amx::") != std::string::npos)
+            AddToFunction(src, dst.amx, enable.amx);
         if (desc.find("Simd::Vmx::") != std::string::npos)
             AddToFunction(src, dst.vmx, enable.vmx);
         if (desc.find("Simd::Vsx::") != std::string::npos)
@@ -327,6 +333,8 @@ namespace Test
         if (enable.avx512f) Add(Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.sse2, s.base))))), d.avx512f);
         if (enable.avx512bw) Add(Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.sse2, s.base)))))), d.avx512bw);
         if (enable.avx512vnni) Add(Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.sse2, s.base))))))), d.avx512vnni);
+        if (enable.avx512bf16) Add(Cond(s.avx512bf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.sse2, s.base)))))))), d.avx512bf16);
+        if (enable.amx) Add(Cond(s.amx, Cond(s.avx512bf16, Cond(s.avx512vnni, Cond(s.avx512bw, Cond(s.avx512f, Cond(s.avx2, Cond(s.avx, Cond(s.sse41, Cond(s.sse2, s.base))))))))), d.amx);
         if (enable.vmx) Add(Cond(s.vmx, s.base), d.vmx);
         if (enable.vsx) Add(Cond(s.vsx, Cond(s.vmx, s.base)), d.vsx);
         if (enable.neon) Add(Cond(s.neon, s.base), d.neon);
@@ -405,8 +413,8 @@ namespace Test
 
         FunctionStatisticMap functions;
         CommonStatistic common;
-        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false};
-        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse2", "S2" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Avx5v", "A7" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
+        StatisticEnable enable = { false, false, false, false, false, false, false, false, false, false, false, false, false, false };
+        StatisticNames names = { { "API", "A" },{ "Base", "Bs" },{ "Sse2", "S2" },{ "Sse41", "S4" },{ "Avx", "A1" },{ "Avx2", "A2" },{ "Avx5f", "A5" },{ "Avx5b", "A6" },{ "Vnni", "Vn" },{ "Bf16", "Bf" },{ "Amx", "Am" },{ "Vmx", "Vm" },{ "Vsx", "Vs" },{ "Neon", "Ne" } };
         double timeMax = 0;
         for (FunctionMap::const_iterator it = map.begin(); it != map.end(); ++it)
         {
