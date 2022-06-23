@@ -35,20 +35,6 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
-        void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst);
-
-        void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
-
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);

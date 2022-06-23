@@ -558,9 +558,9 @@ namespace Test
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512bw::NeuralRoughSigmoid), FUNC_AF(SimdNeuralRoughSigmoid));
 #endif
 
 #ifdef SIMD_VSX_ENABLE
@@ -597,9 +597,9 @@ namespace Test
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx2::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512bw::NeuralRoughSigmoid2), FUNC_AF(SimdNeuralRoughSigmoid2));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -626,9 +626,9 @@ namespace Test
             result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512f::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralActivateFunctionAutoTest(EPS, false, 1.1f, FUNC_AF(Simd::Avx512bw::NeuralRoughTanh), FUNC_AF(SimdNeuralRoughTanh));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -670,9 +670,9 @@ namespace Test
             result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Avx2::NeuralPow), FUNC_AF(SimdNeuralPow));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Avx512f::NeuralPow), FUNC_AF(SimdNeuralPow));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralPowAutoTest(EPS, false, FUNC_AF(Simd::Avx512bw::NeuralPow), FUNC_AF(SimdNeuralPow));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -755,9 +755,9 @@ namespace Test
             result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512f::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512bw::NeuralDerivativeSigmoid), FUNC_AD(SimdNeuralDerivativeSigmoid));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -784,9 +784,9 @@ namespace Test
             result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512f::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 3.0f, FUNC_AD(Simd::Avx512bw::NeuralDerivativeTanh), FUNC_AD(SimdNeuralDerivativeTanh));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -813,9 +813,9 @@ namespace Test
             result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx512f::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralActivateDerivativeAutoTest(EPS, true, 0.5f, FUNC_AD(Simd::Avx512bw::NeuralDerivativeRelu), FUNC_AD(SimdNeuralDerivativeRelu));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

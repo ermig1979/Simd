@@ -3718,7 +3718,7 @@ SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t siz
 SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
     typedef void(*SimdNeuralRoughSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralRoughSigmoidPtr simdNeuralRoughSigmoid = SIMD_FUNC5(NeuralRoughSigmoid, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralRoughSigmoidPtr simdNeuralRoughSigmoid = SIMD_FUNC5(NeuralRoughSigmoid, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralRoughSigmoid(src, size, slope, dst);
 }
@@ -3726,7 +3726,7 @@ SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float
 SIMD_API void SimdNeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst)
 {
     typedef void(*SimdNeuralRoughSigmoid2Ptr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralRoughSigmoid2Ptr simdNeuralRoughSigmoid2 = SIMD_FUNC5(NeuralRoughSigmoid2, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralRoughSigmoid2Ptr simdNeuralRoughSigmoid2 = SIMD_FUNC5(NeuralRoughSigmoid2, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralRoughSigmoid2(src, size, slope, dst);
 }
@@ -3734,7 +3734,7 @@ SIMD_API void SimdNeuralRoughSigmoid2(const float * src, size_t size, const floa
 SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const float * slope, float * dst)
 {
     typedef void(*SimdNeuralDerivativeSigmoidPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralDerivativeSigmoidPtr simdNeuralDerivativeSigmoid = SIMD_FUNC4(NeuralDerivativeSigmoid, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralDerivativeSigmoidPtr simdNeuralDerivativeSigmoid = SIMD_FUNC4(NeuralDerivativeSigmoid, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralDerivativeSigmoid(src, size, slope, dst);
 }
@@ -3742,7 +3742,7 @@ SIMD_API void SimdNeuralDerivativeSigmoid(const float * src, size_t size, const 
 SIMD_API void SimdNeuralRoughTanh(const float * src, size_t size, const float * slope, float * dst)
 {
     typedef void(*SimdNeuralRoughTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralRoughTanhPtr simdNeuralRoughTanh = SIMD_FUNC4(NeuralRoughTanh, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralRoughTanhPtr simdNeuralRoughTanh = SIMD_FUNC4(NeuralRoughTanh, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralRoughTanh(src, size, slope, dst);
 }
@@ -3750,7 +3750,7 @@ SIMD_API void SimdNeuralRoughTanh(const float * src, size_t size, const float * 
 SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const float * slope, float * dst)
 {
     typedef void(*SimdNeuralDerivativeTanhPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralDerivativeTanhPtr simdNeuralDerivativeTanh = SIMD_FUNC4(NeuralDerivativeTanh, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralDerivativeTanhPtr simdNeuralDerivativeTanh = SIMD_FUNC4(NeuralDerivativeTanh, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralDerivativeTanh(src, size, slope, dst);
 }
@@ -3758,7 +3758,7 @@ SIMD_API void SimdNeuralDerivativeTanh(const float * src, size_t size, const flo
 SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const float * slope, float * dst)
 {
     typedef void(*SimdNeuralDerivativeReluPtr) (const float * src, size_t size, const float * slope, float * dst);
-    const static SimdNeuralDerivativeReluPtr simdNeuralDerivativeRelu = SIMD_FUNC4(NeuralDerivativeRelu, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralDerivativeReluPtr simdNeuralDerivativeRelu = SIMD_FUNC4(NeuralDerivativeRelu, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralDerivativeRelu(src, size, slope, dst);
 }
@@ -3766,7 +3766,7 @@ SIMD_API void SimdNeuralDerivativeRelu(const float * src, size_t size, const flo
 SIMD_API void SimdNeuralPow(const float * src, size_t size, const float * exponent, float * dst)
 {
     typedef void(*SimdNeuralPowPtr) (const float * src, size_t size, const float * exponent, float * dst);
-    const static SimdNeuralPowPtr simdNeuralPow = SIMD_FUNC4(NeuralPow, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralPowPtr simdNeuralPow = SIMD_FUNC4(NeuralPow, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralPow(src, size, exponent, dst);
 }
