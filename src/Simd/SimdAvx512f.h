@@ -35,12 +35,6 @@ namespace Simd
 
         void Gemm32fNT(size_t M, size_t N, size_t K, const float * alpha, const float * A, size_t lda, const float * B, size_t ldb, const float * beta, float * C, size_t ldc);
 
-        void NeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst);
-
-        void NeuralAddVector(const float * src, size_t size, float * dst);
-
-        void NeuralAddValue(const float * value, float * dst, size_t size);
-
         void NeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst);
 
         void NeuralRoughSigmoid2(const float * src, size_t size, const float * slope, float * dst);

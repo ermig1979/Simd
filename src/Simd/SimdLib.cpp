@@ -3691,28 +3691,28 @@ SIMD_API void SimdNeuralProductSum(const float * a, const float * b, size_t size
     simdNeuralProductSum(a, b, size, sum);
 }
 
-SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
+SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size)
 {
-    typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
-    const static SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC5(NeuralAddVectorMultipliedByValue, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    typedef void(*SimdNeuralAddValuePtr) (const float * value, float * dst, size_t size);
+    const static SimdNeuralAddValuePtr simdNeuralAddValue = SIMD_FUNC4(NeuralAddValue, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
-    simdNeuralAddVectorMultipliedByValue(src, size, value, dst);
+    simdNeuralAddValue(value, dst, size);
 }
 
 SIMD_API void SimdNeuralAddVector(const float * src, size_t size, float * dst)
 {
     typedef void(*SimdNeuralAddVectorPtr) (const float * src, size_t size, float * dst);
-    const static SimdNeuralAddVectorPtr simdNeuralAddVector = SIMD_FUNC4(NeuralAddVector, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdNeuralAddVectorPtr simdNeuralAddVector = SIMD_FUNC4(NeuralAddVector, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdNeuralAddVector(src, size, dst);
 }
 
-SIMD_API void SimdNeuralAddValue(const float * value, float * dst, size_t size)
+SIMD_API void SimdNeuralAddVectorMultipliedByValue(const float * src, size_t size, const float * value, float * dst)
 {
-    typedef void(*SimdNeuralAddValuePtr) (const float * value, float * dst, size_t size);
-    const static SimdNeuralAddValuePtr simdNeuralAddValue = SIMD_FUNC4(NeuralAddValue, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    typedef void(*SimdNeuralAddVectorMultipliedByValuePtr) (const float * src, size_t size, const float * value, float * dst);
+    const static SimdNeuralAddVectorMultipliedByValuePtr simdNeuralAddVectorMultipliedByValue = SIMD_FUNC5(NeuralAddVectorMultipliedByValue, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
-    simdNeuralAddValue(value, dst, size);
+    simdNeuralAddVectorMultipliedByValue(src, size, value, dst);
 }
 
 SIMD_API void SimdNeuralRoughSigmoid(const float * src, size_t size, const float * slope, float * dst)

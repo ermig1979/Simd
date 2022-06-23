@@ -337,6 +337,12 @@ namespace Simd
 
         void NeuralAddConvolution5x5Sum(const float* src, size_t srcStride, const float* dst, size_t dstStride, size_t width, size_t height, float* sums);
 
+        void NeuralAddValue(const float* value, float* dst, size_t size);
+
+        void NeuralAddVector(const float* src, size_t size, float* dst);
+
+        void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst);
+
         void NeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion);
 
         void NeuralConvolutionForward(const float* src, size_t srcWidth, size_t srcHeight, size_t srcDepth, const float* weight,

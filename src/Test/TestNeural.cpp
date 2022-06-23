@@ -308,9 +308,9 @@ namespace Test
             result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx2::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx512f::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralAddVectorMultipliedByValueAutoTest(EPS, FUNC_AVMV(Simd::Avx512bw::NeuralAddVectorMultipliedByValue), FUNC_AVMV(SimdNeuralAddVectorMultipliedByValue));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -393,9 +393,9 @@ namespace Test
             result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx512f::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralAddVectorAutoTest(EPS, FUNC_ADDVEC(Simd::Avx512bw::NeuralAddVector), FUNC_ADDVEC(SimdNeuralAddVector));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -477,9 +477,9 @@ namespace Test
             result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Avx::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Avx512f::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && NeuralAddValueAutoTest(EPS, FUNC_ADDVAL(Simd::Avx512bw::NeuralAddValue), FUNC_ADDVAL(SimdNeuralAddValue));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
