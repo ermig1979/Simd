@@ -55,8 +55,6 @@ namespace Simd
 
         void NeuralPow(const float * src, size_t size, const float * exponent, float * dst);
 
-        void NeuralUpdateWeights(const float * x, size_t size, const float * a, const float * b, float * d, float * w);
-
         void SynetAddBias(const float * bias, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
 
         void SynetEltwiseLayerForward(float const * const * src, const float * weight, size_t count, size_t size, SimdSynetEltwiseOperationType type, float * dst);

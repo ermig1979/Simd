@@ -444,6 +444,57 @@ namespace Simd
             else
                 NeuralProductSum<false>(a, b, size, sum);
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float* x, const __m512& a, const __m512& b, float* d, float* w, __mmask16 m)
+        {
+            __m512 _x = Avx512f::Load<align, mask>(x, m);
+            __m512 _d = Avx512f::Load<align, mask>(d, m);
+            _d = _mm512_fmadd_ps(a, _d, _mm512_mul_ps(b, _x));
+            Avx512f::Store<align, mask>(d, _d, m);
+            __m512 _w = Avx512f::Load<align, mask>(w, m);
+            Avx512f::Store<align, mask>(w, _mm512_add_ps(_w, _d), m);
+        }
+
+        template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float* x, size_t offset, const __m512& a, const __m512& b, float* d, float* w, __mmask16 m = -1)
+        {
+            NeuralUpdateWeights<align, mask>(x + offset, a, b, d + offset, w + offset, m);
+        }
+
+        template <bool align> SIMD_INLINE void NeuralUpdateWeights(const float* x, size_t size, const float& a, const float& b, float* d, float* w)
+        {
+            if (align)
+                assert(Aligned(x) && Aligned(d) && Aligned(w));
+
+            __m512 _a = _mm512_set1_ps(a);
+            __m512 _b = _mm512_set1_ps(b);
+            size_t partialAlignedSize = AlignLo(size, F);
+            size_t fullAlignedSize = AlignLo(size, QF);
+            size_t i = 0;
+            for (; i < fullAlignedSize; i += QF)
+            {
+                NeuralUpdateWeights<align, false>(x, i + F * 0, _a, _b, d, w);
+                NeuralUpdateWeights<align, false>(x, i + F * 1, _a, _b, d, w);
+                NeuralUpdateWeights<align, false>(x, i + F * 2, _a, _b, d, w);
+                NeuralUpdateWeights<align, false>(x, i + F * 3, _a, _b, d, w);
+            }
+            for (; i < partialAlignedSize; i += F)
+                NeuralUpdateWeights<align, false>(x, i, _a, _b, d, w);
+            if (i < size)
+            {
+                __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
+                NeuralUpdateWeights<align, true>(x, i, _a, _b, d, w, tailMask);
+            }
+        }
+
+        void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w)
+        {
+            if (Aligned(x) && Aligned(d) && Aligned(w))
+                NeuralUpdateWeights<true>(x, size, *a, *b, d, w);
+            else
+                NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
+        }
     }
 #endif// SIMD_AVX512BW_ENABLE
 }

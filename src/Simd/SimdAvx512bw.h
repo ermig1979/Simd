@@ -351,6 +351,8 @@ namespace Simd
 
         void NeuralProductSum(const float* a, const float* b, size_t size, float* sum);
 
+        void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w);
+
         void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
             size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
 
