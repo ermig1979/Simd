@@ -129,7 +129,7 @@ namespace Test
         SimdBool t = SimdTrue, f = SimdFalse;
         SimdConvolutionActivationType a = SimdConvolutionActivationIdentity;
 
-#ifdef NDEBUG
+#if defined(NDEBUG)
 #if 0
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, f, a, f1, f2);
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 192, f, a, f1, f2);
@@ -170,8 +170,9 @@ namespace Test
         result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, f, a, f1, f2);
 #endif
 #else
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, t, a, f1, f2);
-        result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, t, a, f1, f2);
+        result = result && SynetInnerProduct32fForwardAutoTest(eps, 1, 192, 96, t, a, f1, f2);
+        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 1024, 4096, t, a, f1, f2);
+        //result = result && SynetInnerProduct32fForwardAutoTest(eps, 100, 4096, 1024, t, a, f1, f2);
 #endif
 
         return result;
@@ -199,9 +200,9 @@ namespace Test
             result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx2::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx512f::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetInnerProduct32fForwardAutoTest(EPS, FUNC_IP32F(Simd::Avx512bw::SynetInnerProduct32fInit), FUNC_IP32F(SimdSynetInnerProduct32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

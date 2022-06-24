@@ -46,8 +46,8 @@ namespace Simd
                     _mm512_mask_storeu_ps(dst, nose, _value);
                     dst = beg;
                 }
-                float* endF = (float*)AlignLo(end, F);
-                float* endQF = (float*)AlignLo(end, QF);
+                float* endF = dst + AlignLo(end - dst, F);
+                float* endQF = dst + AlignLo(end - dst, QF);
                 if (size * sizeof(float) >= Base::AlgCacheL3())
                 {
                     for (; dst < endQF; dst += QF)

@@ -5630,7 +5630,7 @@ SIMD_API void * SimdSynetConvolution32fInit(size_t batch, const SimdConvolutionP
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetConvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC9(SynetConvolution32fInit, SIMD_AMX_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetConvolution32fInitPtr simdSynetConvolution32fInit = SIMD_FUNC8(SynetConvolution32fInit, SIMD_AMX_FUNC, SIMD_AVX512BF16_FUNC, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetConvolution32fInit(batch, params, compatibility);
 #else
@@ -5756,7 +5756,7 @@ SIMD_API void * SimdSynetDeconvolution32fInit(size_t batch, const SimdConvolutio
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetDeconvolution32fInitPtr) (size_t batch, const SimdConvolutionParameters * params, SimdSynetCompatibilityType compatibility);
-    const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetDeconvolution32fInitPtr simdSynetDeconvolution32fInit = SIMD_FUNC5(SynetDeconvolution32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
     
     return simdSynetDeconvolution32fInit(batch, params, compatibility);
 #else
@@ -5951,7 +5951,7 @@ SIMD_API void* SimdSynetInnerProduct32fInit(size_t batch, size_t input, size_t o
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void* (*SimdSynetInnerProduct32fInitPtr) (size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
-    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC5(SynetInnerProduct32fInit, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetInnerProduct32fInitPtr simdSynetInnerProduct32fInit = SIMD_FUNC5(SynetInnerProduct32fInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdSynetInnerProduct32fInit(batch, input, output, transpose, activation);
 #else

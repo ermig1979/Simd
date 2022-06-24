@@ -27,14 +27,15 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512f.h"
+#include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx512f
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx512bw
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
             : Avx2::SynetDeconvolution32fGemmNN(p)

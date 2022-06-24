@@ -188,9 +188,9 @@ namespace Test
             result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx2::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx512f::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetDeconvolution32fForwardAutoTest(EPS, FUNC_D(Simd::Avx512bw::SynetDeconvolution32fInit), FUNC_D(SimdSynetDeconvolution32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

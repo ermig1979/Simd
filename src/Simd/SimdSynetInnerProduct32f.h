@@ -239,15 +239,15 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         class SynetInnerProduct32fGemm : public Avx2::SynetInnerProduct32fGemm
         {
         public:
             SynetInnerProduct32fGemm(const InnerProductParam32f& p);
 
-            virtual String Ext() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512bw"; }
         };
 
         class SynetInnerProduct32fProd : public Avx2::SynetInnerProduct32fProd
@@ -255,12 +255,12 @@ namespace Simd
         public:
             SynetInnerProduct32fProd(const InnerProductParam32f& p);
 
-            virtual String Ext() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512bw"; }
         };
 
         void* SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation);
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon

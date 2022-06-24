@@ -307,21 +307,21 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         class SynetDeconvolution32fGemmNN : public Avx2::SynetDeconvolution32fGemmNN
         {
         public:
             SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
-            virtual String Ext() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512bw"; }
         };
 
         class SynetDeconvolution32fNhwcDirect2x2 : public Avx2::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
             SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
-            virtual String Ext() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512bw"; }
         };
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);

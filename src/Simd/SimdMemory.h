@@ -115,7 +115,13 @@ namespace Simd
 #endif
 #ifdef SIMD_NO_MANS_LAND
         if (ptr)
+        {
+#if !defined(NDEBUG) 
+            memset(ptr, 0x55, SIMD_NO_MANS_LAND);
+            memset((char*)ptr + size - SIMD_NO_MANS_LAND, 0x55, SIMD_NO_MANS_LAND);
+#endif
             ptr = (char*)ptr + SIMD_NO_MANS_LAND;
+        }
 #endif
         return ptr;
     }

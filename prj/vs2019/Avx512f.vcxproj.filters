@@ -22,9 +22,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fNhwcDirect3r.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetDeconvolution32f.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetFused.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
@@ -53,9 +50,6 @@
       <Filter>Avx512f</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetInnerProduct32f.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNchw.cpp">
@@ -173,9 +167,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fCommon.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -195,9 +186,6 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse2.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSynetInnerProduct32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdWinograd.h">

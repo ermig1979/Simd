@@ -210,7 +210,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-
         void * SynetInnerProduct32fInit(size_t batch, size_t input, size_t output, SimdBool transpose, SimdConvolutionActivationType activation)
         {
             InnerProductParam32f param(batch, input, output, transpose, activation);
