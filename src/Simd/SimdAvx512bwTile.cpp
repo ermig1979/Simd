@@ -71,7 +71,7 @@ namespace Simd
             assert(dst < TileRegCount);
 
             TileReg& dstTile = g_tileRegs[dst];
-            size_t colbs = g_tileConf.colsb[dst], rows = g_tileConf.rows[dst], start = g_tileConf.startRow;
+            int colbs = g_tileConf.colsb[dst], rows = g_tileConf.rows[dst], start = g_tileConf.startRow;
 
             assert(colbs <= 64 && rows <= 16);
 
@@ -89,7 +89,7 @@ namespace Simd
             assert(src < TileRegCount);
 
             const TileReg& srcTile = g_tileRegs[src];
-            size_t colbs = g_tileConf.colsb[src], rows = g_tileConf.rows[src], start = g_tileConf.startRow;
+            int colbs = g_tileConf.colsb[src], rows = g_tileConf.rows[src], start = g_tileConf.startRow;
 
             assert(colbs <= 64 && rows <= 16);
 
@@ -107,27 +107,90 @@ namespace Simd
             const TileReg& aTile = g_tileRegs[a];
             const TileReg& bTile = g_tileRegs[b];
 
-            size_t M = g_tileConf.rows[dst], N = g_tileConf.colsb[dst] / 4, K = g_tileConf.colsb[a] / 4;
+            int M = g_tileConf.rows[dst], N = g_tileConf.colsb[dst] / 4, K = g_tileConf.colsb[a] / 4;
 
             assert(M <= 16 && N <= 16 && K <= 16);
 
             __mmask16 tileN = TailMask16(N);
 
             static const __m512 mask = _mm512_castsi512_ps(Bf16::MASK);
-            for (size_t m = 0; m < M; m++)
+            __m512 a0, a1, b0, b1;
+            int m = 0;
+            for (int M4 = M & (~3); m < M4; m += 4)
             {
-                __m512 _dst = _mm512_loadu_ps(dstTile.f32[m]);
-                for (size_t k = 0; k < K; k++)
+                __m512 dst0 = _mm512_loadu_ps(dstTile.f32[m + 0]);
+                __m512 dst1 = _mm512_loadu_ps(dstTile.f32[m + 1]);
+                __m512 dst2 = _mm512_loadu_ps(dstTile.f32[m + 2]);
+                __m512 dst3 = _mm512_loadu_ps(dstTile.f32[m + 3]);
+                for (int k = 0; k < K; k++)
+                {
+                    b1 = _mm512_maskz_loadu_ps(tileN, bTile.f32[k]);
+                    b0 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(b1), Base::Bf16::SHIFT));
+                    b1 = _mm512_and_ps(b1, mask);
+
+                    a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m + 0][k]));
+                    dst0 = _mm512_fmadd_ps(a0, b0, dst0);
+                    a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 0][k]), mask);
+                    dst0 = _mm512_fmadd_ps(a1, b1, dst0);
+
+                    a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m + 1][k]));
+                    dst1 = _mm512_fmadd_ps(a0, b0, dst1);
+                    a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 1][k]), mask);
+                    dst1 = _mm512_fmadd_ps(a1, b1, dst1);
+
+                    a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m + 2][k]));
+                    dst2 = _mm512_fmadd_ps(a0, b0, dst2);
+                    a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 2][k]), mask);
+                    dst2 = _mm512_fmadd_ps(a1, b1, dst2);
+
+                    a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m + 3][k]));
+                    dst3 = _mm512_fmadd_ps(a0, b0, dst3);
+                    a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 3][k]), mask);
+                    dst3 = _mm512_fmadd_ps(a1, b1, dst3);
+                }
+                _mm512_storeu_ps(dstTile.f32[m + 0], dst0);
+                _mm512_storeu_ps(dstTile.f32[m + 1], dst1);
+                _mm512_storeu_ps(dstTile.f32[m + 2], dst2);
+                _mm512_storeu_ps(dstTile.f32[m + 3], dst3);
+            }
+            for (int M2 = M & (~1); m < M2; m += 2)
+            {
+                __m512 dst0 = _mm512_loadu_ps(dstTile.f32[m + 0]);
+                __m512 dst1 = _mm512_loadu_ps(dstTile.f32[m + 1]);
+                for (int k = 0; k < K; k++)
+                {
+                    b1 = _mm512_maskz_loadu_ps(tileN, bTile.f32[k]);
+                    b0 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(b1), Base::Bf16::SHIFT));
+                    b1 = _mm512_and_ps(b1, mask);
+
+                    a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m + 0][k]));
+                    dst0 = _mm512_fmadd_ps(a0, b0, dst0);
+                    a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 0][k]), mask);
+                    dst0 = _mm512_fmadd_ps(a1, b1, dst0);
+
+                    a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m + 1][k]));
+                    dst1 = _mm512_fmadd_ps(a0, b0, dst1);
+                    a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 1][k]), mask);
+                    dst1 = _mm512_fmadd_ps(a1, b1, dst1);
+                }
+                _mm512_storeu_ps(dstTile.f32[m + 0], dst0);
+                _mm512_storeu_ps(dstTile.f32[m + 1], dst1);
+            }
+            for (; m < M; m++)
+            {
+                __m512 dst0 = _mm512_loadu_ps(dstTile.f32[m]);
+                for (int k = 0; k < K; k++)
                 {
                     __m512 _b = _mm512_maskz_loadu_ps(tileN, bTile.f32[k]);
                     __m512 b0 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(_b), Base::Bf16::SHIFT));
                     __m512 b1 = _mm512_and_ps(_b, mask);
 
                     __m512 a0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, aTile.u32[m][k]));
-                    _dst = _mm512_fmadd_ps(a0, b0, _dst);
+                    dst0 = _mm512_fmadd_ps(a0, b0, dst0);
                     __m512 a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m][k]), mask);
-                    _dst = _mm512_fmadd_ps(a1, b1, _dst);
+                    dst0 = _mm512_fmadd_ps(a1, b1, dst0);
                 }
+                _mm512_storeu_ps(dstTile.f32[m], dst0);
             }
         }
     }

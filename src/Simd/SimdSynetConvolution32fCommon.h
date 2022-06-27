@@ -777,35 +777,20 @@ namespace Simd
 #ifdef SIMD_AMX_ENABLE    
     namespace Amx
     {
-        template <TermType term> struct Term
+        template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float * src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1));
-        };
-
-        template <> struct Term<TermLast>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
-            {
-                _mm512_mask_storeu_ps(dst, tail, Avx512f::Activate<type>(_mm512_add_ps(_mm512_maskz_loadu_ps(src, tail), bias[index]), params, index));
-            }
-        };
-
-        template <> struct Term<TermInterim>
-        {
-            template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float* src, float* dst, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
-            {
-            }
-        };
-
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply1(const float* src, float* dst, const __m512* bias, const __m512* params, const __mmask16* tails)
-        {
-            Term<term>::template Apply<type, 0>(src, dst, bias, params, tails[0]);
+            _mm512_mask_storeu_ps(dst, tail, Avx512f::Activate<type>(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src), bias[index]), params, index));
         }
 
-        template<TermType term, SimdConvolutionActivationType type> SIMD_INLINE void Apply2(const float* src, float* dst, const __m512* bias, const __m512* params, const __mmask16* tails)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail)
         {
-            Term<term>::template Apply<type, 0>(src + 0, dst + 0, bias, params);
-            Term<term>::template Apply<type, 1>(src + F, dst + F, bias, params, tails[1]);
+            Apply<type, 0>(src, dst, bias, params, tail);
+        }
+
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail)
+        {
+            Apply<type, 0>(src + 0, dst + 0, bias, params);
+            Apply<type, 1>(src + F, dst + F, bias, params, tail);
         }
     }
 #endif

@@ -100,7 +100,7 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AMX_ENABLE
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
     namespace Amx
     {
         bool GetEnable();
