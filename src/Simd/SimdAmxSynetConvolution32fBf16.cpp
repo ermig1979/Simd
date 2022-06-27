@@ -427,7 +427,6 @@ namespace Simd
             conf.rows[5] = dstS - 16;
             conf.rows[6] = 16;
             conf.rows[7] = 16;
-
             conf.colsb[0] = 64;
             conf.colsb[1] = (dstC - 16) * 4;
             conf.colsb[2] = 64;
@@ -436,8 +435,8 @@ namespace Simd
             conf.colsb[5] = 64;
             conf.colsb[6] = 64;
             conf.colsb[7] = (dstC - 16) * 4;
-
             _tile_loadconfig(&conf);
+
             if (zero)
             {
                 _tile_zero(0);
@@ -445,14 +444,33 @@ namespace Simd
                 _tile_zero(2);
                 _tile_zero(3);
             }
-            for (size_t sc = 0; sc < srcC32; sc += 32)
+            size_t sc = 0;
+            for (; sc < srcC32; sc += 32)
             {
                 _tile_loadd(4, src0 + sc, strideS);
-                _tile_loadd(5, src1 + sc, strideS);
-                _tile_loadd(6, weight0 + sc * 16, strideW);
-                _tile_loadd(7, weight1 + sc * 16, strideW);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
                 _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
                 _tile_dpbf16ps(1, 4, 7);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                _tile_dpbf16ps(3, 5, 7);
+            }
+            if(sc < srcC)
+            {
+                size_t tailC = srcC - sc;
+                conf.rows[6] = tailC / 2;
+                conf.rows[7] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                conf.colsb[5] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+                _tile_loadd(5, src1 + sc, strideS);
                 _tile_dpbf16ps(2, 5, 6);
                 _tile_dpbf16ps(3, 5, 7);
             }
@@ -462,18 +480,168 @@ namespace Simd
             _tile_stored(3, dst + 16 * dD + F, strideD);
             if (type)
             {
-                if (dstC > F)
-                {
-                    __mmask16 tail = TailMask16(dstC - F);
-                    for(size_t s = 0; s < dstS; ++s, dst += dD) 
-                        Apply2<type>(dst, dst, bias, params, tail);
-                }
-                else
-                {
-                    __mmask16 tail = TailMask16(dstC);
-                    for (size_t s = 0; s < dstS; ++s, dst += dD)
-                        Apply1<type>(dst, dst, bias, params, tail);
-                }
+                __mmask16 tailD = TailMask16(dstC - F);
+                for(size_t s = 0; s < dstS; ++s, dst += dD) 
+                    Apply2<type>(dst, dst, bias, params, tailD);
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void ConvolutionBf16NhwcGemm_2x1(const uint16_t* src0, const ConvParam32f& p,
+            size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
+        {
+            size_t dD = p.dstC, srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+            const uint16_t* src1 = src0 + srcC * 16;
+
+            TileConf conf;
+            conf.rows[0] = 16;
+            conf.rows[2] = dstS - 16;
+            conf.rows[4] = 16;
+            conf.rows[5] = dstS - 16;
+            conf.rows[6] = 16;
+            conf.colsb[0] = dstC * 4;
+            conf.colsb[2] = dstC * 4;
+            conf.colsb[4] = 64;
+            conf.colsb[5] = 64;
+            conf.colsb[6] = dstC * 4;
+            _tile_loadconfig(&conf);
+
+            if (zero)
+            {
+                _tile_zero(0);
+                _tile_zero(2);
+            }
+            size_t sc = 0;
+            for (; sc < srcC32; sc += 32)
+            {
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = srcC - sc;
+                conf.rows[6] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                conf.colsb[5] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+            }
+            _tile_stored(0, dst + 0, strideD);
+            _tile_stored(2, dst + 16 * dD + 0, strideD);
+            if (type)
+            {
+                __mmask16 tailD = TailMask16(dstC);
+                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                    Apply1<type>(dst, dst, bias, params, tailD);
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void ConvolutionBf16NhwcGemm_1x2(const uint16_t* src0, const ConvParam32f& p,
+            size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
+        {
+            size_t dD = p.dstC, srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+            const uint16_t* weight1 = weight0 + 32;
+
+            TileConf conf;
+            conf.rows[0] = dstS;
+            conf.rows[1] = dstS;
+            conf.rows[4] = dstS;
+            conf.rows[6] = 16;
+            conf.rows[7] = 16;
+            conf.colsb[0] = 64;
+            conf.colsb[1] = (dstC - 16) * 4;
+            conf.colsb[4] = 64;
+            conf.colsb[6] = 64;
+            conf.colsb[7] = (dstC - 16) * 4;
+            _tile_loadconfig(&conf);
+
+            if (zero)
+            {
+                _tile_zero(0);
+                _tile_zero(1);
+            }
+            size_t sc = 0;
+            for (; sc < srcC32; sc += 32)
+            {
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = srcC - sc;
+                conf.rows[6] = tailC / 2;
+                conf.rows[7] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+            }
+            _tile_stored(0, dst + 0, strideD);
+            _tile_stored(1, dst + F, strideD);
+            if (type)
+            {
+                __mmask16 tailD = TailMask16(dstC - F);
+                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                    Apply2<type>(dst, dst, bias, params, tailD);
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void ConvolutionBf16NhwcGemm_1x1(const uint16_t* src0, const ConvParam32f& p,
+            size_t srcC, size_t dstS, size_t dstC, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
+        {
+            size_t dD = p.dstC, srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+
+            TileConf conf;
+            conf.rows[0] = dstS;
+            conf.rows[4] = dstS;
+            conf.rows[6] = 16;
+            conf.colsb[0] = dstC * 4;
+            conf.colsb[4] = 64;
+            conf.colsb[6] = dstC * 4;
+            _tile_loadconfig(&conf);
+
+            if (zero)
+            {
+                _tile_zero(0);
+            }
+            size_t sc = 0;
+            for (; sc < srcC32; sc += 32)
+            {
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+            }
+            if (sc < srcC)
+            {
+                size_t tailC = srcC - sc;
+                conf.rows[6] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+            }
+            _tile_stored(0, dst + 0, strideD);
+            if (type)
+            {
+                __mmask16 tailD = TailMask16(dstC);
+                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                    Apply1<type>(dst, dst, bias, params, tailD);
             }
         }
 
@@ -483,7 +651,7 @@ namespace Simd
         template<SimdConvolutionActivationType type> void ConvolutionBf16NhwcGemm_2(const uint16_t* src, const ConvParam32f& p,
             size_t dstC, size_t dstH, size_t srcC, int zero, const uint16_t* weight, const float* bias, const float* params, float* dst)
         {
-            size_t n = dstH * p.dstW, n32 = AlignLoAny(n, 32), dW = AlignHi(srcC, 2) * DF;
+            size_t n = dstH * p.dstW, n32 = AlignLoAny(n, 32), m = n - n32, dW = AlignHi(srcC, 2) * DF;
 
             __m512 _params[2], _bias[2];
             _params[0] = _mm512_set1_ps(params[0]);
@@ -509,11 +677,26 @@ namespace Simd
                 {
                     for (; i < n32; i += 32, s += 32 * srcC, d += 32 * p.dstC)
                         ConvolutionBf16NhwcGemm_2x2<type>(s, p, srcC, 32, dC, zero, weight, _bias, _params, d);
+                    if (i < n)
+                    {
+                        if (m > 16)
+                            ConvolutionBf16NhwcGemm_2x2<type>(s, p, srcC, m, dC, zero, weight, _bias, _params, d);
+                        else
+                            ConvolutionBf16NhwcGemm_1x2<type>(s, p, srcC, m, dC, zero, weight, _bias, _params, d);
+                    }
                 }
-                //for (; i < nn; i += n, s += n * srcC, d += n * p.dstC)
-                //    convolution_2xN(s, p, srcC, zero, weight, _bias, _params, d, tails);
-                //for (; i < n1; i += m, s += m * srcC, d += m * p.dstC)
-                //    convolution_2xM(s, p, srcC, zero, weight, _bias, _params, d, tails);
+                else
+                {
+                    for (; i < n32; i += 32, s += 32 * srcC, d += 32 * p.dstC)
+                        ConvolutionBf16NhwcGemm_2x1<type>(s, p, srcC, 32, dC, zero, weight, _bias, _params, d);
+                    if (i < n)
+                    {
+                        if (m > 16)
+                            ConvolutionBf16NhwcGemm_2x1<type>(s, p, srcC, m, dC, zero, weight, _bias, _params, d);
+                        else
+                            ConvolutionBf16NhwcGemm_1x1<type>(s, p, srcC, m, dC, zero, weight, _bias, _params, d);
+                    }
+                }
                 weight += dW;
                 dst += DF;
             }
