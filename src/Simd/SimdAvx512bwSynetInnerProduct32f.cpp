@@ -37,7 +37,7 @@ namespace Simd
         SynetInnerProduct32fGemm::SynetInnerProduct32fGemm(const InnerProductParam32f& p)
             : Avx2::SynetInnerProduct32fGemm(p)
         {
-            _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
+            _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
             if (_param.transpose)
             {
                 if (_param.input > Avx::F)

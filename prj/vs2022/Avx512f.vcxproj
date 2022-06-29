@@ -16,7 +16,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNchw.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNhwc.cpp" />

@@ -430,9 +430,9 @@ namespace Test
             result = result && SynetReorderImageAutoTest(TFM_256, FUNC_RT(Simd::Avx::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetReorderImageAutoTest(TFM_512, FUNC_RT(Simd::Avx512f::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetReorderImageAutoTest(TFM_512, FUNC_RT(Simd::Avx512bw::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -478,9 +478,9 @@ namespace Test
             result = result && SynetReorderFilterAutoTest(TFM_256, FUNC_RT(Simd::Avx::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 #endif 
         
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_512, FUNC_RT(Simd::Avx512f::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetReorderFilterAutoTest(TFM_512, FUNC_RT(Simd::Avx512bw::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE

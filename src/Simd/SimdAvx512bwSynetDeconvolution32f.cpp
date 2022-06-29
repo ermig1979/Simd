@@ -53,7 +53,7 @@ namespace Simd
                 _nhwcRun = Avx512f::Gemm32fNNcbRun;
                 _nhwcReorderB = Avx512f::Gemm32fNNcbReorderB;
             }
-            _biasAndActivation = Avx512f::ConvolutionBiasAndActivation;
+            _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------

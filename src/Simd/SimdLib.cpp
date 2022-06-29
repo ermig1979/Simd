@@ -6236,7 +6236,7 @@ SIMD_API void SimdSynetReorderImage(size_t batch, size_t channels, size_t spatia
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetReorderImagePtr) (size_t batch, size_t channels, size_t spatial, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
-    const static SimdSynetReorderImagePtr simdSynetReorderImage = SIMD_FUNC4(SynetReorderImage, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetReorderImagePtr simdSynetReorderImage = SIMD_FUNC4(SynetReorderImage, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
 #else
@@ -6248,7 +6248,7 @@ SIMD_API void SimdSynetReorderFilter(size_t output, size_t input, size_t kernel,
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetReorderFilterPtr) (size_t output, size_t input, size_t kernel, const float* src, SimdTensorFormatType srcFormat, float* dst, SimdTensorFormatType dstFormat);
-    const static SimdSynetReorderFilterPtr simdSynetReorderFilter = SIMD_FUNC4(SynetReorderFilter, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetReorderFilterPtr simdSynetReorderFilter = SIMD_FUNC4(SynetReorderFilter, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
 #else
