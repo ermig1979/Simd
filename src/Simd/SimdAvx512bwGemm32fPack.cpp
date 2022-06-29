@@ -29,8 +29,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         SIMD_INLINE void GemmPackA_4x16(const float* src, size_t stride, float* dst)
         {
@@ -622,5 +622,5 @@ namespace Simd
             }
         }
     }
-#endif// SIMD_AVX512F_ENABLE
+#endif
 }

@@ -40,18 +40,18 @@ namespace Simd
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
             : Avx2::SynetDeconvolution32fGemmNN(p)
         {
-            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512f"));
             if (_param.trans && _param.group == 1)
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Avx512f::Gemm32fNNcbBufferSize, Avx512f::Gemm32fNNcbReorderB, Avx512f::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
                 }
                 else
-                    _nhwcWeight.Resize(Avx512f::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
-                _nhwcRun = Avx512f::Gemm32fNNcbRun;
-                _nhwcReorderB = Avx512f::Gemm32fNNcbReorderB;
+                    _nhwcWeight.Resize(Avx512bw::Gemm32fNNcbBufferSize(_M*_merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Avx512bw::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx512bw::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
         }

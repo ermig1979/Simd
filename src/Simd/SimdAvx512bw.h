@@ -246,6 +246,10 @@ namespace Simd
 
         void NormalizeHistogram(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
 
+        void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
+
+        void Gemm32fNT(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
+
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height,
             size_t cellX, size_t cellY, size_t quantization, float * histograms);
 

@@ -30,8 +30,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         SIMD_INLINE void Add4ExtractedSums(const __m512 & sum0, const __m512 & sum1, const __m512 & sum2, const __m512 & sum3, const __m128 & alpha, float * dst)
         {
@@ -517,5 +517,5 @@ namespace Simd
             gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
-#endif// SIMD_AVX512F_ENABLE
+#endif
 }

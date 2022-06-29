@@ -27,6 +27,7 @@
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdAvx512f.h"
+#include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdPrefetch.h"
 
 namespace Simd
@@ -42,7 +43,7 @@ namespace Simd
             {
                 if (_param.input > Avx::F)
                 {
-                    _gemm = Avx512f::Gemm32fNT;
+                    _gemm = Avx512bw::Gemm32fNT;
                     if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
                         _prod = Avx512f::SynetInnerProductLayerForward;
                     else
@@ -52,13 +53,13 @@ namespace Simd
             else
             {
                 if (_param.output > Avx::F)
-                    _gemm = Avx512f::Gemm32fNN;
+                    _gemm = Avx512bw::Gemm32fNN;
             }
             if (_param.output > Avx::F && _prod == NULL)
             {
-                _cbRun = Avx512f::Gemm32fNNcbRun;
-                _cbPack = Avx512f::Gemm32fNNcbReorderB;
-                _cbWeight.Resize(Avx512f::Gemm32fNNcbBufferSize(_M, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _cbRun = Avx512bw::Gemm32fNNcbRun;
+                _cbPack = Avx512bw::Gemm32fNNcbReorderB;
+                _cbWeight.Resize(Avx512bw::Gemm32fNNcbBufferSize(_M, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
             }
         }
 

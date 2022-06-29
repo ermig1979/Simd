@@ -39,6 +39,9 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwFloat32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGaussianBlur.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fNT.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwGemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwGrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwHistogram.cpp" />
@@ -116,6 +119,7 @@
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdAlphaBlending.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx1.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512f.h" />
@@ -178,6 +182,7 @@
     <ClInclude Include="..\..\src\Simd\SimdTile.h" />
     <ClInclude Include="..\..\src\Simd\SimdTime.h" />
     <ClInclude Include="..\..\src\Simd\SimdTransform.h" />
+    <ClInclude Include="..\..\src\Simd\SimdTranspose.h" />
     <ClInclude Include="..\..\src\Simd\SimdUpdate.h" />
     <ClInclude Include="..\..\src\Simd\SimdView.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdYuvToBgr.h" />

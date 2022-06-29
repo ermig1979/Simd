@@ -568,18 +568,18 @@ namespace Simd
             }
             if (p.dstC == 8)
                 return;
-            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512f"));
             if (_param.trans && _param.group == 1)
             {
                 if (GemmRuntime())
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Avx512f::Gemm32fNNcbBufferSize, Avx512f::Gemm32fNNcbReorderB, Avx512f::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M * _merge, _N, _K));
                 }
                 else
-                    _nhwcWeight.Resize(Avx512f::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
-                _nhwcRun = Avx512f::Gemm32fNNcbRun;
-                _nhwcReorderB = Avx512f::Gemm32fNNcbReorderB;
+                    _nhwcWeight.Resize(Avx512bw::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Avx512bw::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx512bw::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = _N > Avx::F ? Avx512bw::ConvolutionBiasAndActivation : Avx::ConvolutionBiasAndActivation;
         }
@@ -628,7 +628,7 @@ namespace Simd
                                     //if (p.strideX == 3)
                                     //{
                                     //    for (; dx < aligned; dx += F, sx += p.strideX*F)
-                                    //        _mm512_storeu_ps(dst + dx, Avx512f::Gather<3>(src + sx));
+                                    //        _mm512_storeu_ps(dst + dx, Avx512bw::Gather<3>(src + sx));
                                     //}
                                     //else
                                     //{
@@ -661,7 +661,7 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f& p)
             : Avx2::SynetConvolution32fGemmNT(p)
         {
-            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNT, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNT, "Avx512f"));
             _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
         }
 
@@ -734,19 +734,19 @@ namespace Simd
             }
             else
                 assert(0);
-            _gemm.Init(InitGemmFuncs(Avx512f::Gemm32fNN, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512f"));
             if (_param.trans)
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Avx512f::Gemm32fNNcbBufferSize, Avx512f::Gemm32fNNcbReorderB, Avx512f::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
                     _nhwcStrideW = _gemmCb.At(0).BufferSize(_M * _merge, _N, _K);
                 }
                 else
-                    _nhwcStrideW = Avx512f::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    _nhwcStrideW = Avx512bw::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 _nhwcWeight.Resize(_nhwcStrideW * _count);
-                _nhwcRun = Avx512f::Gemm32fNNcbRun;
-                _nhwcReorderB = Avx512f::Gemm32fNNcbReorderB;
+                _nhwcRun = Avx512bw::Gemm32fNNcbRun;
+                _nhwcReorderB = Avx512bw::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
         }
