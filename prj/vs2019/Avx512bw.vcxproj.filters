@@ -313,6 +313,15 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetFused.cpp">
       <Filter>Avx512bw</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd1.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd2.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwWinograd3.cpp">
+      <Filter>Avx512bw</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512bw">

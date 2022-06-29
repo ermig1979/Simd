@@ -676,18 +676,18 @@ namespace Simd
             {
                 {
                     SetBlock(1, 4);
-                    _setFilter = Avx512f::WinogradKernel1x3Block1x4SetFilter;
-                    _setInput = Avx512f::WinogradKernel1x3Block1x4SetInput;
-                    _setOutput = Avx512f::WinogradKernel1x3Block1x4SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel1x3Block1x4SetFilter;
+                    _setInput = Avx512bw::WinogradKernel1x3Block1x4SetInput;
+                    _setOutput = Avx512bw::WinogradKernel1x3Block1x4SetOutput;
                 }
             }
             else if (p.kernelY == 1 && p.kernelX == 5)
             {
                 {
                     SetBlock(1, 4);
-                    _setFilter = Avx512f::WinogradKernel1x5Block1x4SetFilter;
-                    _setInput = Avx512f::WinogradKernel1x5Block1x4SetInput;
-                    _setOutput = Avx512f::WinogradKernel1x5Block1x4SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel1x5Block1x4SetFilter;
+                    _setInput = Avx512bw::WinogradKernel1x5Block1x4SetInput;
+                    _setOutput = Avx512bw::WinogradKernel1x5Block1x4SetOutput;
                 }
             }
             else if (p.kernelY == 2 && p.kernelX == 2)
@@ -695,16 +695,16 @@ namespace Simd
                 if (_blockY == 4 && _blockX == 4)
                 {
                     SetBlock(4, 4);
-                    _setFilter = Avx512f::WinogradKernel2x2Block4x4SetFilter;
-                    _setInput = Avx512f::WinogradKernel2x2Block4x4SetInput;
-                    _setOutput = Avx512f::WinogradKernel2x2Block4x4SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel2x2Block4x4SetFilter;
+                    _setInput = Avx512bw::WinogradKernel2x2Block4x4SetInput;
+                    _setOutput = Avx512bw::WinogradKernel2x2Block4x4SetOutput;
                 }
                 else if (_blockY == 2 && _blockX == 2)
                 {
                     SetBlock(2, 2);
-                    _setFilter = Avx512f::WinogradKernel2x2Block2x2SetFilter;
-                    _setInput = Avx512f::WinogradKernel2x2Block2x2SetInput;
-                    _setOutput = Avx512f::WinogradKernel2x2Block2x2SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel2x2Block2x2SetFilter;
+                    _setInput = Avx512bw::WinogradKernel2x2Block2x2SetInput;
+                    _setOutput = Avx512bw::WinogradKernel2x2Block2x2SetOutput;
                 }
                 else
                     assert(0);
@@ -713,21 +713,21 @@ namespace Simd
             {
                 if (_blockY == 4 && _blockX == 4)
                 {
-                    _setFilter = Avx512f::WinogradKernel3x3Block4x4SetFilter;
-                    _setInput = Avx512f::WinogradKernel3x3Block4x4SetInput;
-                    _setOutput = Avx512f::WinogradKernel3x3Block4x4SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel3x3Block4x4SetFilter;
+                    _setInput = Avx512bw::WinogradKernel3x3Block4x4SetInput;
+                    _setOutput = Avx512bw::WinogradKernel3x3Block4x4SetOutput;
                 }
                 else if (_blockY == 3 && _blockX == 3)
                 {
-                    _setFilter = Avx512f::WinogradKernel3x3Block3x3SetFilter;
-                    _setInput = Avx512f::WinogradKernel3x3Block3x3SetInput;
-                    _setOutput = Avx512f::WinogradKernel3x3Block3x3SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel3x3Block3x3SetFilter;
+                    _setInput = Avx512bw::WinogradKernel3x3Block3x3SetInput;
+                    _setOutput = Avx512bw::WinogradKernel3x3Block3x3SetOutput;
                 }
                 else if (_blockY == 2 && _blockX == 2)
                 {
-                    _setFilter = Avx512f::WinogradKernel3x3Block2x2SetFilter;
-                    _setInput = Avx512f::WinogradKernel3x3Block2x2SetInput;
-                    _setOutput = Avx512f::WinogradKernel3x3Block2x2SetOutput;
+                    _setFilter = Avx512bw::WinogradKernel3x3Block2x2SetFilter;
+                    _setInput = Avx512bw::WinogradKernel3x3Block2x2SetInput;
+                    _setOutput = Avx512bw::WinogradKernel3x3Block2x2SetOutput;
                 }
                 else
                     assert(0);

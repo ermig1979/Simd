@@ -43,15 +43,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNhwc.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd1.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd2.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fWinograd3.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Avx512f">
