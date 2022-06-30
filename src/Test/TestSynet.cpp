@@ -118,9 +118,9 @@ namespace Test
             result = result && SynetAddBiasAutoTest(TFM_256, FUNC_AB(Simd::Avx::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetAddBiasAutoTest(TFM_512, FUNC_AB(Simd::Avx512f::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetAddBiasAutoTest(TFM_512, FUNC_AB(Simd::Avx512bw::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -360,9 +360,9 @@ namespace Test
             result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Avx2::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Avx512f::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Avx512bw::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -463,9 +463,9 @@ namespace Test
             result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_256, FUNC_LLCC(Simd::Avx2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_512, FUNC_LLCC(Simd::Avx512f::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_512, FUNC_LLCC(Simd::Avx512bw::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
@@ -573,9 +573,9 @@ namespace Test
             result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Avx::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Avx512f::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Avx512bw::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -669,9 +669,9 @@ namespace Test
             result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Avx2::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Avx512f::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Avx512bw::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
@@ -793,9 +793,9 @@ namespace Test
             result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Avx2::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Avx512f::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Avx512bw::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

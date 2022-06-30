@@ -11,7 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNchw.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNhwc.cpp" />
@@ -21,8 +20,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fCd.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fCdc.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetMergedConvolution32fDc.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetPooling.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetScale.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />

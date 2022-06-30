@@ -138,9 +138,9 @@ namespace Test
             result = result && SynetScaleLayerForwardAutoTest(TFM_256, FUNC_SCLF(Simd::Avx2::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetScaleLayerForwardAutoTest(TFM_512, FUNC_SCLF(Simd::Avx512f::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetScaleLayerForwardAutoTest(TFM_512, FUNC_SCLF(Simd::Avx512bw::SynetScaleLayerForward), FUNC_SCLF(SimdSynetScaleLayerForward));
 #endif
 
 #ifdef SIMD_NEON_ENABLE

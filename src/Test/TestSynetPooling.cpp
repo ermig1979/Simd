@@ -173,9 +173,9 @@ namespace Test
             result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Avx::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE
-        if (Simd::Avx512f::Enable)
-            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Avx512f::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable)
+            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Avx512bw::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
