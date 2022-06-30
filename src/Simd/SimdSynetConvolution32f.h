@@ -823,44 +823,6 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
-    {
-        class SynetConvolution32fDirectNchw : public Avx2::SynetConvolution32fDirectNchw
-        {
-        public:
-            SynetConvolution32fDirectNchw(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx512f"; }
-
-            static bool Preferable(const ConvParam32f & p);
-
-        protected:
-            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
-        };
-
-        class SynetConvolution32fDirectNhwc : public Avx2::SynetConvolution32fDirectNhwc
-        {
-        public:
-            SynetConvolution32fDirectNhwc(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx512f"; }
-        protected:
-            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
-        };
-
-        class SynetConvolution32fNhwcDirect : public Avx2::SynetConvolution32fNhwcDirect
-        {
-        public:
-            SynetConvolution32fNhwcDirect(const ConvParam32f & p);
-            virtual String Ext() const { return "Avx512f"; }
-        private:
-            static bool Set2f(const ConvParam32f& p, OldConvolutionPtr& convolution);
-            static bool SetRt(const ConvParam32f& p, AlgParam& a);
-            static bool Set2r(const ConvParam32f& p, AlgParam& a);
-            static bool Set3r(const ConvParam32f& p, AlgParam& a);
-        };
-    }
-#endif
-
 #ifdef SIMD_AVX512BW_ENABLE    
     namespace Avx512bw
     {
@@ -892,6 +854,39 @@ namespace Simd
         public:
             SynetConvolution32fWinograd(const ConvParam32f& p);
             virtual String Ext() const { return "Avx512bw"; }
+        };
+
+        class SynetConvolution32fDirectNchw : public Avx2::SynetConvolution32fDirectNchw
+        {
+        public:
+            SynetConvolution32fDirectNchw(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx512bw"; }
+
+            static bool Preferable(const ConvParam32f& p);
+
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
+        class SynetConvolution32fDirectNhwc : public Avx2::SynetConvolution32fDirectNhwc
+        {
+        public:
+            SynetConvolution32fDirectNhwc(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx512bw"; }
+        protected:
+            virtual ConvolutionBiasActivationPtr SetConvolutionBiasActivation();
+        };
+
+        class SynetConvolution32fNhwcDirect : public Avx2::SynetConvolution32fNhwcDirect
+        {
+        public:
+            SynetConvolution32fNhwcDirect(const ConvParam32f& p);
+            virtual String Ext() const { return "Avx512bw"; }
+        private:
+            static bool Set2f(const ConvParam32f& p, OldConvolutionPtr& convolution);
+            static bool SetRt(const ConvParam32f& p, AlgParam& a);
+            static bool Set2r(const ConvParam32f& p, AlgParam& a);
+            static bool Set3r(const ConvParam32f& p, AlgParam& a);
         };
 
         //-----------------------------------------------------------------------------------------

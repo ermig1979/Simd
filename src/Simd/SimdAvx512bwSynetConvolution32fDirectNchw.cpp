@@ -35,8 +35,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Avx512f
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Avx512bw
     {
          SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam32f & p)
             : Avx2::SynetConvolution32fDirectNchw(p)
@@ -458,29 +458,29 @@ namespace Simd
             {
             case 1:
                 if (p.kernelX == 1)
-                    return Avx512f::SetConvolutionBiasActivation<1, 1>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<1, 1>(p.activation);
                 if (p.kernelX == 2)
-                    return Avx512f::SetConvolutionBiasActivation<2, 1>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<2, 1>(p.activation);
                 if (p.kernelX == 3)
-                    return Avx512f::SetConvolutionBiasActivation<3, 1>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<3, 1>(p.activation);
                 if (p.kernelX == 4)
-                    return Avx512f::SetConvolutionBiasActivation<4, 1>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<4, 1>(p.activation);
                 if (p.kernelX == 5)
-                    return Avx512f::SetConvolutionBiasActivation<5, 1>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<5, 1>(p.activation);
                 break;
             case 2:
                 if (p.kernelX == 2)
-                    return Avx512f::SetConvolutionBiasActivation<2, 2>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<2, 2>(p.activation);
                 if (p.kernelX == 3)
-                    return Avx512f::SetConvolutionBiasActivation<3, 2>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<3, 2>(p.activation);
                 if (p.kernelX == 4)
-                    return Avx512f::SetConvolutionBiasActivation<4, 2>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<4, 2>(p.activation);
                 if (p.kernelX == 5)
-                    return Avx512f::SetConvolutionBiasActivation<5, 2>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<5, 2>(p.activation);
                 break;
             case 3:
                 if (p.kernelX == 3)
-                    return Avx512f::SetConvolutionBiasActivation<3, 3>(p.activation);
+                    return Avx512bw::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
             return Avx2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
