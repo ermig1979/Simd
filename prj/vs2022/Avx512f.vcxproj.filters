@@ -4,9 +4,6 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp">
-      <Filter>Avx512f</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32f.cpp">
       <Filter>Avx512f</Filter>
     </ClCompile>

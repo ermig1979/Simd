@@ -83,6 +83,7 @@
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwStretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSvm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynet.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConversion.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512bwSynetConvolution32fBf16.cpp" />

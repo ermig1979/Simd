@@ -5831,7 +5831,7 @@ SIMD_API void SimdSynetElu32f(const float * src, size_t size, const float * alph
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetElu32fPtr) (const float * src, size_t size, const float * alpha, float * dst);
-    const static SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC4(SynetElu32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetElu32fPtr simdSynetElu32f = SIMD_FUNC4(SynetElu32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetElu32f(src, size, alpha, dst);
 #else
@@ -5927,7 +5927,7 @@ SIMD_API void SimdSynetHardSigmoid32f(const float* src, size_t size, const float
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetHardSigmoid32fPtr) (const float* src, size_t size, const float* scale, const float* shift, float* dst);
-    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC4(SynetHardSigmoid32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetHardSigmoid32fPtr simdSynetHardSigmoid32f = SIMD_FUNC4(SynetHardSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHardSigmoid32f(src, size, scale, shift, dst);
 #else
@@ -5939,7 +5939,7 @@ SIMD_API void SimdSynetHswish32f(const float * src, size_t size, const float * s
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetHswish32fPtr) (const float * src, size_t size, const float * shift, const float * scale, float * dst);
-    const static SimdSynetHswish32fPtr simdSynetHswish32f = SIMD_FUNC4(SynetHswish32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetHswish32fPtr simdSynetHswish32f = SIMD_FUNC4(SynetHswish32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetHswish32f(src, size, shift, scale, dst);
 #else
@@ -6156,7 +6156,7 @@ SIMD_API void SimdSynetMish32f(const float* src, size_t size, const float* thres
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetMish32fPtr) (const float* src, size_t size, const float* threshold, float* dst);
-    const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC4(SynetMish32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetMish32fPtr simdSynetMish32f = SIMD_FUNC4(SynetMish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetMish32f(src, size, threshold, dst);
 #else
@@ -6212,7 +6212,7 @@ SIMD_API void SimdSynetPreluLayerForward(const float * src, const float * slope,
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetPreluLayerForwardPtr) (const float * src, const float * slope, size_t channels, size_t spatial, float * dst, SimdTensorFormatType format);
-    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetPreluLayerForwardPtr simdSynetPreluLayerForward = SIMD_FUNC4(SynetPreluLayerForward, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetPreluLayerForward(src, slope, channels, spatial, dst, format);
 #else
@@ -6224,7 +6224,7 @@ SIMD_API void SimdSynetRelu32f(const float* src, size_t size, const float* slope
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRelu32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetRelu32fPtr simdSynetRelu32f = SIMD_FUNC4(SynetRelu32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRelu32f(src, size, slope, dst);
 #else
@@ -6260,7 +6260,7 @@ SIMD_API void SimdSynetRestrictRange32f(const float * src, size_t size, const fl
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetRestrictRange32fPtr) (const float * src, size_t size, const float * lower, const float * upper, float * dst);
-    const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512F_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetRestrictRange32fPtr simdSynetRestrictRange32f = SIMD_FUNC4(SynetRestrictRange32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetRestrictRange32f(src, size, lower, upper, dst);
 #else
@@ -6367,7 +6367,7 @@ SIMD_API void SimdSynetSigmoid32f(const float* src, size_t size, const float* sl
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSigmoid32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetSigmoid32fPtr simdSynetSigmoid32f = SIMD_FUNC4(SynetSigmoid32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSigmoid32fPtr simdSynetSigmoid32f = SIMD_FUNC4(SynetSigmoid32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSigmoid32f(src, size, slope, dst);
 #else
@@ -6391,7 +6391,7 @@ SIMD_API void SimdSynetSoftplus32f(const float* src, size_t size, const float* b
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSoftplus32fPtr) (const float* src, size_t size, const float* beta, const float* threshold, float* dst);
-    const static SimdSynetSoftplus32fPtr simdSynetSoftplus32f = SIMD_FUNC4(SynetSoftplus32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSoftplus32fPtr simdSynetSoftplus32f = SIMD_FUNC4(SynetSoftplus32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSoftplus32f(src, size, beta, threshold, dst);
 #else
@@ -6413,7 +6413,7 @@ SIMD_API void SimdSynetSwish32f(const float* src, size_t size, const float* slop
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetSwish32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetSwish32fPtr simdSynetSwish32f = SIMD_FUNC4(SynetSwish32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetSwish32fPtr simdSynetSwish32f = SIMD_FUNC4(SynetSwish32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetSwish32f(src, size, slope, dst);
 #else
@@ -6425,7 +6425,7 @@ SIMD_API void SimdSynetTanh32f(const float* src, size_t size, const float* slope
 {
 #if defined(SIMD_SYNET_ENABLE)
     typedef void(*SimdSynetTanh32fPtr) (const float* src, size_t size, const float* slope, float* dst);
-    const static SimdSynetTanh32fPtr simdSynetTanh32f = SIMD_FUNC4(SynetTanh32f, SIMD_AVX512F_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdSynetTanh32fPtr simdSynetTanh32f = SIMD_FUNC4(SynetTanh32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
 
     simdSynetTanh32f(src, size, slope, dst);
 #else

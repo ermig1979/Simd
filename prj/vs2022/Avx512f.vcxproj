@@ -12,7 +12,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAvx512fCpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynet.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetActivation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNchw.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdAvx512fSynetConvolution32fDirectNhwc.cpp" />
