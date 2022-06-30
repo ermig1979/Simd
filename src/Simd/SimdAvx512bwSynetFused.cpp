@@ -31,7 +31,6 @@
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdArray.h"
 
 namespace Simd
@@ -41,16 +40,16 @@ namespace Simd
     {
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, __m512 sign, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _bias = Avx512f::Load<align, mask>(bias + offset, tail);
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), _bias);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_mul_ps(_mm512_sub_ps(x, AndNot(sign, x)), _scale), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), _bias);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_mul_ps(_mm512_sub_ps(x, AndNot(sign, x)), _scale), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward0(const float * src, __m512 bias, __m512 scale, __m512 sign, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), bias);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_mul_ps(_mm512_sub_ps(x, AndNot(sign, x)), scale), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), bias);
+            Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_mul_ps(_mm512_sub_ps(x, AndNot(sign, x)), scale), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
         }
 
         template <bool align> void SynetFusedLayerForward0Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -137,8 +136,8 @@ namespace Simd
             __m512 sign = _mm512_set1_ps(-0.0f);
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _bias = Avx512f::Load<false>(bias + c);
-                __m512 _scale = Avx512f::Load<false>(scale + c);
+                __m512 _bias = Load<false>(bias + c);
+                __m512 _scale = Load<false>(scale + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -182,17 +181,17 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float * bias1, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _bias0 = Avx512f::Load<align, mask>(bias0 + offset, tail);
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), _bias0);
-            __m512 _scale1 = Avx512f::Load<align, mask>(scale1 + offset, tail);
-            __m512 _bias1 = Avx512f::Load<align, mask>(bias1 + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_fmadd_ps(_mm512_max_ps(_mm512_setzero_ps(), _mm512_sub_ps(_mm512_setzero_ps(), x)), _scale1, _bias1), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
+            __m512 _bias0 = Load<align, mask>(bias0 + offset, tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), _bias0);
+            __m512 _scale1 = Load<align, mask>(scale1 + offset, tail);
+            __m512 _bias1 = Load<align, mask>(bias1 + offset, tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_fmadd_ps(_mm512_max_ps(_mm512_setzero_ps(), _mm512_sub_ps(_mm512_setzero_ps(), x)), _scale1, _bias1), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward1(const float * src, __m512 bias0, __m512 scale1, __m512 bias1, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), bias0);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_fmadd_ps(_mm512_max_ps(_mm512_setzero_ps(), _mm512_sub_ps(_mm512_setzero_ps(), x)), scale1, bias1), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), bias0);
+            Store<align, mask>(dst + offset, _mm512_add_ps(_mm512_fmadd_ps(_mm512_max_ps(_mm512_setzero_ps(), _mm512_sub_ps(_mm512_setzero_ps(), x)), scale1, bias1), _mm512_max_ps(_mm512_setzero_ps(), x)), tail);
         }
 
         template <bool align> void SynetFusedLayerForward1Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst)
@@ -277,9 +276,9 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _bias0 = Avx512f::Load<false>(bias0 + c);
-                __m512 _scale1 = Avx512f::Load<false>(scale1 + c);
-                __m512 _bias1 = Avx512f::Load<false>(bias1 + c);
+                __m512 _bias0 = Load<false>(bias0 + c);
+                __m512 _scale1 = Load<false>(scale1 + c);
+                __m512 _bias1 = Load<false>(bias1 + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -323,20 +322,20 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, __m512 slope, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _bias = Avx512f::Load<align, mask>(bias + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
             __m512 x = _mm512_fmadd_ps(_src, _scale, _bias);
             __m512 _dst = _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), x), _mm512_mul_ps(_mm512_min_ps(_mm512_setzero_ps(), x), slope));
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward2(const float * src, __m512 scale, __m512 bias, __m512 slope, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 x = _mm512_fmadd_ps(_src, scale, bias);
             __m512 _dst = _mm512_add_ps(_mm512_max_ps(_mm512_setzero_ps(), x), _mm512_mul_ps(_mm512_min_ps(_mm512_setzero_ps(), x), slope));
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template <bool align> void SynetFusedLayerForward2Nchw(const float * src, const float * scale, const float * bias, size_t channels, size_t spatial, const float * slope, float * dst)
@@ -423,8 +422,8 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _scale = Avx512f::Load<false>(scale + c);
-                __m512 _bias = Avx512f::Load<false>(bias + c);
+                __m512 _scale = Load<false>(scale + c);
+                __m512 _bias = Load<false>(bias + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -468,20 +467,20 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _bias = Avx512f::Load<align, mask>(bias + offset, tail);
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), _bias);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), _bias);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
             __m512 pos = _mm512_max_ps(_mm512_setzero_ps(), x);
             __m512 neg = _mm512_min_ps(_mm512_setzero_ps(), x);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(_scale, neg)), tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(_scale, neg)), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward3(const float * src, __m512 bias, __m512 scale, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), bias);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), bias);
             __m512 pos = _mm512_max_ps(_mm512_setzero_ps(), x);
             __m512 neg = _mm512_min_ps(_mm512_setzero_ps(), x);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(scale, neg)), tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(scale, neg)), tail);
         }
 
         template <bool align> void SynetFusedLayerForward3Nchw(const float * src, const float * bias, const float * scale, size_t channels, size_t spatial, float * dst)
@@ -565,8 +564,8 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _bias = Avx512f::Load<false>(bias + c);
-                __m512 _scale = Avx512f::Load<false>(scale + c);
+                __m512 _bias = Load<false>(bias + c);
+                __m512 _scale = Load<false>(scale + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -610,16 +609,16 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward4(const float * src, const float * bias0, __m512 scale1, __m512 bias1, float * dst0, float * dst1, size_t offset, __mmask16 tail = -1)
         {
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), (Avx512f::Load<align, mask>(bias0 + offset, tail)));
-            Avx512f::Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), x), tail);
-            Avx512f::Store<align, mask>(dst1 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(x, scale1, bias1)), tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), (Load<align, mask>(bias0 + offset, tail)));
+            Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), x), tail);
+            Store<align, mask>(dst1 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(x, scale1, bias1)), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward4(const float * src, __m512 bias0, __m512 scale1, __m512 bias1, float * dst0, float * dst1, size_t offset, __mmask16 tail = -1)
         {
-            __m512 x = _mm512_add_ps((Avx512f::Load<align, mask>(src + offset, tail)), bias0);
-            Avx512f::Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), x), tail);
-            Avx512f::Store<align, mask>(dst1 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(x, scale1, bias1)), tail);
+            __m512 x = _mm512_add_ps((Load<align, mask>(src + offset, tail)), bias0);
+            Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), x), tail);
+            Store<align, mask>(dst1 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(x, scale1, bias1)), tail);
         }
 
         template <bool align> void SynetFusedLayerForward4Nchw(const float * src, const float * bias0, const float * scale1, const float * bias1, size_t channels, size_t spatial, float * dst0)
@@ -713,7 +712,7 @@ namespace Simd
             float * dst1 = dst0 + channels * spatial;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _bias0 = Avx512f::Load<false>(bias0 + c);
+                __m512 _bias0 = Load<false>(bias0 + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -759,14 +758,14 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps((Avx512f::Load<align, mask>(src0 + offset, tail)),
-                _mm512_mul_ps((Avx512f::Load<align, mask>(src1 + offset, tail)), (Avx512f::Load<align, mask>(src2 + offset, tail)))), tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps((Load<align, mask>(src0 + offset, tail)),
+                _mm512_mul_ps((Load<align, mask>(src1 + offset, tail)), (Load<align, mask>(src2 + offset, tail)))), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const __m512 & src2, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps((Avx512f::Load<align, mask>(src0 + offset, tail)),
-                _mm512_mul_ps((Avx512f::Load<align, mask>(src1 + offset, tail)), src2)), tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps((Load<align, mask>(src0 + offset, tail)),
+                _mm512_mul_ps((Load<align, mask>(src1 + offset, tail)), src2)), tail);
         }
 
         template <bool align> void SynetFusedLayerForward8Nchw(const float * src0, const float * src1, const float * src2, size_t channels, size_t spatial, float * dst)
@@ -851,7 +850,7 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4)*F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _src2 = Avx512f::Load<false>(src2 + c);
+                __m512 _src2 = Load<false>(src2 + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -896,32 +895,32 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, float * dst1, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _bias = Avx512f::Load<align, mask>(bias + offset, tail);
-            Avx512f::Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, _scale, _bias)), tail);
-            Avx512f::Store<align, mask>(dst1 + offset, _src, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
+            Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, _scale, _bias)), tail);
+            Store<align, mask>(dst1 + offset, _src, tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _bias = Avx512f::Load<align, mask>(bias + offset, tail);
-            Avx512f::Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, _scale, _bias)), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
+            Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, _scale, _bias)), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const __m512 & scale, const __m512 & bias, float * dst0, float * dst1, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            Avx512f::Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, scale, bias)), tail);
-            Avx512f::Store<align, mask>(dst1 + offset, _src, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, scale, bias)), tail);
+            Store<align, mask>(dst1 + offset, _src, tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const __m512 & scale, const __m512 & bias, float * dst0, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            Avx512f::Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, scale, bias)), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            Store<align, mask>(dst0 + offset, _mm512_max_ps(_mm512_setzero_ps(), _mm512_fmadd_ps(_src, scale, bias)), tail);
         }
 
         template<bool align> void SynetFusedLayerForward9Nchw(const float * src0, const float * src1, const float * scale0, const float * bias0, size_t channels0, size_t channels1, size_t spatial, float * dst0, float * dst1)
@@ -1131,8 +1130,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < channels0; c += F)
                 {
-                    __m512 _scale0 = Avx512f::Load<false>(scale0 + c);
-                    __m512 _bias0 = Avx512f::Load<false>(bias0 + c);
+                    __m512 _scale0 = Load<false>(scale0 + c);
+                    __m512 _bias0 = Load<false>(bias0 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1149,8 +1148,8 @@ namespace Simd
                 }
                 for (size_t c = 0; c < channels1; c += F)
                 {
-                    __m512 _scale1 = Avx512f::Load<false>(scale1 + c);
-                    __m512 _bias1 = Avx512f::Load<false>(bias1 + c);
+                    __m512 _scale1 = Load<false>(scale1 + c);
+                    __m512 _bias1 = Load<false>(bias1 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1170,8 +1169,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < channels0; c += F)
                 {
-                    __m512 _scale0 = Avx512f::Load<false>(scale0 + c);
-                    __m512 _bias0 = Avx512f::Load<false>(bias0 + c);
+                    __m512 _scale0 = Load<false>(scale0 + c);
+                    __m512 _bias0 = Load<false>(bias0 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1187,8 +1186,8 @@ namespace Simd
                 }
                 for (size_t c = 0; c < channels1; c += F)
                 {
-                    __m512 _scale1 = Avx512f::Load<false>(scale1 + c);
-                    __m512 _bias1 = Avx512f::Load<false>(bias1 + c);
+                    __m512 _scale1 = Load<false>(scale1 + c);
+                    __m512 _bias1 = Load<false>(bias1 + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -1230,5 +1229,5 @@ namespace Simd
                 Base::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
         }
     }
-#endif// SIMD_AVX512F_ENABLE
+#endif
 }

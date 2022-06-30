@@ -103,10 +103,10 @@ namespace Simd
 
         template <bool mask> SIMD_INLINE void WinogradKernel3x3Block2x2SetInputLoad16n(const float * src, __m512 * dst, const __mmask16 * tails)
         {
-            __m512 a0 = Avx512f::Load<false, mask>(src + 0, tails[0]);
-            __m512 a1 = Avx512f::Load<false, mask>(src + 2, tails[1]);
-            __m512 a2 = Avx512f::Load<false, mask>(src + 16, tails[2]);
-            __m512 a3 = Avx512f::Load<false, mask>(src + 18, tails[3]);
+            __m512 a0 = Load<false, mask>(src + 0, tails[0]);
+            __m512 a1 = Load<false, mask>(src + 2, tails[1]);
+            __m512 a2 = Load<false, mask>(src + 16, tails[2]);
+            __m512 a3 = Load<false, mask>(src + 18, tails[3]);
             dst[0] = Deinterleave<0>(a0, a2);
             dst[1] = Deinterleave<1>(a0, a2);
             dst[2] = Deinterleave<0>(a1, a3);
@@ -123,22 +123,22 @@ namespace Simd
 
         template <bool mask> SIMD_INLINE void WinogradKernel3x3Block2x2SetInput16Store(const __m512 * src, float * dst, size_t stride, __mmask16 tail = -1)
         {
-            Avx512f::Store<false, mask>(dst + 0 * stride, _mm512_sub_ps(_mm512_sub_ps(src[0], src[8]), _mm512_sub_ps(src[2], src[10])), tail);
-            Avx512f::Store<false, mask>(dst + 1 * stride, _mm512_add_ps(_mm512_sub_ps(src[1], src[9]), _mm512_sub_ps(src[2], src[10])), tail);
-            Avx512f::Store<false, mask>(dst + 2 * stride, _mm512_sub_ps(_mm512_sub_ps(src[2], src[10]), _mm512_sub_ps(src[1], src[9])), tail);
-            Avx512f::Store<false, mask>(dst + 3 * stride, _mm512_sub_ps(_mm512_sub_ps(src[1], src[9]), _mm512_sub_ps(src[3], src[11])), tail);
-            Avx512f::Store<false, mask>(dst + 4 * stride, _mm512_sub_ps(_mm512_add_ps(src[4], src[8]), _mm512_add_ps(src[6], src[10])), tail);
-            Avx512f::Store<false, mask>(dst + 5 * stride, _mm512_add_ps(_mm512_add_ps(src[5], src[9]), _mm512_add_ps(src[6], src[10])), tail);
-            Avx512f::Store<false, mask>(dst + 6 * stride, _mm512_sub_ps(_mm512_add_ps(src[6], src[10]), _mm512_add_ps(src[5], src[9])), tail);
-            Avx512f::Store<false, mask>(dst + 7 * stride, _mm512_sub_ps(_mm512_add_ps(src[5], src[9]), _mm512_add_ps(src[7], src[11])), tail);
-            Avx512f::Store<false, mask>(dst + 8 * stride, _mm512_sub_ps(_mm512_sub_ps(src[8], src[4]), _mm512_sub_ps(src[10], src[6])), tail);
-            Avx512f::Store<false, mask>(dst + 9 * stride, _mm512_add_ps(_mm512_sub_ps(src[9], src[5]), _mm512_sub_ps(src[10], src[6])), tail);
-            Avx512f::Store<false, mask>(dst + 10 * stride, _mm512_sub_ps(_mm512_sub_ps(src[10], src[6]), _mm512_sub_ps(src[9], src[5])), tail);
-            Avx512f::Store<false, mask>(dst + 11 * stride, _mm512_sub_ps(_mm512_sub_ps(src[9], src[5]), _mm512_sub_ps(src[11], src[7])), tail);
-            Avx512f::Store<false, mask>(dst + 12 * stride, _mm512_sub_ps(_mm512_sub_ps(src[4], src[12]), _mm512_sub_ps(src[6], src[14])), tail);
-            Avx512f::Store<false, mask>(dst + 13 * stride, _mm512_add_ps(_mm512_sub_ps(src[5], src[13]), _mm512_sub_ps(src[6], src[14])), tail);
-            Avx512f::Store<false, mask>(dst + 14 * stride, _mm512_sub_ps(_mm512_sub_ps(src[6], src[14]), _mm512_sub_ps(src[5], src[13])), tail);
-            Avx512f::Store<false, mask>(dst + 15 * stride, _mm512_sub_ps(_mm512_sub_ps(src[5], src[13]), _mm512_sub_ps(src[7], src[15])), tail);
+            Store<false, mask>(dst + 0 * stride, _mm512_sub_ps(_mm512_sub_ps(src[0], src[8]), _mm512_sub_ps(src[2], src[10])), tail);
+            Store<false, mask>(dst + 1 * stride, _mm512_add_ps(_mm512_sub_ps(src[1], src[9]), _mm512_sub_ps(src[2], src[10])), tail);
+            Store<false, mask>(dst + 2 * stride, _mm512_sub_ps(_mm512_sub_ps(src[2], src[10]), _mm512_sub_ps(src[1], src[9])), tail);
+            Store<false, mask>(dst + 3 * stride, _mm512_sub_ps(_mm512_sub_ps(src[1], src[9]), _mm512_sub_ps(src[3], src[11])), tail);
+            Store<false, mask>(dst + 4 * stride, _mm512_sub_ps(_mm512_add_ps(src[4], src[8]), _mm512_add_ps(src[6], src[10])), tail);
+            Store<false, mask>(dst + 5 * stride, _mm512_add_ps(_mm512_add_ps(src[5], src[9]), _mm512_add_ps(src[6], src[10])), tail);
+            Store<false, mask>(dst + 6 * stride, _mm512_sub_ps(_mm512_add_ps(src[6], src[10]), _mm512_add_ps(src[5], src[9])), tail);
+            Store<false, mask>(dst + 7 * stride, _mm512_sub_ps(_mm512_add_ps(src[5], src[9]), _mm512_add_ps(src[7], src[11])), tail);
+            Store<false, mask>(dst + 8 * stride, _mm512_sub_ps(_mm512_sub_ps(src[8], src[4]), _mm512_sub_ps(src[10], src[6])), tail);
+            Store<false, mask>(dst + 9 * stride, _mm512_add_ps(_mm512_sub_ps(src[9], src[5]), _mm512_sub_ps(src[10], src[6])), tail);
+            Store<false, mask>(dst + 10 * stride, _mm512_sub_ps(_mm512_sub_ps(src[10], src[6]), _mm512_sub_ps(src[9], src[5])), tail);
+            Store<false, mask>(dst + 11 * stride, _mm512_sub_ps(_mm512_sub_ps(src[9], src[5]), _mm512_sub_ps(src[11], src[7])), tail);
+            Store<false, mask>(dst + 12 * stride, _mm512_sub_ps(_mm512_sub_ps(src[4], src[12]), _mm512_sub_ps(src[6], src[14])), tail);
+            Store<false, mask>(dst + 13 * stride, _mm512_add_ps(_mm512_sub_ps(src[5], src[13]), _mm512_sub_ps(src[6], src[14])), tail);
+            Store<false, mask>(dst + 14 * stride, _mm512_sub_ps(_mm512_sub_ps(src[6], src[14]), _mm512_sub_ps(src[5], src[13])), tail);
+            Store<false, mask>(dst + 15 * stride, _mm512_sub_ps(_mm512_sub_ps(src[5], src[13]), _mm512_sub_ps(src[7], src[15])), tail);
         }
 
         SIMD_INLINE void WinogradKernel3x3Block2x2SetInput16n(const float * src, size_t srcStride, float * dst, size_t dstStride, const __mmask16 * tails)
@@ -391,10 +391,10 @@ namespace Simd
 
         template<bool mask> SIMD_INLINE void WinogradKernel3x3Block2x2SetOutputLoad4(const float * src, size_t srcStride, __m512 * dst, __mmask16 tail)
         {
-            __m512 s0 = Avx512f::Load<false, mask>(src + 0 * srcStride, tail);
-            __m512 s1 = Avx512f::Load<false, mask>(src + 1 * srcStride, tail);
-            __m512 s2 = Avx512f::Load<false, mask>(src + 2 * srcStride, tail);
-            __m512 s3 = Avx512f::Load<false, mask>(src + 3 * srcStride, tail);
+            __m512 s0 = Load<false, mask>(src + 0 * srcStride, tail);
+            __m512 s1 = Load<false, mask>(src + 1 * srcStride, tail);
+            __m512 s2 = Load<false, mask>(src + 2 * srcStride, tail);
+            __m512 s3 = Load<false, mask>(src + 3 * srcStride, tail);
             dst[0] = _mm512_add_ps(_mm512_add_ps(s0, s1), s2);
             dst[1] = _mm512_sub_ps(_mm512_sub_ps(s1, s2), s3);
         }
@@ -407,16 +407,16 @@ namespace Simd
             WinogradKernel3x3Block2x2SetOutputLoad4<mask>(src + 8 * srcStride, srcStride, t + 4, tails[0]);
             d[0] = _mm512_add_ps(_mm512_add_ps(t[0], t[2]), t[4]);
             d[1] = _mm512_add_ps(_mm512_add_ps(t[1], t[3]), t[5]);
-            Avx512f::Store<false, mask>(dst + 0, Interleave<0>(d[0], d[1]), tails[1]);
-            Avx512f::Store<false, mask>(dst + F, Interleave<1>(d[0], d[1]), tails[2]);
+            Store<false, mask>(dst + 0, Interleave<0>(d[0], d[1]), tails[1]);
+            Store<false, mask>(dst + F, Interleave<1>(d[0], d[1]), tails[2]);
             if (main)
             {
                 dst += dstStride;
                 WinogradKernel3x3Block2x2SetOutputLoad4<mask>(src + 12 * srcStride, srcStride, t + 6, tails[0]);
                 d[2] = _mm512_sub_ps(_mm512_sub_ps(t[2], t[4]), t[6]);
                 d[3] = _mm512_sub_ps(_mm512_sub_ps(t[3], t[5]), t[7]);
-                Avx512f::Store<false, mask>(dst + 0, Interleave<0>(d[2], d[3]), tails[1]);
-                Avx512f::Store<false, mask>(dst + F, Interleave<1>(d[2], d[3]), tails[2]);
+                Store<false, mask>(dst + 0, Interleave<0>(d[2], d[3]), tails[1]);
+                Store<false, mask>(dst + F, Interleave<1>(d[2], d[3]), tails[2]);
             }
         }
 

@@ -622,8 +622,8 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m512 Activate(__m512 value, const float* params, size_t offset, __mmask16 tail = -1);
 
@@ -654,27 +654,27 @@ namespace Simd
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationElu>(__m512 value, const float* params, size_t offset, __mmask16 tail)
         {
-            return Avx512f::Elu(value, _mm512_set1_ps(params[0]));
+            return Elu(value, _mm512_set1_ps(params[0]));
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHswish>(__m512 value, const float* params, size_t offset, __mmask16 tail)
         {
-            return Avx512f::SynetHswish32f(value, _mm512_set1_ps(params[0]), _mm512_set1_ps(params[1]));
+            return SynetHswish32f(value, _mm512_set1_ps(params[0]), _mm512_set1_ps(params[1]));
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationMish>(__m512 value, const float* params, size_t offset, __mmask16 tail)
         {
-            return Avx512f::Mish(value, _mm512_set1_ps(params[0]));
+            return Mish(value, _mm512_set1_ps(params[0]));
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHardSigmoid>(__m512 value, const float* params, size_t offset, __mmask16 tail)
         {
-            return Avx512f::SynetHardSigmoid32f(value, _mm512_set1_ps(params[0]), _mm512_set1_ps(params[1]));
+            return SynetHardSigmoid32f(value, _mm512_set1_ps(params[0]), _mm512_set1_ps(params[1]));
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationSwish>(__m512 value, const float* params, size_t offset, __mmask16 tail)
         {
-            return Avx512f::Swish(value, _mm512_set1_ps(params[0]));
+            return Swish(value, _mm512_set1_ps(params[0]));
         }
 
         //---------------------------------------------------------------------
@@ -708,27 +708,27 @@ namespace Simd
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationElu>(__m512 value, const __m512 * params, size_t index)
         {
-            return Avx512f::Elu(value, params[0]);
+            return Elu(value, params[0]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHswish>(__m512 value, const __m512 * params, size_t index)
         {
-            return Avx512f::SynetHswish32f(value, params[0], params[1]);
+            return SynetHswish32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationMish>(__m512 value, const __m512* params, size_t index)
         {
-            return Avx512f::Mish(value, params[0]);
+            return Mish(value, params[0]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHardSigmoid>(__m512 value, const __m512* params, size_t index)
         {
-            return Avx512f::SynetHardSigmoid32f(value, params[0], params[1]);
+            return SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationSwish>(__m512 value, const __m512* params, size_t index)
         {
-            return Avx512f::Swish(value, params[0]);
+            return Swish(value, params[0]);
         }
 
         //---------------------------------------------------------------------
@@ -772,14 +772,14 @@ namespace Simd
             Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tails[2]);
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_AMX_ENABLE    
     namespace Amx
     {
         template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Apply(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
-            _mm512_mask_storeu_ps(dst, tail, Avx512f::Activate<type>(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src), bias[index]), params, index));
+            _mm512_mask_storeu_ps(dst, tail, Activate<type>(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src), bias[index]), params, index));
         }
 
         template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1(const float* src, float* dst, const __m512* bias, const __m512* params, __mmask16 tail)

@@ -225,20 +225,20 @@ namespace Simd
                         }
                     }
                 }
-                if (M > 0x0) Avx512f::Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save2<term, type>(dst, d10, d11, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save2<term, type>(dst, d20, d21, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save2<term, type>(dst, d30, d31, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save2<term, type>(dst, d40, d41, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save2<term, type>(dst, d50, d51, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save2<term, type>(dst, d60, d61, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save2<term, type>(dst, d70, d71, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save2<term, type>(dst, d80, d81, bias, params, tails), dst += dD;
-                if (M > 0x9) Avx512f::Save2<term, type>(dst, d90, d91, bias, params, tails), dst += dD;
-                if (M > 0xa) Avx512f::Save2<term, type>(dst, da0, da1, bias, params, tails), dst += dD;
-                if (M > 0xb) Avx512f::Save2<term, type>(dst, db0, db1, bias, params, tails), dst += dD;
-                if (M > 0xc) Avx512f::Save2<term, type>(dst, dc0, dc1, bias, params, tails), dst += dD;
-                if (M > 0xd) Avx512f::Save2<term, type>(dst, dd0, dd1, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save2<term, type>(dst, d10, d11, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save2<term, type>(dst, d20, d21, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save2<term, type>(dst, d30, d31, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save2<term, type>(dst, d40, d41, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save2<term, type>(dst, d50, d51, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save2<term, type>(dst, d60, d61, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save2<term, type>(dst, d70, d71, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save2<term, type>(dst, d80, d81, bias, params, tails), dst += dD;
+                if (M > 0x9) Avx512bw::Save2<term, type>(dst, d90, d91, bias, params, tails), dst += dD;
+                if (M > 0xa) Avx512bw::Save2<term, type>(dst, da0, da1, bias, params, tails), dst += dD;
+                if (M > 0xb) Avx512bw::Save2<term, type>(dst, db0, db1, bias, params, tails), dst += dD;
+                if (M > 0xc) Avx512bw::Save2<term, type>(dst, dc0, dc1, bias, params, tails), dst += dD;
+                if (M > 0xd) Avx512bw::Save2<term, type>(dst, dd0, dd1, bias, params, tails), dst += dD;
             }
             else
             {
@@ -301,20 +301,20 @@ namespace Simd
                         }
                     }
                 }
-                if (M > 0x0) Avx512f::Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save1<term, type>(dst, d20, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save1<term, type>(dst, d30, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save1<term, type>(dst, d40, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save1<term, type>(dst, d50, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save1<term, type>(dst, d60, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save1<term, type>(dst, d70, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save1<term, type>(dst, d80, bias, params, tails), dst += dD;
-                if (M > 0x9) Avx512f::Save1<term, type>(dst, d90, bias, params, tails), dst += dD;
-                if (M > 0xa) Avx512f::Save1<term, type>(dst, da0, bias, params, tails), dst += dD;
-                if (M > 0xb) Avx512f::Save1<term, type>(dst, db0, bias, params, tails), dst += dD;
-                if (M > 0xc) Avx512f::Save1<term, type>(dst, dc0, bias, params, tails), dst += dD;
-                if (M > 0xd) Avx512f::Save1<term, type>(dst, dd0, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save1<term, type>(dst, d20, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save1<term, type>(dst, d30, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save1<term, type>(dst, d40, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save1<term, type>(dst, d50, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save1<term, type>(dst, d60, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save1<term, type>(dst, d70, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save1<term, type>(dst, d80, bias, params, tails), dst += dD;
+                if (M > 0x9) Avx512bw::Save1<term, type>(dst, d90, bias, params, tails), dst += dD;
+                if (M > 0xa) Avx512bw::Save1<term, type>(dst, da0, bias, params, tails), dst += dD;
+                if (M > 0xb) Avx512bw::Save1<term, type>(dst, db0, bias, params, tails), dst += dD;
+                if (M > 0xc) Avx512bw::Save1<term, type>(dst, dc0, bias, params, tails), dst += dD;
+                if (M > 0xd) Avx512bw::Save1<term, type>(dst, dd0, bias, params, tails), dst += dD;
             }
         }
 
@@ -458,20 +458,20 @@ namespace Simd
                     if (M > 0xd) s0 = Set2(src6 + offs7), dd0 = _mm512_dpbf16_ps(dd0, s0, w0), dd1 = _mm512_dpbf16_ps(dd1, s0, w1);
                     weight += QF;
                 }
-                if (M > 0x0) Avx512f::Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save2<term, type>(dst, d10, d11, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save2<term, type>(dst, d20, d21, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save2<term, type>(dst, d30, d31, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save2<term, type>(dst, d40, d41, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save2<term, type>(dst, d50, d51, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save2<term, type>(dst, d60, d61, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save2<term, type>(dst, d70, d71, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save2<term, type>(dst, d80, d81, bias, params, tails), dst += dD;
-                if (M > 0x9) Avx512f::Save2<term, type>(dst, d90, d91, bias, params, tails), dst += dD;
-                if (M > 0xa) Avx512f::Save2<term, type>(dst, da0, da1, bias, params, tails), dst += dD;
-                if (M > 0xb) Avx512f::Save2<term, type>(dst, db0, db1, bias, params, tails), dst += dD;
-                if (M > 0xc) Avx512f::Save2<term, type>(dst, dc0, dc1, bias, params, tails), dst += dD;
-                if (M > 0xd) Avx512f::Save2<term, type>(dst, dd0, dd1, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save2<term, type>(dst, d10, d11, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save2<term, type>(dst, d20, d21, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save2<term, type>(dst, d30, d31, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save2<term, type>(dst, d40, d41, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save2<term, type>(dst, d50, d51, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save2<term, type>(dst, d60, d61, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save2<term, type>(dst, d70, d71, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save2<term, type>(dst, d80, d81, bias, params, tails), dst += dD;
+                if (M > 0x9) Avx512bw::Save2<term, type>(dst, d90, d91, bias, params, tails), dst += dD;
+                if (M > 0xa) Avx512bw::Save2<term, type>(dst, da0, da1, bias, params, tails), dst += dD;
+                if (M > 0xb) Avx512bw::Save2<term, type>(dst, db0, db1, bias, params, tails), dst += dD;
+                if (M > 0xc) Avx512bw::Save2<term, type>(dst, dc0, dc1, bias, params, tails), dst += dD;
+                if (M > 0xd) Avx512bw::Save2<term, type>(dst, dd0, dd1, bias, params, tails), dst += dD;
             }
             else
             {
@@ -528,20 +528,20 @@ namespace Simd
                     if (M > 0xd) s0 = Set2(src6 + offs7), dd0 = _mm512_dpbf16_ps(dd0, s0, w0);
                     weight += QF;
                 }
-                if (M > 0x0) Avx512f::Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save1<term, type>(dst, d20, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save1<term, type>(dst, d30, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save1<term, type>(dst, d40, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save1<term, type>(dst, d50, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save1<term, type>(dst, d60, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save1<term, type>(dst, d70, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save1<term, type>(dst, d80, bias, params, tails), dst += dD;
-                if (M > 0x9) Avx512f::Save1<term, type>(dst, d90, bias, params, tails), dst += dD;
-                if (M > 0xa) Avx512f::Save1<term, type>(dst, da0, bias, params, tails), dst += dD;
-                if (M > 0xb) Avx512f::Save1<term, type>(dst, db0, bias, params, tails), dst += dD;
-                if (M > 0xc) Avx512f::Save1<term, type>(dst, dc0, bias, params, tails), dst += dD;
-                if (M > 0xd) Avx512f::Save1<term, type>(dst, dd0, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save1<term, type>(dst, d20, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save1<term, type>(dst, d30, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save1<term, type>(dst, d40, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save1<term, type>(dst, d50, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save1<term, type>(dst, d60, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save1<term, type>(dst, d70, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save1<term, type>(dst, d80, bias, params, tails), dst += dD;
+                if (M > 0x9) Avx512bw::Save1<term, type>(dst, d90, bias, params, tails), dst += dD;
+                if (M > 0xa) Avx512bw::Save1<term, type>(dst, da0, bias, params, tails), dst += dD;
+                if (M > 0xb) Avx512bw::Save1<term, type>(dst, db0, bias, params, tails), dst += dD;
+                if (M > 0xc) Avx512bw::Save1<term, type>(dst, dc0, bias, params, tails), dst += dD;
+                if (M > 0xd) Avx512bw::Save1<term, type>(dst, dd0, bias, params, tails), dst += dD;
             }
         }
 
@@ -665,15 +665,15 @@ namespace Simd
                     if (M > 0x8) s0 = Set2(src3 + offs5), d80 = _mm512_dpbf16_ps(d80, s0, w0), d81 = _mm512_dpbf16_ps(d81, s0, w1), d82 = _mm512_dpbf16_ps(d82, s0, w2);
                     weight += 6 * F;
                 }
-                if (M > 0x0) Avx512f::Save3<term, type>(dst, d00, d01, d02, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save3<term, type>(dst, d10, d11, d12, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save3<term, type>(dst, d20, d21, d22, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save3<term, type>(dst, d30, d31, d32, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save3<term, type>(dst, d40, d41, d42, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save3<term, type>(dst, d50, d51, d52, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save3<term, type>(dst, d60, d61, d62, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save3<term, type>(dst, d70, d71, d72, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save3<term, type>(dst, d80, d81, d82, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save3<term, type>(dst, d00, d01, d02, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save3<term, type>(dst, d10, d11, d12, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save3<term, type>(dst, d20, d21, d22, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save3<term, type>(dst, d30, d31, d32, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save3<term, type>(dst, d40, d41, d42, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save3<term, type>(dst, d50, d51, d52, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save3<term, type>(dst, d60, d61, d62, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save3<term, type>(dst, d70, d71, d72, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save3<term, type>(dst, d80, d81, d82, bias, params, tails), dst += dD;
             }
             else if (tails[1])
             {
@@ -716,15 +716,15 @@ namespace Simd
                     if (M > 0x8) s0 = Set2(src3 + offs5), d80 = _mm512_dpbf16_ps(d80, s0, w0), d81 = _mm512_dpbf16_ps(d81, s0, w1);
                     weight += 6 * F;
                 }
-                if (M > 0x0) Avx512f::Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save2<term, type>(dst, d10, d11, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save2<term, type>(dst, d20, d21, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save2<term, type>(dst, d30, d31, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save2<term, type>(dst, d40, d41, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save2<term, type>(dst, d50, d51, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save2<term, type>(dst, d60, d61, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save2<term, type>(dst, d70, d71, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save2<term, type>(dst, d80, d81, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save2<term, type>(dst, d00, d01, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save2<term, type>(dst, d10, d11, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save2<term, type>(dst, d20, d21, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save2<term, type>(dst, d30, d31, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save2<term, type>(dst, d40, d41, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save2<term, type>(dst, d50, d51, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save2<term, type>(dst, d60, d61, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save2<term, type>(dst, d70, d71, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save2<term, type>(dst, d80, d81, bias, params, tails), dst += dD;
             }
             else
             {
@@ -766,15 +766,15 @@ namespace Simd
                     if (M > 0x8) s0 = Set2(src3 + offs5), d80 = _mm512_dpbf16_ps(d80, s0, w0);
                     weight += 6 * F;
                 }
-                if (M > 0x0) Avx512f::Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
-                if (M > 0x1) Avx512f::Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
-                if (M > 0x2) Avx512f::Save1<term, type>(dst, d20, bias, params, tails), dst += dD;
-                if (M > 0x3) Avx512f::Save1<term, type>(dst, d30, bias, params, tails), dst += dD;
-                if (M > 0x4) Avx512f::Save1<term, type>(dst, d40, bias, params, tails), dst += dD;
-                if (M > 0x5) Avx512f::Save1<term, type>(dst, d50, bias, params, tails), dst += dD;
-                if (M > 0x6) Avx512f::Save1<term, type>(dst, d60, bias, params, tails), dst += dD;
-                if (M > 0x7) Avx512f::Save1<term, type>(dst, d70, bias, params, tails), dst += dD;
-                if (M > 0x8) Avx512f::Save1<term, type>(dst, d80, bias, params, tails), dst += dD;
+                if (M > 0x0) Avx512bw::Save1<term, type>(dst, d00, bias, params, tails), dst += dD;
+                if (M > 0x1) Avx512bw::Save1<term, type>(dst, d10, bias, params, tails), dst += dD;
+                if (M > 0x2) Avx512bw::Save1<term, type>(dst, d20, bias, params, tails), dst += dD;
+                if (M > 0x3) Avx512bw::Save1<term, type>(dst, d30, bias, params, tails), dst += dD;
+                if (M > 0x4) Avx512bw::Save1<term, type>(dst, d40, bias, params, tails), dst += dD;
+                if (M > 0x5) Avx512bw::Save1<term, type>(dst, d50, bias, params, tails), dst += dD;
+                if (M > 0x6) Avx512bw::Save1<term, type>(dst, d60, bias, params, tails), dst += dD;
+                if (M > 0x7) Avx512bw::Save1<term, type>(dst, d70, bias, params, tails), dst += dD;
+                if (M > 0x8) Avx512bw::Save1<term, type>(dst, d80, bias, params, tails), dst += dD;
             }
         }
 

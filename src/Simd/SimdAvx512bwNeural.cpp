@@ -35,8 +35,8 @@ namespace Simd
     {
         template <bool align, bool mask> SIMD_INLINE void AddValue(const __m512& value, float* dst, __mmask16 m = -1)
         {
-            __m512 _dst = Avx512f::Load<align, mask>(dst, m);
-            Avx512f::Store<align, mask>(dst, _mm512_add_ps(_dst, value), m);
+            __m512 _dst = Load<align, mask>(dst, m);
+            Store<align, mask>(dst, _mm512_add_ps(_dst, value), m);
         }
 
         template <bool align> SIMD_INLINE void AddValue(const float* value, float* dst, size_t aligned, size_t partial, size_t full)
@@ -73,9 +73,9 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void AddVector(const float* src, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
-            __m512 _dst = Avx512f::Load<align, mask>(dst, m);
-            Avx512f::Store<align, mask>(dst, _mm512_add_ps(_src, _dst), m);
+            __m512 _src = Load<align, mask>(src, m);
+            __m512 _dst = Load<align, mask>(dst, m);
+            Store<align, mask>(dst, _mm512_add_ps(_src, _dst), m);
         }
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, size_t aligned, size_t partial, size_t full, float* dst)
@@ -114,22 +114,22 @@ namespace Simd
             size_t aligned = AlignLo(size, QF);
             size_t partial = AlignLo(size, F);
             if (Aligned(src) && Aligned(dst))
-                Avx512f::AddMultiplied<true>(src, aligned, partial, size, *value, dst);
+                AddMultiplied<true>(src, aligned, partial, size, *value, dst);
             else
-                Avx512f::AddMultiplied<false>(src, aligned, partial, size, *value, dst);
+                AddMultiplied<false>(src, aligned, partial, size, *value, dst);
         }
 
         //-----------------------------------------------------------------------------------------
 
         template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, const __m512& norm, const __m512& alpha, const __m512& epsilon, float* gradient, float* weight, __mmask16 m)
         {
-            __m512 _delta = Avx512f::Load<align, mask>(delta, m);
+            __m512 _delta = Load<align, mask>(delta, m);
             __m512 d = _mm512_mul_ps(_delta, norm);
-            __m512 _gradient = Avx512f::Load<align, mask>(gradient, m);
+            __m512 _gradient = Load<align, mask>(gradient, m);
             _gradient = _mm512_fmadd_ps(d, d, _gradient);
-            Avx512f::Store<align, mask>(gradient, _gradient, m);
-            __m512 _weight = Avx512f::Load<align, mask>(weight, m);
-            Avx512f::Store<align, mask>(weight, _mm512_sub_ps(_weight, _mm512_mul_ps(_mm512_mul_ps(alpha, d), Avx512f::Rsqrt14(_mm512_add_ps(_gradient, epsilon)))), m);
+            Store<align, mask>(gradient, _gradient, m);
+            __m512 _weight = Load<align, mask>(weight, m);
+            Store<align, mask>(weight, _mm512_sub_ps(_weight, _mm512_mul_ps(_mm512_mul_ps(alpha, d), Rsqrt14(_mm512_add_ps(_gradient, epsilon)))), m);
         }
 
         template <bool align, bool mask> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, size_t offset, const __m512& norm, const __m512& alpha, const __m512& epsilon, float* gradient, float* weight, __mmask16 m = -1)
@@ -190,7 +190,7 @@ namespace Simd
         template <bool inversion, bool align, bool stream> void Convert(const uint8_t* src, const __m512& _1_255, float* dst)
         {
             __m128i _src = Invert<inversion>(Sse2::Load<align>((__m128i*)src));
-            Avx512f::Stream<align, stream>(dst, _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_src)), _1_255));
+            Stream<align, stream>(dst, _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_src)), _1_255));
         }
 
         template <bool inversion, bool align, bool stream> void NeuralConvert(const uint8_t* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
@@ -240,10 +240,10 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeRelu(const float* src, const __m512& _0, const __m512& _1, const __m512& slope, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
+            __m512 _src = Load<align, mask>(src, m);
             __mmask16 positive = _mm512_cmp_ps_mask(_src, _0, _CMP_GT_OS);
-            __m512 _dst = Avx512f::Load<align, mask>(dst, m);
-            Avx512f::Store<align, mask>(dst, _mm512_mul_ps(_mm512_mask_blend_ps(positive, slope, _1), _dst), m);
+            __m512 _dst = Load<align, mask>(dst, m);
+            Store<align, mask>(dst, _mm512_mul_ps(_mm512_mask_blend_ps(positive, slope, _1), _dst), m);
         }
 
         template <bool align> SIMD_INLINE void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst)
@@ -282,9 +282,9 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeSigmoid(const float* src, const __m512& _1, const __m512& slope, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
-            __m512 _dst = Avx512f::Load<align, mask>(dst, m);
-            Avx512f::Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_mul_ps(_mm512_sub_ps(_1, _src), _src)), m);
+            __m512 _src = Load<align, mask>(src, m);
+            __m512 _dst = Load<align, mask>(dst, m);
+            Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_mul_ps(_mm512_sub_ps(_1, _src), _src)), m);
         }
 
         template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst)
@@ -322,9 +322,9 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void NeuralDerivativeTanh(const float* src, const __m512& _1, const __m512& slope, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
-            __m512 _dst = Avx512f::Load<align, mask>(dst, m);
-            Avx512f::Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_sub_ps(_1, _mm512_mul_ps(_src, _src))), m);
+            __m512 _src = Load<align, mask>(src, m);
+            __m512 _dst = Load<align, mask>(dst, m);
+            Store<align, mask>(dst, _mm512_mul_ps(_mm512_mul_ps(_dst, slope), _mm512_sub_ps(_1, _mm512_mul_ps(_src, _src))), m);
         }
 
         template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst)
@@ -362,7 +362,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m512 Pooling1x1Max3x1Body(const float* src)
         {
-            return _mm512_max_ps(_mm512_max_ps(Avx512f::Load<false>(src - 1), Avx512f::Load<align>(src)), Avx512f::Load<false>(src + 1));
+            return _mm512_max_ps(_mm512_max_ps(Load<false>(src - 1), Load<align>(src)), Load<false>(src + 1));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x3Body(const float* src, size_t stride, float* dst)
@@ -370,23 +370,23 @@ namespace Simd
             __m512 src0 = Pooling1x1Max3x1Body<align>(src - stride);
             __m512 src1 = Pooling1x1Max3x1Body<align>(src);
             __m512 src2 = Pooling1x1Max3x1Body<align>(src + stride);
-            Avx512f::Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Body(const float* src, size_t stride, float* dst)
         {
             __m512 src0 = Pooling1x1Max3x1Body<align>(src);
             __m512 src1 = Pooling1x1Max3x1Body<align>(src + stride);
-            Avx512f::Store<align>(dst, _mm512_max_ps(src0, src1));
+            Store<align>(dst, _mm512_max_ps(src0, src1));
         }
 
         __m512i K32_PERMUTE_NOSE = SIMD_MM512_SETR_EPI32(0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14);
 
         template <bool align> SIMD_INLINE __m512 Pooling1x1Max3x1Nose(const float* src)
         {
-            __m512 src1 = Avx512f::Load<align>(src);
+            __m512 src1 = Load<align>(src);
             __m512 src0 = _mm512_permutexvar_ps(K32_PERMUTE_NOSE, src1);
-            __m512 src2 = Avx512f::Load<false>(src + 1);
+            __m512 src2 = Load<false>(src + 1);
             return _mm512_max_ps(_mm512_max_ps(src0, src1), src2);
         }
 
@@ -395,21 +395,21 @@ namespace Simd
             __m512 src0 = Pooling1x1Max3x1Nose<align>(src - stride);
             __m512 src1 = Pooling1x1Max3x1Nose<align>(src);
             __m512 src2 = Pooling1x1Max3x1Nose<align>(src + stride);
-            Avx512f::Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
         }
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Nose(const float* src, size_t stride, float* dst)
         {
             __m512 src0 = Pooling1x1Max3x1Nose<align>(src);
             __m512 src1 = Pooling1x1Max3x1Nose<align>(src + stride);
-            Avx512f::Store<align>(dst, _mm512_max_ps(src0, src1));
+            Store<align>(dst, _mm512_max_ps(src0, src1));
         }
 
         __m512i K32_PERMUTE_TAIL = SIMD_MM512_SETR_EPI32(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 15);
 
         template <bool align> SIMD_INLINE __m512 Pooling1x1Max3x1Tail(const float* src)
         {
-            __m512 src0 = Avx512f::Load<false>(src - 1);
-            __m512 src1 = Avx512f::Load<align>(src);
+            __m512 src0 = Load<false>(src - 1);
+            __m512 src1 = Load<align>(src);
             __m512 src2 = _mm512_permutexvar_ps(K32_PERMUTE_TAIL, src1);
             return _mm512_max_ps(_mm512_max_ps(src0, src1), src2);
         }
@@ -419,14 +419,14 @@ namespace Simd
             __m512 src0 = Pooling1x1Max3x1Tail<align>(src - stride);
             __m512 src1 = Pooling1x1Max3x1Tail<align>(src);
             __m512 src2 = Pooling1x1Max3x1Tail<align>(src + stride);
-            Avx512f::Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
+            Store<align>(dst, _mm512_max_ps(_mm512_max_ps(src0, src1), src2));
         }
 
         template <bool align> SIMD_INLINE void Pooling1x1Max3x2Tail(const float* src, size_t stride, float* dst)
         {
             __m512 src0 = Pooling1x1Max3x1Tail<align>(src);
             __m512 src1 = Pooling1x1Max3x1Tail<align>(src + stride);
-            Avx512f::Store<align>(dst, _mm512_max_ps(src0, src1));
+            Store<align>(dst, _mm512_max_ps(src0, src1));
         }
 
         template <bool align> void NeuralPooling1x1Max3x3(const float* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
@@ -474,8 +474,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m512 Pooling2x2Max2x2(const float* src, size_t stride)
         {
-            __m512 lo = _mm512_max_ps(Avx512f::Load<align>(src + 0), Avx512f::Load<align>(src + stride + 0));
-            __m512 hi = _mm512_max_ps(Avx512f::Load<align>(src + F), Avx512f::Load<align>(src + stride + F));
+            __m512 lo = _mm512_max_ps(Load<align>(src + 0), Load<align>(src + stride + 0));
+            __m512 hi = _mm512_max_ps(Load<align>(src + F), Load<align>(src + stride + F));
             __m512 _lo = _mm512_shuffle_f32x4(lo, hi, 0x88);
             __m512 _hi = _mm512_shuffle_f32x4(lo, hi, 0xDD);
             return _mm512_max_ps(_mm512_shuffle_ps(_lo, _hi, 0x88), _mm512_shuffle_ps(_lo, _hi, 0xDD));
@@ -483,8 +483,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m512 Pooling2x2Max2(const float* src)
         {
-            __m512 lo = Avx512f::Load<align>(src + 0);
-            __m512 hi = Avx512f::Load<align>(src + F);
+            __m512 lo = Load<align>(src + 0);
+            __m512 hi = Load<align>(src + F);
             __m512 _lo = _mm512_shuffle_f32x4(lo, hi, 0x88);
             __m512 _hi = _mm512_shuffle_f32x4(lo, hi, 0xDD);
             return _mm512_max_ps(_mm512_shuffle_ps(_lo, _hi, 0x88), _mm512_shuffle_ps(_lo, _hi, 0xDD));
@@ -498,11 +498,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Avx512f::Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2x2<align>(src + col, srcStride));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Avx512f::Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2x2<false>(src + col, srcStride));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = Simd::Max(src[widthEven], src[widthEven + srcStride]);
@@ -512,11 +512,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += DF)
-                    Avx512f::Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
+                    Store<align>(dst + (col >> 1), Pooling2x2Max2<align>(src + col));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - DF;
-                    Avx512f::Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
+                    Store<false>(dst + (col >> 1), Pooling2x2Max2<false>(src + col));
                 }
                 if (width - widthEven)
                     dst[widthEven >> 1] = src[widthEven];
@@ -535,7 +535,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m512 Pooling2x2Max1x3(const float* src, size_t stride)
         {
-            return _mm512_max_ps(_mm512_max_ps(Avx512f::Load<align>(src), Avx512f::Load<align>(src + stride)), Avx512f::Load<align>(src + 2 * stride));
+            return _mm512_max_ps(_mm512_max_ps(Load<align>(src), Load<align>(src + stride)), Load<align>(src + 2 * stride));
         }
 
         template <bool align> SIMD_INLINE __m512 Pooling2x2Max3x3(const float* src, size_t stride)
@@ -550,7 +550,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m512 Pooling2x2Max1x2(const float* src, size_t stride)
         {
-            return _mm512_max_ps(Avx512f::Load<align>(src), Avx512f::Load<align>(src + stride));
+            return _mm512_max_ps(Load<align>(src), Load<align>(src + stride));
         }
 
         template <bool align> SIMD_INLINE __m512 Pooling2x2Max3x2(const float* src, size_t stride)
@@ -574,11 +574,11 @@ namespace Simd
             for (size_t row = 0; row < heightEven; row += 2)
             {
                 for (size_t col = 0; col < alignedWidth; col += step)
-                    Avx512f::Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
+                    Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - step;
-                    Avx512f::Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
+                    Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
                 }
                 if (width - widthEven)
                     Sse2::Max2x3s(src + widthEven, srcStride, dst + (widthEven >> 1));
@@ -588,11 +588,11 @@ namespace Simd
             if (height - heightEven)
             {
                 for (size_t col = 0; col < alignedWidth; col += step)
-                    Avx512f::Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
+                    Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
                 if (widthEven - alignedWidth)
                 {
                     size_t col = widthEven - step;
-                    Avx512f::Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
+                    Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
                 }
                 if (width - widthEven)
                     Sse2::Max2x2s(src + widthEven, srcStride, dst + (widthEven >> 1));
@@ -620,11 +620,11 @@ namespace Simd
             Pow pow;
             size_t i = 0;
             for (; i < aligned; i += F)
-                Avx512f::Store<align>(dst + i, pow(Avx512f::Load<align>(src + i), _e));
+                Store<align>(dst + i, pow(Load<align>(src + i), _e));
             if (i < size)
             {
                 __mmask16 tail = TailMask16(size - i);
-                Avx512f::Store<align, true>(dst + i, pow(Avx512f::Load<align, true>(src + i, tail), _e), tail);
+                Store<align, true>(dst + i, pow(Load<align, true>(src + i, tail), _e), tail);
             }
         }
 
@@ -644,8 +644,8 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void NeuralProductSum(const float* a, const float* b, size_t offset, __m512& sum, __mmask16 m = -1)
         {
-            __m512 _a = Avx512f::Load<align, mask>(a + offset, m);
-            __m512 _b = Avx512f::Load<align, mask>(b + offset, m);
+            __m512 _a = Load<align, mask>(a + offset, m);
+            __m512 _b = Load<align, mask>(b + offset, m);
             sum = _mm512_fmadd_ps(_a, _b, sum);
         }
 
@@ -679,7 +679,7 @@ namespace Simd
                 __mmask16 tailMask = __mmask16(-1) >> (F + i - size);
                 NeuralProductSum<align, true>(a, b, i, sum0, tailMask);
             }
-            *sum = Avx512f::ExtractSum(sum0);
+            *sum = ExtractSum(sum0);
         }
 
         void NeuralProductSum(const float* a, const float* b, size_t size, float* sum)
@@ -695,14 +695,14 @@ namespace Simd
         template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid(const float* src, const __m512& _0, const __m512& _1,
             const __m512& a, const __m512& b, const __m512& slope, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
+            __m512 _src = Load<align, mask>(src, m);
             __m512 x = AndNot(_0, _mm512_mul_ps(_src, slope));
             __m512 x2 = _mm512_mul_ps(x, x);
             __m512 x4 = _mm512_mul_ps(x2, x2);
             __m512 series = _mm512_add_ps(_mm512_fmadd_ps(x2, a, _1), _mm512_fmadd_ps(x4, b, x));
             __m512 exp = _mm512_mask_blend_ps(_mm512_cmp_ps_mask(_src, _0, _CMP_GT_OS), series, Rcp14(series));
             __m512 sigmoid = Rcp14(_mm512_add_ps(_1, exp));
-            Avx512f::Store<align, mask>(dst, sigmoid, m);
+            Store<align, mask>(dst, sigmoid, m);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float* src, size_t size, const float* slope, float* dst)
@@ -744,7 +744,7 @@ namespace Simd
         template <bool align, bool mask> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, const __m512& k,
             const __m512& _1, const __m512& _05, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
+            __m512 _src = Load<align, mask>(src, m);
             __m512 e1 = _mm512_max_ps(_05, _mm512_fmadd_ps(_src, k, _1));
             __m512 e2 = _mm512_mul_ps(e1, e1);
             __m512 e4 = _mm512_mul_ps(e2, e2);
@@ -753,7 +753,7 @@ namespace Simd
             __m512 e32 = _mm512_mul_ps(e16, e16);
             __m512 e64 = _mm512_mul_ps(e32, e32);
             __m512 sigmoid = Rcp14(_mm512_fmadd_ps(e64, e64, _1));
-            Avx512f::Store<align, mask>(dst, sigmoid, m);
+            Store<align, mask>(dst, sigmoid, m);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, size_t size, const float* slope, float* dst)
@@ -793,7 +793,7 @@ namespace Simd
         template <bool align, bool mask> SIMD_INLINE void NeuralRoughTanh(const float* src, const __m512& _0, const __m512& _1,
             const __m512& a, const __m512& b, const __m512& slope, float* dst, __mmask16 m = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src, m);
+            __m512 _src = Load<align, mask>(src, m);
             __m512 x = AndNot(_0, _mm512_mul_ps(_src, slope));
             __m512 x2 = _mm512_mul_ps(x, x);
             __m512 x4 = _mm512_mul_ps(x2, x2);
@@ -801,7 +801,7 @@ namespace Simd
             __m512 ne = Rcp14(pe);
             __m512 absTanh = _mm512_mul_ps(_mm512_sub_ps(pe, ne), Rcp14(_mm512_add_ps(pe, ne)));
             __m512 tanh = Xor(absTanh, AndMaskZ(_0, _0, _mm512_cmp_ps_mask(_0, _src, _CMP_GT_OS)));
-            Avx512f::Store<align, mask>(dst, tanh, m);
+            Store<align, mask>(dst, tanh, m);
         }
 
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst)
@@ -842,12 +842,12 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float* x, const __m512& a, const __m512& b, float* d, float* w, __mmask16 m)
         {
-            __m512 _x = Avx512f::Load<align, mask>(x, m);
-            __m512 _d = Avx512f::Load<align, mask>(d, m);
+            __m512 _x = Load<align, mask>(x, m);
+            __m512 _d = Load<align, mask>(d, m);
             _d = _mm512_fmadd_ps(a, _d, _mm512_mul_ps(b, _x));
-            Avx512f::Store<align, mask>(d, _d, m);
-            __m512 _w = Avx512f::Load<align, mask>(w, m);
-            Avx512f::Store<align, mask>(w, _mm512_add_ps(_w, _d), m);
+            Store<align, mask>(d, _d, m);
+            __m512 _w = Load<align, mask>(w, m);
+            Store<align, mask>(w, _mm512_add_ps(_w, _d), m);
         }
 
         template <bool align, bool mask> SIMD_INLINE void NeuralUpdateWeights(const float* x, size_t offset, const __m512& a, const __m512& b, float* d, float* w, __mmask16 m = -1)

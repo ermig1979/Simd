@@ -172,8 +172,8 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SquaredDifferenceSum32f(const float* a, const float* b, size_t offset, __m512& sum, __mmask16 tail = -1)
         {
-            __m512 _a = Avx512f::Load<align, mask>(a + offset, tail);
-            __m512 _b = Avx512f::Load<align, mask>(b + offset, tail);
+            __m512 _a = Load<align, mask>(a + offset, tail);
+            __m512 _b = Load<align, mask>(b + offset, tail);
             __m512 _d = _mm512_sub_ps(_a, _b);
             sum = _mm512_fmadd_ps(_d, _d, sum);
         }
@@ -209,7 +209,7 @@ namespace Simd
 #else
             if (i < size)
                 SquaredDifferenceSum32f<align, true>(a, b, i, sums[0], tailMask);
-            *sum = Avx512f::ExtractSum(sums[0]);
+            *sum = ExtractSum(sums[0]);
 #endif
         }
 
@@ -225,8 +225,8 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t offset, __m512& sum, __m512& correction, __mmask16 tail = -1)
         {
-            __m512 _a = Avx512f::Load<align, mask>(a + offset, tail);
-            __m512 _b = Avx512f::Load<align, mask>(b + offset, tail);
+            __m512 _a = Load<align, mask>(a + offset, tail);
+            __m512 _b = Load<align, mask>(b + offset, tail);
             __m512 _d = _mm512_sub_ps(_a, _b);
             __m512 term = _mm512_fmsub_ps(_d, _d, correction);
             __m512 temp = _mm512_add_ps(sum, term);
@@ -265,7 +265,7 @@ namespace Simd
 #else
             if (i < size)
                 SquaredDifferenceKahanSum32f<align, true>(a, b, i, sums[0], corrections[0], tailMask);
-            *sum = Avx512f::ExtractSum(sums[0]);
+            *sum = ExtractSum(sums[0]);
 #endif
         }
 

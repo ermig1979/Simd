@@ -136,39 +136,36 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
-        template <UpdateType update, bool align, bool mask> SIMD_INLINE void Update(float  * p, __m512 a, __mmask16 m)
+        template <UpdateType update, bool align, bool mask> SIMD_INLINE void Update(float* p, __m512 a, __mmask16 m)
         {
             Store<align, mask>(p, a, m);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, false, false>(float  * p, __m512 a, __mmask16 m)
+        template <> SIMD_INLINE void Update<UpdateAdd, false, false>(float* p, __m512 a, __mmask16 m)
         {
             Store<false, false>(p, _mm512_add_ps((Load<false, false>(p, m)), a), m);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, false, true>(float  * p, __m512 a, __mmask16 m)
+        template <> SIMD_INLINE void Update<UpdateAdd, false, true>(float* p, __m512 a, __mmask16 m)
         {
             Store<false, true>(p, _mm512_add_ps((Load<false, true>(p, m)), a), m);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, true, false>(float  * p, __m512 a, __mmask16 m)
+        template <> SIMD_INLINE void Update<UpdateAdd, true, false>(float* p, __m512 a, __mmask16 m)
         {
             Store<true, false>(p, _mm512_add_ps((Load<true, false>(p, m)), a), m);
         }
 
-        template <> SIMD_INLINE void Update<UpdateAdd, true, true>(float  * p, __m512 a, __mmask16 m)
+        template <> SIMD_INLINE void Update<UpdateAdd, true, true>(float* p, __m512 a, __mmask16 m)
         {
             Store<true, true>(p, _mm512_add_ps((Load<true, true>(p, m)), a), m);
         }
-    }
-#endif//SIMD_AVX512F_ENABLE
 
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
+        //-----------------------------------------------------------------------------------------
+
         template <UpdateType update, bool align, bool mask> SIMD_INLINE void Update(int32_t  * p, __m512i a, __mmask16 m)
         {
             Store<align, mask>(p, a, m);

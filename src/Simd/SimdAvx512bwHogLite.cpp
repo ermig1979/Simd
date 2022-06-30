@@ -242,8 +242,8 @@ namespace Simd
                 Floats & nf = _nf[rowI & 3];
                 for (size_t i = 0; i < hf.size; i += DF)
                 {
-                    Avx512f::Store<true>(hf.data + i + 0, _mm512_mul_ps(_k, _mm512_cvtepi32_ps(Load<true>(hi.data + i + 0))));
-                    Avx512f::Store<true>(hf.data + i + F, _mm512_mul_ps(_k, _mm512_cvtepi32_ps(Load<true>(hi.data + i + F))));
+                    Store<true>(hf.data + i + 0, _mm512_mul_ps(_k, _mm512_cvtepi32_ps(Load<true>(hi.data + i + 0))));
+                    Store<true>(hf.data + i + F, _mm512_mul_ps(_k, _mm512_cvtepi32_ps(Load<true>(hi.data + i + F))));
                 }
                 hi.Clear();
 
@@ -278,16 +278,16 @@ namespace Simd
                 float * dst = _nb.data;
                 for (size_t x = 0; x < _fx; x += 12, dst += 3 * F)
                 {
-                    __m512 s0 = Avx512f::Load<false>(src0 + x);
-                    __m512 s1 = Avx512f::Load<false>(src1 + x);
-                    __m512 s2 = Avx512f::Load<false>(src2 + x);
+                    __m512 s0 = Load<false>(src0 + x);
+                    __m512 s1 = Load<false>(src1 + x);
+                    __m512 s2 = Load<false>(src2 + x);
                     __m512 v0 = _mm512_add_ps(s0, s1);
                     __m512 v1 = _mm512_add_ps(s1, s2);
                     __m512 h0 = _mm512_add_ps(v0, Alignr<1>(v0, v0));
                     __m512 h1 = _mm512_add_ps(v1, Alignr<1>(v1, v1));
-                    Avx512f::Store<true>(dst + 0 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_0, h1));
-                    Avx512f::Store<true>(dst + 1 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_1, h1));
-                    Avx512f::Store<true>(dst + 2 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_2, h1));
+                    Store<true>(dst + 0 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_0, h1));
+                    Store<true>(dst + 1 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_1, h1));
+                    Store<true>(dst + 2 * F, _mm512_permutex2var_ps(h0, K32_PERMUTE_BN_2, h1));
                 }
             }
 
@@ -420,8 +420,8 @@ namespace Simd
         {
             template<bool align, bool mask> SIMD_INLINE void ProductSum1x1(const float * src, const float * filter, __m512 & sum, __mmask16 tail = -1)
             {
-                __m512 _src = Avx512f::Load<align, mask>(src, tail);
-                __m512 _filter = Avx512f::Load<align, mask>(filter, tail);
+                __m512 _src = Load<align, mask>(src, tail);
+                __m512 _filter = Load<align, mask>(filter, tail);
                 sum = _mm512_fmadd_ps(_src, _filter, sum);
             }
 
@@ -444,19 +444,19 @@ namespace Simd
             template<bool align> SIMD_INLINE void ProductSum1x4x8(const float * src, const float * filter, __m512 * sums)
             {
                 __m512 _filter = _mm512_broadcast_f32x8(Avx::Load<align>(filter));
-                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * F), _filter, sums[0]);
-                sums[1] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 1 * F), _filter, sums[1]);
+                sums[0] = _mm512_fmadd_ps(Load<align>(src + 0 * F), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Load<align>(src + 1 * F), _filter, sums[1]);
             }
 
             template <bool align> static SIMD_INLINE void ProductSum4x4x8(const float * src, const float * filter, __m512 * sums)
             {
                 __m512 filter0 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 0 * HF));
-                __m512 src0 = Avx512f::Load<align>(src + 0 * HF);
-                __m512 src2 = Avx512f::Load<align>(src + 2 * HF);
+                __m512 src0 = Load<align>(src + 0 * HF);
+                __m512 src2 = Load<align>(src + 2 * HF);
                 sums[0] = _mm512_fmadd_ps(src0, filter0, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src2, filter0, sums[1]);
                 __m512 filter2 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 2 * HF));
-                __m512 src4 = Avx512f::Load<align>(src + 4 * HF);
+                __m512 src4 = Load<align>(src + 4 * HF);
                 sums[0] = _mm512_fmadd_ps(src2, filter2, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src4, filter2, sums[1]);
                 __m512 filter1 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 1 * HF));
@@ -465,7 +465,7 @@ namespace Simd
                 sums[0] = _mm512_fmadd_ps(src1, filter1, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src3, filter1, sums[1]);
                 __m512 filter3 = _mm512_broadcast_f32x8(Avx::Load<align>(filter + 3 * HF));
-                __m512 src5 = Avx512f::Load<false>(src + 5 * HF);
+                __m512 src5 = Load<false>(src + 5 * HF);
                 sums[0] = _mm512_fmadd_ps(src3, filter3, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src5, filter3, sums[1]);
             }
@@ -577,26 +577,26 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE void ProductSum1x4x16(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 _filter = Avx512f::Load<align>(filter);
-                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * F), _filter, sums[0]);
-                sums[1] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 1 * F), _filter, sums[1]);
-                sums[2] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 2 * F), _filter, sums[2]);
-                sums[3] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 3 * F), _filter, sums[3]);
+                __m512 _filter = Load<align>(filter);
+                sums[0] = _mm512_fmadd_ps(Load<align>(src + 0 * F), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Load<align>(src + 1 * F), _filter, sums[1]);
+                sums[2] = _mm512_fmadd_ps(Load<align>(src + 2 * F), _filter, sums[2]);
+                sums[3] = _mm512_fmadd_ps(Load<align>(src + 3 * F), _filter, sums[3]);
             }
 
             template <bool align> static SIMD_INLINE void ProductSum4x4x16(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 filter0 = Avx512f::Load<align>(filter + 0 * F);
-                __m512 src0 = Avx512f::Load<align>(src + 0 * F);
-                __m512 src1 = Avx512f::Load<align>(src + 1 * F);
-                __m512 src2 = Avx512f::Load<align>(src + 2 * F);
-                __m512 src3 = Avx512f::Load<align>(src + 3 * F);
+                __m512 filter0 = Load<align>(filter + 0 * F);
+                __m512 src0 = Load<align>(src + 0 * F);
+                __m512 src1 = Load<align>(src + 1 * F);
+                __m512 src2 = Load<align>(src + 2 * F);
+                __m512 src3 = Load<align>(src + 3 * F);
                 sums[0] = _mm512_fmadd_ps(src0, filter0, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src1, filter0, sums[1]);
                 sums[2] = _mm512_fmadd_ps(src2, filter0, sums[2]);
                 sums[3] = _mm512_fmadd_ps(src3, filter0, sums[3]);
-                __m512 filter1 = Avx512f::Load<align>(filter + 1 * F);
-                __m512 src4 = Avx512f::Load<align>(src + 4 * F);
+                __m512 filter1 = Load<align>(filter + 1 * F);
+                __m512 src4 = Load<align>(src + 4 * F);
                 sums[0] = _mm512_fmadd_ps(src1, filter1, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src2, filter1, sums[1]);
                 sums[2] = _mm512_fmadd_ps(src3, filter1, sums[2]);
@@ -645,7 +645,7 @@ namespace Simd
                             pSrc += srcStride;
                             pFilter += filterStride;
                         }
-                        dst[dstCol] = Avx512f::ExtractSum(sum);
+                        dst[dstCol] = ExtractSum(sum);
                     }
                     dst += dstStride;
                 }
@@ -702,7 +702,7 @@ namespace Simd
                                 pSrc += srcStride;
                                 pFilter += filterStride;
                             }
-                            dst[dstCol] = Avx512f::ExtractSum(sum);
+                            dst[dstCol] = ExtractSum(sum);
                         }
                         else
                             dst[dstCol] = -FLT_MAX;
@@ -818,7 +818,7 @@ namespace Simd
                         const float * pSrc01 = pSrc + _ix[colDst + 1];
                         const float * pSrc10 = pSrc00 + srcStride;
                         const float * pSrc11 = pSrc01 + srcStride;
-                        Avx512f::Store<align>(pDst, _mm512_add_ps(
+                        Store<align>(pDst, _mm512_add_ps(
                             _mm512_fmadd_ps(Load<align>(pSrc00, pSrc01), k00, _mm512_mul_ps(Load<align>(pSrc00 + Avx2::F, pSrc01 + Avx2::F), k01)),
                             _mm512_fmadd_ps(Load<align>(pSrc10, pSrc11), k10, _mm512_mul_ps(Load<align>(pSrc10 + Avx2::F, pSrc11 + Avx2::F), k11))));
                     }
@@ -858,9 +858,9 @@ namespace Simd
                         __m512 k11 = _mm512_mul_ps(ky1, kx1);
                         const float * pSrc0 = pSrc + _ix[colDst];
                         const float * pSrc1 = pSrc0 + srcStride;
-                        Avx512f::Store<align>(pDst, _mm512_add_ps(
-                            _mm512_fmadd_ps(Avx512f::Load<align>(pSrc0), k00, _mm512_mul_ps(Avx512f::Load<align>(pSrc0 + F), k01)),
-                            _mm512_fmadd_ps(Avx512f::Load<align>(pSrc1), k10, _mm512_mul_ps(Avx512f::Load<align>(pSrc1 + F), k11))));
+                        Store<align>(pDst, _mm512_add_ps(
+                            _mm512_fmadd_ps(Load<align>(pSrc0), k00, _mm512_mul_ps(Load<align>(pSrc0 + F), k01)),
+                            _mm512_fmadd_ps(Load<align>(pSrc1), k10, _mm512_mul_ps(Load<align>(pSrc1 + F), k11))));
                     }
                 }
             }
@@ -917,7 +917,7 @@ namespace Simd
             }
             __m512 _pca[8];
             for (size_t i = 0; i < 8; ++i)
-                _pca[i] = Avx512f::Load<true>(pca2 + i * F);
+                _pca[i] = Load<true>(pca2 + i * F);
             for (size_t row = 0; row < height; ++row)
             {
                 const float * s = src;
@@ -925,7 +925,7 @@ namespace Simd
                 for (size_t col = 0; col < width; ++col)
                 {
                     __m512 sums[2] = { _mm512_setzero_ps(), _mm512_setzero_ps() };
-                    __m512 _src = Avx512f::Load<align>(s);
+                    __m512 _src = Load<align>(s);
                     __m512 src0 = Shuffle2x<0x44>(_src);
                     __m512 src1 = Shuffle2x<0xEE>(_src);
                     sums[0] = _mm512_fmadd_ps(Broadcast<0>(src0), _pca[0], sums[0]);
@@ -937,7 +937,7 @@ namespace Simd
                     sums[0] = _mm512_fmadd_ps(Broadcast<3>(src0), _pca[3], sums[0]);
                     sums[1] = _mm512_fmadd_ps(Broadcast<3>(src1), _pca[7], sums[1]);
                     sums[0] = _mm512_add_ps(sums[0], sums[1]);
-                    sums[0] = _mm512_add_ps(sums[0], Avx512f::Alignr<8>(sums[0], _mm512_setzero_ps()));
+                    sums[0] = _mm512_add_ps(sums[0], Alignr<8>(sums[0], _mm512_setzero_ps()));
                     Avx::Store<align>(d, _mm512_castps512_ps256(sums[0]));
                     s += 16;
                     d += 8;
@@ -965,7 +965,7 @@ namespace Simd
             void Init(size_t srcWidth, size_t srcHeight, size_t hSize, size_t vSize)
             {
                 _dstWidth = srcWidth - hSize + 1;
-                _dstStride = AlignHi(_dstWidth, Avx512f::F);
+                _dstStride = AlignHi(_dstWidth, Avx512bw::F);
                 _dstHeight = srcHeight - vSize + 1;
                 _buffer.Resize(_dstStride*srcHeight);
             }
@@ -1016,11 +1016,11 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE void FilterHx4x8(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 _filter = Avx512f::Load<align>(filter);
-                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * HF), _filter, sums[0]);
-                sums[1] = _mm512_fmadd_ps(Avx512f::Load<false>(src + 1 * HF), _filter, sums[1]);
-                sums[2] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 2 * HF), _filter, sums[2]);
-                sums[3] = _mm512_fmadd_ps(Avx512f::Load<false>(src + 3 * HF), _filter, sums[3]);
+                __m512 _filter = Load<align>(filter);
+                sums[0] = _mm512_fmadd_ps(Load<align>(src + 0 * HF), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Load<false>(src + 1 * HF), _filter, sums[1]);
+                sums[2] = _mm512_fmadd_ps(Load<align>(src + 2 * HF), _filter, sums[2]);
+                sums[3] = _mm512_fmadd_ps(Load<false>(src + 3 * HF), _filter, sums[3]);
             }
 
             template <bool align> void FilterHx8e(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -1036,7 +1036,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4x8<align>(s + i, filter + i, sums);
-                        Sse2::Store<true>(dst + col, Avx512f::Extract4Sums(sums));
+                        Sse2::Store<true>(dst + col, Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
@@ -1053,33 +1053,33 @@ namespace Simd
 
             template<bool align> static SIMD_INLINE void FilterHx1x16(const float * src, const float * filter, __m512 & sum)
             {
-                __m512 _src = Avx512f::Load<align>(src);
-                __m512 _filter = Avx512f::Load<align>(filter);
+                __m512 _src = Load<align>(src);
+                __m512 _filter = Load<align>(filter);
                 sum = _mm512_fmadd_ps(_src, _filter, sum);
             }
 
             template<bool align> static SIMD_INLINE void FilterHx4x16(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 _filter = Avx512f::Load<align>(filter);
-                sums[0] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 0 * F), _filter, sums[0]);
-                sums[1] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 1 * F), _filter, sums[1]);
-                sums[2] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 2 * F), _filter, sums[2]);
-                sums[3] = _mm512_fmadd_ps(Avx512f::Load<align>(src + 3 * F), _filter, sums[3]);
+                __m512 _filter = Load<align>(filter);
+                sums[0] = _mm512_fmadd_ps(Load<align>(src + 0 * F), _filter, sums[0]);
+                sums[1] = _mm512_fmadd_ps(Load<align>(src + 1 * F), _filter, sums[1]);
+                sums[2] = _mm512_fmadd_ps(Load<align>(src + 2 * F), _filter, sums[2]);
+                sums[3] = _mm512_fmadd_ps(Load<align>(src + 3 * F), _filter, sums[3]);
             }
 
             template <bool align> static SIMD_INLINE void FilterHx4x16x2(const float * src, const float * filter, __m512 * sums)
             {
-                __m512 filter0 = Avx512f::Load<align>(filter + 0 * F);
-                __m512 src0 = Avx512f::Load<align>(src + 0 * F);
-                __m512 src1 = Avx512f::Load<align>(src + 1 * F);
-                __m512 src2 = Avx512f::Load<align>(src + 2 * F);
-                __m512 src3 = Avx512f::Load<align>(src + 3 * F);
+                __m512 filter0 = Load<align>(filter + 0 * F);
+                __m512 src0 = Load<align>(src + 0 * F);
+                __m512 src1 = Load<align>(src + 1 * F);
+                __m512 src2 = Load<align>(src + 2 * F);
+                __m512 src3 = Load<align>(src + 3 * F);
                 sums[0] = _mm512_fmadd_ps(src0, filter0, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src1, filter0, sums[1]);
                 sums[2] = _mm512_fmadd_ps(src2, filter0, sums[2]);
                 sums[3] = _mm512_fmadd_ps(src3, filter0, sums[3]);
-                __m512 filter1 = Avx512f::Load<align>(filter + 1 * F);
-                __m512 src4 = Avx512f::Load<align>(src + 4 * F);
+                __m512 filter1 = Load<align>(filter + 1 * F);
+                __m512 src4 = Load<align>(src + 4 * F);
                 sums[0] = _mm512_fmadd_ps(src1, filter1, sums[0]);
                 sums[1] = _mm512_fmadd_ps(src2, filter1, sums[1]);
                 sums[2] = _mm512_fmadd_ps(src3, filter1, sums[2]);
@@ -1103,7 +1103,7 @@ namespace Simd
                             FilterHx4x16x2<align>(s + i, filter + i, sums);
                         for (; i < size; i += F)
                             FilterHx4x16<align>(s + i, filter + i, sums);
-                        _mm_storeu_ps(dst + col, Avx512f::Extract4Sums(sums));
+                        _mm_storeu_ps(dst + col, Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
@@ -1111,7 +1111,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx1x16<align>(s + i, filter + i, sum);
-                        dst[col] = Avx512f::ExtractSum(sum);
+                        dst[col] = ExtractSum(sum);
                     }
                     src += srcStride;
                     dst += dstStride;
@@ -1135,8 +1135,8 @@ namespace Simd
             {
                 __m512 sum = _mm512_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
-                    sum = _mm512_fmadd_ps(Avx512f::Load<srcAlign>(src), filter[i], sum);
-                Avx512f::Update<update, dstAlign, mask>(dst, sum, tail);
+                    sum = _mm512_fmadd_ps(Load<srcAlign>(src), filter[i], sum);
+                Update<update, dstAlign, mask>(dst, sum, tail);
             }
 
             template <UpdateType update, bool align> void FilterV(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -1249,7 +1249,7 @@ namespace Simd
                     size_t col = 0;
                     for (; col < alignedSrcWidth; col += F)
                     {
-                        __mmask16 mmask = _mm512_cmp_ps_mask(Avx512f::Load<false>(src + col), _threshold, _CMP_GT_OQ);
+                        __mmask16 mmask = _mm512_cmp_ps_mask(Load<false>(src + col), _threshold, _CMP_GT_OQ);
 
                         __mmask64 lo = ((mmask & 0xFF) * 0x0101010101010101ull) & 0xFF7F3F1F0F070301ull;
                         _rowSums = _mm512_add_epi32(_rowSums, _mm512_sad_epu8(_mm512_movm_epi8(lo), K_ZERO));
@@ -1302,7 +1302,7 @@ namespace Simd
                     size_t srcCol = 0, dstCol = 0;
                     for (; srcCol < alignedSrcWidth; srcCol += F, dstCol += DF)
                     {
-                        __mmask16 mmask = _mm512_cmp_ps_mask(Avx512f::Load<false>(src + srcCol), _threshold, _CMP_GT_OQ);
+                        __mmask16 mmask = _mm512_cmp_ps_mask(Load<false>(src + srcCol), _threshold, _CMP_GT_OQ);
 
                         __mmask64 lo = ((mmask & 0xFF) * 0x0101010101010101ull) & 0xFF7F3F1F0F070301ull;
                         _rowSums = _mm512_add_epi32(_rowSums, _mm512_sad_epu8(_mm512_movm_epi8(lo), K_ZERO));

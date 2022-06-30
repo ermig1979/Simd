@@ -32,7 +32,7 @@ namespace Simd
     {
         template <bool align, bool mask> SIMD_INLINE __m512i Float32ToUint8(const float * src, const __m512 & lower, const __m512 & upper, const __m512 & boost, __mmask16 tail = -1)
         {
-            return _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_sub_ps(_mm512_min_ps(_mm512_max_ps((Avx512f::Load<align, mask>(src, tail)), lower), upper), lower), boost));
+            return _mm512_cvtps_epi32(_mm512_mul_ps(_mm512_sub_ps(_mm512_min_ps(_mm512_max_ps((Load<align, mask>(src, tail)), lower), upper), lower), boost));
         }
 
         template <bool align, bool mask> SIMD_INLINE void Float32ToUint8(const float * src, const __m512 & lower, const __m512 & upper, const __m512 & boost, uint8_t * dst, const __mmask16 * srcTails, __mmask64 dstTail)
@@ -76,7 +76,7 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const __m128i & value, const __m512 & lower, const __m512 & boost, float * dst, __mmask16 tail)
         {
-            Avx512f::Store<align, mask>(dst, _mm512_add_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower), tail);
+            Store<align, mask>(dst, _mm512_add_ps(_mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(value)), boost), lower), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m512 & lower, const __m512 & boost, float * dst, __mmask64 srcTail, const __mmask16 * dstTails)
@@ -132,13 +132,13 @@ namespace Simd
             {
                 for (; i < fullAlignedSize; i += DF)
                 {
-                    __m512 a0 = Avx512f::Load<align>(a + i + 0 * F);
-                    __m512 b0 = Avx512f::Load<align>(b + i + 0 * F);
+                    __m512 a0 = Load<align>(a + i + 0 * F);
+                    __m512 b0 = Load<align>(b + i + 0 * F);
                     _aa[0] = _mm512_fmadd_ps(a0, a0, _aa[0]);
                     _ab[0] = _mm512_fmadd_ps(a0, b0, _ab[0]);
                     _bb[0] = _mm512_fmadd_ps(b0, b0, _bb[0]);
-                    __m512 a1 = Avx512f::Load<align>(a + i + 1 * F);
-                    __m512 b1 = Avx512f::Load<align>(b + i + 1 * F);
+                    __m512 a1 = Load<align>(a + i + 1 * F);
+                    __m512 b1 = Load<align>(b + i + 1 * F);
                     _aa[1] = _mm512_fmadd_ps(a1, a1, _aa[1]);
                     _ab[1] = _mm512_fmadd_ps(a1, b1, _ab[1]);
                     _bb[1] = _mm512_fmadd_ps(b1, b1, _bb[1]);
@@ -149,13 +149,13 @@ namespace Simd
             }
             for (; i < partialAlignedSize; i += F)
             {
-                __m512 a0 = Avx512f::Load<align>(a + i);
-                __m512 b0 = Avx512f::Load<align>(b + i);
+                __m512 a0 = Load<align>(a + i);
+                __m512 b0 = Load<align>(b + i);
                 _aa[0] = _mm512_fmadd_ps(a0, a0, _aa[0]);
                 _ab[0] = _mm512_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm512_fmadd_ps(b0, b0, _bb[0]);
             }
-            float aa = Avx512f::ExtractSum(_aa[0]), ab = Avx512f::ExtractSum(_ab[0]), bb = Avx512f::ExtractSum(_bb[0]);
+            float aa = ExtractSum(_aa[0]), ab = ExtractSum(_ab[0]), bb = ExtractSum(_bb[0]);
             for (; i < size; ++i)
             {
                 float _a = a[i];

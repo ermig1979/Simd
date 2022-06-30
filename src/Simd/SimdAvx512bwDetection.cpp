@@ -222,7 +222,7 @@ namespace Simd
                 if (resultCount == 1)
                 {
                     int j = _tzcnt_u32(result);
-                    return Base::Detect32f(hid, offset + j, i + 1, Avx512f::Extract(norm, j)) > 0 ? result : __mmask16(0);
+                    return Base::Detect32f(hid, offset + j, i + 1, Extract(norm, j)) > 0 ? result : __mmask16(0);
                 }
             }
             return result;

@@ -80,15 +80,15 @@ namespace Simd
             const uint8_t* b, const float* bScale, const float* bShift, const float* cScale, const float* cShift, __m128i upper, uint8_t* c, size_t offset, __mmask16 tail = -1)
         {
             __m512 _a = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(a + offset, tail))));
-            __m512 _aScale = Avx512f::Load<align, mask>(aScale + offset, tail);
-            __m512 _aShift = Avx512f::Load<align, mask>(aShift + offset, tail);
+            __m512 _aScale = Load<align, mask>(aScale + offset, tail);
+            __m512 _aShift = Load<align, mask>(aShift + offset, tail);
             _a = Fmadd<nofma>(_a, _aScale, _aShift);
             __m512 _b = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(b + offset, tail))));
-            __m512 _bScale = Avx512f::Load<align, mask>(bScale + offset, tail);
-            __m512 _bShift = Avx512f::Load<align, mask>(bShift + offset, tail);
+            __m512 _bScale = Load<align, mask>(bScale + offset, tail);
+            __m512 _bShift = Load<align, mask>(bShift + offset, tail);
             _b = Fmadd<nofma>(_b, _bScale, _bShift);
-            __m512 _cScale = Avx512f::Load<align, mask>(cScale + offset, tail);
-            __m512 _cShift = Avx512f::Load<align, mask>(cShift + offset, tail);
+            __m512 _cScale = Load<align, mask>(cScale + offset, tail);
+            __m512 _cShift = Load<align, mask>(cShift + offset, tail);
             __m512i c32 = _mm512_cvtps_epi32(Fmadd<nofma>(_mm512_add_ps(_a, _b), _cScale, _cShift));
             __m512i c8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(c32, K_ZERO), K_ZERO));
             Store<false, mask>(c + offset, _mm_min_epu8(_mm512_extracti32x4_epi32(c8, 0), upper), tail);
@@ -155,14 +155,14 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetAddBias(const __m512& bias, float* dst, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst, _mm512_add_ps((Avx512f::Load<align, mask>(dst, tail)), bias), tail);
+            Store<align, mask>(dst, _mm512_add_ps((Load<align, mask>(dst, tail)), bias), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetAddBias(const float* bias, float* dst, __mmask16 tail = -1)
         {
-            __m512 _bias = Avx512f::Load<align, mask>(bias, tail);
-            __m512 _dst = Avx512f::Load<align, mask>(dst, tail);
-            Avx512f::Store<align, mask>(dst, _mm512_add_ps(_dst, _bias), tail);
+            __m512 _bias = Load<align, mask>(bias, tail);
+            __m512 _dst = Load<align, mask>(dst, tail);
+            Store<align, mask>(dst, _mm512_add_ps(_dst, _bias), tail);
         }
 
         template <bool align> void SynetAddBiasNchw(const float* bias, size_t channels, size_t spatial, float* dst)
@@ -242,7 +242,7 @@ namespace Simd
             size_t spatial4 = AlignLo(spatial, 4);
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _bias = Avx512f::Load<false>(bias + c);
+                __m512 _bias = Load<false>(bias + c);
                 size_t s = 0;
                 for (; s < spatial4; s += 4, dst += 4 * F)
                 {
@@ -301,7 +301,7 @@ namespace Simd
 
         template <SimdSynetEltwiseOperationType type, bool align, bool mask > SIMD_INLINE void SynetEltwiseLayerForward(const float* src0, const float* src1, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst + offset, SynetEltwiseLayerForward<type>((Avx512f::Load<align, mask>(src0 + offset, tail)), (Avx512f::Load<align, mask>(src1 + offset, tail))), tail);
+            Store<align, mask>(dst + offset, SynetEltwiseLayerForward<type>((Load<align, mask>(src0 + offset, tail)), (Load<align, mask>(src1 + offset, tail))), tail);
         }
 
         template <SimdSynetEltwiseOperationType type, bool align> void SynetEltwiseLayerForward(float const* const* src, size_t count, size_t size, float* dst)
@@ -342,12 +342,12 @@ namespace Simd
 
         template <bool align, bool mask> void SynetEltwiseLayerForwardSum(const float* src0, const __m512& weight0, const float* src1, const __m512& weight1, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst + offset, _mm512_fmadd_ps((Avx512f::Load<align, mask>(src0 + offset, tail)), weight0, _mm512_mul_ps((Avx512f::Load<align, mask>(src1 + offset, tail)), weight1)), tail);
+            Store<align, mask>(dst + offset, _mm512_fmadd_ps((Load<align, mask>(src0 + offset, tail)), weight0, _mm512_mul_ps((Load<align, mask>(src1 + offset, tail)), weight1)), tail);
         }
 
         template <bool align, bool mask> void SynetEltwiseLayerForwardSum(const float* src, const __m512& weight, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst + offset, _mm512_fmadd_ps((Avx512f::Load<align, mask>(src + offset, tail)), weight, (Avx512f::Load<align, mask>(dst + offset, tail))), tail);
+            Store<align, mask>(dst + offset, _mm512_fmadd_ps((Load<align, mask>(src + offset, tail)), weight, (Load<align, mask>(dst + offset, tail))), tail);
         }
 
         template <bool align> void SynetEltwiseLayerForwardSum(float const* const* src, const float* weight, size_t count, size_t size, float* dst)
@@ -809,7 +809,7 @@ namespace Simd
                 w0 = _mm512_maskz_loadu_ps(tail, W0 + k);
                 d00 = _mm512_fmadd_ps(s0, w0, d00);
             }
-            D[0] = Avx512f::ExtractSum(d00) + B[0];
+            D[0] = ExtractSum(d00) + B[0];
         }
 
         void SynetInnerProductLayerForward4(const float* S0, const float* W, const float* B, size_t K, float* D)
@@ -884,7 +884,7 @@ namespace Simd
                 w0 = _mm512_maskz_loadu_ps(tail, W3 + k);
                 d30 = _mm512_fmadd_ps(s0, w0, d30);
             }
-            _mm_storeu_ps(D, _mm_add_ps(Avx512f::Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
+            _mm_storeu_ps(D, _mm_add_ps(Extract4Sums(d00, d10, d20, d30), _mm_loadu_ps(B)));
         }
 
         void SynetInnerProductLayerForward(const float* src, const float* weight, const float* bias, size_t count, size_t size, float* dst)
@@ -935,7 +935,7 @@ namespace Simd
             __m512 k0 = _mm512_set1_ps(k[0]);
             __m512 k1 = _mm512_set1_ps(k[1]);
             __m512 k2 = _mm512_set1_ps(k[2]);
-            Avx512f::Pow pow;
+            Pow pow;
             Array32f sum(spatial, true), zero(spatial, true);
             size_t aligned = AlignLo(spatial, F);
             __mmask16 tail = TailMask16(spatial - aligned);
@@ -945,14 +945,14 @@ namespace Simd
                 size_t s = 0;
                 for (; s < aligned; s += F)
                 {
-                    __m512 _pos = Avx512f::Load<align>(pos + s);
-                    Avx512f::Store<true>(sum.data + s, _mm512_fmadd_ps(_pos, _pos, Avx512f::Load<true>(sum.data + s)));
+                    __m512 _pos = Load<align>(pos + s);
+                    Store<true>(sum.data + s, _mm512_fmadd_ps(_pos, _pos, Load<true>(sum.data + s)));
                 }
                 if (s < spatial)
                 {
-                    __m512 _pos = Avx512f::Load<align, true>(pos + s, tail);
-                    __m512 _sum = Avx512f::Load<true, true>(sum.data + s, tail);
-                    Avx512f::Store<true, true>(sum.data + s, _mm512_fmadd_ps(_pos, _pos, _sum), tail);
+                    __m512 _pos = Load<align, true>(pos + s, tail);
+                    __m512 _sum = Load<true, true>(sum.data + s, tail);
+                    Store<true, true>(sum.data + s, _mm512_fmadd_ps(_pos, _pos, _sum), tail);
                 }
             }
             for (size_t c = 0; c < channels; ++c)
@@ -962,23 +962,23 @@ namespace Simd
                 size_t s = 0;
                 for (; s < aligned; s += F)
                 {
-                    __m512 _pos = Avx512f::Load<align>(pos + s);
-                    __m512 _neg = Avx512f::Load<align>(neg + s);
-                    __m512 _sum = Avx512f::Load<true>(sum.data + s);
+                    __m512 _pos = Load<align>(pos + s);
+                    __m512 _neg = Load<align>(neg + s);
+                    __m512 _sum = Load<true>(sum.data + s);
                     _sum = _mm512_fmadd_ps(_pos, _pos, _mm512_fnmadd_ps(_neg, _neg, _sum));
-                    __m512 _src = Avx512f::Load<align>(src + s);
-                    Avx512f::Store<true>(sum.data + s, _sum);
-                    Avx512f::Store<align>(dst + s, _mm512_mul_ps(_src, pow(_mm512_fmadd_ps(k1, _sum, k0), k2)));
+                    __m512 _src = Load<align>(src + s);
+                    Store<true>(sum.data + s, _sum);
+                    Store<align>(dst + s, _mm512_mul_ps(_src, pow(_mm512_fmadd_ps(k1, _sum, k0), k2)));
                 }
                 if (s < spatial)
                 {
-                    __m512 _pos = Avx512f::Load<align, true>(pos + s, tail);
-                    __m512 _neg = Avx512f::Load<align, true>(neg + s, tail);
-                    __m512 _sum = Avx512f::Load<true, true>(sum.data + s, tail);
+                    __m512 _pos = Load<align, true>(pos + s, tail);
+                    __m512 _neg = Load<align, true>(neg + s, tail);
+                    __m512 _sum = Load<true, true>(sum.data + s, tail);
                     _sum = _mm512_fmadd_ps(_pos, _pos, _mm512_fnmadd_ps(_neg, _neg, _sum));
-                    __m512 _src = Avx512f::Load<align, true>(src + s, tail);
-                    Avx512f::Store<true, true>(sum.data + s, _sum, tail);
-                    Avx512f::Store<align, true>(dst + s, _mm512_mul_ps(_src, pow(_mm512_fmadd_ps(k1, _sum, k0), k2)), tail);
+                    __m512 _src = Load<align, true>(src + s, tail);
+                    Store<true, true>(sum.data + s, _sum, tail);
+                    Store<align, true>(dst + s, _mm512_mul_ps(_src, pow(_mm512_fmadd_ps(k1, _sum, k0), k2)), tail);
                 }
                 src += spatial;
                 dst += spatial;
@@ -998,20 +998,20 @@ namespace Simd
             __m512 k0 = _mm512_set1_ps(k[0]);
             __m512 k1 = _mm512_set1_ps(k[1]);
             __m512 k2 = _mm512_set1_ps(k[2]);
-            Avx512f::Pow pow;
+            Pow pow;
             size_t aligned = AlignLo(channels - half, F);
             for (size_t s = 0; s < spatial; ++s)
             {
-                Avx512f::Store<align>(dst + 0, _mm512_mul_ps(Avx512f::Load<align>(src + 0), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, NoseSquareSum(src + 0))), k2)));
+                Store<align>(dst + 0, _mm512_mul_ps(Load<align>(src + 0), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, NoseSquareSum(src + 0))), k2)));
                 for (size_t c = F; c < aligned; c += F)
-                    Avx512f::Store<align>(dst + c, _mm512_mul_ps(Avx512f::Load<align>(src + c), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, BodySquareSum(src + c))), k2)));
+                    Store<align>(dst + c, _mm512_mul_ps(Load<align>(src + c), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, BodySquareSum(src + c))), k2)));
                 if (aligned != channels - half)
                 {
                     size_t c = channels - half - F;
-                    Avx512f::Store<false>(dst + c, _mm512_mul_ps(Avx512f::Load<false>(src + c), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, BodySquareSum(src + c))), k2)));
+                    Store<false>(dst + c, _mm512_mul_ps(Load<false>(src + c), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, BodySquareSum(src + c))), k2)));
                 }
                 size_t c = channels - F;
-                Avx512f::Store<false>(dst + c, _mm512_mul_ps(Avx512f::Load<false>(src + c), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, TailSquareSum(src + c))), k2)));
+                Store<false>(dst + c, _mm512_mul_ps(Load<false>(src + c), pow(_mm512_add_ps(k0, _mm512_mul_ps(k1, TailSquareSum(src + c))), k2)));
                 src += channels;
                 dst += channels;
             }
@@ -1152,7 +1152,7 @@ namespace Simd
 
         void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
         {
-            Avx512f::Exp exp;
+            Exp exp;
             size_t aligned = Simd::AlignLo(outer, F), tail = outer - aligned;
             for (size_t o = 0; o < aligned; o += F)
             {
@@ -1190,7 +1190,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void SynetSoftmaxLayerForward31(const Avx512f::Exp& exp, __m512 buf[3])
+        SIMD_INLINE void SynetSoftmaxLayerForward31(const Exp& exp, __m512 buf[3])
         {
             __m512 max = _mm512_max_ps(buf[0], _mm512_max_ps(buf[1], buf[2]));
             buf[0] = exp.Exponent(_mm512_sub_ps(buf[0], max));
@@ -1205,7 +1205,7 @@ namespace Simd
         void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
         {
             static const __m512i idx = _mm512_setr_epi32(0x00, 0x03, 0x06, 0x09, 0x0C, 0x0F, 0x12, 0x15, 0x18, 0x1B, 0x1E, 0x21, 0x24, 0x27, 0x2A, 0x2D);
-            Avx512f::Exp exp;
+            Exp exp;
             __m512 buf[3];
             size_t aligned = Simd::AlignLo(outer, F), tail = outer - aligned;
             for (size_t o = 0; o < aligned; o += F)
@@ -1241,7 +1241,7 @@ namespace Simd
                 SynetSoftmaxLayerForward31(src, outer, dst);
             else
             {
-                Avx512f::Exp exp;
+                Exp exp;
                 size_t aligned = Simd::AlignLo(inner, F);
                 __mmask16 tail = TailMask16(inner - aligned);
                 Array32f tmp(inner * 2);
@@ -1350,17 +1350,17 @@ namespace Simd
             size_t i = 0;
             for (; i < sizeQF; i += QF)
             {
-                Avx512f::Store<align>(dst + i + 0 * F, SynetUnaryOperation32f<type>(Avx512f::Load<align>(src + i + 0 * F)));
-                Avx512f::Store<align>(dst + i + 1 * F, SynetUnaryOperation32f<type>(Avx512f::Load<align>(src + i + 1 * F)));
-                Avx512f::Store<align>(dst + i + 2 * F, SynetUnaryOperation32f<type>(Avx512f::Load<align>(src + i + 2 * F)));
-                Avx512f::Store<align>(dst + i + 3 * F, SynetUnaryOperation32f<type>(Avx512f::Load<align>(src + i + 3 * F)));
+                Store<align>(dst + i + 0 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 0 * F)));
+                Store<align>(dst + i + 1 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 1 * F)));
+                Store<align>(dst + i + 2 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 2 * F)));
+                Store<align>(dst + i + 3 * F, SynetUnaryOperation32f<type>(Load<align>(src + i + 3 * F)));
             }
             for (; i < sizeF; i += F)
-                Avx512f::Store<align>(dst + i, SynetUnaryOperation32f<type>(Avx512f::Load<align>(src + i)));
+                Store<align>(dst + i, SynetUnaryOperation32f<type>(Load<align>(src + i)));
             if (i < size)
             {
                 __mmask16 tail = TailMask16(size - sizeF);
-                Avx512f::Store<align, true>(dst + i, SynetUnaryOperation32f<type>(Avx512f::Load<align, true>(src + i, tail)), tail);
+                Store<align, true>(dst + i, SynetUnaryOperation32f<type>(Load<align, true>(src + i, tail)), tail);
             }
         }
 

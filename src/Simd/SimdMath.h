@@ -826,8 +826,8 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         SIMD_INLINE __mmask8 TailMask8(ptrdiff_t tail)
         {
@@ -849,7 +849,7 @@ namespace Simd
             return nose <= 0 ? __mmask16(0) : (nose >= 16 ? __mmask16(-1) : __mmask16(-1) << (16 - nose));
         }
 
-        SIMD_INLINE __m512 Cast(const __m512i & value)
+        SIMD_INLINE __m512 Cast(const __m512i& value)
         {
 #if defined(__clang__)
             return (__m512)value;
@@ -858,7 +858,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512i Cast(const __m512 & value)
+        SIMD_INLINE __m512i Cast(const __m512& value)
         {
 #if defined(__clang__)
             return (__m512i)value;
@@ -867,7 +867,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 Or(const __m512 & a, const __m512 & b)
+        SIMD_INLINE __m512 Or(const __m512& a, const __m512& b)
         {
 #if defined(__clang__)
             return (__m512)_mm512_or_epi32((__m512i)a, (__m512i)b);
@@ -876,7 +876,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 And(const __m512 & a, const __m512 & b)
+        SIMD_INLINE __m512 And(const __m512& a, const __m512& b)
         {
 #if defined(__clang__)
             return (__m512)_mm512_and_epi32((__m512i)a, (__m512i)b);
@@ -885,7 +885,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 AndMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
+        SIMD_INLINE __m512 AndMaskZ(const __m512& a, const __m512& b, __mmask16 m)
         {
 #if defined(__clang__)
             return (__m512)_mm512_maskz_and_epi32(m, (__m512i)a, (__m512i)b);
@@ -894,7 +894,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 AndNot(const __m512 & a, const __m512 & b)
+        SIMD_INLINE __m512 AndNot(const __m512& a, const __m512& b)
         {
 #if defined(__clang__)
             return (__m512)_mm512_andnot_epi32((__m512i)a, (__m512i)b);
@@ -903,7 +903,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 AndNotMaskZ(const __m512 & a, const __m512 & b, __mmask16 m)
+        SIMD_INLINE __m512 AndNotMaskZ(const __m512& a, const __m512& b, __mmask16 m)
         {
 #if defined(__clang__)
             return (__m512)_mm512_maskz_andnot_epi32(m, (__m512i)a, (__m512i)b);
@@ -912,7 +912,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 Xor(const __m512 & a, const __m512 & b)
+        SIMD_INLINE __m512 Xor(const __m512& a, const __m512& b)
         {
 #if defined(__clang__)
             return (__m512)_mm512_xor_epi32((__m512i)a, (__m512i)b);
@@ -921,7 +921,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 Rcp14(const __m512 & a)
+        SIMD_INLINE __m512 Rcp14(const __m512& a)
         {
 #if defined(_MSC_VER) && _MSC_VER<1922
             return _mm512_maskz_rcp14_ps(_MM_K0_REG, a);
@@ -930,7 +930,7 @@ namespace Simd
 #endif
         }
 
-        SIMD_INLINE __m512 Rsqrt14(const __m512 & a)
+        SIMD_INLINE __m512 Rsqrt14(const __m512& a)
         {
 #if defined(_MSC_VER) && _MSC_VER<1922
             return _mm512_maskz_rsqrt14_ps(_MM_K0_REG, a);
@@ -949,48 +949,48 @@ namespace Simd
         template<> SIMD_INLINE __m512 Mask<false>(__m512 a, __mmask16 m)
         {
             return a;
-        }        
-        
-        template<int shift> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi)
+        }
+
+        template<int shift> SIMD_INLINE __m512 Alignr(const __m512& lo, const __m512& hi)
         {
             return Cast(_mm512_alignr_epi32(Cast(hi), Cast(lo), shift));
         }
 
-        template<> SIMD_INLINE __m512 Alignr<0>(const __m512 & lo, const __m512 & hi)
+        template<> SIMD_INLINE __m512 Alignr<0>(const __m512& lo, const __m512& hi)
         {
             return lo;
         }
 
-        template<> SIMD_INLINE __m512 Alignr<F>(const __m512 & lo, const __m512 & hi)
+        template<> SIMD_INLINE __m512 Alignr<F>(const __m512& lo, const __m512& hi)
         {
             return hi;
         }
 
-        template<int shift, bool mask> SIMD_INLINE __m512 Alignr(const __m512 & lo, const __m512 & hi, __mmask16 m)
+        template<int shift, bool mask> SIMD_INLINE __m512 Alignr(const __m512& lo, const __m512& hi, __mmask16 m)
         {
             return Mask<mask>(Alignr<shift>(lo, hi), m);
         }
 
-        template <int part> SIMD_INLINE __m512 Interleave(const __m512 & a, const __m512 & b);
+        template <int part> SIMD_INLINE __m512 Interleave(const __m512& a, const __m512& b);
 
-        template <> SIMD_INLINE __m512 Interleave<0>(const __m512 & a, const __m512 & b)
+        template <> SIMD_INLINE __m512 Interleave<0>(const __m512& a, const __m512& b)
         {
             return _mm512_permutex2var_ps(a, K32_INTERLEAVE_0, b);
         }
 
-        template <> SIMD_INLINE __m512 Interleave<1>(const __m512 & a, const __m512 & b)
+        template <> SIMD_INLINE __m512 Interleave<1>(const __m512& a, const __m512& b)
         {
             return _mm512_permutex2var_ps(a, K32_INTERLEAVE_1, b);
         }
 
-        template <int odd> SIMD_INLINE __m512 Deinterleave(const __m512 & a, const __m512 & b);
+        template <int odd> SIMD_INLINE __m512 Deinterleave(const __m512& a, const __m512& b);
 
-        template <> SIMD_INLINE __m512 Deinterleave<0>(const __m512 & a, const __m512 & b)
+        template <> SIMD_INLINE __m512 Deinterleave<0>(const __m512& a, const __m512& b)
         {
             return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_0, b);
         }
 
-        template <> SIMD_INLINE __m512 Deinterleave<1>(const __m512 & a, const __m512 & b)
+        template <> SIMD_INLINE __m512 Deinterleave<1>(const __m512& a, const __m512& b)
         {
             return _mm512_permutex2var_ps(a, K32_DEINTERLEAVE_1, b);
         }
@@ -1010,12 +1010,7 @@ namespace Simd
             return _mm512_maskz_add_ps(-1, _mm512_mul_ps(a, b), c);
 #endif
         }
-    }
-#endif //SIMD_AVX512F_ENABLE
 
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
         SIMD_INLINE __mmask32 TailMask32(ptrdiff_t tail)
         {
             return tail <= 0 ? __mmask32(0) : (tail >= 32 ? __mmask32(-1) : __mmask32(-1) >> (32 - tail));

@@ -25,7 +25,6 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
 
@@ -269,27 +268,27 @@ namespace Simd
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationElu>(__m512 value, const __m512 * params)
         {
-            return Avx512f::Elu(value, params[0]);
+            return Elu(value, params[0]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHswish>(__m512 value, const __m512 * params)
         {
-            return Avx512f::SynetHswish32f(value, params[0], params[1]);
+            return SynetHswish32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationMish>(__m512 value, const __m512* params)
         {
-            return Avx512f::Mish(value, params[0]);
+            return Mish(value, params[0]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationHardSigmoid>(__m512 value, const __m512* params)
         {
-            return Avx512f::SynetHardSigmoid32f(value, params[0], params[1]);
+            return SynetHardSigmoid32f(value, params[0], params[1]);
         }
 
         template<> SIMD_INLINE __m512 Activate<::SimdConvolutionActivationSwish>(__m512 value, const __m512* params)
         {
-            return Avx512f::Swish(value, params[0]);
+            return Swish(value, params[0]);
         }
 
         template<int kernel, int stride, ::SimdConvolutionActivationType type>
@@ -486,5 +485,5 @@ namespace Simd
             return Avx2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 }

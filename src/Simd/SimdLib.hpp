@@ -57,8 +57,7 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoAmx) ? " AMX" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? " AVX-512BF16" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? " AVX-512VNNI" : "");
-        os << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW" : "");
-        os << (SimdCpuInfo(SimdCpuInfoAvx512f) ? " AVX-512F" : "");
+        os << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW AVX-512F" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx) ? " AVX" : "");
         os << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3" : "");

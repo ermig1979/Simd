@@ -33,15 +33,15 @@ namespace Simd
     {
         template<bool align, bool mask> SIMD_INLINE void Float32ToFloat16(const float * src, uint16_t * dst, const __mmask16 * srcTails, __mmask32 dstTail)
         {
-            __m256i lo = _mm512_cvtps_ph((Avx512f::Load<align, mask>(src + 0, srcTails[0])), 0);
-            __m256i hi = _mm512_cvtps_ph((Avx512f::Load<align, mask>(src + F, srcTails[1])), 0);
+            __m256i lo = _mm512_cvtps_ph((Load<align, mask>(src + 0, srcTails[0])), 0);
+            __m256i hi = _mm512_cvtps_ph((Load<align, mask>(src + F, srcTails[1])), 0);
             Store<align, mask>(dst, _mm512_inserti64x4(_mm512_castsi256_si512(lo), hi, 1), dstTail);
         }
 
         template<bool align> SIMD_INLINE void Float32ToFloat16x2(const float * src, uint16_t * dst)
         {
-            Store<align>(dst + 0 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Avx512f::Load<align>(src + 0 * F), 0)), _mm512_cvtps_ph(Avx512f::Load<align>(src + 1 * F), 0), 1));
-            Store<align>(dst + 1 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Avx512f::Load<align>(src + 2 * F), 0)), _mm512_cvtps_ph(Avx512f::Load<align>(src + 3 * F), 0), 1));
+            Store<align>(dst + 0 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Load<align>(src + 0 * F), 0)), _mm512_cvtps_ph(Load<align>(src + 1 * F), 0), 1));
+            Store<align>(dst + 1 * HA, _mm512_inserti64x4(_mm512_castsi256_si512(_mm512_cvtps_ph(Load<align>(src + 2 * F), 0)), _mm512_cvtps_ph(Load<align>(src + 3 * F), 0), 1));
         }
 
         template <bool align> void Float32ToFloat16(const float * src, size_t size, uint16_t * dst)
@@ -76,24 +76,24 @@ namespace Simd
         template<bool align, bool mask> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst, __mmask32 srcTail, const __mmask16 * dstTails)
         {
             __m512i _src = Load<align, mask>(src, srcTail);
-            Avx512f::Store<align, mask>(dst + 0, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0)), dstTails[0]);
-            Avx512f::Store<align, mask>(dst + F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1)), dstTails[1]);
+            Store<align, mask>(dst + 0, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 0)), dstTails[0]);
+            Store<align, mask>(dst + F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(_src, 1)), dstTails[1]);
         }
 
         template<bool align> SIMD_INLINE void Float16ToFloat32x2(const uint16_t * src, float * dst)
         {
 #if defined(_MSC_VER)
             const __m512i src0 = Load<align>(src + 00);
-            Avx512f::Store<align>(dst + 0 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 0)));
-            Avx512f::Store<align>(dst + 1 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 1)));
+            Store<align>(dst + 0 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 0)));
+            Store<align>(dst + 1 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src0, 1)));
             const __m512i src1 = Load<align>(src + HA);
-            Avx512f::Store<align>(dst + 2 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 0)));
-            Avx512f::Store<align>(dst + 3 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 1)));
+            Store<align>(dst + 2 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 0)));
+            Store<align>(dst + 3 * F, _mm512_cvtph_ps(_mm512_extracti64x4_epi64(src1, 1)));
 #else
-            Avx512f::Store<align>(dst + 0 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 0)));
-            Avx512f::Store<align>(dst + 1 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 1)));
-            Avx512f::Store<align>(dst + 2 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 2)));
-            Avx512f::Store<align>(dst + 3 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 3)));
+            Store<align>(dst + 0 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 0)));
+            Store<align>(dst + 1 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 1)));
+            Store<align>(dst + 2 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 2)));
+            Store<align>(dst + 3 * F, _mm512_cvtph_ps(Avx2::Load<align>((__m256i*)src + 3)));
 #endif
         }
 
@@ -193,7 +193,7 @@ namespace Simd
             if (i < size)
                 SquaredDifferenceSum16f2<align, true>(a + i, b + i, sums, tailMask);
             sums[0] = _mm512_add_ps(sums[0], sums[1]);
-            *sum = Avx512f::ExtractSum(sums[0]);
+            *sum = ExtractSum(sums[0]);
         }
 
         void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t size, float * sum)
@@ -251,9 +251,9 @@ namespace Simd
                 CosineDistance16f2<align, false>(a + i, b + i, _aa, _ab, _bb);
             if (i < size)
                 CosineDistance16f2<align, true>(a + i, b + i, _aa, _ab, _bb, tailMask);
-            float aa = Avx512f::ExtractSum(_mm512_add_ps(_aa[0], _aa[1]));
-            float ab = Avx512f::ExtractSum(_mm512_add_ps(_ab[0], _ab[1]));
-            float bb = Avx512f::ExtractSum(_mm512_add_ps(_bb[0], _bb[1]));
+            float aa = ExtractSum(_mm512_add_ps(_aa[0], _aa[1]));
+            float ab = ExtractSum(_mm512_add_ps(_ab[0], _ab[1]));
+            float bb = ExtractSum(_mm512_add_ps(_bb[0], _bb[1]));
             *distance = 1.0f - ab / ::sqrt(aa*bb);
         }
 
@@ -319,7 +319,7 @@ namespace Simd
                     __m512 a = _mm512_and_ps(mask, _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[i] + k))));
                     sum = _mm512_fmadd_ps(a, a, sum);
                 }
-                squares[i] = Avx512f::ExtractSum(sum);
+                squares[i] = ExtractSum(sum);
             }
         }
 
@@ -481,12 +481,12 @@ namespace Simd
                 a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[5] + k)));
                 c50 = _mm512_fmadd_ps(a0, b0, c50);
             }
-            distances[0 * stride] = 1.0f - Avx512f::ExtractSum(c00) / sqrt(bb[0] * aa[0]);
-            distances[1 * stride] = 1.0f - Avx512f::ExtractSum(c10) / sqrt(bb[0] * aa[1]);
-            distances[2 * stride] = 1.0f - Avx512f::ExtractSum(c20) / sqrt(bb[0] * aa[2]);
-            distances[3 * stride] = 1.0f - Avx512f::ExtractSum(c30) / sqrt(bb[0] * aa[3]);
-            distances[4 * stride] = 1.0f - Avx512f::ExtractSum(c40) / sqrt(bb[0] * aa[4]);
-            distances[5 * stride] = 1.0f - Avx512f::ExtractSum(c50) / sqrt(bb[0] * aa[5]);
+            distances[0 * stride] = 1.0f - ExtractSum(c00) / sqrt(bb[0] * aa[0]);
+            distances[1 * stride] = 1.0f - ExtractSum(c10) / sqrt(bb[0] * aa[1]);
+            distances[2 * stride] = 1.0f - ExtractSum(c20) / sqrt(bb[0] * aa[2]);
+            distances[3 * stride] = 1.0f - ExtractSum(c30) / sqrt(bb[0] * aa[3]);
+            distances[4 * stride] = 1.0f - ExtractSum(c40) / sqrt(bb[0] * aa[4]);
+            distances[5 * stride] = 1.0f - ExtractSum(c50) / sqrt(bb[0] * aa[5]);
         }
 
         static void MicroCosineDistances3x4(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)
@@ -587,9 +587,9 @@ namespace Simd
                 a0 = _mm512_cvtph_ps(_mm256_loadu_si256((__m256i*)(A[2] + k)));
                 c20 = _mm512_fmadd_ps(a0, b0, c20);
             }
-            distances[0 * stride] = 1.0f - Avx512f::ExtractSum(c00) / sqrt(bb[0] * aa[0]);
-            distances[1 * stride] = 1.0f - Avx512f::ExtractSum(c10) / sqrt(bb[0] * aa[1]);
-            distances[2 * stride] = 1.0f - Avx512f::ExtractSum(c20) / sqrt(bb[0] * aa[2]);
+            distances[0 * stride] = 1.0f - ExtractSum(c00) / sqrt(bb[0] * aa[0]);
+            distances[1 * stride] = 1.0f - ExtractSum(c10) / sqrt(bb[0] * aa[1]);
+            distances[2 * stride] = 1.0f - ExtractSum(c20) / sqrt(bb[0] * aa[2]);
         }
 
         static void MicroCosineDistances1x4(size_t K, const uint16_t * const * A, const uint16_t * const * B, const float * aa, const float * bb, float * distances, size_t stride)

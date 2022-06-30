@@ -186,17 +186,17 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
-        SIMD_INLINE float Extract(const __m512 & a, size_t index)
+        SIMD_INLINE float Extract(const __m512& a, size_t index)
         {
             float buffer[F];
             _mm512_storeu_ps(buffer, a);
             return buffer[index];
         }
 
-        SIMD_INLINE float ExtractSum(const __m512 & a)
+        SIMD_INLINE float ExtractSum(const __m512& a)
         {
             __m128 lo = _mm_add_ps(_mm512_extractf32x4_ps(a, 0), _mm512_extractf32x4_ps(a, 1));
             __m128 hi = _mm_add_ps(_mm512_extractf32x4_ps(a, 2), _mm512_extractf32x4_ps(a, 3));
@@ -213,7 +213,7 @@ namespace Simd
             return _mm_add_ps(_mm256_castps256_ps128(c), _mm256_extractf128_ps(c, 1));
         }
 
-        SIMD_INLINE __m128 Extract4Sums(const __m512 & a0, const __m512 & a1, const __m512 & a2, const __m512 & a3)
+        SIMD_INLINE __m128 Extract4Sums(const __m512& a0, const __m512& a1, const __m512& a2, const __m512& a3)
         {
             __m256 b0 = _mm512_castps512_ps256(_mm512_add_ps(a0, Alignr<8>(a0, a0)));
             __m256 b1 = _mm512_castps512_ps256(_mm512_add_ps(a1, Alignr<8>(a1, a1)));
@@ -222,12 +222,7 @@ namespace Simd
             __m256 c = _mm256_hadd_ps(_mm256_hadd_ps(b0, b1), _mm256_hadd_ps(b2, b3));
             return _mm_add_ps(_mm256_castps256_ps128(c), _mm256_extractf128_ps(c, 1));
         }
-    }
-#endif//SIMD_AVX512F_ENABLE
 
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
         template <class T> SIMD_INLINE T ExtractSum(__m512i a)
         {
             const size_t size = A / sizeof(T);

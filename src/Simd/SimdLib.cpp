@@ -79,7 +79,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdAvx512vnni.h"
 #include "Simd/SimdAvx512bf16.h"
@@ -125,9 +124,6 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
 #endif
 #ifdef SIMD_AVX2_ENABLE
     case SimdCpuInfoAvx2: return Avx2::Enable ? 1 : 0;
-#endif
-#ifdef SIMD_AVX512F_ENABLE
-    case SimdCpuInfoAvx512f: return Avx512f::Enable ? 1 : 0;
 #endif
 #ifdef SIMD_AVX512BW_ENABLE
     case SimdCpuInfoAvx512bw: return Avx512bw::Enable ? 1 : 0;
@@ -3656,7 +3652,7 @@ SIMD_API void SimdMedianFilterSquare5x5(const uint8_t * src, size_t srcStride, s
 SIMD_API void SimdNeuralConvert(const uint8_t * src, size_t srcStride, size_t width, size_t height, float * dst, size_t dstStride, int inversion)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralConvert(src, srcStride, width, height, dst, dstStride, inversion);
     else
 #endif
@@ -3790,7 +3786,7 @@ SIMD_API void SimdNeuralAdaptiveGradientUpdate(const float * delta, size_t size,
 SIMD_API void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution2x2Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
@@ -3820,7 +3816,7 @@ SIMD_API void SimdNeuralAddConvolution2x2Forward(const float * src, size_t srcSt
 SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution3x3Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
@@ -3850,7 +3846,7 @@ SIMD_API void SimdNeuralAddConvolution3x3Forward(const float * src, size_t srcSt
 SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution4x4Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
@@ -3880,7 +3876,7 @@ SIMD_API void SimdNeuralAddConvolution4x4Forward(const float * src, size_t srcSt
 SIMD_API void SimdNeuralAddConvolution5x5Forward(const float * src, size_t srcStride, size_t width, size_t height, const float * weights, float * dst, size_t dstStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution5x5Forward(src, srcStride, width, height, weights, dst, dstStride);
     else
 #endif
@@ -3942,7 +3938,7 @@ SIMD_API void SimdNeuralAddConvolution5x5Backward(const float * src, size_t srcS
 SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution2x2Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
@@ -3977,7 +3973,7 @@ SIMD_API void SimdNeuralAddConvolution2x2Sum(const float * src, size_t srcStride
 SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution3x3Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
@@ -4012,7 +4008,7 @@ SIMD_API void SimdNeuralAddConvolution3x3Sum(const float * src, size_t srcStride
 SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution4x4Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif
@@ -4047,7 +4043,7 @@ SIMD_API void SimdNeuralAddConvolution4x4Sum(const float * src, size_t srcStride
 SIMD_API void SimdNeuralAddConvolution5x5Sum(const float * src, size_t srcStride, const float * dst, size_t dstStride, size_t width, size_t height, float * sums)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512f::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F)
         Avx512bw::NeuralAddConvolution5x5Sum(src, srcStride, dst, dstStride, width, height, sums);
     else
 #endif

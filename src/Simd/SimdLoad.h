@@ -277,56 +277,49 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
-        template <bool align> SIMD_INLINE __m512 Load(const float * p);
+        template <bool align> SIMD_INLINE __m512 Load(const float* p);
 
-        template <> SIMD_INLINE __m512 Load<false>(const float * p)
+        template <> SIMD_INLINE __m512 Load<false>(const float* p)
         {
             return _mm512_loadu_ps(p);
         }
 
-        template <> SIMD_INLINE __m512 Load<true>(const float * p)
+        template <> SIMD_INLINE __m512 Load<true>(const float* p)
         {
 #if defined(__clang__) && (__clang_major__ == 3) && (__clang_minor__ == 8) && (__clang_patchlevel__ == 0)
-            return _mm512_load_ps((const double *)p);
+            return _mm512_load_ps((const double*)p);
 #else
             return _mm512_load_ps(p);
 #endif
         }
 
-        template <bool align, bool mask> SIMD_INLINE __m512 Load(const float * p, __mmask16 m)
+        template <bool align, bool mask> SIMD_INLINE __m512 Load(const float* p, __mmask16 m)
         {
             return Load<align>(p);
         }
 
-        template <> SIMD_INLINE __m512 Load<false, true>(const float * p, __mmask16 m)
+        template <> SIMD_INLINE __m512 Load<false, true>(const float* p, __mmask16 m)
         {
             return _mm512_maskz_loadu_ps(m, p);
         }
 
-        template <> SIMD_INLINE __m512 Load<true, true>(const float * p, __mmask16 m)
+        template <> SIMD_INLINE __m512 Load<true, true>(const float* p, __mmask16 m)
         {
             return _mm512_maskz_load_ps(m, p);
         }
 
-        template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1)
+        template<bool align> SIMD_INLINE __m512 Load(const float* p0, const float* p1)
         {
             return _mm512_castpd_ps(_mm512_insertf64x4(_mm512_castps_pd(_mm512_castps256_ps512(Avx::Load<align>(p0))), _mm256_castps_pd(Avx::Load<align>(p1)), 1));
         }
 
-        template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
+        template<bool align> SIMD_INLINE __m512 Load(const float* p0, const float* p1, const float* p2, const float* p3)
         {
-            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Load<align>(p0)), Load<align>(p1), 1), Load<align>(p2), 2), Load<align>(p3), 3);
+            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse2::Load<align>(p0)), Sse2::Load<align>(p1), 1), Sse2::Load<align>(p2), 2), Sse2::Load<align>(p3), 3);
         }
-    }
-#endif//SIMD_AVX512F_ENABLE
-
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
-        using namespace Avx512f;
 
         template <bool align> SIMD_INLINE __m512i Load(const void * p);
 
@@ -436,16 +429,6 @@ namespace Simd
         {
             __m512i src = Load<false, true>(p + 2 * step, __mmask64(-1) >> 2 * step);
             return _mm512_inserti32x4(src, Sse2::LoadAfterLast<step>(Sse2::LoadAfterLast<step>(Sse2::Load<false>((__m128i*)p + 3))), 3);
-        }
-
-        template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1)
-        {
-            return _mm512_insertf32x8(_mm512_castps256_ps512(Avx::Load<align>(p0)), Avx::Load<align>(p1), 1);
-        }
-
-        template<bool align> SIMD_INLINE __m512 Load(const float * p0, const float * p1, const float * p2, const float * p3)
-        {
-            return _mm512_insertf32x4(_mm512_insertf32x4(_mm512_insertf32x4(_mm512_castps128_ps512(Sse2::Load<align>(p0)), Sse2::Load<align>(p1), 1), Sse2::Load<align>(p2), 2), Sse2::Load<align>(p3), 3);
         }
 
         template<bool align> SIMD_INLINE __m512i Load(const __m256i* p0, const __m256i* p1)

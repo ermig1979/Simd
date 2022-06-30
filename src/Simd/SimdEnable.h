@@ -64,15 +64,6 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
-    {
-        bool GetEnable();
-
-        const bool Enable = GetEnable();
-    }
-#endif
-
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
     {
@@ -161,12 +152,6 @@ namespace Simd
 #define SIMD_AVX2_FUNC(func) Simd::Avx2::Enable ? Simd::Avx2::func : 
 #else
 #define SIMD_AVX2_FUNC(func)
-#endif
-
-#ifdef SIMD_AVX512F_ENABLE
-#define SIMD_AVX512F_FUNC(func) Simd::Avx512f::Enable ? Simd::Avx512f::func : 
-#else
-#define SIMD_AVX512F_FUNC(func)
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE

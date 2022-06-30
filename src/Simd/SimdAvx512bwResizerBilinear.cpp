@@ -735,7 +735,7 @@ namespace Simd
             size_t rs = _param.dstW * cn;
             float* pbx[2] = { _bx[0].data, _bx[1].data };
             int32_t prev = -2;
-            size_t rsa = AlignLo(rs, Avx512f::F);
+            size_t rsa = AlignLo(rs, Avx512bw::F);
             __mmask16 tail = TailMask16(rs - rsa);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
@@ -762,7 +762,7 @@ namespace Simd
                     if (cn == 1)
                     {
                         __m512 _1 = _mm512_set1_ps(1.0f);
-                        for (; dx < rsa; dx += Avx512f::F)
+                        for (; dx < rsa; dx += Avx512bw::F)
                         {
                             __m512i idx = _mm512_permutexvar_epi64(K64_PERMUTE_FOR_PACK, _mm512_load_si512(_ix.data + dx));
                             __m512 sp0 = _mm512_castpd_ps(_mm512_i32gather_pd(_mm512_extracti64x4_epi64(idx, 0), (double*)ps, 4));
@@ -817,7 +817,7 @@ namespace Simd
                     {
                         __m512 _1 = _mm512_set1_ps(1.0f);
                         __m512i _cn = _mm512_set1_epi32((int)cn);
-                        for (; dx < rsa; dx += Avx512f::F)
+                        for (; dx < rsa; dx += Avx512bw::F)
                         {
                             __m512i i0 = _mm512_load_si512(_ix.data + dx);
                             __m512i i1 = _mm512_add_epi32(i0, _cn);
@@ -842,7 +842,7 @@ namespace Simd
                 size_t dx = 0;
                 __m512 _fy0 = _mm512_set1_ps(fy0);
                 __m512 _fy1 = _mm512_set1_ps(fy1);
-                for (; dx < rsa; dx += Avx512f::F)
+                for (; dx < rsa; dx += Avx512bw::F)
                 {
                     __m512 b0 = _mm512_loadu_ps(pbx[0] + dx);
                     __m512 b1 = _mm512_loadu_ps(pbx[1] + dx);

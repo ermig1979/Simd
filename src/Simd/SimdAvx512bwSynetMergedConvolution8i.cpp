@@ -89,7 +89,7 @@ namespace Simd
         SynetMergedConvolution8iCdc::SynetMergedConvolution8iCdc(const MergConvParam8i& p)
             : Avx2::SynetMergedConvolution8iCdc(p)
         {
-            SetSize(Avx512f::F);
+            SetSize(Avx512bw::F);
             _cvt32fTo8u = _s8u ? NULL : Convert32fTo8u;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
@@ -101,7 +101,7 @@ namespace Simd
         SynetMergedConvolution8iCd::SynetMergedConvolution8iCd(const MergConvParam8i& p)
             : Avx2::SynetMergedConvolution8iCd(p)
         {
-            SetSize(Avx512f::F);
+            SetSize(Avx512bw::F);
             _cvt32fTo8u = _s8u ? NULL : Convert32fTo8u;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
@@ -112,7 +112,7 @@ namespace Simd
         SynetMergedConvolution8iDc::SynetMergedConvolution8iDc(const MergConvParam8i& p)
             : Avx2::SynetMergedConvolution8iDc(p)
         {
-            SetSize(Avx512f::F);
+            SetSize(Avx512bw::F);
             _cvt8uTo32f = _s8u ? (Convert8uTo32fPtr)Convert8uTo32f : NULL;
             SetDepthwise(_param.conv[0], _depthwise);
             SetOutput(_param.conv[1], _output);

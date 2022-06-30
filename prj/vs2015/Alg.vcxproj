@@ -40,10 +40,6 @@
       <EnableEnhancedInstructionSet Condition="'$(PlatformToolset)'=='v140'">AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(PlatformToolset)'=='v120'">AdvancedVectorExtensions</EnableEnhancedInstructionSet>
     </ClCompile>
-	<ClCompile Include="..\..\src\Simd\SimdAvx512f*.cpp">
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
-      <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAvx512bw*.cpp">
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='Win32'">NoExtensions</EnableEnhancedInstructionSet>
       <EnableEnhancedInstructionSet Condition="'$(Platform)'=='x64'">NotSet</EnableEnhancedInstructionSet>

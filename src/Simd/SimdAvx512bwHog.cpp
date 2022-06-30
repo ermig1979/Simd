@@ -85,7 +85,7 @@ namespace Simd
                 bestDot = _mm512_max_ps(dot, bestDot);
             }
             Store<align>(buffer.index + col, bestIndex);
-            Avx512f::Store<align>(buffer.value + col, _mm512_sqrt_ps(_mm512_fmadd_ps(dx, dx, _mm512_mul_ps(dy, dy))));
+            Store<align>(buffer.value + col, _mm512_sqrt_ps(_mm512_fmadd_ps(dx, dx, _mm512_mul_ps(dy, dy))));
         }
 
         template <int part> SIMD_INLINE __m512 CovertDifference(const __m256i & a, const __m256i & b)
@@ -180,7 +180,7 @@ namespace Simd
                 bestIndex = _mm512_mask_set1_epi32(bestIndex, _mm512_cmpeq_epi32_mask(bestIndex, K32_18), 0);
 
                 Store<align>(buffer.index + col, bestIndex);
-                Avx512f::Store<align>(buffer.value + col, _mm512_sqrt_ps(_mm512_fmadd_ps(adx, adx, _mm512_mul_ps(ady, ady))));
+                Store<align>(buffer.value + col, _mm512_sqrt_ps(_mm512_fmadd_ps(adx, adx, _mm512_mul_ps(ady, ady))));
             }
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
@@ -301,10 +301,10 @@ namespace Simd
                         __m512 b1 = _mm512_unpackhi_ps(a0, a2);
                         __m512 b2 = _mm512_unpacklo_ps(a1, a3);
                         __m512 b3 = _mm512_unpackhi_ps(a1, a3);
-                        Avx512f::Store<false>(h0[0], _mm512_add_ps(Avx512f::Load<false>(h0[0]), _mm512_unpacklo_ps(b0, b2)));
-                        Avx512f::Store<false>(h0[1], _mm512_add_ps(Avx512f::Load<false>(h0[1]), _mm512_unpackhi_ps(b0, b2)));
-                        Avx512f::Store<false>(h1[0], _mm512_add_ps(Avx512f::Load<false>(h1[0]), _mm512_unpacklo_ps(b1, b3)));
-                        Avx512f::Store<false>(h1[1], _mm512_add_ps(Avx512f::Load<false>(h1[1]), _mm512_unpackhi_ps(b1, b3)));
+                        Store<false>(h0[0], _mm512_add_ps(Load<false>(h0[0]), _mm512_unpacklo_ps(b0, b2)));
+                        Store<false>(h0[1], _mm512_add_ps(Load<false>(h0[1]), _mm512_unpackhi_ps(b0, b2)));
+                        Store<false>(h1[0], _mm512_add_ps(Load<false>(h1[0]), _mm512_unpacklo_ps(b1, b3)));
+                        Store<false>(h1[1], _mm512_add_ps(Load<false>(h1[1]), _mm512_unpackhi_ps(b1, b3)));
                         for (size_t i = 16; i < 18; ++i)
                         {
                             h0[0][i] += src[i * 4 + 0];
@@ -450,7 +450,7 @@ namespace Simd
                 bestIndex = _mm512_mask_set1_epi32(bestIndex, _mm512_cmpeq_epi32_mask(bestIndex, _Q2), 0);
 
                 Store<align>(_index.data + col, bestIndex);
-                Avx512f::Store<align>(_value.data + col, _mm512_sqrt_ps(_mm512_fmadd_ps(adx, adx, _mm512_mul_ps(ady, ady))));
+                Store<align>(_value.data + col, _mm512_sqrt_ps(_mm512_fmadd_ps(adx, adx, _mm512_mul_ps(ady, ady))));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)
@@ -504,10 +504,10 @@ namespace Simd
                     __m512 b1 = _mm512_unpackhi_ps(a0, a2);
                     __m512 b2 = _mm512_unpacklo_ps(a1, a3);
                     __m512 b3 = _mm512_unpackhi_ps(a1, a3);
-                    Avx512f::Store<false>(h0[0], _mm512_add_ps(Avx512f::Load<false>(h0[0]), _mm512_unpacklo_ps(b0, b2)));
-                    Avx512f::Store<false>(h0[1], _mm512_add_ps(Avx512f::Load<false>(h0[1]), _mm512_unpackhi_ps(b0, b2)));
-                    Avx512f::Store<false>(h1[0], _mm512_add_ps(Avx512f::Load<false>(h1[0]), _mm512_unpacklo_ps(b1, b3)));
-                    Avx512f::Store<false>(h1[1], _mm512_add_ps(Avx512f::Load<false>(h1[1]), _mm512_unpackhi_ps(b1, b3)));
+                    Store<false>(h0[0], _mm512_add_ps(Load<false>(h0[0]), _mm512_unpacklo_ps(b0, b2)));
+                    Store<false>(h0[1], _mm512_add_ps(Load<false>(h0[1]), _mm512_unpackhi_ps(b0, b2)));
+                    Store<false>(h1[0], _mm512_add_ps(Load<false>(h1[0]), _mm512_unpacklo_ps(b1, b3)));
+                    Store<false>(h1[1], _mm512_add_ps(Load<false>(h1[1]), _mm512_unpackhi_ps(b1, b3)));
 #if defined(_MSC_VER)
                     for (size_t i = 16; i < 18; ++i)
                     {
@@ -682,10 +682,10 @@ namespace Simd
             __m512 b1 = _mm512_unpackhi_ps(a0, a2);
             __m512 b2 = _mm512_unpacklo_ps(a1, a3);
             __m512 b3 = _mm512_unpackhi_ps(a1, a3);
-            Avx512f::Store<false>(dst[i + 0] + offset, _mm512_unpacklo_ps(b0, b2));
-            Avx512f::Store<false>(dst[i + 1] + offset, _mm512_unpackhi_ps(b0, b2));
-            Avx512f::Store<false>(dst[i + 2] + offset, _mm512_unpacklo_ps(b1, b3));
-            Avx512f::Store<false>(dst[i + 3] + offset, _mm512_unpackhi_ps(b1, b3));
+            Store<false>(dst[i + 0] + offset, _mm512_unpacklo_ps(b0, b2));
+            Store<false>(dst[i + 1] + offset, _mm512_unpackhi_ps(b0, b2));
+            Store<false>(dst[i + 2] + offset, _mm512_unpacklo_ps(b1, b3));
+            Store<false>(dst[i + 3] + offset, _mm512_unpackhi_ps(b1, b3));
         }
 
         void HogDeinterleave(const float * src, size_t srcStride, size_t width, size_t height, size_t count, float ** dst, size_t dstStride)
@@ -725,17 +725,17 @@ namespace Simd
         {
             template <int add, bool mask> SIMD_INLINE void Set(float * dst, const __m512 & value, __mmask16 tail = -1)
             {
-                Avx512f::Store<false, mask>(dst, value, tail);
+                Store<false, mask>(dst, value, tail);
             }
 
             template <> SIMD_INLINE void Set<1, false>(float * dst, const __m512 & value, __mmask16 tail)
             {
-                Avx512f::Store<false>(dst, _mm512_add_ps(Avx512f::Load<false>(dst), value));
+                Store<false>(dst, _mm512_add_ps(Load<false>(dst), value));
             }
 
             template <> SIMD_INLINE void Set<1, true>(float * dst, const __m512 & value, __mmask16 tail)
             {
-                Avx512f::Store<false, true>(dst, _mm512_add_ps((Avx512f::Load<false, true>(dst, tail)), value), tail);
+                Store<false, true>(dst, _mm512_add_ps((Load<false, true>(dst, tail)), value), tail);
             }
         }
 
@@ -757,8 +757,8 @@ namespace Simd
             {
                 __m512 sum = _mm512_setzero_ps();
                 for (size_t i = 0; i < size; ++i)
-                    sum = _mm512_fmadd_ps(Avx512f::Load<false>(src + i), filter[i], sum);
-                Avx512f::Store<align>(dst, sum);
+                    sum = _mm512_fmadd_ps(Load<false>(src + i), filter[i], sum);
+                Store<align>(dst, sum);
             }
 
             void FilterRows(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, size_t size, float * dst, size_t dstStride)
@@ -782,8 +782,8 @@ namespace Simd
 
             template <bool align> SIMD_INLINE void FilterRows_10(const float * src, const __m512 * filter, float * dst)
             {
-                __m512  src0 = Avx512f::Load<false>(src + 0);
-                __m512  srcf = Avx512f::Load<false>(src + F);
+                __m512  src0 = Load<false>(src + 0);
+                __m512  srcf = Load<false>(src + F);
                 __m512 sum0 = _mm512_mul_ps(Alignr<0>(src0, srcf), filter[0]);
                 __m512 sum1 = _mm512_mul_ps(Alignr<1>(src0, srcf), filter[1]);
                 sum0 = _mm512_fmadd_ps(Alignr<2>(src0, srcf), filter[2], sum0);
@@ -794,7 +794,7 @@ namespace Simd
                 sum1 = _mm512_fmadd_ps(Alignr<7>(src0, srcf), filter[7], sum1);
                 sum0 = _mm512_fmadd_ps(Alignr<8>(src0, srcf), filter[8], sum0);
                 sum1 = _mm512_fmadd_ps(Alignr<9>(src0, srcf), filter[9], sum1);
-                Avx512f::Store<align>(dst, _mm512_add_ps(sum0, sum1));
+                Store<align>(dst, _mm512_add_ps(sum0, sum1));
             }
 
             void FilterRows_10(const float * src, size_t srcStride, size_t width, size_t height, const float * filter, float * dst, size_t dstStride)
@@ -820,7 +820,7 @@ namespace Simd
             {
                 __m512 sum = _mm512_setzero_ps();
                 for (size_t i = 0; i < size; ++i, src += stride)
-                    sum = _mm512_fmadd_ps((Avx512f::Load<true, mask>(src, tail)), filter[i], sum);
+                    sum = _mm512_fmadd_ps((Load<true, mask>(src, tail)), filter[i], sum);
                 HogSeparableFilter_Detail::Set<add, mask>(dst, sum, tail);
             }
 
@@ -830,10 +830,10 @@ namespace Simd
                 for (size_t i = 0; i < size; ++i, src += stride)
                 {
                     __m512 f = filter[i];
-                    sums[0] = _mm512_fmadd_ps(Avx512f::Load<true>(src + 0 * F), f, sums[0]);
-                    sums[1] = _mm512_fmadd_ps(Avx512f::Load<true>(src + 1 * F), f, sums[1]);
-                    sums[2] = _mm512_fmadd_ps(Avx512f::Load<true>(src + 2 * F), f, sums[2]);
-                    sums[3] = _mm512_fmadd_ps(Avx512f::Load<true>(src + 3 * F), f, sums[3]);
+                    sums[0] = _mm512_fmadd_ps(Load<true>(src + 0 * F), f, sums[0]);
+                    sums[1] = _mm512_fmadd_ps(Load<true>(src + 1 * F), f, sums[1]);
+                    sums[2] = _mm512_fmadd_ps(Load<true>(src + 2 * F), f, sums[2]);
+                    sums[3] = _mm512_fmadd_ps(Load<true>(src + 3 * F), f, sums[3]);
                 }
                 HogSeparableFilter_Detail::Set<add, false>(dst + 0 * F, sums[0]);
                 HogSeparableFilter_Detail::Set<add, false>(dst + 1 * F, sums[1]);

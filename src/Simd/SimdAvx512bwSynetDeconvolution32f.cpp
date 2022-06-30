@@ -26,7 +26,6 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
@@ -40,12 +39,12 @@ namespace Simd
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
             : Avx2::SynetDeconvolution32fGemmNN(p)
         {
-            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512bw"));
             if (_param.trans && _param.group == 1)
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512bw", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M*_merge, _N, _K));
                 }
                 else
@@ -368,5 +367,5 @@ namespace Simd
                 return new SynetDeconvolution32fGemmNN(param);
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 }

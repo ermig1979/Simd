@@ -779,7 +779,7 @@ namespace Simd
             {
                 __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + offset);
-                __m512 f32 = Avx512f::Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
+                __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
                 __m512 _scale = _mm512_maskz_loadu_ps(tail, scale + offset);
                 __m512 _shift = _mm512_maskz_loadu_ps(tail, shift + offset);
                 __m128i u8 = Cvt32fTo8u(Fmadd<nofma>(f32, _scale, _shift));
@@ -794,7 +794,7 @@ namespace Simd
             {
                 __m512 _norm = _mm512_maskz_loadu_ps(tail, norm + offset);
                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + offset);
-                __m512 f32 = Avx512f::Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
+                __m512 f32 = Activate<type>(Fmadd<nofma>(_mm512_cvtepi32_ps(sum), _norm, _bias), params, offset, tail);
                 _mm512_mask_storeu_ps((float*)dst + offset, tail, f32);
             }
         };

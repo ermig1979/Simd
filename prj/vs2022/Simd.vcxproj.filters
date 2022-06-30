@@ -70,9 +70,6 @@
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdAvx512f.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdAvx512vnni.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -203,6 +200,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdConfig.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAmx.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

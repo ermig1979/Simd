@@ -38,14 +38,14 @@ namespace Simd
     {
         template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, __m512 scale, __m512 shift, __m128i upper, uint8_t* dst, __mmask16 tail = -1)
         {
-            __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(Avx512f::Load<align, mask>(src, tail), scale, shift));
+            __m512i i32 = _mm512_cvtps_epi32(Fmadd<nofma>(Load<align, mask>(src, tail), scale, shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(i32, K_ZERO), K_ZERO));
             Store<align, mask>(dst, _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper), tail);
         }
 
         template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetConvert32fTo8u(const float* src, const float* scale, const float* shift, __m128i upper, uint8_t* dst, __mmask16 tail = -1)
         {
-            SynetConvert32fTo8u<align, mask, nofma>(src, Avx512f::Load<align, mask>(scale, tail), Avx512f::Load<align, mask>(shift, tail), upper, dst, tail);
+            SynetConvert32fTo8u<align, mask, nofma>(src, Load<align, mask>(scale, tail), Load<align, mask>(shift, tail), upper, dst, tail);
         }
 
         template <bool align, bool nofma> void SynetConvert32fTo8uNchw(const float* src, size_t batch, size_t channels, size_t height, size_t width, const float* scale, const float* shift, int upper, uint8_t* dst)
@@ -143,12 +143,12 @@ namespace Simd
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
 
-            __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
-            __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
-            __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
-            __m512 _shift0 = Avx512f::Load<false>(_shift + 0 * F);
-            __m512 _shift1 = Avx512f::Load<false>(_shift + 1 * F);
-            __m512 _shift2 = Avx512f::Load<false>(_shift + 2 * F);
+            __m512 _scale0 = Load<false>(_scale + 0 * F);
+            __m512 _scale1 = Load<false>(_scale + 1 * F);
+            __m512 _scale2 = Load<false>(_scale + 2 * F);
+            __m512 _shift0 = Load<false>(_shift + 0 * F);
+            __m512 _shift1 = Load<false>(_shift + 1 * F);
+            __m512 _shift2 = Load<false>(_shift + 2 * F);
 
             for (size_t b = 0; b < batch; ++b)
             {
@@ -938,7 +938,7 @@ namespace Simd
  
         template <bool align> SIMD_INLINE void StoreScaled(float * ptr, __m512i value32, __m512 scale, __m512 shift)
         {
-            Avx512f::Store<align>(ptr, _mm512_fmadd_ps(_mm512_cvtepi32_ps(value32), scale, shift));
+            Store<align>(ptr, _mm512_fmadd_ps(_mm512_cvtepi32_ps(value32), scale, shift));
         }
 
         const __m512i K16_BLUE_RED = SIMD_MM512_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);

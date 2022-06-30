@@ -50,11 +50,7 @@
 #define SIMD_AVX2_DISABLE
 #endif
 
-#if defined(SIMD_AVX2_DISABLE) && !defined(SIMD_AVX512F_DISABLE)
-#define SIMD_AVX512F_DISABLE
-#endif
-
-#if defined(SIMD_AVX512F_DISABLE) && !defined(SIMD_AVX512BW_DISABLE)
+#if defined(SIMD_AVX2_DISABLE) && !defined(SIMD_AVX512BW_DISABLE)
 #define SIMD_AVX512BW_DISABLE
 #endif
 
@@ -120,10 +116,6 @@
 
 #if defined(NDEBUG) && _MSC_VER >= 1700 && _MSC_VER < 1900
 #define SIMD_MADDUBS_ERROR // Visual Studio 2012/2013 release mode compiler bug in function _mm256_maddubs_epi16.
-#endif
-
-#if !defined(SIMD_AVX512F_DISABLE) && _MSC_VER >= 1911
-#define SIMD_AVX512F_ENABLE
 #endif
 
 #if !defined(SIMD_AVX512BW_DISABLE) && _MSC_VER >= 1911
@@ -223,10 +215,6 @@
 #endif
 
 #if !defined(__clang__) || (defined(__clang__) && __clang_major__ >= 4)
-#if !defined(SIMD_AVX512F_DISABLE) && defined(__AVX512F__)
-#define SIMD_AVX512F_ENABLE
-#endif
-
 #if !defined(SIMD_AVX512BW_DISABLE) && defined(__AVX512BW__)
 #define SIMD_AVX512BW_ENABLE
 #endif
@@ -307,7 +295,7 @@
 #endif
 
 #if defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE) \
-    || defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) \
+    || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE) \
     || defined(SIMD_AMX_ENABLE)
 #include <immintrin.h>
 #endif
@@ -326,7 +314,7 @@
 #include <arm_neon.h>
 #endif
 
-#if defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE)
+#if defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE)
 #define SIMD_ALIGN 64
 #elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
@@ -340,7 +328,7 @@
 #define SIMD_ALIGN 4
 #endif
 
-#if (defined(SIMD_AVX512F_ENABLE) || defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE))
+#if (defined(SIMD_AVX512BW_ENABLE) || defined(SIMD_AVX512VNNI_ENABLE) || defined(SIMD_AVX512BF16_ENABLE))
 #ifdef SIMD_X64_ENABLE
 #if defined(__GNUC__) || (defined(_MSC_VER) && _MSC_VER >= 1915)
 #define SIMD_ZMM_COUNT 32

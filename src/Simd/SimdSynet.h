@@ -403,8 +403,8 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         SIMD_INLINE __m512 SynetHardSigmoid32f(__m512 value, __m512 scale, __m512 shift)
         {
@@ -421,13 +421,8 @@ namespace Simd
             __m512 positive = _mm512_max_ps(_mm512_setzero_ps(), value);
             __m512 negative = _mm512_min_ps(_mm512_setzero_ps(), value);
             return _mm512_add_ps(positive, _mm512_mul_ps(slope, negative));
-        }
-    }
-#endif//SIMD_AVX512F_ENABLE
-
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
+        }        
+        
         SIMD_INLINE __m512i Set4(const uint8_t* src)
         {
             return _mm512_set1_epi32(*(int32_t*)src);

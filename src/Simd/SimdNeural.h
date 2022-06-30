@@ -345,8 +345,8 @@ namespace Simd
     }
 #endif 
 
-#ifdef SIMD_AVX512F_ENABLE 
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE 
+    namespace Avx512bw
     {
         template <bool align, bool mask> SIMD_INLINE void AddMultiplied(const float* src, const __m512& value, float* dst, __mmask16 m = -1)
         {

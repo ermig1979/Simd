@@ -90,8 +90,8 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         const __m512i K32_GATHER_ANY = SIMD_MM512_SET1_EPI32(1);
         const __m512i K32_GATHER_3A = SIMD_MM512_SETR_EPI32(0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 0, 0, 0, 0, 0);
@@ -110,6 +110,6 @@ namespace Simd
             return _mm512_mask_permutexvar_ps(_mm512_maskz_permutex2var_ps(0xFFFF, s0, K32_GATHER_3A, s1), 0xF800, K32_GATHER_3B, s2);
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 }
 #endif//__SimdGather_h__

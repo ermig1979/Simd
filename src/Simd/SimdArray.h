@@ -128,8 +128,8 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         typedef Array<__m512> Array512f;
     }

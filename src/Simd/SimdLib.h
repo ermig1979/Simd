@@ -208,7 +208,6 @@ typedef enum
     SimdCpuInfoSse41, /*!< Availability of SSE4.1 (x86). */
     SimdCpuInfoAvx, /*!< Availability of AVX (x86). */
     SimdCpuInfoAvx2, /*!< Availability of AVX2 (x86). */
-    SimdCpuInfoAvx512f, /*!< Availability of AVX-512F (x86). */
     SimdCpuInfoAvx512bw, /*!< Availability of AVX-512BW (x86). */
     SimdCpuInfoAvx512vnni, /*!< Availability of AVX-512VNNI (x86). */
     SimdCpuInfoAvx512bf16, /*!< Availability of AVX-512BF16 (x86). */
@@ -649,9 +648,10 @@ extern "C"
             std::cout << "SSE4.1: " << (SimdCpuInfo(SimdCpuInfoSse41) ? "Yes" : "No") << std::endl;
             std::cout << "AVX: " << (SimdCpuInfo(SimdCpuInfoAvx) ? "Yes" : "No") << std::endl;
             std::cout << "AVX2: " << (SimdCpuInfo(SimdCpuInfoAvx2) ? "Yes" : "No") << std::endl;
-            std::cout << "AVX-512F: " << (SimdCpuInfo(SimdCpuInfoAvx512f) ? "Yes" : "No") << std::endl;
             std::cout << "AVX-512BW: " << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? "Yes" : "No") << std::endl;
             std::cout << "AVX-512VNNI: " << (SimdCpuInfo(SimdCpuInfoAvx512vnni) ? "Yes" : "No") << std::endl;
+            std::cout << "AVX-512BF16: " << (SimdCpuInfo(SimdCpuInfoAvx512bf16) ? "Yes" : "No") << std::endl;
+            std::cout << "AMX: " << (SimdCpuInfo(SimdCpuInfoAmx) ? "Yes" : "No") << std::endl;
             std::cout << "PowerPC-Altivec: " << (SimdCpuInfo(SimdCpuInfoVmx) ? "Yes" : "No") << std::endl;
             std::cout << "PowerPC-VSX: " << (SimdCpuInfo(SimdCpuInfoVsx) ? "Yes" : "No") << std::endl;
             std::cout << "ARM-NEON: " << (SimdCpuInfo(SimdCpuInfoNeon) ? "Yes" : "No") << std::endl;

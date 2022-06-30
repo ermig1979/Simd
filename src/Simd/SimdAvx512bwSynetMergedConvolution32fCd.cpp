@@ -497,7 +497,7 @@ namespace Simd
         SynetMergedConvolution32fCd::SynetMergedConvolution32fCd(const MergConvParam32f& p)
             : Avx2::SynetMergedConvolution32fCd(p)
         {
-            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx512f::F);
+            SetSize(Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx512bw::F);
             SynetMergedConvolution32fCdc::Set(_param, 0, 0, _convolution);
             SynetMergedConvolution32fCd::Set(_param, 1, 1, _convolution);
         }

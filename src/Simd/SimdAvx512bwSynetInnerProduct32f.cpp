@@ -26,7 +26,6 @@
 #include "Simd/SimdSynetInnerProduct32f.h"
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdPrefetch.h"
 
@@ -379,7 +378,7 @@ namespace Simd
         {
             if (_param.output > Avx::F)
             {
-                SetSize(Avx512f::F);
+                SetSize(Avx512bw::F);
                 _prod = InnerProductKxKNr;
             }
         }

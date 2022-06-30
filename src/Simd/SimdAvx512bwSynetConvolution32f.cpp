@@ -22,7 +22,6 @@
 * SOFTWARE.
 */
 #include "Simd/SimdSynetConvolution32f.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdExp.h"
@@ -110,13 +109,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, Avx512f::SynetRelu32f(_mm512_add_ps(_dst, _bias), _slope));
+                                _mm512_storeu_ps(dst + i, SynetRelu32f(_mm512_add_ps(_dst, _bias), _slope));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::SynetRelu32f(_mm512_add_ps(_dst, _bias), _slope));
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetRelu32f(_mm512_add_ps(_dst, _bias), _slope));
                             }
                             dst += count;
                         }
@@ -130,12 +129,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::SynetRelu32f(value, _slope));
+                                _mm512_storeu_ps(dst + j, SynetRelu32f(value, _slope));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::SynetRelu32f(value, _slope));
+                                _mm512_mask_storeu_ps(dst + j, tail, SynetRelu32f(value, _slope));
                             }
                             dst += size;
                         }
@@ -235,13 +234,13 @@ namespace Simd
                             for (; i < nF; i += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _bias);
-                                _mm512_storeu_ps(dst + i, Avx512f::SynetRelu32f(value, _slope));
+                                _mm512_storeu_ps(dst + i, SynetRelu32f(value, _slope));
                             }
                             if (i < n)
                             {
                                 __mmask16 tail = TailMask16(n - nF);
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _bias);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::SynetRelu32f(value, _slope));
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetRelu32f(value, _slope));
                             }
                         }
                         else
@@ -252,12 +251,12 @@ namespace Simd
                                 for (; i < aligned; i += F)
                                 {
                                     __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + i), _mm512_loadu_ps(bias + i));
-                                    _mm512_storeu_ps(dst + i, Avx512f::SynetRelu32f(value, _mm512_loadu_ps(params + i)));
+                                    _mm512_storeu_ps(dst + i, SynetRelu32f(value, _mm512_loadu_ps(params + i)));
                                 }
                                 if (i < count)
                                 {
                                     __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + i), _mm512_maskz_loadu_ps(tail, bias + i));
-                                    _mm512_mask_storeu_ps(dst + i, tail, Avx512f::SynetRelu32f(value, _mm512_maskz_loadu_ps(tail, params + i)));
+                                    _mm512_mask_storeu_ps(dst + i, tail, SynetRelu32f(value, _mm512_maskz_loadu_ps(tail, params + i)));
                                 }
                                 dst += count;
                             }
@@ -273,12 +272,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::SynetRelu32f(value, _slope));
+                                _mm512_storeu_ps(dst + j, SynetRelu32f(value, _slope));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::SynetRelu32f(value, _slope));
+                                _mm512_mask_storeu_ps(dst + j, tail, SynetRelu32f(value, _slope));
                             }
                             dst += size;
                         }
@@ -302,13 +301,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, Avx512f::Elu(_mm512_add_ps(_dst, _bias), _alpha));
+                                _mm512_storeu_ps(dst + i, Elu(_mm512_add_ps(_dst, _bias), _alpha));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::Elu(_mm512_add_ps(_dst, _bias), _alpha));
+                                _mm512_mask_storeu_ps(dst + i, tail, Elu(_mm512_add_ps(_dst, _bias), _alpha));
                             }
                             dst += count;
                         }
@@ -322,12 +321,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::Elu(value, _alpha));
+                                _mm512_storeu_ps(dst + j, Elu(value, _alpha));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::Elu(value, _alpha));
+                                _mm512_mask_storeu_ps(dst + j, tail, Elu(value, _alpha));
                             }
                             dst += size;
                         }
@@ -353,13 +352,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, Avx512f::SynetHswish32f(_mm512_add_ps(_dst, _bias), _shift, _scale));
+                                _mm512_storeu_ps(dst + i, SynetHswish32f(_mm512_add_ps(_dst, _bias), _shift, _scale));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::SynetHswish32f(_mm512_add_ps(_dst, _bias), _shift, _scale));
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetHswish32f(_mm512_add_ps(_dst, _bias), _shift, _scale));
                             }
                             dst += count;
                         }
@@ -373,12 +372,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::SynetHswish32f(value, _shift, _scale));
+                                _mm512_storeu_ps(dst + j, SynetHswish32f(value, _shift, _scale));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::SynetHswish32f(value, _shift, _scale));
+                                _mm512_mask_storeu_ps(dst + j, tail, SynetHswish32f(value, _shift, _scale));
                             }
                             dst += size;
                         }
@@ -402,13 +401,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, Avx512f::Mish(_mm512_add_ps(_dst, _bias), _threshold));
+                                _mm512_storeu_ps(dst + i, Mish(_mm512_add_ps(_dst, _bias), _threshold));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::Mish(_mm512_add_ps(_dst, _bias), _threshold));
+                                _mm512_mask_storeu_ps(dst + i, tail, Mish(_mm512_add_ps(_dst, _bias), _threshold));
                             }
                             dst += count;
                         }
@@ -422,12 +421,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::Mish(value, _threshold));
+                                _mm512_storeu_ps(dst + j, Mish(value, _threshold));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::Mish(value, _threshold));
+                                _mm512_mask_storeu_ps(dst + j, tail, Mish(value, _threshold));
                             }
                             dst += size;
                         }
@@ -453,13 +452,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, Avx512f::SynetHardSigmoid32f(_mm512_add_ps(_dst, _bias), _scale, _shift));
+                                _mm512_storeu_ps(dst + i, SynetHardSigmoid32f(_mm512_add_ps(_dst, _bias), _scale, _shift));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::SynetHardSigmoid32f(_mm512_add_ps(_dst, _bias), _scale, _shift));
+                                _mm512_mask_storeu_ps(dst + i, tail, SynetHardSigmoid32f(_mm512_add_ps(_dst, _bias), _scale, _shift));
                             }
                             dst += count;
                         }
@@ -473,12 +472,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::SynetHardSigmoid32f(value, _scale, _shift));
+                                _mm512_storeu_ps(dst + j, SynetHardSigmoid32f(value, _scale, _shift));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::SynetHardSigmoid32f(value, _scale, _shift));
+                                _mm512_mask_storeu_ps(dst + j, tail, SynetHardSigmoid32f(value, _scale, _shift));
                             }
                             dst += size;
                         }
@@ -502,13 +501,13 @@ namespace Simd
                             {
                                 __m512 _dst = _mm512_loadu_ps(dst + i);
                                 __m512 _bias = _mm512_loadu_ps(bias + i);
-                                _mm512_storeu_ps(dst + i, Avx512f::Swish(_mm512_add_ps(_dst, _bias), _slope));
+                                _mm512_storeu_ps(dst + i, Swish(_mm512_add_ps(_dst, _bias), _slope));
                             }
                             if (i < count)
                             {
                                 __m512 _dst = _mm512_maskz_loadu_ps(tail, dst + i);
                                 __m512 _bias = _mm512_maskz_loadu_ps(tail, bias + i);
-                                _mm512_mask_storeu_ps(dst + i, tail, Avx512f::Swish(_mm512_add_ps(_dst, _bias), _slope));
+                                _mm512_mask_storeu_ps(dst + i, tail, Swish(_mm512_add_ps(_dst, _bias), _slope));
                             }
                             dst += count;
                         }
@@ -522,12 +521,12 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_loadu_ps(dst + j), _bias);
-                                _mm512_storeu_ps(dst + j, Avx512f::Swish(value, _slope));
+                                _mm512_storeu_ps(dst + j, Swish(value, _slope));
                             }
                             if (j < size)
                             {
                                 __m512 value = _mm512_add_ps(_mm512_maskz_loadu_ps(tail, dst + j), _bias);
-                                _mm512_mask_storeu_ps(dst + j, tail, Avx512f::Swish(value, _slope));
+                                _mm512_mask_storeu_ps(dst + j, tail, Swish(value, _slope));
                             }
                             dst += size;
                         }
@@ -568,12 +567,12 @@ namespace Simd
             }
             if (p.dstC == 8)
                 return;
-            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512bw"));
             if (_param.trans && _param.group == 1)
             {
                 if (GemmRuntime())
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512bw", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M * _merge, _N, _K));
                 }
                 else
@@ -661,7 +660,7 @@ namespace Simd
         SynetConvolution32fGemmNT::SynetConvolution32fGemmNT(const ConvParam32f& p)
             : Avx2::SynetConvolution32fGemmNT(p)
         {
-            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNT, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNT, "Avx512bw"));
             _biasAndActivation = Avx512bw::ConvolutionBiasAndActivation;
         }
 
@@ -734,12 +733,12 @@ namespace Simd
             }
             else
                 assert(0);
-            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512f"));
+            _gemm.Init(InitGemmFuncs(Avx512bw::Gemm32fNN, "Avx512bw"));
             if (_param.trans)
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512f", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Avx512bw::Gemm32fNNcbBufferSize, Avx512bw::Gemm32fNNcbReorderB, Avx512bw::Gemm32fNNcbRun, "Avx512bw", GemmKernelF2, GemmKernelF3));
                     _nhwcStrideW = _gemmCb.At(0).BufferSize(_M * _merge, _N, _K);
                 }
                 else

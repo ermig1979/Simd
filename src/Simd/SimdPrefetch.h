@@ -41,8 +41,8 @@ namespace Simd
     }
 #endif
 
-#if defined(SIMD_AVX512F_ENABLE)
-    namespace Avx512f
+#if defined(SIMD_AVX512BW_ENABLE)
+    namespace Avx512bw
     {
         const size_t PREFETCH_SIZE = 4096;
 

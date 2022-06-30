@@ -25,7 +25,6 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
 

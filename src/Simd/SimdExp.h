@@ -371,8 +371,8 @@ namespace Simd
     }
 #endif //SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         class Exp
         {
@@ -534,7 +534,7 @@ namespace Simd
             return _mm512_div_ps(_mm512_sub_ps(exp, _1), _mm512_add_ps(_1, exp));
         }
     }
-#endif //SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon

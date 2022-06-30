@@ -36,15 +36,15 @@ namespace Simd
 #if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE)   
     namespace Avx512bw
     {
-        template<bool align, bool mask> SIMD_INLINE void SynetElu32f(const float * src, const Avx512f::Exp & exp, __m512 alpha, float * dst, size_t offset, __mmask16 tail = -1)
+        template<bool align, bool mask> SIMD_INLINE void SynetElu32f(const float * src, const Exp & exp, __m512 alpha, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            Avx512f::Store<align, mask>(dst + offset, exp.Elu(Avx512f::Load<align, mask>(src + offset, tail), alpha), tail);
+            Store<align, mask>(dst + offset, exp.Elu(Load<align, mask>(src + offset, tail), alpha), tail);
         }
 
         template<bool align> void SynetElu32f(const float * src, size_t size, const float * alpha, float * dst)
         {
             __m512 _alpha = _mm512_set1_ps(alpha[0]);
-            Avx512f::Exp exp;
+            Exp exp;
             size_t sizeF = AlignLo(size, F);
             size_t sizeQF = AlignLo(size, QF);
             __mmask16 tail = TailMask16(size - sizeF);
@@ -75,9 +75,9 @@ namespace Simd
 
         template<bool align, bool mask> SIMD_INLINE void SynetHardSigmoid32f(const float* src, __m512 scale, __m512 shift, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _dst = Avx512f::SynetHardSigmoid32f(_src, scale, shift);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetHardSigmoid32f(const float* src, size_t size, const float* scale, const float* shift, float* dst)
@@ -113,9 +113,9 @@ namespace Simd
 
         template<bool align, bool mask> SIMD_INLINE void SynetHswish32f(const float * src, __m512 shift, __m512 scale, float * dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 _dst = _mm512_mul_ps(_mm512_mul_ps(_mm512_max_ps(_mm512_add_ps(_mm512_min_ps(_src, shift), shift), _mm512_setzero_ps()), scale), _src);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetHswish32f(const float * src, size_t size, const float * shift, const float * scale, float * dst)
@@ -151,8 +151,8 @@ namespace Simd
 
         template<bool align, bool mask> SIMD_INLINE void SynetMish32f(const float* src, __m512 threshold, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, Mish(_src, threshold), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            Store<align, mask>(dst + offset, Mish(_src, threshold), tail);
         }
 
         template<bool align> void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
@@ -190,19 +190,19 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void SynetPreluLayerForward(const float* src, const float* slope, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _slope = Avx512f::Load<align, mask>(slope + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _slope = Load<align, mask>(slope + offset, tail);
             __m512 pos = _mm512_max_ps(_mm512_setzero_ps(), _src);
             __m512 neg = _mm512_min_ps(_mm512_setzero_ps(), _src);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(_slope, neg)), tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(_slope, neg)), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetPreluLayerForward(const float* src, __m512 slope, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 pos = _mm512_max_ps(_mm512_setzero_ps(), _src);
             __m512 neg = _mm512_min_ps(_mm512_setzero_ps(), _src);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(slope, neg)), tail);
+            Store<align, mask>(dst + offset, _mm512_add_ps(pos, _mm512_mul_ps(slope, neg)), tail);
         }
 
         template <bool align> void SynetPreluLayerForward(const float* src, const float* slope, size_t count, size_t size, float* dst, SimdBool trans)
@@ -338,7 +338,7 @@ namespace Simd
             size_t spatial4F = AlignLo(spatial, 4) * F;
             for (size_t c = 0; c < channels; c += F)
             {
-                __m512 _slope = Avx512f::Load<false>(slope + c);
+                __m512 _slope = Load<false>(slope + c);
                 size_t s = 0;
                 for (; s < spatial4F; s += 4 * F)
                 {
@@ -382,9 +382,9 @@ namespace Simd
 
         template<bool align, bool mask> SIMD_INLINE void SynetRelu32f(const float* src, __m512 slope, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _dst = Avx512f::SynetRelu32f(_src, slope);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _dst = SynetRelu32f(_src, slope);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
@@ -431,17 +431,17 @@ namespace Simd
             size_t i = 0;
             for (; i < sizeQF; i += QF)
             {
-                Avx512f::Store<align>(dst + i + 0 * F, _mm512_min_ps(_mm512_max_ps(_min, Avx512f::Load<align>(src + i + 0 * F)), _max));
-                Avx512f::Store<align>(dst + i + 1 * F, _mm512_min_ps(_mm512_max_ps(_min, Avx512f::Load<align>(src + i + 1 * F)), _max));
-                Avx512f::Store<align>(dst + i + 2 * F, _mm512_min_ps(_mm512_max_ps(_min, Avx512f::Load<align>(src + i + 2 * F)), _max));
-                Avx512f::Store<align>(dst + i + 3 * F, _mm512_min_ps(_mm512_max_ps(_min, Avx512f::Load<align>(src + i + 3 * F)), _max));
+                Store<align>(dst + i + 0 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 0 * F)), _max));
+                Store<align>(dst + i + 1 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 1 * F)), _max));
+                Store<align>(dst + i + 2 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 2 * F)), _max));
+                Store<align>(dst + i + 3 * F, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i + 3 * F)), _max));
             }
             for (; i < sizeF; i += F)
-                Avx512f::Store<align>(dst + i, _mm512_min_ps(_mm512_max_ps(_min, Avx512f::Load<align>(src + i)), _max));
+                Store<align>(dst + i, _mm512_min_ps(_mm512_max_ps(_min, Load<align>(src + i)), _max));
             if (i < size)
             {
                 __mmask16 tail = TailMask16(size - i);
-                Avx512f::Store<align, true>(dst + i, _mm512_min_ps(_mm512_max_ps(_min, (Avx512f::Load<align, true>(src + i, tail))), _max), tail);
+                Store<align, true>(dst + i, _mm512_min_ps(_mm512_max_ps(_min, (Load<align, true>(src + i, tail))), _max), tail);
             }
         }
 
@@ -455,11 +455,11 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool align, bool mask> SIMD_INLINE void SynetSigmoid32f(const float* src, const Avx512f::Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
+        template<bool align, bool mask> SIMD_INLINE void SynetSigmoid32f(const float* src, const Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 _dst = exp.Sigmoid(_src);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetSigmoid32f(const float* src, size_t size, const float* slope, float* dst)
@@ -499,9 +499,9 @@ namespace Simd
 
         template<bool align, bool mask> SIMD_INLINE void SynetSoftplus32f(const float* src, __m512 beta, __m512 threshold, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 _dst = Softplus(_src, beta, threshold);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetSoftplus32f(const float* src, size_t size, const float* beta, const float* threshold, float* dst)
@@ -537,11 +537,11 @@ namespace Simd
 
         //-----------------------------------------------------------------------------------------
 
-        template<bool align, bool mask> SIMD_INLINE void SynetSwish32f(const float* src, const Avx512f::Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
+        template<bool align, bool mask> SIMD_INLINE void SynetSwish32f(const float* src, const Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 _dst = exp.Swish(_src);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetSwish32f(const float* src, size_t size, const float* slope, float* dst)
@@ -579,11 +579,11 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<bool align, bool mask> SIMD_INLINE void SynetTanh32f(const float* src, const Avx512f::Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
+        template<bool align, bool mask> SIMD_INLINE void SynetTanh32f(const float* src, const Exp& exp, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
             __m512 _dst = exp.Tanh(_src);
-            Avx512f::Store<align, mask>(dst + offset, _dst, tail);
+            Store<align, mask>(dst + offset, _dst, tail);
         }
 
         template<bool align> void SynetTanh32f(const float* src, size_t size, const float* slope, float* dst)

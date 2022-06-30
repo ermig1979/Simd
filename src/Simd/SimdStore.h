@@ -255,43 +255,43 @@ namespace Simd
     }
 #endif//SIMD_SAVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
-        template <bool align> SIMD_INLINE void Store(float * p, __m512 a);
+        template <bool align> SIMD_INLINE void Store(float* p, __m512 a);
 
-        template <> SIMD_INLINE void Store<false>(float * p, __m512 a)
+        template <> SIMD_INLINE void Store<false>(float* p, __m512 a)
         {
             _mm512_storeu_ps(p, a);
         }
 
-        template <> SIMD_INLINE void Store<true>(float * p, __m512 a)
+        template <> SIMD_INLINE void Store<true>(float* p, __m512 a)
         {
             _mm512_store_ps(p, a);
         }
 
-        template <bool align, bool mask> SIMD_INLINE void Store(float * p, __m512 a, __mmask16 m)
+        template <bool align, bool mask> SIMD_INLINE void Store(float* p, __m512 a, __mmask16 m)
         {
             return Store<align>(p, a);
         }
 
-        template <> SIMD_INLINE void Store<false, true>(float * p, __m512 a, __mmask16 m)
+        template <> SIMD_INLINE void Store<false, true>(float* p, __m512 a, __mmask16 m)
         {
             return _mm512_mask_storeu_ps(p, m, a);
         }
 
-        template <> SIMD_INLINE void Store<true, true>(float * p, __m512 a, __mmask16 m)
+        template <> SIMD_INLINE void Store<true, true>(float* p, __m512 a, __mmask16 m)
         {
             return _mm512_mask_store_ps(p, m, a);
         }
 
-        template <bool align> SIMD_INLINE void Store(float * p0, float * p1, __m512 a)
+        template <bool align> SIMD_INLINE void Store(float* p0, float* p1, __m512 a)
         {
             Avx::Store<align>(p0, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 0)));
             Avx::Store<align>(p1, _mm256_castpd_ps(_mm512_extractf64x4_pd(_mm512_castps_pd(a), 1)));
         }
 
-        template <bool align> SIMD_INLINE void Store(float * p0, float * p1, float * p2, float * p3, __m512 a)
+        template <bool align> SIMD_INLINE void Store(float* p0, float* p1, float* p2, float* p3, __m512 a)
         {
             Sse2::Store<align>(p0, _mm512_extractf32x4_ps(a, 0));
             Sse2::Store<align>(p1, _mm512_extractf32x4_ps(a, 1));
@@ -307,12 +307,7 @@ namespace Simd
             return _mm256_castsi256_si128(Avx2::PackI16ToU8(_mm512_cvtepi32_epi16(_mm512_cvtps_epi32(a)), _mm256_setzero_si256()));
 #endif
         }
-    }
-#endif//SIMD_AVX512F_ENABLE
 
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
         template <bool align> SIMD_INLINE void Store(void * p, __m512i a);
 
         template <> SIMD_INLINE void Store<false>(void * p, __m512i a)

@@ -54,8 +54,8 @@ namespace Simd
             __m512i _src = Load<align, mask>(src, srcMask[0]);
             __m512i s0 = _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 0));
             __m512i s1 = _mm512_cvtepu16_epi32(_mm512_extracti64x4_epi64(_src, 1));
-            Avx512f::Store<align, mask>(dst + 0, BFloat16ToFloat32(s0), dstMask[0]);
-            Avx512f::Store<align, mask>(dst + F, BFloat16ToFloat32(s1), dstMask[1]);
+            Store<align, mask>(dst + 0, BFloat16ToFloat32(s0), dstMask[0]);
+            Store<align, mask>(dst + F, BFloat16ToFloat32(s1), dstMask[1]);
         }
 
         void BFloat16ToFloat32(const uint16_t* src, size_t size, float* dst)

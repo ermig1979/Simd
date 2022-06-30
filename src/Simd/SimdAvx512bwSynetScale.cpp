@@ -26,7 +26,6 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdAvx2.h"
-#include "Simd/SimdAvx512f.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdSynetScale8i.h"
@@ -38,29 +37,29 @@ namespace Simd
     {
         template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float* src, const float* scale, const float* bias, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _bias = Avx512f::Load<align, mask>(bias + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, Fmadd<nofma>(_src, _scale, _bias), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _bias = Load<align, mask>(bias + offset, tail);
+            Store<align, mask>(dst + offset, Fmadd<nofma>(_src, _scale, _bias), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetScaleLayerForward(const float* src, const float* scale, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_mul_ps(_src, _scale), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            Store<align, mask>(dst + offset, _mm512_mul_ps(_src, _scale), tail);
         }
 
         template <bool align, bool mask, bool nofma> SIMD_INLINE void SynetScaleLayerForward(const float* src, const __m512& scale, const __m512& bias, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, Fmadd<nofma>(_src, scale, bias), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            Store<align, mask>(dst + offset, Fmadd<nofma>(_src, scale, bias), tail);
         }
 
         template <bool align, bool mask> SIMD_INLINE void SynetScaleLayerForward(const float* src, const __m512& scale, float* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<align, mask>(src + offset, tail);
-            Avx512f::Store<align, mask>(dst + offset, _mm512_mul_ps(_src, scale), tail);
+            __m512 _src = Load<align, mask>(src + offset, tail);
+            Store<align, mask>(dst + offset, _mm512_mul_ps(_src, scale), tail);
         }
 
         template <bool align, bool nofma, bool notail> void SynetScaleLayerForwardNchw(const float* src, const float* scale, const float* bias, size_t channels, size_t height, size_t width, float* dst)
@@ -228,12 +227,12 @@ namespace Simd
                 for (size_t i = 0; i < F; ++i)
                     for (size_t c = 0; c < 3; ++c)
                         _scale[i * 3 + c] = scale[c], _bias[i * 3 + c] = bias[c];
-                __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
-                __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
-                __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
-                __m512 _bias0 = Avx512f::Load<false>(_bias + 0 * F);
-                __m512 _bias1 = Avx512f::Load<false>(_bias + 1 * F);
-                __m512 _bias2 = Avx512f::Load<false>(_bias + 2 * F);
+                __m512 _scale0 = Load<false>(_scale + 0 * F);
+                __m512 _scale1 = Load<false>(_scale + 1 * F);
+                __m512 _scale2 = Load<false>(_scale + 2 * F);
+                __m512 _bias0 = Load<false>(_bias + 0 * F);
+                __m512 _bias1 = Load<false>(_bias + 1 * F);
+                __m512 _bias2 = Load<false>(_bias + 2 * F);
                 for (size_t h = 0; h < height; ++h)
                 {
                     size_t w = 0;
@@ -259,9 +258,9 @@ namespace Simd
                 for (size_t i = 0; i < F; ++i)
                     for (size_t c = 0; c < 3; ++c)
                         _scale[i * 3 + c] = scale[c];
-                __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
-                __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
-                __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
+                __m512 _scale0 = Load<false>(_scale + 0 * F);
+                __m512 _scale1 = Load<false>(_scale + 1 * F);
+                __m512 _scale2 = Load<false>(_scale + 2 * F);
                 for (size_t h = 0; h < height; ++h)
                 {
                     size_t w = 0;
@@ -322,8 +321,8 @@ namespace Simd
             {
                 for (size_t c = 0; c < channels; c += F)
                 {
-                    __m512 _scale = Avx512f::Load<false>(scale + c);
-                    __m512 _bias = Avx512f::Load<false>(bias + c);
+                    __m512 _scale = Load<false>(scale + c);
+                    __m512 _bias = Load<false>(bias + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -342,7 +341,7 @@ namespace Simd
             {
                 for (size_t c = 0; c < channels; c += F)
                 {
-                    __m512 _scale = Avx512f::Load<false>(scale + c);
+                    __m512 _scale = Load<false>(scale + c);
                     size_t s = 0;
                     for (; s < spatial4F; s += 4 * F)
                     {
@@ -436,8 +435,8 @@ namespace Simd
         template <bool align, bool mask, bool nofma> SIMD_INLINE void ScaleNhwcF(const uint8_t* src, const float* scale, const float* shift, __m128i upper, uint8_t* dst, size_t offset, __mmask16 tail = -1)
         {
             __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(src + offset, tail))));
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _shift = Avx512f::Load<align, mask>(shift + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _shift = Load<align, mask>(shift + offset, tail);
             __m512i _dst = _mm512_cvtps_epi32(Fmadd<nofma>(_src, _scale, _shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(_dst, K_ZERO), K_ZERO));
             Store<false, mask>(dst + offset, _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper), tail);
@@ -492,12 +491,12 @@ namespace Simd
             for (size_t i = 0; i < F; ++i)
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
-            __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
-            __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
-            __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
-            __m512 _shift0 = Avx512f::Load<false>(_shift + 0 * F);
-            __m512 _shift1 = Avx512f::Load<false>(_shift + 1 * F);
-            __m512 _shift2 = Avx512f::Load<false>(_shift + 2 * F);
+            __m512 _scale0 = Load<false>(_scale + 0 * F);
+            __m512 _scale1 = Load<false>(_scale + 1 * F);
+            __m512 _scale2 = Load<false>(_scale + 2 * F);
+            __m512 _shift0 = Load<false>(_shift + 0 * F);
+            __m512 _shift1 = Load<false>(_shift + 1 * F);
+            __m512 _shift2 = Load<false>(_shift + 2 * F);
             __m128i _upper = _mm_set1_epi8(upper);
             for (size_t b = 0; b < batch; ++b)
             {
@@ -553,7 +552,7 @@ namespace Simd
         template <bool mask, bool nofma> SIMD_INLINE void ScaleNchwF(const uint8_t* src, __m512 scale, __m512 shift, float* dst, size_t offset, __mmask16 tail = -1)
         {
             __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(src + offset, tail))));
-            Avx512f::Store<false, mask>(dst + offset, Fmadd<nofma>(_src, scale, shift), tail);
+            Store<false, mask>(dst + offset, Fmadd<nofma>(_src, scale, shift), tail);
         }
 
         template <bool nofma> void ScaleNchw(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, float* dst)
@@ -580,9 +579,9 @@ namespace Simd
         template <bool align, bool mask, bool nofma> SIMD_INLINE void ScaleNhwcF(const uint8_t* src, const float* scale, const float* shift, float * dst, size_t offset, __mmask16 tail = -1)
         {
             __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32((Load<false, mask>(src + offset, tail))));
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _shift = Avx512f::Load<align, mask>(shift + offset, tail);
-            Avx512f::Store<false, mask>(dst + offset, Fmadd<nofma>(_src, _scale, _shift), tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _shift = Load<align, mask>(shift + offset, tail);
+            Store<false, mask>(dst + offset, Fmadd<nofma>(_src, _scale, _shift), tail);
         }
 
         template <bool align, bool nofma> void ScaleNhwc(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t channels, size_t spatial, float* dst)
@@ -618,7 +617,7 @@ namespace Simd
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const uint8_t* src, __m512 scale, __m512 shift, float* dst, size_t offset)
         {
             __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)(src + offset))));
-            Avx512f::Store<false>(dst + offset, Fmadd<nofma>(_src, scale, shift));
+            Store<false>(dst + offset, Fmadd<nofma>(_src, scale, shift));
         }
 
         template <bool nofma> void ScaleNhwc3(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t spatial, float* dst)
@@ -631,12 +630,12 @@ namespace Simd
             for (size_t i = 0; i < F; ++i)
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
-            __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
-            __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
-            __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
-            __m512 _shift0 = Avx512f::Load<false>(_shift + 0 * F);
-            __m512 _shift1 = Avx512f::Load<false>(_shift + 1 * F);
-            __m512 _shift2 = Avx512f::Load<false>(_shift + 2 * F);
+            __m512 _scale0 = Load<false>(_scale + 0 * F);
+            __m512 _scale1 = Load<false>(_scale + 1 * F);
+            __m512 _scale2 = Load<false>(_scale + 2 * F);
+            __m512 _shift0 = Load<false>(_shift + 0 * F);
+            __m512 _shift1 = Load<false>(_shift + 1 * F);
+            __m512 _shift2 = Load<false>(_shift + 2 * F);
             for (size_t b = 0; b < batch; ++b)
             {
                 size_t s = 0;
@@ -690,7 +689,7 @@ namespace Simd
 
         template <bool mask, bool nofma> SIMD_INLINE void ScaleNchwF(const float* src, __m512 scale, __m512 shift, __m128i upper, uint8_t* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<false, mask>(src + offset, tail);
+            __m512 _src = Load<false, mask>(src + offset, tail);
             __m512i _dst = _mm512_cvtps_epi32(Fmadd<nofma>(_src, scale, shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(_dst, K_ZERO), K_ZERO));
             Store<false, mask>(dst + offset, _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper), tail);
@@ -720,9 +719,9 @@ namespace Simd
 
         template <bool align, bool mask, bool nofma> SIMD_INLINE void ScaleNhwcF(const float* src, const float* scale, const float* shift, __m128i upper, uint8_t* dst, size_t offset, __mmask16 tail = -1)
         {
-            __m512 _src = Avx512f::Load<false, mask>(src + offset, tail);
-            __m512 _scale = Avx512f::Load<align, mask>(scale + offset, tail);
-            __m512 _shift = Avx512f::Load<align, mask>(shift + offset, tail);
+            __m512 _src = Load<false, mask>(src + offset, tail);
+            __m512 _scale = Load<align, mask>(scale + offset, tail);
+            __m512 _shift = Load<align, mask>(shift + offset, tail);
             __m512i _dst = _mm512_cvtps_epi32(Fmadd<nofma>(_src, _scale, _shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(_dst, K_ZERO), K_ZERO));
             Store<false, mask>(dst + offset, _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper), tail);
@@ -761,7 +760,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const float* src, __m512 scale, __m512 shift, __m128i upper, uint8_t* dst, size_t offset)
         {
-            __m512 _src = Avx512f::Load<false>(src + offset);
+            __m512 _src = Load<false>(src + offset);
             __m512i _dst = _mm512_cvtps_epi32(Fmadd<nofma>(_src, scale, shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(_dst, K_ZERO), K_ZERO));
             Sse2::Store<false>((__m128i*)(dst + offset), _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper));
@@ -777,12 +776,12 @@ namespace Simd
             for (size_t i = 0; i < F; ++i)
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
-            __m512 _scale0 = Avx512f::Load<false>(_scale + 0 * F);
-            __m512 _scale1 = Avx512f::Load<false>(_scale + 1 * F);
-            __m512 _scale2 = Avx512f::Load<false>(_scale + 2 * F);
-            __m512 _shift0 = Avx512f::Load<false>(_shift + 0 * F);
-            __m512 _shift1 = Avx512f::Load<false>(_shift + 1 * F);
-            __m512 _shift2 = Avx512f::Load<false>(_shift + 2 * F);
+            __m512 _scale0 = Load<false>(_scale + 0 * F);
+            __m512 _scale1 = Load<false>(_scale + 1 * F);
+            __m512 _scale2 = Load<false>(_scale + 2 * F);
+            __m512 _shift0 = Load<false>(_shift + 0 * F);
+            __m512 _shift1 = Load<false>(_shift + 1 * F);
+            __m512 _shift2 = Load<false>(_shift + 2 * F);
             __m128i _upper = _mm_set1_epi8(upper);
             for (size_t b = 0; b < batch; ++b)
             {

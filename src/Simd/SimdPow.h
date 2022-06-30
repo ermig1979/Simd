@@ -146,8 +146,8 @@ namespace Simd
     }
 #endif //SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         class Pow
         {
@@ -199,7 +199,7 @@ namespace Simd
             }
         };
     }
-#endif //SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon

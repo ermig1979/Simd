@@ -64,7 +64,7 @@ namespace Simd
                 b0 = _mm512_maskz_loadu_ps(tail, B0 + k);
                 c00 = _mm512_fmadd_ps(a0, b0, c00);
             }
-            C[0] += alpha * Avx512f::ExtractSum(c00);
+            C[0] += alpha * ExtractSum(c00);
         }
 
         static void Kernel1x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -137,8 +137,8 @@ namespace Simd
                 c00 = _mm512_fmadd_ps(a0, b0, c00);
                 c10 = _mm512_fmadd_ps(a1, b0, c10);
             }
-            C[0 * ldc] += alpha * Avx512f::ExtractSum(c00);
-            C[1 * ldc] += alpha * Avx512f::ExtractSum(c10);
+            C[0 * ldc] += alpha * ExtractSum(c00);
+            C[1 * ldc] += alpha * ExtractSum(c10);
         }
 
         static void Kernel2x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -233,9 +233,9 @@ namespace Simd
                 c10 = _mm512_fmadd_ps(a1, b0, c10);
                 c20 = _mm512_fmadd_ps(a2, b0, c20);
             }
-            C[0 * ldc] += alpha * Avx512f::ExtractSum(c00);
-            C[1 * ldc] += alpha * Avx512f::ExtractSum(c10);
-            C[2 * ldc] += alpha * Avx512f::ExtractSum(c20);
+            C[0 * ldc] += alpha * ExtractSum(c00);
+            C[1 * ldc] += alpha * ExtractSum(c10);
+            C[2 * ldc] += alpha * ExtractSum(c20);
         }
 
         static void Kernel3x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)
@@ -364,12 +364,12 @@ namespace Simd
                 c40 = _mm512_fmadd_ps(a4, b0, c40);
                 c50 = _mm512_fmadd_ps(a5, b0, c50);
             }
-            C[0 * ldc] += alpha * Avx512f::ExtractSum(c00);
-            C[1 * ldc] += alpha * Avx512f::ExtractSum(c10);
-            C[2 * ldc] += alpha * Avx512f::ExtractSum(c20);
-            C[3 * ldc] += alpha * Avx512f::ExtractSum(c30);
-            C[4 * ldc] += alpha * Avx512f::ExtractSum(c40);
-            C[5 * ldc] += alpha * Avx512f::ExtractSum(c50);
+            C[0 * ldc] += alpha * ExtractSum(c00);
+            C[1 * ldc] += alpha * ExtractSum(c10);
+            C[2 * ldc] += alpha * ExtractSum(c20);
+            C[3 * ldc] += alpha * ExtractSum(c30);
+            C[4 * ldc] += alpha * ExtractSum(c40);
+            C[5 * ldc] += alpha * ExtractSum(c50);
         }
 
         static void Kernel6x4x16nt(size_t K, float alpha, const float * A, size_t lda, const float * B, size_t ldb, float * C, size_t ldc)

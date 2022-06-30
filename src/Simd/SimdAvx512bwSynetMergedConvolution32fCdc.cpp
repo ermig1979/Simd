@@ -1409,7 +1409,7 @@ namespace Simd
 		{
 			for (size_t i = 0; i < _param.count; ++i)
 				Set(p, i, i, _convolution);
-			SetSize(Base::AlgCacheL1(), Base::AlgCacheL2() / 2, Base::AlgCacheL3(), Avx512f::F);
+			SetSize(Base::AlgCacheL1(), Base::AlgCacheL2() / 2, Base::AlgCacheL3(), Avx512bw::F);
 		}
 
 		void SynetMergedConvolution32fCdc::Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c)

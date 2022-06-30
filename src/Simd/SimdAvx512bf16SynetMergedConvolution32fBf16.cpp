@@ -49,7 +49,7 @@ namespace Simd
         {
             if (p.conv[2].dstC > HF)
             {
-                SetSize(Avx512f::F);
+                SetSize(Avx512bw::F);
                 _convert = ConvertFp32ToBf16;
                 SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
@@ -64,7 +64,7 @@ namespace Simd
         {
             if (p.conv[1].dstC > HF)
             {
-                SetSize(Avx512f::F);
+                SetSize(Avx512bw::F);
                 _convert = ConvertFp32ToBf16;
                 SetInput(_param.conv[0], _input);
                 SetDepthwise(_param.conv[1], _depthwise);
@@ -78,7 +78,7 @@ namespace Simd
         {
             if (p.conv[0].dstC > HF && p.conv[1].dstC > HF)
             {
-                SetSize(Avx512f::F);
+                SetSize(Avx512bw::F);
                 SetDepthwise(_param.conv[0], _depthwise);
                 SetOutput(_param.conv[1], _output);
             }

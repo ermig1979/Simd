@@ -55,15 +55,15 @@ namespace Simd
             size_t i = 0;
             __m512 _sum = _mm512_setzero_ps();
             for (; i < alignedCount; i += F)
-                _sum = _mm512_fmadd_ps(Avx512f::Load<true>(sums.data + i), Avx512f::Load<false>(weights + i), _sum);
+                _sum = _mm512_fmadd_ps(Load<true>(sums.data + i), Load<false>(weights + i), _sum);
             if (i < count)
             {
                 __m512 _sums = _mm512_maskz_loadu_ps(tailMask, sums.data + i);
                 __m512 _weight = _mm512_maskz_loadu_ps(tailMask, weights + i);
                 _sum = _mm512_fmadd_ps(_sums, _weight, _sum);
             }
-            *sum = Avx512f::ExtractSum(_sum);
+            *sum = ExtractSum(_sum);
         }
     }
-#endif// SIMD_AVX512F_ENABLE
+#endif
 }

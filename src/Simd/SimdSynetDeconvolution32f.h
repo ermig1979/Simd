@@ -326,7 +326,7 @@ namespace Simd
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE    
     namespace Neon

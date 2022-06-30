@@ -133,8 +133,8 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         template <bool align, bool stream> SIMD_INLINE void Stream(float  * p, __m512 a);
 
@@ -162,6 +162,6 @@ namespace Simd
 #endif
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 }
 #endif//__SimdStream_h__

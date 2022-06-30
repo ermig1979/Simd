@@ -250,8 +250,8 @@ namespace Simd
     }
 #endif// SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m512))
         {
@@ -262,13 +262,6 @@ namespace Simd
         {
             return Simd::Aligned(ptr, align);
         }
-    }
-#endif// SIMD_AVX512F_ENABLE
-
-#ifdef SIMD_AVX512BW_ENABLE
-    namespace Avx512bw
-    {
-        using Avx512f::Aligned;
     }
 #endif// SIMD_AVX512BW_ENABLE
 

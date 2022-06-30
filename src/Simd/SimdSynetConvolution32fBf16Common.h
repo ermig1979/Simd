@@ -217,7 +217,7 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
             {
-                __m512 f32 = Avx512f::Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
+                __m512 f32 = Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
                 _mm256_mask_storeu_epi16(ptr, tail, _mm512_cvtepi32_epi16(Float32ToBFloat16(f32)));
             }
         };
@@ -226,7 +226,7 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
             {
-                _mm512_mask_storeu_ps((float*)ptr, tail, Avx512f::Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
+                _mm512_mask_storeu_ps((float*)ptr, tail, Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
             }
         };
 
@@ -263,7 +263,7 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
             {
-                __m512 f32 = Avx512f::Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
+                __m512 f32 = Activate<type>(_mm512_add_ps(value, bias[index]), params, index);
                 _mm256_mask_storeu_epi16(ptr, tail, (__m256i)_mm512_cvtneps_pbh(f32));
             }
         };
@@ -272,7 +272,7 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m512 value, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
             {
-                _mm512_mask_storeu_ps((float*)ptr, tail, Avx512f::Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
+                _mm512_mask_storeu_ps((float*)ptr, tail, Activate<type>(_mm512_add_ps(value, bias[index]), params, index));
             }
         };
 

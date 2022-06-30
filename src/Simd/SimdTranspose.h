@@ -248,8 +248,8 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX512F_ENABLE
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE
+    namespace Avx512bw
     {
         template <bool align> SIMD_INLINE void Copy(const float * src, float * dst)
         {
@@ -574,7 +574,7 @@ namespace Simd
             Store<align>(dst + 3 * F, buf33);
         }
     }
-#endif//SIMD_AVX512F_ENABLE
+#endif
 
 #ifdef SIMD_NEON_ENABLE
     namespace Neon
