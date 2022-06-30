@@ -42,7 +42,7 @@ namespace Simd
                 Float32ToBFloat16(src + yInt * size, (yEnd - yInt) * size, dst + (yInt & mask) * size);
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
             : Avx2::SynetMergedConvolution32fBf16Cdc(p)
@@ -57,7 +57,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
             : Avx2::SynetMergedConvolution32fBf16Cd(p)
@@ -71,7 +71,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
             : Avx2::SynetMergedConvolution32fBf16Dc(p)
@@ -84,7 +84,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
         {
@@ -102,8 +102,32 @@ namespace Simd
                 else
                     return new Base::SynetMergedConvolution32fBf16(param);
             }
-            else 
-                return Avx512f::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
+            else
+            {
+                if (SynetMergedConvolution32fCdc::Preferable(param))
+                {
+                    if (param.conv[1].dstC <= HF && param.conv[2].dstC <= HF)
+                        return new Avx2::SynetMergedConvolution32fCdc(param);
+                    else
+                        return new Avx512bw::SynetMergedConvolution32fCdc(param);
+                }
+                else if (SynetMergedConvolution32fCd::Preferable(param))
+                {
+                    if (param.conv[1].dstC <= HF)
+                        return new Avx2::SynetMergedConvolution32fCd(param);
+                    else
+                        return new Avx512bw::SynetMergedConvolution32fCd(param);
+                }
+                else if (SynetMergedConvolution32fDc::Preferable(param))
+                {
+                    if (param.conv[0].dstC <= HF || param.conv[1].dstC <= HF)
+                        return new Avx2::SynetMergedConvolution32fDc(param);
+                    else
+                        return new Avx512bw::SynetMergedConvolution32fDc(param);
+                }
+                else
+                    return new Base::SynetMergedConvolution32f(param);
+            }
         }
 	}
 #endif

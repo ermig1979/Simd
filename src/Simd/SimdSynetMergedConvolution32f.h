@@ -546,14 +546,14 @@ namespace Simd
     }
 #endif//SIMD_AVX2_ENABLE
 
-#ifdef SIMD_AVX512F_ENABLE    
-    namespace Avx512f
+#ifdef SIMD_AVX512BW_ENABLE    
+    namespace Avx512bw
     {
         class SynetMergedConvolution32fCdc : public Avx2::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Ext() const { return "Avx512f"; }
+            SynetMergedConvolution32fCdc(const MergConvParam32f& p);
+            virtual String Ext() const { return "Avx512bw"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -562,7 +562,7 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
-            virtual String Ext() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512bw"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -571,18 +571,13 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
-            virtual String Ext() const { return "Avx512f"; }
+            virtual String Ext() const { return "Avx512bw"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
-    }
-#endif//SIMD_AVX512F_ENABLE
+        //-----------------------------------------------------------------------------------------
 
-#ifdef SIMD_AVX512BW_ENABLE    
-    namespace Avx512bw
-    {
         void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);

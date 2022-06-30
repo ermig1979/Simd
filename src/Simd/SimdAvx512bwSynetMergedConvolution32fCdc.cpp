@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-	namespace Avx512f
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+	namespace Avx512bw
 	{
 		namespace Cdc
 		{
@@ -1428,42 +1428,6 @@ namespace Simd
 			case SimdConvolutionActivationSwish: Cdc::Set<SimdConvolutionActivationSwish>(p, t, i, c); break;
 			default: assert(0);
 			}
-		}
-
-		//---------------------------------------------------------------------
-
-		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
-		{
-			MergConvParam32f param(batch, convs, count, add, compatibility);
-			if (!param.Valid())
-				return NULL;
-			if (Base::Bf16Soft(compatibility))
-			{
-				return Avx2::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
-			}
-			else if (SynetMergedConvolution32fCdc::Preferable(param))
-			{
-				if (param.conv[1].dstC <= HF && param.conv[2].dstC <= HF)
-					return new Avx2::SynetMergedConvolution32fCdc(param);
-				else
-					return new Avx512f::SynetMergedConvolution32fCdc(param);
-			}
-			else if (SynetMergedConvolution32fCd::Preferable(param))
-			{
-				if (param.conv[1].dstC <= HF)
-					return new Avx2::SynetMergedConvolution32fCd(param);
-				else
-					return new Avx512f::SynetMergedConvolution32fCd(param);
-			}
-			else if (SynetMergedConvolution32fDc::Preferable(param))
-			{
-				if (param.conv[0].dstC <= HF || param.conv[1].dstC <= HF)
-					return new Avx2::SynetMergedConvolution32fDc(param);
-				else
-					return new Avx512f::SynetMergedConvolution32fDc(param);
-			}
-			else
-				return new Base::SynetMergedConvolution32f(param);
 		}
 	}
 #endif//SIMD_AVX512f_ENABLE

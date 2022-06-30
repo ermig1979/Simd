@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_AVX512F_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-	namespace Avx512f
+#if defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+	namespace Avx512bw
 	{
 		namespace Dc
 		{

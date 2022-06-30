@@ -103,7 +103,7 @@ namespace Simd
                     return new Base::SynetMergedConvolution32fBf16(param);
             }
             else 
-                return Avx512f::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
+                return Avx512bw::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
         }
 	}
 #endif
