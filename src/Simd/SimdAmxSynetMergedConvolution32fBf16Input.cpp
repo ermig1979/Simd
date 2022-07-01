@@ -29,6 +29,7 @@
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdTile.h"
 
 namespace Simd
 {
@@ -38,20 +39,22 @@ namespace Simd
         using AlgParam = Base::SynetMergedConvolution32fBf16::AlgParam;
         using InputPtr = Base::SynetMergedConvolution32fBf16::InputConvolutionPtr;
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> 
-        SIMD_INLINE void SaveInput1(float* dst, __m512 sum, const __m512* bias, const __m512* params)
+        template<SimdConvolutionActivationType type>
+        SIMD_INLINE void ApplyInput1(float* dst0, const __m512* bias, const __m512* params)
         {
-            _mm512_storeu_ps(dst, Activate<type>(_mm512_add_ps(sum, bias[0]), params, 0));
+           Apply<type, 0>(dst0, dst0, bias, params);
         }
 
         template<SimdConvolutionActivationType type>
-        SIMD_INLINE void SaveInput2(float* dst0, float* dst1, __m512 sum0, __m512 sum1, const __m512* bias, const __m512* params)
+        SIMD_INLINE void ApplyInput2(float* dst0, float* dst1, const __m512* bias, const __m512* params)
         {
-            _mm512_storeu_ps(dst0, Activate<type>(_mm512_add_ps(sum0, bias[0]), params, 0));
-            _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(sum1, bias[1]), params, 1));
+            Apply<type, 0>(dst0, dst0, bias, params);
+            Apply<type, 1>(dst1, dst1, bias, params);
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type, bool nofma> void InputConvolution_2x1(const uint16_t* src0,
             const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t dstC, const uint16_t* weight,
@@ -701,481 +704,234 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type, int M> void InputConvolution1x1_2xM(const uint16_t* src0, const ConvParam32f& p,
-            const AlgParam& a, size_t dstC, const uint16_t* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1)
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_2x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+            size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float *dst1)
         {
-            __m512 d00, d01, d10, d11, d20, d21, d30, d31, d40, d41, d50, d51,
-                d60, d61, d70, d71, d80, d81, d90, d91, da0, da1, db0, db1,
-                s0, w00, w01, w10, w11, m = _mm512_castsi512_ps(Bf16::MASK);
-            const uint16_t* src1 = src0 + 1 * p.srcC;
-            const uint16_t* src2 = src0 + 2 * p.srcC;
-            const uint16_t* src3 = src0 + 3 * p.srcC;
-            const uint16_t* src4 = src0 + 4 * p.srcC;
-            const uint16_t* src5 = src0 + 5 * p.srcC;
-            if (dstC > F)
+            size_t dD = p.dstC, sC = p.srcC, sC32 = AlignLo(sC, 32), strideS = sC * 2, strideW = 128, strideD = 64;
+            const uint16_t* src1 = src0 + sC * 16, * weight1 = weight0 + 32;
+
+            TileConf conf;
+            conf.rows[0] = 16;
+            conf.rows[1] = 16;
+            conf.rows[2] = uint8_t(dstS - 16);
+            conf.rows[3] = uint8_t(dstS - 16);
+            conf.rows[4] = 16;
+            conf.rows[5] = uint8_t(dstS - 16);
+            conf.rows[6] = 16;
+            conf.rows[7] = 16;
+            conf.colsb[0] = 64;
+            conf.colsb[1] = uint16_t((dstC - 16) * 4);
+            conf.colsb[2] = 64;
+            conf.colsb[3] = uint16_t((dstC - 16) * 4);
+            conf.colsb[4] = 64;
+            conf.colsb[5] = 64;
+            conf.colsb[6] = 64;
+            conf.colsb[7] = uint16_t((dstC - 16) * 4);
+            _tile_loadconfig(&conf);
+
+            _tile_zero(0);
+            _tile_zero(1);
+            _tile_zero(2);
+            _tile_zero(3);
+            size_t sc = 0;
+            for (; sc < sC32; sc += 32)
             {
-                if (M > 0x0) d00 = _mm512_setzero_ps(), d01 = _mm512_setzero_ps();
-                if (M > 0x1) d10 = _mm512_setzero_ps(), d11 = _mm512_setzero_ps();
-                if (M > 0x2) d20 = _mm512_setzero_ps(), d21 = _mm512_setzero_ps();
-                if (M > 0x3) d30 = _mm512_setzero_ps(), d31 = _mm512_setzero_ps();
-                if (M > 0x4) d40 = _mm512_setzero_ps(), d41 = _mm512_setzero_ps();
-                if (M > 0x5) d50 = _mm512_setzero_ps(), d51 = _mm512_setzero_ps();
-                if (M > 0x6) d60 = _mm512_setzero_ps(), d61 = _mm512_setzero_ps();
-                if (M > 0x7) d70 = _mm512_setzero_ps(), d71 = _mm512_setzero_ps();
-                if (M > 0x8) d80 = _mm512_setzero_ps(), d81 = _mm512_setzero_ps();
-                if (M > 0x9) d90 = _mm512_setzero_ps(), d91 = _mm512_setzero_ps();
-                if (M > 0xa) da0 = _mm512_setzero_ps(), da1 = _mm512_setzero_ps();
-                if (M > 0xb) db0 = _mm512_setzero_ps(), db1 = _mm512_setzero_ps();
-                if (Base::FmaAvoid(p.compatibility))
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * p.srcC, end = p.srcC; offs0 < end; offs0 += 2, offs6 += 2)
-                    {
-                        w01 = _mm512_loadu_ps((float*)weight + 0);
-                        w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
-                        w01 = _mm512_and_ps(w01, m);
-                        w11 = _mm512_loadu_ps((float*)weight + F);
-                        w10 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w11), Base::Bf16::SHIFT));
-                        w11 = _mm512_and_ps(w11, m);
-                        if (M > 0x0)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
-                            d00 = Fmadd<true>(s0, w00, d00); d01 = Fmadd<true>(s0, w10, d01);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
-                            d00 = Fmadd<true>(s0, w01, d00); d01 = Fmadd<true>(s0, w11, d01);
-                        }
-                        if (M > 0x1)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
-                            d10 = Fmadd<true>(s0, w00, d10); d11 = Fmadd<true>(s0, w10, d11);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
-                            d10 = Fmadd<true>(s0, w01, d10); d11 = Fmadd<true>(s0, w11, d11);
-                        }
-                        if (M > 0x2)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
-                            d20 = Fmadd<true>(s0, w00, d20); d21 = Fmadd<true>(s0, w10, d21);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
-                            d20 = Fmadd<true>(s0, w01, d20); d21 = Fmadd<true>(s0, w11, d21);
-                        }
-                        if (M > 0x3)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
-                            d30 = Fmadd<true>(s0, w00, d30); d31 = Fmadd<true>(s0, w10, d31);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
-                            d30 = Fmadd<true>(s0, w01, d30); d31 = Fmadd<true>(s0, w11, d31);
-                        }
-                        if (M > 0x4)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
-                            d40 = Fmadd<true>(s0, w00, d40); d41 = Fmadd<true>(s0, w10, d41);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
-                            d40 = Fmadd<true>(s0, w01, d40); d41 = Fmadd<true>(s0, w11, d41);
-                        }
-                        if (M > 0x5)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
-                            d50 = Fmadd<true>(s0, w00, d50); d51 = Fmadd<true>(s0, w10, d51);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
-                            d50 = Fmadd<true>(s0, w01, d50); d51 = Fmadd<true>(s0, w11, d51);
-                        }
-                        if (M > 0x6)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
-                            d60 = Fmadd<true>(s0, w00, d60); d61 = Fmadd<true>(s0, w10, d61);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
-                            d60 = Fmadd<true>(s0, w01, d60); d61 = Fmadd<true>(s0, w11, d61);
-                        }
-                        if (M > 0x7)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
-                            d70 = Fmadd<true>(s0, w00, d70); d71 = Fmadd<true>(s0, w10, d71);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
-                            d70 = Fmadd<true>(s0, w01, d70); d71 = Fmadd<true>(s0, w11, d71);
-                        }
-                        if (M > 0x8)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
-                            d80 = Fmadd<true>(s0, w00, d80); d81 = Fmadd<true>(s0, w10, d81);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
-                            d80 = Fmadd<true>(s0, w01, d80); d81 = Fmadd<true>(s0, w11, d81);
-                        }
-                        if (M > 0x9)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
-                            d90 = Fmadd<true>(s0, w00, d90); d91 = Fmadd<true>(s0, w10, d91);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
-                            d90 = Fmadd<true>(s0, w01, d90); d91 = Fmadd<true>(s0, w11, d91);
-                        }
-                        if (M > 0xa)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
-                            da0 = Fmadd<true>(s0, w00, da0); da1 = Fmadd<true>(s0, w10, da1);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
-                            da0 = Fmadd<true>(s0, w01, da0); da1 = Fmadd<true>(s0, w11, da1);
-                        }
-                        if (M > 0xb)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
-                            db0 = Fmadd<true>(s0, w00, db0); db1 = Fmadd<true>(s0, w10, db1);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
-                            db0 = Fmadd<true>(s0, w01, db0); db1 = Fmadd<true>(s0, w11, db1);
-                        }
-                        weight += QF;
-                    }
-                }
-                else
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * p.srcC, end = p.srcC; offs0 < end; offs0 += 2, offs6 += 2)
-                    {
-                        w01 = _mm512_loadu_ps((float*)weight + 0);
-                        w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
-                        w01 = _mm512_and_ps(w01, m);
-                        w11 = _mm512_loadu_ps((float*)weight + F);
-                        w10 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w11), Base::Bf16::SHIFT));
-                        w11 = _mm512_and_ps(w11, m);
-                        if (M > 0x0)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
-                            d00 = Fmadd<false>(s0, w00, d00); d01 = Fmadd<false>(s0, w10, d01);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
-                            d00 = Fmadd<false>(s0, w01, d00); d01 = Fmadd<false>(s0, w11, d01);
-                        }
-                        if (M > 0x1)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
-                            d10 = Fmadd<false>(s0, w00, d10); d11 = Fmadd<false>(s0, w10, d11);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
-                            d10 = Fmadd<false>(s0, w01, d10); d11 = Fmadd<false>(s0, w11, d11);
-                        }
-                        if (M > 0x2)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
-                            d20 = Fmadd<false>(s0, w00, d20); d21 = Fmadd<false>(s0, w10, d21);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
-                            d20 = Fmadd<false>(s0, w01, d20); d21 = Fmadd<false>(s0, w11, d21);
-                        }
-                        if (M > 0x3)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
-                            d30 = Fmadd<false>(s0, w00, d30); d31 = Fmadd<false>(s0, w10, d31);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
-                            d30 = Fmadd<false>(s0, w01, d30); d31 = Fmadd<false>(s0, w11, d31);
-                        }
-                        if (M > 0x4)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
-                            d40 = Fmadd<false>(s0, w00, d40); d41 = Fmadd<false>(s0, w10, d41);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
-                            d40 = Fmadd<false>(s0, w01, d40); d41 = Fmadd<false>(s0, w11, d41);
-                        }
-                        if (M > 0x5)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
-                            d50 = Fmadd<false>(s0, w00, d50); d51 = Fmadd<false>(s0, w10, d51);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
-                            d50 = Fmadd<false>(s0, w01, d50); d51 = Fmadd<false>(s0, w11, d51);
-                        }
-                        if (M > 0x6)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
-                            d60 = Fmadd<false>(s0, w00, d60); d61 = Fmadd<false>(s0, w10, d61);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
-                            d60 = Fmadd<false>(s0, w01, d60); d61 = Fmadd<false>(s0, w11, d61);
-                        }
-                        if (M > 0x7)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
-                            d70 = Fmadd<false>(s0, w00, d70); d71 = Fmadd<false>(s0, w10, d71);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
-                            d70 = Fmadd<false>(s0, w01, d70); d71 = Fmadd<false>(s0, w11, d71);
-                        }
-                        if (M > 0x8)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
-                            d80 = Fmadd<false>(s0, w00, d80); d81 = Fmadd<false>(s0, w10, d81);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
-                            d80 = Fmadd<false>(s0, w01, d80); d81 = Fmadd<false>(s0, w11, d81);
-                        }
-                        if (M > 0x9)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
-                            d90 = Fmadd<false>(s0, w00, d90); d91 = Fmadd<false>(s0, w10, d91);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
-                            d90 = Fmadd<false>(s0, w01, d90); d91 = Fmadd<false>(s0, w11, d91);
-                        }
-                        if (M > 0xa)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
-                            da0 = Fmadd<false>(s0, w00, da0); da1 = Fmadd<false>(s0, w10, da1);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
-                            da0 = Fmadd<false>(s0, w01, da0); da1 = Fmadd<false>(s0, w11, da1);
-                        }
-                        if (M > 0xb)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
-                            db0 = Fmadd<false>(s0, w00, db0); db1 = Fmadd<false>(s0, w10, db1);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
-                            db0 = Fmadd<false>(s0, w01, db0); db1 = Fmadd<false>(s0, w11, db1);
-                        }
-                        weight += QF;
-                    }
-                }
-                if (M > 0x0) SaveInput2<type>(dst0 + 0x0 * F, dst1 + 0x0 * F, d00, d01, bias, params);
-                if (M > 0x1) SaveInput2<type>(dst0 + 0x1 * F, dst1 + 0x1 * F, d10, d11, bias, params);
-                if (M > 0x2) SaveInput2<type>(dst0 + 0x2 * F, dst1 + 0x2 * F, d20, d21, bias, params);
-                if (M > 0x3) SaveInput2<type>(dst0 + 0x3 * F, dst1 + 0x3 * F, d30, d31, bias, params);
-                if (M > 0x4) SaveInput2<type>(dst0 + 0x4 * F, dst1 + 0x4 * F, d40, d41, bias, params);
-                if (M > 0x5) SaveInput2<type>(dst0 + 0x5 * F, dst1 + 0x5 * F, d50, d51, bias, params);
-                if (M > 0x6) SaveInput2<type>(dst0 + 0x6 * F, dst1 + 0x6 * F, d60, d61, bias, params);
-                if (M > 0x7) SaveInput2<type>(dst0 + 0x7 * F, dst1 + 0x7 * F, d70, d71, bias, params);
-                if (M > 0x8) SaveInput2<type>(dst0 + 0x8 * F, dst1 + 0x8 * F, d80, d81, bias, params);
-                if (M > 0x9) SaveInput2<type>(dst0 + 0x9 * F, dst1 + 0x9 * F, d90, d91, bias, params);
-                if (M > 0xa) SaveInput2<type>(dst0 + 0xa * F, dst1 + 0xa * F, da0, da1, bias, params);
-                if (M > 0xb) SaveInput2<type>(dst0 + 0xb * F, dst1 + 0xb * F, db0, db1, bias, params);
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                _tile_dpbf16ps(3, 5, 7);
             }
-            else
+            if (sc < sC)
             {
-                if (M > 0x0) d00 = _mm512_setzero_ps();
-                if (M > 0x1) d10 = _mm512_setzero_ps();
-                if (M > 0x2) d20 = _mm512_setzero_ps();
-                if (M > 0x3) d30 = _mm512_setzero_ps();
-                if (M > 0x4) d40 = _mm512_setzero_ps();
-                if (M > 0x5) d50 = _mm512_setzero_ps();
-                if (M > 0x6) d60 = _mm512_setzero_ps();
-                if (M > 0x7) d70 = _mm512_setzero_ps();
-                if (M > 0x8) d80 = _mm512_setzero_ps();
-                if (M > 0x9) d90 = _mm512_setzero_ps();
-                if (M > 0xa) da0 = _mm512_setzero_ps();
-                if (M > 0xb) db0 = _mm512_setzero_ps();
-                if (Base::FmaAvoid(p.compatibility))
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * p.srcC, end = p.srcC; offs0 < end; offs0 += 2, offs6 += 2)
-                    {
-                        w01 = _mm512_loadu_ps((float*)weight + 0);
-                        w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
-                        w01 = _mm512_and_ps(w01, m);
-                        if (M > 0x0)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
-                            d00 = Fmadd<true>(s0, w00, d00);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
-                            d00 = Fmadd<true>(s0, w01, d00);
-                        }
-                        if (M > 0x1)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
-                            d10 = Fmadd<true>(s0, w00, d10);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
-                            d10 = Fmadd<true>(s0, w01, d10);
-                        }
-                        if (M > 0x2)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
-                            d20 = Fmadd<true>(s0, w00, d20);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
-                            d20 = Fmadd<true>(s0, w01, d20);
-                        }
-                        if (M > 0x3)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
-                            d30 = Fmadd<true>(s0, w00, d30);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
-                            d30 = Fmadd<true>(s0, w01, d30);
-                        }
-                        if (M > 0x4)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
-                            d40 = Fmadd<true>(s0, w00, d40);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
-                            d40 = Fmadd<true>(s0, w01, d40);
-                        }
-                        if (M > 0x5)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
-                            d50 = Fmadd<true>(s0, w00, d50);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
-                            d50 = Fmadd<true>(s0, w01, d50);
-                        }
-                        if (M > 0x6)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
-                            d60 = Fmadd<true>(s0, w00, d60);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
-                            d60 = Fmadd<true>(s0, w01, d60);
-                        }
-                        if (M > 0x7)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
-                            d70 = Fmadd<true>(s0, w00, d70);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
-                            d70 = Fmadd<true>(s0, w01, d70);
-                        }
-                        if (M > 0x8)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
-                            d80 = Fmadd<true>(s0, w00, d80);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
-                            d80 = Fmadd<true>(s0, w01, d80);
-                        }
-                        if (M > 0x9)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
-                            d90 = Fmadd<true>(s0, w00, d90);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
-                            d90 = Fmadd<true>(s0, w01, d90);
-                        }
-                        if (M > 0xa)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
-                            da0 = Fmadd<true>(s0, w00, da0);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
-                            da0 = Fmadd<true>(s0, w01, da0);
-                        }
-                        if (M > 0xb)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
-                            db0 = Fmadd<true>(s0, w00, db0);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
-                            db0 = Fmadd<true>(s0, w01, db0);
-                        }
-                        weight += QF;
-                    }
-                }
-                else
-                {
-                    for (size_t offs0 = 0, offs6 = offs0 + 6 * p.srcC, end = p.srcC; offs0 < end; offs0 += 2, offs6 += 2)
-                    {
-                        w01 = _mm512_loadu_ps((float*)weight + 0);
-                        w00 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(w01), Base::Bf16::SHIFT));
-                        w01 = _mm512_and_ps(w01, m);
-                        if (M > 0x0)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs0]));
-                            d00 = Fmadd<false>(s0, w00, d00);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs0)), m);
-                            d00 = Fmadd<false>(s0, w01, d00);
-                        }
-                        if (M > 0x1)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs0]));
-                            d10 = Fmadd<false>(s0, w00, d10);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs0)), m);
-                            d10 = Fmadd<false>(s0, w01, d10);
-                        }
-                        if (M > 0x2)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs0]));
-                            d20 = Fmadd<false>(s0, w00, d20);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs0)), m);
-                            d20 = Fmadd<false>(s0, w01, d20);
-                        }
-                        if (M > 0x3)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs0]));
-                            d30 = Fmadd<false>(s0, w00, d30);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs0)), m);
-                            d30 = Fmadd<false>(s0, w01, d30);
-                        }
-                        if (M > 0x4)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs0]));
-                            d40 = Fmadd<false>(s0, w00, d40);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs0)), m);
-                            d40 = Fmadd<false>(s0, w01, d40);
-                        }
-                        if (M > 0x5)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs0]));
-                            d50 = Fmadd<false>(s0, w00, d50);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs0)), m);
-                            d50 = Fmadd<false>(s0, w01, d50);
-                        }
-                        if (M > 0x6)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src0[offs6]));
-                            d60 = Fmadd<false>(s0, w00, d60);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src0 + offs6)), m);
-                            d60 = Fmadd<false>(s0, w01, d60);
-                        }
-                        if (M > 0x7)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src1[offs6]));
-                            d70 = Fmadd<false>(s0, w00, d70);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src1 + offs6)), m);
-                            d70 = Fmadd<false>(s0, w01, d70);
-                        }
-                        if (M > 0x8)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src2[offs6]));
-                            d80 = Fmadd<false>(s0, w00, d80);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src2 + offs6)), m);
-                            d80 = Fmadd<false>(s0, w01, d80);
-                        }
-                        if (M > 0x9)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src3[offs6]));
-                            d90 = Fmadd<false>(s0, w00, d90);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src3 + offs6)), m);
-                            d90 = Fmadd<false>(s0, w01, d90);
-                        }
-                        if (M > 0xa)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src4[offs6]));
-                            da0 = Fmadd<false>(s0, w00, da0);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src4 + offs6)), m);
-                            da0 = Fmadd<false>(s0, w01, da0);
-                        }
-                        if (M > 0xb)
-                        {
-                            s0 = _mm512_castsi512_ps(_mm512_maskz_set1_epi16(0xAAAAAAAA, src5[offs6]));
-                            db0 = Fmadd<false>(s0, w00, db0);
-                            s0 = _mm512_and_ps(_mm512_set1_ps(*(float*)(src5 + offs6)), m);
-                            db0 = Fmadd<false>(s0, w01, db0);
-                        }
-                        weight += QF;
-                    }
-                }
-                if (M > 0x0) SaveInput1<type>(dst0 + 0x0 * F, d00, bias, params);
-                if (M > 0x1) SaveInput1<type>(dst0 + 0x1 * F, d10, bias, params);
-                if (M > 0x2) SaveInput1<type>(dst0 + 0x2 * F, d20, bias, params);
-                if (M > 0x3) SaveInput1<type>(dst0 + 0x3 * F, d30, bias, params);
-                if (M > 0x4) SaveInput1<type>(dst0 + 0x4 * F, d40, bias, params);
-                if (M > 0x5) SaveInput1<type>(dst0 + 0x5 * F, d50, bias, params);
-                if (M > 0x6) SaveInput1<type>(dst0 + 0x6 * F, d60, bias, params);
-                if (M > 0x7) SaveInput1<type>(dst0 + 0x7 * F, d70, bias, params);
-                if (M > 0x8) SaveInput1<type>(dst0 + 0x8 * F, d80, bias, params);
-                if (M > 0x9) SaveInput1<type>(dst0 + 0x9 * F, d90, bias, params);
-                if (M > 0xa) SaveInput1<type>(dst0 + 0xa * F, da0, bias, params);
-                if (M > 0xb) SaveInput1<type>(dst0 + 0xb * F, db0, bias, params);
+                size_t tailC = AlignHi(sC - sc, 2);
+                conf.rows[6] = tailC / 2;
+                conf.rows[7] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                conf.colsb[5] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+                _tile_dpbf16ps(3, 5, 7);
+            }
+            _tile_stored(0, dst0, strideD);
+            _tile_stored(2, dst0 + 256, strideD);
+            _tile_stored(1, dst1, strideD);
+            _tile_stored(3, dst1 + 256, strideD);
+            if (type)
+            {
+                for (size_t s = 0; s < dstS; ++s, dst0 += F)
+                    Apply<type, 0>(dst0, dst0, bias, params);
+                for (size_t s = 0; s < dstS; ++s, dst1 += F)
+                    Apply<type, 1>(dst1, dst1, bias, params);
             }
         }
 
-        typedef void(*InputConvolution1x1_2xM_Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a, size_t dstC,
-            const uint16_t* weight, const __m512* bias, const __m512* params, float* dst0, float* dst1);
-
-        template<SimdConvolutionActivationType type> InputConvolution1x1_2xM_Ptr GetInputConvolution1x1_2xM(size_t M)
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_2x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+            size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
         {
-            switch (M)
+            size_t dD = p.dstC, sC = p.srcC, sC32 = AlignLo(sC, 32), strideS = sC * 2, strideW = 128, strideD = 64;
+            const uint16_t* src1 = src0 + sC * 16;
+
+            TileConf conf;
+            conf.rows[0] = 16;
+            conf.rows[2] = dstS - 16;
+            conf.rows[4] = 16;
+            conf.rows[5] = dstS - 16;
+            conf.rows[6] = 16;
+            conf.colsb[0] = dstC * 4;
+            conf.colsb[2] = dstC * 4;
+            conf.colsb[4] = 64;
+            conf.colsb[5] = 64;
+            conf.colsb[6] = dstC * 4;
+            _tile_loadconfig(&conf);
+
+            _tile_zero(0);
+            _tile_zero(2);
+            size_t sc = 0;
+            for (; sc < sC32; sc += 32)
             {
-            case 0: return NULL;
-            case 0x1: return InputConvolution1x1_2xM<type, 0x1>;
-            case 0x2: return InputConvolution1x1_2xM<type, 0x2>;
-            case 0x3: return InputConvolution1x1_2xM<type, 0x3>;
-            case 0x4: return InputConvolution1x1_2xM<type, 0x4>;
-            case 0x5: return InputConvolution1x1_2xM<type, 0x5>;
-            case 0x6: return InputConvolution1x1_2xM<type, 0x6>;
-            case 0x7: return InputConvolution1x1_2xM<type, 0x7>;
-            case 0x8: return InputConvolution1x1_2xM<type, 0x8>;
-            case 0x9: return InputConvolution1x1_2xM<type, 0x9>;
-            case 0xa: return InputConvolution1x1_2xM<type, 0xa>;
-            case 0xb: return InputConvolution1x1_2xM<type, 0xb>;
-            case 0xc: return InputConvolution1x1_2xM<type, 0xc>;
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
             }
-            assert(0);
-            return NULL;
+            if (sc < sC)
+            {
+                size_t tailC = AlignHi(sC - sc, 2);
+                conf.rows[6] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                conf.colsb[5] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(5, src1 + sc, strideS);
+                _tile_dpbf16ps(2, 5, 6);
+            }
+            _tile_stored(0, dst0, strideD);
+            _tile_stored(2, dst0 + 256, strideD);
+            if (type)
+            {
+                for (size_t s = 0; s < dstS; ++s, dst0 += F)
+                    Apply<type, 0>(dst0, dst0, bias, params);
+            }
         }
+
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_1x2(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+            size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
+        {
+            size_t dD = p.dstC, sC = p.srcC, sC32 = AlignLo(sC, 32), strideS = sC * 2, strideW = 128, strideD = 64;
+            const uint16_t* weight1 = weight0 + 32;
+
+            TileConf conf;
+            conf.rows[0] = dstS;
+            conf.rows[1] = dstS;
+            conf.rows[4] = dstS;
+            conf.rows[6] = 16;
+            conf.rows[7] = 16;
+            conf.colsb[0] = 64;
+            conf.colsb[1] = (dstC - 16) * 4;
+            conf.colsb[4] = 64;
+            conf.colsb[6] = 64;
+            conf.colsb[7] = (dstC - 16) * 4;
+            _tile_loadconfig(&conf);
+
+            _tile_zero(0);
+            _tile_zero(1);
+            size_t sc = 0;
+            for (; sc < sC32; sc += 32)
+            {
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+            }
+            if (sc < sC)
+            {
+                size_t tailC = AlignHi(sC - sc, 2);
+                conf.rows[6] = tailC / 2;
+                conf.rows[7] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+                _tile_loadd(7, weight1 + sc * 32, strideW);
+                _tile_dpbf16ps(1, 4, 7);
+            }
+            _tile_stored(0, dst0, strideD);
+            _tile_stored(1, dst1, strideD);
+            if (type)
+            {
+                if (type)
+                {
+                    for (size_t s = 0; s < dstS; ++s, dst0 += F)
+                        Apply<type, 0>(dst0, dst0, bias, params);
+                    for (size_t s = 0; s < dstS; ++s, dst1 += F)
+                        Apply<type, 1>(dst1, dst1, bias, params);
+                }
+            }
+        }
+
+        template<SimdConvolutionActivationType type> void InputConvolution1x1_1x1(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+            size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1)
+        {
+            size_t dD = p.dstC, sC = p.srcC, sC32 = AlignLo(sC, 32), strideS = sC * 2, strideW = 128, strideD = 64;
+
+            TileConf conf;
+            conf.rows[0] = dstS;
+            conf.rows[4] = dstS;
+            conf.rows[6] = 16;
+            conf.colsb[0] = dstC * 4;
+            conf.colsb[4] = 64;
+            conf.colsb[6] = dstC * 4;
+            _tile_loadconfig(&conf);
+
+            _tile_zero(0);
+            size_t sc = 0;
+            for (; sc < sC32; sc += 32)
+            {
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+            }
+            if (sc < sC)
+            {
+                size_t tailC = AlignHi(sC - sc, 2);
+                conf.rows[6] = tailC / 2;
+                conf.colsb[4] = tailC * 2;
+                _tile_loadconfig(&conf);
+
+                _tile_loadd(4, src0 + sc, strideS);
+                _tile_loadd(6, weight0 + sc * 32, strideW);
+                _tile_dpbf16ps(0, 4, 6);
+            }
+            _tile_stored(0, dst0, strideD);
+            if (type)
+            {
+                for (size_t s = 0; s < dstS; ++s, dst0 += F)
+                    Apply<type, 0>(dst0, dst0, bias, params);
+            }
+        }
+
+        typedef void (*InputConvolution1x1Ptr)(const uint16_t* src0, const ConvParam32f& p, const AlgParam& a,
+            size_t dstS, size_t dstC, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst0, float* dst1);
 
         template<SimdConvolutionActivationType type> void InputConvolution1x1_2(const uint16_t* src, const ConvParam32f& p,
             const AlgParam& a, size_t maC, size_t yBeg, size_t yEnd, const uint16_t* weight, const float* bias, const float* params, float* dst)
@@ -1184,14 +940,17 @@ namespace Simd
             __m512 _bias[2], _params[2];
             _params[0] = _mm512_set1_ps(params[0]);
             _params[1] = _mm512_set1_ps(params[1]);
+            InputConvolution1x1Ptr conv_2x2 = InputConvolution1x1_2x2<type>;
+            InputConvolution1x1Ptr conv_2x1 = InputConvolution1x1_2x1<type>;
             if (a.bufH[0] == 0)
             {
-                size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 12;
+                size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 32;
                 size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLoAny(i1, n), i = i1 - in;
                 size_t e1 = (yEnd - yInt) * p.dstW, en = AlignLoAny(e1, n), e = e1 - en;
-                InputConvolution1x1_2xM_Ptr inputConvolution1x1_2xN = GetInputConvolution1x1_2xM<type>(n);
-                InputConvolution1x1_2xM_Ptr inputConvolution1x1_2xI = GetInputConvolution1x1_2xM<type>(i);
-                InputConvolution1x1_2xM_Ptr inputConvolution1x1_2xE = GetInputConvolution1x1_2xM<type>(e);
+                InputConvolution1x1Ptr conv_Ix2 = i > 16 ? InputConvolution1x1_2x2<type> : InputConvolution1x1_1x2<type>;
+                InputConvolution1x1Ptr conv_Ix1 = i > 16 ? InputConvolution1x1_2x1<type> : InputConvolution1x1_1x1<type>;
+                InputConvolution1x1Ptr conv_Ex2 = e > 16 ? InputConvolution1x1_2x2<type> : InputConvolution1x1_1x2<type>;
+                InputConvolution1x1Ptr conv_Ex1 = e > 16 ? InputConvolution1x1_2x1<type> : InputConvolution1x1_1x1<type>;
                 for (size_t dc = 0; dc < maC; dc += DF)
                 {
                     size_t dC = Simd::Min(DF, maC - dc);
@@ -1202,23 +961,47 @@ namespace Simd
                         _params[0] = _mm512_loadu_ps(params + dc + 0);
                         _params[1] = _mm512_loadu_ps(params + dc + F);
                     }
-                    if (yInt > yBeg)
+                    if (dC > F)
                     {
-                        const uint16_t* src0 = src + yBeg * p.srcW * p.srcC;
-                        float* dst0 = dst + (yBeg & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                        for (size_t j = 0; j < in; j += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
-                            inputConvolution1x1_2xN(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
-                        if (in < i1)
-                            inputConvolution1x1_2xI(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
+                        if (yInt > yBeg)
+                        {
+                            const uint16_t* src0 = src + yBeg * p.srcW * p.srcC;
+                            float* dst0 = dst + (yBeg & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
+                            for (size_t j = 0; j < in; j += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
+                                conv_2x2(src0, p, a, n, dC, weight, _bias, _params, dst0, dst1);
+                            if (in < i1)
+                                conv_Ix2(src0, p, a, i, dC, weight, _bias, _params, dst0, dst1);
+                        }
+                        if (yEnd > yInt)
+                        {
+                            const uint16_t* src0 = src + yInt * p.srcW * p.srcC;
+                            float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
+                            for (size_t j = 0; j < en; j += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
+                                conv_2x2(src0, p, a, n, dC, weight, _bias, _params, dst0, dst1);
+                            if (en < e1)
+                                conv_Ex2(src0, p, a, e, dC, weight, _bias, _params, dst0, dst1);
+                        }
                     }
-                    if (yEnd > yInt)
+                    else
                     {
-                        const uint16_t* src0 = src + yInt * p.srcW * p.srcC;
-                        float* dst0 = dst + (yInt & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                        for (size_t j = 0; j < en; j += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
-                            inputConvolution1x1_2xN(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
-                        if (en < e1)
-                            inputConvolution1x1_2xE(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
+                        if (yInt > yBeg)
+                        {
+                            const uint16_t* src0 = src + yBeg * p.srcW * p.srcC;
+                            float* dst0 = dst + (yBeg & dstM) * p.dstW * F;
+                            for (size_t j = 0; j < in; j += n, src0 += p.srcC * n, dst0 += F * n)
+                                conv_2x1(src0, p, a, n, dC, weight, _bias, _params, dst0, NULL);
+                            if (in < i1)
+                                conv_Ix1(src0, p, a, i, dC, weight, _bias, _params, dst0, NULL);
+                        }
+                        if (yEnd > yInt)
+                        {
+                            const uint16_t* src0 = src + yInt * p.srcW * p.srcC;
+                            float* dst0 = dst + (yInt & dstM) * p.dstW * F;
+                            for (size_t j = 0; j < en; j += n, src0 += p.srcC * n, dst0 += F * n)
+                                conv_2x1(src0, p, a, n, dC, weight, _bias, _params, dst0, NULL);
+                            if (en < e1)
+                                conv_Ex1(src0, p, a, e, dC, weight, _bias, _params, dst0, NULL);
+                        }
                     }
                     dst += a.bufH[1] * p.dstW * DF;
                     weight += DivHi(p.srcC, 2) * QF;
@@ -1226,9 +1009,9 @@ namespace Simd
             }
             else
             {
-                size_t n = 12, bodyW = p.dstW, bodyWn = AlignLoAny(bodyW, n), m = bodyW - bodyWn;
-                InputConvolution1x1_2xM_Ptr inputConvolution1x1_2xN = GetInputConvolution1x1_2xM<type>(n);
-                InputConvolution1x1_2xM_Ptr inputConvolution1x1_2xM = GetInputConvolution1x1_2xM<type>(m);
+                size_t n = 32, bodyW = p.dstW, bodyWn = AlignLoAny(bodyW, n), m = bodyW - bodyWn;
+                InputConvolution1x1Ptr conv_Mx2 = m > 16 ? InputConvolution1x1_2x2<type> : InputConvolution1x1_1x2<type>;
+                InputConvolution1x1Ptr conv_Mx1 = m > 16 ? InputConvolution1x1_2x1<type> : InputConvolution1x1_1x1<type>;
                 for (size_t dc = 0; dc < maC; dc += DF)
                 {
                     size_t dC = Simd::Min(DF, maC - dc);
@@ -1239,15 +1022,31 @@ namespace Simd
                         _params[0] = _mm512_loadu_ps(params + dc + 0);
                         _params[1] = _mm512_loadu_ps(params + dc + F);
                     }
-                    for (size_t dy = yBeg; dy < yEnd; dy++)
+                    if (dC > F)
                     {
-                        const uint16_t* src0 = src + (dy & srcM) * p.srcW * p.srcC;
-                        float* dst0 = dst + (dy & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
-                        size_t dx = 0;
-                        for (; dx < bodyWn; dx += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
-                            inputConvolution1x1_2xN(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
-                        if (dx < bodyW)
-                            inputConvolution1x1_2xM(src0, p, a, dC, weight, _bias, _params, dst0, dst1);
+                        for (size_t dy = yBeg; dy < yEnd; dy++)
+                        {
+                            const uint16_t* src0 = src + (dy & srcM) * p.srcW * p.srcC;
+                            float* dst0 = dst + (dy & dstM) * p.dstW * F, * dst1 = dst0 + dstS;
+                            size_t dx = 0;
+                            for (; dx < bodyWn; dx += n, src0 += p.srcC * n, dst0 += F * n, dst1 += F * n)
+                                conv_2x2(src0, p, a, n, dC, weight, _bias, _params, dst0, dst1);
+                            if (dx < bodyW)
+                                conv_Mx2(src0, p, a, m, dC, weight, _bias, _params, dst0, dst1);
+                        }
+                    }
+                    else
+                    {
+                        for (size_t dy = yBeg; dy < yEnd; dy++)
+                        {
+                            const uint16_t* src0 = src + (dy & srcM) * p.srcW * p.srcC;
+                            float* dst0 = dst + (dy & dstM) * p.dstW * F;
+                            size_t dx = 0;
+                            for (; dx < bodyWn; dx += n, src0 += p.srcC * n, dst0 += F * n)
+                                conv_2x1(src0, p, a, n, dC, weight, _bias, _params, dst0, NULL);
+                            if (dx < bodyW)
+                                conv_Mx1(src0, p, a, m, dC, weight, _bias, _params, dst0, NULL);
+                        }
                     }
                     dst += a.bufH[1] * p.dstW * DF;
                     weight += DivHi(p.srcC, 2) * QF;
@@ -1255,7 +1054,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template<SimdConvolutionActivationType type> static void SetInput(const ConvParam32f& p, InputPtr& input)
         {

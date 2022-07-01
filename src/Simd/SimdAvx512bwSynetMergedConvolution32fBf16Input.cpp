@@ -40,19 +40,6 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<SimdConvolutionActivationType type> 
-        SIMD_INLINE void SaveInput1(float* dst, __m512 sum, const __m512* bias, const __m512* params)
-        {
-            _mm512_storeu_ps(dst, Activate<type>(_mm512_add_ps(sum, bias[0]), params, 0));
-        }
-
-        template<SimdConvolutionActivationType type>
-        SIMD_INLINE void SaveInput2(float* dst0, float* dst1, __m512 sum0, __m512 sum1, const __m512* bias, const __m512* params)
-        {
-            _mm512_storeu_ps(dst0, Activate<type>(_mm512_add_ps(sum0, bias[0]), params, 0));
-            _mm512_storeu_ps(dst1, Activate<type>(_mm512_add_ps(sum1, bias[1]), params, 1));
-        }
-
         template<SimdConvolutionActivationType type, bool nofma> void InputConvolution_2x1(const uint16_t* src0,
             const ConvParam32f& p, const AlgParam& a, size_t dy, size_t dx, size_t dstC, const uint16_t* weight,
             const __m512* bias, const __m512* params, float* dst0, float* dst1)

@@ -69,7 +69,7 @@ namespace Simd
             body.colsb[7] = uint16_t((dstC - 16) * 4);
             if (srcC32 < srcC)
             {
-                size_t tailC = srcC - srcC32;
+                size_t tailC = AlignHi(srcC - srcC32, 2);
                 tail = body;
                 tail.rows[6] = tailC / 2;
                 tail.rows[7] = tailC / 2;
@@ -157,7 +157,7 @@ namespace Simd
             body.colsb[7] = uint16_t((dstC - 16) * 4);
             if (srcC32 < srcC)
             {
-                size_t tailC = srcC - srcC32;
+                size_t tailC = AlignHi(srcC - srcC32, 2);
                 tail = body;
                 tail.rows[6] = tailC / 2;
                 tail.rows[7] = tailC / 2;
@@ -232,7 +232,7 @@ namespace Simd
             body.colsb[6] = uint16_t(dstC * 4);
             if (srcC32 < srcC)
             {
-                size_t tailC = srcC - srcC32;
+                size_t tailC = AlignHi(srcC - srcC32, 2);
                 tail = body;
                 tail.rows[6] = tailC / 2;
                 tail.colsb[4] = tailC * 2;
@@ -301,7 +301,7 @@ namespace Simd
             body.colsb[6] = uint16_t(dstC * 4);
             if (srcC32 < srcC)
             {
-                size_t tailC = srcC - srcC32;
+                size_t tailC = AlignHi(srcC - srcC32, 2);
                 tail = body;
                 tail.rows[6] = tailC / 2;
                 tail.colsb[4] = tailC * 2;
@@ -464,7 +464,7 @@ namespace Simd
             }
             if(sc < srcC)
             {
-                size_t tailC = srcC - sc;
+                size_t tailC = AlignHi(srcC - sc, 2);
                 conf.rows[6] = tailC / 2;
                 conf.rows[7] = tailC / 2;
                 conf.colsb[4] = tailC * 2;
@@ -532,7 +532,7 @@ namespace Simd
             }
             if (sc < srcC)
             {
-                size_t tailC = srcC - sc;
+                size_t tailC = AlignHi(srcC - sc, 2);
                 conf.rows[6] = tailC / 2;
                 conf.colsb[4] = tailC * 2;
                 conf.colsb[5] = tailC * 2;
@@ -594,7 +594,7 @@ namespace Simd
             }
             if (sc < srcC)
             {
-                size_t tailC = srcC - sc;
+                size_t tailC = AlignHi(srcC - sc, 2);
                 conf.rows[6] = tailC / 2;
                 conf.rows[7] = tailC / 2;
                 conf.colsb[4] = tailC * 2;
@@ -647,7 +647,7 @@ namespace Simd
             }
             if (sc < srcC)
             {
-                size_t tailC = srcC - sc;
+                size_t tailC = AlignHi(srcC - sc, 2);
                 conf.rows[6] = tailC / 2;
                 conf.colsb[4] = tailC * 2;
                 _tile_loadconfig(&conf);
