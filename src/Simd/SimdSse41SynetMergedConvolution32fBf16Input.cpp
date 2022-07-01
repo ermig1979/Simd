@@ -493,7 +493,7 @@ namespace Simd
             __m128 _bias[2], _params[2];
             _params[0] = _mm_set1_ps(params[0]);
             _params[1] = _mm_set1_ps(params[1]);
-            if (a.bufH[0] == 0)
+            if (a.bufH[0] == 0 || a.bufH[0] >= p.srcH)
             {
                 size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, a.bufH[1])), n = 5;
                 size_t i1 = (yInt - yBeg) * p.dstW, in = AlignLoAny(i1, n), i = i1 - in;

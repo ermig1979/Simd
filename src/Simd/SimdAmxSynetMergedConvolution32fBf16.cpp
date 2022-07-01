@@ -44,13 +44,17 @@ namespace Simd
                 SetSize(Avx512bw::F);
 #if defined(SIMD_AMX_EMULATE)
                 _convert = Avx512bw::ConvertFp32ToBf16;
-#else
-                _convert = Avx512bf16::ConvertFp32ToBf16;
-#endif
-                SetInput(_param.conv[0], _input);
-#if defined(SIMD_AMX_EMULATE)
+                if(_param.conv[0].Is1x1())
+                    SetInput(_param.conv[0], _input);
+                else
+                    Avx512bw::SetInput(_param.conv[0], _input);
                 Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
 #else
+                _convert = Avx512bf16::ConvertFp32ToBf16;
+                if (_param.conv[0].Is1x1())
+                    SetInput(_param.conv[0], _input);
+                else
+                    Avx512bf16::SetInput(_param.conv[0], _input);
                 Avx512bf16::SetDepthwise(_param.conv[1], _depthwise);
 #endif
                 SetOutput(_param.conv[2], _output);
@@ -71,13 +75,17 @@ namespace Simd
                 SetSize(Avx512bw::F);
 #if defined(SIMD_AMX_EMULATE)
                 _convert = Avx512bw::ConvertFp32ToBf16;
-#else
-                _convert = Avx512bf16::ConvertFp32ToBf16;
-#endif
-                SetInput(_param.conv[0], _input);
-#if defined(SIMD_AMX_EMULATE)
+                if (_param.conv[0].Is1x1())
+                    SetInput(_param.conv[0], _input);
+                else
+                    Avx512bw::SetInput(_param.conv[0], _input);
                 Avx512bw::SetDepthwise(_param.conv[1], _depthwise);
 #else
+                _convert = Avx512bf16::ConvertFp32ToBf16;
+                if (_param.conv[0].Is1x1())
+                    SetInput(_param.conv[0], _input);
+                else
+                    Avx512bf16::SetInput(_param.conv[0], _input);
                 Avx512bf16::SetDepthwise(_param.conv[1], _depthwise);
 #endif
             }
