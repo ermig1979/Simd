@@ -101,5 +101,14 @@
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetConvolution32fBf16.cpp">
       <Filter>Amx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Input.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Output.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

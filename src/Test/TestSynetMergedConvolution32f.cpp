@@ -304,7 +304,7 @@ namespace Test
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 384, 389), Cnv(a0, 3, 2, 32), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 16), f), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 9, 17, 25), Cnv(a0, 3, 1, 16), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 16), f), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 96, 99), Cnv(a0, 1, 1, 144), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 24), t), c, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 9, 17, 25), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 16)), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 32, 32, 32), Cnv(a0, 3, 1), Cnv(a1, 1, 1, 32)), c, f1, f2);
 #endif
         return result;
     }
@@ -317,7 +317,7 @@ namespace Test
         SimdSynetCompatibilityType bf16 = (SimdSynetCompatibilityType)(SimdSynetCompatibility16bfSoft | SimdSynetCompatibilityFmaAvoid);
 
 #if defined(NDEBUG)
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
@@ -355,6 +355,16 @@ namespace Test
 #ifdef SIMD_AVX512BW_ENABLE
         if (Simd::Avx512bw::Enable)
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
+#endif
+
+#ifdef SIMD_AVX512BF16_ENABLE
+        if (Simd::Avx512bf16::Enable)
+            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bf16::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
+#endif
+
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
+        if (Simd::Amx::Enable)
+            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Amx::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
 
 #ifdef SIMD_NEON_ENABLE
