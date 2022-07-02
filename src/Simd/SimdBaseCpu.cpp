@@ -161,7 +161,7 @@ namespace Simd
         size_t CpuSocketNumber()
         {
             uint32_t number = 0;
-            ::FILE * p = ::popen("lscpu -b -p=Socket | grep -v '^#' | sort -u | wc -l", "r");
+            ::FILE * p = ::popen("lscpu -b -p=Socket 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
                 char buffer[PATH_MAX];
@@ -175,7 +175,7 @@ namespace Simd
         size_t CpuCoreNumber()
         {
             uint32_t number = 0;
-            ::FILE * p = ::popen("lscpu -b -p=Core | grep -v '^#' | sort -u | wc -l", "r");
+            ::FILE * p = ::popen("lscpu -b -p=Core 2>/dev/null | grep -v '^#' | sort -u 2>/dev/null | wc -l 2>/dev/null", "r");
             if (p)
             {
                 char buffer[PATH_MAX];
