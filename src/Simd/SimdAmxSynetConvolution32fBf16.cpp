@@ -46,8 +46,8 @@ namespace Simd
             size_t srcC, size_t dstC, size_t dstW, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * srcC * p.dilationY, 
-                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
-            size_t srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX, dW = AlignHi(srcC, 2) * 32;
+            size_t srcC32 = AlignLo(srcC, 32), strideS = dS * 2, strideW = 128, strideD = dD * 4;
             const uint16_t* src1 = src0 + dS * 16, * weight1 = weight0 + 32;
 
             TileConf body, tail;
@@ -120,8 +120,8 @@ namespace Simd
                         _tile_dpbf16ps(2, 5, 6);
                         _tile_dpbf16ps(3, 5, 7);
                     }
-                    weight0 += srcC * 32;
-                    weight1 += srcC * 32;
+                    weight0 += dW;
+                    weight1 += dW;
                 }
             }
             _tile_stored(0, dst + 0, strideD);
@@ -140,8 +140,8 @@ namespace Simd
             size_t srcC, size_t dstC, size_t dstW, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * srcC * p.dilationY,
-                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
-            size_t srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX, dW = AlignHi(srcC, 2) * 32;
+            size_t srcC32 = AlignLo(srcC, 32), strideS = dS * 2, strideW = 128, strideD = dD * 4;
             const uint16_t* weight1 = weight0 + 32;
 
             TileConf body, tail;
@@ -197,8 +197,8 @@ namespace Simd
                         _tile_loadd(7, weight1 + sc * 32, strideW);
                         _tile_dpbf16ps(1, 4, 7);
                     }
-                    weight0 += srcC * 32;
-                    weight1 += srcC * 32;
+                    weight0 += dW;
+                    weight1 += dW;
                 }
             }
             _tile_stored(0, dst + 0, strideD);
@@ -215,8 +215,8 @@ namespace Simd
             size_t srcC, size_t dstC, size_t dstW, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * srcC * p.dilationY,
-                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
-            size_t srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX, dW = AlignHi(srcC, 2) * 32;
+            size_t srcC32 = AlignLo(srcC, 32), strideS = dS * 2, strideW = 128, strideD = dD * 4;
             const uint16_t* src1 = src0 + dS * 16;
 
             TileConf body, tail;
@@ -272,7 +272,7 @@ namespace Simd
                         _tile_loadd(5, src1 + offs + sc, strideS);
                         _tile_dpbf16ps(2, 5, 6);
                     }
-                    weight0 += srcC * 32;
+                    weight0 += dW;
                 }
             }
             _tile_stored(0, dst + 0, strideD);
@@ -289,8 +289,8 @@ namespace Simd
             size_t srcC, size_t dstC, size_t dstW, int zero, const uint16_t* weight0, const __m512* bias, const __m512* params, float* dst)
         {
             size_t dS = srcC * p.strideX, dY = (p.srcW + p.padX + p.padW) * srcC * p.dilationY,
-                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX;
-            size_t srcC32 = AlignLo(srcC, 32), strideS = srcC * 2, strideW = 128, strideD = dD * 4;
+                dX = srcC * p.dilationX, dD = p.dstC, kY = p.kernelY, kX = p.kernelX, dW = AlignHi(srcC, 2) * 32;
+            size_t srcC32 = AlignLo(srcC, 32), strideS = dS * 2, strideW = 128, strideD = dD * 4;
 
             TileConf body, tail;
             body.rows[0] = uint8_t(dstW);
@@ -334,7 +334,7 @@ namespace Simd
                         _tile_loadd(6, weight0 + sc * 32, strideW);
                         _tile_dpbf16ps(0, 4, 6);
                     }
-                    weight0 += srcC * 32;
+                    weight0 += dW;
                 }
             }
             _tile_stored(0, dst + 0, strideD);

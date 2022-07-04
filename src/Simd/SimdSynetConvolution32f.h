@@ -560,6 +560,7 @@ namespace Simd
 
         protected:
             void SetAlgParam(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3);
+            int PreferableMode(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3);
             void SetWeight(const float* weight);
             void SetBias(const float* bias);
             void SetParams(const float* params);

@@ -233,22 +233,14 @@ namespace Simd
             const ConvParam32f& p = _param;
             AlgParam& a = _alg;
 
-            a.mode = 0;
-            if (p.Is1x1())
-                a.mode = 1;
-            float convArea = float(p.kernelY * p.kernelX) / float(p.strideY * p.strideX);
-            if (convArea <= 1.5f)
-                a.mode = 1;
-            if (p.dstW * p.dstH < 25)
-                a.mode = 1;
-
+            a.mode = PreferableMode(microD, microHW, microC, L1, L2, L3);
             a.batch = 1;
             if (a.mode)
             {
                 a.srcH = p.dstH;
                 a.srcW = p.dstW;
                 a.microD = microD;
-                a.macroC = Simd::Min(AlignLoAny(L1 / p.kernelY / p.kernelX / microD / 2, microC), p.srcC);
+                a.macroC = Simd::RestrictRange(AlignHiAny(L1 / p.kernelY / p.kernelX / microD / 2, 2), size_t(1), p.srcC);
                 size_t matSize = p.srcC * p.dstW * p.dstH * p.kernelY * p.kernelX * 2;
                 if (matSize * 2 <= L2 && p.batch > 1)
                 {
@@ -264,7 +256,7 @@ namespace Simd
                 a.srcH = p.srcH + p.padY + p.padH;
                 a.srcW = p.srcW + p.padX + p.padW;
                 a.microD = microD;
-                a.macroC = Simd::Min(AlignLoAny(L1 / p.kernelY / p.kernelX / microD / 2, microC), p.srcC);
+                a.macroC = Simd::RestrictRange<size_t>(AlignHiAny(L1 / p.kernelY / p.kernelX / microD / 2, 2), size_t(1), p.srcC);
                 for (size_t macroH = p.dstH; macroH >= 1; macroH--)
                 {
                     a.macroH = macroH;
@@ -273,6 +265,22 @@ namespace Simd
                 }
                 a.macroD = Simd::RestrictRange(AlignLoAny(L3 / p.kernelY / p.kernelX / a.macroC / 2, a.microD), a.microD, AlignHiAny(p.dstC, a.microD));
             }
+        }
+
+        int SynetConvolution32fBf16Nhwc::PreferableMode(size_t microD, size_t microHW, size_t microC, size_t L1, size_t L2, size_t L3)
+        {
+            const ConvParam32f& p = _param;
+            if (p.Is1x1())
+                return 1;
+            float kernelArea = float(p.kernelY * p.kernelX);
+            float convArea = kernelArea / float(p.strideY * p.strideX);
+            if (convArea <= 1.5f)
+                return 1;
+            if (p.dstW * p.dstH < 25)
+                return 1;
+            if (L1 / kernelArea / microD / 2 < microC)
+                return 1;
+            return 0;
         }
 
         size_t SynetConvolution32fBf16Nhwc::ExternalBufferSize() const
