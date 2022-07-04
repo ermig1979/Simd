@@ -78,8 +78,12 @@ namespace Simd
             if (start == 0)
                 memset(&dstTile, 0, sizeof(TileReg));
 
+            __mmask64 tail = TailMask64(colbs);
             for (; start < rows; start++)
-                memcpy(dstTile.u8[start], (uint8_t*)base + start * stride, colbs);
+            {
+                __m512i val = _mm512_maskz_loadu_epi8(tail, (uint8_t*)base + start * stride);
+                _mm512_mask_storeu_epi8(dstTile.u8[start], tail, val);
+            }
         }
 
         //-----------------------------------------------------------------------------------------
@@ -93,8 +97,12 @@ namespace Simd
 
             assert(colbs <= 64 && rows <= 16);
 
+            __mmask64 tail = TailMask64(colbs);
             for (; start < rows; start++)
-                memcpy((uint8_t*)base + start * stride, srcTile.u8[start], colbs);
+            {
+                __m512i val = _mm512_maskz_loadu_epi8(tail, srcTile.u8[start]);
+                _mm512_mask_storeu_epi8((uint8_t*)base + start * stride, tail, val);
+            }
         }
 
         //-----------------------------------------------------------------------------------------
@@ -111,20 +119,20 @@ namespace Simd
 
             assert(M <= 16 && N <= 16 && K <= 16);
 
-            __mmask16 tileN = TailMask16(N);
+            __mmask16 tailN = TailMask16(N);
 
             static const __m512 mask = _mm512_castsi512_ps(Bf16::MASK);
             __m512 a0, a1, b0, b1;
             int m = 0;
             for (int M4 = M & (~3); m < M4; m += 4)
             {
-                __m512 dst0 = _mm512_loadu_ps(dstTile.f32[m + 0]);
-                __m512 dst1 = _mm512_loadu_ps(dstTile.f32[m + 1]);
-                __m512 dst2 = _mm512_loadu_ps(dstTile.f32[m + 2]);
-                __m512 dst3 = _mm512_loadu_ps(dstTile.f32[m + 3]);
+                __m512 dst0 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m + 0]);
+                __m512 dst1 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m + 1]);
+                __m512 dst2 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m + 2]);
+                __m512 dst3 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m + 3]);
                 for (int k = 0; k < K; k++)
                 {
-                    b1 = _mm512_maskz_loadu_ps(tileN, bTile.f32[k]);
+                    b1 = _mm512_maskz_loadu_ps(tailN, bTile.f32[k]);
                     b0 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(b1), Base::Bf16::SHIFT));
                     b1 = _mm512_and_ps(b1, mask);
 
@@ -148,18 +156,18 @@ namespace Simd
                     a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 3][k]), mask);
                     dst3 = _mm512_fmadd_ps(a1, b1, dst3);
                 }
-                _mm512_storeu_ps(dstTile.f32[m + 0], dst0);
-                _mm512_storeu_ps(dstTile.f32[m + 1], dst1);
-                _mm512_storeu_ps(dstTile.f32[m + 2], dst2);
-                _mm512_storeu_ps(dstTile.f32[m + 3], dst3);
+                _mm512_mask_storeu_ps(dstTile.f32[m + 0], tailN, dst0);
+                _mm512_mask_storeu_ps(dstTile.f32[m + 1], tailN, dst1);
+                _mm512_mask_storeu_ps(dstTile.f32[m + 2], tailN, dst2);
+                _mm512_mask_storeu_ps(dstTile.f32[m + 3], tailN, dst3);
             }
             for (int M2 = M & (~1); m < M2; m += 2)
             {
-                __m512 dst0 = _mm512_loadu_ps(dstTile.f32[m + 0]);
-                __m512 dst1 = _mm512_loadu_ps(dstTile.f32[m + 1]);
+                __m512 dst0 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m + 0]);
+                __m512 dst1 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m + 1]);
                 for (int k = 0; k < K; k++)
                 {
-                    b1 = _mm512_maskz_loadu_ps(tileN, bTile.f32[k]);
+                    b1 = _mm512_maskz_loadu_ps(tailN, bTile.f32[k]);
                     b0 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(b1), Base::Bf16::SHIFT));
                     b1 = _mm512_and_ps(b1, mask);
 
@@ -173,15 +181,15 @@ namespace Simd
                     a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m + 1][k]), mask);
                     dst1 = _mm512_fmadd_ps(a1, b1, dst1);
                 }
-                _mm512_storeu_ps(dstTile.f32[m + 0], dst0);
-                _mm512_storeu_ps(dstTile.f32[m + 1], dst1);
+                _mm512_mask_storeu_ps(dstTile.f32[m + 0], tailN, dst0);
+                _mm512_mask_storeu_ps(dstTile.f32[m + 1], tailN, dst1);
             }
             for (; m < M; m++)
             {
-                __m512 dst0 = _mm512_loadu_ps(dstTile.f32[m]);
+                __m512 dst0 = _mm512_maskz_loadu_ps(tailN, dstTile.f32[m]);
                 for (int k = 0; k < K; k++)
                 {
-                    __m512 _b = _mm512_maskz_loadu_ps(tileN, bTile.f32[k]);
+                    __m512 _b = _mm512_maskz_loadu_ps(tailN, bTile.f32[k]);
                     __m512 b0 = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_castps_si512(_b), Base::Bf16::SHIFT));
                     __m512 b1 = _mm512_and_ps(_b, mask);
 
@@ -190,7 +198,7 @@ namespace Simd
                     __m512 a1 = _mm512_and_ps(_mm512_set1_ps(aTile.f32[m][k]), mask);
                     dst0 = _mm512_fmadd_ps(a1, b1, dst0);
                 }
-                _mm512_storeu_ps(dstTile.f32[m], dst0);
+                _mm512_mask_storeu_ps(dstTile.f32[m], tailN, dst0);
             }
         }
     }
