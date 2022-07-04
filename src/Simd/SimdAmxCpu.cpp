@@ -30,7 +30,7 @@
 
 namespace Simd
 {
-#ifdef SIMD_AMX_ENABLE
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AMX_EMULATE) && defined(SIMD_AVX512BW_ENABLE))
     namespace Amx
     {
         SIMD_INLINE bool SupportedByCPU()

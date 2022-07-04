@@ -357,7 +357,7 @@ namespace Test
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bw::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif
 
-#ifdef SIMD_AVX512BF16_ENABLE
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
         if (Simd::Avx512bf16::Enable)
             result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Avx512bf16::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
 #endif

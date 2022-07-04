@@ -637,7 +637,7 @@ namespace Test
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bw::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif
 
-#ifdef SIMD_AVX512BF16_ENABLE
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
         if (Simd::Avx512bf16::Enable)
             result = result && SynetConvolution32fForwardAutoTest(2 * EPS, FUNC_C(Simd::Avx512bf16::SynetConvolution32fInit), FUNC_C(SimdSynetConvolution32fInit));
 #endif

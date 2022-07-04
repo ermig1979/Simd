@@ -33,7 +33,7 @@
 
 namespace Simd
 {
-#if defined(SIMD_AMX_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+#if (defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))) && defined(SIMD_SYNET_ENABLE)  
     namespace Amx
     {
         using AlgParam = Base::SynetMergedConvolution32fBf16::AlgParam;

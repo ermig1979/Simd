@@ -82,7 +82,7 @@ namespace Simd
     }
 #endif
 
-#ifdef SIMD_AVX512BF16_ENABLE
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
     namespace Avx512bf16
     {
         bool GetEnable();
@@ -166,13 +166,13 @@ namespace Simd
 #define SIMD_AVX512VNNI_FUNC(func)
 #endif
 
-#ifdef SIMD_AVX512BF16_ENABLE
+#if defined(SIMD_AVX512BF16_ENABLE) && !defined(SIMD_AMX_EMULATE)
 #define SIMD_AVX512BF16_FUNC(func) Simd::Avx512bf16::Enable ? Simd::Avx512bf16::func : 
 #else
 #define SIMD_AVX512BF16_FUNC(func)
 #endif
 
-#ifdef SIMD_AMX_ENABLE
+#if defined(SIMD_AMX_ENABLE) || (defined(SIMD_AVX512BW_ENABLE) && defined(SIMD_AMX_EMULATE))
 #define SIMD_AMX_FUNC(func) Simd::Amx::Enable ? Simd::Amx::func : 
 #else
 #define SIMD_AMX_FUNC(func)

@@ -599,7 +599,11 @@ namespace Simd
 #ifdef SIMD_AMX_ENABLE    
     namespace Amx
     {
+#if defined(SIMD_AMX_EMULATE)
+        using namespace Avx512bw;
+#else
         using namespace Avx512bf16;
+#endif
     }
 #endif
 
