@@ -99,6 +99,7 @@ namespace Simd
 
         void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
+            size_t srcCh2 = AlignHi(srcC, 2);
             size_t srcC32 = AlignLo(srcC, 32);
             __mmask16 srcMask[2];
             __mmask32 dstMask[1];
@@ -106,7 +107,7 @@ namespace Simd
             {
                 srcMask[0] = TailMask16(srcC - srcC32 - F * 0);
                 srcMask[1] = TailMask16(srcC - srcC32 - F * 1);
-                dstMask[0] = TailMask32(srcC - srcC32);
+                dstMask[0] = TailMask32(srcCh2 - srcC32);
             }
             for (size_t dy = yBeg; dy < yEnd; ++dy)
             {
@@ -128,19 +129,19 @@ namespace Simd
                                         Float32ToBFloat16<false, false>(ps + sc, dst + sc, srcMask, dstMask);
                                     if (srcC32 < srcC)
                                         Float32ToBFloat16<false, true>(ps + sc, dst + sc, srcMask, dstMask);
-                                    dst += srcC;
+                                    dst += srcCh2;
                                 }
                                 else
                                 {
-                                    memset(dst, 0, srcC * 2);
-                                    dst += srcC;
+                                    memset(dst, 0, srcCh2 * 2);
+                                    dst += srcCh2;
                                 }
                             }
                         }
                         else
                         {
-                            memset(dst, 0, p.kernelX * srcC * 2);
-                            dst += p.kernelX * srcC;
+                            memset(dst, 0, p.kernelX * srcCh2 * 2);
+                            dst += p.kernelX * srcCh2;
                         }
                     }
                 }

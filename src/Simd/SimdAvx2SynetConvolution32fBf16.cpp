@@ -107,6 +107,7 @@ namespace Simd
 
         void ConvolutionBf16NhwcConvertGemm(const float* src, const ConvParam32f& p, size_t yBeg, size_t yEnd, size_t srcC, uint16_t* dst)
         {
+            size_t srcCh2 = AlignHi(srcC, 2);
             size_t srcC16 = Simd::AlignLo(srcC, 16);
             size_t srcC8 = Simd::AlignLo(srcC, 8);
             size_t srcC4 = Simd::AlignLo(srcC, 4);
@@ -145,19 +146,21 @@ namespace Simd
                                     }
                                     for (; sc < srcC; ++sc)
                                         dst[sc] = Base::Float32ToBFloat16(ps[sc]);
-                                    dst += srcC;
+                                    if (sc < srcCh2)
+                                        dst[sc] = 0;
+                                    dst += srcCh2;
                                 }
                                 else
                                 {
-                                    memset(dst, 0, srcC * 2);
-                                    dst += srcC;
+                                    memset(dst, 0, srcCh2 * 2);
+                                    dst += srcCh2;
                                 }
                             }
                         }
                         else
                         {
-                            memset(dst, 0, p.kernelX * srcC * 2);
-                            dst += p.kernelX * srcC;
+                            memset(dst, 0, p.kernelX * srcCh2 * 2);
+                            dst += p.kernelX * srcCh2;
                         }
                     }
                 }

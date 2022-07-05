@@ -292,7 +292,7 @@ namespace Simd
             else
             {
                 if (a.mode)
-                    return a.batch * p.srcC * p.dstW * p.dstH * p.kernelY * p.kernelX / 2;
+                    return a.batch * AlignHi(p.srcC, 2) * p.dstW * p.dstH * p.kernelY * p.kernelX / 2;
                 else
                     return a.srcH * a.srcW * AlignHi(p.srcC, 2) / 2;
             }
@@ -484,17 +484,17 @@ namespace Simd
                 for (size_t sc = 0; sc < p.srcC; sc += a.macroC)
                 {
                     size_t macroC = Simd::Min(p.srcC, sc + a.macroC) - sc;
-                    size_t macroK = macroC * p.kernelY * p.kernelX;
+                    size_t macroK = AlignHi(macroC, 2) * p.kernelY * p.kernelX;
                     for (size_t yBeg = 0; yBeg < dstH;)
                     {
                         size_t yEnd = Simd::Min(yBeg + a.macroH, dstH);
-                        size_t offs = Offset(yBeg, sc, sc + macroC);
+                        size_t offs = Offset(yBeg, sc, sc + AlignHi(macroC, 2));
                         if (dc == 0)
                         {
                             if (a.batch > 1)
                             {
                                 size_t dS = p.srcH * p.srcW * p.srcC;
-                                size_t dB = p.dstH * p.dstW * p.kernelY * p.kernelX * macroC;
+                                size_t dB = p.dstH * p.dstW * macroK;
                                 for (size_t b = 0; b < a.batch; ++b)
                                     _convert(src + sc + b * dS, p, 0, p.dstH, macroC, buf + offs + b * dB);
                             }
