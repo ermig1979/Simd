@@ -146,7 +146,6 @@ namespace Simd
 
         void ResizerNearest::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            assert(_param.dstW >= A);
             EstimateParams();
             if (_blocks)
                 Shuffle32x2(src, srcStride, dst, dstStride);
