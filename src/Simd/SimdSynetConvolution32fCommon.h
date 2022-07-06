@@ -795,12 +795,12 @@ namespace Simd
             _mm512_mask_storeu_ps(dst, tail, Activate<type>(_mm512_add_ps(_mm512_maskz_loadu_ps(tail, src), bias[index]), params, index));
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1(float* dst, const __m512* bias, const __m512* params, __mmask16 tail)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1(float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
             Apply<type, 0>(dst, dst, bias, params, tail);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1x4(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1x4(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
             Apply1<type>(dst + 0 * stride, bias, params, tail);
             Apply1<type>(dst + 1 * stride, bias, params, tail);
@@ -808,7 +808,7 @@ namespace Simd
             Apply1<type>(dst + 3 * stride, bias, params, tail);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1x8(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply1x8(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
             Apply1<type>(dst + 0 * stride, bias, params, tail);
             Apply1<type>(dst + 1 * stride, bias, params, tail);
@@ -820,13 +820,13 @@ namespace Simd
             Apply1<type>(dst + 7 * stride, bias, params, tail);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2(float* dst, const __m512* bias, const __m512* params, __mmask16 tail)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2(float* dst, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
             Apply<type, 0>(dst + 0, dst + 0, bias, params);
             Apply<type, 1>(dst + F, dst + F, bias, params, tail);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2x4(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2x4(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
             Apply2<type>(dst + 0 * stride, bias, params, tail);
             Apply2<type>(dst + 1 * stride, bias, params, tail);
@@ -834,7 +834,7 @@ namespace Simd
             Apply2<type>(dst + 3 * stride, bias, params, tail);
         }
 
-        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2x8(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail)
+        template<SimdConvolutionActivationType type> SIMD_INLINE void Apply2x8(float* dst, size_t stride, const __m512* bias, const __m512* params, __mmask16 tail = __mmask16(-1))
         {
             Apply2<type>(dst + 0 * stride, bias, params, tail);
             Apply2<type>(dst + 1 * stride, bias, params, tail);

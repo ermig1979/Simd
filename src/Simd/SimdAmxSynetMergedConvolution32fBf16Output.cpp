@@ -115,7 +115,10 @@ namespace Simd
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
-                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                for (; s < dstS8; s += 8, dst += 8 * dD)
+                    Apply2x8<type>(dst, dD, bias, params, tailD);
+                for (; s < dstS; ++s, dst += dD)
                     Apply2<type>(dst, bias, params, tailD);
             }
         }
@@ -177,7 +180,10 @@ namespace Simd
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC);
-                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                for (; s < dstS8; s += 8, dst += 8 * dD)
+                    Apply1x8<type>(dst, dD, bias, params, tailD);
+                for (; s < dstS; ++s, dst += dD)
                     Apply1<type>(dst, bias, params, tailD);
             }
         }
@@ -239,7 +245,10 @@ namespace Simd
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC - F);
-                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                for (; s < dstS8; s += 8, dst += 8 * dD)
+                    Apply2x8<type>(dst, dD, bias, params, tailD);
+                for (; s < dstS; ++s, dst += dD)
                     Apply2<type>(dst, bias, params, tailD);
             }
         }
@@ -288,7 +297,10 @@ namespace Simd
             if (type)
             {
                 __mmask16 tailD = TailMask16(dstC);
-                for (size_t s = 0; s < dstS; ++s, dst += dD)
+                size_t dstS8 = AlignLo(dstS, 8), s = 0;
+                for (; s < dstS8; s += 8, dst += 8 * dD)
+                    Apply1x8<type>(dst, dD, bias, params, tailD);
+                for (; s < dstS; ++s, dst += dD)
                     Apply1<type>(dst, bias, params, tailD);
             }
         }
