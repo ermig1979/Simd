@@ -909,7 +909,7 @@ namespace Simd
             ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;
-            else if (Base::Bf16Soft(compatibility))
+            else if (Base::Bf16Soft(compatibility) || Base::Bf16Hard(compatibility))
             {
                 if (Base::SynetConvolution32fBf16Nhwc::Preferable(param))
                     return new Avx512bf16::SynetConvolution32fBf16Nhwc(param);

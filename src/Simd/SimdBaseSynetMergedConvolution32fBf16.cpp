@@ -428,6 +428,8 @@ namespace Simd
                     if (p.count > 2)
                     {
                         _depthwise(buf0, c1, a, 0, 0, c1.dstH, _weightD.data, _bias[1].data, _params[1].data, (uint16_t*)buf1);
+                        if (p.add)
+                            memcpy(dst, src, sizeof(float) * _sizeS);
                         _output[0]((uint16_t*)buf1, c2, a, 0, 0, c2.dstH, _weightO.data, _bias[2].data, _params[2].data, dst, 0);
                     }
                     else
@@ -473,6 +475,11 @@ namespace Simd
                             _bias[0].data + c, _params[0].data + c * a.dp[0], buf1);
                         _depthwise(buf1, c1, a, maC, yBeg2, yEnd2, _weightD.data + c * a.dw[1], 
                             _bias[1].data + c, _params[1].data + c * a.dp[1], buf2);
+                        if (p.add && c == 0)
+                        {
+                            size_t offset = yBeg1 * p.conv[2].dstW * p.conv[2].dstC, size = (yEnd1 - yBeg1) * p.conv[2].dstW * p.conv[2].dstC;
+                            memcpy(dst + offset, src + offset, sizeof(float) * size);
+                        }
                         if (c + maC == C)
                             _output[0](buf2, c2, a, maC, yBeg2, yEnd2, _weightO.data + c * a.dw[2], 
                                 _bias[2].data, _params[2].data, dst, (maC != C || p.add) ? 0 : 1);
