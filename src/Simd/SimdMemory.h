@@ -133,6 +133,12 @@ namespace Simd
         return ptr;
     }
 
+    SIMD_INLINE void SetGap(uint8_t*& buffer, size_t size = SIMD_ALIGN)
+    {
+        memset(buffer, 0, size);
+        buffer += size;
+    }
+
     SIMD_INLINE void Free(void * ptr)
     {
 #ifdef SIMD_NO_MANS_LAND

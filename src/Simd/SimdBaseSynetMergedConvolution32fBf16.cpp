@@ -207,7 +207,7 @@ namespace Simd
         size_t SynetMergedConvolution32fBf16::ExternalBufferSize() const
         {
             if (_alg.miC)
-                return _sizeB[1] + (_sizeB[0] + _sizeB[2]) / 2;
+                return _sizeB[1] + (_sizeB[0] + _sizeB[2]) / 2 + (SIMD_ALIGN * 2 / 4);
             else
                 return _sizeB[1] + _sizeB[0];
         }
@@ -457,8 +457,10 @@ namespace Simd
 
             uint8_t* buffer = (uint8_t*)Buffer(buf);
             uint16_t* buf0 = Allocate<uint16_t>(buffer, _sizeB[0]);
+            SetGap(buffer);
             float* buf1 = Allocate<float>(buffer, _sizeB[1]);
             uint16_t* buf2 = Allocate<uint16_t>(buffer, _sizeB[2]);
+            SetGap(buffer);
 
             for (size_t b = 0; b < c0.batch; ++b)
             {
@@ -565,6 +567,7 @@ namespace Simd
 
             uint8_t* buffer = (uint8_t*)Buffer(buf);
             uint16_t* buf0 = Allocate<uint16_t>(buffer, _sizeB[0]);
+            SetGap(buffer);
             float* buf1 = Allocate<float>(buffer, _sizeB[1]);
 
             for (size_t b = 0; b < c0.batch; ++b)
@@ -657,6 +660,7 @@ namespace Simd
 
             uint8_t* buffer = (uint8_t*)Buffer(buf);
             uint16_t* buf2 = Allocate<uint16_t>(buffer, _sizeB[2]);
+            SetGap(buffer);
 
             for (size_t b = 0; b < c0.batch; ++b)
             {

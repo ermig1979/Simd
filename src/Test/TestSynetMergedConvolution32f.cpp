@@ -225,7 +225,8 @@ namespace Test
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationHardSigmoid, a1 = ::SimdConvolutionActivationHardSigmoid, a2 = ::SimdConvolutionActivationHardSigmoid;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationSwish, a1 = ::SimdConvolutionActivationSwish, a2 = ::SimdConvolutionActivationSwish;
         //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationIdentity, a1 = ::SimdConvolutionActivationIdentity, a2 = ::SimdConvolutionActivationIdentity;
-        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationPrelu, a2 = ::SimdConvolutionActivationPrelu;
+        //const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationPrelu, a1 = ::SimdConvolutionActivationPrelu, a2 = ::SimdConvolutionActivationPrelu;
+        const ::SimdConvolutionActivationType a0 = ::SimdConvolutionActivationRestrictRange, a1 = ::SimdConvolutionActivationRestrictRange, a2 = ::SimdConvolutionActivationRestrictRange;
 #if defined(NDEBUG)
 #if 1
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 384, 389), Cnv(a0, 3, 2, 32), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 16), f), c, f1, f2);
@@ -306,7 +307,9 @@ namespace Test
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 24, 96, 99), Cnv(a0, 1, 1, 144), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 24), t), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 19, 63, 81), Cnv(a0, 1, 1, 51), Cnv(a1, 3, 2)), c, f1, f2);
         //result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 35, 63, 81), Cnv(a0, 1, 1, 51), Cnv(a1, 3, 2)), c, f1, f2);
-        result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 160, 12, 15), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), t), c, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 160, 12, 15), Cnv(a0, 1, 1, 960), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 160), t), c, f1, f2);
+        //result = result && SynetMergedConvolution32fForwardAutoTest(eps * 2.0f, Param(Shp(1, 64, 14, 14), Cnv(a0, 1, 1, 384), Cnv(a1, 3, 1), Cnv(a2, 1, 1, 64), t), c, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, Param(Shp(1, 3, 480, 640), Cnv(a0, 3, 2, 16), Cnv(a1, 3, 1)), c, f1, f2);
 #endif
         return result;
     }
