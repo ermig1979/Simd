@@ -224,18 +224,13 @@ namespace Simd
             Creates an Tensorflow Tensor which references this image.
 
             \note You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality.
-
-            \return an Tensorflow Tensor which references to this image.
         */
         void ToTFTensor(tensorflow::Tensor & tensor, float shift = 0, float scale = 1) const;
-
 
         /*!
            Creates an Tensorflow Tensor which references this image.
 
            \note You have to define SIMD_TENSORFLOW_ENABLE in order to use this functionality.
-
-           \return an Tensorflow Tensor which references to this image.
        */
         void ToTFTensor(tensorflow::Tensor & tensor, int batchIndex, float shift = 0, float scale = 0) const;
 #endif

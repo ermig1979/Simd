@@ -7224,7 +7224,7 @@ extern "C"
 
     /*! @ingroup synet_pooling
 
-        \fn void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, size_t padC, size_t padY, size_t padX, float * dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format));
+        \fn void SimdSynetPoolingMax32f(const float * src, size_t srcC, size_t srcH, size_t srcW, size_t kernelC, size_t kernelY, size_t kernelX, size_t strideC, size_t strideY, size_t strideX, size_t padC, size_t padY, size_t padX, float * dst, size_t dstC, size_t dstH, size_t dstW, SimdTensorFormatType format);
 
         \short This function is used for forward propagation of PoolingLayer (MaxPooling, 32-bit float). It supports 2D and 3D pooling.
 
@@ -8259,6 +8259,31 @@ extern "C"
     */
     SIMD_API void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, 
         const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
+
+    /*! @ingroup yuv_conversion
+
+        \fn void SimdYuva444pToBgraV2(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride, const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride, SimdYuvType yuvType);
+
+        \short Converts YUVA444P image to 32-bit BGRA image.
+
+        The input Y, U, V, A and output BGRA images must have the same width and height.
+
+        \param [in] y - a pointer to pixels data of input 8-bit image with Y color plane.
+        \param [in] yStride - a row size of the y image.
+        \param [in] u - a pointer to pixels data of input 8-bit image with U color plane.
+        \param [in] uStride - a row size of the u image.
+        \param [in] v - a pointer to pixels data of input 8-bit image with V color plane.
+        \param [in] vStride - a row size of the v image.
+        \param [in] a - a pointer to pixels data of input 8-bit image with alpha channel.
+        \param [in] aStride - a row size of the a image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [out] bgra - a pointer to pixels data of output 32-bit BGRA image.
+        \param [in] bgraStride - a row size of the bgra image.
+        \param [in] yuvType - a type of input YUV image (see descriprion of ::SimdYuvType).
+    */
+    SIMD_API void SimdYuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+        const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType);
 
     /*! @ingroup yuv_conversion
 

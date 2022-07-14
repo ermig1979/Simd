@@ -56,6 +56,39 @@ namespace Simd
             }
         }
 
+        //-----------------------------------------------------------------------------------------
+
+        template <class YuvType> void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, 
+            const uint8_t* v, size_t vStride, const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, colBgra = 0; col < width; col++, colBgra += 4)
+                    YuvToBgra<YuvType>(y[col], u[col], v[col], a[col], bgra + colBgra);
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                a += aStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
+            const uint8_t* a, size_t aStride, size_t width, size_t height, uint8_t* bgra, size_t bgraStride, SimdYuvType yuvType)
+        {
+            switch (yuvType)
+            {
+            case SimdYuvBt601: Yuva444pToBgraV2<Bt601>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt709: Yuva444pToBgraV2<Bt709>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvBt2020: Yuva444pToBgraV2<Bt2020>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            case SimdYuvTrect871: Yuva444pToBgraV2<Trect871>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         SIMD_INLINE void Yuv422pToBgra(const uint8_t *y, int u, int v, int alpha, uint8_t * bgra)
         {
             YuvToBgra(y[0], u, v, alpha, bgra + 0);
