@@ -80,6 +80,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToUyvy.cpp" />
   </ItemGroup>
   <ItemGroup>

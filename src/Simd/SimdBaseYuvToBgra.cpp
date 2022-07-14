@@ -63,8 +63,8 @@ namespace Simd
         {
             for (size_t row = 0; row < height; ++row)
             {
-                for (size_t col = 0, colBgra = 0; col < width; col++, colBgra += 4)
-                    YuvToBgra<YuvType>(y[col], u[col], v[col], a[col], bgra + colBgra);
+                for (size_t col = 0; col < width; col++)
+                    YuvToBgra<YuvType>(y[col], u[col], v[col], a[col], bgra + col * 4);
                 y += yStride;
                 u += uStride;
                 v += vStride;
