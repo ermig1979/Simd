@@ -31,15 +31,15 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
-        template <bool align, class T> SIMD_INLINE void YuvaToBgra16(__m128i y16, __m128i u16, __m128i v16, const __m128i& a16, __m128i* bgra)
+        template <class T> SIMD_INLINE void YuvaToBgra16(__m128i y16, __m128i u16, __m128i v16, const __m128i& a16, __m128i* bgra)
         {
             const __m128i b16 = YuvToBlue16<T>(y16, u16);
             const __m128i g16 = YuvToGreen16<T>(y16, u16, v16);
             const __m128i r16 = YuvToRed16<T>(y16, v16);
             const __m128i bg8 = _mm_or_si128(b16, _mm_slli_si128(g16, 1));
             const __m128i ra8 = _mm_or_si128(r16, _mm_slli_si128(a16, 1));
-            Store<align>(bgra + 0, _mm_unpacklo_epi16(bg8, ra8));
-            Store<align>(bgra + 1, _mm_unpackhi_epi16(bg8, ra8));
+            _mm_storeu_si128(bgra + 0, _mm_unpacklo_epi16(bg8, ra8));
+            _mm_storeu_si128(bgra + 1, _mm_unpackhi_epi16(bg8, ra8));
         }
 
         template <class T> SIMD_INLINE void Yuva444pToBgraV2(const uint8_t* y, const uint8_t* u, const uint8_t* v, const uint8_t* a, uint8_t* bgra)
@@ -48,8 +48,8 @@ namespace Simd
             __m128i _u = _mm_loadu_si128((__m128i*)u);
             __m128i _v = _mm_loadu_si128((__m128i*)v);
             __m128i _a = _mm_loadu_si128((__m128i*)a);
-            YuvaToBgra16<false, T>(UnpackY<T, 0>(_y), UnpackUV<T, 0>(_u), UnpackUV<T, 0>(_v), UnpackU8<0>(_a), (__m128i*)bgra + 0);
-            YuvaToBgra16<false, T>(UnpackY<T, 1>(_y), UnpackUV<T, 1>(_u), UnpackUV<T, 1>(_v), UnpackU8<1>(_a), (__m128i*)bgra + 2);
+            YuvaToBgra16<T>(UnpackY<T, 0>(_y), UnpackUV<T, 0>(_u), UnpackUV<T, 0>(_v), UnpackU8<0>(_a), (__m128i*)bgra + 0);
+            YuvaToBgra16<T>(UnpackY<T, 1>(_y), UnpackUV<T, 1>(_u), UnpackUV<T, 1>(_v), UnpackU8<1>(_a), (__m128i*)bgra + 2);
         }
 
         template <class T> void Yuva444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride,
