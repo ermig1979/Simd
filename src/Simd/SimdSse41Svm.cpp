@@ -24,38 +24,16 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdArray.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
-        namespace
-        {
-            struct Buffer
-            {
-                Buffer(size_t count)
-                {
-                    size_t size = sizeof(float)*count;
-                    _p = Allocate(size);
-                    memset(_p, 0, size);
-                    sums = (float*)_p;
-                }
-
-                ~Buffer()
-                {
-                    Free(_p);
-                }
-
-                float * sums;
-            private:
-                void *_p;
-            };
-        }
-
         void SvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
         {
-            Buffer buffer(count);
+            Array32f buffer(count, true);
             size_t alignedCount = AlignLo(count, F);
 
             for (size_t j = 0; j < length; ++j)
@@ -65,12 +43,12 @@ namespace Simd
                 __m128 _v = _mm_set1_ps(v);
                 for (; i < alignedCount; i += F)
                 {
-                    __m128 sums = Load<true>(buffer.sums + i);
-                    __m128 _svs = Load<false>(svs + i);
-                    Store<true>(buffer.sums + i, _mm_add_ps(sums, _mm_mul_ps(_v, _svs)));
+                    __m128 sums = _mm_loadu_ps(buffer.data + i);
+                    __m128 _svs = _mm_loadu_ps(svs + i);
+                    _mm_storeu_ps(buffer.data + i, _mm_add_ps(sums, _mm_mul_ps(_v, _svs)));
                 }
                 for (; i < count; ++i)
-                    buffer.sums[i] += v*svs[i];
+                    buffer.data[i] += v*svs[i];
                 svs += count;
             }
 
@@ -78,14 +56,14 @@ namespace Simd
             __m128 _sum = _mm_setzero_ps();
             for (; i < alignedCount; i += F)
             {
-                __m128 sums = Load<true>(buffer.sums + i);
-                __m128 _weights = Load<false>(weights + i);
+                __m128 sums = _mm_loadu_ps(buffer.data + i);
+                __m128 _weights = _mm_loadu_ps(weights + i);
                 _sum = _mm_add_ps(_sum, _mm_mul_ps(sums, _weights));
             }
             *sum = ExtractSum(_sum);
             for (; i < count; ++i)
-                *sum += buffer.sums[i] * weights[i];
+                *sum += buffer.data[i] * weights[i];
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

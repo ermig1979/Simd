@@ -5567,7 +5567,7 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
 SIMD_API void SimdSvmSumLinear(const float * x, const float * svs, const float * weights, size_t length, size_t count, float * sum)
 {
     typedef void(*SimdSvmSumLinearPtr) (const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
-    const static SimdSvmSumLinearPtr simdSvmSumLinear = SIMD_FUNC5(SvmSumLinear, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdSvmSumLinearPtr simdSvmSumLinear = SIMD_FUNC5(SvmSumLinear, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
     simdSvmSumLinear(x, svs, weights, length, count, sum);
 }
