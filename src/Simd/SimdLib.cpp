@@ -250,9 +250,9 @@ SIMD_API void SimdAbsDifference(const uint8_t *a, size_t aStride, const uint8_t 
         Avx2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::AbsDifference(a, aStride, b, bStride, c, cStride, width, height);
     else
 #endif 
 #ifdef SIMD_NEON_ENABLE

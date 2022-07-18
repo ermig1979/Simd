@@ -178,9 +178,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifference.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetPooling.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>

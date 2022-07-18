@@ -10,7 +10,6 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2AddFeatureDifference.cpp" />

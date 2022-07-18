@@ -26,46 +26,33 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
-		template <bool align> void AbsDifference(
-			const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride,
-			size_t width, size_t height)
+		void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride, size_t width, size_t height)
 		{
 			assert(width >= A);
-			if (align)
-				assert(Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride) && Aligned(c) && Aligned(cStride));
 
 			size_t bodyWidth = AlignLo(width, A);
 			for (size_t row = 0; row < height; ++row)
 			{
 				for (size_t col = 0; col < bodyWidth; col += A)
 				{
-					const __m128i a_ = Load<align>((__m128i*)(a + col));
-					const __m128i b_ = Load<align>((__m128i*)(b + col));
-					Store<align>((__m128i*)(c + col), _mm_sub_epi8(_mm_max_epu8(a_, b_), _mm_min_epu8(a_, b_)));
+					const __m128i _a = _mm_loadu_si128((__m128i*)(a + col));
+					const __m128i _b = _mm_loadu_si128((__m128i*)(b + col));
+					_mm_storeu_si128((__m128i*)(c + col), _mm_sub_epi8(_mm_max_epu8(_a, _b), _mm_min_epu8(_a, _b)));
 				}
 				if (width - bodyWidth)
 				{
-					const __m128i a_ = Load<false>((__m128i*)(a + width - A));
-					const __m128i b_ = Load<false>((__m128i*)(b + width - A));
-					Store<false>((__m128i*)(c + width - A), _mm_sub_epi8(_mm_max_epu8(a_, b_), _mm_min_epu8(a_, b_)));
+					const __m128i _a = _mm_loadu_si128((__m128i*)(a + width - A));
+					const __m128i _b = _mm_loadu_si128((__m128i*)(b + width - A));
+					_mm_storeu_si128((__m128i*)(c + width - A), _mm_sub_epi8(_mm_max_epu8(_a, _b), _mm_min_epu8(_a, _b)));
 				}
 				a += aStride;
 				b += bStride;
 				c += bStride;
 			}
 		}
-
-		void AbsDifference(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, uint8_t* c, size_t cStride,
-			size_t width, size_t height)
-		{
-			if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-				AbsDifference<true>(a, aStride, b, bStride, c, cStride, width, height);
-			else
-				AbsDifference<false>(a, aStride, b, bStride, c, cStride, width, height);
-		}
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }
