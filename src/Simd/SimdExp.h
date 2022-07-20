@@ -80,7 +80,7 @@ namespace Simd
                 _1_0 = _mm_set1_ps(1.0f);
                 _0_5 = _mm_set1_ps(0.5f);
                 _min = _mm_set1_ps(-126.99999f);
-                _max = _mm_set1_ps(129.00000f);
+                _max = _mm_set1_ps(126.99999f);
                 _exp0 = _mm_set1_ps(9.9999994e-1f);
                 _exp1 = _mm_set1_ps(6.9315308e-1f);
                 _exp2 = _mm_set1_ps(2.4015361e-1f);
@@ -137,7 +137,7 @@ namespace Simd
 
             SIMD_INLINE __m128 Exp2(__m128 x)
             {
-                x = _mm_max_ps(_mm_min_ps(x, _mm_set1_ps(129.00000f)), _mm_set1_ps(-126.99999f));
+                x = _mm_max_ps(_mm_min_ps(x, _mm_set1_ps(126.99999f)), _mm_set1_ps(-126.99999f));
                 __m128i ipart = _mm_cvtps_epi32(_mm_sub_ps(x, _mm_set1_ps(0.5f)));
                 __m128 fpart = _mm_sub_ps(x, _mm_cvtepi32_ps(ipart));
                 __m128 expipart = _mm_castsi128_ps(_mm_slli_epi32(_mm_add_epi32(ipart, _mm_set1_epi32(127)), 23));
@@ -245,7 +245,7 @@ namespace Simd
                 _1_0 = _mm256_set1_ps(1.0f);
                 _0_5 = _mm256_set1_ps(0.5f);
                 _min = _mm256_set1_ps(-126.99999f);
-                _max = _mm256_set1_ps(129.00000f);
+                _max = _mm256_set1_ps(126.99999f);
                 _exp0 = _mm256_set1_ps(9.9999994e-1f);
                 _exp1 = _mm256_set1_ps(6.9315308e-1f);
                 _exp2 = _mm256_set1_ps(2.4015361e-1f);
@@ -302,7 +302,7 @@ namespace Simd
 
             SIMD_INLINE __m256 Exp2(__m256 x)
             {
-                x = _mm256_max_ps(_mm256_min_ps(x, _mm256_set1_ps(129.00000f)), _mm256_set1_ps(-126.99999f));
+                x = _mm256_max_ps(_mm256_min_ps(x, _mm256_set1_ps(126.99999f)), _mm256_set1_ps(-126.99999f));
                 __m256i ipart = _mm256_cvtps_epi32(_mm256_sub_ps(x, _mm256_set1_ps(0.5f)));
                 __m256 fpart = _mm256_sub_ps(x, _mm256_cvtepi32_ps(ipart));
                 __m256 expipart = _mm256_castsi256_ps(_mm256_slli_epi32(_mm256_add_epi32(ipart, _mm256_set1_epi32(127)), 23));
@@ -410,7 +410,7 @@ namespace Simd
                 _1_0 = _mm512_set1_ps(1.0f);
                 _0_5 = _mm512_set1_ps(0.5f);
                 _min = _mm512_set1_ps(-126.99999f);
-                _max = _mm512_set1_ps(129.00000f);
+                _max = _mm512_set1_ps(126.99999f);
                 _exp0 = _mm512_set1_ps(9.9999994e-1f);
                 _exp1 = _mm512_set1_ps(6.9315308e-1f);
                 _exp2 = _mm512_set1_ps(2.4015361e-1f);
@@ -467,7 +467,7 @@ namespace Simd
 
             SIMD_INLINE __m512 Exp2(__m512 x)
             {
-                x = _mm512_max_ps(_mm512_min_ps(x, _mm512_set1_ps(129.00000f)), _mm512_set1_ps(-126.99999f));
+                x = _mm512_max_ps(_mm512_min_ps(x, _mm512_set1_ps(126.99999f)), _mm512_set1_ps(-126.99999f));
                 __m512i ipart = _mm512_cvtps_epi32(_mm512_sub_ps(x, _mm512_set1_ps(0.5f)));
                 __m512 fpart = _mm512_sub_ps(x, _mm512_cvtepi32_ps(ipart));
                 __m512 expipart = _mm512_castsi512_ps(_mm512_slli_epi32(_mm512_add_epi32(ipart, _mm512_set1_epi32(127)), 23));
@@ -575,7 +575,7 @@ namespace Simd
                 _1_0 = vdupq_n_f32(1.0f);
                 _0_5 = vdupq_n_f32(0.5f);
                 _min = vdupq_n_f32(-126.99999f);
-                _max = vdupq_n_f32(129.00000f);
+                _max = vdupq_n_f32(126.99999f);
                 _exp0 = vdupq_n_f32(9.9999994e-1f);
                 _exp1 = vdupq_n_f32(6.9315308e-1f);
                 _exp2 = vdupq_n_f32(2.4015361e-1f);
@@ -632,7 +632,7 @@ namespace Simd
 
             SIMD_INLINE float32x4_t Exp2(float32x4_t x)
             {
-                x = vmaxq_f32(vminq_f32(x, vdupq_n_f32(129.00000f)), vdupq_n_f32(-126.99999f));
+                x = vmaxq_f32(vminq_f32(x, vdupq_n_f32(126.99999f)), vdupq_n_f32(-126.99999f));
                 int32x4_t ipart = vcvtq_s32_f32(vsubq_f32(x, vdupq_n_f32(0.5f)));
                 float32x4_t fpart = vsubq_f32(x, vcvtq_f32_s32(ipart));
                 float32x4_t expipart = vreinterpretq_f32_s32(vshlq_n_s32(vaddq_s32(ipart, vdupq_n_s32(127)), 23));
