@@ -148,6 +148,11 @@ namespace Simd
             else
                 _mm_setcsr(_mm_getcsr() & ~(SCR_FTZ | SCR_DAZ));
         }
+
+        SIMD_INLINE void Empty()
+        {
+            _m_empty();
+        }
     }
 #endif
 

@@ -287,6 +287,7 @@
 #endif
 
 #ifdef SIMD_SSE2_ENABLE
+#include <mmintrin.h>
 #include <emmintrin.h>
 #endif
 

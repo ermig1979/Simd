@@ -222,6 +222,14 @@ SIMD_API void SimdSetFastMode(SimdBool value)
 #endif
 }
 
+SIMD_API void SimdEmpty()
+{
+#ifdef SIMD_SSE2_ENABLE
+    if (Sse2::Enable)
+        Sse2::Empty();
+#endif
+}
+
 SIMD_API uint32_t SimdCrc32(const void* src, size_t size)
 {
     return Base::Crc32(src, size);

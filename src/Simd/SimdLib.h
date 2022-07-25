@@ -760,6 +760,14 @@ extern "C"
 
     /*! @ingroup cpu_flags
 
+        \fn void SimdEmpty();
+
+        \short Clears MMX registers (runs EMMS instruction). It is x86 specific functionality. 
+    */
+    SIMD_API void SimdEmpty();
+
+    /*! @ingroup cpu_flags
+
         \fn SimdBool SimdGetFastMode();
 
         \short Gets current CPU Flush-To-Zero (FTZ) and Denormals-Are-Zero (DAZ) flags. It is used in order to process subnormal numbers.

@@ -25,6 +25,8 @@
 #include "Test/TestPerformance.h"
 #include "Test/TestData.h"
 
+#include <unordered_set>
+
 namespace Test
 {
     namespace
@@ -509,6 +511,36 @@ namespace Test
         bool result = true;
 
         result = result && YuvToAnyDataTest(create, DW, DH, 1, 1, View::Gray8, FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    bool Yuv420pToBgrSpecialTest()
+    {
+        bool result = true;
+
+        std::ostringstream os;
+        Simd::PrintInfo(os);
+        std::cout << os.str();
+
+        const size_t h = 720, w = 1280;
+        uint8_t* y = (uint8_t*)SimdAllocate(w * h, SimdAlignment());
+        uint8_t* u = (uint8_t*)SimdAllocate(w * h, SimdAlignment());
+        uint8_t* v = (uint8_t*)SimdAllocate(w * h, SimdAlignment());
+        uint8_t* bgr = (uint8_t*)SimdAllocate(w * h * 3, SimdAlignment());
+
+        SimdYuv420pToBgr(y, w, u, w / 2, v, w / 2, w, h, bgr, w * 3);
+        //_mm_empty();
+
+        SimdFree(y);
+        SimdFree(u);
+        SimdFree(v);
+        SimdFree(bgr);
+
+        std::vector<int> assignments(2, -1);
+        std::unordered_set<int> assigned_detections(assignments.cbegin(), assignments.cend());
 
         return result;
     }
