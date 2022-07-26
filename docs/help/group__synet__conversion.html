@@ -486,7 +486,7 @@ Functions</h2></td></tr>
     for(y = 0; y &lt; height; ++y)
         for(x = 0; x &lt; width; ++x)
             dst[(c*height + y)*width + x] = src[stride*y + width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
-</pre><p >Note that there are following relationships: </p><pre class="fragment">upper[c] = (255 - mean[c]) / std[c];
+</pre><p >Note that there are following relationships: </p><pre class="fragment">upper[c] = (1 - mean[c]) / std[c];
 lower[c] = - mean[c] / std[c];
 </pre><dl class="section note"><dt>Note</dt><dd>This function has a C++ wrappers: <a class="el" href="group__synet__conversion.html#ga5bc210e89b6190c85c9cbcc75d8a1205" title="Sets image to the input of neural network of Synet Framework.">Simd::SynetSetInput(const View&lt;A&gt; &amp; src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format)</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>
@@ -562,7 +562,7 @@ lower[c] = - mean[c] / std[c];
     for(y = 0; y &lt; src.height; ++y)
         for(x = 0; x &lt; src.width; ++x)
             dst[(c*height + y)*width + x] = src.data[src.stride*y + src.width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
-</pre><p >Note that there are following relationships: </p><pre class="fragment">upper[c] = (255 - mean[c]) / std[c];
+</pre><p >Note that there are following relationships: </p><pre class="fragment">upper[c] = (1 - mean[c]) / std[c];
 lower[c] = - mean[c] / std[c];
 </pre><dl class="section note"><dt>Note</dt><dd>This function is a C++ wrapper for function <a class="el" href="group__synet__conversion.html#ga579496daf24d20e8370e0cccfe45f94c" title="Sets image to the input of neural network of Synet Framework.">SimdSynetSetInput</a>.</dd></dl>
 <dl class="params"><dt>Parameters</dt><dd>

@@ -458,7 +458,6 @@ namespace Simd
             }
             else if (p.IsDilation(1) && p.IsStride(1))
             {
-                const ptrdiff_t bodySize = p.dstW - p.padX - p.padW;
                 for (size_t c = 0; c < p.srcC; ++c)
                 {
                     for (size_t ky = 0; ky < p.kernelY; ++ky)
@@ -471,33 +470,18 @@ namespace Simd
                                 if (sy < p.srcH)
                                 {
                                     size_t sx = kx - p.padX, dx = 0;
-                                    const float* psrc = src + sy * p.srcW;
-                                    for (; dx < p.padX; ++dx, ++sx)
+                                    for (size_t dx = 0; dx < p.dstW; ++dx, ++sx)
                                     {
                                         if (sx < p.srcW)
-                                            *(dst++) = psrc[sx];
-                                        else
-                                            *(dst++) = 0;
-                                    }
-                                    if (bodySize > 0)
-                                    {
-                                        memcpy(dst, psrc + sx, bodySize * sizeof(float));
-                                        dst += bodySize;
-                                        dx += bodySize;
-                                        sx += bodySize;
-                                    }
-                                    for (; dx < p.dstW; ++dx, ++sx)
-                                    {
-                                        if (sx < p.srcW)
-                                            *(dst++) = psrc[sx];
+                                            *(dst++) = src[sy * p.srcW + sx];
                                         else
                                             *(dst++) = 0;
                                     }
                                 }
                                 else
                                 {
-                                    memset(dst, 0, p.dstW * sizeof(float));
-                                    dst += p.dstW;
+                                    for (size_t dx = 0; dx < p.dstW; ++dx)
+                                        *(dst++) = 0;
                                 }
                             }
                         }

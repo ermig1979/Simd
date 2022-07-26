@@ -4185,7 +4185,7 @@ namespace Simd
 
         Note that there are following relationships:
         \verbatim
-        upper[c] = (255 - mean[c]) / std[c];
+        upper[c] = (1 - mean[c]) / std[c];
         lower[c] = - mean[c] / std[c];
         \endverbatim
 
