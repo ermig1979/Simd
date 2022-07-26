@@ -7487,6 +7487,12 @@ extern "C"
                     dst[(c*height + y)*width + x] = src[stride*y + width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
         \endverbatim
 
+        Note that there are following relationships: 
+        \verbatim
+        upper[c] = (255 - mean[c]) / std[c];
+        lower[c] = - mean[c] / std[c];
+        \endverbatim
+
         \note This function has a C++ wrappers: Simd::SynetSetInput(const View<A> & src, const float * lower, const float * upper, float * dst, size_t channels, SimdTensorFormatType format).
 
         \param [in] src - a pointer to pixels data of input image.

@@ -4183,6 +4183,12 @@ namespace Simd
                     dst[(c*height + y)*width + x] = src.data[src.stride*y + src.width*4 + c]*(upper[c] - lower[c])/255 + lower[c];
         \endverbatim
 
+        Note that there are following relationships:
+        \verbatim
+        upper[c] = (255 - mean[c]) / std[c];
+        lower[c] = - mean[c] / std[c];
+        \endverbatim
+
         \note This function is a C++ wrapper for function ::SimdSynetSetInput.
 
         \param [in] src - an input image.There are supported following image formats: View<A>::Gray8, View<A>::Bgr24, View<A>::Bgra32, View<A>::Rgb24.
