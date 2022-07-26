@@ -23,11 +23,12 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<bool align> SIMD_INLINE __m128i AbsGradientSaturatedSum(const uint8_t * src, size_t stride)
         {
@@ -68,7 +69,8 @@ namespace Simd
                 AbsGradientSaturatedSum<true>(src, srcStride, width, height, dst, dstStride);
             else
                 AbsGradientSaturatedSum<false>(src, srcStride, width, height, dst, dstStride);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

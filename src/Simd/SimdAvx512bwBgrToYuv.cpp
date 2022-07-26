@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -136,7 +137,10 @@ namespace Simd
                 BgrToYuv420p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv420p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void Average16(__m512i a[2][2])
         {
@@ -200,7 +204,10 @@ namespace Simd
                 BgrToYuv422p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m512i ConvertY16(__m512i b16_r16[2], __m512i g16_1[2])
         {
@@ -257,6 +264,7 @@ namespace Simd
                 BgrToYuv444p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv444p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
     }
 #endif// SIMD_AVX512BW_ENABLE

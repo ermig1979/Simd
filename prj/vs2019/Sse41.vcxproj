@@ -11,6 +11,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifference.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41AbsDifferenceSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41AbsGradientSaturatedSum.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41AddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Base64.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp" />

@@ -366,9 +366,9 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sse2::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sse41::AbsGradientSaturatedSum), FUNC_G(SimdAbsGradientSaturatedSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

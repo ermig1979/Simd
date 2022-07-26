@@ -24,15 +24,15 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdLoad.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
-        template <bool align> void AbsDifferenceSum(
-            const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            size_t width, size_t height, uint64_t * sum)
+        template <bool align> void AbsDifferenceSum(const uint8_t *a, size_t aStride, 
+            const uint8_t *b, size_t bStride, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
             if (align)
@@ -61,8 +61,19 @@ namespace Simd
             *sum = ExtractInt64Sum(fullSum);
         }
 
-        template <bool align> void AbsDifferenceSumMasked(
-            const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
+        void AbsDifferenceSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, uint64_t* sum)
+        {
+            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
+                AbsDifferenceSum<true>(a, aStride, b, bStride, width, height, sum);
+            else
+                AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align> void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
         {
             assert(width >= A);
@@ -99,15 +110,6 @@ namespace Simd
             *sum = ExtractInt64Sum(fullSum);
         }
 
-        void AbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            size_t width, size_t height, uint64_t * sum)
-        {
-            if (Aligned(a) && Aligned(aStride) && Aligned(b) && Aligned(bStride))
-                AbsDifferenceSum<true>(a, aStride, b, bStride, width, height, sum);
-            else
-                AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
-        }
-
         void AbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum)
         {
@@ -115,7 +117,10 @@ namespace Simd
                 AbsDifferenceSumMasked<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
             else
                 AbsDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void AbsDifferenceSums3(__m128i current, const uint8_t * background, __m128i sums[3])
         {
@@ -191,7 +196,10 @@ namespace Simd
                 AbsDifferenceSums3x3<true>(current, currentStride, background, backgroundStride, width, height, sums);
             else
                 AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void AbsDifferenceSums3x3Masked(const uint8_t *current, size_t currentStride, const uint8_t *background, size_t backgroundStride,
             const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sums)
@@ -244,7 +252,8 @@ namespace Simd
                 AbsDifferenceSums3x3Masked<true>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
             else
                 AbsDifferenceSums3x3Masked<false>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

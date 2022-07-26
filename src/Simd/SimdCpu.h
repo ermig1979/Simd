@@ -151,7 +151,10 @@ namespace Simd
 
         SIMD_INLINE void Empty()
         {
-            _m_empty();
+#if defined(_MSC_VER) && defined(SIMD_X64_ENABLE)
+#else
+            _mm_empty();
+#endif
         }
     }
 #endif

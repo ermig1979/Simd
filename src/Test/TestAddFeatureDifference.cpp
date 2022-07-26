@@ -99,9 +99,9 @@ namespace Test
 
         result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Base::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Sse2::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AddFeatureDifferenceAutoTest(FUNC(Simd::Sse41::AddFeatureDifference), FUNC(SimdAddFeatureDifference));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

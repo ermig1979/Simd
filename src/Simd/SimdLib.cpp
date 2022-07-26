@@ -284,9 +284,9 @@ SIMD_API void SimdAbsDifferenceSum(const uint8_t *a, size_t aStride, const uint8
         Avx2::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::AbsDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -315,9 +315,9 @@ SIMD_API void SimdAbsDifferenceSumMasked(const uint8_t *a, size_t aStride, const
         Avx2::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::AbsDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -346,9 +346,9 @@ SIMD_API void SimdAbsDifferenceSums3x3(const uint8_t *current, size_t currentStr
         Avx2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A + 2)
-        Sse2::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A + 2)
+        Sse41::AbsDifferenceSums3x3(current, currentStride, background, backgroundStride, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -377,9 +377,9 @@ SIMD_API void SimdAbsDifferenceSums3x3Masked(const uint8_t *current, size_t curr
         Avx2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A + 2)
-        Sse2::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A + 2)
+        Sse41::AbsDifferenceSums3x3Masked(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -408,9 +408,9 @@ SIMD_API void SimdAbsGradientSaturatedSum(const uint8_t * src, size_t srcStride,
         Simd::Avx2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::AbsGradientSaturatedSum(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -440,9 +440,9 @@ SIMD_API void SimdAddFeatureDifference(const uint8_t * value, size_t valueStride
         Avx2::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::AddFeatureDifference(value, valueStride, width, height, lo, loStride, hi, hiStride, weight, difference, differenceStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
