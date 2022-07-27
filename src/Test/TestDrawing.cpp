@@ -97,11 +97,6 @@ namespace Test
 
         result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Base::AlphaBlending), FUNC_AB(SimdAlphaBlending));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse2::AlphaBlending), FUNC_AB(SimdAlphaBlending));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
             result = result && AlphaBlendingAutoTest(FUNC_AB(Simd::Sse41::AlphaBlending), FUNC_AB(SimdAlphaBlending));
@@ -200,9 +195,9 @@ namespace Test
 
         result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Base::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Sse2::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AlphaBlendingUniformAutoTest(FUNC_ABU(Simd::Sse41::AlphaBlendingUniform), FUNC_ABU(SimdAlphaBlendingUniform));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -294,11 +289,6 @@ namespace Test
 
         result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Base::AlphaFilling), FUNC_AF(SimdAlphaFilling));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Sse2::AlphaFilling), FUNC_AF(SimdAlphaFilling));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
             result = result && AlphaFillingAutoTest(FUNC_AF(Simd::Sse41::AlphaFilling), FUNC_AF(SimdAlphaFilling));
@@ -387,11 +377,6 @@ namespace Test
         bool result = true;
 
         result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Base::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && AlphaPremultiplyAutoTest(false, FUNC_AP(Simd::Sse2::AlphaPremultiply), FUNC_AP(SimdAlphaPremultiply));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

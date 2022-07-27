@@ -476,11 +476,6 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Sse41::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
@@ -506,9 +501,9 @@ SIMD_API void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, siz
         Avx2::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::AlphaBlendingUniform(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -536,11 +531,6 @@ SIMD_API void SimdAlphaFilling(uint8_t * dst, size_t dstStride, size_t width, si
         Sse41::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && width >= Neon::A)
         Neon::AlphaFilling(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
@@ -564,11 +554,6 @@ SIMD_API void SimdAlphaPremultiply(const uint8_t* src, size_t srcStride, size_t 
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable)
         Sse41::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable)
-        Sse2::AlphaPremultiply(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

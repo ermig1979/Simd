@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -127,9 +128,46 @@ namespace Simd
                 AlphaBlending<true>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
             else
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(src) && Aligned(srcStride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
+            size_t size = width * channelCount;
+            size_t sizeA = AlignLo(size, A);
+            __m128i _alpha = _mm_set1_epi8(alpha);
+            __m128i tail = _mm_and_si128(ShiftLeft(K_INV_ZERO, A - size + sizeA), _alpha);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t offs = 0; offs < sizeA; offs += A)
+                    Sse2::AlphaBlending<align>((__m128i*)(src + offs), (__m128i*)(dst + offs), _alpha);
+                if (sizeA != size)
+                    Sse2::AlphaBlending<false>((__m128i*)(src + size - A), (__m128i*)(dst + size - A), tail);
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            uint8_t alpha, uint8_t* dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                AlphaBlendingUniform<true>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+            else
+                AlphaBlendingUniform<false>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, size_t channelCount> struct AlphaFiller
         {
@@ -239,9 +277,10 @@ namespace Simd
                 AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
             else
                 AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K8_SHUFFLE_BGRA_TO_A0A0 = SIMD_MM_SETR_EPI8(0x3, -1, 0x3, -1, 0x7, -1, 0x7, -1, 0xB, -1, 0xB, -1, 0xF, -1, 0xF, -1);
 
@@ -270,9 +309,10 @@ namespace Simd
                 src += srcStride;
                 dst += dstStride;
             }
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K8_SHUFFLE_BGRA_TO_B = SIMD_MM_SETR_EPI8(0x0, -1, -1, -1, 0x4, -1, -1, -1, 0x8, -1, -1, -1, 0xC, -1, -1, -1);
         const __m128i K8_SHUFFLE_BGRA_TO_G = SIMD_MM_SETR_EPI8(0x1, -1, -1, -1, 0x5, -1, -1, -1, 0x9, -1, -1, -1, 0xD, -1, -1, -1);
@@ -312,7 +352,8 @@ namespace Simd
                 src += srcStride;
                 dst += dstStride;
             }
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 }
