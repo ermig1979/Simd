@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -153,6 +154,7 @@ namespace Simd
                 GaussianBlur3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 GaussianBlur3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
+            Sse2::Empty();
         }
     }
 #endif

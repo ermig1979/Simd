@@ -36,7 +36,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41EdgeBackground.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32f.cpp" />

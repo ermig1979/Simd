@@ -24,12 +24,61 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdDeinterleave.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        template <bool align> void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += DA)
+                {
+                    __m128i uv0 = Load<align>((__m128i*)(uv + offset));
+                    __m128i uv1 = Load<align>((__m128i*)(uv + offset + A));
+                    Store<align>((__m128i*)(u + col), Sse2::Deinterleave8<0>(uv0, uv1));
+                    Store<align>((__m128i*)(v + col), Sse2::Deinterleave8<1>(uv0, uv1));
+                }
+                if (tail)
+                {
+                    size_t col = width - A;
+                    size_t offset = 2 * col;
+                    __m128i uv0 = Load<false>((__m128i*)(uv + offset));
+                    __m128i uv1 = Load<false>((__m128i*)(uv + offset + A));
+                    Store<false>((__m128i*)(u + col), Sse2::Deinterleave8<0>(uv0, uv1));
+                    Store<false>((__m128i*)(v + col), Sse2::Deinterleave8<1>(uv0, uv1));
+                }
+                uv += uvStride;
+                u += uStride;
+                v += vStride;
+            }
+        }
+
+        void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            if (Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride))
+                DeinterleaveUv<true>(uv, uvStride, width, height, u, uStride, v, vStride);
+            else
+                DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void DeinterleaveBgr(const uint8_t * bgr, uint8_t * b, uint8_t * g, uint8_t * r, size_t offset)
         {
             __m128i _bgr[3] = { Load<align>((__m128i*)bgr + 0), Load<align>((__m128i*)bgr + 1), Load<align>((__m128i*)bgr + 2) };
@@ -67,9 +116,10 @@ namespace Simd
                 DeinterleaveBgr<true>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
             else
                 DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K8_SHUFFLE_BGRA = SIMD_MM_SETR_EPI8(0x0, 0x4, 0x8, 0xC, 0x1, 0x5, 0x9, 0xD, 0x2, 0x6, 0xA, 0xE, 0x3, 0x7, 0xB, 0xF);
 
@@ -146,6 +196,7 @@ namespace Simd
                 DeinterleaveBgra<true>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
             else
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
+            Sse2::Empty();
         }
     }
 #endif

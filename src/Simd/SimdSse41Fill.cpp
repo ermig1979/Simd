@@ -23,11 +23,12 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         void Fill32f(float* dst, size_t size, const float* value)
         {
@@ -56,7 +57,10 @@ namespace Simd
                 for (; dst < end;)
                     *dst++ = v;
             }
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red)
         {
@@ -102,7 +106,10 @@ namespace Simd
                 FillBgr<true>(dst, stride, width, height, blue, green, red);
             else
                 FillBgr<false>(dst, stride, width, height, blue, green, red);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha)
         {
@@ -129,7 +136,10 @@ namespace Simd
                 FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
             else
                 FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const __m128i & pixel)
         {
@@ -188,7 +198,8 @@ namespace Simd
                 FillPixel<true>(dst, stride, width, height, pixel, pixelSize);
             else
                 FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

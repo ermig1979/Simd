@@ -238,9 +238,9 @@ namespace Test
 
         result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Base::FillBgra), FUNC_BGRA(SimdFillBgra));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::F)
-            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Sse2::FillBgra), FUNC_BGRA(SimdFillBgra));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::F)
+            result = result && FillBgraAutoTest(FUNC_BGRA(Simd::Sse41::FillBgra), FUNC_BGRA(SimdFillBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -328,9 +328,9 @@ namespace Test
 
         result = result && FillBgrAutoTest(FUNC_BGR(Simd::Base::FillBgr), FUNC_BGR(SimdFillBgr));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && FillBgrAutoTest(FUNC_BGR(Simd::Sse2::FillBgr), FUNC_BGR(SimdFillBgr));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && FillBgrAutoTest(FUNC_BGR(Simd::Sse41::FillBgr), FUNC_BGR(SimdFillBgr));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -424,9 +424,9 @@ namespace Test
 
         result = result && FillPixelAutoTest(FUNC_FP(Simd::Base::FillPixel), FUNC_FP(SimdFillPixel));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && FillPixelAutoTest(FUNC_FP(Simd::Sse2::FillPixel), FUNC_FP(SimdFillPixel));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && FillPixelAutoTest(FUNC_FP(Simd::Sse41::FillPixel), FUNC_FP(SimdFillPixel));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -506,9 +506,9 @@ namespace Test
 
         result = result && Fill32fAutoTest(FUNC_32F(Simd::Base::Fill32f), FUNC_32F(SimdFill32f));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse2::Fill32f), FUNC_32F(SimdFill32f));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Fill32fAutoTest(FUNC_32F(Simd::Sse41::Fill32f), FUNC_32F(SimdFill32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

@@ -161,6 +161,8 @@ namespace Simd
 
         uint32_t Crc32c(const void* src, size_t size);
 
+        void DeinterleaveUv(const uint8_t* uv, size_t uvStride, size_t width, size_t height, uint8_t* u, size_t uStride, uint8_t* v, size_t vStride);
+
         void DeinterleaveBgr(const uint8_t* bgr, size_t bgrStride, size_t width, size_t height, uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride);
 
         void DeinterleaveBgra(const uint8_t* bgra, size_t bgraStride, size_t width, size_t height, uint8_t* b, size_t bStride, uint8_t* g, size_t gStride, uint8_t* r, size_t rStride, uint8_t* a, size_t aStride);
@@ -200,6 +202,20 @@ namespace Simd
 
         void EdgeBackgroundShiftRangeMasked(const uint8_t* value, size_t valueStride, size_t width, size_t height,
             uint8_t* background, size_t backgroundStride, const uint8_t* mask, size_t maskStride);
+
+        void Fill32f(float* dst, size_t size, const float* value);
+
+        void FillBgr(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
+
+        void FillBgra(uint8_t* dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
+
+        void FillPixel(uint8_t* dst, size_t stride, size_t width, size_t height, const uint8_t* pixel, size_t pixelSize);
+
+        void CosineDistance32f(const float* a, const float* b, size_t size, float* distance);
+
+        void Float32ToUint8(const float* src, size_t size, const float* lower, const float* upper, uint8_t* dst);
+
+        void Uint8ToFloat32(const uint8_t* src, size_t size, const float* lower, const float* upper, float* dst);
 
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 

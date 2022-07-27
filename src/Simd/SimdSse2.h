@@ -31,25 +31,6 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
-
-        void Fill32f(float* dst, size_t size, const float* value);
-
-        void FillBgr(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red);
-
-        void FillBgra(uint8_t * dst, size_t stride, size_t width, size_t height, uint8_t blue, uint8_t green, uint8_t red, uint8_t alpha);
-
-        void FillPixel(uint8_t * dst, size_t stride, size_t width, size_t height, const uint8_t * pixel, size_t pixelSize);
-
-        void CosineDistance32f(const float* a, const float* b, size_t size, float* distance);
-
-        void Float32ToUint8(const float * src, size_t size, const float * lower, const float * upper, uint8_t * dst);
-
-        void Uint8ToFloat32(const uint8_t * src, size_t size, const float * lower, const float * upper, float * dst);
-
-        void GaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t channelCount, uint8_t * dst, size_t dstStride);
-
         void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
 
         void GrayToBgra(const uint8_t *gray, size_t width, size_t height, size_t grayStride, uint8_t *bgra, size_t bgraStride, uint8_t alpha);

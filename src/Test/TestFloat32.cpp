@@ -86,9 +86,9 @@ namespace Test
 
         result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Base::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Sse2::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Float32ToUint8AutoTest(FUNC_FB(Simd::Sse41::Float32ToUint8), FUNC_FB(SimdFloat32ToUint8));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -168,9 +168,9 @@ namespace Test
 
         result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Base::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Sse2::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && Uint8ToFloat32AutoTest(FUNC_BF(Simd::Sse41::Uint8ToFloat32), FUNC_BF(SimdUint8ToFloat32));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

@@ -1734,9 +1734,9 @@ SIMD_API void SimdDeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t wid
         Avx2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::DeinterleaveUv(uv, uvStride, width, height, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -2207,9 +2207,9 @@ SIMD_API void SimdFillBgr(uint8_t * dst, size_t stride, size_t width, size_t hei
         Avx2::FillBgr(dst, stride, width, height, blue, green, red);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::FillBgr(dst, stride, width, height, blue, green, red);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::FillBgr(dst, stride, width, height, blue, green, red);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -2237,9 +2237,9 @@ SIMD_API void SimdFillBgra(uint8_t * dst, size_t stride, size_t width, size_t he
         Avx2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::F)
-        Sse2::FillBgra(dst, stride, width, height, blue, green, red, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::F)
+        Sse41::FillBgra(dst, stride, width, height, blue, green, red, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -2267,9 +2267,9 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
         Avx2::FillPixel(dst, stride, width, height, pixel, pixelSize);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::FillPixel(dst, stride, width, height, pixel, pixelSize);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::FillPixel(dst, stride, width, height, pixel, pixelSize);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2283,7 +2283,7 @@ SIMD_API void SimdFillPixel(uint8_t * dst, size_t stride, size_t width, size_t h
 SIMD_API void SimdFill32f(float * dst, size_t size, const float * value)
 {
     typedef void(*SimdFill32fPtr) (float * dst, size_t size, const float * value);
-    const static SimdFill32fPtr simdFill32f = SIMD_FUNC4(Fill32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdFill32fPtr simdFill32f = SIMD_FUNC4(Fill32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdFill32f(dst, size, value);
 }
@@ -2486,9 +2486,9 @@ SIMD_API void SimdFloat32ToUint8(const float * src, size_t size, const float * l
         Avx2::Float32ToUint8(src, size, lower, upper, dst);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && size >= Sse2::A)
-        Sse2::Float32ToUint8(src, size, lower, upper, dst);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && size >= Sse41::A)
+        Sse41::Float32ToUint8(src, size, lower, upper, dst);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2511,9 +2511,9 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
         Avx2::Uint8ToFloat32(src, size, lower, upper, dst);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && size >= Sse2::A)
-        Sse2::Uint8ToFloat32(src, size, lower, upper, dst);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && size >= Sse41::A)
+        Sse41::Uint8ToFloat32(src, size, lower, upper, dst);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2527,7 +2527,7 @@ SIMD_API void SimdUint8ToFloat32(const uint8_t * src, size_t size, const float *
 SIMD_API void SimdCosineDistance32f(const float * a, const float * b, size_t size, float * distance)
 {
     typedef void(*SimdCosineDistance32fPtr) (const float * a, const float * b, size_t size, float * distance);
-    const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC5(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdCosineDistance32fPtr simdCosineDistance32f = SIMD_FUNC5(CosineDistance32f, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     simdCosineDistance32f(a, b, size, distance);
 }
@@ -2548,11 +2548,6 @@ SIMD_API void SimdGaussianBlur3x3(const uint8_t * src, size_t srcStride, size_t 
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && (width - 1)*channelCount >= Sse41::A)
         Sse41::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && (width - 1)*channelCount >= Sse2::A)
-        Sse2::GaussianBlur3x3(src, srcStride, width, height, channelCount, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE

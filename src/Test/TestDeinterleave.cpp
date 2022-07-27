@@ -90,9 +90,9 @@ namespace Test
 
         result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Base::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Sse2::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && DeinterleaveUvAutoTest(FUNC2(Simd::Sse41::DeinterleaveUv), FUNC2(SimdDeinterleaveUv));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

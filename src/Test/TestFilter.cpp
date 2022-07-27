@@ -272,11 +272,6 @@ namespace Test
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::GaussianBlur3x3), FUNC_C(SimdGaussianBlur3x3));

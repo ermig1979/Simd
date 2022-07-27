@@ -22,6 +22,7 @@
 * SOFTWARE.
 */
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -56,8 +57,9 @@ namespace Simd
             Crc32c(crc, nose, (uint8_t*)body);
             Crc32c(crc, body, tail);
             Crc32c(crc, (uint8_t*)tail, nose + size);
+            Sse2::Empty();
             return ~(uint32_t)crc;
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 }

@@ -24,11 +24,12 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<bool align> void CosineDistance32f(const float* a, const float* b, size_t size, float* distance)
         {
@@ -86,9 +87,10 @@ namespace Simd
                 CosineDistance32f<true>(a, b, size, distance);
             else
                 CosineDistance32f<false>(a, b, size, distance);
+            Sse2::Empty();
         }
 
-        //-------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE __m128i Float32ToUint8(const float * src, const __m128 & lower, const __m128 & upper, const __m128 & boost)
         {
@@ -127,9 +129,10 @@ namespace Simd
                 Float32ToUint8<true>(src, size, lower, upper, dst);
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
+            Sse2::Empty();
         }
 
-        //-------------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128 Uint8ToFloat32(const __m128i & value, const __m128 & lower, const __m128 & boost)
         {
@@ -169,7 +172,8 @@ namespace Simd
                 Uint8ToFloat32<true>(src, size, lower, upper, dst);
             else
                 Uint8ToFloat32<false>(src, size, lower, upper, dst);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

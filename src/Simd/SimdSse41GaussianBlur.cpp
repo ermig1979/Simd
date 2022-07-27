@@ -25,6 +25,7 @@
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdGaussianBlur.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -145,6 +146,8 @@ namespace Simd
                 memcpy(rows + b * a.stride, rows + last * a.stride, a.size * sizeof(float));
                 BlurRowsAny(rows, a.size, a.stride, a.weight.data + w, a.kernel, dst), dst += dstStride;
             }
+
+            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------
@@ -300,6 +303,8 @@ namespace Simd
                 memcpy(rows + b * a.stride, rows + last * a.stride, a.size * sizeof(float));
                 BlurRows<kernel>(rows, a.size, a.stride, a.weight.data + w, dst), dst += dstStride;
             }
+
+            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------
