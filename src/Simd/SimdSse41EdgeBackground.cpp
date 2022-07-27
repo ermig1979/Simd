@@ -25,11 +25,12 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeSlow(const uint8_t * value, uint8_t * background, __m128i tailMask)
         {
@@ -69,7 +70,10 @@ namespace Simd
                 EdgeBackgroundGrowRangeSlow<true>(value, valueStride, width, height, background, backgroundStride);
             else
                 EdgeBackgroundGrowRangeSlow<false>(value, valueStride, width, height, background, backgroundStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void EdgeBackgroundGrowRangeFast(const uint8_t * value, uint8_t * background)
         {
@@ -107,7 +111,10 @@ namespace Simd
                 EdgeBackgroundGrowRangeFast<true>(value, valueStride, width, height, background, backgroundStride);
             else
                 EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void EdgeBackgroundIncrementCount(const uint8_t * value,
             const uint8_t * backgroundValue, uint8_t * backgroundCount, size_t offset, __m128i tailMask)
@@ -155,7 +162,10 @@ namespace Simd
             else
                 EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
                     backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128i AdjustEdge(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
@@ -207,7 +217,10 @@ namespace Simd
             else
                 EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height,
                     backgroundValue, backgroundValueStride, threshold);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, uint8_t * backgroundValue,
             const uint8_t * mask, size_t offset, const __m128i & threshold, const __m128i & tailMask)
@@ -252,7 +265,10 @@ namespace Simd
             else
                 EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride,
                     threshold, mask, maskStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void EdgeBackgroundShiftRangeMasked(const uint8_t * value, uint8_t * background, const uint8_t * mask, size_t offset)
         {
@@ -293,7 +309,8 @@ namespace Simd
                 EdgeBackgroundShiftRangeMasked<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
             else
                 EdgeBackgroundShiftRangeMasked<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

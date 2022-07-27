@@ -31,33 +31,6 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        void BackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
-
-        void BackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
-
-        void BackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            const uint8_t * loValue, size_t loValueStride, const uint8_t * hiValue, size_t hiValueStride,
-            uint8_t * loCount, size_t loCountStride, uint8_t * hiCount, size_t hiCountStride);
-
-        void BackgroundAdjustRange(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
-            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
-            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold);
-
-        void BackgroundAdjustRangeMasked(uint8_t * loCount, size_t loCountStride, size_t width, size_t height,
-            uint8_t * loValue, size_t loValueStride, uint8_t * hiCount, size_t hiCountStride,
-            uint8_t * hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
-
-        void BackgroundShiftRange(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride);
-
-        void BackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * lo, size_t loStride, uint8_t * hi, size_t hiStride, const uint8_t * mask, size_t maskStride);
-
-        void BackgroundInitMask(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t index, uint8_t value, uint8_t * dst, size_t dstStride);
-
         void BayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
 
         void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
@@ -102,24 +75,6 @@ namespace Simd
             uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
 
         void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
-
-        void EdgeBackgroundGrowRangeSlow(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride);
-
-        void EdgeBackgroundGrowRangeFast(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride);
-
-        void EdgeBackgroundIncrementCount(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            const uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t * backgroundCount, size_t backgroundCountStride);
-
-        void EdgeBackgroundAdjustRange(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
-            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold);
-
-        void EdgeBackgroundAdjustRangeMasked(uint8_t * backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
-            uint8_t * backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t * mask, size_t maskStride);
-
-        void EdgeBackgroundShiftRangeMasked(const uint8_t * value, size_t valueStride, size_t width, size_t height,
-            uint8_t * background, size_t backgroundStride, const uint8_t * mask, size_t maskStride);
 
         void Fill32f(float* dst, size_t size, const float* value);
 

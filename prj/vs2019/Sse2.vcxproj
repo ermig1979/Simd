@@ -10,7 +10,6 @@
     <ConfigurationType>StaticLibrary</ConfigurationType>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2BayerToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2BgraToGray.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2BgraToYuv.cpp" />
@@ -20,7 +19,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Conditional.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Deinterleave.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Fill.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2GaussianBlur3x3.cpp" />

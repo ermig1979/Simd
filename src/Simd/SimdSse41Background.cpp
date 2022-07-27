@@ -24,11 +24,12 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void BackgroundGrowRangeSlow(const uint8_t * value, uint8_t * lo, uint8_t * hi, __m128i tailMask)
         {
@@ -75,7 +76,10 @@ namespace Simd
                 BackgroundGrowRangeSlow<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
             else
                 BackgroundGrowRangeSlow<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BackgroundGrowRangeFast(const uint8_t * value, uint8_t * lo, uint8_t * hi)
         {
@@ -118,7 +122,10 @@ namespace Simd
                 BackgroundGrowRangeFast<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
             else
                 BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BackgroundIncrementCount(const uint8_t * value,
             const uint8_t * loValue, const uint8_t * hiValue, uint8_t * loCount, uint8_t * hiCount, size_t offset, __m128i tailMask)
@@ -176,7 +183,10 @@ namespace Simd
             else
                 BackgroundIncrementCount<false>(value, valueStride, width, height,
                     loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128i AdjustLo(const __m128i & count, const __m128i & value, const __m128i & mask, const __m128i & threshold)
         {
@@ -244,7 +254,10 @@ namespace Simd
             else
                 BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride,
                     hiCount, hiCountStride, hiValue, hiValueStride, threshold);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BackgroundAdjustRangeMasked(uint8_t * loCount, uint8_t * loValue, uint8_t * hiCount, uint8_t * hiValue,
             const uint8_t * mask, size_t offset, const __m128i & threshold, const __m128i & tailMask)
@@ -294,7 +307,10 @@ namespace Simd
             else
                 BackgroundAdjustRangeMasked<false>(loCount, loCountStride, width, height, loValue, loValueStride,
                     hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BackgroundShiftRange(const uint8_t * value, uint8_t * lo, uint8_t * hi, size_t offset, __m128i mask)
         {
@@ -341,7 +357,10 @@ namespace Simd
                 BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
             else
                 BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BackgroundShiftRangeMasked(const uint8_t * value, uint8_t * lo, uint8_t * hi, const uint8_t * mask,
             size_t offset, __m128i tailMask)
@@ -385,7 +404,10 @@ namespace Simd
                 BackgroundShiftRangeMasked<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
             else
                 BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BackgroundInitMask(const uint8_t * src, uint8_t * dst, const __m128i & index, const __m128i & value)
         {
@@ -426,7 +448,8 @@ namespace Simd
                 BackgroundInitMask<true>(src, srcStride, width, height, index, value, dst, dstStride);
             else
                 BackgroundInitMask<false>(src, srcStride, width, height, index, value, dst, dstStride);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

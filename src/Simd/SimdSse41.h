@@ -63,6 +63,33 @@ namespace Simd
 
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
+        void BackgroundGrowRangeSlow(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride);
+
+        void BackgroundGrowRangeFast(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride);
+
+        void BackgroundIncrementCount(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            const uint8_t* loValue, size_t loValueStride, const uint8_t* hiValue, size_t hiValueStride,
+            uint8_t* loCount, size_t loCountStride, uint8_t* hiCount, size_t hiCountStride);
+
+        void BackgroundAdjustRange(uint8_t* loCount, size_t loCountStride, size_t width, size_t height,
+            uint8_t* loValue, size_t loValueStride, uint8_t* hiCount, size_t hiCountStride,
+            uint8_t* hiValue, size_t hiValueStride, uint8_t threshold);
+
+        void BackgroundAdjustRangeMasked(uint8_t* loCount, size_t loCountStride, size_t width, size_t height,
+            uint8_t* loValue, size_t loValueStride, uint8_t* hiCount, size_t hiCountStride,
+            uint8_t* hiValue, size_t hiValueStride, uint8_t threshold, const uint8_t* mask, size_t maskStride);
+
+        void BackgroundShiftRange(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride);
+
+        void BackgroundShiftRangeMasked(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* lo, size_t loStride, uint8_t* hi, size_t hiStride, const uint8_t* mask, size_t maskStride);
+
+        void BackgroundInitMask(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t index, uint8_t value, uint8_t* dst, size_t dstStride);
+
         void Base64Decode(const uint8_t* src, size_t srcSize, uint8_t* dst, size_t* dstSize);
             
         void Base64Encode(const uint8_t* src, size_t size, uint8_t* dst);
@@ -121,6 +148,24 @@ namespace Simd
 
         void DetectionLbpDetect16ii(const void * hid, const uint8_t * mask, size_t maskStride,
             ptrdiff_t left, ptrdiff_t top, ptrdiff_t right, ptrdiff_t bottom, uint8_t * dst, size_t dstStride);
+
+        void EdgeBackgroundGrowRangeSlow(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* background, size_t backgroundStride);
+
+        void EdgeBackgroundGrowRangeFast(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* background, size_t backgroundStride);
+
+        void EdgeBackgroundIncrementCount(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            const uint8_t* backgroundValue, size_t backgroundValueStride, uint8_t* backgroundCount, size_t backgroundCountStride);
+
+        void EdgeBackgroundAdjustRange(uint8_t* backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+            uint8_t* backgroundValue, size_t backgroundValueStride, uint8_t threshold);
+
+        void EdgeBackgroundAdjustRangeMasked(uint8_t* backgroundCount, size_t backgroundCountStride, size_t width, size_t height,
+            uint8_t* backgroundValue, size_t backgroundValueStride, uint8_t threshold, const uint8_t* mask, size_t maskStride);
+
+        void EdgeBackgroundShiftRangeMasked(const uint8_t* value, size_t valueStride, size_t width, size_t height,
+            uint8_t* background, size_t backgroundStride, const uint8_t* mask, size_t maskStride);
 
         void Float32ToBFloat16(const float* src, size_t size, uint16_t* dst);
 

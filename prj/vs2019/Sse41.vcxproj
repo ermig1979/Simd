@@ -15,6 +15,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41AbsGradientSaturatedSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AddFeatureDifference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41AlphaBlending.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Background.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Base64.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BayerToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41BFloat16.cpp" />
@@ -30,6 +31,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Crc32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Deinterleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Detection.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41EdgeBackground.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Float16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp" />
