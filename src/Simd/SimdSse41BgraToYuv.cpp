@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -131,7 +132,10 @@ namespace Simd
                 BgraToYuv420p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv420p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void Average16(__m128i a[2][2])
         {
@@ -190,7 +194,68 @@ namespace Simd
                 BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        SIMD_INLINE __m128i ConvertY16(__m128i b16_r16[2], __m128i g16_1[2])
+        {
+            return SaturateI16ToU8(_mm_add_epi16(K16_Y_ADJUST, _mm_packs_epi32(BgrToY32(b16_r16[0], g16_1[0]), BgrToY32(b16_r16[1], g16_1[1]))));
+        }
+
+        template <bool align> SIMD_INLINE void BgraToYuv444p(const uint8_t* bgra, uint8_t* y, uint8_t* u, uint8_t* v)
+        {
+            __m128i _b16_r16[2][2], _g16_1[2][2];
+            LoadPreparedBgra16<align>((__m128i*)bgra + 0, _b16_r16[0][0], _g16_1[0][0]);
+            LoadPreparedBgra16<align>((__m128i*)bgra + 1, _b16_r16[0][1], _g16_1[0][1]);
+            LoadPreparedBgra16<align>((__m128i*)bgra + 2, _b16_r16[1][0], _g16_1[1][0]);
+            LoadPreparedBgra16<align>((__m128i*)bgra + 3, _b16_r16[1][1], _g16_1[1][1]);
+
+            Store<align>((__m128i*)y, _mm_packus_epi16(ConvertY16(_b16_r16[0], _g16_1[0]), ConvertY16(_b16_r16[1], _g16_1[1])));
+            Store<align>((__m128i*)u, _mm_packus_epi16(ConvertU16(_b16_r16[0], _g16_1[0]), ConvertU16(_b16_r16[1], _g16_1[1])));
+            Store<align>((__m128i*)v, _mm_packus_epi16(ConvertV16(_b16_r16[0], _g16_1[0]), ConvertV16(_b16_r16[1], _g16_1[1])));
+        }
+
+        template <bool align> void BgraToYuv444p(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride));
+                assert(Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, colBgra = 0; col < alignedWidth; col += A, colBgra += QA)
+                    BgraToYuv444p<align>(bgra + colBgra, y + col, u + col, v + col);
+                if (width != alignedWidth)
+                {
+                    size_t offset = width - A;
+                    BgraToYuv444p<false>(bgra + offset * 4, y + offset, u + offset, v + offset);
+                }
+                y += yStride;
+                u += uStride;
+                v += vStride;
+                bgra += bgraStride;
+            }
+        }
+
+        void BgraToYuv444p(const uint8_t* bgra, size_t width, size_t height, size_t bgraStride, uint8_t* y, size_t yStride,
+            uint8_t* u, size_t uStride, uint8_t* v, size_t vStride)
+        {
+            if (Aligned(y) && Aligned(yStride) && Aligned(u) && Aligned(uStride)
+                && Aligned(v) && Aligned(vStride) && Aligned(bgra) && Aligned(bgraStride))
+                BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+            else
+                BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void LoadPreparedBgra16(const __m128i * bgra, __m128i & b16_r16, __m128i & g16_1, __m128i & a32)
         {
@@ -283,6 +348,7 @@ namespace Simd
                 BgraToYuva420p<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
             else
                 BgraToYuva420p<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
+            Sse2::Empty();
         }
     }
 #endif

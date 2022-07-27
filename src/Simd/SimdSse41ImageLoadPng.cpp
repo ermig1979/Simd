@@ -1779,7 +1779,7 @@ namespace Simd
                     switch (_param.format)
                     {
                     case SimdPixelFormatGray8:
-                        Sse2::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
+                        Sse41::RgbaToGray(data, x, y, stride, _image.data, _image.stride);
                         break;
                     case SimdPixelFormatBgr24:
                         Sse41::BgraToRgb(data, x, y, stride, _image.data, _image.stride);

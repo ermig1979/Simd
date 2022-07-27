@@ -25,6 +25,7 @@
 #include "Simd/SimdBase64.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdMath.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -77,6 +78,7 @@ namespace Simd
             for (const uint8_t* body = src + srcSize - srcSize16 - 4; src < body; src += 4, dst += 3)
                 Base::Base64Decode3(src, dst);
             *dstSize = srcSize / 4 * 3 + Base::Base64DecodeTail(src, dst) - 3;
+            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------------------------------
@@ -118,6 +120,7 @@ namespace Simd
                 Base::Base64Encode3(src, dst);
             if(size - size3)
                 Base::Base64EncodeTail(src, size - size3, dst);
+            Sse2::Empty();
         }
     }
 #endif

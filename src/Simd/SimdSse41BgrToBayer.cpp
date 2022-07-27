@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -119,6 +120,7 @@ namespace Simd
                 BgrToBayer<true>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
             else
                 BgrToBayer<false>(bgr, width, height, bgrStride, bayer, bayerStride, bayerFormat);
+            Sse2::Empty();
         }
     }
 #endif

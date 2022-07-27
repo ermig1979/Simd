@@ -91,9 +91,9 @@ namespace Test
 
         result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Base::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::HA)
-            result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Sse2::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::HA)
+            result = result && Bgr48pToBgra32AutoTest(FUNC(Simd::Sse41::Bgr48pToBgra32), FUNC(SimdBgr48pToBgra32));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

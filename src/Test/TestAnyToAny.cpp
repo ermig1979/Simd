@@ -138,9 +138,9 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC_O(Simd::Base::BgraToGray), FUNC_O(SimdBgraToGray));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC_O(Simd::Sse2::BgraToGray), FUNC_O(SimdBgraToGray));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Bgra32, View::Gray8, FUNC_O(Simd::Sse41::BgraToGray), FUNC_O(SimdBgraToGray));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -229,11 +229,6 @@ namespace Test
         bool result = true;
 
         result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Base::BgrToGray), FUNC_O(SimdBgrToGray));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AnyToAnyAutoTest(View::Bgr24, View::Gray8, FUNC_O(Simd::Sse2::BgrToGray), FUNC_O(SimdBgrToGray));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
@@ -408,9 +403,9 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Base::RgbaToGray), FUNC_O(SimdRgbaToGray));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Sse2::RgbaToGray), FUNC_O(SimdRgbaToGray));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Rgba32, View::Gray8, FUNC_O(Simd::Sse41::RgbaToGray), FUNC_O(SimdRgbaToGray));
 #endif 
 
 #if defined(SIMD_AVX2_ENABLE)

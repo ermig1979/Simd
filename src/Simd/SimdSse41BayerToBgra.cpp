@@ -24,11 +24,12 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBayer.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void SaveBgra(const __m128i bgr[3], const __m128i & alpha, uint8_t * bgra)
         {
@@ -106,7 +107,8 @@ namespace Simd
                 BayerToBgra<true>(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
             else
                 BayerToBgra<false>(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -112,7 +113,10 @@ namespace Simd
                 BgrToYuv420p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv420p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void Average16(__m128i & a)
         {
@@ -176,7 +180,10 @@ namespace Simd
                 BgrToYuv422p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void BgrToYuv444p(const uint8_t * bgr, uint8_t * y, uint8_t * u, uint8_t * v)
         {
@@ -223,6 +230,7 @@ namespace Simd
                 BgrToYuv444p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv444p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
+            Sse2::Empty();
         }
     }
 #endif

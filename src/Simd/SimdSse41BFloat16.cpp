@@ -24,6 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBFloat16.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -48,6 +49,7 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = Base::Float32ToBFloat16(src[i]);
+            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------------------------------
@@ -70,6 +72,7 @@ namespace Simd
             }
             for (; i < size; ++i)
                 dst[i] = Base::BFloat16ToFloat32(src[i]);
+            Sse2::Empty();
         }
     }
 #endif

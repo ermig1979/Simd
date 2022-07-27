@@ -939,9 +939,9 @@ SIMD_API void SimdBayerToBgra(const uint8_t * bayer, size_t width, size_t height
         Avx2::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A + 2)
-        Sse2::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A + 2)
+        Sse41::BayerToBgra(bayer, width, height, bayerStride, bayerFormat, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1019,9 +1019,9 @@ SIMD_API void SimdBgraToGray(const uint8_t *bgra, size_t width, size_t height, s
         Avx2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::BgraToGray(bgra, width, height, bgraStride, gray, grayStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1104,11 +1104,6 @@ SIMD_API void SimdBgraToYuv420p(const uint8_t * bgra, size_t width, size_t heigh
         Sse41::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::DA)
-        Sse2::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::DA)
         Vmx::BgraToYuv420p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
@@ -1145,11 +1140,6 @@ SIMD_API void SimdBgraToYuv422p(const uint8_t * bgra, size_t width, size_t heigh
         Sse41::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::DA)
-        Sse2::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::DA)
         Vmx::BgraToYuv422p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
@@ -1175,9 +1165,9 @@ SIMD_API void SimdBgraToYuv444p(const uint8_t * bgra, size_t width, size_t heigh
         Avx2::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::BgraToYuv444p(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1215,11 +1205,6 @@ SIMD_API void SimdBgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t
 #ifdef SIMD_SSE41_ENABLE
     if (Sse41::Enable && width >= Sse41::DA)
         Sse41::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::DA)
-        Sse2::BgraToYuva420p(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -1298,9 +1283,9 @@ SIMD_API void SimdBgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t
         Avx2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::HA)
-        Sse2::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::HA)
+        Sse41::Bgr48pToBgra32(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1331,11 +1316,6 @@ SIMD_API void SimdBgrToGray(const uint8_t *bgr, size_t width, size_t height, siz
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width >= Sse41::A)
         Sse41::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::BgrToGray(bgr, width, height, bgrStride, gray, grayStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1489,9 +1469,9 @@ SIMD_API void SimdBinarization(const uint8_t * src, size_t srcStride, size_t wid
         Avx2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::Binarization(src, srcStride, width, height, value, positive, negative, dst, dstStride, compareType);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1521,9 +1501,9 @@ SIMD_API void SimdAveragingBinarization(const uint8_t * src, size_t srcStride, s
         Avx2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::AveragingBinarization(src, srcStride, width, height, value, neighborhood, threshold, positive, negative, dst, dstStride, compareType);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1558,9 +1538,9 @@ SIMD_API void SimdConditionalCount8u(const uint8_t * src, size_t stride, size_t 
         Avx2::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalCount8u(src, stride, width, height, value, compareType, count);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::ConditionalCount8u(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1589,9 +1569,9 @@ SIMD_API void SimdConditionalCount16i(const uint8_t * src, size_t stride, size_t
         Avx2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::HA)
-        Sse2::ConditionalCount16i(src, stride, width, height, value, compareType, count);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::HA)
+        Sse41::ConditionalCount16i(src, stride, width, height, value, compareType, count);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1620,9 +1600,9 @@ SIMD_API void SimdConditionalSum(const uint8_t * src, size_t srcStride, size_t w
         Avx2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::ConditionalSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1651,9 +1631,9 @@ SIMD_API void SimdConditionalSquareSum(const uint8_t * src, size_t srcStride, si
         Avx2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::ConditionalSquareSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1682,9 +1662,9 @@ SIMD_API void SimdConditionalSquareGradientSum(const uint8_t * src, size_t srcSt
         Avx2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A + 2)
-        Sse2::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A + 2)
+        Sse41::ConditionalSquareGradientSum(src, srcStride, width, height, mask, maskStride, value, compareType, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -1712,9 +1692,9 @@ SIMD_API void SimdConditionalFill(const uint8_t * src, size_t srcStride, size_t 
         Avx2::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::ConditionalFill(src, srcStride, width, height, threshold, compareType, value, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4628,9 +4608,9 @@ SIMD_API void SimdRgbaToGray(const uint8_t* rgba, size_t width, size_t height, s
         Avx2::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::RgbaToGray(rgba, width, height, rgbaStride, gray, grayStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE

@@ -31,49 +31,6 @@ namespace Simd
 #ifdef SIMD_SSE2_ENABLE    
     namespace Sse2
     {
-        void BayerToBgra(const uint8_t * bayer, size_t width, size_t height, size_t bayerStride, SimdPixelFormatType bayerFormat, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
-
-        void BgraToGray(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * gray, size_t grayStride);
-
-        void BgraToYuv420p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
-
-        void BgraToYuv422p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
-
-        void BgraToYuv444p(const uint8_t * bgra, size_t width, size_t height, size_t bgraStride, uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
-
-        void BgraToYuva420p(const uint8_t * bgra, size_t bgraStride, size_t width, size_t height,
-            uint8_t * y, size_t yStride, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride, uint8_t * a, size_t aStride);
-
-        void Bgr48pToBgra32(const uint8_t * blue, size_t blueStride, size_t width, size_t height,
-            const uint8_t * green, size_t greenStride, const uint8_t * red, size_t redStride, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
-
-        void BgrToGray(const uint8_t *bgr, size_t width, size_t height, size_t bgrStride, uint8_t *gray, size_t grayStride);
-
-        void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, uint8_t positive, uint8_t negative, uint8_t * dst, size_t dstStride, SimdCompareType compareType);
-
-        void AveragingBinarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t value, size_t neighborhood, uint8_t threshold, uint8_t positive, uint8_t negative,
-            uint8_t * dst, size_t dstStride, SimdCompareType compareType);
-
-        void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height,
-            uint8_t value, SimdCompareType compareType, uint32_t * count);
-
-        void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height,
-            int16_t value, SimdCompareType compareType, uint32_t * count);
-
-        void ConditionalSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
-
-        void ConditionalSquareSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
-
-        void ConditionalSquareGradientSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint64_t * sum);
-
-        void ConditionalFill(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t threshold, SimdCompareType compareType, uint8_t value, uint8_t * dst, size_t dstStride);
-
         void DeinterleaveUv(const uint8_t * uv, size_t uvStride, size_t width, size_t height, uint8_t * u, size_t uStride, uint8_t * v, size_t vStride);
 
         void Fill32f(float* dst, size_t size, const float* value);
@@ -234,8 +191,6 @@ namespace Simd
 
         void ResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
-
-        void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride);
 
         void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 

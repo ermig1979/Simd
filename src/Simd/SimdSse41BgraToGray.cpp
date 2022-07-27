@@ -23,11 +23,12 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         const __m128i K16_BLUE_RED = SIMD_MM_SET2_EPI16(Base::BLUE_TO_GRAY_WEIGHT, Base::RED_TO_GRAY_WEIGHT);
         const __m128i K16_GREEN_0000 = SIMD_MM_SET2_EPI16(Base::GREEN_TO_GRAY_WEIGHT, 0x0000);
@@ -50,10 +51,10 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Load(const uint8_t* p, __m128i a[4])
         {
-            a[0] = Load<align>((__m128i*)p + 0);
-            a[1] = Load<align>((__m128i*)p + 1);
-            a[2] = Load<align>((__m128i*)p + 2);
-            a[3] = Load<align>((__m128i*)p + 3);
+            a[0] = Sse2::Load<align>((__m128i*)p + 0);
+            a[1] = Sse2::Load<align>((__m128i*)p + 1);
+            a[2] = Sse2::Load<align>((__m128i*)p + 2);
+            a[3] = Sse2::Load<align>((__m128i*)p + 3);
         }
 
         template <bool align> void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)
@@ -68,12 +69,12 @@ namespace Simd
             {
                 for (size_t col = 0; col < alignedWidth; col += A)
                 {
-                    Load<align>(bgra + 4 * col, a);
+                    Sse41::Load<align>(bgra + 4 * col, a);
                     Store<align>((__m128i*)(gray + col), BgraToGray(a));
                 }
                 if (alignedWidth != width)
                 {
-                    Load<false>(bgra + 4 * (width - A), a);
+                    Sse41::Load<false>(bgra + 4 * (width - A), a);
                     Store<false>((__m128i*)(gray + width - A), BgraToGray(a));
                 }
                 bgra += bgraStride;
@@ -87,9 +88,10 @@ namespace Simd
                 BgraToGray<true>(bgra, width, height, bgraStride, gray, grayStride);
             else
                 BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K16_RED_BLUE = SIMD_MM_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
 
@@ -139,7 +141,8 @@ namespace Simd
                 RgbaToGray<true>(rgba, width, height, rgbaStride, gray, grayStride);
             else
                 RgbaToGray<false>(rgba, width, height, rgbaStride, gray, grayStride);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

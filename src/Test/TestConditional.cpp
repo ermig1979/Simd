@@ -97,9 +97,9 @@ namespace Test
 
         result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Base::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Sse2::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && ConditionalCount8uAutoTest(FUNC_C8U(Simd::Sse41::ConditionalCount8u), FUNC_C8U(SimdConditionalCount8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -193,9 +193,9 @@ namespace Test
 
         result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Base::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::HA)
-            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Sse2::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::HA)
+            result = result && ConditionalCount16iAutoTest(FUNC_C16I(Simd::Sse41::ConditionalCount16i), FUNC_C16I(SimdConditionalCount16i));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -291,9 +291,9 @@ namespace Test
 
         result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSum), FUNC_S(SimdConditionalSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSum), FUNC_S(SimdConditionalSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse41::ConditionalSum), FUNC_S(SimdConditionalSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -325,9 +325,9 @@ namespace Test
 
         result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse41::ConditionalSquareSum), FUNC_S(SimdConditionalSquareSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -359,9 +359,9 @@ namespace Test
 
         result = result && ConditionalSumAutoTest(FUNC_S(Simd::Base::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A + 2)
-            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse2::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A + 2)
+            result = result && ConditionalSumAutoTest(FUNC_S(Simd::Sse41::ConditionalSquareGradientSum), FUNC_S(SimdConditionalSquareGradientSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -459,9 +459,9 @@ namespace Test
 
         result = result && ConditionalFillAutoTest(FUNC_F(Simd::Base::ConditionalFill), FUNC_F(SimdConditionalFill));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Sse2::ConditionalFill), FUNC_F(SimdConditionalFill));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && ConditionalFillAutoTest(FUNC_F(Simd::Sse41::ConditionalFill), FUNC_F(SimdConditionalFill));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

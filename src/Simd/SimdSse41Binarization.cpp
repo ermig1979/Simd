@@ -25,11 +25,12 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdSet.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align, SimdCompareType compareType>
         void Binarization(const uint8_t * src, size_t srcStride, size_t width, size_t height,
@@ -91,7 +92,10 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         namespace
         {
@@ -254,7 +258,8 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

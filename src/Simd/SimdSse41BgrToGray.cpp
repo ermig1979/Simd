@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -84,9 +85,10 @@ namespace Simd
                 BgrToGray<true>(bgr, width, height, bgrStride, gray, grayStride);
             else
                 BgrToGray<false>(bgr, width, height, bgrStride, gray, grayStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K16_RED_BLUE = SIMD_MM_SET2_EPI16(Base::RED_TO_GRAY_WEIGHT, Base::BLUE_TO_GRAY_WEIGHT);
 
@@ -142,6 +144,7 @@ namespace Simd
                 RgbToGray<true>(rgb, width, height, rgbStride, gray, grayStride);
             else
                 RgbToGray<false>(rgb, width, height, rgbStride, gray, grayStride);
+            Sse2::Empty();
         }
     }
 #endif

@@ -25,11 +25,12 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align, SimdCompareType compareType>
         void ConditionalCount8u(const uint8_t * src, size_t stride, size_t width, size_t height, uint8_t value, uint32_t * count)
@@ -89,7 +90,10 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, SimdCompareType compareType>
         void ConditionalCount16i(const uint8_t * src, size_t stride, size_t width, size_t height, int16_t value, uint32_t * count)
@@ -150,6 +154,7 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
 
         template <bool align, SimdCompareType compareType>
@@ -215,7 +220,10 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128i Square(__m128i value)
         {
@@ -289,7 +297,10 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align>
         SIMD_INLINE __m128i SquaredDifference(const uint8_t * src, ptrdiff_t step, __m128i mask)
@@ -377,7 +388,10 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, SimdCompareType compareType>
         SIMD_INLINE void ConditionalFill(const uint8_t * src, size_t offset, const __m128i & threshold, const __m128i & value, uint8_t * dst)
@@ -440,7 +454,8 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }
