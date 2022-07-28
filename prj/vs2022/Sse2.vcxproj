@@ -12,12 +12,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2GrayToBgra.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Histogram.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Hog.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Int16ToGray.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Interference.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2MeanFilter3x3.cpp" />

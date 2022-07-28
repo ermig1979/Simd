@@ -23,11 +23,12 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<bool increment> __m128i InterferenceChange(__m128i statistic, __m128i value, __m128i saturation);
 
@@ -75,7 +76,10 @@ namespace Simd
                 InterferenceChange<true, true>((int16_t*)statistic, stride / 2, width, height, increment, saturation);
             else
                 InterferenceChange<false, true>((int16_t*)statistic, stride / 2, width, height, increment, saturation);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         void InterferenceDecrement(uint8_t * statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation)
         {
@@ -85,7 +89,10 @@ namespace Simd
                 InterferenceChange<true, false>((int16_t*)statistic, stride / 2, width, height, decrement, saturation);
             else
                 InterferenceChange<false, false>((int16_t*)statistic, stride / 2, width, height, decrement, saturation);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, bool increment> void InterferenceChangeMasked(int16_t * statistic, size_t statisticStride, size_t width, size_t height,
             uint8_t value, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index)
@@ -128,7 +135,10 @@ namespace Simd
                 InterferenceChangeMasked<true, true>((int16_t*)statistic, statisticStride / 2, width, height, increment, saturation, mask, maskStride, index);
             else
                 InterferenceChangeMasked<false, true>((int16_t*)statistic, statisticStride / 2, width, height, increment, saturation, mask, maskStride, index);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         void InterferenceDecrementMasked(uint8_t * statistic, size_t statisticStride, size_t width, size_t height,
             uint8_t decrement, int16_t saturation, const uint8_t * mask, size_t maskStride, uint8_t index)
@@ -139,7 +149,8 @@ namespace Simd
                 InterferenceChangeMasked<true, false>((int16_t*)statistic, statisticStride / 2, width, height, decrement, saturation, mask, maskStride, index);
             else
                 InterferenceChangeMasked<false, false>((int16_t*)statistic, statisticStride / 2, width, height, decrement, saturation, mask, maskStride, index);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

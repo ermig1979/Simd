@@ -24,11 +24,12 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         namespace
         {
@@ -133,7 +134,10 @@ namespace Simd
                 AbsSecondDerivativeHistogram<true>(src, width, height, stride, step, indent, histogram);
             else
                 AbsSecondDerivativeHistogram<false>(src, width, height, stride, step, indent, histogram);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool srcAlign, bool dstAlign>
         SIMD_INLINE void MaskSrc(const uint8_t * src, const uint8_t * mask, const __m128i & index, ptrdiff_t offset, uint16_t * dst)
@@ -191,7 +195,10 @@ namespace Simd
                 HistogramMasked<true>(src, srcStride, width, height, mask, maskStride, index, histogram);
             else
                 HistogramMasked<false>(src, srcStride, width, height, mask, maskStride, index, histogram);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <SimdCompareType compareType, bool srcAlign, bool dstAlign>
         SIMD_INLINE void ConditionalSrc(const uint8_t * src, const uint8_t * mask, const __m128i & value, ptrdiff_t offset, uint16_t * dst)
@@ -270,7 +277,8 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

@@ -345,9 +345,9 @@ namespace Test
 
         result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC_O(Simd::Base::Int16ToGray), FUNC_O(SimdInt16ToGray));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC_O(Simd::Sse2::Int16ToGray), FUNC_O(SimdInt16ToGray));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToAnyAutoTest(View::Int16, View::Gray8, FUNC_O(Simd::Sse41::Int16ToGray), FUNC_O(SimdInt16ToGray));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

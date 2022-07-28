@@ -23,11 +23,12 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void GrayToBgra(uint8_t * bgra, __m128i gray, __m128i alpha)
         {
@@ -73,7 +74,8 @@ namespace Simd
                 GrayToBgra<true>(gray, width, height, grayStride, bgra, bgraStride, alpha);
             else
                 GrayToBgra<false>(gray, width, height, grayStride, bgra, bgraStride, alpha);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

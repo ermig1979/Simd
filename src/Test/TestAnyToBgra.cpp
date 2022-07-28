@@ -120,9 +120,9 @@ namespace Test
 
         result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Base::GrayToBgra), FUNC(SimdGrayToBgra));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Sse2::GrayToBgra), FUNC(SimdGrayToBgra));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && AnyToBgraAutoTest(View::Gray8, FUNC(Simd::Sse41::GrayToBgra), FUNC(SimdGrayToBgra));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

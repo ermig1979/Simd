@@ -90,11 +90,6 @@ namespace Test
 
         result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Base::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A + 2)
-            result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse2::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W >= Simd::Sse41::A + 2)
             result = result && HogDirectionHistogramsAutoTest(FUNC_HDH(Simd::Sse41::HogDirectionHistograms), FUNC_HDH(SimdHogDirectionHistograms));
@@ -276,9 +271,9 @@ namespace Test
 
         result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Base::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Sse2::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogDeinterleaveAutoTest(FUNC_HD(Simd::Sse41::HogDeinterleave), FUNC_HD(SimdHogDeinterleave));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -374,9 +369,9 @@ namespace Test
 
         result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Base::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Sse2::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && HogFilterSeparableAutoTest(FUNC_HSF(Simd::Sse41::HogFilterSeparable), FUNC_HSF(SimdHogFilterSeparable));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

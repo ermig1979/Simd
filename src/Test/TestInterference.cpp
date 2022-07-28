@@ -111,9 +111,9 @@ namespace Test
 
         result = result && InterferenceChangeAutoTest(FUNC1(Simd::Base::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Sse2::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Sse41::InterferenceIncrement), FUNC1(SimdInterferenceIncrement));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -145,9 +145,9 @@ namespace Test
 
         result = result && InterferenceChangeAutoTest(FUNC1(Simd::Base::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Sse2::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && InterferenceChangeAutoTest(FUNC1(Simd::Sse41::InterferenceDecrement), FUNC1(SimdInterferenceDecrement));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -217,9 +217,9 @@ namespace Test
 
         result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Base::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Sse2::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Sse41::InterferenceIncrementMasked), FUNC2(SimdInterferenceIncrementMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -251,9 +251,9 @@ namespace Test
 
         result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Base::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Sse2::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && InterferenceChangeMaskedAutoTest(FUNC2(Simd::Sse41::InterferenceDecrementMasked), FUNC2(SimdInterferenceDecrementMasked));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

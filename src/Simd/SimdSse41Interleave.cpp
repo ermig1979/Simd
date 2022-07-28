@@ -24,12 +24,58 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
+        template <bool align> SIMD_INLINE void InterleaveUv(const uint8_t* u, const uint8_t* v, uint8_t* uv)
+        {
+            __m128i _u = Load<align>((__m128i*)u);
+            __m128i _v = Load<align>((__m128i*)v);
+            Store<align>((__m128i*)uv + 0, _mm_unpacklo_epi8(_u, _v));
+            Store<align>((__m128i*)uv + 1, _mm_unpackhi_epi8(_u, _v));
+        }
+
+        template <bool align> void InterleaveUv(const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* uv, size_t uvStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride));
+            }
+
+            size_t bodyWidth = AlignLo(width, A);
+            size_t tail = width - bodyWidth;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < bodyWidth; col += A, offset += DA)
+                    InterleaveUv<align>(u + col, v + col, uv + offset);
+                if (tail)
+                {
+                    size_t col = width - A;
+                    size_t offset = 2 * col;
+                    InterleaveUv<false>(u + col, v + col, uv + offset);
+                }
+                u += uStride;
+                v += vStride;
+                uv += uvStride;
+            }
+        }
+
+        void InterleaveUv(const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* uv, size_t uvStride)
+        {
+            if (Aligned(uv) && Aligned(uvStride) && Aligned(u) && Aligned(uStride) && Aligned(v) && Aligned(vStride))
+                InterleaveUv<true>(u, uStride, v, vStride, width, height, uv, uvStride);
+            else
+                InterleaveUv<false>(u, uStride, v, vStride, width, height, uv, uvStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
+
         template <bool align> SIMD_INLINE void InterleaveBgr(const uint8_t * b, const uint8_t * g, const uint8_t * r, size_t offset, uint8_t * bgr)
         {
             __m128i _b = Load<align>((__m128i*)(b + offset));
@@ -72,7 +118,10 @@ namespace Simd
                 InterleaveBgr<true>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
             else
                 InterleaveBgr<false>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void InterleaveBgra(const uint8_t * b, const uint8_t * g, const uint8_t * r, const uint8_t * a, size_t offset, uint8_t * bgra)
         {
@@ -122,6 +171,7 @@ namespace Simd
                 InterleaveBgra<true>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
             else
                 InterleaveBgra<false>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
+            Sse2::Empty();
         }
     }
 #endif

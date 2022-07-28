@@ -231,9 +231,24 @@ namespace Simd
 
         void GrayToBgr(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* bgr, size_t bgrStride);
 
+        void GrayToBgra(const uint8_t* gray, size_t width, size_t height, size_t grayStride, uint8_t* bgra, size_t bgraStride, uint8_t alpha);
+
+        void AbsSecondDerivativeHistogram(const uint8_t* src, size_t width, size_t height, size_t stride,
+            size_t step, size_t indent, uint32_t* histogram);
+
+        void HistogramMasked(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t index, uint32_t* histogram);
+
+        void HistogramConditional(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* mask, size_t maskStride, uint8_t value, SimdCompareType compareType, uint32_t* histogram);
+
+        void HogDeinterleave(const float* src, size_t srcStride, size_t width, size_t height, size_t count, float** dst, size_t dstStride);
+
         void HogDirectionHistograms(const uint8_t * src, size_t stride, size_t width, size_t height, size_t cellX, size_t cellY, size_t quantization, float * histograms);
 
         void HogExtractFeatures(const uint8_t * src, size_t stride, size_t width, size_t height, float * features);
+
+        void HogFilterSeparable(const float* src, size_t srcStride, size_t width, size_t height, const float* rowFilter, size_t rowSize, const float* colFilter, size_t colSize, float* dst, size_t dstStride, int add);
 
         void HogLiteExtractFeatures(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t cell, float * features, size_t featuresStride);
 
@@ -248,6 +263,20 @@ namespace Simd
         void HogLiteFindMax7x7(const float * a, size_t aStride, const float * b, size_t bStride, size_t height, float * value, size_t * col, size_t * row);
 
         void HogLiteCreateMask(const float * src, size_t srcStride, size_t srcWidth, size_t srcHeight, const float * threshold, size_t scale, size_t size, uint32_t * dst, size_t dstStride);
+
+        void Int16ToGray(const uint8_t* src, size_t width, size_t height, size_t srcStride, uint8_t* dst, size_t dstStride);
+
+        void InterferenceIncrement(uint8_t* statistic, size_t stride, size_t width, size_t height, uint8_t increment, int16_t saturation);
+
+        void InterferenceIncrementMasked(uint8_t* statistic, size_t statisticStride, size_t width, size_t height,
+            uint8_t increment, int16_t saturation, const uint8_t* mask, size_t maskStride, uint8_t index);
+
+        void InterferenceDecrement(uint8_t* statistic, size_t stride, size_t width, size_t height, uint8_t decrement, int16_t saturation);
+
+        void InterferenceDecrementMasked(uint8_t* statistic, size_t statisticStride, size_t width, size_t height,
+            uint8_t decrement, int16_t saturation, const uint8_t* mask, size_t maskStride, uint8_t index);
+
+        void InterleaveUv(const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride, size_t width, size_t height, uint8_t* uv, size_t uvStride);
 
         void InterleaveBgr(const uint8_t* b, size_t bStride, const uint8_t* g, size_t gStride, const uint8_t* r, size_t rStride, size_t width, size_t height, uint8_t* bgr, size_t bgrStride);
 

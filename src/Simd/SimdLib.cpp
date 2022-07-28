@@ -2634,9 +2634,9 @@ SIMD_API void SimdGrayToBgra(const uint8_t * gray, size_t width, size_t height, 
         Avx2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GrayToBgra(gray, width, height, grayStride, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -2664,9 +2664,9 @@ SIMD_API void SimdAbsSecondDerivativeHistogram(const uint8_t *src, size_t width,
         Avx2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A + 2*indent)
-        Sse2::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A + 2*indent)
+        Sse41::AbsSecondDerivativeHistogram(src, width, height, stride, step, indent, histogram);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -2700,9 +2700,9 @@ SIMD_API void SimdHistogramMasked(const uint8_t *src, size_t srcStride, size_t w
         Avx2::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::HistogramMasked(src, srcStride, width, height, mask, maskStride, index, histogram);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -2731,9 +2731,9 @@ SIMD_API void SimdHistogramConditional(const uint8_t * src, size_t srcStride, si
         Avx2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::HistogramConditional(src, srcStride, width, height, mask, maskStride, value, compareType, histogram);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2787,11 +2787,6 @@ SIMD_API void SimdHogDirectionHistograms(const uint8_t * src, size_t stride, siz
         Sse41::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A + 2)
-        Sse2::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-    else
-#endif
 #ifdef SIMD_VSX_ENABLE
     if(Vsx::Enable && width >= Vsx::A + 2)
         Vsx::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
@@ -2842,9 +2837,9 @@ SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t wi
         Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::F && count >= Sse2::F)
-        Sse2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::F && count >= Sse41::F)
+        Sse41::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -2868,9 +2863,9 @@ SIMD_API void SimdHogFilterSeparable(const float * src, size_t srcStride, size_t
         Avx2::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::F + colSize - 1)
-        Sse2::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::F + colSize - 1)
+        Sse41::HogFilterSeparable(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3103,9 +3098,9 @@ SIMD_API void SimdInt16ToGray(const uint8_t * src, size_t width, size_t height, 
         Avx2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::Int16ToGray(src, width, height, srcStride, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::Int16ToGray(src, width, height, srcStride, dst, dstStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -3145,9 +3140,9 @@ SIMD_API void SimdInterferenceIncrement(uint8_t * statistic, size_t stride, size
         Avx2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::HA)
-        Sse2::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::HA)
+        Sse41::InterferenceIncrement(statistic, stride, width, height, increment, saturation);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -3176,9 +3171,9 @@ SIMD_API void SimdInterferenceIncrementMasked(uint8_t * statistic, size_t statis
         Avx2::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::InterferenceIncrementMasked(statistic, statisticStride, width, height, increment, saturation, mask, maskStride, index);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -3206,9 +3201,9 @@ SIMD_API void SimdInterferenceDecrement(uint8_t * statistic, size_t stride, size
         Avx2::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::HA)
-        Sse2::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::HA)
+        Sse41::InterferenceDecrement(statistic, stride, width, height, decrement, saturation);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -3237,9 +3232,9 @@ SIMD_API void SimdInterferenceDecrementMasked(uint8_t * statistic, size_t statis
         Avx2::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::InterferenceDecrementMasked(statistic, statisticStride, width, height, decrement, saturation, mask, maskStride, index);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -3267,9 +3262,9 @@ SIMD_API void SimdInterleaveUv(const uint8_t * u, size_t uStride, const uint8_t 
         Avx2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::InterleaveUv(u, uStride, v, vStride, width, height, uv, uvStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE

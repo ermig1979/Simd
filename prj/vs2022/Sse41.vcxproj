@@ -43,6 +43,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgr.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Hog.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41HogLite.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageLoad.cpp" />
@@ -50,6 +52,8 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSaveJpeg.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ImageSavePng.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Int16ToGray.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Interference.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Interleave.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Laplace.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41MeanFilter3x3.cpp" />
