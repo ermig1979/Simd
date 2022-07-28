@@ -12,17 +12,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Operation.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Reduce.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray2x2.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray3x3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray4x4.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray5x5.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Reorder.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ResizeBilinear.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Resizer.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerArea.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Segmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Sobel.cpp" />
