@@ -28,11 +28,12 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdNeural.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void AdaptiveGradientUpdate(const float* delta, const __m128& norm, const __m128& alpha, const __m128& epsilon, float* gradient, float* weight)
         {
@@ -84,9 +85,10 @@ namespace Simd
                 NeuralAdaptiveGradientUpdate<true>(delta, size, batch, alpha, epsilon, gradient, weight);
             else
                 NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         void NeuralAddVectorMultipliedByValue(const float* src, size_t size, const float* value, float* dst)
         {
@@ -96,9 +98,10 @@ namespace Simd
                 AddMultiplied<true>(src, aligned, partial, size, *value, dst);
             else
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AddVector(const float* src, float* dst)
         {
@@ -129,9 +132,10 @@ namespace Simd
                 AddVector<true>(src, aligned, partial, size, dst);
             else
                 AddVector<false>(src, aligned, partial, size, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void AddValue(const __m128& value, float* dst)
         {
@@ -166,9 +170,10 @@ namespace Simd
                 AddValue<true>(value, dst, aligned, partial, size);
             else
                 AddValue<false>(value, dst, aligned, partial, size);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool inversion> __m128i Invert(__m128i value);
 
@@ -236,9 +241,10 @@ namespace Simd
                 NeuralConvert<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void NeuralDerivativeRelu(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -266,9 +272,10 @@ namespace Simd
                 NeuralDerivativeRelu<true>(src, size, slope, dst);
             else
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralDerivativeSigmoid(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -294,9 +301,10 @@ namespace Simd
                 NeuralDerivativeSigmoid<true>(src, size, slope, dst);
             else
                 NeuralDerivativeSigmoid<false>(src, size, slope, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralDerivativeTanh(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -322,9 +330,10 @@ namespace Simd
                 NeuralDerivativeTanh<true>(src, size, slope, dst);
             else
                 NeuralDerivativeTanh<false>(src, size, slope, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE __m128 Pooling1x1Max3x1Body(const float* src)
         {
@@ -425,9 +434,10 @@ namespace Simd
                 NeuralPooling1x1Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling1x1Max3x3<false>(src, srcStride, width, height, dst, dstStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE __m128 Pooling2x2Max2x2(const float* src, size_t stride)
         {
@@ -482,9 +492,10 @@ namespace Simd
                 NeuralPooling2x2Max2x2<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max2x2<false>(src, srcStride, width, height, dst, dstStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE float Max2(const float* src)
         {
@@ -574,9 +585,10 @@ namespace Simd
                 NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template<bool align> void NeuralPow(const float * src, size_t size, const float * exponent, float * dst)
         {
@@ -600,9 +612,10 @@ namespace Simd
                 NeuralPow<true>(src, size, exponent, dst);
             else
                 NeuralPow<false>(src, size, exponent, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralProductSum(const float* a, const float* b, size_t offset, __m128& sum)
         {
@@ -648,9 +661,10 @@ namespace Simd
                 NeuralProductSum<true>(a, b, size, sum);
             else
                 NeuralProductSum<false>(a, b, size, sum);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -685,9 +699,10 @@ namespace Simd
                 NeuralRoughSigmoid<true>(src, size, slope, dst);
             else
                 NeuralRoughSigmoid<false>(src, size, slope, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralRoughSigmoid2(const float* src, const __m128& k, const __m128& o, const __m128& m, float* dst)
         {
@@ -732,9 +747,10 @@ namespace Simd
                 NeuralRoughSigmoid2<true>(src, size, slope, dst);
             else
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void NeuralRoughTanh(const float* src, size_t size, const float* slope, float* dst)
         {
@@ -769,9 +785,10 @@ namespace Simd
                 NeuralRoughTanh<true>(src, size, slope, dst);
             else
                 NeuralRoughTanh<false>(src, size, slope, dst);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void UpdateWeights(const float* x, const __m128& a, const __m128& b, float* d, float* w)
         {
@@ -820,7 +837,8 @@ namespace Simd
                 NeuralUpdateWeights<true>(x, size, *a, *b, d, w);
             else
                 NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

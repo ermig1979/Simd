@@ -169,19 +169,19 @@ namespace Simd
                 if (strideY == 1 && strideX == 1 && kernelY == 3 && kernelX == 3 && srcH == dstH && srcW == dstW && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Sse2::NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        Sse41::NeuralPooling1x1Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 2 && kernelX == 2 && padY == 0 && padX == 0 && dstW >= F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Sse2::NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
+                        Sse41::NeuralPooling2x2Max2x2(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 if (strideY == 2 && strideX == 2 && kernelY == 3 && kernelX == 3 && padY == 0 && padX == 0 && dstW > F)
                 {
                     for (size_t c = 0; c < srcC; ++c, src += srcH * srcW, dst += dstH * dstW)
-                        Sse2::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
+                        Sse41::NeuralPooling2x2Max3x3(src, srcW, srcW, srcH, dst, dstW);
                     return;
                 }
                 Base::SynetPoolingMax32f(src, srcC, srcH, srcW, 1, kernelY, kernelX, 1, strideY, strideX, 0, padY, padX, dst, srcC, dstH, dstW, format);

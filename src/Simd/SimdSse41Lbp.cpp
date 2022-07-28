@@ -24,11 +24,12 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align> void LbpEstimate(const uint8_t * src, ptrdiff_t stride, uint8_t * dst)
         {
@@ -78,7 +79,8 @@ namespace Simd
                 LbpEstimate<true>(src, srcStride, width, height, dst, dstStride);
             else
                 LbpEstimate<false>(src, srcStride, width, height, dst, dstStride);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

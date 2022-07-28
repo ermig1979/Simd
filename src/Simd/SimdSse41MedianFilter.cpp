@@ -25,11 +25,12 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <bool align, size_t step> SIMD_INLINE void LoadNoseRhomb3x3(const uint8_t* y[3], size_t offset, __m128i a[5])
         {
@@ -124,7 +125,10 @@ namespace Simd
                 MedianFilterRhomb3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterRhomb3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare3x3(const uint8_t* y[3], size_t offset, __m128i a[9])
         {
@@ -224,7 +228,10 @@ namespace Simd
                 MedianFilterSquare3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterSquare3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, size_t step> SIMD_INLINE void LoadNoseRhomb5x5(const uint8_t* y[5], size_t offset, __m128i a[13])
         {
@@ -351,7 +358,10 @@ namespace Simd
                 MedianFilterRhomb5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterRhomb5x5<false>(src, srcStride, width, height, channelCount, dst, dstStride);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align, size_t step> SIMD_INLINE void LoadNoseSquare5x5(const uint8_t* y[5], size_t offset, __m128i a[25])
         {
@@ -647,7 +657,8 @@ namespace Simd
                 MedianFilterSquare5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterSquare5x5<false>(src, srcStride, width, height, channelCount, dst, dstStride);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

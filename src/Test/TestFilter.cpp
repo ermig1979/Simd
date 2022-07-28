@@ -97,11 +97,6 @@ namespace Test
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
             result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MeanFilter3x3), FUNC_C(SimdMeanFilter3x3));
@@ -136,9 +131,9 @@ namespace Test
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MedianFilterRhomb3x3), FUNC_C(SimdMedianFilterRhomb3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -170,9 +165,9 @@ namespace Test
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 2 >= Simd::Sse2::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 2 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MedianFilterRhomb5x5), FUNC_C(SimdMedianFilterRhomb5x5));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -204,9 +199,9 @@ namespace Test
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MedianFilterSquare3x3), FUNC_C(SimdMedianFilterSquare3x3));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -238,9 +233,9 @@ namespace Test
 
         result = result && ColorFilterAutoTest(FUNC_C(Simd::Base::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 2 >= Simd::Sse2::A)
-            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse2::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 2 >= Simd::Sse41::A)
+            result = result && ColorFilterAutoTest(FUNC_C(Simd::Sse41::MedianFilterSquare5x5), FUNC_C(SimdMedianFilterSquare5x5));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -395,9 +390,9 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Base::LbpEstimate), FUNC_G(SimdLbpEstimate));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 2 >= Simd::Sse2::A)
-            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sse2::LbpEstimate), FUNC_G(SimdLbpEstimate));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W - 2 >= Simd::Sse41::A)
+            result = result && GrayFilterAutoTest(View::Gray8, FUNC_G(Simd::Sse41::LbpEstimate), FUNC_G(SimdLbpEstimate));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -622,11 +617,6 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::Laplace), FUNC_G(SimdLaplace));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::Laplace), FUNC_G(SimdLaplace));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)

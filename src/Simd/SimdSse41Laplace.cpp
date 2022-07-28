@@ -25,6 +25,7 @@
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -94,7 +95,10 @@ namespace Simd
                 Laplace<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 Laplace<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         void LaplaceAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
@@ -104,7 +108,10 @@ namespace Simd
                 Laplace<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 Laplace<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void LaplaceAbsSum(__m128i a[3][3], __m128i & sum)
         {
@@ -179,6 +186,7 @@ namespace Simd
                 LaplaceAbsSum<true>(src, srcStride, width, height, sum);
             else
                 LaplaceAbsSum<false>(src, srcStride, width, height, sum);
+            Sse2::Empty();
         }
     }
 #endif
