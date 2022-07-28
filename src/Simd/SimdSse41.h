@@ -366,6 +366,14 @@ namespace Simd
 
         void NeuralUpdateWeights(const float* x, size_t size, const float* a, const float* b, float* d, float* w);
 
+        void OperationBinary8u(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride, SimdOperationBinary8uType type);
+
+        void OperationBinary16i(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            size_t width, size_t height, uint8_t* dst, size_t dstStride, SimdOperationBinary16iType type);
+
+        void VectorProduct(const uint8_t* vertical, const uint8_t* horizontal, uint8_t* dst, size_t stride, size_t width, size_t height);
+
         void RgbaToGray(const uint8_t* rgba, size_t width, size_t height, size_t rgbaStride, uint8_t* gray, size_t grayStride);
 
         void ReduceColor2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
@@ -374,8 +382,14 @@ namespace Simd
         void ReduceGray2x2(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
 
+        void ReduceGray3x3(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
+
         void ReduceGray4x4(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
             uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
+
+        void ReduceGray5x5(const uint8_t* src, size_t srcWidth, size_t srcHeight, size_t srcStride,
+            uint8_t* dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
 
         void Reorder16bit(const uint8_t* src, size_t size, uint8_t* dst);
 

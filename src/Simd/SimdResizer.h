@@ -259,50 +259,6 @@ namespace Simd
         void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
-    {
-        class ResizerByteBilinear : public Base::ResizerByteBilinear
-        {
-        protected:
-            Array16i _ax;
-            Array8u _bx[2];
-
-            void EstimateParams();
-            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        public:
-            ResizerByteBilinear(const ResParam & param);
-
-            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        };
-
-        //---------------------------------------------------------------------------------------------
-
-        class ResizerFloatBilinear : public Base::ResizerFloatBilinear
-        {
-            virtual void Run(const float * src, size_t srcStride, float * dst, size_t dstStride);
-        public:
-            ResizerFloatBilinear(const ResParam & param);
-        };
-
-        //---------------------------------------------------------------------------------------------
-
-        class ResizerByteArea1x1 : public Base::ResizerByteArea1x1
-        {
-        protected:
-            template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        public:
-            ResizerByteArea1x1(const ResParam & param);
-
-            virtual void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);
-        };
-
-        //---------------------------------------------------------------------------------------------
-
-        void * ResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    }
-#endif //SIMD_SSE2_ENABLE 
-
 #ifdef SIMD_SSE41_ENABLE    
     namespace Sse41
     {
@@ -330,10 +286,11 @@ namespace Simd
 
         //---------------------------------------------------------------------------------------------
         
-        class ResizerByteBilinear : public Sse2::ResizerByteBilinear
+        class ResizerByteBilinear : public Base::ResizerByteBilinear
         {
         protected:
             Array8u _ax;
+            Array8u _bx[2];
             size_t _blocks;
             struct Idx
             {
@@ -387,7 +344,7 @@ namespace Simd
 
         //---------------------------------------------------------------------------------------------
 
-        class ResizerByteArea1x1 : public Sse2::ResizerByteArea1x1
+        class ResizerByteArea1x1 : public Base::ResizerByteArea1x1
         {
         protected:
             template<size_t N> void Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride);

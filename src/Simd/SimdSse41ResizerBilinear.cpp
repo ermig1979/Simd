@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -32,7 +33,7 @@ namespace Simd
     namespace Sse41
     {
         ResizerByteBilinear::ResizerByteBilinear(const ResParam& param)
-            : Sse2::ResizerByteBilinear(param)
+            : Base::ResizerByteBilinear(param)
             , _blocks(0)
         {
         }
@@ -330,6 +331,7 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -585,6 +587,7 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
     }
 #endif//SIMD_SSE41_ENABLE

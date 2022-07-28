@@ -59,6 +59,7 @@
  <li>External buffer reading overflow in class SynetMergedConvolution32fBf16Dc.</li>
  <li>FP32 overflow in SSE2, AVX2, AVX-512BW, NEON optimizations of function Tanh.</li>
  <li>Error in function Base::SynetConvolution32fGemmNN::ImgToCol.</li>
+ <li>Error in SSE4.1, AVX2 optimizations of class ResizerByteArea2x2.</li>
 </ul>
 <h5>Replacing</h5>
 <ul>
@@ -163,6 +164,22 @@
  <li>Replace SSE2 optimizations to SSE4.1 for function NeuralRoughSigmoid2.</li>
  <li>Replace SSE2 optimizations to SSE4.1 for function NeuralRoughTanh.</li>
  <li>Replace SSE2 optimizations to SSE4.1 for function NeuralUpdateWeights.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function OperationBinary8u.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function OperationBinary16i.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function VectorProduct.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ReduceColor2x2.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ReduceGray2x2.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ReduceGray3x3.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ReduceGray4x4.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ReduceGray5x5.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function Reorder16bit.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function Reorder32bit.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function Reorder64bit.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ResizeBilinear.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for function ResizerInit.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for class ResizerByteBilinear.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for class ResizerFloatBilinear.</li>
+ <li>Replace SSE2 optimizations to SSE4.1 for class ResizerByteArea1x1.</li>
 </ul>
 
 <h4>Test framework</h4>

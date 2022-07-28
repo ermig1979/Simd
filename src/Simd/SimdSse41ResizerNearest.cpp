@@ -25,9 +25,8 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
-//#include "Simd/SimdSet.h"
-//#include "Simd/SimdUpdate.h"
 #include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -136,6 +135,7 @@ namespace Simd
                 Resize12(src, srcStride, dst, dstStride);
             else
                 Base::ResizerNearest::Run(src, srcStride, dst, dstStride);
+            Sse2::Empty();
         }
     }
 #endif//SIMD_SSE41_ENABLE

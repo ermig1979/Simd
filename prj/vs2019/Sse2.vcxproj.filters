@@ -1,21 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Laplace.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Lbp.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2MeanFilter3x3.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2MedianFilter.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Neural.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Operation.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
@@ -140,9 +125,6 @@
       <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2ResizerBilinear.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2NeuralConvolution.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
   </ItemGroup>

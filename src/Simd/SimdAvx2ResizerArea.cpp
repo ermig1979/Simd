@@ -225,9 +225,9 @@ namespace Simd
         {
             uint8_t buffer[3 * A];
             _mm256_storeu_si256((__m256i*)(buffer + 00), _mm256_loadu_si256((__m256i*)(ptr + tail - 48)));
-            _mm256_storeu_si256((__m256i*)(buffer + 16), LoadAfterLast<false, 3>(ptr + tail - 32));
+            _mm256_storeu_si256((__m256i*)(buffer + 19), LoadAfterLast<false, 3>(ptr + tail - 32));
             val[0] = _mm256_loadu_si256((__m256i*)(buffer + 48 - tail));
-            val[1] = _mm256_loadu_si256((__m256i*)(buffer + 61 - tail));
+            val[1] = _mm256_loadu_si256((__m256i*)(buffer + 64 - tail));
         }
 
         template<UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdateBgr(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t val, int32_t* dst)
@@ -262,8 +262,8 @@ namespace Simd
             {
                 size_t tail = size - i;
                 __m256i s[4];
-                SaveLoadTailBgr2x2(src0, tail, s + 0);
-                SaveLoadTailBgr2x2(src1, tail, s + 2);
+                SaveLoadTailBgr2x2(src0 + i, tail, s + 0);
+                SaveLoadTailBgr2x2(src1 + i, tail, s + 2);
                 __m256i s0 = _mm256_add_epi16(
                     _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(s[0], K32_PRM0), K8_SHFL), K8_01),
                     _mm256_maddubs_epi16(_mm256_shuffle_epi8(_mm256_permutevar8x32_epi32(s[2], K32_PRM0), K8_SHFL), K8_01));
@@ -275,7 +275,7 @@ namespace Simd
                 Update<update, false>(dst + 0 * F, _mm256_madd_epi16(_mm256_cvtepi16_epi32(_mm256_castsi256_si128(d0)), _val));
                 Update<update, false>(dst + 1 * F, _mm256_madd_epi16(_mm256_cvtepi16_epi32(_mm256_extracti128_si256(_mm256_or_si256(d0, d2), 1)), _val));
                 Update<update, false>(dst + 2 * F, _mm256_madd_epi16(_mm256_cvtepi16_epi32(_mm256_castsi256_si128(d2)), _val));
-            }
+            } 
         }
 
         template<> SIMD_INLINE void ResizerByteArea2x2RowSum<3>(const uint8_t* src, size_t stride, size_t count, size_t size, int32_t curr, int32_t zero, int32_t next, bool tail, int32_t* dst)

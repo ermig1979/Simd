@@ -182,9 +182,9 @@ namespace Test
 
         result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Base::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sse2::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && OperationBinary8uAutoTest(FUNC_OB8U(Simd::Sse41::OperationBinary8u), FUNC_OB8U(SimdOperationBinary8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -254,9 +254,9 @@ namespace Test
 
         result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Base::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Sse2::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && OperationBinary16iAutoTest(FUNC_OB16I(Simd::Sse41::OperationBinary16i), FUNC_OB16I(SimdOperationBinary16i));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -322,9 +322,9 @@ namespace Test
 
         result = result && VectorProductAutoTest(ARGS_VP(Simd::Base::VectorProduct), ARGS_VP(SimdVectorProduct));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && VectorProductAutoTest(ARGS_VP(Simd::Sse2::VectorProduct), ARGS_VP(SimdVectorProduct));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && VectorProductAutoTest(ARGS_VP(Simd::Sse41::VectorProduct), ARGS_VP(SimdVectorProduct));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

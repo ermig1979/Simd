@@ -78,6 +78,8 @@ namespace Test
         View d1(width, height, format, NULL, TEST_ALIGN(width));
         View d2(width, height, format, NULL, TEST_ALIGN(width));
 
+        TEST_ALIGN(SIMD_ALIGN);
+
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s, d1));
 
         TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s, d2));
@@ -107,11 +109,6 @@ namespace Test
         bool result = true;
 
         result = result && ResizeAutoTest(FUNC_RB(Simd::Base::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && ResizeAutoTest(FUNC_RB(Simd::Sse2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -216,7 +213,7 @@ namespace Test
 #define FUNC_RS(function) \
     FuncRS(function, std::string(#function))
 
-#define TEST_RESIZE_REAL_IMAGE
+//#define TEST_RESIZE_REAL_IMAGE
 
     bool ResizerAutoTest(SimdResizeMethodType method, SimdResizeChannelType type, size_t channels, size_t srcW, size_t srcH, size_t dstW, size_t dstH, FuncRS f1, FuncRS f2)
     {
@@ -274,8 +271,13 @@ namespace Test
         View dst2(dstW, dstH, format, NULL, TEST_ALIGN(dstW));
         if (format == View::Int16)
         {
-            Simd::Fill(dst1, 0);
-            Simd::Fill(dst2, 0);
+            Simd::FillPixel(dst1, uint16_t(0x0001));
+            Simd::FillPixel(dst1, uint16_t(0x0002));
+        }
+        else
+        {
+            Simd::Fill(dst1, 0x01);
+            Simd::Fill(dst2, 0x02);
         }
 
         TEST_ALIGN(SIMD_ALIGN);
@@ -317,9 +319,9 @@ namespace Test
     {
         bool result = true;
 
-        result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
-        result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
+        //result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
 
@@ -340,14 +342,14 @@ namespace Test
         bool result = true;
 
 #if !defined(__aarch64__) || 1  
-        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, /*SimdResizeMethodBicubic,  SimdResizeMethodArea, SimdResizeMethodAreaFast*/ };
+        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBicubic,  SimdResizeMethodArea, SimdResizeMethodAreaFast };
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 3, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
-            if (methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast)// || 1)
+            if (methods[m] == SimdResizeMethodBicubic || methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast)
                 continue;
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 2, f1, f2);
@@ -366,11 +368,6 @@ namespace Test
         bool result = true;
 
         result = result && ResizerAutoTest(FUNC_RS(Simd::Base::ResizerInit), FUNC_RS(SimdResizerInit));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && ResizerAutoTest(FUNC_RS(Simd::Sse2::ResizerInit), FUNC_RS(SimdResizerInit));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -497,11 +494,6 @@ namespace Test
         bool result = true;
 
         result = result && ResizeSpecialTest(FUNC_RB(Simd::Base::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && ResizeSpecialTest(FUNC_RB(Simd::Sse2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
-#endif
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

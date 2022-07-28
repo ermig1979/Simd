@@ -24,11 +24,12 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdAlphaBlending.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template <SimdOperationBinary8uType type> SIMD_INLINE __m128i OperationBinary8u(const __m128i & a, const __m128i & b);
 
@@ -127,7 +128,10 @@ namespace Simd
                 OperationBinary8u<true>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
             else
                 OperationBinary8u<false>(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <SimdOperationBinary16iType type> SIMD_INLINE __m128i OperationBinary16i(const __m128i & a, const __m128i & b);
 
@@ -191,7 +195,10 @@ namespace Simd
                 OperationBinary16i<true>(a, aStride, b, bStride, width, height, dst, dstStride, type);
             else
                 OperationBinary16i<false>(a, aStride, b, bStride, width, height, dst, dstStride, type);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void VectorProduct(const __m128i & vertical, const uint8_t * horizontal, uint8_t * dst)
         {
@@ -225,7 +232,8 @@ namespace Simd
                 VectorProduct<true>(vertical, horizontal, dst, stride, width, height);
             else
                 VectorProduct<false>(vertical, horizontal, dst, stride, width, height);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

@@ -27,6 +27,7 @@
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -34,7 +35,7 @@ namespace Simd
     namespace Sse41
     {
         ResizerByteArea1x1::ResizerByteArea1x1(const ResParam & param)
-            : Sse2::ResizerByteArea1x1(param)
+            : Base::ResizerByteArea1x1(param)
         {
         }
 
@@ -148,6 +149,7 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------------------------------
@@ -221,11 +223,11 @@ namespace Simd
 
         SIMD_INLINE void SaveLoadTailBgr2x2(const uint8_t* ptr, size_t tail, __m128i * val)
         {
-            uint8_t buffer[3 * A];
+            uint8_t buffer[3 * A] = { 0 };
             _mm_storeu_si128((__m128i*)(buffer + 0), _mm_loadu_si128((__m128i*)(ptr + tail - 24)));
-            _mm_storeu_si128((__m128i*)(buffer + 8), LoadAfterLast<3>(_mm_loadu_si128((__m128i*)(ptr + tail - 16))));
+            _mm_storeu_si128((__m128i*)(buffer + 11), LoadAfterLast<3>(_mm_loadu_si128((__m128i*)(ptr + tail - 16))));
             val[0] = _mm_loadu_si128((__m128i*)(buffer + 24 - tail));
-            val[1] = _mm_loadu_si128((__m128i*)(buffer + 29 - tail));
+            val[1] = _mm_loadu_si128((__m128i*)(buffer + 32 - tail));
         }
 
         template<UpdateType update> SIMD_INLINE void ResizerByteArea2x2RowUpdateBgr(const uint8_t* src0, const uint8_t* src1, size_t size, int32_t val, int32_t* dst)
@@ -253,8 +255,8 @@ namespace Simd
             {
                 size_t tail = size - i;
                 __m128i s[4];
-                SaveLoadTailBgr2x2(src0, tail, s + 0);
-                SaveLoadTailBgr2x2(src1, tail, s + 2);
+                SaveLoadTailBgr2x2(src0 + i, tail, s + 0);
+                SaveLoadTailBgr2x2(src1 + i, tail, s + 2);
                 __m128i s0 = _mm_add_epi16(
                     _mm_maddubs_epi16(_mm_shuffle_epi8(s[0], K8_BGR0), K8_01), 
                     _mm_maddubs_epi16(_mm_shuffle_epi8(s[2], K8_BGR0), K8_01));
@@ -311,8 +313,9 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 }
 

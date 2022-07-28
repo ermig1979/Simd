@@ -4108,9 +4108,9 @@ SIMD_API void SimdOperationBinary8u(const uint8_t * a, size_t aStride, const uin
         Avx2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width*channelCount >= Sse2::A)
-        Sse2::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width*channelCount >= Sse41::A)
+        Sse41::OperationBinary8u(a, aStride, b, bStride, width, height, channelCount, dst, dstStride, type);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4139,9 +4139,9 @@ SIMD_API void SimdOperationBinary16i(const uint8_t * a, size_t aStride, const ui
         Avx2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::HA)
-        Sse2::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::HA)
+        Sse41::OperationBinary16i(a, aStride, b, bStride, width, height, dst, dstStride, type);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4169,9 +4169,9 @@ SIMD_API void SimdVectorProduct(const uint8_t * vertical, const uint8_t * horizo
         Avx2::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::VectorProduct(vertical, horizontal, dst, stride, width, height);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::VectorProduct(vertical, horizontal, dst, stride, width, height);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4205,11 +4205,6 @@ SIMD_API void SimdReduceColor2x2(const uint8_t *src, size_t srcWidth, size_t src
         Sse41::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && srcWidth >= Sse2::DA)
-        Sse2::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
-    else
-#endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable && srcWidth >= Neon::DA)
         Neon::ReduceColor2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
@@ -4234,11 +4229,6 @@ SIMD_API void SimdReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcH
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && srcWidth >= Sse41::DA)
         Sse41::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && srcWidth >= Sse2::DA)
-        Sse2::ReduceGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4267,9 +4257,9 @@ SIMD_API void SimdReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcH
         Avx2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && srcWidth >= Sse2::A)
-        Sse2::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && srcWidth >= Sse41::A)
+        Sse41::ReduceGray3x3(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4303,11 +4293,6 @@ SIMD_API void SimdReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcH
         Sse41::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && srcWidth > Sse2::A)
-        Sse2::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && srcWidth > Vmx::DA)
         Vmx::ReduceGray4x4(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
@@ -4334,9 +4319,9 @@ SIMD_API void SimdReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcH
         Avx2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && srcWidth >= Sse2::A)
-        Sse2::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && srcWidth >= Sse41::A)
+        Sse41::ReduceGray5x5(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, compensation);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4369,11 +4354,6 @@ SIMD_API void SimdReorder16bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder16bit(src, size, dst);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && size >= Sse2::A)
-        Sse2::Reorder16bit(src, size, dst);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && size >= Vmx::A)
         Vmx::Reorder16bit(src, size, dst);
@@ -4404,11 +4384,6 @@ SIMD_API void SimdReorder32bit(const uint8_t * src, size_t size, uint8_t * dst)
         Sse41::Reorder32bit(src, size, dst);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && size >= Sse2::A)
-        Sse2::Reorder32bit(src, size, dst);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && size >= Vmx::A)
         Vmx::Reorder32bit(src, size, dst);
@@ -4437,11 +4412,6 @@ SIMD_API void SimdReorder64bit(const uint8_t * src, size_t size, uint8_t * dst)
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && size >= Sse41::A)
         Sse41::Reorder64bit(src, size, dst);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && size >= Sse2::A)
-        Sse2::Reorder64bit(src, size, dst);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4475,11 +4445,6 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
         Sse41::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && dstWidth >= Sse2::A)
-        Sse2::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && dstWidth >= Vmx::A)
         Vmx::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
@@ -4496,7 +4461,7 @@ SIMD_API void SimdResizeBilinear(const uint8_t *src, size_t srcWidth, size_t src
 SIMD_API void * SimdResizerInit(size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method)
 {
     typedef void*(*SimdResizerInitPtr) (size_t srcX, size_t srcY, size_t dstX, size_t dstY, size_t channels, SimdResizeChannelType type, SimdResizeMethodType method);
-    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC6(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_SSE2_FUNC, SIMD_NEON_FUNC);
+    const static SimdResizerInitPtr simdResizerInit = SIMD_FUNC5(ResizerInit, SIMD_AVX512BW_FUNC, SIMD_AVX2_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_NEON_FUNC);
 
     return simdResizerInit(srcX, srcY, dstX, dstY, channels, type, method);
 }

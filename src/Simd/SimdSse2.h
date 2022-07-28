@@ -33,38 +33,6 @@ namespace Simd
     {
         void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
 
-        void OperationBinary8u(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-            size_t width, size_t height, size_t channelCount, uint8_t * dst, size_t dstStride, SimdOperationBinary8uType type);
-
-        void OperationBinary16i(const uint8_t * a, size_t aStride, const uint8_t * b, size_t bStride,
-            size_t width, size_t height, uint8_t * dst, size_t dstStride, SimdOperationBinary16iType type);
-
-        void VectorProduct(const uint8_t * vertical, const uint8_t * horizontal, uint8_t * dst, size_t stride, size_t width, size_t height);
-
-        void ReduceColor2x2(const uint8_t * src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t * dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
-
-        void ReduceGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-        void ReduceGray3x3(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
-
-        void ReduceGray4x4(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
-        void ReduceGray5x5(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, int compensation);
-
-        void Reorder16bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void Reorder32bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void Reorder64bit(const uint8_t * src, size_t size, uint8_t * dst);
-
-        void ResizeBilinear(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride, size_t channelCount);
-
         void SegmentationChangeIndex(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
         void SegmentationFillSingleHoles(uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index);

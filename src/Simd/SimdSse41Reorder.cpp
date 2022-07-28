@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -54,7 +55,10 @@ namespace Simd
                 Reorder16bit<true>(src, size, dst);
             else
                 Reorder16bit<false>(src, size, dst);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K8_SHUFFLE_REORDER_32 = SIMD_MM_SETR_EPI8(0x3, 0x2, 0x1, 0x0, 0x7, 0x6, 0x5, 0x4, 0xB, 0xA, 0x9, 0x8, 0xF, 0xE, 0xD, 0xC);
 
@@ -81,7 +85,10 @@ namespace Simd
                 Reorder32bit<true>(src, size, dst);
             else
                 Reorder32bit<false>(src, size, dst);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         const __m128i K8_SHUFFLE_REORDER_64 = SIMD_MM_SETR_EPI8(0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0, 0xF, 0xE, 0xD, 0xC, 0xB, 0xA, 0x9, 0x8);
 
@@ -108,6 +115,7 @@ namespace Simd
                 Reorder64bit<true>(src, size, dst);
             else
                 Reorder64bit<false>(src, size, dst);
+            Sse2::Empty();
         }
     }
 #endif

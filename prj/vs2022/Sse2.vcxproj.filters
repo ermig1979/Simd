@@ -1,33 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Operation.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Reduce.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray2x2.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray3x3.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray4x4.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ReduceGray5x5.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Reorder.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ResizeBilinear.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2Resizer.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Segmentation.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
@@ -119,12 +92,6 @@
       <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fDirectNhwc.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerArea.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2ResizerBilinear.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
   </ItemGroup>

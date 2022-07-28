@@ -26,6 +26,7 @@
 #include "Simd/SimdResizer.h"
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdCopyPixel.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -405,6 +406,7 @@ namespace Simd
             default:
                 assert(0);
             }
+            Sse2::Empty();
         }
     }
 #endif//SIMD_SSE41_ENABLE

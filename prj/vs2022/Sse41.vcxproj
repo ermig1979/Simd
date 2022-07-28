@@ -61,9 +61,12 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41MedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Neural.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41NeuralConvolution.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Operation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Reduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray2x2.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray4x4.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ReduceGray5x5.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Reorder.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ResizeBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Resizer.cpp" />
