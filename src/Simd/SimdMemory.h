@@ -87,18 +87,39 @@ namespace Simd
         return ptr == AlignLo(ptr, align);
     }
 
-    SIMD_INLINE void * Allocate(size_t size, size_t align = SIMD_ALIGN)
+    //---------------------------------------------------------------------------------------------
+
+    template<class T> T* Allocate(uint8_t*& buffer, size_t size, size_t align = SIMD_ALIGN)
+    {
+        T* ptr = (T*)buffer;
+        buffer = buffer + AlignHi(size * sizeof(T), align);
+        return ptr;
+    }
+
+    SIMD_INLINE void SetGap(uint8_t*& buffer, size_t size = SIMD_ALIGN)
+    {
+        memset(buffer, 0, size);
+        buffer += size;
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+#ifdef SIMD_NO_MANS_LAND
+    const uint8_t NO_MANS_LAND_WATERMARK = 0x55;
+#endif
+
+    SIMD_INLINE void* Allocate(size_t size, size_t align = SIMD_ALIGN)
     {
 #ifdef SIMD_NO_MANS_LAND
         size += 2 * SIMD_NO_MANS_LAND;
 #endif
-        void * ptr = NULL;
+        void* ptr = NULL;
 #if defined(_MSC_VER) 
         ptr = _aligned_malloc(size, align);
 #elif defined(__MINGW32__) || defined(__MINGW64__)
         ptr = __mingw_aligned_malloc(size, align);
 #elif defined(__GNUC__)
-        align = AlignHi(align, sizeof(void *));
+        align = AlignHi(align, sizeof(void*));
         size = AlignHi(size, align);
         int result = ::posix_memalign(&ptr, align, size);
         if (result != 0)
@@ -116,9 +137,10 @@ namespace Simd
 #ifdef SIMD_NO_MANS_LAND
         if (ptr)
         {
-#if !defined(NDEBUG) 
-            memset(ptr, 0x55, SIMD_NO_MANS_LAND);
-            memset((char*)ptr + size - SIMD_NO_MANS_LAND, 0x55, SIMD_NO_MANS_LAND);
+#if !defined(NDEBUG) && SIMD_NO_MANS_LAND >= 16
+            * (size_t*)ptr = size - 2 * SIMD_NO_MANS_LAND;
+            memset((char*)ptr + sizeof(size_t), NO_MANS_LAND_WATERMARK, SIMD_NO_MANS_LAND - sizeof(size_t));
+            memset((char*)ptr + size - SIMD_NO_MANS_LAND, NO_MANS_LAND_WATERMARK, SIMD_NO_MANS_LAND);
 #endif
             ptr = (char*)ptr + SIMD_NO_MANS_LAND;
         }
@@ -126,24 +148,21 @@ namespace Simd
         return ptr;
     }
 
-    template<class T> T* Allocate(uint8_t*& buffer, size_t size, size_t align = SIMD_ALIGN)
-    {
-        T* ptr = (T*)buffer;
-        buffer = buffer + AlignHi(size * sizeof(T), align);
-        return ptr;
-    }
-
-    SIMD_INLINE void SetGap(uint8_t*& buffer, size_t size = SIMD_ALIGN)
-    {
-        memset(buffer, 0, size);
-        buffer += size;
-    }
-
     SIMD_INLINE void Free(void * ptr)
     {
 #ifdef SIMD_NO_MANS_LAND
         if (ptr)
+        {
             ptr = (char*)ptr - SIMD_NO_MANS_LAND;
+#if !defined(NDEBUG) && SIMD_NO_MANS_LAND >= 16
+            size_t size = *(size_t*)ptr;
+            char* nose = (char*)ptr + sizeof(size_t), *tail = (char*)ptr + SIMD_NO_MANS_LAND + size;
+            for (size_t i = 0, n = SIMD_NO_MANS_LAND - sizeof(size_t); i < n; ++i)
+                assert(nose[i] == NO_MANS_LAND_WATERMARK);
+            for (size_t i = 0, n = SIMD_NO_MANS_LAND; i < n; ++i)
+                assert(tail[i] == NO_MANS_LAND_WATERMARK);
+#endif  
+        }
 #endif
 #if defined(_MSC_VER) 
         _aligned_free(ptr);
