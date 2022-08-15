@@ -265,14 +265,14 @@ namespace Simd
         class ResizerNearest : public Base::ResizerNearest
         {
         protected:
-            size_t _blocks;
+            size_t _blocks, _tails;
             struct IndexShuffle16x1
             {
                 int32_t src, dst;
                 uint8_t shuffle[A];
             };
             Array<IndexShuffle16x1> _ix16x1;
-            __m128i _tail16x1;
+            Array128i _tail16x1;
 
             size_t BlockCountMax(size_t align);
             void EstimateParams();

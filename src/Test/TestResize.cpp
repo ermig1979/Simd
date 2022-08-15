@@ -319,20 +319,20 @@ namespace Test
     {
         bool result = true;
 
-        //result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 124, 93, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 249, 187, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 499, 374, 319, 239, f1, f2);
         result = result && ResizerAutoTest(method, type, channels, 999, 749, 319, 239, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1999, 1499, 319, 239, f1, f2);
 
-        //result = result && ResizerAutoTest(method, type, channels, 1919, 1081, 299, 168, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 299, 168, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1919, 1081, 299, 168, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 299, 168, f1, f2);
 
-        //result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 480, 270, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 240, 135, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 480, 270, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 1920, 1080, 240, 135, f1, f2);
 
-        //result = result && ResizerAutoTest(method, type, channels, 960, 540, 480, 270, f1, f2);
-        //result = result && ResizerAutoTest(method, type, channels, 960, 540, 240, 135, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 960, 540, 480, 270, f1, f2);
+        result = result && ResizerAutoTest(method, type, channels, 960, 540, 240, 135, f1, f2);
 
         return result;
     }
@@ -342,14 +342,14 @@ namespace Test
         bool result = true;
 
 #if !defined(__aarch64__) || 1  
-        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, /*SimdResizeMethodBilinear, SimdResizeMethodBicubic,  SimdResizeMethodArea, SimdResizeMethodAreaFast*/ };
+        std::vector<SimdResizeMethodType> methods = { SimdResizeMethodNearest, SimdResizeMethodBilinear, SimdResizeMethodBicubic, SimdResizeMethodArea, SimdResizeMethodAreaFast };
         for (size_t m = 0; m < methods.size(); ++m)
         {
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 2, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 3, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelByte, 4, f1, f2);
-            if (methods[m] == SimdResizeMethodBicubic || methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast || 1)
+            if (methods[m] == SimdResizeMethodBicubic || methods[m] == SimdResizeMethodArea || methods[m] == SimdResizeMethodAreaFast)
                 continue;
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 1, f1, f2);
             result = result && ResizerAutoTest(methods[m], SimdResizeChannelShort, 2, f1, f2);

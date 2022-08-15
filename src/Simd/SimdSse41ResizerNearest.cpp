@@ -57,8 +57,11 @@ namespace Simd
             float scale = (float)_param.srcW / _param.dstW;
             if (_blocks)
             {
+                _tails = 0;
                 _ix16x1.Resize(_blocks);
-                int block = 0, tail = 0;
+                _tail16x1.Resize((size_t)::ceil(A * scale / pixelSize));
+                size_t dstRowSize = _param.dstW * pixelSize;
+                int block = 0;
                 _ix16x1[0].src = 0;
                 _ix16x1[0].dst = 0;
                 for (int dstIndex = 0; dstIndex < (int)_param.dstW; ++dstIndex)
@@ -71,36 +74,41 @@ namespace Simd
                         block++;
                         _ix16x1[block].src = srcIndex * (int)pixelSize;
                         _ix16x1[block].dst = dstIndex * (int)pixelSize;
+                        if (_ix16x1[block].dst > dstRowSize - A)
+                        {
+                            _tail16x1[_tails] = LeftNotZero8i(dstRowSize - _ix16x1[block].dst);
+                            _tails++;
+                        }
                         dst = 0;
                         src = srcIndex * (int)pixelSize - _ix16x1[block].src;
                     }
                     for(size_t i = 0; i < pixelSize; ++i)
                         _ix16x1[block].shuffle[dst + i] = uint8_t(src + i);
-                    tail = dst + (int)pixelSize;
                 }
-                _tail16x1 = LeftNotZero8i(tail);
                 _blocks = block + 1;
             }
         }
 
         void ResizerNearest::Shuffle16x1(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            size_t blocks = _blocks - 1;
+            size_t body = _blocks - _tails;
             for (size_t dy = 0; dy < _param.dstH; dy++)
             {
                 const uint8_t* srcRow = src + _iy[dy] * srcStride;
-                for (size_t i = 0; i < blocks; ++i)
+                size_t i = 0, t = 0;
+                for (; i < body; ++i)
                 {
                    const IndexShuffle16x1& index = _ix16x1[i];
                     __m128i _src = _mm_loadu_si128((__m128i*)(srcRow + index.src));
                     __m128i _shuffle = _mm_loadu_si128((__m128i*) & index.shuffle);
                     _mm_storeu_si128((__m128i*)(dst + index.dst), _mm_shuffle_epi8(_src, _shuffle));
                 }
+                for (; i < _blocks; ++i, t++)
                 {
-                    const IndexShuffle16x1& index = _ix16x1[blocks];
+                    const IndexShuffle16x1& index = _ix16x1[i];
                     __m128i _src = _mm_loadu_si128((__m128i*)(srcRow + index.src));
                     __m128i _shuffle = _mm_loadu_si128((__m128i*) & index.shuffle);
-                    StoreMasked<false>((__m128i*)(dst + index.dst), _mm_shuffle_epi8(_src, _shuffle), _tail16x1);
+                    StoreMasked<false>((__m128i*)(dst + index.dst), _mm_shuffle_epi8(_src, _shuffle), _tail16x1[t]);
                 }
                 dst += dstStride;
             }

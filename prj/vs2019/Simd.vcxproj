@@ -26,11 +26,12 @@
   <ItemGroup>
     <ClInclude Include="..\..\src\Simd\SimdAlignment.h" />
     <ClInclude Include="..\..\src\Simd\SimdAllocator.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdAmx.h" />
     <ClInclude Include="..\..\src\Simd\SimdArray.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx1.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx2.h" />
+    <ClInclude Include="..\..\src\Simd\SimdAvx512bf16.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512bw.h" />
-    <ClInclude Include="..\..\src\Simd\SimdAvx512f.h" />
     <ClInclude Include="..\..\src\Simd\SimdAvx512vnni.h" />
     <ClInclude Include="..\..\src\Simd\SimdBase.h" />
     <ClInclude Include="..\..\src\Simd\SimdConfig.h" />

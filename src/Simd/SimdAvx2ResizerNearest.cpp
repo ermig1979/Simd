@@ -86,7 +86,7 @@ namespace Simd
 
         void ResizerNearest::Gather3(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            size_t body = AlignLo(_param.dstW, 8);
+            size_t body = AlignLo(_param.dstW - 1, 8);
             size_t tail = _param.dstW - 8;
             for (size_t dy = 0; dy < _param.dstH; dy++)
             {

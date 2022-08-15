@@ -267,7 +267,7 @@ namespace Simd
         {
             assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4 / N;
-            size_t body = AlignLoAny(_param.dstW, step);
+            size_t body = AlignLoAny(_param.dstW - (N == 3 ? 1 : 0), step);
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += dstStride)
             {
                 size_t sy = _iy[dy];

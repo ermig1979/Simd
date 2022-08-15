@@ -118,6 +118,7 @@ namespace Simd
     namespace Sse2
     {
         typedef Array<__m128> Array128f;
+        typedef Array<__m128i> Array128i;
     }
 #endif
 

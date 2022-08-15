@@ -119,7 +119,7 @@ namespace Simd
                     alphas += 2 * _param.channels;
                 }
             }
-            size_t size = AlignHi(_param.dstW, _param.align)*_param.channels * 2;
+            size_t size = AlignHi(_param.dstW, _param.align)*_param.channels * 2 + SIMD_ALIGN;
             _bx[0].Resize(size, false, _param.align);
             _bx[1].Resize(size, false, _param.align);
         }
