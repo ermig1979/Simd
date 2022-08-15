@@ -454,6 +454,7 @@ namespace Test
         View Af(K, N, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Af, -1.0, 1.0);
         View Ai(K, N, View::Int16, NULL, TEST_ALIGN(K));
+        SimdFloat32ToFloat16(Af.Row<float>(0), K * N, Ai.Row<uint16_t>(0));
 
         Tensor32f norms1({ N });
         Tensor32f norms2({ N });
