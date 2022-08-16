@@ -499,7 +499,7 @@ namespace Simd
                 uint16_t shuffle[HA];
             };
             Array<IndexShuffle32x2> _ix32x2;
-            __mmask32 _tail32x2;
+            Array<__mmask32> _tail32x2;
 
             void EstimateParams();
             void Shuffle32x2(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride);

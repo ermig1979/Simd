@@ -130,7 +130,7 @@ namespace Simd
 
         template<size_t N> void ResizerByteArea1x1::Run(const uint8_t * src, size_t srcStride, uint8_t * dst, size_t dstStride)
         {
-            size_t dstW = _param.dstW, rowSize = _param.srcW*N, rowRest = dstStride - dstW * N;
+            size_t bodyW = _param.dstW - (N == 3 ? 1 : 0), rowSize = _param.srcW * N, rowRest = dstStride - _param.dstW * N;
             const int32_t * iy = _iy.data, *ix = _ix.data, *ay = _ay.data, *ax = _ax.data;
             int32_t ay0 = ay[0], ax0 = ax[0];
             size_t rowSizeA = AlignLo(rowSize, A);
@@ -140,10 +140,16 @@ namespace Simd
                 int32_t * buf = _by.data;
                 size_t yn = iy[dy + 1] - iy[dy];
                 ResizerByteArea1x1RowSum(src, srcStride, yn, rowSize, rowSizeA, ay[dy], ay0, ay[dy + 1], buf, tail), src += yn * srcStride;
-                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                size_t dx = 0;
+                for (; dx < bodyW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
                     Sse41::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                }
+                for (; dx < _param.dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    Base::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }
@@ -292,7 +298,7 @@ namespace Simd
 
         template<size_t N> void ResizerByteArea2x2::Run(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)
         {
-            size_t dstW = _param.dstW, rowSize = _param.srcW * N, rowRest = dstStride - dstW * N;
+            size_t bodyW = _param.dstW - (N == 3 ? 1 : 0), rowSize = _param.srcW * N, rowRest = dstStride - _param.dstW * N;
             const int32_t* iy = _iy.data, * ix = _ix.data, * ay = _ay.data, * ax = _ax.data;
             int32_t ay0 = ay[0], ax0 = ax[0];
             for (size_t dy = 0; dy < _param.dstH; dy++, dst += rowRest)
@@ -301,10 +307,16 @@ namespace Simd
                 size_t yn = (iy[dy + 1] - iy[dy]) * 2;
                 bool tail = (dy == _param.dstH - 1) && (_param.srcH & 1);
                 ResizerByteArea2x2RowSum<N>(src, srcStride, yn, rowSize, ay[dy], ay0, ay[dy + 1], tail, buf), src += yn * srcStride;
-                for (size_t dx = 0; dx < dstW; dx++, dst += N)
+                size_t dx = 0;
+                for (; dx < bodyW; dx++, dst += N)
                 {
                     size_t xn = ix[dx + 1] - ix[dx];
                     Sse41::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
+                }
+                for (; dx < _param.dstW; dx++, dst += N)
+                {
+                    size_t xn = ix[dx + 1] - ix[dx];
+                    Base::ResizerByteAreaResult<N>(buf, xn, ax[dx], ax0, ax[dx + 1], dst), buf += xn * N;
                 }
             }
         }

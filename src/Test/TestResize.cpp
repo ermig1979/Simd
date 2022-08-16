@@ -95,10 +95,10 @@ namespace Test
 
         for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
         {
-            result = result && ResizeAutoTest(ARGS_RB1(format, W/3, H/3, 3.3, f1, f2));
+            //result = result && ResizeAutoTest(ARGS_RB1(format, W/3, H/3, 3.3, f1, f2));
             //result = result && ResizeAutoTest(ARGS_RB1(format, W, H, 0.9, f1, f2));
-            //result = result && ResizeAutoTest(ARGS_RB1(format, W + O, H - O, 1.3, f1, f2));
-            //result = result && ResizeAutoTest(ARGS_RB1(format, W - O, H + O, 0.7, f1, f2));
+            result = result && ResizeAutoTest(ARGS_RB1(format, W + O, H - O, 1.3, f1, f2));
+            result = result && ResizeAutoTest(ARGS_RB1(format, W - O, H + O, 0.7, f1, f2));
         }
 
         return result;
@@ -111,17 +111,17 @@ namespace Test
         result = result && ResizeAutoTest(FUNC_RB(Simd::Base::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 
 #ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable)
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
             result = result && ResizeAutoTest(FUNC_RB(Simd::Sse41::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable)
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
             result = result && ResizeAutoTest(FUNC_RB(Simd::Avx2::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W >= Simd::Avx512bw::A)
             result = result && ResizeAutoTest(FUNC_RB(Simd::Avx512bw::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif 
 
@@ -131,7 +131,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable)
+        if (Simd::Neon::Enable && W >= Simd::Neon::A)
             result = result && ResizeAutoTest(FUNC_RB(Simd::Neon::ResizeBilinear), FUNC_RB(SimdResizeBilinear));
 #endif
 

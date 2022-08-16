@@ -314,7 +314,7 @@ namespace Simd
         {
             assert(_xn == 0 && _xt == _param.dstW);
             size_t step = 4;
-            size_t body = AlignLoAny(_param.dstW, step), tail = _param.dstW - body;
+            size_t body = AlignLoAny(_param.dstW - 1, step), tail = _param.dstW - body;
             __mmask8 srcMaskTail[5];
             srcMaskTail[0] = tail > 0 ? 0x7 : 0x0;
             srcMaskTail[1] = tail > 1 ? 0x7 : 0x0;
