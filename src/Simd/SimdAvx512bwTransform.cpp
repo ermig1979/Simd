@@ -300,10 +300,10 @@ namespace Simd
 
         template<> void TransformImageRotate180<3>(const uint8_t* src, ptrdiff_t srcStride, size_t width, size_t height, uint8_t* dst, ptrdiff_t dstStride)
         {
-            dst += (height - 1) * dstStride + (width - 16) * 3;
+            dst += (height - 1) * dstStride + width * 3 - 48;
             size_t width16 = AlignLo(width, 16);
-            size_t size = width * 3, size48 = width16 * 3, size192 = AlignLo(width, 64)* 3;
-            __mmask64 tail = TailMask64(size - size48), nose = NoseMask64(size - size48);
+            size_t size = width * 3, size48 = width16 * 3, size192 = AlignLo(width, 64) * 3;
+            __mmask64 tail = TailMask64(size - size48), nose = 0x0000FFFFFFFFFFFF & NoseMask64(size - size48 + 16);
             for (size_t row = 0; row < height; ++row)
             {
                 size_t offs = 0;
@@ -312,7 +312,7 @@ namespace Simd
                 for (; offs < size48; offs += 48)
                     Avx512bw::TransformImageMirror3x16(src + offs, dst - offs);
                 if (offs < size)
-                    Avx512bw::TransformImageMirror3x16(src + offs, dst - offs, tail);
+                    Avx512bw::TransformImageMirror3x16(src + offs, dst - offs, tail, nose);
                 src += srcStride;
                 dst -= dstStride;
             }

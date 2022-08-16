@@ -318,7 +318,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && (W / 5 + O >= Simd::Avx512bw::A))
             result = result && SynetSetInputAutoTest(FUNC_SI(Simd::Avx512bw::SynetSetInput), FUNC_SI(SimdSynetSetInput));
 #endif 
 
