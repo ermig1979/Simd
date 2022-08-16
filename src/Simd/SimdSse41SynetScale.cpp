@@ -297,7 +297,7 @@ namespace Simd
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c = 0;
-                    for (; c < channelsF; c += A)
+                    for (; c < channelsA; c += A)
                         ScaleNhwcA<align>(src, scale, shift, dst, c);
                     for (; c < channelsF; c += F)
                         ScaleNhwcF<align>(src, scale, shift, dst, c);
@@ -464,7 +464,7 @@ namespace Simd
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c = 0;
-                    for (; c < channelsF; c += A)
+                    for (; c < channelsA; c += A)
                         ScaleNhwcA<align>(src, scale, shift, _upper, dst, c);
                     for (; c < channelsF; c += F)
                         ScaleNhwcF<align>(src, scale, shift, _upper, dst, c);
