@@ -141,7 +141,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 1, View::Bgr24, FUNC(Simd::Avx512bw::Yuv422pToBgr), FUNC(SimdYuv422pToBgr));
 #endif 
 
@@ -175,7 +175,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Bgr24, FUNC(Simd::Avx512bw::Yuv420pToBgr), FUNC(SimdYuv420pToBgr));
 #endif 
 
@@ -267,7 +267,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Avx512bw::Yuv420pToHue), FUNC(SimdYuv420pToHue));
 #endif
 
@@ -330,7 +330,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 1, View::Rgb24, FUNC(Simd::Avx512bw::Yuv422pToRgb), FUNC(SimdYuv422pToRgb));
 #endif 
 
@@ -359,7 +359,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Rgb24, FUNC(Simd::Avx512bw::Yuv420pToRgb), FUNC(SimdYuv420pToRgb));
 #endif 
 
@@ -388,7 +388,7 @@ namespace Test
 #endif 
 
 #ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
+        if (Simd::Avx512bw::Enable && W > Simd::Avx512bw::DA)
             result = result && YuvToAnyAutoTest(2, 2, View::Uyvy16, FUNC(Simd::Avx512bw::Yuv420pToUyvy422), FUNC(SimdYuv420pToUyvy422));
 #endif 
 

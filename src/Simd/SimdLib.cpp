@@ -7237,7 +7237,7 @@ SIMD_API void SimdYuv420pToUyvy422(const uint8_t* y, size_t yStride, const uint8
     size_t width, size_t height, uint8_t* uyvy, size_t uyvyStride)
 {
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable)
+    if (Avx512bw::Enable && width >= Avx512bw::DA)
         Avx512bw::Yuv420pToUyvy422(y, yStride, u, uStride, v, vStride, width, height, uyvy, uyvyStride);
     else
 #endif
