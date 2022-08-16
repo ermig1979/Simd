@@ -527,7 +527,7 @@ namespace Simd
                     float _scale0 = scale0[c];
                     float _bias0 = bias0[c];
                     size_t s = 0;
-                    for (; s < aligned; ++s)
+                    for (; s < aligned; s += 4)
                     {
                         dst0[s + 0] = SynetFusedLayerForward9(src0[s + 0], _scale0, _bias0), dst1[s + 0] = src0[s + 0];
                         dst0[s + 1] = SynetFusedLayerForward9(src0[s + 1], _scale0, _bias0), dst1[s + 1] = src0[s + 1];
@@ -545,7 +545,7 @@ namespace Simd
                     float _scale1 = scale1[c];
                     float _bias1 = bias1[c];
                     size_t s = 0;
-                    for (; s < aligned; ++s)
+                    for (; s < aligned; s += 4)
                     {
                         dst0[s + 0] = SynetFusedLayerForward9(src1[s + 0], _scale1, _bias1), dst1[s + 0] = src1[s + 0];
                         dst0[s + 1] = SynetFusedLayerForward9(src1[s + 1], _scale1, _bias1), dst1[s + 1] = src1[s + 1];
@@ -566,7 +566,7 @@ namespace Simd
                     float _scale0 = scale0[c];
                     float _bias0 = bias0[c];
                     size_t s = 0;
-                    for (; s < aligned; ++s)
+                    for (; s < aligned; s += 4)
                     {
                         dst0[s + 0] = SynetFusedLayerForward9(src0[s + 0], _scale0, _bias0);
                         dst0[s + 1] = SynetFusedLayerForward9(src0[s + 1], _scale0, _bias0);
@@ -583,7 +583,7 @@ namespace Simd
                     float _scale1 = scale1[c];
                     float _bias1 = bias1[c];
                     size_t s = 0;
-                    for (; s < aligned; ++s)
+                    for (; s < aligned; s += 4)
                     {
                         dst0[s + 0] = SynetFusedLayerForward9(src1[s + 0], _scale1, _bias1);
                         dst0[s + 1] = SynetFusedLayerForward9(src1[s + 1], _scale1, _bias1);
@@ -609,7 +609,7 @@ namespace Simd
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c;
-                    for (c = 0; c < channels0; c += 4)
+                    for (c = 0; c < aligned0; c += 4)
                     {
                         dst0[c + 0] = SynetFusedLayerForward9(src0[c + 0], scale0[c + 0], bias0[c + 0]), dst1[c + 0] = src0[c + 0];
                         dst0[c + 1] = SynetFusedLayerForward9(src0[c + 1], scale0[c + 1], bias0[c + 1]), dst1[c + 1] = src0[c + 1];
@@ -621,7 +621,7 @@ namespace Simd
                     src0 += channels0;
                     dst0 += channels0;
                     dst1 += channels0;
-                    for (c = 0; c < channels1; c += 4)
+                    for (c = 0; c < aligned1; c += 4)
                     {
                         dst0[c + 0] = SynetFusedLayerForward9(src1[c + 0], scale1[c + 0], bias1[c + 0]), dst1[c + 0] = src1[c + 0];
                         dst0[c + 1] = SynetFusedLayerForward9(src1[c + 1], scale1[c + 1], bias1[c + 1]), dst1[c + 1] = src1[c + 1];
@@ -640,7 +640,7 @@ namespace Simd
                 for (size_t s = 0; s < spatial; ++s)
                 {
                     size_t c;
-                    for (c = 0; c < channels0; c += 4)
+                    for (c = 0; c < aligned0; c += 4)
                     {
                         dst0[c + 0] = SynetFusedLayerForward9(src0[c + 0], scale0[c + 0], bias0[c + 0]);
                         dst0[c + 1] = SynetFusedLayerForward9(src0[c + 1], scale0[c + 1], bias0[c + 1]);
@@ -651,7 +651,7 @@ namespace Simd
                         dst0[c] = SynetFusedLayerForward9(src0[c], scale0[c], bias0[c]);
                     src0 += channels0;
                     dst0 += channels0;
-                    for (c = 0; c < channels1; c += 4)
+                    for (c = 0; c < aligned1; c += 4)
                     {
                         dst0[c + 0] = SynetFusedLayerForward9(src1[c + 0], scale1[c + 0], bias1[c + 0]);
                         dst0[c + 1] = SynetFusedLayerForward9(src1[c + 1], scale1[c + 1], bias1[c + 1]);
