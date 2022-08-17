@@ -12,7 +12,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Segmentation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2ShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2SquaredDifferenceSum.cpp" />

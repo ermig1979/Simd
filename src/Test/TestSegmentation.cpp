@@ -173,9 +173,9 @@ namespace Test
 
         result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Base::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Sse2::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SegmentationFillSingleHolesAutoTest(FUNC_FSH(Simd::Sse41::SegmentationFillSingleHoles), FUNC_FSH(SimdSegmentationFillSingleHoles));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
@@ -260,9 +260,9 @@ namespace Test
 
         result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Base::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sse2::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SegmentationChangeIndexAutoTest(FUNC_CI(Simd::Sse41::SegmentationChangeIndex), FUNC_CI(SimdSegmentationChangeIndex));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
@@ -355,9 +355,9 @@ namespace Test
 
         result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Base::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Sse2::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SegmentationPropagate2x2AutoTest(FUNC_P(Simd::Sse41::SegmentationPropagate2x2), FUNC_P(SimdSegmentationPropagate2x2));
 #endif
 
 #ifdef SIMD_AVX2_ENABLE
