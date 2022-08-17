@@ -557,7 +557,7 @@ namespace Test
 
         String text, html;
 
-        size_t testThreads, workThreads;
+        size_t testThreads, workThreads, testRepeats;
 
         bool printAlign, printInternal;
 
@@ -565,6 +565,7 @@ namespace Test
             : mode(Auto)
             , help(false)
             , testThreads(0)
+            , testRepeats(1)
             , workThreads(1)
             , printAlign(false)
             , printInternal(true)
@@ -595,6 +596,10 @@ namespace Test
 #if defined(NDEBUG)
                     testThreads = FromString<size_t>(arg.substr(4, arg.size() - 4));
 #endif
+                }
+                else if (arg.find("-tr=") == 0)
+                {
+                    testRepeats = FromString<size_t>(arg.substr(4, arg.size() - 4));
                 }
                 else if (arg.find("-fi=") == 0)
                 {
@@ -698,12 +703,12 @@ namespace Test
             Test::TaskPtrs tasks;
             size_t n = options.testThreads;
             size_t total = groups.size();
-            size_t block = (total + n - 1) / n;
+            size_t block = Simd::DivHi(total, n);
             for (size_t i = 0; i < n; ++i)
             {
-                size_t begin = i * block;
-                size_t end = std::min(total, begin + block);
-                tasks.push_back(Test::TaskPtr(new Test::Task(groups.begin() + begin, groups.begin() + end, true)));
+                size_t beg = i * block;
+                size_t end = std::min(total, beg + block);
+                tasks.push_back(Test::TaskPtr(new Test::Task(groups.begin() + beg, groups.begin() + end, true)));
             }
 
             std::cout << std::endl;
@@ -822,6 +827,7 @@ namespace Test
         std::cout << "    -lc=1         to litter CPU cache between test runs." << std::endl << std::endl;
         std::cout << "    -ri=city.jpg  a name of real image used in some tests." << std::endl << std::endl;
         std::cout << "                  The image have to be placed in ./data/image directory." << std::endl << std::endl;
+        std::cout << "    -tr=2         a number of test execution repeats." << std::endl;
         return 0;
     }
 
@@ -859,9 +865,14 @@ int main(int argc, char* argv[])
         return Test::PrintHelp();
 
     Test::Groups groups;
-    for (const Test::Group & group : Test::g_groups)
+    for (const Test::Group& group : Test::g_groups)
+    {
         if (options.Required(group))
-            groups.push_back(group);
+        {
+            for(size_t r = 0; r < options.testRepeats; ++r)
+                groups.push_back(group);
+        }
+    }
     if (groups.empty())
     {
         std::stringstream ss;
