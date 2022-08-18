@@ -404,8 +404,6 @@ namespace Simd
 
         void RgbToGray(const uint8_t* rgb, size_t width, size_t height, size_t rgbStride, uint8_t* gray, size_t grayStride);
 
-        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
-
         void SegmentationChangeIndex(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t oldIndex, uint8_t newIndex);
 
         void SegmentationFillSingleHoles(uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index);
@@ -450,6 +448,33 @@ namespace Simd
         void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum);
 
         void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum);
+
+        void GetStatistic(const uint8_t* src, size_t stride, size_t width, size_t height,
+            uint8_t* min, uint8_t* max, uint8_t* average);
+
+        void GetMoments(const uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index,
+            uint64_t* area, uint64_t* x, uint64_t* y, uint64_t* xx, uint64_t* xy, uint64_t* yy);
+
+        void GetObjectMoments(const uint8_t* src, size_t srcStride, size_t width, size_t height, const uint8_t* mask, size_t maskStride, uint8_t index,
+            uint64_t* n, uint64_t* s, uint64_t* sx, uint64_t* sy, uint64_t* sxx, uint64_t* sxy, uint64_t* syy);
+
+        void GetRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
+
+        void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
+
+        void GetAbsDyRowSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
+
+        void GetAbsDxColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums);
+
+        void ValueSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
+
+        void SquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
+
+        void ValueSquareSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* valueSum, uint64_t* squareSum);
+
+        void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums);
+
+        void CorrelationSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride, size_t width, size_t height, uint64_t* sum);
 
         void SvmSumLinear(const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
 

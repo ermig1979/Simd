@@ -289,6 +289,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ShiftBilinear.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

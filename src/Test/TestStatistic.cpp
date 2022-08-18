@@ -90,9 +90,9 @@ namespace Test
 
         result = result && GetStatisticAutoTest(FUNC1(Simd::Base::GetStatistic), FUNC1(SimdGetStatistic));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetStatisticAutoTest(FUNC1(Simd::Sse2::GetStatistic), FUNC1(SimdGetStatistic));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetStatisticAutoTest(FUNC1(Simd::Sse41::GetStatistic), FUNC1(SimdGetStatistic));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -204,9 +204,9 @@ namespace Test
 
         result = result && GetMomentsAutoTest(FUNC_M(Simd::Base::GetMoments), FUNC_M(SimdGetMoments));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetMomentsAutoTest(FUNC_M(Simd::Sse2::GetMoments), FUNC_M(SimdGetMoments));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetMomentsAutoTest(FUNC_M(Simd::Sse41::GetMoments), FUNC_M(SimdGetMoments));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -321,9 +321,9 @@ namespace Test
 
         result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Base::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Sse2::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetObjectMomentsAutoTest(FUNC_GOM(Simd::Sse41::GetObjectMoments), FUNC_GOM(SimdGetObjectMoments));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -406,9 +406,9 @@ namespace Test
 
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetRowSums), FUNC3(SimdGetRowSums), true);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetRowSums), FUNC3(SimdGetRowSums), true);
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse41::GetRowSums), FUNC3(SimdGetRowSums), true);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -440,9 +440,9 @@ namespace Test
 
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetColSums), FUNC3(SimdGetColSums), false);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetColSums), FUNC3(SimdGetColSums), false);
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse41::GetColSums), FUNC3(SimdGetColSums), false);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -474,9 +474,9 @@ namespace Test
 
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse41::GetAbsDyRowSums), FUNC3(SimdGetAbsDyRowSums), true);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -508,9 +508,9 @@ namespace Test
 
         result = result && GetSumsAutoTest(FUNC3(Simd::Base::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && GetSumsAutoTest(FUNC3(Simd::Sse2::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && GetSumsAutoTest(FUNC3(Simd::Sse41::GetAbsDxColSums), FUNC3(SimdGetAbsDxColSums), false);
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -597,9 +597,9 @@ namespace Test
 
         result = result && SumAutoTest(FUNC4(Simd::Base::ValueSum), FUNC4(SimdValueSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Sse2::ValueSum), FUNC4(SimdValueSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse41::ValueSum), FUNC4(SimdValueSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -631,9 +631,9 @@ namespace Test
 
         result = result && SumAutoTest(FUNC4(Simd::Base::SquareSum), FUNC4(SimdSquareSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SumAutoTest(FUNC4(Simd::Sse2::SquareSum), FUNC4(SimdSquareSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SumAutoTest(FUNC4(Simd::Sse41::SquareSum), FUNC4(SimdSquareSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -822,9 +822,9 @@ namespace Test
 
         result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Base::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sse2::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && ValueSquareSumAutoTest(FUNC_VSS(Simd::Sse41::ValueSquareSum), FUNC_VSS(SimdValueSquareSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -1004,9 +1004,9 @@ namespace Test
 
         result = result && CorrelationSumAutoTest(FUNC5(Simd::Base::CorrelationSum), FUNC5(SimdCorrelationSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && CorrelationSumAutoTest(FUNC5(Simd::Sse2::CorrelationSum), FUNC5(SimdCorrelationSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && CorrelationSumAutoTest(FUNC5(Simd::Sse41::CorrelationSum), FUNC5(SimdCorrelationSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

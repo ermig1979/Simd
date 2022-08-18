@@ -5075,9 +5075,9 @@ SIMD_API void SimdGetStatistic(const uint8_t * src, size_t stride, size_t width,
         Avx2::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GetStatistic(src, stride, width, height, min, max, average);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GetStatistic(src, stride, width, height, min, max, average);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5107,9 +5107,9 @@ SIMD_API void SimdGetMoments(const uint8_t * mask, size_t stride, size_t width, 
         Avx2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GetMoments(mask, stride, width, height, index, area, x, y, xx, xy, yy);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5138,9 +5138,9 @@ SIMD_API void SimdGetObjectMoments(const uint8_t* src, size_t srcStride, size_t 
         Avx2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::GetObjectMoments(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -5163,9 +5163,9 @@ SIMD_API void SimdGetRowSums(const uint8_t * src, size_t stride, size_t width, s
         Avx2::GetRowSums(src, stride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GetRowSums(src, stride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GetRowSums(src, stride, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5193,9 +5193,9 @@ SIMD_API void SimdGetColSums(const uint8_t * src, size_t stride, size_t width, s
         Avx2::GetColSums(src, stride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GetColSums(src, stride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GetColSums(src, stride, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5223,9 +5223,9 @@ SIMD_API void SimdGetAbsDyRowSums(const uint8_t * src, size_t stride, size_t wid
         Avx2::GetAbsDyRowSums(src, stride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GetAbsDyRowSums(src, stride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GetAbsDyRowSums(src, stride, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5253,9 +5253,9 @@ SIMD_API void SimdGetAbsDxColSums(const uint8_t * src, size_t stride, size_t wid
         Avx2::GetAbsDxColSums(src, stride, width, height, sums);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::GetAbsDxColSums(src, stride, width, height, sums);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::GetAbsDxColSums(src, stride, width, height, sums);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5283,9 +5283,9 @@ SIMD_API void SimdValueSum(const uint8_t * src, size_t stride, size_t width, siz
         Avx2::ValueSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ValueSum(src, stride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::ValueSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5313,9 +5313,9 @@ SIMD_API void SimdSquareSum(const uint8_t * src, size_t stride, size_t width, si
         Avx2::SquareSum(src, stride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::SquareSum(src, stride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::SquareSum(src, stride, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5343,9 +5343,9 @@ SIMD_API void SimdValueSquareSum(const uint8_t * src, size_t stride, size_t widt
         Avx2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::ValueSquareSum(src, stride, width, height, valueSum, squareSum);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -5369,7 +5369,7 @@ SIMD_API void SimdValueSquareSums(const uint8_t* src, size_t stride, size_t widt
     else
 #endif
 #ifdef SIMD_SSE41_ENABLE
-    if (Sse41::Enable && width >= Sse2::A)
+    if (Sse41::Enable && width >= Sse41::A)
         Sse41::ValueSquareSums(src, stride, width, height, channels, valueSums, squareSums);
     else
 #endif
@@ -5393,9 +5393,9 @@ SIMD_API void SimdCorrelationSum(const uint8_t * a, size_t aStride, const uint8_
         Avx2::CorrelationSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::CorrelationSum(a, aStride, b, bStride, width, height, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::CorrelationSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE

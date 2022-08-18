@@ -79,6 +79,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Svm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />

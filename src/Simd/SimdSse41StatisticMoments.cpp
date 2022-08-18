@@ -25,11 +25,12 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE void GetObjectMoments16(__m128i src, __m128i col, __m128i & sx, __m128i & sxx)
         {
@@ -185,7 +186,10 @@ namespace Simd
                 GetObjectMoments<true>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
             else
                 GetObjectMoments<false>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         void GetMoments(const uint8_t* mask, size_t stride, size_t width, size_t height, uint8_t index,
             uint64_t* area, uint64_t* x, uint64_t* y, uint64_t* xx, uint64_t* xy, uint64_t* yy)
@@ -194,5 +198,5 @@ namespace Simd
             GetObjectMoments(NULL, 0, width, height, mask, stride, index, &stub, area, x, y, xx, xy, yy);
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }
