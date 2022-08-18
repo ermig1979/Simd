@@ -118,9 +118,9 @@ namespace Test
 
         result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Base::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Sse2::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetConvert32fTo8uAutoTest(FUNC_C_32F_8U(Simd::Sse41::SynetConvert32fTo8u), FUNC_C_32F_8U(SimdSynetConvert32fTo8u));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -420,9 +420,9 @@ namespace Test
 
         result = result && SynetReorderImageAutoTest(TFM_ANY, FUNC_RT(Simd::Base::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetReorderImageAutoTest(TFM_128, FUNC_RT(Simd::Sse2::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetReorderImageAutoTest(TFM_128, FUNC_RT(Simd::Sse41::SynetReorderImage), FUNC_RT(SimdSynetReorderImage));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -468,9 +468,9 @@ namespace Test
 
         result = result && SynetReorderFilterAutoTest(TFM_ANY, FUNC_RT(Simd::Base::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetReorderFilterAutoTest(TFM_128, FUNC_RT(Simd::Sse2::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetReorderFilterAutoTest(TFM_128, FUNC_RT(Simd::Sse41::SynetReorderFilter), FUNC_RT(SimdSynetReorderFilter));
 #endif 
         
 #ifdef SIMD_AVX_ENABLE

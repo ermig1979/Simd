@@ -27,12 +27,13 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void SynetFusedLayerForward0(const float * src, const float * bias, const float * scale, __m128 sign, float * dst, size_t offset)
         {
@@ -171,9 +172,10 @@ namespace Simd
                 SynetFusedLayerForward0Nchw4c(src, bias, scale, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward0(src, bias, scale, channels, spatial, dst, format);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward1(const float * src, const float * bias0, const float * scale1, const float *  bias1, float * dst, size_t offset)
         {
@@ -312,9 +314,10 @@ namespace Simd
                 SynetFusedLayerForward1Nchw4c(src, bias0, scale1, bias1, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward1(src, bias0, scale1, bias1, channels, spatial, dst, format);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward2(const float * src, const float * scale, const float * bias, __m128 slope, float * dst, size_t offset)
         {
@@ -455,9 +458,10 @@ namespace Simd
                 SynetFusedLayerForward2Nchw4c(src, scale, bias, channels, spatial, slope, dst);
             else
                 Base::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward3(const float * src, const float * bias, const float * scale, float * dst, size_t offset)
         {
@@ -597,9 +601,10 @@ namespace Simd
                 SynetFusedLayerForward3Nchw4c(src, bias, scale, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward4(const float * src, const float * bias0, __m128 scale1, __m128 bias1, float * dst0, float * dst1, size_t offset)
         {
@@ -746,9 +751,10 @@ namespace Simd
                 SynetFusedLayerForward4Nchw4cA(src, bias0, scale1, bias1, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward8(const float * src0, const float * src1, const float * src2, float * dst, size_t offset)
         {
@@ -881,9 +887,10 @@ namespace Simd
                 SynetFusedLayerForward8Nchw4c(src0, src1, src2, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
+            Sse2::Empty();
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> SIMD_INLINE void SynetFusedLayerForward9(const float * src, const float * scale, const float * bias, float * dst0, float * dst1, size_t offset)
         {
@@ -1220,7 +1227,8 @@ namespace Simd
                 SynetFusedLayerForward9Nchw4cA(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else
                 Base::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
+            Sse2::Empty();
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

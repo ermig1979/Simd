@@ -163,9 +163,9 @@ namespace Test
 
         result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Base::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Sse2::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetPoolingAverageAutoTest(FUNC_PA(Simd::Sse41::SynetPoolingAverage), FUNC_PA(SimdSynetPoolingAverage));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

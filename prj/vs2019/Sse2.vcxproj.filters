@@ -7,9 +7,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetActivation.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConversion.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32f.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
@@ -37,16 +34,10 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetPooling.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetFused.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetScale.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd1.cpp">

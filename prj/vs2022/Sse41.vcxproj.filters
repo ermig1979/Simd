@@ -298,6 +298,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHue.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetFused.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">

@@ -90,6 +90,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirect1x1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution8iNhwcDirectAny.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetFused.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fBf16Depthwise.cpp" />

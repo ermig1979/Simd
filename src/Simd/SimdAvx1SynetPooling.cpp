@@ -26,7 +26,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 
 namespace Simd
@@ -207,7 +207,7 @@ namespace Simd
                     return;
                 }
             }
-            Sse2::SynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
+            Sse41::SynetPoolingAverage(src, srcC, srcH, srcW, kernelY, kernelX, strideY, strideX, padY, padX, dst, dstH, dstW, excludePad, format);
         }
     }
 #endif// SIMD_AVX_ENABLE

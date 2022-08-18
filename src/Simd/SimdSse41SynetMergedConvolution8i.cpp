@@ -26,7 +26,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -71,9 +71,9 @@ namespace Simd
             size_t size = width * channels, mask = bufH - 1;
             size_t yInt = Simd::Max(yBeg, AlignLo(yEnd, bufH));
             if (yInt > yBeg)
-                Sse2::SynetConvert32fTo8u(src + yBeg * size, 1, channels, yInt - yBeg, width, SimdTensorFormatNhwc, scale, shift, dst + (yBeg & mask) * size, compatibility);
+                Sse41::SynetConvert32fTo8u(src + yBeg * size, 1, channels, yInt - yBeg, width, SimdTensorFormatNhwc, scale, shift, dst + (yBeg & mask) * size, compatibility);
             if (yEnd > yInt)
-                Sse2::SynetConvert32fTo8u(src + yInt * size, 1, channels, yEnd - yInt, width, SimdTensorFormatNhwc, scale, shift, dst + (yInt & mask) * size, compatibility);
+                Sse41::SynetConvert32fTo8u(src + yInt * size, 1, channels, yEnd - yInt, width, SimdTensorFormatNhwc, scale, shift, dst + (yInt & mask) * size, compatibility);
         }
 
         //---------------------------------------------------------------------

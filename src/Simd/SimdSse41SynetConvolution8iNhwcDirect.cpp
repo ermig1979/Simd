@@ -26,7 +26,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -42,7 +42,7 @@ namespace Simd
                 SetDirect1x1(p, _alg, _convolutions);
             else
                 SetDirectAny(p, _alg, _convolutions);
-            _convertSrc = Sse2::SynetConvert32fTo8u;
+            _convertSrc = Sse41::SynetConvert32fTo8u;
         }
 
         bool SynetConvolution8iNhwcDirect::Preferable(const ConvParam8i& p)

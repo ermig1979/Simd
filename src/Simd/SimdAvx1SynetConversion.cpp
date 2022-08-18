@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdTranspose.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 
 namespace Simd
 {
@@ -286,7 +286,7 @@ namespace Simd
                 }
             }
             else
-                return Sse2::SynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
+                return Sse41::SynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
         }
 
         template<bool align> void SynetReorderFilter_Oiyx_Yxio(size_t output, size_t input, size_t kernel, const float * src, float * dst)
@@ -560,7 +560,7 @@ namespace Simd
             if (filterConverter)
                 filterConverter(output, input, kernel, src, dst);
             else
-                Sse2::SynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
+                Sse41::SynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
         }
     }
 #endif// SIMD_AVX_ENABLE
