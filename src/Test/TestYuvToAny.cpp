@@ -222,9 +222,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Base::Yuv444pToHue), FUNC(SimdYuv444pToHue), MAX_DIFFERECE);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Sse2::Yuv444pToHue), FUNC(SimdYuv444pToHue));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(1, 1, View::Gray8, FUNC(Simd::Sse41::Yuv444pToHue), FUNC(SimdYuv444pToHue));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -256,9 +256,9 @@ namespace Test
 
         result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Base::Yuv420pToHue), FUNC(SimdYuv420pToHue), MAX_DIFFERECE);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Sse2::Yuv420pToHue), FUNC(SimdYuv420pToHue));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && YuvToAnyAutoTest(2, 2, View::Gray8, FUNC(Simd::Sse41::Yuv420pToHue), FUNC(SimdYuv420pToHue));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

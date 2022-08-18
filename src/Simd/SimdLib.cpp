@@ -5424,9 +5424,9 @@ SIMD_API void SimdStretchGray2x2(const uint8_t *src, size_t srcWidth, size_t src
         Avx2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && srcWidth >= Sse2::A)
-        Sse2::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && srcWidth >= Sse41::A)
+        Sse41::StretchGray2x2(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6348,11 +6348,6 @@ SIMD_API void SimdTextureBoostedSaturatedGradient(const uint8_t * src, size_t sr
         Sse41::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::TextureBoostedSaturatedGradient(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
@@ -6379,9 +6374,9 @@ SIMD_API void SimdTextureBoostedUv(const uint8_t * src, size_t srcStride, size_t
         Avx2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::TextureBoostedUv(src, srcStride, width, height, boost, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6410,9 +6405,9 @@ SIMD_API void SimdTextureGetDifferenceSum(const uint8_t * src, size_t srcStride,
         Avx2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::TextureGetDifferenceSum(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6441,9 +6436,9 @@ SIMD_API void SimdTexturePerformCompensation(const uint8_t * src, size_t srcStri
         Avx2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::TexturePerformCompensation(src, srcStride, width, height, shift, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6789,9 +6784,9 @@ SIMD_API void SimdYuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_
         Avx2::Yuva420pToBgra(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::DA)
-        Sse2::Yuva420pToBgra(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuva420pToBgra(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -6929,9 +6924,9 @@ SIMD_API void SimdYuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t
         Avx2::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::DA)
-        Sse2::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv420pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -6960,9 +6955,9 @@ SIMD_API void SimdYuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
         Avx2::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::DA)
-        Sse2::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv420pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -6986,9 +6981,9 @@ SIMD_API void SimdYuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t
         Avx2::Yuv422pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::DA)
-        Sse2::Yuv422pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv422pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -7017,9 +7012,9 @@ SIMD_API void SimdYuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t
         Avx2::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToBgra(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -7048,9 +7043,9 @@ SIMD_API void SimdYuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_
         Avx2::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable && width >= Sse2::A)
-        Sse2::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToBgraV2(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -7086,9 +7081,9 @@ SIMD_API void SimdYuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Avx2::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::DA)
-        Sse2::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::DA)
+        Sse41::Yuv420pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE
@@ -7117,9 +7112,9 @@ SIMD_API void SimdYuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t 
         Avx2::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width >= Sse41::A)
+        Sse41::Yuv444pToHue(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
     else
 #endif
 #ifdef SIMD_VSX_ENABLE

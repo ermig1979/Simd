@@ -33,9 +33,6 @@ namespace Simd
     {
         void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
 
-        void StretchGray2x2(const uint8_t *src, size_t srcWidth, size_t srcHeight, size_t srcStride,
-            uint8_t *dst, size_t dstWidth, size_t dstHeight, size_t dstStride);
-
         void SynetAddBias(const float* bias, size_t channels, size_t spatial, float* dst, SimdTensorFormatType format);
 
         void SynetConvert32fTo8u(const float* src, size_t batch, size_t channels, size_t height, size_t width, SimdTensorFormatType format, const float* scale, const float* shift, uint8_t* dst, SimdSynetCompatibilityType compatibility);
@@ -97,18 +94,6 @@ namespace Simd
 
         void SynetUnaryOperation32fLayerForward(const float* src, size_t size, SimdSynetUnaryOperation32fType type, float* dst);
 
-        void TextureBoostedSaturatedGradient(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t saturation, uint8_t boost, uint8_t * dx, size_t dxStride, uint8_t * dy, size_t dyStride);
-
-        void TextureBoostedUv(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            uint8_t boost, uint8_t * dst, size_t dstStride);
-
-        void TextureGetDifferenceSum(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            const uint8_t * lo, size_t loStride, const uint8_t * hi, size_t hiStride, int64_t * sum);
-
-        void TexturePerformCompensation(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            int shift, uint8_t * dst, size_t dstStride);
-
         void WinogradKernel1x3Block1x4SetFilter(const float* src, size_t size, float* dst, SimdBool trans);
 
         void WinogradKernel1x3Block1x4SetInput(const float* src, size_t srcChannels, size_t srcHeight, size_t srcWidth,
@@ -158,29 +143,6 @@ namespace Simd
 
         void WinogradKernel3x3Block4x4SetOutput(const float* src, size_t srcStride, float* dst, size_t dstChannels, size_t dstHeight, size_t dstWidth, SimdBool trans);
 
-        void Yuva420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            const uint8_t * a, size_t aStride, size_t width, size_t height, uint8_t * bgra, size_t bgraStride);
-
-        void Yuv420pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
-
-        void Yuv420pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
-
-        void Yuv422pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
-
-        void Yuv444pToBgra(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * bgra, size_t bgraStride, uint8_t alpha);
-
-        void Yuv444pToBgraV2(const uint8_t* y, size_t yStride, const uint8_t* u, size_t uStride, const uint8_t* v, size_t vStride,
-            size_t width, size_t height, uint8_t* bgra, size_t bgraStride, uint8_t alpha, SimdYuvType yuvType);
-
-        void Yuv420pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * hue, size_t hueStride);
-
-        void Yuv444pToHue(const uint8_t * y, size_t yStride, const uint8_t * u, size_t uStride, const uint8_t * v, size_t vStride,
-            size_t width, size_t height, uint8_t * hue, size_t hueStride);
     }
 #endif// SIMD_SSE2_ENABLE
 }

@@ -99,9 +99,9 @@ namespace Test
 
         result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Base::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sse2::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && TextureBoostedSaturatedGradientAutoTest(FUNC1(Simd::Sse41::TextureBoostedSaturatedGradient), FUNC1(SimdTextureBoostedSaturatedGradient));
 #endif 
 
 #ifdef SIMD_SSE41_ENABLE
@@ -201,9 +201,9 @@ namespace Test
 
         result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Base::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Sse2::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && TextureBoostedUvAutoTest(FUNC2(Simd::Sse41::TextureBoostedUv), FUNC2(SimdTextureBoostedUv));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -290,9 +290,9 @@ namespace Test
 
         result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Base::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Sse2::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && TextureGetDifferenceSumAutoTest(FUNC3(Simd::Sse41::TextureGetDifferenceSum), FUNC3(SimdTextureGetDifferenceSum));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -390,9 +390,9 @@ namespace Test
 
         result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Base::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Sse2::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && TexturePerformCompensationAutoTest(FUNC4(Simd::Sse41::TexturePerformCompensation), FUNC4(SimdTexturePerformCompensation));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

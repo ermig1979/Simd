@@ -80,6 +80,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41StatisticMoments.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41StretchGray2x2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Svm.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Synet.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConversion.cpp" />
@@ -106,6 +107,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41UyvyToYuv.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToBgra.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41YuvToHue.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41YuvToUyvy.cpp" />
   </ItemGroup>
   <ItemGroup>

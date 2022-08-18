@@ -26,6 +26,7 @@
 #include "Simd/SimdSet.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -100,6 +101,176 @@ namespace Simd
                 TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
             else
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE void TextureBoostedUv(const uint8_t* src, uint8_t* dst, __m128i min8, __m128i max8, __m128i boost16)
+        {
+            const __m128i _src = Load<align>((__m128i*)src);
+            const __m128i saturated = _mm_sub_epi8(_mm_max_epu8(min8, _mm_min_epu8(max8, _src)), min8);
+            const __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(saturated, K_ZERO), boost16);
+            const __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(saturated, K_ZERO), boost16);
+            Store<align>((__m128i*)dst, _mm_packus_epi16(lo, hi));
+        }
+
+        template<bool align> void TextureBoostedUv(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t boost, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A && boost < 0x80);
+            if (align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            int min = 128 - (128 / boost);
+            int max = 255 - min;
+
+            __m128i min8 = _mm_set1_epi8(min);
+            __m128i max8 = _mm_set1_epi8(max);
+            __m128i boost16 = _mm_set1_epi16(boost);
+
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    TextureBoostedUv<align>(src + col, dst + col, min8, max8, boost16);
+                if (width != alignedWidth)
+                    TextureBoostedUv<false>(src + width - A, dst + width - A, min8, max8, boost16);
+
+                src += srcStride;
+                dst += dstStride;
+            }
+        }
+
+        void TextureBoostedUv(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            uint8_t boost, uint8_t* dst, size_t dstStride)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
+            else
+                TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align> SIMD_INLINE void TextureGetDifferenceSum(const uint8_t* src, const uint8_t* lo, const uint8_t* hi,
+            __m128i& positive, __m128i& negative, const __m128i& mask)
+        {
+            const __m128i _src = Load<align>((__m128i*)src);
+            const __m128i _lo = Load<align>((__m128i*)lo);
+            const __m128i _hi = Load<align>((__m128i*)hi);
+            const __m128i average = _mm_and_si128(mask, _mm_avg_epu8(_lo, _hi));
+            const __m128i current = _mm_and_si128(mask, _src);
+            positive = _mm_add_epi64(positive, _mm_sad_epu8(_mm_subs_epu8(current, average), K_ZERO));
+            negative = _mm_add_epi64(negative, _mm_sad_epu8(_mm_subs_epu8(average, current), K_ZERO));
+        }
+
+        template <bool align> void TextureGetDifferenceSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* lo, size_t loStride, const uint8_t* hi, size_t hiStride, int64_t* sum)
+        {
+            assert(width >= A && sum != NULL);
+            if (align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+            __m128i positive = _mm_setzero_si128();
+            __m128i negative = _mm_setzero_si128();
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0; col < alignedWidth; col += A)
+                    TextureGetDifferenceSum<align>(src + col, lo + col, hi + col, positive, negative, K_INV_ZERO);
+                if (width != alignedWidth)
+                    TextureGetDifferenceSum<false>(src + width - A, lo + width - A, hi + width - A, positive, negative, tailMask);
+                src += srcStride;
+                lo += loStride;
+                hi += hiStride;
+            }
+            *sum = ExtractInt64Sum(positive) - ExtractInt64Sum(negative);
+        }
+
+        void TextureGetDifferenceSum(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            const uint8_t* lo, size_t loStride, const uint8_t* hi, size_t hiStride, int64_t* sum)
+        {
+            if (Aligned(src) && Aligned(srcStride) && Aligned(lo) && Aligned(loStride) && Aligned(hi) && Aligned(hiStride))
+                TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+            else
+                TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
+
+        template <bool align> void TexturePerformCompensation(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            int shift, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A && shift > -0xFF && shift < 0xFF && shift != 0);
+            if (align)
+            {
+                assert(Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride));
+            }
+
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = src == dst ? ShiftLeft(K_INV_ZERO, A - width + alignedWidth) : K_INV_ZERO;
+            if (shift > 0)
+            {
+                __m128i _shift = _mm_set1_epi8((char)shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                    {
+                        const __m128i _src = Load<align>((__m128i*) (src + col));
+                        Store<align>((__m128i*) (dst + col), _mm_adds_epu8(_src, _shift));
+                    }
+                    if (width != alignedWidth)
+                    {
+                        const __m128i _src = Load<false>((__m128i*) (src + width - A));
+                        Store<false>((__m128i*) (dst + width - A), _mm_adds_epu8(_src, _mm_and_si128(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+            if (shift < 0)
+            {
+                __m128i _shift = _mm_set1_epi8((char)-shift);
+                for (size_t row = 0; row < height; ++row)
+                {
+                    for (size_t col = 0; col < alignedWidth; col += A)
+                    {
+                        const __m128i _src = Load<align>((__m128i*) (src + col));
+                        Store<align>((__m128i*) (dst + col), _mm_subs_epu8(_src, _shift));
+                    }
+                    if (width != alignedWidth)
+                    {
+                        const __m128i _src = Load<false>((__m128i*) (src + width - A));
+                        Store<false>((__m128i*) (dst + width - A), _mm_subs_epu8(_src, _mm_and_si128(_shift, tailMask)));
+                    }
+                    src += srcStride;
+                    dst += dstStride;
+                }
+            }
+        }
+
+        void TexturePerformCompensation(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            int shift, uint8_t* dst, size_t dstStride)
+        {
+            if (shift == 0)
+            {
+                if (src != dst)
+                    Base::Copy(src, srcStride, width, height, 1, dst, dstStride);
+                return;
+            }
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
+            else
+                TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
+            Sse2::Empty();
         }
     }
 #endif
