@@ -25,7 +25,6 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdArray.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -80,7 +79,6 @@ namespace Simd
                 }
                 src += srcStride;
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -460,8 +458,6 @@ namespace Simd
                 Custom_8x8_18::HogDirectionHistograms(src, stride, width, height, histograms);
             else
                 Common::HogDirectionHistograms(src, stride, width, height, cellX, cellY, quantization, histograms);
-
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -754,8 +750,6 @@ namespace Simd
 
             HogFeatureExtractor extractor;
             extractor.Run(src, stride, width, height, features);
-
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -870,8 +864,6 @@ namespace Simd
 
             HogSeparableFilter filter;
             filter.Run(src, srcStride, width, height, rowFilter, rowSize, colFilter, colSize, dst, dstStride, add);
-
-            Sse2::Empty();
         }
     }
 #endif

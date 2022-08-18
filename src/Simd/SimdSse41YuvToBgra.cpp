@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -89,7 +88,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -172,7 +170,6 @@ namespace Simd
                 Yuva420pToBgra<true>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
             else
                 Yuva420pToBgra<false>(y, yStride, u, uStride, v, vStride, a, aStride, width, height, bgra, bgraStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -230,7 +227,6 @@ namespace Simd
                 Yuv444pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
             else
                 Yuv444pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -287,7 +283,6 @@ namespace Simd
                 Yuv420pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
             else
                 Yuv420pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -334,7 +329,6 @@ namespace Simd
                 Yuv422pToBgra<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
             else
                 Yuv422pToBgra<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -414,7 +408,6 @@ namespace Simd
                 Yuv444pToBgraV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
             else
                 Yuv444pToBgraV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -485,7 +478,6 @@ namespace Simd
                 Yuv420pToBgraV2<true>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
             else
                 Yuv420pToBgraV2<false>(y, yStride, u, uStride, v, vStride, width, height, bgra, bgraStride, alpha, yuvType);
-            Sse2::Empty();
         }
     }
 #endif

@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -68,7 +67,6 @@ namespace Simd
                 SegmentationFillSingleHoles<true>(mask, stride, width, height, index);
             else
                 SegmentationFillSingleHoles<false>(mask, stride, width, height, index);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -100,7 +98,6 @@ namespace Simd
                 SegmentationChangeIndex<true>(mask, stride, width, height, oldIndex, newIndex);
             else
                 SegmentationChangeIndex<false>(mask, stride, width, height, oldIndex, newIndex);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -179,7 +176,6 @@ namespace Simd
             else
                 SegmentationPropagate2x2<false>(parent, parentStride, width, height, child, childStride,
                     difference, differenceStride, currentIndex, invalidIndex, emptyIndex, differenceThreshold);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -286,7 +282,6 @@ namespace Simd
                     break;
                 }
             }
-            Sse2::Empty();
         }
     }
 #endif

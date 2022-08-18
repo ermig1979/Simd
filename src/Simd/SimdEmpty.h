@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -21,43 +21,40 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include "Simd/SimdMemory.h"
+#ifndef __SimdEmpty_h__
+#define __SimdEmpty_h__
+
+#include "Simd/SimdEnable.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
+#ifdef SIMD_SSE2_ENABLE
+    namespace Sse2
     {
-        SIMD_INLINE void Crc32c(size_t & crc, const size_t * p, const size_t * end)
+        SIMD_INLINE void Empty()
         {
-            while (p < end)
-            {
-#ifdef SIMD_X64_ENABLE
-                crc = _mm_crc32_u64(crc, *p++);
+#if defined(_MSC_VER) && defined(SIMD_X64_ENABLE)
 #else
-                crc = _mm_crc32_u32(crc, *p++);
+            _mm_empty();
 #endif
+        }
+
+        struct EmptyCaller
+        {
+            SIMD_INLINE ~EmptyCaller()
+            {
+                if (Enable)
+                    Empty();
             }
-        }
-
-        SIMD_INLINE void Crc32c(size_t & crc, const uint8_t * p, const uint8_t * end)
-        {
-            while (p < end)
-                crc = _mm_crc32_u8((uint32_t)crc, *p++);
-        }
-
-        uint32_t Crc32c(const void *src, size_t size)
-        {
-            uint8_t * nose = (uint8_t*)src;
-            size_t * body = (size_t*)AlignHi(nose, sizeof(size_t));
-            size_t * tail = (size_t*)AlignLo(nose + size, sizeof(size_t));
-
-            size_t crc = 0xFFFFFFFF;
-            Crc32c(crc, nose, (uint8_t*)body);
-            Crc32c(crc, body, tail);
-            Crc32c(crc, (uint8_t*)tail, nose + size);
-            return ~(uint32_t)crc;
-        }
+        };
     }
 #endif
 }
+
+#if defined(SIMD_SSE2_ENABLE) && !(defined(_MSC_VER) && defined(SIMD_X64_ENABLE))
+#define SIMD_EMPTY() Simd::Sse2::EmptyCaller emptyCaller;
+#else
+#define SIMD_EMPTY() 
+#endif
+
+#endif//__SimdEmpty_h__

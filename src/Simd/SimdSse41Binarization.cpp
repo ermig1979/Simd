@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdSet.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -92,7 +91,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -258,7 +256,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
     }
 #endif

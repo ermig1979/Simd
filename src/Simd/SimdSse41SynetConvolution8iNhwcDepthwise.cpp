@@ -26,7 +26,7 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdMath.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdCpu.h"
 
 namespace Simd
@@ -411,7 +411,7 @@ namespace Simd
             : Base::SynetConvolution8iNhwcDepthwise(p)
         {
             Set(p, _convolution);
-            _convertSrc = Sse2::SynetConvert32fTo8u;
+            _convertSrc = Sse41::SynetConvert32fTo8u;
         }
 
         bool SynetConvolution8iNhwcDepthwise::Preferable(const ConvParam8i& p)

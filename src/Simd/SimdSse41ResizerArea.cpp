@@ -27,7 +27,6 @@
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -155,7 +154,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------------------------------
@@ -325,7 +323,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
     }
 #endif

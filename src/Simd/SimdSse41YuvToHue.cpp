@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -130,7 +129,6 @@ namespace Simd
                 Yuv420pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
             else
                 Yuv420pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -176,7 +174,6 @@ namespace Simd
                 Yuv444pToHue<true>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
             else
                 Yuv444pToHue<false>(y, yStride, u, uStride, v, vStride, width, height, hue, hueStride);
-            Sse2::Empty();
         }
     }
 #endif

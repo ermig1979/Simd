@@ -25,8 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConversion.h"
-#include "Simd/SimdCpu.h"
-
 
 namespace Simd
 {
@@ -84,7 +82,6 @@ namespace Simd
                 GetStatistic<true>(src, stride, width, height, min, max, average);
             else
                 GetStatistic<false>(src, stride, width, height, min, max, average);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -119,7 +116,6 @@ namespace Simd
                 GetRowSums<true>(src, stride, width, height, sums);
             else
                 GetRowSums<false>(src, stride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -175,7 +171,6 @@ namespace Simd
                 }
             }
             memcpy(sums, sums32.data, sizeof(uint32_t) * width);
-            Sse2::Empty();
         }
 
         void GetColSums(const uint8_t* src, size_t stride, size_t width, size_t height, uint32_t* sums)
@@ -224,7 +219,6 @@ namespace Simd
                 GetAbsDyRowSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDyRowSums<false>(src, stride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -280,7 +274,6 @@ namespace Simd
                 GetAbsDxColSums<true>(src, stride, width, height, sums);
             else
                 GetAbsDxColSums<false>(src, stride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -317,7 +310,6 @@ namespace Simd
                 ValueSum<true>(src, stride, width, height, sum);
             else
                 ValueSum<false>(src, stride, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -363,7 +355,6 @@ namespace Simd
                 SquareSum<true>(src, stride, width, height, sum);
             else
                 SquareSum<false>(src, stride, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -406,7 +397,6 @@ namespace Simd
                 ValueSquareSum<true>(src, stride, width, height, valueSum, squareSum);
             else
                 ValueSquareSum<false>(src, stride, width, height, valueSum, squareSum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -455,7 +445,6 @@ namespace Simd
                 CorrelationSum<true>(a, aStride, b, bStride, width, height, sum);
             else
                 CorrelationSum<false>(a, aStride, b, bStride, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -667,7 +656,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
     }
 #endif

@@ -25,7 +25,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -125,7 +124,6 @@ namespace Simd
                 MedianFilterRhomb3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterRhomb3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -228,7 +226,6 @@ namespace Simd
                 MedianFilterSquare3x3<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterSquare3x3<false>(src, srcStride, width, height, channelCount, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -358,7 +355,6 @@ namespace Simd
                 MedianFilterRhomb5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterRhomb5x5<false>(src, srcStride, width, height, channelCount, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -657,7 +653,6 @@ namespace Simd
                 MedianFilterSquare5x5<true>(src, srcStride, width, height, channelCount, dst, dstStride);
             else
                 MedianFilterSquare5x5<false>(src, srcStride, width, height, channelCount, dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -134,7 +133,6 @@ namespace Simd
                 AbsSecondDerivativeHistogram<true>(src, width, height, stride, step, indent, histogram);
             else
                 AbsSecondDerivativeHistogram<false>(src, width, height, stride, step, indent, histogram);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -195,7 +193,6 @@ namespace Simd
                 HistogramMasked<true>(src, srcStride, width, height, mask, maskStride, index, histogram);
             else
                 HistogramMasked<false>(src, srcStride, width, height, mask, maskStride, index, histogram);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -277,7 +274,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
     }
 #endif

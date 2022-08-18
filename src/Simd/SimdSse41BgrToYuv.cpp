@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -113,7 +112,6 @@ namespace Simd
                 BgrToYuv420p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv420p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -180,7 +178,6 @@ namespace Simd
                 BgrToYuv422p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv422p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -230,7 +227,6 @@ namespace Simd
                 BgrToYuv444p<true>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
             else
                 BgrToYuv444p<false>(bgr, width, height, bgrStride, y, yStride, u, uStride, v, vStride);
-            Sse2::Empty();
         }
     }
 #endif

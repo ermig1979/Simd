@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -53,7 +52,6 @@ namespace Simd
 				b += bStride;
 				c += bStride;
 			}
-			Sse2::Empty();
 		}
     }
 #endif

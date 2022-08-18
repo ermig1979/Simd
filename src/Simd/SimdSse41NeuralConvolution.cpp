@@ -25,7 +25,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdNeural.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -280,7 +279,6 @@ namespace Simd
                 NeuralAddConvolutionForward<true, 2, 2>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionForward<false, 2, 2>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -291,7 +289,6 @@ namespace Simd
                 NeuralAddConvolutionForward<true, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionForward<false, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -302,7 +299,6 @@ namespace Simd
                 NeuralAddConvolutionForward<true, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionForward<false, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -313,7 +309,6 @@ namespace Simd
                 NeuralAddConvolutionForward<true, 5, 5>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionForward<false, 5, 5>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -397,7 +392,6 @@ namespace Simd
                 NeuralAddConvolutionBackwardSmall<align, coreX, coreY>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionBackwardLarge<align, coreX, coreY>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -408,7 +402,6 @@ namespace Simd
                 NeuralAddConvolutionBackward<true, 2, 2>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionBackward<false, 2, 2>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -419,7 +412,6 @@ namespace Simd
                 NeuralAddConvolutionBackward<true, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionBackward<false, 3, 3>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -430,7 +422,6 @@ namespace Simd
                 NeuralAddConvolutionBackward<true, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionBackward<false, 4, 4>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -441,7 +432,6 @@ namespace Simd
                 NeuralAddConvolutionBackward<true, 5, 5>(src, srcStride, width, height, weights, dst, dstStride);
             else
                 NeuralAddConvolutionBackward<false, 5, 5>(src, srcStride, width, height, weights, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -486,7 +476,6 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 2, 2>(src, srcStride, dst, dstStride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -497,7 +486,6 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 3, 3>(src, srcStride, dst, dstStride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -508,7 +496,6 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 4, 4>(src, srcStride, dst, dstStride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -519,7 +506,6 @@ namespace Simd
                 NeuralAddConvolutionSum<true, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
             else
                 NeuralAddConvolutionSum<false, 5, 5>(src, srcStride, dst, dstStride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -1388,8 +1374,6 @@ namespace Simd
             case Opt::Ver2: Ver2::Execute(data.b, opt.paddedW, opt.paddedH, srcDepth, weight, kernelX, kernelY, dst, dstWidth, dstHeight, dstDepth); break;
             default: break;
             }
-
-            Sse2::Empty();
         }
     }
 #endif

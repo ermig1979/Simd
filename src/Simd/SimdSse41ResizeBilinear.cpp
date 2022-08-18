@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -400,7 +399,6 @@ namespace Simd
             default:
                 Base::ResizeBilinear(src, srcWidth, srcHeight, srcStride, dst, dstWidth, dstHeight, dstStride, channelCount);
             }
-            Sse2::Empty();
         }
     }
 #endif

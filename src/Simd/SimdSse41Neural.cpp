@@ -28,7 +28,6 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdNeural.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -85,7 +84,6 @@ namespace Simd
                 NeuralAdaptiveGradientUpdate<true>(delta, size, batch, alpha, epsilon, gradient, weight);
             else
                 NeuralAdaptiveGradientUpdate<false>(delta, size, batch, alpha, epsilon, gradient, weight);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -98,7 +96,6 @@ namespace Simd
                 AddMultiplied<true>(src, aligned, partial, size, *value, dst);
             else
                 AddMultiplied<false>(src, aligned, partial, size, *value, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -132,7 +129,6 @@ namespace Simd
                 AddVector<true>(src, aligned, partial, size, dst);
             else
                 AddVector<false>(src, aligned, partial, size, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -170,7 +166,6 @@ namespace Simd
                 AddValue<true>(value, dst, aligned, partial, size);
             else
                 AddValue<false>(value, dst, aligned, partial, size);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -241,7 +236,6 @@ namespace Simd
                 NeuralConvert<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralConvert<false>(src, srcStride, width, height, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -272,7 +266,6 @@ namespace Simd
                 NeuralDerivativeRelu<true>(src, size, slope, dst);
             else
                 NeuralDerivativeRelu<false>(src, size, slope, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -301,7 +294,6 @@ namespace Simd
                 NeuralDerivativeSigmoid<true>(src, size, slope, dst);
             else
                 NeuralDerivativeSigmoid<false>(src, size, slope, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -330,7 +322,6 @@ namespace Simd
                 NeuralDerivativeTanh<true>(src, size, slope, dst);
             else
                 NeuralDerivativeTanh<false>(src, size, slope, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -434,7 +425,6 @@ namespace Simd
                 NeuralPooling1x1Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling1x1Max3x3<false>(src, srcStride, width, height, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -492,7 +482,6 @@ namespace Simd
                 NeuralPooling2x2Max2x2<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max2x2<false>(src, srcStride, width, height, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -585,7 +574,6 @@ namespace Simd
                 NeuralPooling2x2Max3x3<true>(src, srcStride, width, height, dst, dstStride);
             else
                 NeuralPooling2x2Max3x3<false>(src, srcStride, width, height, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -612,7 +600,6 @@ namespace Simd
                 NeuralPow<true>(src, size, exponent, dst);
             else
                 NeuralPow<false>(src, size, exponent, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -661,7 +648,6 @@ namespace Simd
                 NeuralProductSum<true>(a, b, size, sum);
             else
                 NeuralProductSum<false>(a, b, size, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -699,7 +685,6 @@ namespace Simd
                 NeuralRoughSigmoid<true>(src, size, slope, dst);
             else
                 NeuralRoughSigmoid<false>(src, size, slope, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -747,7 +732,6 @@ namespace Simd
                 NeuralRoughSigmoid2<true>(src, size, slope, dst);
             else
                 NeuralRoughSigmoid2<false>(src, size, slope, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -785,7 +769,6 @@ namespace Simd
                 NeuralRoughTanh<true>(src, size, slope, dst);
             else
                 NeuralRoughTanh<false>(src, size, slope, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -837,7 +820,6 @@ namespace Simd
                 NeuralUpdateWeights<true>(x, size, *a, *b, d, w);
             else
                 NeuralUpdateWeights<false>(x, size, *a, *b, d, w);
-            Sse2::Empty();
         }
     }
 #endif

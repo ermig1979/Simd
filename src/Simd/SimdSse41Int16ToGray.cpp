@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -61,7 +60,6 @@ namespace Simd
                 Int16ToGray<true>((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
             else
                 Int16ToGray<false>((const int16_t *)src, width, height, srcStride / sizeof(int16_t), dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

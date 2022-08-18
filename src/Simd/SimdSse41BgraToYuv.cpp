@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -132,7 +131,6 @@ namespace Simd
                 BgraToYuv420p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv420p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -194,7 +192,6 @@ namespace Simd
                 BgraToYuv422p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv422p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -252,7 +249,6 @@ namespace Simd
                 BgraToYuv444p<true>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
             else
                 BgraToYuv444p<false>(bgra, width, height, bgraStride, y, yStride, u, uStride, v, vStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -348,7 +344,6 @@ namespace Simd
                 BgraToYuva420p<true>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
             else
                 BgraToYuva420p<false>(bgra, bgraStride, width, height, y, yStride, u, uStride, v, vStride, a, aStride);
-            Sse2::Empty();
         }
     }
 #endif

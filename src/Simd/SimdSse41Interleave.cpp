@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -71,7 +70,6 @@ namespace Simd
                 InterleaveUv<true>(u, uStride, v, vStride, width, height, uv, uvStride);
             else
                 InterleaveUv<false>(u, uStride, v, vStride, width, height, uv, uvStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -118,7 +116,6 @@ namespace Simd
                 InterleaveBgr<true>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
             else
                 InterleaveBgr<false>(b, bStride, g, gStride, r, rStride, width, height, bgr, bgrStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -171,7 +168,6 @@ namespace Simd
                 InterleaveBgra<true>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
             else
                 InterleaveBgra<false>(b, bStride, g, gStride, r, rStride, a, aStride, width, height, bgra, bgraStride);
-            Sse2::Empty();
         }
     }
 #endif

@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -80,7 +79,6 @@ namespace Simd
                 SquaredDifferenceSum<true>(a, aStride, b, bStride, width, height, sum);
             else
                 SquaredDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -132,7 +130,6 @@ namespace Simd
                 SquaredDifferenceSumMasked<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
             else
                 SquaredDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -182,7 +179,6 @@ namespace Simd
                 SquaredDifferenceSum32f<true>(a, b, size, sum);
             else
                 SquaredDifferenceSum32f<false>(a, b, size, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -235,7 +231,6 @@ namespace Simd
                 SquaredDifferenceKahanSum32f<true>(a, b, size, sum);
             else
                 SquaredDifferenceKahanSum32f<false>(a, b, size, sum);
-            Sse2::Empty();
         }
     }
 #endif

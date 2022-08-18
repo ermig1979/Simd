@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -69,7 +68,6 @@ namespace Simd
                 AbsGradientSaturatedSum<true>(src, srcStride, width, height, dst, dstStride);
             else
                 AbsGradientSaturatedSum<false>(src, srcStride, width, height, dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

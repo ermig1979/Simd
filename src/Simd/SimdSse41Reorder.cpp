@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -55,7 +54,6 @@ namespace Simd
                 Reorder16bit<true>(src, size, dst);
             else
                 Reorder16bit<false>(src, size, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -85,7 +83,6 @@ namespace Simd
                 Reorder32bit<true>(src, size, dst);
             else
                 Reorder32bit<false>(src, size, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -115,7 +112,6 @@ namespace Simd
                 Reorder64bit<true>(src, size, dst);
             else
                 Reorder64bit<false>(src, size, dst);
-            Sse2::Empty();
         }
     }
 #endif

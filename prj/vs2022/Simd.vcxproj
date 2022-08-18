@@ -42,6 +42,7 @@
     <ClInclude Include="..\..\src\Simd\SimdDefs.h" />
     <ClInclude Include="..\..\src\Simd\SimdDetection.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdDrawing.hpp" />
+    <ClInclude Include="..\..\src\Simd\SimdEmpty.h" />
     <ClInclude Include="..\..\src\Simd\SimdEnable.h" />
     <ClInclude Include="..\..\src\Simd\SimdExp.h" />
     <ClInclude Include="..\..\src\Simd\SimdExtract.h" />

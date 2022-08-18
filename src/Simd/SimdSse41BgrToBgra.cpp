@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -79,7 +78,6 @@ namespace Simd
                 Bgr48pToBgra32<true>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
             else
                 Bgr48pToBgra32<false>(blue, blueStride, width, height, green, greenStride, red, redStride, bgra, bgraStride, alpha);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -120,7 +118,6 @@ namespace Simd
                 BgrToBgra<true>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
             else
                 BgrToBgra<false>(bgr, width, height, bgrStride, bgra, bgraStride, alpha);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -161,7 +158,6 @@ namespace Simd
                 RgbToBgra<true>(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
             else
                 RgbToBgra<false>(rgb, width, height, rgbStride, bgra, bgraStride, alpha);
-            Sse2::Empty();
         }
     }
 #endif

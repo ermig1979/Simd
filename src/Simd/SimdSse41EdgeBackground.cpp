@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -70,7 +69,6 @@ namespace Simd
                 EdgeBackgroundGrowRangeSlow<true>(value, valueStride, width, height, background, backgroundStride);
             else
                 EdgeBackgroundGrowRangeSlow<false>(value, valueStride, width, height, background, backgroundStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -111,7 +109,6 @@ namespace Simd
                 EdgeBackgroundGrowRangeFast<true>(value, valueStride, width, height, background, backgroundStride);
             else
                 EdgeBackgroundGrowRangeFast<false>(value, valueStride, width, height, background, backgroundStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -162,7 +159,6 @@ namespace Simd
             else
                 EdgeBackgroundIncrementCount<false>(value, valueStride, width, height,
                     backgroundValue, backgroundValueStride, backgroundCount, backgroundCountStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -217,7 +213,6 @@ namespace Simd
             else
                 EdgeBackgroundAdjustRange<false>(backgroundCount, backgroundCountStride, width, height,
                     backgroundValue, backgroundValueStride, threshold);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -265,7 +260,6 @@ namespace Simd
             else
                 EdgeBackgroundAdjustRangeMasked<false>(backgroundCount, backgroundCountStride, width, height, backgroundValue, backgroundValueStride,
                     threshold, mask, maskStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -309,7 +303,6 @@ namespace Simd
                 EdgeBackgroundShiftRangeMasked<true>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
             else
                 EdgeBackgroundShiftRangeMasked<false>(value, valueStride, width, height, background, backgroundStride, mask, maskStride);
-            Sse2::Empty();
         }
     }
 #endif

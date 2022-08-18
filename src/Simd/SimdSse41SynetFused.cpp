@@ -28,7 +28,6 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -172,7 +171,6 @@ namespace Simd
                 SynetFusedLayerForward0Nchw4c(src, bias, scale, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward0(src, bias, scale, channels, spatial, dst, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -314,7 +312,6 @@ namespace Simd
                 SynetFusedLayerForward1Nchw4c(src, bias0, scale1, bias1, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward1(src, bias0, scale1, bias1, channels, spatial, dst, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -458,7 +455,6 @@ namespace Simd
                 SynetFusedLayerForward2Nchw4c(src, scale, bias, channels, spatial, slope, dst);
             else
                 Base::SynetFusedLayerForward2(src, scale, bias, channels, spatial, slope, dst, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -601,7 +597,6 @@ namespace Simd
                 SynetFusedLayerForward3Nchw4c(src, bias, scale, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward3(src, bias, scale, channels, spatial, dst, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -751,7 +746,6 @@ namespace Simd
                 SynetFusedLayerForward4Nchw4cA(src, bias0, scale1, bias1, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward4(src, bias0, scale1, bias1, channels, spatial, dst, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -887,7 +881,6 @@ namespace Simd
                 SynetFusedLayerForward8Nchw4c(src0, src1, src2, channels, spatial, dst);
             else
                 Base::SynetFusedLayerForward8(src0, src1, src2, channels, spatial, dst, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -1227,7 +1220,6 @@ namespace Simd
                 SynetFusedLayerForward9Nchw4cA(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1);
             else
                 Base::SynetFusedLayerForward9(src0, src1, scale, bias, channels0, channels1, spatial, dst0, dst1, format);
-            Sse2::Empty();
         }
     }
 #endif

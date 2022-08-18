@@ -28,7 +28,6 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSynetScale8i.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -325,7 +324,6 @@ namespace Simd
                 SynetScaleLayerForwardNchw4c(src, scale, bias, channels, spatial, dst);
             else
                 Base::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
-            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------
@@ -506,7 +504,6 @@ namespace Simd
                 ScaleNhwc(src, _scale.data, _shift.data, p.batch, p.channels, p.spatial, _dstCvt.uMax, dst);
             else
                 Base::SynetScale8i::Scale(src, dst);
-            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------
@@ -667,7 +664,6 @@ namespace Simd
                 ScaleNhwc(src, _scale.data, _shift.data, p.batch, p.channels, p.spatial, dst);
             else
                 Base::SynetScale8i::Scale(src, dst);
-            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------
@@ -836,7 +832,6 @@ namespace Simd
                 ScaleNhwc(src, _scale.data, _shift.data, p.batch, p.channels, p.spatial, _dstCvt.uMax, dst);
             else
                 Base::SynetScale8i::Scale(src, dst);
-            Sse2::Empty();
         }
 
         //---------------------------------------------------------------------

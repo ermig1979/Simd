@@ -46,6 +46,7 @@
  <li>Buffer overrun in AVX-512BW optimizations of class ResizerByteArea2x2.</li>
  <li>Buffer overrun in AVX-512BW optimizations of function TransformImage.</li>
  <li>Error in AVX-512BW optimizations of function Yuv420pToUyvy422.</li>
+ <li>Crash in std::unordered_map after calling of some Simd function (Simd does not clear MMX registers after using).</li>
 </ul>
 <h5>Replacing</h5>
 <ul>

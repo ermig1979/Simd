@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -128,7 +127,6 @@ namespace Simd
                 AlphaBlending<true>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
             else
                 AlphaBlending<false>(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -164,7 +162,6 @@ namespace Simd
                 AlphaBlendingUniform<true>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
             else
                 AlphaBlendingUniform<false>(src, srcStride, width, height, channelCount, alpha, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -277,7 +274,6 @@ namespace Simd
                 AlphaFilling<true>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
             else
                 AlphaFilling<false>(dst, dstStride, width, height, channel, channelCount, alpha, alphaStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -309,7 +305,6 @@ namespace Simd
                 src += srcStride;
                 dst += dstStride;
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -352,7 +347,6 @@ namespace Simd
                 src += srcStride;
                 dst += dstStride;
             }
-            Sse2::Empty();
         }
     }
 #endif

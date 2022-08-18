@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdDeinterleave.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -74,7 +73,6 @@ namespace Simd
                 DeinterleaveUv<true>(uv, uvStride, width, height, u, uStride, v, vStride);
             else
                 DeinterleaveUv<false>(uv, uvStride, width, height, u, uStride, v, vStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -116,7 +114,6 @@ namespace Simd
                 DeinterleaveBgr<true>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
             else
                 DeinterleaveBgr<false>(bgr, bgrStride, width, height, b, bStride, g, gStride, r, rStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -196,7 +193,6 @@ namespace Simd
                 DeinterleaveBgra<true>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
             else
                 DeinterleaveBgra<false>(bgra, bgraStride, width, height, b, bStride, g, gStride, r, rStride, a, aStride);
-            Sse2::Empty();
         }
     }
 #endif

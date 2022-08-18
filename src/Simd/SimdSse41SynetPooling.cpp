@@ -29,7 +29,6 @@
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
 #include "Simd/SimdSse41.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -206,7 +205,6 @@ namespace Simd
                             }
                         }
                     }
-                    Sse2::Empty();
                     return;
                 }
             }
@@ -632,7 +630,6 @@ namespace Simd
             else
                 SynetPoolingMax32f3D(src, srcC, srcH, srcW, kernelC, kernelY, kernelX,
                     strideC, strideY, strideX, padC, padY, padX, dst, dstC, dstH, dstW, format);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -778,7 +775,6 @@ namespace Simd
             }
             else
                 assert(0);
-            Sse2::Empty();
         }
     }
 #endif// SIMD_SSE41_ENABLE

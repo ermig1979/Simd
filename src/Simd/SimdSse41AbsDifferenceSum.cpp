@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdLoad.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -68,7 +67,6 @@ namespace Simd
                 AbsDifferenceSum<true>(a, aStride, b, bStride, width, height, sum);
             else
                 AbsDifferenceSum<false>(a, aStride, b, bStride, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -117,7 +115,6 @@ namespace Simd
                 AbsDifferenceSumMasked<true>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
             else
                 AbsDifferenceSumMasked<false>(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -196,7 +193,6 @@ namespace Simd
                 AbsDifferenceSums3x3<true>(current, currentStride, background, backgroundStride, width, height, sums);
             else
                 AbsDifferenceSums3x3<false>(current, currentStride, background, backgroundStride, width, height, sums);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -252,7 +248,6 @@ namespace Simd
                 AbsDifferenceSums3x3Masked<true>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
             else
                 AbsDifferenceSums3x3Masked<false>(current, currentStride, background, backgroundStride, mask, maskStride, index, width, height, sums);
-            Sse2::Empty();
         }
     }
 #endif

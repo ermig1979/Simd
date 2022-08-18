@@ -771,5 +771,5 @@ namespace Simd
                 Image(hid.sum.width - 1, hid.sum.height - 1, dstStride, Image::Gray8, dst).Ref());
         }
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 }

@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -186,7 +185,6 @@ namespace Simd
                 GetObjectMoments<true>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
             else
                 GetObjectMoments<false>(src, srcStride, width, height, mask, maskStride, index, n, s, sx, sy, sxx, sxy, syy);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------

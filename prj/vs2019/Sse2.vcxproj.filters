@@ -37,9 +37,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetFused.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd1.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>

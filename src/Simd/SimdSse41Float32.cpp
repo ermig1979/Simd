@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -87,7 +86,6 @@ namespace Simd
                 CosineDistance32f<true>(a, b, size, distance);
             else
                 CosineDistance32f<false>(a, b, size, distance);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -129,7 +127,6 @@ namespace Simd
                 Float32ToUint8<true>(src, size, lower, upper, dst);
             else
                 Float32ToUint8<false>(src, size, lower, upper, dst);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -172,7 +169,6 @@ namespace Simd
                 Uint8ToFloat32<true>(src, size, lower, upper, dst);
             else
                 Uint8ToFloat32<false>(src, size, lower, upper, dst);
-            Sse2::Empty();
         }
     }
 #endif

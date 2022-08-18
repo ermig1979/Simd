@@ -26,7 +26,6 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -95,7 +94,6 @@ namespace Simd
                 SobelDx<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDx<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -108,7 +106,6 @@ namespace Simd
                 SobelDx<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -178,7 +175,6 @@ namespace Simd
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
             }
             *sum = Sse2::ExtractInt64Sum(fullSum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -242,7 +238,6 @@ namespace Simd
                 SobelDy<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDy<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -255,7 +250,6 @@ namespace Simd
                 SobelDy<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -316,7 +310,6 @@ namespace Simd
                 SobelDyAbsSum<true>(src, stride, width, height, sum);
             else
                 SobelDyAbsSum<false>(src, stride, width, height, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -381,7 +374,6 @@ namespace Simd
                 ContourAnchors<true>((const int16_t*)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
             else
                 ContourAnchors<false>((const int16_t*)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -456,7 +448,6 @@ namespace Simd
                 ContourMetrics<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -522,7 +513,6 @@ namespace Simd
                 ContourMetricsMasked<true>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
-            Sse2::Empty();
         }
     }
 #endif

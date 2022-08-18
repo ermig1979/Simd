@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -76,7 +75,6 @@ namespace Simd
                 InterferenceChange<true, true>((int16_t*)statistic, stride / 2, width, height, increment, saturation);
             else
                 InterferenceChange<false, true>((int16_t*)statistic, stride / 2, width, height, increment, saturation);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -89,7 +87,6 @@ namespace Simd
                 InterferenceChange<true, false>((int16_t*)statistic, stride / 2, width, height, decrement, saturation);
             else
                 InterferenceChange<false, false>((int16_t*)statistic, stride / 2, width, height, decrement, saturation);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -135,7 +132,6 @@ namespace Simd
                 InterferenceChangeMasked<true, true>((int16_t*)statistic, statisticStride / 2, width, height, increment, saturation, mask, maskStride, index);
             else
                 InterferenceChangeMasked<false, true>((int16_t*)statistic, statisticStride / 2, width, height, increment, saturation, mask, maskStride, index);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -149,7 +145,6 @@ namespace Simd
                 InterferenceChangeMasked<true, false>((int16_t*)statistic, statisticStride / 2, width, height, decrement, saturation, mask, maskStride, index);
             else
                 InterferenceChangeMasked<false, false>((int16_t*)statistic, statisticStride / 2, width, height, decrement, saturation, mask, maskStride, index);
-            Sse2::Empty();
         }
     }
 #endif

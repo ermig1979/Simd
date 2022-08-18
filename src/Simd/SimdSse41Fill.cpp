@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -57,7 +56,6 @@ namespace Simd
                 for (; dst < end;)
                     *dst++ = v;
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -106,7 +104,6 @@ namespace Simd
                 FillBgr<true>(dst, stride, width, height, blue, green, red);
             else
                 FillBgr<false>(dst, stride, width, height, blue, green, red);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -136,7 +133,6 @@ namespace Simd
                 FillBgra<true>(dst, stride, width, height, blue, green, red, alpha);
             else
                 FillBgra<false>(dst, stride, width, height, blue, green, red, alpha);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -198,7 +194,6 @@ namespace Simd
                 FillPixel<true>(dst, stride, width, height, pixel, pixelSize);
             else
                 FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
-            Sse2::Empty();
         }
     }
 #endif

@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdSynet.h"
@@ -384,7 +384,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetScaleLayerForwardNhwc(src, scale, bias, channels, height, width, dst, compatibility);
             else if (format == SimdTensorFormatNchw4c)
-                Sse2::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
+                Sse41::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
             else if (format == SimdTensorFormatNchw8c)
                 Avx2::SynetScaleLayerForward(src, scale, bias, channels, height, width, dst, format, compatibility);
             else if (format == SimdTensorFormatNchw16c)

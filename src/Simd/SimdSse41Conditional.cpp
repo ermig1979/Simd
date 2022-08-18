@@ -25,7 +25,6 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdCompare.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -90,7 +89,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -154,7 +152,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         template <bool align, SimdCompareType compareType>
@@ -220,7 +217,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -297,7 +293,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -388,7 +383,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -454,7 +448,6 @@ namespace Simd
             default:
                 assert(0);
             }
-            Sse2::Empty();
         }
     }
 #endif

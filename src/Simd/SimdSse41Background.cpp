@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -76,7 +75,6 @@ namespace Simd
                 BackgroundGrowRangeSlow<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
             else
                 BackgroundGrowRangeSlow<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -122,7 +120,6 @@ namespace Simd
                 BackgroundGrowRangeFast<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
             else
                 BackgroundGrowRangeFast<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -183,7 +180,6 @@ namespace Simd
             else
                 BackgroundIncrementCount<false>(value, valueStride, width, height,
                     loValue, loValueStride, hiValue, hiValueStride, loCount, loCountStride, hiCount, hiCountStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -254,7 +250,6 @@ namespace Simd
             else
                 BackgroundAdjustRange<false>(loCount, loCountStride, width, height, loValue, loValueStride,
                     hiCount, hiCountStride, hiValue, hiValueStride, threshold);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -307,7 +302,6 @@ namespace Simd
             else
                 BackgroundAdjustRangeMasked<false>(loCount, loCountStride, width, height, loValue, loValueStride,
                     hiCount, hiCountStride, hiValue, hiValueStride, threshold, mask, maskStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -357,7 +351,6 @@ namespace Simd
                 BackgroundShiftRange<true>(value, valueStride, width, height, lo, loStride, hi, hiStride);
             else
                 BackgroundShiftRange<false>(value, valueStride, width, height, lo, loStride, hi, hiStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -404,7 +397,6 @@ namespace Simd
                 BackgroundShiftRangeMasked<true>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
             else
                 BackgroundShiftRangeMasked<false>(value, valueStride, width, height, lo, loStride, hi, hiStride, mask, maskStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -448,7 +440,6 @@ namespace Simd
                 BackgroundInitMask<true>(src, srcStride, width, height, index, value, dst, dstStride);
             else
                 BackgroundInitMask<false>(src, srcStride, width, height, index, value, dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

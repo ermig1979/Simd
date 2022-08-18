@@ -24,7 +24,6 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdStore.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -79,7 +78,6 @@ namespace Simd
                 LbpEstimate<true>(src, srcStride, width, height, dst, dstStride);
             else
                 LbpEstimate<false>(src, srcStride, width, height, dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

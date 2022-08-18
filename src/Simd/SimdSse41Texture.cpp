@@ -26,7 +26,6 @@
 #include "Simd/SimdSet.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -101,7 +100,6 @@ namespace Simd
                 TextureBoostedSaturatedGradient<true>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
             else
                 TextureBoostedSaturatedGradient<false>(src, srcStride, width, height, saturation, boost, dx, dxStride, dy, dyStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -151,7 +149,6 @@ namespace Simd
                 TextureBoostedUv<true>(src, srcStride, width, height, boost, dst, dstStride);
             else
                 TextureBoostedUv<false>(src, srcStride, width, height, boost, dst, dstStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -201,7 +198,6 @@ namespace Simd
                 TextureGetDifferenceSum<true>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
             else
                 TextureGetDifferenceSum<false>(src, srcStride, width, height, lo, loStride, hi, hiStride, sum);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -270,7 +266,6 @@ namespace Simd
                 TexturePerformCompensation<true>(src, srcStride, width, height, shift, dst, dstStride);
             else
                 TexturePerformCompensation<false>(src, srcStride, width, height, shift, dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -183,7 +182,6 @@ namespace Simd
                 ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
             else
                 Base::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
-            Sse2::Empty();
         }
     }
 #endif

@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -88,7 +87,6 @@ namespace Simd
                 BgraToGray<true>(bgra, width, height, bgraStride, gray, grayStride);
             else
                 BgraToGray<false>(bgra, width, height, bgraStride, gray, grayStride);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -141,7 +139,6 @@ namespace Simd
                 RgbaToGray<true>(rgba, width, height, rgbaStride, gray, grayStride);
             else
                 RgbaToGray<false>(rgba, width, height, rgbaStride, gray, grayStride);
-            Sse2::Empty();
         }
     }
 #endif

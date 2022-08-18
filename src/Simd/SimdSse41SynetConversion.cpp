@@ -27,7 +27,6 @@
 #include "Simd/SimdTranspose.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -170,7 +169,6 @@ namespace Simd
             }
             else
                 assert(0);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -271,7 +269,6 @@ namespace Simd
             }
             else
                 assert(0);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -595,7 +592,6 @@ namespace Simd
                 }
             default: assert(0);
             }
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -828,7 +824,6 @@ namespace Simd
             }
             else
                 Base::SynetReorderImage(batch, channels, spatial, src, srcFormat, dst, dstFormat);
-            Sse2::Empty();
         }
 
         //-----------------------------------------------------------------------------------------
@@ -1097,7 +1092,6 @@ namespace Simd
                 filterConverter(output, input, kernel, src, dst);
             else
                 Base::SynetReorderFilter(output, input, kernel, src, srcFormat, dst, dstFormat);
-            Sse2::Empty();
         }
     }
 #endif
