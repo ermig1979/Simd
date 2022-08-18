@@ -438,11 +438,6 @@ namespace Test
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDx), FUNC_G(SimdSobelDx));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDx), FUNC_G(SimdSobelDx));
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)
             result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse41::SobelDx), FUNC_G(SimdSobelDx));
@@ -510,11 +505,6 @@ namespace Test
         bool result = true;
 
         result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Base::SobelDy), FUNC_G(SimdSobelDy));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W - 1 >= Simd::Sse2::A)
-            result = result && GrayFilterAutoTest(View::Int16, FUNC_G(Simd::Sse2::SobelDy), FUNC_G(SimdSobelDy));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable && W - 1 >= Simd::Sse41::A)

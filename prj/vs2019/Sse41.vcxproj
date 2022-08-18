@@ -75,6 +75,7 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41ResizerBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41ResizerNearest.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Segmentation.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41ShiftBilinear.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Sobel.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41SquaredDifferenceSum.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Statistic.cpp" />

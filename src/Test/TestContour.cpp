@@ -180,9 +180,9 @@ namespace Test
 
         result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Base::ContourAnchors), FUNC_A(SimdContourAnchors));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W > Simd::Sse2::A)
-            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Sse2::ContourAnchors), FUNC_A(SimdContourAnchors));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W > Simd::Sse41::A)
+            result = result && ContourAnchorsAutoTest(FUNC_A(Simd::Sse41::ContourAnchors), FUNC_A(SimdContourAnchors));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

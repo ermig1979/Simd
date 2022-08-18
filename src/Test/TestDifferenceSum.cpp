@@ -193,11 +193,6 @@ namespace Test
 
         result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Base::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sse2::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
-#endif 
-
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
             result = result && DifferenceSumsAutoTest(FUNC_S(Simd::Sse41::SquaredDifferenceSum), FUNC_S(SimdSquaredDifferenceSum), 1);
@@ -231,11 +226,6 @@ namespace Test
         bool result = true;
 
         result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Base::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked), 1);
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && DifferenceSumsMaskedAutoTest(FUNC_M(Simd::Sse2::SquaredDifferenceSumMasked), FUNC_M(SimdSquaredDifferenceSumMasked), 1);
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)
@@ -407,9 +397,9 @@ namespace Test
 
         result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Base::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse2::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS, FUNC_F(Simd::Sse41::SquaredDifferenceSum32f), FUNC_F(SimdSquaredDifferenceSum32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -441,9 +431,9 @@ namespace Test
 
         result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Base::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Sse2::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && DifferenceSum32fAutoTest(EPS*EPS, FUNC_F(Simd::Sse41::SquaredDifferenceKahanSum32f), FUNC_F(SimdSquaredDifferenceKahanSum32f));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE

@@ -4691,9 +4691,9 @@ SIMD_API void SimdShiftBilinear(const uint8_t * src, size_t srcStride, size_t wi
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable)
-        Sse2::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable)
+        Sse41::ShiftBilinear(src, srcStride, width, height, channelCount, bkg, bkgStride,
         shiftX, shiftY, cropLeft, cropTop, cropRight, cropBottom, dst, dstStride);
     else
 #endif
@@ -4728,11 +4728,6 @@ SIMD_API void SimdSobelDx(const uint8_t * src, size_t srcStride, size_t width, s
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::SobelDx(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width > Sse2::A)
-        Sse2::SobelDx(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4823,11 +4818,6 @@ SIMD_API void SimdSobelDy(const uint8_t * src, size_t srcStride, size_t width, s
 #ifdef SIMD_SSE41_ENABLE
     if(Sse41::Enable && width > Sse41::A)
         Sse41::SobelDy(src, srcStride, width, height, dst, dstStride);
-    else
-#endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width > Sse2::A)
-        Sse2::SobelDy(src, srcStride, width, height, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -4976,9 +4966,9 @@ SIMD_API void SimdContourAnchors(const uint8_t * src, size_t srcStride, size_t w
         Avx2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width > Sse2::A)
-        Sse2::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
+#ifdef SIMD_SSE41_ENABLE
+    if(Sse41::Enable && width > Sse41::A)
+        Sse41::ContourAnchors(src, srcStride, width, height, step, threshold, dst, dstStride);
     else
 #endif
 #ifdef SIMD_VMX_ENABLE
@@ -5012,11 +5002,6 @@ SIMD_API void SimdSquaredDifferenceSum(const uint8_t *a, size_t aStride, const u
         Sse41::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::SquaredDifferenceSum(a, aStride, b, bStride, width, height, sum);
@@ -5048,11 +5033,6 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
         Sse41::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
     else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-    if(Sse2::Enable && width >= Sse2::A)
-        Sse2::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
-    else
-#endif
 #ifdef SIMD_VMX_ENABLE
     if(Vmx::Enable && width >= Vmx::A)
         Vmx::SquaredDifferenceSumMasked(a, aStride, b, bStride, mask, maskStride, index, width, height, sum);
@@ -5069,7 +5049,7 @@ SIMD_API void SimdSquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, c
 SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size_t size, float * sum)
 {
     typedef void (* SimdSquaredDifferenceSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC5(SquaredDifferenceSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdSquaredDifferenceSum32fPtr simdSquaredDifferenceSum32f = SIMD_FUNC5(SquaredDifferenceSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
     simdSquaredDifferenceSum32f(a, b, size, sum);
 }
@@ -5077,7 +5057,7 @@ SIMD_API void SimdSquaredDifferenceSum32f(const float * a, const float * b, size
 SIMD_API void SimdSquaredDifferenceKahanSum32f(const float * a, const float * b, size_t size, float * sum)
 {
     typedef void (* SimdSquaredDifferenceKahanSum32fPtr) (const float * a, const float * b, size_t size, float * sum);
-    const static SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC5(SquaredDifferenceKahanSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE2_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
+    const static SimdSquaredDifferenceKahanSum32fPtr simdSquaredDifferenceKahanSum32f = SIMD_FUNC5(SquaredDifferenceKahanSum32f, SIMD_AVX512BW_FUNC, SIMD_AVX_FUNC, SIMD_SSE41_FUNC, SIMD_VSX_FUNC, SIMD_NEON_FUNC);
 
     simdSquaredDifferenceKahanSum32f(a, b, size, sum);
 }

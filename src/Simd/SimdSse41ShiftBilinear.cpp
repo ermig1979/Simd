@@ -23,11 +23,12 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         const __m128i K16_LINEAR_ROUND_TERM = SIMD_MM_SET1_EPI16(Base::LINEAR_ROUND_TERM);
         const __m128i K16_BILINEAR_ROUND_TERM = SIMD_MM_SET1_EPI16(Base::BILINEAR_ROUND_TERM);
@@ -179,11 +180,12 @@ namespace Simd
                 cropLeft, cropTop, cropRight, cropBottom, dst, dstStride, fDx, fDy);
 
             if (*shiftX + A < cropRight - cropLeft)
-                Sse2::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
+                ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
             else
                 Base::ShiftBilinear(src, srcStride, width, height, channelCount, fDx, fDy, dst, dstStride);
+            Sse2::Empty();
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif
 }
 

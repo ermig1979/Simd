@@ -26,6 +26,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdCpu.h"
 
 namespace Simd
 {
@@ -94,7 +95,10 @@ namespace Simd
                 SobelDx<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDx<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         void SobelDxAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
@@ -104,7 +108,10 @@ namespace Simd
                 SobelDx<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDx<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void SobelDxAbsSum(__m128i a[3][3], __m128i & sum)
         {
@@ -171,7 +178,10 @@ namespace Simd
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
             }
             *sum = Sse2::ExtractInt64Sum(fullSum);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template<bool abs> SIMD_INLINE void SobelDy(__m128i a[3][3], __m128i & lo, __m128i & hi)
         {
@@ -232,7 +242,10 @@ namespace Simd
                 SobelDy<true, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDy<false, false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         void SobelDyAbs(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride)
         {
@@ -242,7 +255,10 @@ namespace Simd
                 SobelDy<true, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 SobelDy<false, true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE void SobelDyAbsSum(__m128i a[3][3], __m128i & sum)
         {
@@ -300,7 +316,75 @@ namespace Simd
                 SobelDyAbsSum<true>(src, stride, width, height, sum);
             else
                 SobelDyAbsSum<false>(src, stride, width, height, sum);
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
+
+        template<bool align> SIMD_INLINE __m128i AnchorComponent(const int16_t* src, size_t step, const __m128i& current, const __m128i& threshold, const __m128i& mask)
+        {
+            __m128i last = _mm_srli_epi16(Load<align>((__m128i*)(src - step)), 1);
+            __m128i next = _mm_srli_epi16(Load<align>((__m128i*)(src + step)), 1);
+            return _mm_andnot_si128(_mm_or_si128(_mm_cmplt_epi16(_mm_sub_epi16(current, last), threshold),
+                _mm_cmplt_epi16(_mm_sub_epi16(current, next), threshold)), mask);
+        }
+
+        template<bool align> SIMD_INLINE __m128i Anchor(const int16_t* src, size_t stride, const __m128i& threshold)
+        {
+            __m128i _src = Load<align>((__m128i*)src);
+            __m128i direction = _mm_and_si128(_src, K16_0001);
+            __m128i magnitude = _mm_srli_epi16(_src, 1);
+            __m128i vertical = AnchorComponent<false>(src, 1, magnitude, threshold, _mm_cmpeq_epi16(direction, K16_0001));
+            __m128i horizontal = AnchorComponent<align>(src, stride, magnitude, threshold, _mm_cmpeq_epi16(direction, K_ZERO));
+            return _mm_andnot_si128(_mm_cmpeq_epi16(magnitude, K_ZERO), _mm_and_si128(_mm_or_si128(vertical, horizontal), K16_00FF));
+        }
+
+        template<bool align> SIMD_INLINE void Anchor(const int16_t* src, size_t stride, const __m128i& threshold, uint8_t* dst)
+        {
+            __m128i lo = Anchor<align>(src, stride, threshold);
+            __m128i hi = Anchor<align>(src + HA, stride, threshold);
+            Store<align>((__m128i*)dst, _mm_packus_epi16(lo, hi));
+        }
+
+        template <bool align> void ContourAnchors(const int16_t* src, size_t srcStride, size_t width, size_t height,
+            size_t step, int16_t threshold, uint8_t* dst, size_t dstStride)
+        {
+            assert(width > A);
+            if (align)
+                assert(Aligned(src) && Aligned(srcStride, HA) && Aligned(dst) && Aligned(dstStride));
+
+            size_t bodyWidth = Simd::AlignHi(width, A) - A;
+            __m128i _threshold = _mm_set1_epi16(threshold);
+            memset(dst, 0, width);
+            memset(dst + dstStride * (height - 1), 0, width);
+            src += srcStride;
+            dst += dstStride;
+            for (size_t row = 1; row < height - 1; row += step)
+            {
+                dst[0] = 0;
+                Anchor<false>(src + 1, srcStride, _threshold, dst + 1);
+                for (size_t col = A; col < bodyWidth; col += A)
+                    Anchor<align>(src + col, srcStride, _threshold, dst + col);
+                Anchor<false>(src + width - A - 1, srcStride, _threshold, dst + width - A - 1);
+                dst[width - 1] = 0;
+                src += step * srcStride;
+                dst += step * dstStride;
+            }
+        }
+
+        void ContourAnchors(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t step, int16_t threshold, uint8_t* dst, size_t dstStride)
+        {
+            assert(srcStride % sizeof(int16_t) == 0);
+
+            if (Aligned(src) && Aligned(srcStride) && Aligned(dst) && Aligned(dstStride))
+                ContourAnchors<true>((const int16_t*)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
+            else
+                ContourAnchors<false>((const int16_t*)src, srcStride / sizeof(int16_t), width, height, step, threshold, dst, dstStride);
+            Sse2::Empty();
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         SIMD_INLINE __m128i ContourMetrics(__m128i dx, __m128i dy)
         {
@@ -372,7 +456,10 @@ namespace Simd
                 ContourMetrics<true>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 ContourMetrics<false>(src, srcStride, width, height, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
+
+        //-----------------------------------------------------------------------------------------
 
         template<bool align> SIMD_INLINE void ContourMetricsMasked(__m128i a[3][3], const uint8_t * mask, const __m128i & indexMin, int16_t * dst)
         {
@@ -435,6 +522,7 @@ namespace Simd
                 ContourMetricsMasked<true>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
             else
                 ContourMetricsMasked<false>(src, srcStride, width, height, mask, maskStride, indexMin, (int16_t *)dst, dstStride / sizeof(int16_t));
+            Sse2::Empty();
         }
     }
 #endif

@@ -33,27 +33,6 @@ namespace Simd
     {
         void Gemm32fNN(size_t M, size_t N, size_t K, const float* alpha, const float* A, size_t lda, const float* B, size_t ldb, const float* beta, float* C, size_t ldc);
 
-        void ShiftBilinear(const uint8_t * src, size_t srcStride, size_t width, size_t height, size_t channelCount,
-            const uint8_t * bkg, size_t bkgStride, const double * shiftX, const double * shiftY,
-            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t * dst, size_t dstStride);
-
-        void SobelDx(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void SobelDy(const uint8_t * src, size_t srcStride, size_t width, size_t height, uint8_t * dst, size_t dstStride);
-
-        void ContourAnchors(const uint8_t * src, size_t srcStride, size_t width, size_t height,
-            size_t step, int16_t threshold, uint8_t * dst, size_t dstStride);
-
-        void SquaredDifferenceSum(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            size_t width, size_t height, uint64_t * sum);
-
-        void SquaredDifferenceSumMasked(const uint8_t *a, size_t aStride, const uint8_t *b, size_t bStride,
-            const uint8_t *mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t * sum);
-
-        void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum);
-
-        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum);
-
         void GetStatistic(const uint8_t * src, size_t stride, size_t width, size_t height,
             uint8_t * min, uint8_t * max, uint8_t * average);
 

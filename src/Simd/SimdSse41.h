@@ -417,6 +417,10 @@ namespace Simd
         void SegmentationShrinkRegion(const uint8_t * mask, size_t stride, size_t width, size_t height, uint8_t index,
             ptrdiff_t * left, ptrdiff_t * top, ptrdiff_t * right, ptrdiff_t * bottom);
 
+        void ShiftBilinear(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount,
+            const uint8_t* bkg, size_t bkgStride, const double* shiftX, const double* shiftY,
+            size_t cropLeft, size_t cropTop, size_t cropRight, size_t cropBottom, uint8_t* dst, size_t dstStride);
+
         void SobelDx(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
         void SobelDxAbs(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
@@ -429,6 +433,9 @@ namespace Simd
 
         void SobelDyAbsSum(const uint8_t* src, size_t stride, size_t width, size_t height, uint64_t* sum);
 
+        void ContourAnchors(const uint8_t* src, size_t srcStride, size_t width, size_t height,
+            size_t step, int16_t threshold, uint8_t* dst, size_t dstStride);
+
         void ContourMetrics(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride);
 
         void ContourMetricsMasked(const uint8_t* src, size_t srcStride, size_t width, size_t height,
@@ -436,6 +443,13 @@ namespace Simd
 
         void SquaredDifferenceSum(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
             size_t width, size_t height, uint64_t* sum);
+
+        void SquaredDifferenceSumMasked(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
+            const uint8_t* mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t* sum);
+
+        void SquaredDifferenceSum32f(const float* a, const float* b, size_t size, float* sum);
+
+        void SquaredDifferenceKahanSum32f(const float* a, const float* b, size_t size, float* sum);
 
         void SvmSumLinear(const float* x, const float* svs, const float* weights, size_t length, size_t count, float* sum);
 
@@ -456,9 +470,6 @@ namespace Simd
 
         void SynetPoolingMax8u(const uint8_t* src, size_t srcC, size_t srcH, size_t srcW, size_t kernelY, size_t kernelX,
             size_t strideY, size_t strideX, size_t padY, size_t padX, uint8_t* dst, size_t dstH, size_t dstW, SimdTensorFormatType format);
-
-        void SquaredDifferenceSumMasked(const uint8_t* a, size_t aStride, const uint8_t* b, size_t bStride,
-            const uint8_t* mask, size_t maskStride, uint8_t index, size_t width, size_t height, uint64_t* sum);
 
         void TextureBoostedSaturatedGradient(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             uint8_t saturation, uint8_t boost, uint8_t* dx, size_t dxStride, uint8_t* dy, size_t dyStride);

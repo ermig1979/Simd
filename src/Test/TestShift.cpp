@@ -113,9 +113,9 @@ namespace Test
 
         result = result && ShiftBilinearAutoTest(FUNC(Simd::Base::ShiftBilinear), FUNC(SimdShiftBilinear));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && ShiftBilinearAutoTest(FUNC(Simd::Sse2::ShiftBilinear), FUNC(SimdShiftBilinear));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && ShiftBilinearAutoTest(FUNC(Simd::Sse41::ShiftBilinear), FUNC(SimdShiftBilinear));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
