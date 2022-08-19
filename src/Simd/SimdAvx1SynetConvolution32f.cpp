@@ -339,14 +339,14 @@ namespace Simd
             }
             else
             {
-                Sse2::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
+                Sse41::ConvolutionBiasAndActivation(bias, count, size, activation, params, trans, dst);
             }
         }
 
         //---------------------------------------------------------------------
 
         SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f & p)
-            : Sse2::SynetConvolution32fGemmNN(p)
+            : Sse41::SynetConvolution32fGemmNN(p)
         {
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx"));
             if (_param.trans && _param.group == 1)
@@ -583,7 +583,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetConvolution32fWinograd::SynetConvolution32fWinograd(const ConvParam32f & p)
-            : Sse2::SynetConvolution32fWinograd(p)
+            : Sse41::SynetConvolution32fWinograd(p)
         {
             if (p.kernelY == 1 && p.kernelX == 3)
             {
@@ -667,7 +667,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetConvolution32fDepthwiseDotProduct::SynetConvolution32fDepthwiseDotProduct(const ConvParam32f & p)
-            : Sse2::SynetConvolution32fDepthwiseDotProduct(p)
+            : Sse41::SynetConvolution32fDepthwiseDotProduct(p)
         {
         }
 
@@ -731,7 +731,7 @@ namespace Simd
         //---------------------------------------------------------------------
 
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
-            : Sse2::SynetConvolution32fNhwcDirect(p)
+            : Sse41::SynetConvolution32fNhwcDirect(p)
         {
             if (p.dstC <= Sse2::F)
                 return;
@@ -771,7 +771,7 @@ namespace Simd
         void * SynetConvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility)
         {
             if (conv->activation == SimdConvolutionActivationElu || conv->activation == SimdConvolutionActivationSwish)
-                return Sse2::SynetConvolution32fInit(batch, conv, compatibility);
+                return Sse41::SynetConvolution32fInit(batch, conv, compatibility);
             ConvParam32f param(batch, conv, compatibility);
             if (!param.Valid())
                 return NULL;

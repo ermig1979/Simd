@@ -31,8 +31,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Sse41
     {
         SynetConvolution32fDirectNchw::SynetConvolution32fDirectNchw(const ConvParam32f & p)
             : Base::SynetConvolution32fDirectNchw(p)
@@ -358,21 +358,21 @@ namespace Simd
             {
             case 1:
                 if (p.kernelX == 1)
-                    return Sse2::SetConvolutionBiasActivation<1, 1>(p.activation);
+                    return Sse41::SetConvolutionBiasActivation<1, 1>(p.activation);
                 if (p.kernelX == 2)
-                    return Sse2::SetConvolutionBiasActivation<2, 1>(p.activation);
+                    return Sse41::SetConvolutionBiasActivation<2, 1>(p.activation);
                 if (p.kernelX == 3)
-                    return Sse2::SetConvolutionBiasActivation<3, 1>(p.activation);
+                    return Sse41::SetConvolutionBiasActivation<3, 1>(p.activation);
                 break;
             case 2:
                 if (p.kernelX == 2)
-                    return Sse2::SetConvolutionBiasActivation<2, 2>(p.activation);
+                    return Sse41::SetConvolutionBiasActivation<2, 2>(p.activation);
                 if (p.kernelX == 3)
-                    return Sse2::SetConvolutionBiasActivation<3, 2>(p.activation);
+                    return Sse41::SetConvolutionBiasActivation<3, 2>(p.activation);
                 break;
             case 3:
                 if (p.kernelX == 3)
-                    return Sse2::SetConvolutionBiasActivation<3, 3>(p.activation);
+                    return Sse41::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             default:
                 return Base::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();

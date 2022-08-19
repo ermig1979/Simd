@@ -31,8 +31,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)   
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)   
+    namespace Sse41
     {
         SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam32f & p)
             : Base::SynetConvolution32fDirectNhwc(p)

@@ -37,7 +37,7 @@ namespace Simd
     namespace Avx
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
-            : Sse2::SynetDeconvolution32fGemmNN(p)
+            : Sse41::SynetDeconvolution32fGemmNN(p)
         {
             _gemm.Init(InitGemmFuncs(Avx::Gemm32fNN, "Avx"));
             if (_param.trans && _param.group == 1)
@@ -210,7 +210,7 @@ namespace Simd
         }
 
         SynetDeconvolution32fNhwcDirect2x2::SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p)
-            : Sse2::SynetDeconvolution32fNhwcDirect2x2(p)
+            : Sse41::SynetDeconvolution32fNhwcDirect2x2(p)
         {
             if (p.dstC > HF)
             {
@@ -242,5 +242,5 @@ namespace Simd
                 return new SynetDeconvolution32fGemmNN(param);
         }
     }
-#endif//SIMD_AVX_ENABLE
+#endif
 }

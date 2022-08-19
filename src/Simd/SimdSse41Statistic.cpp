@@ -1,7 +1,7 @@
 /*
 * Simd Library (http://ermig1979.github.io/Simd).
 *
-* Copyright (c) 2011-2021 Yermalayeu Ihar.
+* Copyright (c) 2011-2022 Yermalayeu Ihar.
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -25,6 +25,11 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdConversion.h"
+
+#if defined(__GNUC__)
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wfree-nonheap-object"
+#endif
 
 namespace Simd
 {
@@ -141,14 +146,13 @@ namespace Simd
             size_t stepCount = (height + SCHAR_MAX) / stepSize;
 
             Array16u sums16(alignedHiWidth);
-            Array32u sums32(alignedHiWidth);
-            memset(sums32.data, 0, sizeof(uint32_t) * alignedHiWidth);
+            Array32u sums32(alignedHiWidth, true);
             for (size_t step = 0; step < stepCount; ++step)
             {
                 size_t rowStart = step * stepSize;
                 size_t rowEnd = Min(rowStart + stepSize, height);
 
-                memset(sums16.data, 0, sizeof(uint16_t) * width);
+                sums16.Clear();
                 for (size_t row = rowStart; row < rowEnd; ++row)
                 {
                     for (size_t col = 0; col < alignedLoWidth; col += A)

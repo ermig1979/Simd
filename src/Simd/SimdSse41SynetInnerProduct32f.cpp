@@ -38,7 +38,7 @@ namespace Simd
         SynetInnerProduct32fGemm::SynetInnerProduct32fGemm(const InnerProductParam32f& p)
             : Base::SynetInnerProduct32fGemm(p)
         {
-            _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
+            _biasAndActivation = Sse41::ConvolutionBiasAndActivation;
             if (_param.transpose)
             {
                 _gemm = Sse41::Gemm32fNT;

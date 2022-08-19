@@ -7,21 +7,6 @@
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetActivation.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32f.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect2f.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect2r.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fNhwcDirect3r.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetDeconvolution32f.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2SynetMergedConvolution32fCdc.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
@@ -44,12 +29,6 @@
       <Filter>Sse2</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd3.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fDirectNchw.cpp">
-      <Filter>Sse2</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Simd\SimdSse2SynetConvolution32fDirectNhwc.cpp">
       <Filter>Sse2</Filter>
     </ClCompile>
   </ItemGroup>

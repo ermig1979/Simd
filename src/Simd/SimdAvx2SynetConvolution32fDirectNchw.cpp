@@ -348,7 +348,7 @@ namespace Simd
         {
             const ConvParam32f & p = _param;
             if (p.dstW < F)
-                return Sse2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
+                return Sse41::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
             switch (p.strideX)
             {
             case 1:
@@ -370,7 +370,7 @@ namespace Simd
                     return Avx2::SetConvolutionBiasActivation<3, 3>(p.activation);
                 break;
             }
-            return Sse2::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
+            return Sse41::SynetConvolution32fDirectNchw::SetConvolutionBiasActivation();
         }
     }
 #endif//SIMD_AVX2_ENABLE

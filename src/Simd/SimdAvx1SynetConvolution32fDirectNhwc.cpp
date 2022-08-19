@@ -34,7 +34,7 @@ namespace Simd
     namespace Avx
     {
         SynetConvolution32fDirectNhwc::SynetConvolution32fDirectNhwc(const ConvParam32f & p)
-            : Sse2::SynetConvolution32fDirectNhwc(p)
+            : Sse41::SynetConvolution32fDirectNhwc(p)
         {
             _convolutionBiasActivation = SetConvolutionBiasActivation();
         }
@@ -1140,8 +1140,8 @@ namespace Simd
                 default: break;
                 }
             }
-            return func ? func : Sse2::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
+            return func ? func : Sse41::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
         };
     }
-#endif//SIMD_AVX_ENABLE
+#endif
 }

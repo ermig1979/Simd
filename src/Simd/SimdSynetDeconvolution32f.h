@@ -242,21 +242,21 @@ namespace Simd
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         class SynetDeconvolution32fGemmNN : public Base::SynetDeconvolution32fGemmNN
         {
         public:
             SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
-            virtual String Ext() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse41"; }
         };
 
         class SynetDeconvolution32fNhwcDirect2x2 : public Base::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
             SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);
-            virtual String Ext() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse41"; }
 
             static bool Preferable(const DeconvParam32f & p);
         };
@@ -268,14 +268,14 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class SynetDeconvolution32fGemmNN : public Sse2::SynetDeconvolution32fGemmNN
+        class SynetDeconvolution32fGemmNN : public Sse41::SynetDeconvolution32fGemmNN
         {
         public:
             SynetDeconvolution32fGemmNN(const DeconvParam32f & p);
             virtual String Ext() const { return "Avx"; }
         };
 
-        class SynetDeconvolution32fNhwcDirect2x2 : public Sse2::SynetDeconvolution32fNhwcDirect2x2
+        class SynetDeconvolution32fNhwcDirect2x2 : public Sse41::SynetDeconvolution32fNhwcDirect2x2
         {
         public:
             SynetDeconvolution32fNhwcDirect2x2(const DeconvParam32f & p);

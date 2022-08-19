@@ -33,8 +33,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)  
+    namespace Sse41
     {
         SynetDeconvolution32fGemmNN::SynetDeconvolution32fGemmNN(const DeconvParam32f & p)
             : Base::SynetDeconvolution32fGemmNN(p)
@@ -52,7 +52,7 @@ namespace Simd
                 _nhwcRun = Sse2::Gemm32fNNcbRun;
                 _nhwcReorderB = Sse2::Gemm32fNNcbReorderB;
             }
-            _biasAndActivation = Sse2::ConvolutionBiasAndActivation;
+            _biasAndActivation = Sse41::ConvolutionBiasAndActivation;
         }
 
         //---------------------------------------------------------------------
@@ -246,5 +246,5 @@ namespace Simd
                 return new SynetDeconvolution32fGemmNN(param);
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif
 }
