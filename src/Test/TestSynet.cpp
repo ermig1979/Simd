@@ -108,9 +108,9 @@ namespace Test
 
         result = result && SynetAddBiasAutoTest(TFM_ANY, FUNC_AB(Simd::Base::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetAddBiasAutoTest(TFM_128, FUNC_AB(Simd::Sse2::SynetAddBias), FUNC_AB(SimdSynetAddBias));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetAddBiasAutoTest(TFM_128, FUNC_AB(Simd::Sse41::SynetAddBias), FUNC_AB(SimdSynetAddBias));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -345,9 +345,9 @@ namespace Test
 
         result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Base::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sse2::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetEltwiseLayerForwardAutoTest(FUNC_ELF(Simd::Sse41::SynetEltwiseLayerForward), FUNC_ELF(SimdSynetEltwiseLayerForward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -453,9 +453,9 @@ namespace Test
 
         result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_ANY, FUNC_LLCC(Simd::Base::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_128, FUNC_LLCC(Simd::Sse2::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetLrnLayerCrossChannelsAutoTest(TFM_128, FUNC_LLCC(Simd::Sse41::SynetLrnLayerCrossChannels), FUNC_LLCC(SimdSynetLrnLayerCrossChannels));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -563,9 +563,9 @@ namespace Test
 
         result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Base::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Sse2::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetShuffleLayerForwardAutoTest(FUNC_SHLF(Simd::Sse41::SynetShuffleLayerForward), FUNC_SHLF(SimdSynetShuffleLayerForward));
 #endif 
 
 #ifdef SIMD_AVX_ENABLE
@@ -659,9 +659,9 @@ namespace Test
 
         result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Base::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Sse2::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetSoftmaxLayerForwardAutoTest(FUNC_SM(Simd::Sse41::SynetSoftmaxLayerForward), FUNC_SM(SimdSynetSoftmaxLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -783,9 +783,9 @@ namespace Test
 
         result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Base::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
 
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Sse2::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable)
+            result = result && SynetUnaryOperation32fLayerForwardAutoTest(FUNC_UO(Simd::Sse41::SynetUnaryOperation32fLayerForward), FUNC_UO(SimdSynetUnaryOperation32fLayerForward));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE

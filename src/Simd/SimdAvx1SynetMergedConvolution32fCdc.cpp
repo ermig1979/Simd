@@ -1446,7 +1446,7 @@ namespace Simd
 		//---------------------------------------------------------------------
 
 		SynetMergedConvolution32fCdc::SynetMergedConvolution32fCdc(const MergConvParam32f& p)
-			: Sse2::SynetMergedConvolution32fCdc(p)
+			: Sse41::SynetMergedConvolution32fCdc(p)
 		{
 			for (size_t i = 0; i < _param.count; ++i)
 				if (p.conv[i].activation == SimdConvolutionActivationElu ||
@@ -1481,7 +1481,7 @@ namespace Simd
 				if (convs[i].activation == SimdConvolutionActivationElu ||
 					convs[i].activation == SimdConvolutionActivationMish ||
 					convs[i].activation == SimdConvolutionActivationSwish)
-					return Sse2::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
+					return Sse41::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
 			MergConvParam32f param(batch, convs, count, add, compatibility);
 			if (!param.Valid())
 				return NULL;
@@ -1492,21 +1492,21 @@ namespace Simd
 			else if (SynetMergedConvolution32fCdc::Preferable(param))
 			{
 				if (param.conv[2].dstC < F)
-					return new Sse2::SynetMergedConvolution32fCdc(param);
+					return new Sse41::SynetMergedConvolution32fCdc(param);
 				else
 					return new Avx::SynetMergedConvolution32fCdc(param);
 			}
 			else if (SynetMergedConvolution32fCd::Preferable(param))
 			{
 				if (param.conv[1].dstC < F)
-					return new Sse2::SynetMergedConvolution32fCd(param);
+					return new Sse41::SynetMergedConvolution32fCd(param);
 				else
 					return new Avx::SynetMergedConvolution32fCd(param);
 			}
 			else if (SynetMergedConvolution32fDc::Preferable(param))
 			{
 				if (param.conv[0].dstC < F || param.conv[1].dstC < HF)
-					return new Sse2::SynetMergedConvolution32fDc(param);
+					return new Sse41::SynetMergedConvolution32fDc(param);
 				else
 					return new Avx::SynetMergedConvolution32fDc(param);
 			}

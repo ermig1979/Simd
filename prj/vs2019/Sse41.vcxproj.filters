@@ -316,6 +316,21 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41SynetConvolution32fNhwcDirect3r.cpp">
       <Filter>Sse41</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fCd.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fCdc.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetMergedConvolution32fDc.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetInnerProduct8i.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdSse41SynetActivation.cpp">
+      <Filter>Sse41</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Sse41">
@@ -513,6 +528,18 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdNeural.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdPow.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdStream.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetDeconvolution32f.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

@@ -426,7 +426,7 @@ namespace Simd
 		//---------------------------------------------------------------------
 
 		SynetMergedConvolution32fDc::SynetMergedConvolution32fDc(const MergConvParam32f& p)
-			: Sse2::SynetMergedConvolution32fDc(p)
+			: Sse41::SynetMergedConvolution32fDc(p)
 		{
 			for (size_t i = 0; i < _param.count; ++i)
 				if (p.conv[i].activation == SimdConvolutionActivationElu ||

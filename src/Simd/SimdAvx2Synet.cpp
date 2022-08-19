@@ -722,7 +722,7 @@ namespace Simd
                     SynetLrnLayerCrossChannelsNhwc2h<false>(src, half, channels, spatial, k, dst);
             }
             else
-                Sse2::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, SimdTensorFormatNhwc);
+                Sse41::SynetLrnLayerCrossChannels(src, half, channels, spatial, k, dst, SimdTensorFormatNhwc);
         }
 
         void SynetLrnLayerCrossChannels(const float * src, size_t half, size_t channels, size_t spatial, const float * k, float * dst, SimdTensorFormatType format)

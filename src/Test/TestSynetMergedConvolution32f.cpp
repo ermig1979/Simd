@@ -322,7 +322,7 @@ namespace Test
         SimdSynetCompatibilityType bf16 = (SimdSynetCompatibilityType)(SimdSynetCompatibility16bfSoft | SimdSynetCompatibilityFmaAvoid);
 
 #if defined(NDEBUG)
-        //result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
+        result = result && SynetMergedConvolution32fForwardAutoTest(eps, fp32, f1, f2);
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
 #else
         result = result && SynetMergedConvolution32fForwardAutoTest(eps, bf16, f1, f2);
@@ -336,11 +336,6 @@ namespace Test
         bool result = true;
 
         result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Base::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
-
-#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable)
-            result = result && SynetMergedConvolution32fForwardAutoTest(EPS, FUNC_MC(Simd::Sse2::SynetMergedConvolution32fInit), FUNC_MC(SimdSynetMergedConvolution32fInit));
-#endif 
 
 #ifdef SIMD_SSE41_ENABLE
         if (Simd::Sse41::Enable)

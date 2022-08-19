@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE) 
-	namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE) 
+	namespace Sse41
 	{
 		namespace Cdc
 		{
@@ -1480,14 +1480,21 @@ namespace Simd
 				return NULL;
 			if (Base::Bf16Soft(compatibility))
 			{
-				return new Base::SynetMergedConvolution32fBf16(param);
+				if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
+					return new Sse41::SynetMergedConvolution32fBf16Cdc(param);
+				else if (Base::SynetMergedConvolution32fBf16Cd::Preferable(param))
+					return new Sse41::SynetMergedConvolution32fBf16Cd(param);
+				else if (Base::SynetMergedConvolution32fBf16Dc::Preferable(param))
+					return new Sse41::SynetMergedConvolution32fBf16Dc(param);
+				else
+					return new Base::SynetMergedConvolution32fBf16(param);
 			}
-			else if(SynetMergedConvolution32fCdc::Preferable(param))
-				return new Sse2::SynetMergedConvolution32fCdc(param);
+			else if (SynetMergedConvolution32fCdc::Preferable(param))
+				return new Sse41::SynetMergedConvolution32fCdc(param);
 			else if (SynetMergedConvolution32fCd::Preferable(param))
-				return new Sse2::SynetMergedConvolution32fCd(param);
+				return new Sse41::SynetMergedConvolution32fCd(param);
 			else if (SynetMergedConvolution32fDc::Preferable(param))
-				return new Sse2::SynetMergedConvolution32fDc(param);
+				return new Sse41::SynetMergedConvolution32fDc(param);
 			else
 				return new Base::SynetMergedConvolution32f(param);
 		}

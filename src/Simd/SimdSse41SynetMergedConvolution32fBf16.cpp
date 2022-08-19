@@ -74,28 +74,6 @@ namespace Simd
             SetDepthwise(_param.conv[0], _depthwise);
             SetOutput(_param.conv[1], _output);
         }
-
-		//---------------------------------------------------------------------
-
-		void* SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters* convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility)
-		{
-			MergConvParam32f param(batch, convs, count, add, compatibility);
-			if (!param.Valid())
-				return NULL;
-			if (Base::Bf16Soft(compatibility))
-			{
-                if (Base::SynetMergedConvolution32fBf16Cdc::Preferable(param))
-                    return new Sse41::SynetMergedConvolution32fBf16Cdc(param);
-                else if (Base::SynetMergedConvolution32fBf16Cd::Preferable(param))
-                    return new Sse41::SynetMergedConvolution32fBf16Cd(param);
-                else if (Base::SynetMergedConvolution32fBf16Dc::Preferable(param))
-                    return new Sse41::SynetMergedConvolution32fBf16Dc(param);
-                else
-				    return new Base::SynetMergedConvolution32fBf16(param);
-			}
-			else
-				return Sse2::SynetMergedConvolution32fInit(batch, convs, count, add, compatibility);
-		}
 	}
 #endif
 }

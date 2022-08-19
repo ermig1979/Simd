@@ -31,8 +31,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)  
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)  
+    namespace Sse41
     {
         template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Sse2::Exp & exp, __m128 alpha, float * dst, size_t offset)
         {
@@ -75,7 +75,7 @@ namespace Simd
         template<bool align> SIMD_INLINE void SynetHardSigmoid32f(const float* src, __m128 scale, __m128 shift, float* dst, size_t offset)
         {
             __m128 _src = Load<align>(src + offset);
-            __m128 _dst = SynetHardSigmoid32f(_src, scale, shift);
+            __m128 _dst = Sse2::SynetHardSigmoid32f(_src, scale, shift);
             Store<align>(dst + offset, _dst);
         }
 
@@ -112,7 +112,7 @@ namespace Simd
         template<bool align> SIMD_INLINE void SynetHswish32f(const float* src, __m128 shift, __m128 scale, float* dst, size_t offset)
         {
             __m128 _src = Load<align>(src + offset);
-            __m128 _dst = SynetHswish32f(_src, shift, scale);
+            __m128 _dst = Sse2::SynetHswish32f(_src, shift, scale);
             Store<align>(dst + offset, _dst);
         }
 
@@ -148,7 +148,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetMish32f(const float* src, __m128 threshold, float* dst, size_t offset)
         {
-            Store<align>(dst + offset, Mish(Load<align>(src + offset), threshold));
+            Store<align>(dst + offset, Sse2::Mish(Load<align>(src + offset), threshold));
         }
 
         template<bool align> void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
@@ -185,12 +185,12 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, const float* slope, float* dst, size_t offset)
         {
-            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), Load<align>(slope + offset)));
+            Store<align>(dst + offset, Sse2::SynetRelu32f(Load<align>(src + offset), Load<align>(slope + offset)));
         }
 
         template <bool align> SIMD_INLINE void SynetPreluLayerForward(const float* src, __m128 slope, float* dst, size_t offset)
         {
-            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), slope));
+            Store<align>(dst + offset, Sse2::SynetRelu32f(Load<align>(src + offset), slope));
         }
 
         template <bool align> void SynetPreluLayerForwardNchw(const float* src, const float* slope, size_t channels, size_t spatial, float* dst)
@@ -317,7 +317,7 @@ namespace Simd
         
         template<bool align> SIMD_INLINE void SynetRelu32f(const float* src, __m128 slope, float* dst, size_t offset)
         {
-            Store<align>(dst + offset, SynetRelu32f(Load<align>(src + offset), slope));
+            Store<align>(dst + offset, Sse2::SynetRelu32f(Load<align>(src + offset), slope));
         }
 
         template<bool align> void SynetRelu32f(const float* src, size_t size, const float* slope, float* dst)
@@ -534,5 +534,5 @@ namespace Simd
                 SynetTanh32f<false>(src, size, slope, dst);
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

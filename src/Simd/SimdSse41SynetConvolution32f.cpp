@@ -41,7 +41,7 @@ namespace Simd
             if (activation == ::SimdConvolutionActivationIdentity)
             {
                 if (bias)
-                    Sse2::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
+                    Sse41::SynetAddBias(bias, count, size, dst, (SimdTensorFormatType)trans);
             }
             else if (activation == ::SimdConvolutionActivationRelu)
             {
@@ -101,7 +101,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(_mm_loadu_ps(dst + i), _mm_loadu_ps(bias + i));
-                                _mm_storeu_ps(dst + i, SynetRelu32f(value, _slope));
+                                _mm_storeu_ps(dst + i, Sse2::SynetRelu32f(value, _slope));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetRelu32f(dst[i] + bias[i], slope);
@@ -117,7 +117,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(_mm_loadu_ps(dst + j), _bias);
-                                _mm_storeu_ps(dst + j, SynetRelu32f(value, _slope));
+                                _mm_storeu_ps(dst + j, Sse2::SynetRelu32f(value, _slope));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetRelu32f(dst[j] + bias[i], slope);
@@ -183,7 +183,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(_mm_loadu_ps(dst + i), _mm_loadu_ps(bias + i));
-                                _mm_storeu_ps(dst + i, SynetRelu32f(value, _mm_loadu_ps(params + i)));
+                                _mm_storeu_ps(dst + i, Sse2::SynetRelu32f(value, _mm_loadu_ps(params + i)));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetRelu32f(dst[i] + bias[i], params[i]);
@@ -200,7 +200,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(_mm_loadu_ps(dst + j), _bias);
-                                _mm_storeu_ps(dst + j, SynetRelu32f(value, _slope));
+                                _mm_storeu_ps(dst + j, Sse2::SynetRelu32f(value, _slope));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetRelu32f(dst[j] + bias[i], params[i]);
@@ -268,7 +268,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
-                                Store<false>(dst + i, SynetHswish32f(value, _shift, _scale));
+                                Store<false>(dst + i, Sse2::SynetHswish32f(value, _shift, _scale));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetHswish32f(dst[i] + bias[i], shift, scale);
@@ -284,7 +284,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
-                                Store<false>(dst + j, SynetHswish32f(value, _shift, _scale));
+                                Store<false>(dst + j, Sse2::SynetHswish32f(value, _shift, _scale));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetHswish32f(dst[j] + bias[i], shift, scale);
@@ -309,7 +309,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
-                                Store<false>(dst + i, Mish(value, _threshold));
+                                Store<false>(dst + i, Sse2::Mish(value, _threshold));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetMish32f(dst[i] + bias[i], threshold);
@@ -325,7 +325,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
-                                Store<false>(dst + j, Mish(value, _threshold));
+                                Store<false>(dst + j, Sse2::Mish(value, _threshold));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetMish32f(dst[j] + bias[i], threshold);
@@ -352,7 +352,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(Sse2::Load<false>(dst + i), Sse2::Load<false>(bias + i));
-                                Sse2::Store<false>(dst + i, SynetHardSigmoid32f(value, _scale, _shift));
+                                Sse2::Store<false>(dst + i, Sse2::SynetHardSigmoid32f(value, _scale, _shift));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetHardSigmoid32f(dst[i] + bias[i], scale, shift);
@@ -368,7 +368,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(Sse2::Load<false>(dst + j), _bias);
-                                Sse2::Store<false>(dst + j, SynetHardSigmoid32f(value, _scale, _shift));
+                                Sse2::Store<false>(dst + j, Sse2::SynetHardSigmoid32f(value, _scale, _shift));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetHardSigmoid32f(dst[j] + bias[i], scale, shift);

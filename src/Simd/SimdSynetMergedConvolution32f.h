@@ -371,23 +371,23 @@ namespace Simd
         void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         class SynetMergedConvolution32fCdc : public Base::SynetMergedConvolution32fCdc
         {
         public:
-            SynetMergedConvolution32fCdc(const MergConvParam32f & p);
-            virtual String Ext() const { return "Sse2"; }
+            SynetMergedConvolution32fCdc(const MergConvParam32f& p);
+            virtual String Ext() const { return "Sse41"; }
 
-            static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr * c);
+            static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
         class SynetMergedConvolution32fCd : public Base::SynetMergedConvolution32fCd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
-            virtual String Ext() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse41"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
@@ -396,18 +396,13 @@ namespace Simd
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
-            virtual String Ext() const { return "Sse2"; }
+            virtual String Ext() const { return "Sse41"; }
 
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
-        void * SynetMergedConvolution32fInit(size_t batch, const SimdConvolutionParameters * convs, size_t count, SimdBool add, SimdSynetCompatibilityType compatibility);
-    }
-#endif//SIMD_SSE2_ENABLE
+        //-----------------------------------------------------------------------------------------
 
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
-    {
         void SetInput(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::InputConvolutionPtr& input);
 
         void SetDepthwise(const ConvParam32f& p, Base::SynetMergedConvolution32fBf16::DepthwiseConvolutionPtr& depthwise);
@@ -447,7 +442,7 @@ namespace Simd
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx
     {
-        class SynetMergedConvolution32fCdc : public Sse2::SynetMergedConvolution32fCdc
+        class SynetMergedConvolution32fCdc : public Sse41::SynetMergedConvolution32fCdc
         {
         public:
             SynetMergedConvolution32fCdc(const MergConvParam32f & p);
@@ -456,7 +451,7 @@ namespace Simd
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
-        class SynetMergedConvolution32fCd : public Sse2::SynetMergedConvolution32fCd
+        class SynetMergedConvolution32fCd : public Sse41::SynetMergedConvolution32fCd
         {
         public:
             SynetMergedConvolution32fCd(const MergConvParam32f& p);
@@ -465,7 +460,7 @@ namespace Simd
             static void Set(const MergConvParam32f& p, size_t t, size_t i, SynetMergedConvolution32f::ConvolutionPtr* c);
         };
 
-        class SynetMergedConvolution32fDc : public Sse2::SynetMergedConvolution32fDc
+        class SynetMergedConvolution32fDc : public Sse41::SynetMergedConvolution32fDc
         {
         public:
             SynetMergedConvolution32fDc(const MergConvParam32f& p);
