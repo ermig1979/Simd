@@ -683,7 +683,7 @@ namespace Test
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+            result = result && CosineDistancesMxNp16fAutoTest(EPS * EPS * 0.1f, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE
@@ -868,9 +868,14 @@ namespace Test
         View ABi(K, MN, View::Int16, NULL, TEST_ALIGN(K));
         ::SimdFloat32ToFloat16((float*)ABf.data, K * MN, (uint16_t*)ABi.data);
 
-        Tensor32f D({ M, N, });
+        Tensor32f D1({ M, N, }), D2({ M, N, });
 
-        SimdCosineDistancesMxNp16f(M, N, K, (uint16_t*)ABi.data, (uint16_t*)ABi.data, D.Data());
+        SimdCosineDistancesMxNp16f(M, N, K, (uint16_t*)ABi.data, (uint16_t*)ABi.data, D1.Data());
+
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable)
+            Simd::Avx2::CosineDistancesMxNp16f(M, N, K, (uint16_t*)ABi.data, (uint16_t*)ABi.data, D2.Data());
+#endif
 
         return result;
     }

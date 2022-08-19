@@ -198,9 +198,9 @@ namespace Simd
 
         SIMD_INLINE float ExtractSum(const __m512& a)
         {
-            __m128 lo = _mm_add_ps(_mm512_extractf32x4_ps(a, 0), _mm512_extractf32x4_ps(a, 1));
-            __m128 hi = _mm_add_ps(_mm512_extractf32x4_ps(a, 2), _mm512_extractf32x4_ps(a, 3));
-            return _mm_cvtss_f32(_mm_hadd_ps(_mm_hadd_ps(_mm_add_ps(lo, hi), _mm_setzero_ps()), _mm_setzero_ps()));
+            __m256 b = _mm256_add_ps(_mm512_extractf32x8_ps(a, 0), _mm512_extractf32x8_ps(a, 1));
+            __m256 c = _mm256_hadd_ps(_mm256_hadd_ps(b, _mm256_setzero_ps()), _mm256_setzero_ps());
+            return _mm_cvtss_f32(_mm_add_ps(_mm256_castps256_ps128(c), _mm256_extractf128_ps(c, 1)));
         }
 
         SIMD_INLINE __m128 Extract4Sums(const __m512 a[4])
