@@ -28,6 +28,7 @@
 #include "Simd/SimdExp.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdSynet.h"
 
@@ -369,7 +370,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetPreluLayerForwardNhwc(src, slope, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse2::SynetPreluLayerForward(src, slope, channels, spatial, dst, format);
+                Sse41::SynetPreluLayerForward(src, slope, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetPreluLayerForward(src, slope, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c)

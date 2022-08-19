@@ -215,7 +215,7 @@ namespace Test
     TEST_ADD_GROUP_AD0(SquaredDifferenceSum16f);
     TEST_ADD_GROUP_AD0(CosineDistance16f);
     TEST_ADD_GROUP_A00(CosineDistancesMxNa16f);
-    TEST_ADD_GROUP_A00(CosineDistancesMxNp16f);
+    TEST_ADD_GROUP_A0S(CosineDistancesMxNp16f);
     TEST_ADD_GROUP_A00(VectorNormNa16f);
     TEST_ADD_GROUP_A00(VectorNormNp16f);
 

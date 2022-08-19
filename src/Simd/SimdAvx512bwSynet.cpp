@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
 #include "Simd/SimdAvx512bw.h"
@@ -271,7 +272,7 @@ namespace Simd
             else if (Base::NhwcCompatible(channels, spatial, format))
                 SynetAddBiasNhwc(bias, channels, spatial, dst);
             else if (format == SimdTensorFormatNchw4c)
-                Sse2::SynetAddBias(bias, channels, spatial, dst, format);
+                Sse41::SynetAddBias(bias, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw8c)
                 Avx::SynetAddBias(bias, channels, spatial, dst, format);
             else if (format == SimdTensorFormatNchw16c)

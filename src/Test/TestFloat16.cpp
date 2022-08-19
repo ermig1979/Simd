@@ -340,25 +340,25 @@ namespace Test
 
         TEST_LOG_SS(Info, "Test " << f1.desc << " & " << f2.desc);
 
-        const int scattering = 1;
+        const int gap = 1024;
         View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Af, -1.0, 1.0);
-        View Ai(K * scattering, M, View::Int16, NULL, TEST_ALIGN(K));
+        View Ai(K + gap, M, View::Int16, NULL, TEST_ALIGN(K));
         F16Ptrs A(M);
         for (size_t i = 0; i < M; i++)
         {
-            ::SimdFloat32ToFloat16(Af.Row<float>(i), K, Ai.Row<uint16_t>(i));
-            A[i] = Ai.Row<uint16_t>(i);
+            A[i] = Ai.Row<uint16_t>(i) + Random(gap);
+            ::SimdFloat32ToFloat16(Af.Row<float>(i), K, A[i]);
         }
 
         View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Bf, -1.0, 1.0);
-        View Bi(K * scattering, N, View::Int16, NULL, TEST_ALIGN(K));
+        View Bi(K + gap, N, View::Int16, NULL, TEST_ALIGN(K));
         F16Ptrs B(N);
         for (size_t j = 0; j < N; j++)
         {
-            ::SimdFloat32ToFloat16(Bf.Row<float>(j), K, Bi.Row<uint16_t>(j));
-            B[j] = Bi.Row<uint16_t>(j);
+            B[j] = Bi.Row<uint16_t>(j) + Random(gap);
+            ::SimdFloat32ToFloat16(Bf.Row<float>(j), K, B[j]);
         }
 
         Tensor32f D1({ M, N, });
@@ -636,10 +636,12 @@ namespace Test
         View Af(K, M, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Af, -1.0, 1.0);
         View Ai(K, M, View::Int16, NULL, TEST_ALIGN(K));
+        ::SimdFloat32ToFloat16((float*)Af.data, K * M, (uint16_t*)Ai.data);
 
         View Bf(K, N, View::Float, NULL, TEST_ALIGN(K));
         FillRandom32f(Bf, -1.0, 1.0);
         View Bi(K, N, View::Int16, NULL, TEST_ALIGN(K));
+        ::SimdFloat32ToFloat16((float*)Bf.data, K * N, (uint16_t*)Bi.data);
 
         Tensor32f D1({ M, N, });
         Tensor32f D2({ M, N, });
@@ -850,5 +852,26 @@ namespace Test
     bool CosineDistance16fDataTest(bool create)
     {
         return DifferenceSum16fDataTest(create, DH, EPS * 2, FUNC_S(SimdCosineDistance16f));
+    }
+
+    //---------------------------------------------------------------------------------------------
+
+    bool CosineDistancesMxNp16fSpecialTest()
+    {
+        bool result = true;
+
+        const size_t M = 3, N = 5, K = 512;
+        const size_t MN = std::max(M, N);
+
+        View ABf(K, MN, View::Float, NULL, TEST_ALIGN(K));
+        FillRandom32f(ABf, -1.0, 1.0);
+        View ABi(K, MN, View::Int16, NULL, TEST_ALIGN(K));
+        ::SimdFloat32ToFloat16((float*)ABf.data, K * MN, (uint16_t*)ABi.data);
+
+        Tensor32f D({ M, N, });
+
+        SimdCosineDistancesMxNp16f(M, N, K, (uint16_t*)ABi.data, (uint16_t*)ABi.data, D.Data());
+
+        return result;
     }
 }
