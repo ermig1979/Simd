@@ -316,7 +316,7 @@ namespace Simd
         {
             typedef Simd::GemmNT<float, F> GemmNT;
 #ifdef SIMD_X64_ENABLE
-            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse2::GemmScaleC,
+            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse41::GemmScaleC,
                 Kernel1x1x4nt, Kernel1x4x4nt, Kernel2x1x4nt, Kernel2x4x4nt, Kernel3x1x4nt, Kernel3x4x4nt, NULL, NULL);
 #else
             GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse2::GemmScaleC,
@@ -325,5 +325,5 @@ namespace Simd
             gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);
         }
     }
-#endif// SIMD_SSE41_ENABLE
+#endif
 }

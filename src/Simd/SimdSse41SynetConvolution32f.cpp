@@ -431,18 +431,18 @@ namespace Simd
         SynetConvolution32fGemmNN::SynetConvolution32fGemmNN(const ConvParam32f& p)
             : Base::SynetConvolution32fGemmNN(p)
         {
-            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2"));
+            _gemm.Init(InitGemmFuncs(Sse41::Gemm32fNN, "Sse41"));
             if (_param.trans && _param.group == 1)
             {
                 if (GemmRuntime())
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Sse2::Gemm32fNNcbBufferSize, Sse2::Gemm32fNNcbReorderB, Sse2::Gemm32fNNcbRun, "Sse2", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Sse41::Gemm32fNNcbBufferSize, Sse41::Gemm32fNNcbReorderB, Sse41::Gemm32fNNcbRun, "Sse41", GemmKernelF2, GemmKernelF3));
                     _nhwcWeight.Resize(_gemmCb.At(0).BufferSize(_M * _merge, _N, _K));
                 }
                 else
-                    _nhwcWeight.Resize(Sse2::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
-                _nhwcRun = Sse2::Gemm32fNNcbRun;
-                _nhwcReorderB = Sse2::Gemm32fNNcbReorderB;
+                    _nhwcWeight.Resize(Sse41::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _nhwcRun = Sse41::Gemm32fNNcbRun;
+                _nhwcReorderB = Sse41::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Sse41::ConvolutionBiasAndActivation;
         }
@@ -523,19 +523,19 @@ namespace Simd
             }
             else
                 assert(0);
-            _gemm.Init(InitGemmFuncs(Sse2::Gemm32fNN, "Sse2"));
+            _gemm.Init(InitGemmFuncs(Sse41::Gemm32fNN, "Sse41"));
             if (_param.trans)
             {
                 if (NHWC_GEMM_RUNTIME)
                 {
-                    _gemmCb.Init(InitGemmCbFuncs(Sse2::Gemm32fNNcbBufferSize, Sse2::Gemm32fNNcbReorderB, Sse2::Gemm32fNNcbRun, "Sse2", GemmKernelF2, GemmKernelF3));
+                    _gemmCb.Init(InitGemmCbFuncs(Sse41::Gemm32fNNcbBufferSize, Sse41::Gemm32fNNcbReorderB, Sse41::Gemm32fNNcbRun, "Sse41", GemmKernelF2, GemmKernelF3));
                     _nhwcStrideW = _gemmCb.At(0).BufferSize(_M * _merge, _N, _K);
                 }
                 else
-                    _nhwcStrideW = Sse2::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
+                    _nhwcStrideW = Sse41::Gemm32fNNcbBufferSize(_M * _merge, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE);
                 _nhwcWeight.Resize(_nhwcStrideW * _count);
-                _nhwcRun = Sse2::Gemm32fNNcbRun;
-                _nhwcReorderB = Sse2::Gemm32fNNcbReorderB;
+                _nhwcRun = Sse41::Gemm32fNNcbRun;
+                _nhwcReorderB = Sse41::Gemm32fNNcbReorderB;
             }
             _biasAndActivation = Sse41::ConvolutionBiasAndActivation;
         }

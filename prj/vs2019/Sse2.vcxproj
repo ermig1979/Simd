@@ -11,7 +11,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdSse2Cpu.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse2Gemm32f.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd1.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd2.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse2Winograd3.cpp" />

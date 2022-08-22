@@ -41,7 +41,9 @@
     <ClCompile Include="..\..\src\Simd\SimdSse41Float32.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GaussianBlur3x3.cpp" />
-    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32f.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fNN.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fNT.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdSse41Gemm32fPack.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgr.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41GrayToBgra.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdSse41Histogram.cpp" />

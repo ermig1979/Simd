@@ -49,13 +49,13 @@ namespace Simd
             }
             else
             {
-                _gemm = Sse2::Gemm32fNN;
+                _gemm = Sse41::Gemm32fNN;
             }
-            if (_param.output > Sse2::F && _prod == NULL)
+            if (_param.output > Sse41::F && _prod == NULL)
             {
-                _cbRun = Sse2::Gemm32fNNcbRun;
-                _cbPack = Sse2::Gemm32fNNcbReorderB;
-                _cbWeight.Resize(Sse2::Gemm32fNNcbBufferSize(_M, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
+                _cbRun = Sse41::Gemm32fNNcbRun;
+                _cbPack = Sse41::Gemm32fNNcbReorderB;
+                _cbWeight.Resize(Sse41::Gemm32fNNcbBufferSize(_M, _N, _K, GemmKernelAny, NHWC_GEMM_COMPATIBLE));
             }
         }
 
