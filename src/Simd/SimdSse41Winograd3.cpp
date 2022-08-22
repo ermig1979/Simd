@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Sse41
     {
         SIMD_INLINE void WinogradKernel3x3Block2x2SetFilter(const __m128 src[9], float* dst, size_t stride)
         {
@@ -424,7 +424,7 @@ namespace Simd
             if(lastCol)
                 _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]));
             else
-                StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]), mask);
+                Sse2::StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[0], tmp[1]), mask);
             if (lastRow)
             {
                 dst += dstStride;
@@ -432,7 +432,7 @@ namespace Simd
                 if (lastCol)
                     _mm_storeu_ps(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]));
                 else
-                    StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]), mask);
+                    Sse2::StoreMasked<false>(dst + 4, _mm_unpackhi_ps(tmp[2], tmp[3]), mask);
             }
         }
 
@@ -1514,5 +1514,5 @@ namespace Simd
             }
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

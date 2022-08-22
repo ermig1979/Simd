@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#if defined(SIMD_SSE2_ENABLE) && defined(SIMD_SYNET_ENABLE)    
-    namespace Sse2
+#if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)    
+    namespace Sse41
     {
         SIMD_INLINE void WinogradKernel1x3Block1x4SetFilter(const __m128 * t, float* dst, size_t stride)
         {
@@ -576,5 +576,5 @@ namespace Simd
             }
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

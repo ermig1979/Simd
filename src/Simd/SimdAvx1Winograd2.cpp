@@ -24,7 +24,7 @@
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdStore.h"
 #include "Simd/SimdWinograd.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
 
@@ -70,7 +70,7 @@ namespace Simd
             }
             else
             {
-                Sse2::WinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
+                Sse41::WinogradKernel2x2Block2x2SetFilter(src, size, dst, trans);
             }
         }
 
@@ -170,7 +170,7 @@ namespace Simd
             assert(padY == padX && padW == padH && (padY + padH == 0 || padY + padH == 1));
             if (trans ? (srcChannels < F) : true)
             {
-                Sse2::WinogradKernel2x2Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
+                Sse41::WinogradKernel2x2Block2x2SetInput(src, srcChannels, srcHeight, srcWidth, padY, padX, padH, padW, dst, dstStride, trans);
                 return;
             }
             size_t dstH = srcHeight - 1 + padY + padH;
@@ -295,7 +295,7 @@ namespace Simd
         {
             if (trans ? (dstChannels < F) : true)
             {
-                Sse2::WinogradKernel2x2Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
+                Sse41::WinogradKernel2x2Block2x2SetOutput(src, srcStride, dst, dstChannels, dstHeight, dstWidth, trans);
                 return;
             }
             size_t tileH = (dstHeight + 1) / 2;
@@ -386,7 +386,7 @@ namespace Simd
             }
             else
             {
-                Sse2::WinogradKernel2x2Block4x4SetFilter(src, size, dst, trans);
+                Sse41::WinogradKernel2x2Block4x4SetFilter(src, size, dst, trans);
             }
         }
 
