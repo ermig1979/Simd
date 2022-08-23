@@ -1236,14 +1236,14 @@ namespace Simd
             b6 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_0, a7);
             b7 = _mm512_permutex2var_epi32(a3, K32_INTERLEAVE_1, a7);
 
-            Store<false>((__m256i*)(dst + 0x0 * dstStride), (__m256i*)(dst + 0x8 * dstStride), b0);
-            Store<false>((__m256i*)(dst + 0x1 * dstStride), (__m256i*)(dst + 0x9 * dstStride), b1);
-            Store<false>((__m256i*)(dst + 0x2 * dstStride), (__m256i*)(dst + 0xa * dstStride), b2);
-            Store<false>((__m256i*)(dst + 0x3 * dstStride), (__m256i*)(dst + 0xb * dstStride), b3);
-            Store<false>((__m256i*)(dst + 0x4 * dstStride), (__m256i*)(dst + 0xc * dstStride), b4);
-            Store<false>((__m256i*)(dst + 0x5 * dstStride), (__m256i*)(dst + 0xd * dstStride), b5);
-            Store<false>((__m256i*)(dst + 0x6 * dstStride), (__m256i*)(dst + 0xe * dstStride), b6);
-            Store<false>((__m256i*)(dst + 0x7 * dstStride), (__m256i*)(dst + 0xf * dstStride), b7);
+            Store<false>((__m256i*)(dst + 0x0 * dstStride), (__m256i*)(dst + 0x1 * dstStride), b0);
+            Store<false>((__m256i*)(dst + 0x2 * dstStride), (__m256i*)(dst + 0x3 * dstStride), b1);
+            Store<false>((__m256i*)(dst + 0x4 * dstStride), (__m256i*)(dst + 0x5 * dstStride), b2);
+            Store<false>((__m256i*)(dst + 0x6 * dstStride), (__m256i*)(dst + 0x7 * dstStride), b3);
+            Store<false>((__m256i*)(dst + 0x8 * dstStride), (__m256i*)(dst + 0x9 * dstStride), b4);
+            Store<false>((__m256i*)(dst + 0xa * dstStride), (__m256i*)(dst + 0xb * dstStride), b5);
+            Store<false>((__m256i*)(dst + 0xc * dstStride), (__m256i*)(dst + 0xd * dstStride), b6);
+            Store<false>((__m256i*)(dst + 0xe * dstStride), (__m256i*)(dst + 0xf * dstStride), b7);
         }
 
         const __m512i K32_PERM_4_16_8 = SIMD_MM512_SETR_EPI32(0x0, 0x8, 0x1, 0x9, 0x2, 0xa, 0x3, 0xb, 0x4, 0xc, 0x5, 0xd, 0x6, 0xe, 0x7, 0xf);

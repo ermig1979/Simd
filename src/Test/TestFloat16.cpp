@@ -683,7 +683,7 @@ namespace Test
 
 #ifdef SIMD_AVX2_ENABLE
         if (Simd::Avx2::Enable)
-            result = result && CosineDistancesMxNp16fAutoTest(EPS * EPS * 0.1f, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
+            result = result && CosineDistancesMxNp16fAutoTest(EPS, FUNC_CDP(Simd::Avx2::CosineDistancesMxNp16f), FUNC_CDP(SimdCosineDistancesMxNp16f));
 #endif
 
 #ifdef SIMD_AVX512BW_ENABLE

@@ -82,7 +82,7 @@ namespace Test
 
         View s(width, height, format, NULL, TEST_ALIGN(width));
         FillRandom(s);
-#if 0
+#if 1
         if (format == View::Bgra32)
         {
             for (int y = 0; y < height; ++y)
@@ -143,9 +143,9 @@ namespace Test
 
         result = result && TransformImageAutoTest(FUNC_TI(Simd::Base::TransformImage), FUNC_TI(SimdTransformImage));
 
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable && W >= Simd::Avx2::A)
-            result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx512bw::TransformImage), FUNC_TI(SimdTransformImage));
+#ifdef SIMD_SSE41_ENABLE
+        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+            result = result && TransformImageAutoTest(FUNC_TI(Simd::Sse41::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
 #ifdef SIMD_AVX2_ENABLE
@@ -153,9 +153,9 @@ namespace Test
             result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx2::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
-#ifdef SIMD_SSE41_ENABLE
-        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
-            result = result && TransformImageAutoTest(FUNC_TI(Simd::Sse41::TransformImage), FUNC_TI(SimdTransformImage));
+#ifdef SIMD_AVX512BW_ENABLE
+        if (Simd::Avx512bw::Enable && W >= Simd::Avx2::A)
+            result = result && TransformImageAutoTest(FUNC_TI(Simd::Avx512bw::TransformImage), FUNC_TI(SimdTransformImage));
 #endif 
 
 #ifdef SIMD_NEON_ENABLE

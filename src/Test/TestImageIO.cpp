@@ -242,7 +242,7 @@ namespace Test
             View dst1, dst2;
             if (dst1.Load(data1, size1, format) && dst2.Load(data2, size2, format))
             {
-                int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
+                int differenceMax = REAL_IMAGE.empty() ? 6 : 4;
                 result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
                 if (!result)
                 {
@@ -393,7 +393,7 @@ namespace Test
         View dst1, dst2;
         if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
         {
-            int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
+            int differenceMax = REAL_IMAGE.empty() ? 6 : 4;
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
@@ -538,7 +538,7 @@ namespace Test
         View dst1, dst2;
         if (dst1.Load(data1, size1, View::Bgra32) && dst2.Load(data2, size2, View::Bgra32))
         {
-            int differenceMax = REAL_IMAGE.empty() ? 4 : 4;
+            int differenceMax = REAL_IMAGE.empty() ? 6 : 4;
             result = result && Compare(dst1, dst2, differenceMax, true, 64, 0, "dst1 & dst2");
             if (!result)
             {
