@@ -25,7 +25,6 @@
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
-#include "Simd/SimdSse2.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdStore.h"

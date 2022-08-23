@@ -23,7 +23,6 @@
 */
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdImageLoad.h"
-#include "Simd/SimdSse2.h"
 #include "Simd/SimdSse41.h"
 
 #include <memory>

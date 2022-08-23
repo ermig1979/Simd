@@ -26,7 +26,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
+#include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdWinograd.h"
 
@@ -95,7 +95,7 @@ namespace Simd
             }
             else
             {
-                Sse2::WinogradKernel3x3Block2x2SetFilter(src, size, dst, trans);
+                Sse41::WinogradKernel3x3Block2x2SetFilter(src, size, dst, trans);
             }
         }
 
@@ -624,7 +624,7 @@ namespace Simd
             }
             else
             {
-                Sse2::WinogradKernel3x3Block3x3SetFilter(src, size, dst, trans);
+                Sse41::WinogradKernel3x3Block3x3SetFilter(src, size, dst, trans);
             }
         }
 
@@ -1091,7 +1091,7 @@ namespace Simd
             }
             else
             {
-                Sse2::WinogradKernel3x3Block4x4SetFilter(src, size, dst, trans);
+                Sse41::WinogradKernel3x3Block4x4SetFilter(src, size, dst, trans);
             }
         }
 

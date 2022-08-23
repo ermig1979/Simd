@@ -60,8 +60,7 @@ namespace Simd
         os << (SimdCpuInfo(SimdCpuInfoAvx512bw) ? " AVX-512BW AVX-512F" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx2) ? " AVX2 FMA" : "");
         os << (SimdCpuInfo(SimdCpuInfoAvx) ? " AVX" : "");
-        os << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3" : "");
-        os << (SimdCpuInfo(SimdCpuInfoSse2) ? " SSE2 SSE" : "");
+        os << (SimdCpuInfo(SimdCpuInfoSse41) ? " SSE4.1 SSSE3 SSE3 SSE2 SSE" : "");
         os << (SimdCpuInfo(SimdCpuInfoVmx) ? " Altivec" : "");
         os << (SimdCpuInfo(SimdCpuInfoVsx) ? " VSX" : "");
         os << (SimdCpuInfo(SimdCpuInfoNeon) ? " NEON" : "");
@@ -4966,5 +4965,5 @@ namespace Simd
     }
 }
 
-#endif//__SimdLib_hpp__
+#endif
 

@@ -130,8 +130,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         const unsigned int SCR_FTZ = 1 << 15;
         const unsigned int SCR_DAZ = 1 << 6;
@@ -196,4 +196,4 @@ namespace Simd
 #endif
 }
 
-#endif//__SimdCpu_h__
+#endif

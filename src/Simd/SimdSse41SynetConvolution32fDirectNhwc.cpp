@@ -25,7 +25,6 @@
 #include "Simd/SimdSynetConvolution32fCommon.h"
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdSynet.h"
-#include "Simd/SimdSse2.h"
 #include "Simd/SimdGemm.h"
 #include "Simd/SimdExp.h"
 

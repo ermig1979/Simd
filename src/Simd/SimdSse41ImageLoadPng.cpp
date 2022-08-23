@@ -25,7 +25,6 @@
 #include "Simd/SimdArray.h"
 #include "Simd/SimdCpu.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
 #include "Simd/SimdSse41.h"
 
 namespace Simd

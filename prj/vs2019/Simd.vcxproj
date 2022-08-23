@@ -75,7 +75,6 @@
     <ClInclude Include="..\..\src\Simd\SimdResizer.h" />
     <ClInclude Include="..\..\src\Simd\SimdRuntime.h" />
     <ClInclude Include="..\..\src\Simd\SimdShift.hpp" />
-    <ClInclude Include="..\..\src\Simd\SimdSse2.h" />
     <ClInclude Include="..\..\src\Simd\SimdSse41.h" />
     <ClInclude Include="..\..\src\Simd\SimdSsse3.h" />
     <ClInclude Include="..\..\src\Simd\SimdStore.h" />
@@ -120,9 +119,6 @@
     </ProjectReference>
     <ProjectReference Include="Neon.vcxproj">
       <Project>{271c2d02-b19d-4193-8d83-cc0f06e75f3d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="Sse2.vcxproj">
-      <Project>{01bfb333-09d1-4d8e-85c0-c05d333cf807}</Project>
     </ProjectReference>
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>

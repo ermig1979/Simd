@@ -55,11 +55,6 @@ namespace Simd
             return sizeof(__m128i);
         else
 #endif
-#ifdef SIMD_SSE2_ENABLE
-        if (Sse2::Enable)
-            return sizeof(__m128i);
-        else
-#endif
 #ifdef SIMD_VSX_ENABLE
         if (Vsx::Enable)
             return sizeof(__vector uint8_t);
@@ -90,4 +85,4 @@ namespace Simd
     }
 }
 
-#endif//__SimdAlignment_h__
+#endif

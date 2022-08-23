@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE void Empty()
         {
@@ -51,10 +51,10 @@ namespace Simd
 #endif
 }
 
-#if defined(SIMD_SSE2_ENABLE) && !(defined(_MSC_VER) && defined(SIMD_X64_ENABLE))
-#define SIMD_EMPTY() Simd::Sse2::EmptyCaller emptyCaller;
+#if defined(SIMD_SSE41_ENABLE) && !(defined(_MSC_VER) && defined(SIMD_X64_ENABLE))
+#define SIMD_EMPTY() Simd::Sse41::EmptyCaller emptyCaller;
 #else
 #define SIMD_EMPTY() 
 #endif
 
-#endif//__SimdEmpty_h__
+#endif

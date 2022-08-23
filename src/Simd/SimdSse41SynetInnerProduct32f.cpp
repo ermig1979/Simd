@@ -27,7 +27,6 @@
 #include "Simd/SimdSynetConvolution32f.h"
 #include "Simd/SimdSynet.h"
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
 #include "Simd/SimdSse41.h"
 
 namespace Simd

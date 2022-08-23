@@ -76,7 +76,6 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReasonForCall, LPVOID lpReserved)
 #include "Simd/SimdSynetScale8i.h"
 
 #include "Simd/SimdBase.h"
-#include "Simd/SimdSse2.h"
 #include "Simd/SimdSse41.h"
 #include "Simd/SimdAvx1.h"
 #include "Simd/SimdAvx2.h"
@@ -114,9 +113,6 @@ SIMD_API size_t SimdCpuInfo(SimdCpuInfoType type)
     case SimdCpuInfoCacheL1: return Cpu::L1_CACHE_SIZE;
     case SimdCpuInfoCacheL2: return Cpu::L2_CACHE_SIZE;
     case SimdCpuInfoCacheL3: return Cpu::L3_CACHE_SIZE;
-#ifdef SIMD_SSE2_ENABLE
-    case SimdCpuInfoSse2: return Sse2::Enable ? 1 : 0;
-#endif
 #ifdef SIMD_SSE41_ENABLE
     case SimdCpuInfoSse41: return Sse41::Enable ? 1 : 0;
 #endif
@@ -198,9 +194,9 @@ SIMD_API void SimdSetThreadNumber(size_t threadNumber)
 
 SIMD_API SimdBool SimdGetFastMode()
 {
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable)
-        return Sse2::GetFastMode();
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        return Sse41::GetFastMode();
     else
 #endif
 #ifdef SIMD_NEON_ENABLE
@@ -213,9 +209,9 @@ SIMD_API SimdBool SimdGetFastMode()
 
 SIMD_API void SimdSetFastMode(SimdBool value)
 {
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable)
-        Sse2::SetFastMode(value);
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::SetFastMode(value);
 #endif
 #ifdef SIMD_NEON_ENABLE
     if (Neon::Enable)
@@ -225,9 +221,9 @@ SIMD_API void SimdSetFastMode(SimdBool value)
 
 SIMD_API void SimdEmpty()
 {
-#ifdef SIMD_SSE2_ENABLE
-    if (Sse2::Enable)
-        Sse2::Empty();
+#ifdef SIMD_SSE41_ENABLE
+    if (Sse41::Enable)
+        Sse41::Empty();
 #endif
 }
 

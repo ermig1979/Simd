@@ -51,9 +51,6 @@
     <ProjectReference Include="Simd.vcxproj">
       <Project>{c809d7a3-6c52-4e36-8582-00ced929317d}</Project>
     </ProjectReference>
-    <ProjectReference Include="Sse2.vcxproj">
-      <Project>{01bfb333-09d1-4d8e-85c0-c05d333cf807}</Project>
-    </ProjectReference>
     <ProjectReference Include="Sse41.vcxproj">
       <Project>{50073d4b-e2ef-4fa5-9868-380c4a4dae0c}</Project>
     </ProjectReference>
