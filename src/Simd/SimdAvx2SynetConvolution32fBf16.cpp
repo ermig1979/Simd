@@ -88,7 +88,7 @@ namespace Simd
                             for (; sc < srcC4; sc += 4)
                             {
                                 __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(src + sc + 0));
-                                _mm_storel_epi64((__m128i*)(dst + sc), _mm_packus_epi32(d0, Sse2::K_ZERO));
+                                _mm_storel_epi64((__m128i*)(dst + sc), _mm_packus_epi32(d0, Sse41::K_ZERO));
                             }
                             for (; sc < srcC; ++sc)
                                 dst[sc] = Base::Float32ToBFloat16(src[sc]);
@@ -142,7 +142,7 @@ namespace Simd
                                     for (; sc < srcC4; sc += 4)
                                     {
                                         __m128i d0 = Sse41::Float32ToBFloat16(_mm_loadu_ps(ps + sc + 0));
-                                        _mm_storel_epi64((__m128i*)(dst + sc), _mm_packus_epi32(d0, Sse2::K_ZERO));
+                                        _mm_storel_epi64((__m128i*)(dst + sc), _mm_packus_epi32(d0, Sse41::K_ZERO));
                                     }
                                     for (; sc < srcC; ++sc)
                                         dst[sc] = Base::Float32ToBFloat16(ps[sc]);

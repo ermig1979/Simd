@@ -93,7 +93,7 @@ namespace Simd
         SIMD_INLINE void AddToHistogram(__m128i index, uint32_t * histogram)
         {
             __m128i hist = _mm_i32gather_epi32((int*)histogram, index, 4);
-            hist = _mm_add_epi32(hist, Sse2::K32_00000001);
+            hist = _mm_add_epi32(hist, Sse41::K32_00000001);
             _mm_i32scatter_epi32((int*)histogram, index, hist, 4);
         }
 #endif
@@ -111,7 +111,7 @@ namespace Simd
             ptrdiff_t bodyEnd = bodyStart + AlignLo(width - bodyStart, A);
             size_t rowStep = step*stride;
             size_t alignedWidth = Simd::AlignLo(width, 4);
-            size_t fullAlignedWidth = Simd::AlignLo(width, Sse2::A);
+            size_t fullAlignedWidth = Simd::AlignLo(width, Sse41::A);
             for (size_t row = 0; row < height; ++row)
             {
                 if (bodyStart)
@@ -123,7 +123,7 @@ namespace Simd
 
                 size_t col = 0;
 #if defined(SIMD_USE_GATHER_AND_SCATTER_FOR_HISTOGRAM)
-                for (; col < fullAlignedWidth; col += Sse2::A)
+                for (; col < fullAlignedWidth; col += Sse41::A)
                 {
                     __m512i index = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)(buffer.v + col))), K32_TO_HISTOGRAMS);
                     AddToHistogram(_mm512_extracti32x4_epi32(index, 0), buffer.h[0]);

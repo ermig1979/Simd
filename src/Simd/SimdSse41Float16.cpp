@@ -70,5 +70,5 @@ namespace Simd
                 dst[i] = Base::Float16ToFloat32(src[i]);
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

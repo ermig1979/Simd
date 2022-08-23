@@ -38,10 +38,6 @@
 #include <cmath>
 #include <limits>
 
-#if defined(SIMD_SSE2_DISABLE) && !defined(SIMD_SSE41_DISABLE)
-#define SIMD_SSE41_DISABLE
-#endif
-
 #if defined(SIMD_SSE41_DISABLE) && !defined(SIMD_AVX_DISABLE)
 #define SIMD_AVX_DISABLE
 #endif
@@ -97,10 +93,6 @@
 #endif
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
-
-#if !defined(SIMD_SSE2_DISABLE) && _MSC_VER >= 1300
-#define SIMD_SSE2_ENABLE
-#endif
 
 #if !defined(SIMD_SSE41_DISABLE) && _MSC_VER >= 1500
 #define SIMD_SSE41_ENABLE
@@ -198,11 +190,7 @@
 
 #if defined(SIMD_X86_ENABLE) || defined(SIMD_X64_ENABLE)
 
-#if !defined(SIMD_SSE2_DISABLE) && defined(__SSE__) && defined(__SSE2__)
-#define SIMD_SSE2_ENABLE
-#endif
-
-#if !defined(SIMD_SSE41_DISABLE) && defined(__SSE3__) && defined(__SSSE3__) && defined(__SSE4_1__) && defined(__SSE4_2__)
+#if !defined(SIMD_SSE41_DISABLE) && defined(__SSE__) && defined(__SSE2__) && defined(__SSE3__) && defined(__SSSE3__) && defined(__SSE4_1__) && defined(__SSE4_2__)
 #define SIMD_SSE41_ENABLE
 #endif
 
@@ -286,7 +274,7 @@
 
 #endif
 
-#ifdef SIMD_SSE2_ENABLE
+#ifdef SIMD_X64_ENABLE
 #include <mmintrin.h>
 #include <emmintrin.h>
 #endif
@@ -319,7 +307,7 @@
 #define SIMD_ALIGN 64
 #elif defined(SIMD_AVX_ENABLE) || defined(SIMD_AVX2_ENABLE)
 #define SIMD_ALIGN 32
-#elif defined(SIMD_SSE2_ENABLE) || defined(SIMD_SSE41_ENABLE) \
+#elif defined(SIMD_SSE41_ENABLE) \
     || defined(SIMD_VMX_ENABLE) || defined(SIMD_VSX_ENABLE) \
 	|| defined(SIMD_NEON_ENABLE)
 #define SIMD_ALIGN 16

@@ -857,8 +857,8 @@ namespace Simd
         {
             for (size_t row = 0; row < 7; ++row)
             {
-                Store<align>((__m128i*)(dst + 0), Sse2::K_INV_ZERO);
-                Store<align>((__m128i*)(dst + 3), Sse2::K_INV_ZERO);
+                Store<align>((__m128i*)(dst + 0), K_INV_ZERO);
+                Store<align>((__m128i*)(dst + 3), K_INV_ZERO);
                 dst += stride;
             }
         }

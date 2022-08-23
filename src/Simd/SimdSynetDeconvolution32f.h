@@ -263,7 +263,7 @@ namespace Simd
 
         void * SynetDeconvolution32fInit(size_t batch, const SimdConvolutionParameters * conv, SimdSynetCompatibilityType compatibility);
     }
-#endif//SIMD_SSE2_ENABLE
+#endif
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx

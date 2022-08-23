@@ -658,10 +658,10 @@ namespace Simd
 #else
             microM = 4;
             microN = 4;
-            kernelMM = Sse2::GemmKernel4x4nn;
-            kernelMT = Sse2::GemmKernel4x4nn;
-            kernelTM = Sse2::GetGemmTail(M%microM, microN);
-            kernelTT = Sse2::GetGemmTail(M%microM, microN);
+            kernelMM = Sse41::GemmKernel4x4nn;
+            kernelMT = Sse41::GemmKernel4x4nn;
+            kernelTM = Sse41::GetGemmTail(M%microM, microN);
+            kernelTT = Sse41::GetGemmTail(M%microM, microN);
 #endif
             return Gemm32fNNcb(M, N, K, microM, microN, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(),  
                 kernelMM, kernelMT, kernelTM, kernelTT, NULL, Sse41::GemmPackB, Sse41::GemmScaleC, NULL, compatibility);

@@ -379,5 +379,5 @@ namespace Simd
             return NULL;
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif
 }

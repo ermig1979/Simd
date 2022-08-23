@@ -368,7 +368,7 @@ namespace Simd
         SynetConvolution32fNhwcDirect::SynetConvolution32fNhwcDirect(const ConvParam32f& p)
             : Avx::SynetConvolution32fNhwcDirect(p)
         {
-            if (p.dstC <= Sse2::F)
+            if (p.dstC <= Sse41::F)
                 return;
             //_old.enable = true;
             if (_old.enable)

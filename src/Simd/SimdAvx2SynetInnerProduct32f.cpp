@@ -40,7 +40,7 @@ namespace Simd
             _biasAndActivation = Avx2::ConvolutionBiasAndActivation;
             if (_param.transpose)
             {
-                if (_param.input > Sse2::F)
+                if (_param.input > Sse41::F)
                 {
                     _gemm = Avx2::Gemm32fNT;
                     if (_M == 1 && _param.activation == SimdConvolutionActivationIdentity)
@@ -51,10 +51,10 @@ namespace Simd
             }
             else
             {
-                if (_param.output > Sse2::F)
+                if (_param.output > Sse41::F)
                     _gemm = Avx2::Gemm32fNN;
             }
-            if (_param.output > Sse2::F && _prod == NULL)
+            if (_param.output > Sse41::F && _prod == NULL)
             {
                 _cbRun = Avx2::Gemm32fNNcbRun;
                 _cbPack = Avx2::Gemm32fNNcbReorderB;
@@ -376,7 +376,7 @@ namespace Simd
         SynetInnerProduct32fProd::SynetInnerProduct32fProd(const InnerProductParam32f& p)
             : Avx::SynetInnerProduct32fProd(p)
         {
-            if (_param.output > Sse2::F)
+            if (_param.output > Sse41::F)
             {
                 SetSize(Avx::F);
                 _prod = InnerProductKxKNr;

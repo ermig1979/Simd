@@ -184,5 +184,5 @@ namespace Simd
                 FillPixel<false>(dst, stride, width, height, pixel, pixelSize);
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif
 }

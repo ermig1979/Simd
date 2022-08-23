@@ -246,7 +246,7 @@ namespace Simd
         {
             dst[2] = _mm256_loadu_si256((__m256i*)(src + 1));
             __m128i lo = _mm_or_si128(_mm_slli_si128(_mm_loadu_si128((__m128i*)src), 1), 
-                _mm_and_si128(_mm256_castsi256_si128(dst[2]), _mm_srli_si128(Sse2::K_INV_ZERO, HA - 1)));
+                _mm_and_si128(_mm256_castsi256_si128(dst[2]), _mm_srli_si128(Sse41::K_INV_ZERO, HA - 1)));
             __m128i hi = _mm_loadu_si128((__m128i*)(src + HA - 1));
             dst[0] = _mm256_inserti128_si256(_mm256_castsi128_si256(lo), hi, 0x1);
         }
@@ -256,7 +256,7 @@ namespace Simd
             dst[0] = _mm256_loadu_si256((__m256i*)(src - 1));
             __m128i lo = _mm_loadu_si128((__m128i*)(src + 1));
             __m128i hi = _mm_or_si128(_mm_srli_si128(_mm_loadu_si128((__m128i*)src + 1), 1), 
-                _mm_and_si128(_mm256_extracti128_si256(dst[0], 1), _mm_slli_si128(Sse2::K_INV_ZERO, HA - 1)));
+                _mm_and_si128(_mm256_extracti128_si256(dst[0], 1), _mm_slli_si128(Sse41::K_INV_ZERO, HA - 1)));
             dst[2] = _mm256_inserti128_si256(_mm256_castsi128_si256(lo), hi, 0x1);
         }
 

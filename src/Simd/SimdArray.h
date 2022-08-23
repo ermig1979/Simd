@@ -114,8 +114,8 @@ namespace Simd
 #pragma GCC diagnostic ignored "-Wignored-attributes"
 #endif
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         typedef Array<__m128> Array128f;
         typedef Array<__m128i> Array128i;

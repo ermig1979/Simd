@@ -47,7 +47,7 @@ namespace Simd
         SynetMergedConvolution32fBf16Cdc::SynetMergedConvolution32fBf16Cdc(const MergConvParam32f& p)
             : Base::SynetMergedConvolution32fBf16Cdc(p)
         {
-            SetSize(Sse2::F);
+            SetSize(F);
             _convert = ConvertFp32ToBf16;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
@@ -59,7 +59,7 @@ namespace Simd
         SynetMergedConvolution32fBf16Cd::SynetMergedConvolution32fBf16Cd(const MergConvParam32f& p)
             : Base::SynetMergedConvolution32fBf16Cd(p)
         {
-            SetSize(Sse2::F);
+            SetSize(F);
             _convert = ConvertFp32ToBf16;
             SetInput(_param.conv[0], _input);
             SetDepthwise(_param.conv[1], _depthwise);
@@ -70,7 +70,7 @@ namespace Simd
         SynetMergedConvolution32fBf16Dc::SynetMergedConvolution32fBf16Dc(const MergConvParam32f& p)
             : Base::SynetMergedConvolution32fBf16Dc(p)
         {
-            SetSize(Sse2::F);
+            SetSize(F);
             SetDepthwise(_param.conv[0], _depthwise);
             SetOutput(_param.conv[1], _output);
         }

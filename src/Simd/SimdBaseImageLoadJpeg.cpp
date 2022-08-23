@@ -30,7 +30,7 @@ namespace Simd
 {
     namespace Base
     {
-#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE2_DISABLE)
+#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE41_DISABLE)
 #define JPEG_SSE2
         static int jpeg__sse2_available(void)
         {

@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         template<int step> SIMD_INLINE __m128 Gather(const float* ptr)
         {
@@ -49,7 +49,7 @@ namespace Simd
             return _mm_load_ps(buf);
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx
@@ -76,7 +76,7 @@ namespace Simd
             return _mm256_load_ps(buf);
         }
     }
-#endif//SIMD_AVX_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
@@ -88,7 +88,7 @@ namespace Simd
             return _mm256_i32gather_ps(ptr, idx, 4);
         }
     }
-#endif//SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
@@ -112,4 +112,4 @@ namespace Simd
     }
 #endif
 }
-#endif//__SimdGather_h__
+#endif

@@ -76,8 +76,8 @@ namespace Simd
         const int DIVISION_BY_9_FACTOR = (1 << DIVISION_BY_9_SHIFT) / 9;
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         const size_t F = sizeof(__m128) / sizeof(float);
         const size_t DF = 2 * F;
@@ -149,18 +149,6 @@ namespace Simd
         const __m128i K16_GV_RT = SIMD_MM_SET2_EPI16(Base::GREEN_TO_V_WEIGHT, Base::BGR_TO_YUV_ROUND_TERM);
 
         const __m128i K16_DIVISION_BY_9_FACTOR = SIMD_MM_SET1_EPI16(Base::DIVISION_BY_9_FACTOR);
-    }
-#endif
-
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
-    {
-        using namespace Sse2;
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug      
-        using Sse2::F;
-        using Sse2::DF;
-        using Sse2::QF;
-#endif
 
         const __m128i K8_SHUFFLE_GRAY_TO_BGR0 = SIMD_MM_SETR_EPI8(0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x4, 0x4, 0x4, 0x5);
         const __m128i K8_SHUFFLE_GRAY_TO_BGR1 = SIMD_MM_SETR_EPI8(0x5, 0x5, 0x6, 0x6, 0x6, 0x7, 0x7, 0x7, 0x8, 0x8, 0x8, 0x9, 0x9, 0x9, 0xA, 0xA);

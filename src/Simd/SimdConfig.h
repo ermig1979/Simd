@@ -24,8 +24,6 @@
 #ifndef __SimdConfig_h__
 #define __SimdConfig_h__
 
-//#define SIMD_SSE2_DISABLE
-
 //#define SIMD_SSE41_DISABLE
 
 //#define SIMD_AVX_DISABLE

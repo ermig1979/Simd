@@ -209,7 +209,7 @@ namespace Simd
         {
             if (_param.output > 1)
             {
-                SetSize(Sse2::F);
+                SetSize(F);
                 _prod = InnerProductKxKNr;
             }
         }

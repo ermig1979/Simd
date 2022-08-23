@@ -340,8 +340,8 @@ namespace Simd
                         __m128 h3 = _mm_min_ps(_mm_mul_ps(Sse41::Broadcast<3>(s), n), _mm256_castps256_ps128(_02));
                         t = _mm_add_ps(t, _mm_add_ps(_mm_add_ps(h0, h1), _mm_add_ps(h2, h3)));
                         _mm_storeu_ps(dst, _mm_mul_ps(_mm256_castps256_ps128(_05), _mm_hadd_ps(_mm_hadd_ps(h0, h1), _mm_hadd_ps(h2, h3))));
-                        dst += Sse2::F;
-                        src += Sse2::F;
+                        dst += Sse41::F;
+                        src += Sse41::F;
                     }
                     src = hf + x * FQ;
                     __m128 s = _mm_add_ps(_mm_loadu_ps(src), _mm_loadu_ps(src + HQ));

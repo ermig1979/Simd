@@ -667,7 +667,7 @@ namespace Simd
                         __m128 m0 = _mm_mul_ps(Sse41::BilColS3(ps0 + _ix[dx], fx0, fx1), _mm512_castps512_ps128(_fy0));
                         __m128 m1 = _mm_mul_ps(Sse41::BilColS3(ps1 + _ix[dx], fx0, fx1), _mm512_castps512_ps128(_fy1));
                         __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
-                        _mm_mask_storeu_epi16((__m128i*)(dst + dx), 0x7, _mm_packus_epi32(i0, Sse2::K_ZERO));
+                        _mm_mask_storeu_epi16((__m128i*)(dst + dx), 0x7, _mm_packus_epi32(i0, Sse41::K_ZERO));
                     }
                 }
                 if (N == 4)
@@ -702,7 +702,7 @@ namespace Simd
                         __m128 m0 = _mm_mul_ps(Sse41::BilColS4(ps0 + _ix[dx], fx0, fx1), _mm512_castps512_ps128(_fy0));
                         __m128 m1 = _mm_mul_ps(Sse41::BilColS4(ps1 + _ix[dx], fx0, fx1), _mm512_castps512_ps128(_fy1));
                         __m128i i0 = _mm_cvttps_epi32(_mm_add_ps(m0, m1));
-                        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, Sse2::K_ZERO));
+                        _mm_storel_epi64((__m128i*)(dst + dx), _mm_packus_epi32(i0, Sse41::K_ZERO));
                     }
                 }
             }

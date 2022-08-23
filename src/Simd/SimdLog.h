@@ -58,8 +58,8 @@ namespace Simd
         Log<T>(array.data, array.size, name);
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE void Log(const __m128 & value, const std::string & name)
         {
@@ -75,13 +75,6 @@ namespace Simd
             _mm_storeu_si128((__m128i*)buffer, value);
             Simd::Log<T>(buffer, n, name);
         }
-    }
-#endif //SIMD_SSE2_ENABLE
-
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
-        using namespace Sse2;
     }
 #endif //SIMD_SSE41_ENABLE
 

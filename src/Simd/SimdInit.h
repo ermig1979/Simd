@@ -115,7 +115,7 @@ namespace Simd
 
 #endif
 
-#if defined(SIMD_SSE2_ENABLE)
+#if defined(SIMD_SSE41_ENABLE)
 
 #if defined(SIMD_INIT_AS_CHAR)
 
@@ -207,7 +207,7 @@ namespace Simd
 
 #endif// defined(_MSC_VER) || defined(__GNUC__)
 
-#endif// SIMD_SSE2_ENABLE
+#endif// SIMD_SSE41_ENABLE
 
 #if defined(SIMD_AVX2_ENABLE)
 

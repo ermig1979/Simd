@@ -66,7 +66,7 @@ namespace Simd
 #define SIMD_ROUND
     SIMD_INLINE int Round(double value)
     {
-#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE2_DISABLE)
+#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE41_DISABLE)
         __m128d _value = _mm_set_sd(value);
         return _mm_cvtsd_si32(_value);
 #else
@@ -76,7 +76,7 @@ namespace Simd
 
     SIMD_INLINE int Round(float value)
     {
-#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE2_DISABLE)
+#if defined(SIMD_X64_ENABLE) && !defined(SIMD_SSE41_DISABLE)
         __m128 _value = _mm_set_ss(value);
         return _mm_cvtss_si32(_value);
 #else
@@ -261,8 +261,6 @@ namespace Simd
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
-        using namespace Sse2;
-
         SIMD_INLINE __m128 Square(__m128 value)
         {
             return _mm_mul_ps(value, value);

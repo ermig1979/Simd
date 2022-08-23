@@ -399,7 +399,7 @@ namespace Simd
             __m128i value1 = _mm_and_si128(_mm_shuffle_epi8(subset1, shuffle), mask);
             __m128i value = _mm_blendv_epi8(value0, value1, index);
 
-            return _mm_andnot_si128(_mm_cmpeq_epi32(value, _mm_setzero_si128()), Simd::Sse2::K_INV_ZERO);
+            return _mm_andnot_si128(_mm_cmpeq_epi32(value, _mm_setzero_si128()), K_INV_ZERO);
         }
 
         void Detect(const HidLbpCascade<float, uint32_t> & hid, size_t offset, __m128i & result)
@@ -619,7 +619,7 @@ namespace Simd
             __m128i value1 = _mm_and_si128(_mm_shuffle_epi8(subset1, shuffle), mask);
             __m128i value = _mm_blendv_epi8(value0, value1, index);
 
-            return _mm_andnot_si128(_mm_cmpeq_epi16(value, _mm_setzero_si128()), Simd::Sse2::K_INV_ZERO);
+            return _mm_andnot_si128(_mm_cmpeq_epi16(value, _mm_setzero_si128()), K_INV_ZERO);
         }
 
         void Detect(const HidLbpCascade<int, uint16_t> & hid, size_t offset, __m128i & result)

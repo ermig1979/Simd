@@ -39,7 +39,7 @@ namespace Simd
 
         template <> __m128i Invert<true>(__m128i value)
         {
-            return _mm_sub_epi8(Sse2::K_INV_ZERO, value);
+            return _mm_sub_epi8(Sse41::K_INV_ZERO, value);
         }
 
         template <> __m128i Invert<false>(__m128i value)

@@ -1499,5 +1499,5 @@ namespace Simd
 				return new Base::SynetMergedConvolution32f(param);
 		}
 	}
-#endif//SIMD_SSE2_ENABLE
+#endif
 }

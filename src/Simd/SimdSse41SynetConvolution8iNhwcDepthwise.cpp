@@ -418,7 +418,7 @@ namespace Simd
         {
             if (p.trans != SimdTrue || p.srcC != p.dstC || p.srcC != p.group)
                 return false;
-            if (p.group < Sse2::F)
+            if (p.group < Sse41::F)
                 return false;
             return true;
         }

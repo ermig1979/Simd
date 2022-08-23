@@ -76,12 +76,12 @@ namespace Simd
             __m128i max128 = _mm_max_epu8(_mm_max_epu8(_mm512_extracti32x4_epi32(max512, 0), _mm512_extracti32x4_epi32(max512, 1)),
                 _mm_max_epu8(_mm512_extracti32x4_epi32(max512, 2), _mm512_extracti32x4_epi32(max512, 3)));
 
-            uint8_t min_buffer[Sse2::A], max_buffer[Sse2::A];
+            uint8_t min_buffer[Sse41::A], max_buffer[Sse41::A];
             Sse41::Store<false>((__m128i*)min_buffer, min128);
             Sse41::Store<false>((__m128i*)max_buffer, max128);
             *min = UCHAR_MAX;
             *max = 0;
-            for (size_t i = 0; i < Sse2::A; ++i)
+            for (size_t i = 0; i < Sse41::A; ++i)
             {
                 *min = Base::MinU8(min_buffer[i], *min);
                 *max = Base::MaxU8(max_buffer[i], *max);

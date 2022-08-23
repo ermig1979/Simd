@@ -511,7 +511,7 @@ namespace Simd
             GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Avx::GemmScaleC,
                 Kernel1x1x16nt, Kernel1x4x16nt, Kernel2x1x16nt, Kernel2x4x16nt, Kernel3x1x16nt, Kernel3x4x16nt, NULL, NULL);
 #else
-            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse2::GemmScaleC,
+            GemmNT gemmNT(M, N, K, Base::AlgCacheL1(), Base::AlgCacheL2(), Base::AlgCacheL3(), Sse41::GemmScaleC,
                 Kernel1x1x16nt, Kernel1x4x16nt, NULL, NULL, NULL, NULL, NULL, NULL);
 #endif
             gemmNT.Run(alpha, A, lda, B, ldb, beta, C, ldc);

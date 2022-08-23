@@ -2939,12 +2939,12 @@ SIMD_API void SimdHogDeinterleave(const float * src, size_t srcStride, size_t wi
 {
     SIMD_EMPTY();
 #ifdef SIMD_AVX512BW_ENABLE
-    if (Avx512bw::Enable && width >= Avx512bw::F && count >= Sse2::F)
+    if (Avx512bw::Enable && width >= Avx512bw::F && count >= Sse41::F)
         Avx512bw::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif
 #ifdef SIMD_AVX2_ENABLE
-    if (Avx2::Enable && width >= Avx2::F && count >= Sse2::F)
+    if (Avx2::Enable && width >= Avx2::F && count >= Sse41::F)
         Avx2::HogDeinterleave(src, srcStride, width, height, count, dst, dstStride);
     else
 #endif

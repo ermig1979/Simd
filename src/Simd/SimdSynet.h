@@ -340,7 +340,7 @@ namespace Simd
 
         template<> SIMD_INLINE void Madd4<true>(__m128i& i32, __m128i u8, __m128i i8)
         {
-            i32 = _mm_add_epi32(i32, _mm_madd_epi16(_mm_maddubs_epi16(u8, i8), Sse2::K16_0001));
+            i32 = _mm_add_epi32(i32, _mm_madd_epi16(_mm_maddubs_epi16(u8, i8), K16_0001));
         }
 
         template<> SIMD_INLINE void Madd4<false>(__m128i& i32, __m128i u8, __m128i i8)

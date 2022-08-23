@@ -176,12 +176,12 @@ namespace Simd
 
         template <size_t count> SIMD_INLINE __m128i LoadHalfBeforeFirst(__m128i first)
         {
-            return _mm_or_si128(_mm_slli_si128(first, count), _mm_and_si128(first, _mm_srli_si128(Sse2::K_INV_ZERO, HA - count)));
+            return _mm_or_si128(_mm_slli_si128(first, count), _mm_and_si128(first, _mm_srli_si128(Sse41::K_INV_ZERO, HA - count)));
         }
 
         template <size_t count> SIMD_INLINE __m128i LoadHalfAfterLast(__m128i last)
         {
-            return _mm_or_si128(_mm_srli_si128(last, count), _mm_and_si128(last, _mm_slli_si128(Sse2::K_INV_ZERO, HA - count)));
+            return _mm_or_si128(_mm_srli_si128(last, count), _mm_and_si128(last, _mm_slli_si128(Sse41::K_INV_ZERO, HA - count)));
         }
 
         template <bool align> SIMD_INLINE __m256i LoadPermuted(const __m256i * p)

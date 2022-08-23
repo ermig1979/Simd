@@ -964,5 +964,5 @@ namespace Simd
             return func ? func : Base::SynetConvolution32fDirectNhwc::SetConvolutionBiasActivation();
         };
     }
-#endif//SIMD_SSE2_ENABLE
+#endif
 }

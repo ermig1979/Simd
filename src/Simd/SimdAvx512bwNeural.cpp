@@ -179,7 +179,7 @@ namespace Simd
 
         template <> __m128i Invert<true>(__m128i value)
         {
-            return _mm_sub_epi8(Sse2::K_INV_ZERO, value);
+            return _mm_sub_epi8(Sse41::K_INV_ZERO, value);
         }
 
         template <> __m128i Invert<false>(__m128i value)
@@ -197,7 +197,7 @@ namespace Simd
         {
             assert(width >= F);
             if (align)
-                assert(Aligned(src, Sse2::A) && Aligned(srcStride, Sse2::A) && Aligned(dst) && Aligned(dstStride));
+                assert(Aligned(src, Sse41::A) && Aligned(srcStride, Sse41::A) && Aligned(dst) && Aligned(dstStride));
 
             size_t alignedWidth = AlignLo(width, F);
             __m512 _1_255 = _mm512_set1_ps(1.0f / 255.0f);
@@ -217,7 +217,7 @@ namespace Simd
 
         template <bool inversion> void NeuralConvert(const uint8_t* src, size_t srcStride, size_t width, size_t height, float* dst, size_t dstStride)
         {
-            if (Aligned(src, Sse2::A) && Aligned(srcStride, Sse2::A) && Aligned(dst) && Aligned(dstStride))
+            if (Aligned(src, Sse41::A) && Aligned(srcStride, Sse41::A) && Aligned(dst) && Aligned(dstStride))
             {
                 if (width * height * sizeof(float) >= STREAM_SIZE_MIN)
                     NeuralConvert<inversion, true, true>(src, srcStride, width, height, dst, dstStride);

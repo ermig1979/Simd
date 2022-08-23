@@ -187,7 +187,7 @@ namespace Simd
                 bitBuf.Push(bits);
             }
             int end0pos4 = 60;
-            for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), Sse2::K_INV_ZERO); end0pos4 -= 4);
+            for (; end0pos4 > 0 && _mm_testz_si128(_mm_loadu_si128((__m128i*)(DU + end0pos4)), K_INV_ZERO); end0pos4 -= 4);
             int end0pos = end0pos4 + 3;
             for (; (end0pos > 0) && (DU[end0pos] == 0); --end0pos);
             if (end0pos == 0)

@@ -244,7 +244,7 @@ namespace Test
         ::SimdRelease(context2);
 
 #if defined(SIMD_X64_ENABLE) || defined(SIMD_X86_ENABLE)
-        int differenceMax = (Simd::Base::FmaAvoid(p.comp) ? 0 : 2);
+        int differenceMax = (Simd::Base::FmaAvoid(p.comp) ? 0 : 3);
         float epsilon = (Simd::Base::FmaAvoid(p.comp) ? eps * eps : 0.07f);
 #else
         int differenceMax = 1;
