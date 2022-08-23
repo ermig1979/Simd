@@ -554,7 +554,7 @@ namespace Simd
             __m128 k0 = _mm_set1_ps(k[0]);
             __m128 k1 = _mm_set1_ps(k[1]);
             __m128 k2 = _mm_set1_ps(k[2]);
-            Sse2::Pow pow;
+            Pow pow;
             Array32f sum(spatial, true), zero(spatial, true);
             size_t aligned = AlignLo(spatial, F);
             for (size_t c = 0; c < half; ++c)
@@ -608,7 +608,7 @@ namespace Simd
             __m128 k0 = _mm_set1_ps(k[0]);
             __m128 k1 = _mm_set1_ps(k[1]);
             __m128 k2 = _mm_set1_ps(k[2]);
-            Sse2::Pow pow;
+            Pow pow;
             size_t aligned = AlignLo(channels - half, F);
             for (size_t s = 0; s < spatial; ++s)
             {

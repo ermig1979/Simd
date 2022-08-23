@@ -96,8 +96,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE __m128i NotEqual8u(__m128i a, __m128i b)
         {
@@ -203,7 +203,7 @@ namespace Simd
             return LesserOrEqual16i(a, b);
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif// SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2

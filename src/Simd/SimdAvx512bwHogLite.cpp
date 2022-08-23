@@ -263,8 +263,8 @@ namespace Simd
                 }
                 for (; x < _hx; ++x, h += FQ)
                 {
-                    __m128 h0 = Sse2::Load<true>(h + 00);
-                    __m128 h1 = Sse2::Load<true>(h + HQ);
+                    __m128 h0 = Sse41::Load<true>(h + 00);
+                    __m128 h1 = Sse41::Load<true>(h + HQ);
                     __m128 sum = _mm_add_ps(h0, h1);
                     _mm_store_ss(nf.data + x, _mm_dp_ps(sum, sum, 0xF1));
                 }
@@ -999,7 +999,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += Avx::F)
                             FilterHx4x8<align>(s + i, filter + i, sums);
-                        Sse2::Store<true>(dst + col, Avx::Extract4Sums(sums));
+                        Sse41::Store<true>(dst + col, Avx::Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {
@@ -1036,7 +1036,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4x8<align>(s + i, filter + i, sums);
-                        Sse2::Store<true>(dst + col, Extract4Sums(sums));
+                        Sse41::Store<true>(dst + col, Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {

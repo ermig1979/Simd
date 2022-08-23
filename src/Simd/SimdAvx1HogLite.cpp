@@ -342,7 +342,7 @@ namespace Simd
                             sums[3] = _mm256_add_ps(sums[3], _mm256_mul_ps(_s, Load<align>(p + j + 48)));
                         }
                         __m256 sum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
-                        Sse2::Store<align>(d + i, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
+                        Sse41::Store<align>(d + i, _mm_add_ps(_mm256_castps256_ps128(sum), _mm256_extractf128_ps(sum, 1)));
                     }
                     s += 16;
                     d += 8;
@@ -403,7 +403,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
-                        Sse2::Store<true>(dst + col, Avx::Extract4Sums(sums));
+                        Sse41::Store<true>(dst + col, Avx::Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {

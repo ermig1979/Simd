@@ -116,7 +116,7 @@ namespace Simd
 
         SIMD_INLINE __m128 BilColS2(const uint16_t* src, const int32_t* idx, __m128 fx0, __m128 fx1)
         {
-            __m128i s = Sse2::Load((__m128i*)(src + idx[0]), (__m128i*)(src + idx[2]));
+            __m128i s = Load((__m128i*)(src + idx[0]), (__m128i*)(src + idx[2]));
             __m128 m0 = _mm_mul_ps(fx0, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_2_0)));
             __m128 m1 = _mm_mul_ps(fx1, _mm_cvtepi32_ps(_mm_shuffle_epi8(s, RSB_2_1)));
             return _mm_add_ps(m0, m1);

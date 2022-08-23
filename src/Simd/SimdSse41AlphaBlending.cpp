@@ -38,7 +38,7 @@ namespace Simd
         {
             SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
             {
-                Sse2::AlphaBlending<align>(src, dst, alpha);
+                AlphaBlending<align>(src, dst, alpha);
             }
         };
 
@@ -46,8 +46,8 @@ namespace Simd
         {
             SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
             {
-                Sse2::AlphaBlending<align>(src + 0, dst + 0, _mm_unpacklo_epi8(alpha, alpha));
-                Sse2::AlphaBlending<align>(src + 1, dst + 1, _mm_unpackhi_epi8(alpha, alpha));
+                AlphaBlending<align>(src + 0, dst + 0, _mm_unpacklo_epi8(alpha, alpha));
+                AlphaBlending<align>(src + 1, dst + 1, _mm_unpackhi_epi8(alpha, alpha));
             }
         };
 
@@ -55,9 +55,9 @@ namespace Simd
         {
             SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
             {
-                Sse2::AlphaBlending<align>(src + 0, dst + 0, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
-                Sse2::AlphaBlending<align>(src + 1, dst + 1, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
-                Sse2::AlphaBlending<align>(src + 2, dst + 2, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
+                AlphaBlending<align>(src + 0, dst + 0, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
+                AlphaBlending<align>(src + 1, dst + 1, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
+                AlphaBlending<align>(src + 2, dst + 2, _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
             }
         };
 
@@ -66,11 +66,11 @@ namespace Simd
             SIMD_INLINE void operator()(const __m128i* src, __m128i* dst, __m128i alpha)
             {
                 __m128i lo = _mm_unpacklo_epi8(alpha, alpha);
-                Sse2::AlphaBlending<align>(src + 0, dst + 0, _mm_unpacklo_epi8(lo, lo));
-                Sse2::AlphaBlending<align>(src + 1, dst + 1, _mm_unpackhi_epi8(lo, lo));
+                AlphaBlending<align>(src + 0, dst + 0, _mm_unpacklo_epi8(lo, lo));
+                AlphaBlending<align>(src + 1, dst + 1, _mm_unpackhi_epi8(lo, lo));
                 __m128i hi = _mm_unpackhi_epi8(alpha, alpha);
-                Sse2::AlphaBlending<align>(src + 2, dst + 2, _mm_unpacklo_epi8(hi, hi));
-                Sse2::AlphaBlending<align>(src + 3, dst + 3, _mm_unpackhi_epi8(hi, hi));
+                AlphaBlending<align>(src + 2, dst + 2, _mm_unpacklo_epi8(hi, hi));
+                AlphaBlending<align>(src + 3, dst + 3, _mm_unpackhi_epi8(hi, hi));
             }
         };
 
@@ -147,9 +147,9 @@ namespace Simd
             for (size_t row = 0; row < height; ++row)
             {
                 for (size_t offs = 0; offs < sizeA; offs += A)
-                    Sse2::AlphaBlending<align>((__m128i*)(src + offs), (__m128i*)(dst + offs), _alpha);
+                    AlphaBlending<align>((__m128i*)(src + offs), (__m128i*)(dst + offs), _alpha);
                 if (sizeA != size)
-                    Sse2::AlphaBlending<false>((__m128i*)(src + size - A), (__m128i*)(dst + size - A), tail);
+                    AlphaBlending<false>((__m128i*)(src + size - A), (__m128i*)(dst + size - A), tail);
                 src += srcStride;
                 dst += dstStride;
             }
@@ -175,7 +175,7 @@ namespace Simd
         {
             SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
             {
-                Sse2::AlphaFilling<align>(dst, channel[0], channel[0], alpha);
+                AlphaFilling<align>(dst, channel[0], channel[0], alpha);
             }
         };
 
@@ -183,8 +183,8 @@ namespace Simd
         {
             SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
             {
-                Sse2::AlphaFilling<align>(dst + 0, channel[0], channel[0], UnpackU8<0>(alpha, alpha));
-                Sse2::AlphaFilling<align>(dst + 1, channel[0], channel[0], UnpackU8<1>(alpha, alpha));
+                AlphaFilling<align>(dst + 0, channel[0], channel[0], UnpackU8<0>(alpha, alpha));
+                AlphaFilling<align>(dst + 1, channel[0], channel[0], UnpackU8<1>(alpha, alpha));
             }
         };
 
@@ -192,9 +192,9 @@ namespace Simd
         {
             SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
             {
-                Sse2::AlphaFilling<align>(dst + 0, channel[0], channel[1], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
-                Sse2::AlphaFilling<align>(dst + 1, channel[2], channel[0], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
-                Sse2::AlphaFilling<align>(dst + 2, channel[1], channel[2], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
+                AlphaFilling<align>(dst + 0, channel[0], channel[1], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR0));
+                AlphaFilling<align>(dst + 1, channel[2], channel[0], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR1));
+                AlphaFilling<align>(dst + 2, channel[1], channel[2], _mm_shuffle_epi8(alpha, K8_SHUFFLE_GRAY_TO_BGR2));
             }
         };
 
@@ -203,11 +203,11 @@ namespace Simd
             SIMD_INLINE void operator()(__m128i* dst, const __m128i* channel, __m128i alpha)
             {
                 __m128i lo = UnpackU8<0>(alpha, alpha);
-                Sse2::AlphaFilling<align>(dst + 0, channel[0], channel[0], UnpackU8<0>(lo, lo));
-                Sse2::AlphaFilling<align>(dst + 1, channel[0], channel[0], UnpackU8<1>(lo, lo));
+                AlphaFilling<align>(dst + 0, channel[0], channel[0], UnpackU8<0>(lo, lo));
+                AlphaFilling<align>(dst + 1, channel[0], channel[0], UnpackU8<1>(lo, lo));
                 __m128i hi = UnpackU8<1>(alpha, alpha);
-                Sse2::AlphaFilling<align>(dst + 2, channel[0], channel[0], UnpackU8<0>(hi, hi));
-                Sse2::AlphaFilling<align>(dst + 3, channel[0], channel[0], UnpackU8<1>(hi, hi));
+                AlphaFilling<align>(dst + 2, channel[0], channel[0], UnpackU8<0>(hi, hi));
+                AlphaFilling<align>(dst + 3, channel[0], channel[0], UnpackU8<1>(hi, hi));
             }
         };
 

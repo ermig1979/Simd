@@ -204,10 +204,10 @@ namespace Simd
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const uint8_t * src, size_t stride, Buffer & buffer, size_t col)
             {
                 const uint8_t * s = src + col;
-                __m128i t = Sse2::Load<false>((__m128i*)(s - stride));
-                __m128i l = Sse2::Load<false>((__m128i*)(s - 1));
-                __m128i r = Sse2::Load<false>((__m128i*)(s + 1));
-                __m128i b = Sse2::Load<false>((__m128i*)(s + stride));
+                __m128i t = Sse41::Load<false>((__m128i*)(s - stride));
+                __m128i l = Sse41::Load<false>((__m128i*)(s - 1));
+                __m128i r = Sse41::Load<false>((__m128i*)(s + 1));
+                __m128i b = Sse41::Load<false>((__m128i*)(s + stride));
                 HogDirectionHistograms<align>(CovertDifference<0>(r, l), CovertDifference<0>(b, t), buffer, col + 0);
                 HogDirectionHistograms<align>(CovertDifference<1>(r, l), CovertDifference<1>(b, t), buffer, col + 8);
             }
@@ -486,10 +486,10 @@ namespace Simd
             template <bool align> SIMD_INLINE void GetHistogram(const uint8_t * src, size_t stride, size_t col)
             {
                 const uint8_t * s = src + col;
-                __m128i t = Sse2::Load<false>((__m128i*)(s - stride));
-                __m128i l = Sse2::Load<false>((__m128i*)(s - 1));
-                __m128i r = Sse2::Load<false>((__m128i*)(s + 1));
-                __m128i b = Sse2::Load<false>((__m128i*)(s + stride));
+                __m128i t = Sse41::Load<false>((__m128i*)(s - stride));
+                __m128i l = Sse41::Load<false>((__m128i*)(s - 1));
+                __m128i r = Sse41::Load<false>((__m128i*)(s + 1));
+                __m128i b = Sse41::Load<false>((__m128i*)(s + stride));
                 GetHistogram<align>(ConvertDifference<0>(r, l), ConvertDifference<0>(b, t), col + 0);
                 GetHistogram<align>(ConvertDifference<1>(r, l), ConvertDifference<1>(b, t), col + 8);
             }
@@ -543,12 +543,12 @@ namespace Simd
                         Avx::Store<false>(h1[1] + i, _mm256_add_ps(Avx::Load<false>(h1[1] + i), _mm256_unpackhi_ps(b1, b3)));
                     }
                     __m128 * ps = (__m128*)src;
-                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), Sse2::Load(h0[0] + 16, h0[1] + 16));
-                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), Sse2::Load(h1[0] + 16, h1[1] + 16));
-                    Sse2::StoreHalf<0>(h0[0] + 16, s0);
-                    Sse2::StoreHalf<1>(h0[1] + 16, s0);
-                    Sse2::StoreHalf<0>(h1[0] + 16, s1);
-                    Sse2::StoreHalf<1>(h1[1] + 16, s1);
+                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), Sse41::Load(h0[0] + 16, h0[1] + 16));
+                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), Sse41::Load(h1[0] + 16, h1[1] + 16));
+                    Sse41::StoreHalf<0>(h0[0] + 16, s0);
+                    Sse41::StoreHalf<1>(h0[1] + 16, s0);
+                    Sse41::StoreHalf<0>(h1[0] + 16, s1);
+                    Sse41::StoreHalf<1>(h1[1] + 16, s1);
                     h0++;
                     h1++;
                     src += 72;

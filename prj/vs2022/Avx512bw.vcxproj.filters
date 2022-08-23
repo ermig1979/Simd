@@ -569,10 +569,10 @@
     <ClInclude Include="..\..\src\Simd\SimdTranspose.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
+    <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdWinograd.h">
+    <ClInclude Include="..\..\src\Simd\SimdInterleave.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

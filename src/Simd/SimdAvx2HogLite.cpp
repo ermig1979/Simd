@@ -255,8 +255,8 @@ namespace Simd
                 }
                 for (; x < _hx; ++x, h += FQ)
                 {
-                    __m128 h0 = Sse2::Load<true>(h + 00);
-                    __m128 h1 = Sse2::Load<true>(h + HQ);
+                    __m128 h0 = Sse41::Load<true>(h + 00);
+                    __m128 h1 = Sse41::Load<true>(h + HQ);
                     __m128 sum = _mm_add_ps(h0, h1);
                     _mm_store_ss(nf.data + x, _mm_dp_ps(sum, sum, 0xF1));
                 }
@@ -786,7 +786,7 @@ namespace Simd
         template <bool align> SIMD_INLINE void StoreHorizontalSums(float * ptr, __m256 * sums)
         {
             __m256 hsum = _mm256_hadd_ps(_mm256_hadd_ps(sums[0], sums[1]), _mm256_hadd_ps(sums[2], sums[3]));
-            Sse2::Store<align>(ptr, _mm_add_ps(_mm256_castps256_ps128(hsum), _mm256_extractf128_ps(hsum, 1)));
+            Sse41::Store<align>(ptr, _mm_add_ps(_mm256_castps256_ps128(hsum), _mm256_extractf128_ps(hsum, 1)));
         }
 
         template<bool align> void HogLiteCompressFeatures(const float * src, size_t srcStride, size_t width, size_t height, const float * pca, float * dst, size_t dstStride)
@@ -906,7 +906,7 @@ namespace Simd
                         const float * s = src + col * step;
                         for (size_t i = 0; i < size; i += F)
                             FilterHx4<align, step>(s + i, filter + i, sums);
-                        Sse2::Store<true>(dst + col, Avx::Extract4Sums(sums));
+                        Sse41::Store<true>(dst + col, Avx::Extract4Sums(sums));
                     }
                     for (; col < width; ++col)
                     {

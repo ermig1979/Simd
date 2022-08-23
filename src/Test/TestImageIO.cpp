@@ -141,7 +141,7 @@ namespace Test
         {
             TEST_LOG_SS(Info, "Test " << desc1 << " & " << desc2 << " [" << width << ", " << height << "].");
             image.Recreate(width, height, format, NULL, TEST_ALIGN(width));
-#if 1
+#if 0
             ::srand(0);
             FillRandom(image);
 #else

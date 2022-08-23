@@ -36,8 +36,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         class Pow
         {
@@ -89,7 +89,7 @@ namespace Simd
             }            
         };
     }
-#endif //SIMD_SSE2_ENABLE   
+#endif //SIMD_SSE41_ENABLE   
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2

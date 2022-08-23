@@ -28,8 +28,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void Copy(const float * src, float * dst)
         {
@@ -94,7 +94,7 @@ namespace Simd
             Store<align>(dst + 3 * F, buf33);
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx

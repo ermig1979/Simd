@@ -795,8 +795,8 @@ namespace Simd
                         }
                         for (; dx < rsh; dx += Sse2::F)
                         {
-                            __m128 s01 = Sse2::Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
-                            __m128 s23 = Sse2::Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
+                            __m128 s01 = Sse41::Load(ps + _ix[dx + 0], ps + _ix[dx + 1]);
+                            __m128 s23 = Sse41::Load(ps + _ix[dx + 2], ps + _ix[dx + 3]);
                             __m128 fx1 = _mm_load_ps(_ax.data + dx);
                             __m128 fx0 = _mm_sub_ps(_mm256_castps256_ps128(_1), fx1);
                             __m128 m0 = _mm_mul_ps(fx0, _mm_shuffle_ps(s01, s23, 0x88));

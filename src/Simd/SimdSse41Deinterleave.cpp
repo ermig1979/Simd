@@ -48,8 +48,8 @@ namespace Simd
                 {
                     __m128i uv0 = Load<align>((__m128i*)(uv + offset));
                     __m128i uv1 = Load<align>((__m128i*)(uv + offset + A));
-                    Store<align>((__m128i*)(u + col), Sse2::Deinterleave8<0>(uv0, uv1));
-                    Store<align>((__m128i*)(v + col), Sse2::Deinterleave8<1>(uv0, uv1));
+                    Store<align>((__m128i*)(u + col), Deinterleave8<0>(uv0, uv1));
+                    Store<align>((__m128i*)(v + col), Deinterleave8<1>(uv0, uv1));
                 }
                 if (tail)
                 {
@@ -57,8 +57,8 @@ namespace Simd
                     size_t offset = 2 * col;
                     __m128i uv0 = Load<false>((__m128i*)(uv + offset));
                     __m128i uv1 = Load<false>((__m128i*)(uv + offset + A));
-                    Store<false>((__m128i*)(u + col), Sse2::Deinterleave8<0>(uv0, uv1));
-                    Store<false>((__m128i*)(v + col), Sse2::Deinterleave8<1>(uv0, uv1));
+                    Store<false>((__m128i*)(u + col), Deinterleave8<0>(uv0, uv1));
+                    Store<false>((__m128i*)(v + col), Deinterleave8<1>(uv0, uv1));
                 }
                 uv += uvStride;
                 u += uStride;

@@ -189,7 +189,7 @@ namespace Simd
 
         template <bool inversion, bool align, bool stream> void Convert(const uint8_t* src, const __m512& _1_255, float* dst)
         {
-            __m128i _src = Invert<inversion>(Sse2::Load<align>((__m128i*)src));
+            __m128i _src = Invert<inversion>(Sse41::Load<align>((__m128i*)src));
             Stream<align, stream>(dst, _mm512_mul_ps(_mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(_src)), _1_255));
         }
 

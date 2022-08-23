@@ -370,8 +370,8 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatGray8>(const uint8_t * src, __m256 scale, __m256 shift, float * dst)
         {
-            SynetSetInput1Gray8(Sse2::Load<false>((__m128i*)src + 0), scale, shift, dst + 0 * F);
-            SynetSetInput1Gray8(Sse2::Load<false>((__m128i*)src + 1), scale, shift, dst + 2 * F);
+            SynetSetInput1Gray8(Sse41::Load<false>((__m128i*)src + 0), scale, shift, dst + 0 * F);
+            SynetSetInput1Gray8(Sse41::Load<false>((__m128i*)src + 1), scale, shift, dst + 2 * F);
         }
 
         template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatBgr24>(const uint8_t * src, __m256 scale, __m256 shift, float * dst)
@@ -418,10 +418,10 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNchw3<SimdPixelFormatGray8>(const uint8_t * src, const __m256 * scale, const __m256 * shift, float * dst, size_t channel)
         {
-            __m128i src0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i src0 = Sse41::Load<false>((__m128i*)src + 0);
             __m256i gray0 = _mm256_cvtepu8_epi32(_mm_srli_si128(src0, 0));
             __m256i gray1 = _mm256_cvtepu8_epi32(_mm_srli_si128(src0, 8));
-            __m128i src1 = Sse2::Load<false>((__m128i*)src + 1);
+            __m128i src1 = Sse41::Load<false>((__m128i*)src + 1);
             __m256i gray2 = _mm256_cvtepu8_epi32(_mm_srli_si128(src1, 0));
             __m256i gray3 = _mm256_cvtepu8_epi32(_mm_srli_si128(src1, 8));
             StoreScaled<false>(dst + 0 * F, gray0, scale[0], shift[0]);
@@ -502,7 +502,7 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatGray8>(const uint8_t * src, const __m256 * scale, const __m256 * shift, float * dst)
         {
-            __m128i gray0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i gray0 = Sse41::Load<false>((__m128i*)src + 0);
             __m128i bgr0 = _mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR0);
             StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr0, 0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr0, 8)), scale[1], shift[1]);
@@ -512,7 +512,7 @@ namespace Simd
             __m128i bgr2 = _mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR2);
             StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr2, 0)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr2, 8)), scale[2], shift[2]);
-            __m128i gray1 = Sse2::Load<false>((__m128i*)src + 1);
+            __m128i gray1 = Sse41::Load<false>((__m128i*)src + 1);
             __m128i bgr3 = _mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR0);
             StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr3, 0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr3, 8)), scale[1], shift[1]);
@@ -526,22 +526,22 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatBgr24>(const uint8_t * src, const __m256 * scale, const __m256 * shift, float * dst)
         {
-            __m128i bgr0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i bgr0 = Sse41::Load<false>((__m128i*)src + 0);
             StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr0, 0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr0, 8)), scale[1], shift[1]);
-            __m128i bgr1 = Sse2::Load<false>((__m128i*)src + 1);
+            __m128i bgr1 = Sse41::Load<false>((__m128i*)src + 1);
             StoreScaled<false>(dst + 0x2 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr1, 0)), scale[2], shift[2]);
             StoreScaled<false>(dst + 0x3 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr1, 8)), scale[0], shift[0]);
-            __m128i bgr2 = Sse2::Load<false>((__m128i*)src + 2);
+            __m128i bgr2 = Sse41::Load<false>((__m128i*)src + 2);
             StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr2, 0)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr2, 8)), scale[2], shift[2]);
-            __m128i bgr3 = Sse2::Load<false>((__m128i*)src + 3);
+            __m128i bgr3 = Sse41::Load<false>((__m128i*)src + 3);
             StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr3, 0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr3, 8)), scale[1], shift[1]);
-            __m128i bgr4 = Sse2::Load<false>((__m128i*)src + 4);
+            __m128i bgr4 = Sse41::Load<false>((__m128i*)src + 4);
             StoreScaled<false>(dst + 0x8 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr4, 0)), scale[2], shift[2]);
             StoreScaled<false>(dst + 0x9 * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr4, 8)), scale[0], shift[0]);
-            __m128i bgr5 = Sse2::Load<false>((__m128i*)src + 5);
+            __m128i bgr5 = Sse41::Load<false>((__m128i*)src + 5);
             StoreScaled<false>(dst + 0xA * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr5, 0)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0xB * F, _mm256_cvtepu8_epi32(_mm_srli_si128(bgr5, 8)), scale[2], shift[2]);
         }
@@ -552,18 +552,18 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatBgra32>(const uint8_t * src, const __m256 * scale, const __m256 * shift, float * dst)
         {
-            StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 0)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 10)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x2 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 16)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x3 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 32)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 42)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 48)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 64)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 74)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x8 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 80)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x9 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 96)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0xA * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 106)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0xB * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 112)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 0)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 10)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x2 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 16)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x3 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 32)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 42)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 48)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 64)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 74)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x8 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 80)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x9 * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 96)), K8_BGRA_TO_BGR_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0xA * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 106)), K8_BGRA_TO_BGR_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0xB * F, _mm256_cvtepu8_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 112)), K8_BGRA_TO_BGR_2)), scale[2], shift[2]);
         }
 
         const __m128i K8_RGB_UNPACK_0 = SIMD_MM_SETR_EPI8(0x2, -1, 0x1, -1, 0x0, -1, 0x5, -1, 0x4, - 1, 0x3, -1, 0x8, -1, 0x7, -1);
@@ -572,18 +572,18 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3<SimdPixelFormatRgb24>(const uint8_t * src, const __m256 * scale, const __m256 * shift, float * dst)
         {
-            StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 0)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 6)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x2 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 8)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x3 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 24)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 30)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 32)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 48)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 54)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x8 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 56)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
-            StoreScaled<false>(dst + 0x9 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 72)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0xA * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 78)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0xB * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse2::Load<false>((__m128i*)(src + 80)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x0 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 0)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x1 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 6)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x2 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 8)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x3 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 24)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x4 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 30)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x5 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 32)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x6 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 48)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x7 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 54)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x8 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 56)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x9 * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 72)), K8_RGB_UNPACK_0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0xA * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 78)), K8_RGB_UNPACK_1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0xB * F, _mm256_cvtepi16_epi32(_mm_shuffle_epi8(Sse41::Load<false>((__m128i*)(src + 80)), K8_RGB_UNPACK_2)), scale[2], shift[2]);
         }
 
         template<SimdPixelFormatType format, size_t step> void SynetSetInputNhwc3(const uint8_t * src, size_t width, size_t height, size_t stride, const float * scale, const float * shift, float * dst)

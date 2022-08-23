@@ -311,8 +311,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE __m128 SynetHardSigmoid32f(__m128 value, __m128 scale, __m128 shift)
         {
@@ -330,12 +330,7 @@ namespace Simd
             __m128 negative = _mm_min_ps(_mm_setzero_ps(), value);
             return _mm_add_ps(positive, _mm_mul_ps(slope, negative));
         }
-    }
-#endif//SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
         SIMD_INLINE __m128i Set4(const uint8_t* src)
         {
             return _mm_set1_epi32(*(int32_t*)src);

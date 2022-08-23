@@ -29,25 +29,6 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
-    {
-        template<int part> SIMD_INLINE __m128i Deinterleave8(__m128i ab0, __m128i ab1);
-
-        template<> SIMD_INLINE __m128i Deinterleave8<0>(__m128i ab0, __m128i ab1)
-        {
-            return _mm_packus_epi16(_mm_and_si128(ab0, K16_00FF), _mm_and_si128(ab1, K16_00FF));
-        }
-
-        template<> SIMD_INLINE __m128i Deinterleave8<1>(__m128i ab0, __m128i ab1)
-        {
-            return _mm_packus_epi16(
-                _mm_and_si128(_mm_srli_si128(ab0, 1), K16_00FF), 
-                _mm_and_si128(_mm_srli_si128(ab1, 1), K16_00FF));
-        }
-    }
-#endif
-
 #ifdef SIMD_SSE41_ENABLE
     namespace Sse41
     {
@@ -147,4 +128,4 @@ namespace Simd
 #endif
 }
 
-#endif//__SimdDeinterleave_h__
+#endif

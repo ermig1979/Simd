@@ -29,8 +29,8 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE __m128i SetInt8(char a0, char a1)
         {
@@ -52,7 +52,7 @@ namespace Simd
             return _mm_unpacklo_ps(_mm_set_ps1(a0), _mm_set_ps1(a1));
         }
     }
-#endif// SIMD_SSE2_ENABLE
+#endif// SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx

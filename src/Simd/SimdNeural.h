@@ -65,8 +65,8 @@ namespace Simd
         void * _ptr;
     };
 
-#ifdef SIMD_SSE2_ENABLE 
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE 
+    namespace Sse41
     {
         template <bool align> SIMD_INLINE void AddMultiplied(const float* src, const __m128& value, float* dst)
         {

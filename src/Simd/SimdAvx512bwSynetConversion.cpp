@@ -957,10 +957,10 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInput1<SimdPixelFormatGray8>(const uint8_t * src, __m512 scale, __m512 shift, float * dst)
         {
-            StoreScaled<false>(dst + 0 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 0)), scale, shift);
-            StoreScaled<false>(dst + 1 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 1)), scale, shift);
-            StoreScaled<false>(dst + 2 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 2)), scale, shift);
-            StoreScaled<false>(dst + 3 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 3)), scale, shift);
+            StoreScaled<false>(dst + 0 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 0)), scale, shift);
+            StoreScaled<false>(dst + 1 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 1)), scale, shift);
+            StoreScaled<false>(dst + 2 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 2)), scale, shift);
+            StoreScaled<false>(dst + 3 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 3)), scale, shift);
         }
 
         const __m512i K8_SHUFFLE_BGR_TO_BGRA = SIMD_MM512_SETR_EPI8(
@@ -1033,10 +1033,10 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNchw3A<SimdPixelFormatGray8>(const uint8_t * src, const __m512 * scale, const __m512 * shift, float * dst, size_t channel)
         {
-            __m512i gray0 = _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 0));
-            __m512i gray1 = _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 1));
-            __m512i gray2 = _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 2));
-            __m512i gray3 = _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 3));
+            __m512i gray0 = _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 0));
+            __m512i gray1 = _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 1));
+            __m512i gray2 = _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 2));
+            __m512i gray3 = _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 3));
             StoreScaled<false>(dst + 0 * F, gray0, scale[0], shift[0]);
             StoreScaled<false>(dst + 1 * F, gray1, scale[0], shift[0]);
             StoreScaled<false>(dst + 2 * F, gray2, scale[0], shift[0]);
@@ -1141,7 +1141,7 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNchw3F<SimdPixelFormatGray8>(const uint8_t * src, const __m512 * scale, const __m512 * shift, float * dst, size_t channel)
         {
-            __m512i gray = _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src));
+            __m512i gray = _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src));
             StoreScaled<false>(dst + 0 * channel, gray, scale[0], shift[0]);
             StoreScaled<false>(dst + 1 * channel, gray, scale[1], shift[1]);
             StoreScaled<false>(dst + 2 * channel, gray, scale[2], shift[2]);
@@ -1189,19 +1189,19 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3A<SimdPixelFormatGray8>(const uint8_t * src, const __m512 * scale, const __m512 * shift, float * dst)
         {
-            __m128i gray0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i gray0 = Sse41::Load<false>((__m128i*)src + 0);
             StoreScaled<false>(dst + 0x0 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x1 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR1)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x2 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR2)), scale[2], shift[2]);
-            __m128i gray1 = Sse2::Load<false>((__m128i*)src + 1);
+            __m128i gray1 = Sse41::Load<false>((__m128i*)src + 1);
             StoreScaled<false>(dst + 0x3 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x4 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR1)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x5 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray1, Sse41::K8_SHUFFLE_GRAY_TO_BGR2)), scale[2], shift[2]);
-            __m128i gray2 = Sse2::Load<false>((__m128i*)src + 2);
+            __m128i gray2 = Sse41::Load<false>((__m128i*)src + 2);
             StoreScaled<false>(dst + 0x6 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray2, Sse41::K8_SHUFFLE_GRAY_TO_BGR0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x7 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray2, Sse41::K8_SHUFFLE_GRAY_TO_BGR1)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x8 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray2, Sse41::K8_SHUFFLE_GRAY_TO_BGR2)), scale[2], shift[2]);
-            __m128i gray3 = Sse2::Load<false>((__m128i*)src + 3);
+            __m128i gray3 = Sse41::Load<false>((__m128i*)src + 3);
             StoreScaled<false>(dst + 0x9 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray3, Sse41::K8_SHUFFLE_GRAY_TO_BGR0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0xA * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray3, Sse41::K8_SHUFFLE_GRAY_TO_BGR1)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0xB * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray3, Sse41::K8_SHUFFLE_GRAY_TO_BGR2)), scale[2], shift[2]);
@@ -1284,7 +1284,7 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3F<SimdPixelFormatGray8>(const uint8_t * src, const __m512 * scale, const __m512 * shift, float * dst)
         {
-            __m128i gray0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i gray0 = Sse41::Load<false>((__m128i*)src + 0);
             StoreScaled<false>(dst + 0x0 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR0)), scale[0], shift[0]);
             StoreScaled<false>(dst + 0x1 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR1)), scale[1], shift[1]);
             StoreScaled<false>(dst + 0x2 * F, _mm512_cvtepu8_epi32(_mm_shuffle_epi8(gray0, Sse41::K8_SHUFFLE_GRAY_TO_BGR2)), scale[2], shift[2]);
@@ -1292,9 +1292,9 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNhwc3F<SimdPixelFormatBgr24>(const uint8_t * src, const __m512 * scale, const __m512 * shift, float * dst)
         {
-            StoreScaled<false>(dst + 0x0 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 0x0)), scale[0], shift[0]);
-            StoreScaled<false>(dst + 0x1 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 0x1)), scale[1], shift[1]);
-            StoreScaled<false>(dst + 0x2 * F, _mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)src + 0x2)), scale[2], shift[2]);
+            StoreScaled<false>(dst + 0x0 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 0x0)), scale[0], shift[0]);
+            StoreScaled<false>(dst + 0x1 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 0x1)), scale[1], shift[1]);
+            StoreScaled<false>(dst + 0x2 * F, _mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)src + 0x2)), scale[2], shift[2]);
         }
 
         template<> SIMD_INLINE void SynetSetInputNhwc3F<SimdPixelFormatBgra32>(const uint8_t * src, const __m512 * scale, const __m512 * shift, float * dst)

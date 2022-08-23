@@ -146,22 +146,22 @@ namespace Simd
             b5 = _mm_unpackhi_epi8(a2, a6);
             b6 = _mm_unpacklo_epi8(a3, a7);
             b7 = _mm_unpackhi_epi8(a3, a7);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0x0 * dstStride), b0);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0x1 * dstStride), b0);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0x2 * dstStride), b1);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0x3 * dstStride), b1);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0x4 * dstStride), b2);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0x5 * dstStride), b2);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0x6 * dstStride), b3);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0x7 * dstStride), b3);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0x8 * dstStride), b4);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0x9 * dstStride), b4);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0xa * dstStride), b5);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0xb * dstStride), b5);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0xc * dstStride), b6);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0xd * dstStride), b6);
-            Sse2::StoreHalf<0>((__m128i*)(dst + 0xe * dstStride), b7);
-            Sse2::StoreHalf<1>((__m128i*)(dst + 0xf * dstStride), b7);
+            StoreHalf<0>((__m128i*)(dst + 0x0 * dstStride), b0);
+            StoreHalf<1>((__m128i*)(dst + 0x1 * dstStride), b0);
+            StoreHalf<0>((__m128i*)(dst + 0x2 * dstStride), b1);
+            StoreHalf<1>((__m128i*)(dst + 0x3 * dstStride), b1);
+            StoreHalf<0>((__m128i*)(dst + 0x4 * dstStride), b2);
+            StoreHalf<1>((__m128i*)(dst + 0x5 * dstStride), b2);
+            StoreHalf<0>((__m128i*)(dst + 0x6 * dstStride), b3);
+            StoreHalf<1>((__m128i*)(dst + 0x7 * dstStride), b3);
+            StoreHalf<0>((__m128i*)(dst + 0x8 * dstStride), b4);
+            StoreHalf<1>((__m128i*)(dst + 0x9 * dstStride), b4);
+            StoreHalf<0>((__m128i*)(dst + 0xa * dstStride), b5);
+            StoreHalf<1>((__m128i*)(dst + 0xb * dstStride), b5);
+            StoreHalf<0>((__m128i*)(dst + 0xc * dstStride), b6);
+            StoreHalf<1>((__m128i*)(dst + 0xd * dstStride), b6);
+            StoreHalf<0>((__m128i*)(dst + 0xe * dstStride), b7);
+            StoreHalf<1>((__m128i*)(dst + 0xf * dstStride), b7);
         }
 
         SIMD_INLINE void TransformImageTranspose_2x8x8(const uint8_t* src, size_t srcStride, uint8_t* dst, size_t dstStride)

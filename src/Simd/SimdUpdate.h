@@ -59,8 +59,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         template <UpdateType update, bool align> SIMD_INLINE void Update(float  * p, __m128 a)
         {
@@ -94,7 +94,7 @@ namespace Simd
             Store<true>((__m128i*)p, _mm_add_epi32(Load<true>((__m128i*)p), a));
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx

@@ -229,12 +229,12 @@ namespace Simd
                 for (size_t c = 0; c < 3; ++c)
                     _scale[i * 3 + c] = scale[c], _shift[i * 3 + c] = shift[c];
 
-            __m128 _scale0 = Sse2::Load<false>(_scale + 0 * F);
-            __m128 _scale1 = Sse2::Load<false>(_scale + 1 * F);
-            __m128 _scale2 = Sse2::Load<false>(_scale + 2 * F);
-            __m128 _shift0 = Sse2::Load<false>(_shift + 0 * F);
-            __m128 _shift1 = Sse2::Load<false>(_shift + 1 * F);
-            __m128 _shift2 = Sse2::Load<false>(_shift + 2 * F);
+            __m128 _scale0 = Load<false>(_scale + 0 * F);
+            __m128 _scale1 = Load<false>(_scale + 1 * F);
+            __m128 _scale2 = Load<false>(_scale + 2 * F);
+            __m128 _shift0 = Load<false>(_shift + 0 * F);
+            __m128 _shift1 = Load<false>(_shift + 1 * F);
+            __m128 _shift2 = Load<false>(_shift + 2 * F);
 
             size_t s = 0;
             for (; s < spatial3F; s += 3 * F)
@@ -350,7 +350,7 @@ namespace Simd
 
         template<> SIMD_INLINE void SynetSetInputNchw3<SimdPixelFormatGray8>(const uint8_t * src, const __m128 * scale, const __m128 * shift, float * dst, size_t channel)
         {
-            __m128i src0 = Sse2::Load<false>((__m128i*)src + 0);
+            __m128i src0 = Load<false>((__m128i*)src + 0);
             __m128i gray0 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 0));
             __m128i gray1 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 4));
             __m128i gray2 = _mm_cvtepu8_epi32(_mm_srli_si128(src0, 8));

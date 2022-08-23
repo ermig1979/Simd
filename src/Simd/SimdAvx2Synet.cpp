@@ -53,11 +53,11 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void SynetAdd8iNchwDF(const uint8_t* a, const uint8_t* b, __m256 scale[3], __m256 shift[3], __m256i upper, uint8_t* c, size_t offset)
         {
-            __m128i _a = Sse2::Load<false>((__m128i*)(a + offset));
-            __m128i _b = Sse2::Load<false>((__m128i*)(b + offset));
+            __m128i _a = Sse41::Load<false>((__m128i*)(a + offset));
+            __m128i _b = Sse41::Load<false>((__m128i*)(b + offset));
             __m256i c0 = SynetAdd8iNchw<nofma, 0>(_a, _b, scale, shift);
             __m256i c1 = SynetAdd8iNchw<nofma, 1>(_a, _b, scale, shift);
-            Sse2::Store<false>((__m128i*)(c + offset), _mm256_extracti128_si256(_mm256_min_epu8(PackI16ToU8(PackI32ToI16(c0, c1), K_ZERO), upper), 0));
+            Sse41::Store<false>((__m128i*)(c + offset), _mm256_extracti128_si256(_mm256_min_epu8(PackI16ToU8(PackI32ToI16(c0, c1), K_ZERO), upper), 0));
         }
 
         template<bool nofma> SIMD_INLINE void SynetAdd8iNchwF(const uint8_t* a, const uint8_t* b, __m256 scale[3], __m256 shift[3], __m256i upper, uint8_t* c, size_t offset)
@@ -112,11 +112,11 @@ namespace Simd
         template <bool align, bool nofma> SIMD_INLINE void SynetAdd8iNhwcDF(const uint8_t* a, const float* aScale, const float* aShift,
             const uint8_t* b, const float* bScale, const float* bShift, const float* cScale, const float* cShift, __m256i upper, uint8_t* c, size_t offset)
         {
-            __m128i _a = Sse2::Load<false>((__m128i*)(a + offset));
-            __m128i _b = Sse2::Load<false>((__m128i*)(b + offset));
+            __m128i _a = Sse41::Load<false>((__m128i*)(a + offset));
+            __m128i _b = Sse41::Load<false>((__m128i*)(b + offset));
             __m256i c0 = SynetAdd8iNhwc<0, align, nofma>(_a, aScale, aShift, _b, bScale, bShift, cScale, cShift, offset + 0 * F);
             __m256i c1 = SynetAdd8iNhwc<1, align, nofma>(_a, aScale, aShift, _b, bScale, bShift, cScale, cShift, offset + 1 * F);
-            Sse2::Store<false>((__m128i*)(c + offset), _mm256_extracti128_si256(_mm256_min_epu8(PackI16ToU8(PackI32ToI16(c0, c1), K_ZERO), upper), 0));
+            Sse41::Store<false>((__m128i*)(c + offset), _mm256_extracti128_si256(_mm256_min_epu8(PackI16ToU8(PackI32ToI16(c0, c1), K_ZERO), upper), 0));
         }
 
         template <bool align, bool nofma> SIMD_INLINE void SynetAdd8iNhwcF(const uint8_t* a, const float* aScale, const float* aShift,

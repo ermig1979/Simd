@@ -31,29 +31,29 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
-        template <bool align> SIMD_INLINE void Store(float  * p, __m128 a);
+        template <bool align> SIMD_INLINE void Store(float* p, __m128 a);
 
-        template <> SIMD_INLINE void Store<false>(float  * p, __m128 a)
+        template <> SIMD_INLINE void Store<false>(float* p, __m128 a)
         {
             _mm_storeu_ps(p, a);
         }
 
-        template <> SIMD_INLINE void Store<true>(float  * p, __m128 a)
+        template <> SIMD_INLINE void Store<true>(float* p, __m128 a)
         {
             _mm_store_ps(p, a);
         }
 
-        template <int part> SIMD_INLINE void StoreHalf(float  * p, __m128 a);
+        template <int part> SIMD_INLINE void StoreHalf(float* p, __m128 a);
 
-        template <> SIMD_INLINE void StoreHalf<0>(float  * p, __m128 a)
+        template <> SIMD_INLINE void StoreHalf<0>(float* p, __m128 a)
         {
             _mm_storel_pi((__m64*)p, a);
         }
 
-        template <> SIMD_INLINE void StoreHalf<1>(float  * p, __m128 a)
+        template <> SIMD_INLINE void StoreHalf<1>(float* p, __m128 a)
         {
             _mm_storeh_pi((__m64*)p, a);
         }
@@ -84,8 +84,6 @@ namespace Simd
                 ptr[i * step] = buf[i];
         }
 
-        //---------------------------------------------------------------------
-
         template <bool align> SIMD_INLINE void Store(__m128i * p, __m128i a);
 
         template <> SIMD_INLINE void Store<false>(__m128i * p, __m128i a)
@@ -98,20 +96,10 @@ namespace Simd
             _mm_store_si128(p, a);
         }
 
-        template <int part> SIMD_INLINE void StoreHalf(__m128i* p, __m128i a)
+        template <int part> SIMD_INLINE void StoreHalf(__m128i * p, __m128i a)
         {
             StoreHalf<part>((float*)p, _mm_castsi128_ps(a));
         }
-
-    }
-#endif//SIMD_SSE2_ENABLE
-
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
-#if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
-        using Sse2::Store;
-#endif
 
         template <bool align> SIMD_INLINE void StoreMasked(float* p, __m128 value, __m128 mask)
         {
@@ -152,8 +140,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(float * p0, float * p1, __m256 a)
         {
-            Sse2::Store<align>(p0, _mm256_extractf128_ps(a, 0));
-            Sse2::Store<align>(p1, _mm256_extractf128_ps(a, 1));
+            Sse41::Store<align>(p0, _mm256_extractf128_ps(a, 0));
+            Sse41::Store<align>(p1, _mm256_extractf128_ps(a, 1));
         }
 
         template <bool align> SIMD_INLINE void StoreMasked(float * p, __m256 value, __m256 mask)
@@ -205,8 +193,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(__m128i* p0, __m128i* p1, __m256i a)
         {
-            Sse2::Store<align>(p0, _mm256_extractf128_si256(a, 0));
-            Sse2::Store<align>(p1, _mm256_extractf128_si256(a, 1));
+            Sse41::Store<align>(p0, _mm256_extractf128_si256(a, 0));
+            Sse41::Store<align>(p1, _mm256_extractf128_si256(a, 1));
         }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m256i * p, __m256i value, __m256i mask)
@@ -244,8 +232,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store24(uint8_t * p, __m256i a)
         {
-            Sse2::Store<align>((__m128i*)p, _mm256_extractf128_si256(a, 0));
-            Sse2::StoreHalf<0>((__m128i*)p + 1, _mm256_extractf128_si256(a, 1));
+            Sse41::Store<align>((__m128i*)p, _mm256_extractf128_si256(a, 0));
+            Sse41::StoreHalf<0>((__m128i*)p + 1, _mm256_extractf128_si256(a, 1));
         }
     }
 #endif//SIMD_SAVX2_ENABLE
@@ -288,10 +276,10 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(float* p0, float* p1, float* p2, float* p3, __m512 a)
         {
-            Sse2::Store<align>(p0, _mm512_extractf32x4_ps(a, 0));
-            Sse2::Store<align>(p1, _mm512_extractf32x4_ps(a, 1));
-            Sse2::Store<align>(p2, _mm512_extractf32x4_ps(a, 2));
-            Sse2::Store<align>(p3, _mm512_extractf32x4_ps(a, 3));
+            Sse41::Store<align>(p0, _mm512_extractf32x4_ps(a, 0));
+            Sse41::Store<align>(p1, _mm512_extractf32x4_ps(a, 1));
+            Sse41::Store<align>(p2, _mm512_extractf32x4_ps(a, 2));
+            Sse41::Store<align>(p3, _mm512_extractf32x4_ps(a, 3));
         }
 
         SIMD_INLINE __m128i Cvt32fTo8u(__m512 a)
@@ -387,7 +375,7 @@ namespace Simd
 
         template <bool align, bool mask> SIMD_INLINE void Store(uint8_t* p, __m128i a, __mmask16 m)
         {
-            return Sse2::Store<align>((__m128i*)p, a);
+            return Sse41::Store<align>((__m128i*)p, a);
         }
 
         template <> SIMD_INLINE void Store<false, true>(uint8_t* p, __m128i a, __mmask16 m)
@@ -413,10 +401,10 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Store(__m128i* p0, __m128i* p1, __m128i* p2, __m128i* p3, __m512i a)
         {
-            Sse2::Store<align>(p0, _mm512_extracti64x2_epi64(a, 0));
-            Sse2::Store<align>(p1, _mm512_extracti64x2_epi64(a, 1));
-            Sse2::Store<align>(p2, _mm512_extracti64x2_epi64(a, 2));
-            Sse2::Store<align>(p3, _mm512_extracti64x2_epi64(a, 3));
+            Sse41::Store<align>(p0, _mm512_extracti64x2_epi64(a, 0));
+            Sse41::Store<align>(p1, _mm512_extracti64x2_epi64(a, 1));
+            Sse41::Store<align>(p2, _mm512_extracti64x2_epi64(a, 2));
+            Sse41::Store<align>(p3, _mm512_extracti64x2_epi64(a, 3));
         }
     }
 #endif//SIMD_AVX512BW_ENABLE

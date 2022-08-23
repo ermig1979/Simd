@@ -55,8 +55,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE __m128i Divide16iBy255(__m128i value)
         {
@@ -95,7 +95,7 @@ namespace Simd
             return Divide16uBy255(_mm_mullo_epi16(value, alpha));
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2

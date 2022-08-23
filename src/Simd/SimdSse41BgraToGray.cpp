@@ -50,10 +50,10 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Load(const uint8_t* p, __m128i a[4])
         {
-            a[0] = Sse2::Load<align>((__m128i*)p + 0);
-            a[1] = Sse2::Load<align>((__m128i*)p + 1);
-            a[2] = Sse2::Load<align>((__m128i*)p + 2);
-            a[3] = Sse2::Load<align>((__m128i*)p + 3);
+            a[0] = Load<align>((__m128i*)p + 0);
+            a[1] = Load<align>((__m128i*)p + 1);
+            a[2] = Load<align>((__m128i*)p + 2);
+            a[3] = Load<align>((__m128i*)p + 3);
         }
 
         template <bool align> void BgraToGray(const uint8_t *bgra, size_t width, size_t height, size_t bgraStride, uint8_t *gray, size_t grayStride)

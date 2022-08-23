@@ -76,7 +76,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void Uint8ToFloat32(const uint8_t * src, const __m256 & lower, const __m256 & boost, float * dst)
         {
-            __m128i _src = Sse2::Load<align>((__m128i*)src);
+            __m128i _src = Sse41::Load<align>((__m128i*)src);
             Avx::Store<align>(dst + 0, Uint8ToFloat32(_src, lower, boost));
             Avx::Store<align>(dst + F, Uint8ToFloat32(_mm_srli_si128(_src, 8), lower, boost));
         }

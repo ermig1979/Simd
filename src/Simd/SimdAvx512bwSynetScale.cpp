@@ -475,10 +475,10 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const uint8_t* src, __m512 scale, __m512 shift, __m128i upper, uint8_t* dst, size_t offset)
         {
-            __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)(src + offset))));
+            __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)(src + offset))));
             __m512i _dst = _mm512_cvtps_epi32(Fmadd<nofma>(_src, scale, shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(_dst, K_ZERO), K_ZERO));
-            Sse2::Store<false>((__m128i*)(dst + offset), _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper));
+            Sse41::Store<false>((__m128i*)(dst + offset), _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper));
         }
 
         template <bool nofma> void ScaleNhwc3(const uint8_t* src, const float* scale, const float* shift, size_t batch, size_t spatial, int upper, uint8_t* dst)
@@ -616,7 +616,7 @@ namespace Simd
 
         template <bool nofma> SIMD_INLINE void ScaleNhwc3(const uint8_t* src, __m512 scale, __m512 shift, float* dst, size_t offset)
         {
-            __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)(src + offset))));
+            __m512 _src = _mm512_cvtepi32_ps(_mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)(src + offset))));
             Store<false>(dst + offset, Fmadd<nofma>(_src, scale, shift));
         }
 
@@ -763,7 +763,7 @@ namespace Simd
             __m512 _src = Load<false>(src + offset);
             __m512i _dst = _mm512_cvtps_epi32(Fmadd<nofma>(_src, scale, shift));
             __m512i u8 = _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(_mm512_packs_epi32(_dst, K_ZERO), K_ZERO));
-            Sse2::Store<false>((__m128i*)(dst + offset), _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper));
+            Sse41::Store<false>((__m128i*)(dst + offset), _mm_min_epu8(_mm512_extracti32x4_epi32(u8, 0), upper));
         }
 
         template <bool nofma> void ScaleNhwc3(const float* src, const float* scale, const float* shift, size_t batch, size_t spatial, int upper, uint8_t* dst)

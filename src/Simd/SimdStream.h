@@ -30,8 +30,8 @@ namespace Simd
 {
     const size_t STREAM_SIZE_MIN = 0x00100000;
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         template <bool align, bool stream> SIMD_INLINE void Stream(float* p, __m128 a);
 
@@ -77,7 +77,7 @@ namespace Simd
             _mm_stream_si128(p, a);
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE
     namespace Avx

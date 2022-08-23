@@ -268,7 +268,7 @@ namespace Simd
                 bestIndex = _mm_andnot_si128(_mm_cmpeq_epi32(bestIndex, K32_18), bestIndex);
 
                 Store<align>((__m128i*)(buffer.index + col), bestIndex);
-                Sse2::Store<align>(buffer.value + col, Sqrt<0>(_mm_add_ps(_mm_mul_ps(adx, adx), _mm_mul_ps(ady, ady))));
+                Store<align>(buffer.value + col, Sqrt<0>(_mm_add_ps(_mm_mul_ps(adx, adx), _mm_mul_ps(ady, ady))));
             }
 
             template <bool align> SIMD_INLINE void HogDirectionHistograms(const __m128i & dx, const __m128i & dy, Buffer & buffer, size_t col)
@@ -532,7 +532,7 @@ namespace Simd
                 bestIndex = _mm_andnot_si128(_mm_cmpeq_epi32(bestIndex, _Q2), bestIndex);
 
                 Store<align>((__m128i*)(_index.data + col), bestIndex);
-                Sse2::Store<align>(_value.data + col, Sqrt<0>(_mm_add_ps(_mm_mul_ps(adx, adx), _mm_mul_ps(ady, ady))));
+                Store<align>(_value.data + col, Sqrt<0>(_mm_add_ps(_mm_mul_ps(adx, adx), _mm_mul_ps(ady, ady))));
             }
 
             template <bool align> SIMD_INLINE void GetHistogram(const __m128i & dx, const __m128i & dy, size_t col)
@@ -595,12 +595,12 @@ namespace Simd
                         _mm_storeu_ps(h1[0] + i, _mm_add_ps(_mm_loadu_ps(h1[0] + i), _mm_unpacklo_ps(s10, s11)));
                         _mm_storeu_ps(h1[1] + i, _mm_add_ps(_mm_loadu_ps(h1[1] + i), _mm_unpackhi_ps(s10, s11)));
                     }
-                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), Sse2::Load(h0[0] + 16, h0[1] + 16));
-                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), Sse2::Load(h1[0] + 16, h1[1] + 16));
-                    Sse2::StoreHalf<0>(h0[0] + 16, s0);
-                    Sse2::StoreHalf<1>(h0[1] + 16, s0);
-                    Sse2::StoreHalf<0>(h1[0] + 16, s1);
-                    Sse2::StoreHalf<1>(h1[1] + 16, s1);
+                    __m128 s0 = _mm_add_ps(_mm_unpacklo_ps(ps[16], ps[17]), Load(h0[0] + 16, h0[1] + 16));
+                    __m128 s1 = _mm_add_ps(_mm_unpackhi_ps(ps[16], ps[17]), Load(h1[0] + 16, h1[1] + 16));
+                    StoreHalf<0>(h0[0] + 16, s0);
+                    StoreHalf<1>(h0[1] + 16, s0);
+                    StoreHalf<0>(h1[0] + 16, s1);
+                    StoreHalf<1>(h1[1] + 16, s1);
                     h0++;
                     h1++;
                     src += 4 * Q2;

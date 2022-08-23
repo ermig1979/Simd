@@ -823,18 +823,18 @@ namespace Simd
                             for (; k < K4; k += 4)
                             {
                                 const float * ps = src + k;
-                                __m128 s0 = Sse2::Load<false>(ps + 0 * K);
-                                __m128 s1 = Sse2::Load<false>(ps + 1 * K);
-                                __m128 s2 = Sse2::Load<false>(ps + 2 * K);
-                                __m128 s3 = Sse2::Load<false>(ps + 3 * K);
+                                __m128 s0 = Sse41::Load<false>(ps + 0 * K);
+                                __m128 s1 = Sse41::Load<false>(ps + 1 * K);
+                                __m128 s2 = Sse41::Load<false>(ps + 2 * K);
+                                __m128 s3 = Sse41::Load<false>(ps + 3 * K);
                                 __m128 s00 = _mm_unpacklo_ps(s0, s2);
                                 __m128 s01 = _mm_unpacklo_ps(s1, s3);
                                 __m128 s10 = _mm_unpackhi_ps(s0, s2);
                                 __m128 s11 = _mm_unpackhi_ps(s1, s3);
-                                Sse2::Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
-                                Sse2::Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
-                                Sse2::Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
-                                Sse2::Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
+                                Sse41::Store<false>(dst + 0, _mm_unpacklo_ps(s00, s01));
+                                Sse41::Store<false>(dst + 4, _mm_unpackhi_ps(s00, s01));
+                                Sse41::Store<false>(dst + 8, _mm_unpacklo_ps(s10, s11));
+                                Sse41::Store<false>(dst + 12, _mm_unpackhi_ps(s10, s11));
                                 dst += 16;
                             }
                         }

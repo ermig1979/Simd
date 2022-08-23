@@ -430,32 +430,6 @@ namespace Simd
                 BgrToV16(_mm_unpackhi_epi8(b8, K_ZERO), _mm_unpackhi_epi8(g8, K_ZERO), _mm_unpackhi_epi8(r8, K_ZERO)));
         }
 
-        template <int index> __m128i InterleaveBgr(__m128i blue, __m128i green, __m128i red);
-
-        template<> SIMD_INLINE __m128i InterleaveBgr<0>(__m128i blue, __m128i green, __m128i red)
-        {
-            return
-                _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR0),
-                    _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR0),
-                        _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR0)));
-        }
-
-        template<> SIMD_INLINE __m128i InterleaveBgr<1>(__m128i blue, __m128i green, __m128i red)
-        {
-            return
-                _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR1),
-                    _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR1),
-                        _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR1)));
-        }
-
-        template<> SIMD_INLINE __m128i InterleaveBgr<2>(__m128i blue, __m128i green, __m128i red)
-        {
-            return
-                _mm_or_si128(_mm_shuffle_epi8(blue, K8_SHUFFLE_BLUE_TO_BGR2),
-                    _mm_or_si128(_mm_shuffle_epi8(green, K8_SHUFFLE_GREEN_TO_BGR2),
-                        _mm_shuffle_epi8(red, K8_SHUFFLE_RED_TO_BGR2)));
-        }
-
         SIMD_INLINE __m128i BgrToBlue(__m128i bgr[3])
         {
             return
@@ -646,32 +620,6 @@ namespace Simd
             return _mm256_shuffle_epi8(_mm256_permute4x64_epi64(gray, 0xEE), K8_SHUFFLE_GRAY_TO_BGR2);
         }
 
-        template <int index> __m256i InterleaveBgr(__m256i blue, __m256i green, __m256i red);
-
-        template<> SIMD_INLINE __m256i InterleaveBgr<0>(__m256i blue, __m256i green, __m256i red)
-        {
-            return
-                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0x44), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR0),
-                    _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0x44), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR0),
-                        _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0x44), K8_SHUFFLE_PERMUTED_RED_TO_BGR0)));
-        }
-
-        template<> SIMD_INLINE __m256i InterleaveBgr<1>(__m256i blue, __m256i green, __m256i red)
-        {
-            return
-                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0x99), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR1),
-                    _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0x99), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR1),
-                        _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0x99), K8_SHUFFLE_PERMUTED_RED_TO_BGR1)));
-        }
-
-        template<> SIMD_INLINE __m256i InterleaveBgr<2>(__m256i blue, __m256i green, __m256i red)
-        {
-            return
-                _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(blue, 0xEE), K8_SHUFFLE_PERMUTED_BLUE_TO_BGR2),
-                    _mm256_or_si256(_mm256_shuffle_epi8(_mm256_permute4x64_epi64(green, 0xEE), K8_SHUFFLE_PERMUTED_GREEN_TO_BGR2),
-                        _mm256_shuffle_epi8(_mm256_permute4x64_epi64(red, 0xEE), K8_SHUFFLE_PERMUTED_RED_TO_BGR2)));
-        }
-
         SIMD_INLINE __m256i BgrToBlue(__m256i bgr[3])
         {
             __m256i b0 = _mm256_shuffle_epi8(bgr[0], K8_SHUFFLE_BGR0_TO_BLUE);
@@ -848,32 +796,6 @@ namespace Simd
         {
             return _mm512_srai_epi32(_mm512_add_epi32(_mm512_madd_epi16(b16_r16, K16_BV_RV),
                 _mm512_madd_epi16(g16_1, K16_GV_RT)), Base::BGR_TO_YUV_AVERAGING_SHIFT);
-        }
-
-        template <int index> __m512i InterleaveBgr(__m512i blue, __m512i green, __m512i red);
-
-        template<> SIMD_INLINE __m512i InterleaveBgr<0>(__m512i blue, __m512i green, __m512i red)
-        {
-            return
-                _mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR0, blue), K8_SHUFFLE_BLUE_TO_BGR0),
-                    _mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR0, green), K8_SHUFFLE_GREEN_TO_BGR0),
-                        _mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR0, red), K8_SHUFFLE_RED_TO_BGR0)));
-        }
-
-        template<> SIMD_INLINE __m512i InterleaveBgr<1>(__m512i blue, __m512i green, __m512i red)
-        {
-            return
-                _mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR1, blue), K8_SHUFFLE_BLUE_TO_BGR1),
-                    _mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR1, green), K8_SHUFFLE_GREEN_TO_BGR1),
-                        _mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR1, red), K8_SHUFFLE_RED_TO_BGR1)));
-        }
-
-        template<> SIMD_INLINE __m512i InterleaveBgr<2>(__m512i blue, __m512i green, __m512i red)
-        {
-            return
-                _mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR2, blue), K8_SHUFFLE_BLUE_TO_BGR2),
-                    _mm512_or_si512(_mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR2, green), K8_SHUFFLE_GREEN_TO_BGR2),
-                        _mm512_shuffle_epi8(_mm512_permutexvar_epi32(K32_PERMUTE_COLOR_TO_BGR2, red), K8_SHUFFLE_RED_TO_BGR2)));
         }
     }
 #endif//SIMD_AVX512BW_ENABLE 

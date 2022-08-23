@@ -77,8 +77,8 @@ namespace Simd
                 _mm_max_epu8(_mm512_extracti32x4_epi32(max512, 2), _mm512_extracti32x4_epi32(max512, 3)));
 
             uint8_t min_buffer[Sse2::A], max_buffer[Sse2::A];
-            Sse2::Store<false>((__m128i*)min_buffer, min128);
-            Sse2::Store<false>((__m128i*)max_buffer, max128);
+            Sse41::Store<false>((__m128i*)min_buffer, min128);
+            Sse41::Store<false>((__m128i*)max_buffer, max128);
             *min = UCHAR_MAX;
             *max = 0;
             for (size_t i = 0; i < Sse2::A; ++i)

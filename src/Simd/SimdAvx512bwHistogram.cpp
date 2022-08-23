@@ -125,7 +125,7 @@ namespace Simd
 #if defined(SIMD_USE_GATHER_AND_SCATTER_FOR_HISTOGRAM)
                 for (; col < fullAlignedWidth; col += Sse2::A)
                 {
-                    __m512i index = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse2::Load<false>((__m128i*)(buffer.v + col))), K32_TO_HISTOGRAMS);
+                    __m512i index = _mm512_add_epi32(_mm512_cvtepu8_epi32(Sse41::Load<false>((__m128i*)(buffer.v + col))), K32_TO_HISTOGRAMS);
                     AddToHistogram(_mm512_extracti32x4_epi32(index, 0), buffer.h[0]);
                     AddToHistogram(_mm512_extracti32x4_epi32(index, 1), buffer.h[0]);
                     AddToHistogram(_mm512_extracti32x4_epi32(index, 2), buffer.h[0]);

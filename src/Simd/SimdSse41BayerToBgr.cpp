@@ -24,7 +24,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBayer.h"
-#include "Simd/SimdConversion.h"
+#include "Simd/SimdInterleave.h"
 
 namespace Simd
 {

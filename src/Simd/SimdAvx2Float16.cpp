@@ -34,7 +34,7 @@ namespace Simd
     {
         template<bool align> SIMD_INLINE void Float32ToFloat16(const float * src, uint16_t * dst)
         {
-            Sse2::Store<align>((__m128i*)dst, _mm256_cvtps_ph(Avx::Load<align>(src), 0));
+            Sse41::Store<align>((__m128i*)dst, _mm256_cvtps_ph(Avx::Load<align>(src), 0));
         }
 
         template <bool align> void Float32ToFloat16(const float * src, size_t size, uint16_t * dst)
@@ -70,7 +70,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void Float16ToFloat32(const uint16_t * src, float * dst)
         {
-            Avx::Store<align>(dst, _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)src)));
+            Avx::Store<align>(dst, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)src)));
         }
 
         template <bool align> void Float16ToFloat32(const uint16_t * src, size_t size, float * dst)
@@ -106,8 +106,8 @@ namespace Simd
 
         template <bool align> SIMD_INLINE void SquaredDifferenceSum16f(const uint16_t * a, const uint16_t * b, size_t offset, __m256 & sum)
         {
-            __m256 _a = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + offset)));
-            __m256 _b = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + offset)));
+            __m256 _a = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(a + offset)));
+            __m256 _b = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(b + offset)));
             __m256 _d = _mm256_sub_ps(_a, _b);
             sum = _mm256_fmadd_ps(_d, _d, sum);
         }
@@ -138,8 +138,8 @@ namespace Simd
             if (partialAlignedSize != size)
             {
                 __m256 mask = RightNotZero32f(size - partialAlignedSize);
-                __m256 _a = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(a + size - F)));
-                __m256 _b = _mm256_cvtph_ps(Sse2::Load<false>((__m128i*)(b + size - F)));
+                __m256 _a = _mm256_cvtph_ps(Sse41::Load<false>((__m128i*)(a + size - F)));
+                __m256 _b = _mm256_cvtph_ps(Sse41::Load<false>((__m128i*)(b + size - F)));
                 __m256 _d = _mm256_and_ps(_mm256_sub_ps(_a, _b), mask);
                 sums[0] = _mm256_fmadd_ps(_d, _d, sums[0]);
             }
@@ -169,13 +169,13 @@ namespace Simd
             {
                 for (; i < fullAlignedSize; i += DF)
                 {
-                    __m256 a0 = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + i) + 0));
-                    __m256 b0 = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + i) + 0));
+                    __m256 a0 = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(a + i) + 0));
+                    __m256 b0 = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(b + i) + 0));
                     _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
                     _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                     _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
-                    __m256 a1 = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + i) + 1));
-                    __m256 b1 = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + i) + 1));
+                    __m256 a1 = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(a + i) + 1));
+                    __m256 b1 = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(b + i) + 1));
                     _aa[1] = _mm256_fmadd_ps(a1, a1, _aa[1]);
                     _ab[1] = _mm256_fmadd_ps(a1, b1, _ab[1]);
                     _bb[1] = _mm256_fmadd_ps(b1, b1, _bb[1]);
@@ -186,8 +186,8 @@ namespace Simd
             }
             for (; i < partialAlignedSize; i += F)
             {
-                __m256 a0 = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + i) + 0));
-                __m256 b0 = _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + i) + 0));
+                __m256 a0 = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(a + i) + 0));
+                __m256 b0 = _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(b + i) + 0));
                 _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
                 _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);
@@ -195,8 +195,8 @@ namespace Simd
             if (partialAlignedSize != size)
             {
                 __m256 mask = RightNotZero32f(size - partialAlignedSize);
-                __m256 a0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(a + size - F))));
-                __m256 b0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse2::Load<align>((__m128i*)(b + size - F))));
+                __m256 a0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(a + size - F))));
+                __m256 b0 = _mm256_and_ps(mask, _mm256_cvtph_ps(Sse41::Load<align>((__m128i*)(b + size - F))));
                 _aa[0] = _mm256_fmadd_ps(a0, a0, _aa[0]);
                 _ab[0] = _mm256_fmadd_ps(a0, b0, _ab[0]);
                 _bb[0] = _mm256_fmadd_ps(b0, b0, _bb[0]);

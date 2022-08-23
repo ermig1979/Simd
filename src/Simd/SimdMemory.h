@@ -230,26 +230,18 @@ namespace Simd
 
     //---------------------------------------------------------------------------------------------
 
-
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE bool Aligned(size_t size, size_t align = sizeof(__m128))
         {
             return Simd::Aligned(size, align);
         }
 
-        SIMD_INLINE bool Aligned(const void * ptr, size_t align = sizeof(__m128))
+        SIMD_INLINE bool Aligned(const void* ptr, size_t align = sizeof(__m128))
         {
             return Simd::Aligned(ptr, align);
-        }        
-    }
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
-        using Sse2::Aligned;
+        }
     }
 #endif// SIMD_SSE41_ENABLE
 

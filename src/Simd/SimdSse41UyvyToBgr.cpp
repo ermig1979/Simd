@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdYuvToBgr.h"
+#include "Simd/SimdInterleave.h"
 
 namespace Simd
 {
