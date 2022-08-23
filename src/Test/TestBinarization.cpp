@@ -299,26 +299,6 @@ namespace Test
 
         result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Base::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
 
-/*#ifdef SIMD_SSE2_ENABLE
-        if (Simd::Sse2::Enable && W >= Simd::Sse2::A)
-            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Sse2::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
-#endif 
-
-#ifdef SIMD_AVX2_ENABLE
-        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
-            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Avx2::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
-#endif 
-
-#ifdef SIMD_AVX512BW_ENABLE
-        if (Simd::Avx512bw::Enable)
-            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Avx512bw::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
-#endif 
-
-#ifdef SIMD_NEON_ENABLE
-        if (Simd::Neon::Enable && W >= Simd::Neon::A)
-            result = result && AveragingBinarizationV2AutoTest(FUNC_AB2(Simd::Neon::AveragingBinarizationV2), FUNC_AB2(SimdAveragingBinarizationV2));
-#endif*/ 
-
         return result;
     }
 

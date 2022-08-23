@@ -611,14 +611,14 @@ namespace Simd
             __m128i vSum23s = ExtractSum<__m128i>(vSum23);
             __m128i sSum01s = ExtractSum<__m128i>(sSum01);
             __m128i sSum23s = ExtractSum<__m128i>(sSum23);
-            valueSums[0] = Sse2::ExtractInt64<0>(vSum01s);
-            valueSums[1] = Sse2::ExtractInt64<1>(vSum01s);
-            valueSums[2] = Sse2::ExtractInt64<0>(vSum23s);
-            valueSums[3] = Sse2::ExtractInt64<1>(vSum23s);
-            squareSums[0] = Sse2::ExtractInt64<0>(sSum01s);
-            squareSums[1] = Sse2::ExtractInt64<1>(sSum01s);
-            squareSums[2] = Sse2::ExtractInt64<0>(sSum23s);
-            squareSums[3] = Sse2::ExtractInt64<1>(sSum23s);
+            valueSums[0] = Sse41::ExtractInt64<0>(vSum01s);
+            valueSums[1] = Sse41::ExtractInt64<1>(vSum01s);
+            valueSums[2] = Sse41::ExtractInt64<0>(vSum23s);
+            valueSums[3] = Sse41::ExtractInt64<1>(vSum23s);
+            squareSums[0] = Sse41::ExtractInt64<0>(sSum01s);
+            squareSums[1] = Sse41::ExtractInt64<1>(sSum01s);
+            squareSums[2] = Sse41::ExtractInt64<0>(sSum23s);
+            squareSums[3] = Sse41::ExtractInt64<1>(sSum23s);
         }
 
         void ValueSquareSums(const uint8_t* src, size_t stride, size_t width, size_t height, size_t channels, uint64_t* valueSums, uint64_t* squareSums)

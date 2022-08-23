@@ -121,12 +121,6 @@ namespace Simd
 
 #define SIMD_BASE_FUNC(func) Simd::Base::func
 
-#ifdef SIMD_SSE2_ENABLE
-#define SIMD_SSE2_FUNC(func) Simd::Sse2::Enable ? Simd::Sse2::func : 
-#else
-#define SIMD_SSE2_FUNC(func) 
-#endif
-
 #ifdef SIMD_SSE41_ENABLE
 #define SIMD_SSE41_FUNC(func) Simd::Sse41::Enable ? Simd::Sse41::func : 
 #else

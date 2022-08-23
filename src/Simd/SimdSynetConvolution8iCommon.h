@@ -337,7 +337,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
             {
-                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), norm[index]), bias[index]), params, index);
+                __m128 f32 = Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), norm[index]), bias[index]), params, index);
                 __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(f32, scale[index]), shift[index]));
                 ((int32_t*)dst)[index] = _mm_cvtsi128_si32(_mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
             }
@@ -354,7 +354,7 @@ namespace Simd
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
                 const __m128* params, const __m128 & scale, const __m128 & shift, __m128i upper)
             {
-                __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Sse2::Activate<type>(sum, params, 0), scale), shift));
+                __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(Activate<type>(sum, params, 0), scale), shift));
                 ((int32_t*)dst)[0] = _mm_cvtsi128_si32(_mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
             }
 
@@ -373,7 +373,7 @@ namespace Simd
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint8_t* dst, int32_t* buf, __m128i sum,
                 const __m128* norm, const __m128* bias, const __m128* params, const __m128* scale, const __m128* shift, __m128i upper)
             {
-                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), norm[index]), bias[index]), params, index);
+                __m128 f32 = Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), norm[index]), bias[index]), params, index);
                 _mm_storeu_ps((float*)dst + index*F, f32);
             }
 
@@ -389,7 +389,7 @@ namespace Simd
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
                 const __m128* params, const __m128& scale, const __m128& shift, __m128i upper)
             {
-                _mm_storeu_ps((float*)dst, Sse2::Activate<type>(sum, params, 0));
+                _mm_storeu_ps((float*)dst, Activate<type>(sum, params, 0));
             }
 
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128 sum,
@@ -477,7 +477,7 @@ namespace Simd
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
             {
-                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_loadu_ps(norm + offset)), _mm_loadu_ps(bias + offset)), params, offset);
+                __m128 f32 = Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_loadu_ps(norm + offset)), _mm_loadu_ps(bias + offset)), params, offset);
                 __m128i i32 = _mm_cvtps_epi32(_mm_add_ps(_mm_mul_ps(f32, _mm_loadu_ps(scale + offset)), _mm_loadu_ps(shift + offset)));
                 ((int32_t*)(dst + offset))[0] = _mm_cvtsi128_si32(_mm_min_epu8(_mm_packus_epi16(_mm_packs_epi32(i32, K_ZERO), K_ZERO), upper));
             }
@@ -488,7 +488,7 @@ namespace Simd
             template<SimdConvolutionActivationType type> static SIMD_INLINE void Save(uint8_t* dst, __m128i sum,
                 const float* norm, const float* bias, const float* params, const float* scale, const float* shift, __m128i upper, size_t offset)
             {
-                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_loadu_ps(norm + offset)), _mm_loadu_ps(bias + offset)), params, offset);
+                __m128 f32 = Activate<type>(_mm_add_ps(_mm_mul_ps(_mm_cvtepi32_ps(sum), _mm_loadu_ps(norm + offset)), _mm_loadu_ps(bias + offset)), params, offset);
                 _mm_storeu_ps((float*)dst + offset, f32);
             }
         };

@@ -58,12 +58,6 @@ namespace Simd
             _mm_storeh_pi((__m64*)p, a);
         }
 
-        template <bool align> SIMD_INLINE void StoreMasked(float * p, __m128 value, __m128 mask)
-        {
-            __m128 old = Load<align>(p);
-            Store<align>(p, Combine(mask, value, old));
-        } 
-
         SIMD_INLINE void Store(float* ptr, __m128 val, size_t size)
         {
             SIMD_ALIGNED(16) float buf[F];
@@ -109,11 +103,6 @@ namespace Simd
             StoreHalf<part>((float*)p, _mm_castsi128_ps(a));
         }
 
-        template <bool align> SIMD_INLINE void StoreMasked(__m128i * p, __m128i value, __m128i mask)
-        {
-            __m128i old = Load<align>(p);
-            Store<align>(p, Combine(mask, value, old));
-        }
     }
 #endif//SIMD_SSE2_ENABLE
 
@@ -123,6 +112,12 @@ namespace Simd
 #if defined(_MSC_VER) && _MSC_VER >= 1800  && _MSC_VER < 1900 // Visual Studio 2013 compiler bug       
         using Sse2::Store;
 #endif
+
+        template <bool align> SIMD_INLINE void StoreMasked(float* p, __m128 value, __m128 mask)
+        {
+            __m128 old = Load<align>(p);
+            Store<align>(p, _mm_blendv_ps(old, value, mask));
+        }
 
         template <bool align> SIMD_INLINE void StoreMasked(__m128i* p, __m128i value, __m128i mask)
         {

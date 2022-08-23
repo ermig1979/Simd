@@ -44,14 +44,14 @@ namespace Simd
         template<SimdConvolutionActivationType type> 
         SIMD_INLINE void SaveInput1(float* dst, __m128 sum, const __m128* bias, const __m128* params)
         {
-            _mm_storeu_ps(dst, Sse2::Activate<type>(_mm_add_ps(sum, bias[0]), params, 0));
+            _mm_storeu_ps(dst, Activate<type>(_mm_add_ps(sum, bias[0]), params, 0));
         }
 
         template<SimdConvolutionActivationType type>
         SIMD_INLINE void SaveInput2(float* dst0, float* dst1, __m128 sum0, __m128 sum1, const __m128* bias, const __m128* params)
         {
-            _mm_storeu_ps(dst0, Sse2::Activate<type>(_mm_add_ps(sum0, bias[0]), params, 0));
-            _mm_storeu_ps(dst1, Sse2::Activate<type>(_mm_add_ps(sum1, bias[1]), params, 1));
+            _mm_storeu_ps(dst0, Activate<type>(_mm_add_ps(sum0, bias[0]), params, 0));
+            _mm_storeu_ps(dst1, Activate<type>(_mm_add_ps(sum1, bias[1]), params, 1));
         }
 
         template<SimdConvolutionActivationType type> void InputConvolution_2x1(const uint16_t* src0,

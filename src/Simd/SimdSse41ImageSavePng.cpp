@@ -49,7 +49,7 @@ namespace Simd
                     _h = _mm_add_epi32(_h, _mm_mullo_epi32(d, _i));
                     _i = _mm_sub_epi32(_i, _4);
                 }
-                int l = Sse2::ExtractInt32Sum(_l), h = Sse2::ExtractInt32Sum(_h);
+                int l = ExtractInt32Sum(_l), h = ExtractInt32Sum(_h);
                 for (; i < n; ++i)
                 {
                     l += data[b + i];
@@ -158,7 +158,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _src);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_src)));
             }
-            uint32_t sum = Sse2::ExtractInt32Sum(_sum);
+            uint32_t sum = ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i];
@@ -185,7 +185,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _dst);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - n];
@@ -212,7 +212,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _dst);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - stride];
@@ -242,7 +242,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _dst);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - ((src[i - n] + src[i - stride]) >> 1);
@@ -284,7 +284,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _dst);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - Base::Paeth(src[i - n], src[i - stride], src[i - stride - n]);
@@ -313,7 +313,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _dst);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - (src[i - n] >> 1);
@@ -340,7 +340,7 @@ namespace Simd
                 _mm_storeu_si128((__m128i*)(dst + i), _dst);
                 _sum = _mm_add_epi32(_sum, _mm_sad_epu8(_mm_setzero_si128(), _mm_abs_epi8(_dst)));
             }
-            sum += Sse2::ExtractInt32Sum(_sum);
+            sum += ExtractInt32Sum(_sum);
             for (; i < size; ++i)
             {
                 dst[i] = src[i] - src[i - n];

@@ -100,7 +100,7 @@ namespace Simd
 
         template <bool align> SIMD_INLINE __m128i ReduceRow(const Buffer & buffer, size_t offset)
         {
-            return _mm_packus_epi16(_mm_and_si128(DivideBy64(Sse2::BinomialSum16(
+            return _mm_packus_epi16(_mm_and_si128(DivideBy64(BinomialSum16(
                 Load<align>((__m128i*)(buffer.src0 + offset)), Load<align>((__m128i*)(buffer.src1 + offset)),
                 Load<align>((__m128i*)(buffer.src2 + offset)), Load<align>((__m128i*)(buffer.src3 + offset)))), K16_00FF), K_ZERO);
         }

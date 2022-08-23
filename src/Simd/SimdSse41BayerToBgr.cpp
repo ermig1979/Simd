@@ -41,7 +41,7 @@ namespace Simd
         template <bool align, SimdPixelFormatType bayerFormat> void BayerToBgr(const __m128i src[12], uint8_t * bgr, size_t stride)
         {
             __m128i _bgr[6];
-            Sse2::BayerToBgr<bayerFormat>(src, _bgr);
+            BayerToBgr<bayerFormat>(src, _bgr);
             SaveBgr<align>(_bgr + 0, bgr);
             SaveBgr<align>(_bgr + 3, bgr + stride);
         }

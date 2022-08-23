@@ -76,13 +76,13 @@ namespace Simd
             for (; i < size8; i += 8)
             {
                 __m128i s = _mm_loadu_si128((__m128i*)(src + i));
-                _mm_storeu_ps(dst + i + 0, Sse41::BFloat16ToFloat32(Sse2::UnpackU16<0>(s)));
-                _mm_storeu_ps(dst + i + 4, Sse41::BFloat16ToFloat32(Sse2::UnpackU16<1>(s)));
+                _mm_storeu_ps(dst + i + 0, Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(s)));
+                _mm_storeu_ps(dst + i + 4, Sse41::BFloat16ToFloat32(Sse41::UnpackU16<1>(s)));
             }
             for (; i < size4; i += 4)
             {
                 __m128i s = _mm_loadl_epi64((__m128i*)(src + i));
-                _mm_storeu_ps(dst + i + 0, Sse41::BFloat16ToFloat32(Sse2::UnpackU16<0>(s)));
+                _mm_storeu_ps(dst + i + 0, Sse41::BFloat16ToFloat32(Sse41::UnpackU16<0>(s)));
             }
             for (; i < size; ++i)
                 dst[i] = Base::BFloat16ToFloat32(src[i]);

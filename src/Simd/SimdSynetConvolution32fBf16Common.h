@@ -50,13 +50,13 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params)
             {
-                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index);
+                __m128 f32 = Activate<type>(_mm_add_ps(value, bias[index]), params, index);
                 _mm_storel_epi64((__m128i*)ptr, _mm_packus_epi32(Float32ToBFloat16(f32), Sse2::K_ZERO));
             }
 
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params, size_t tail)
             {
-                __m128 f32 = Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index);
+                __m128 f32 = Activate<type>(_mm_add_ps(value, bias[index]), params, index);
                 uint16_t tmp[F];
                 _mm_storel_epi64((__m128i*)tmp, _mm_packus_epi32(Float32ToBFloat16(f32), Sse2::K_ZERO));
                 for (size_t i = 0; i < tail; ++i)
@@ -68,13 +68,13 @@ namespace Simd
         {
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params)
             {
-                _mm_storeu_ps((float*)ptr, Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index));
+                _mm_storeu_ps((float*)ptr, Activate<type>(_mm_add_ps(value, bias[index]), params, index));
             }
 
             template<SimdConvolutionActivationType type, int index> static SIMD_INLINE void Save(uint16_t* ptr, __m128 value, const __m128* bias, const __m128* params, size_t tail)
             {
                 float tmp[F];
-                _mm_storeu_ps(tmp, Sse2::Activate<type>(_mm_add_ps(value, bias[index]), params, index));
+                _mm_storeu_ps(tmp, Activate<type>(_mm_add_ps(value, bias[index]), params, index));
                 for (size_t i = 0; i < tail; ++i)
                     ((float*)ptr)[i] = tmp[i];
             }

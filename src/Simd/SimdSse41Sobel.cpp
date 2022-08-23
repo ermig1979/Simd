@@ -141,7 +141,7 @@ namespace Simd
 
             __m128i a[3][3];
             __m128i fullSum = _mm_setzero_si128();
-            __m128i tailMask = Sse2::ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
 
             for (size_t row = 0; row < height; ++row)
             {
@@ -174,7 +174,7 @@ namespace Simd
 
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
             }
-            *sum = Sse2::ExtractInt64Sum(fullSum);
+            *sum = ExtractInt64Sum(fullSum);
         }
 
         //-----------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ namespace Simd
             const uint8_t *src0, *src1, *src2;
 
             __m128i a[3][3];
-            __m128i tailMask = Sse2::ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + bodyWidth);
             __m128i fullSum = _mm_setzero_si128();
 
             for (size_t row = 0; row < height; ++row)
@@ -301,7 +301,7 @@ namespace Simd
 
                 fullSum = _mm_add_epi64(fullSum, HorizontalSum32(rowSum));
             }
-            *sum = Sse2::ExtractInt64Sum(fullSum);
+            *sum = ExtractInt64Sum(fullSum);
         }
 
         void SobelDyAbsSum(const uint8_t * src, size_t stride, size_t width, size_t height, uint64_t * sum)

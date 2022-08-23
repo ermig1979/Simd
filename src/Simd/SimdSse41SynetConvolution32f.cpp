@@ -224,7 +224,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(_mm_loadu_ps(dst + i), _mm_loadu_ps(bias + i));
-                                _mm_storeu_ps(dst + i, Sse2::Elu(value, _alpha));
+                                _mm_storeu_ps(dst + i, Elu(value, _alpha));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetElu32f(dst[i] + bias[i], alpha);
@@ -240,7 +240,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(_mm_loadu_ps(dst + j), _bias);
-                                _mm_storeu_ps(dst + j, Sse2::Elu(value, _alpha));
+                                _mm_storeu_ps(dst + j, Elu(value, _alpha));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetElu32f(dst[j] + bias[i], alpha);
@@ -308,7 +308,7 @@ namespace Simd
                             for (; i < aligned; i += F)
                             {
                                 __m128 value = _mm_add_ps(Load<false>(dst + i), Load<false>(bias + i));
-                                Store<false>(dst + i, Sse2::Mish(value, _threshold));
+                                Store<false>(dst + i, Mish(value, _threshold));
                             }
                             for (; i < count; ++i)
                                 dst[i] = Base::SynetMish32f(dst[i] + bias[i], threshold);
@@ -324,7 +324,7 @@ namespace Simd
                             for (; j < aligned; j += F)
                             {
                                 __m128 value = _mm_add_ps(Load<false>(dst + j), _bias);
-                                Store<false>(dst + j, Sse2::Mish(value, _threshold));
+                                Store<false>(dst + j, Mish(value, _threshold));
                             }
                             for (; j < size; ++j)
                                 dst[j] = Base::SynetMish32f(dst[j] + bias[i], threshold);

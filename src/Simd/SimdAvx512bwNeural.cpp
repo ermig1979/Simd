@@ -581,7 +581,7 @@ namespace Simd
                     Store<false, true>(dst + (col >> 1), Pooling2x2Max3x3<false>(src + col, srcStride), __mmask16(0x7FFF));
                 }
                 if (width - widthEven)
-                    Sse2::Max2x3s(src + widthEven, srcStride, dst + (widthEven >> 1));
+                    Sse41::Max2x3s(src + widthEven, srcStride, dst + (widthEven >> 1));
                 src += 2 * srcStride;
                 dst += dstStride;
             }
@@ -595,7 +595,7 @@ namespace Simd
                     Store<false, true>(dst + (col >> 1), Pooling2x2Max3x2<false>(src + col, srcStride), __mmask16(0x7FFF));
                 }
                 if (width - widthEven)
-                    Sse2::Max2x2s(src + widthEven, srcStride, dst + (widthEven >> 1));
+                    Sse41::Max2x2s(src + widthEven, srcStride, dst + (widthEven >> 1));
             }
         }
 

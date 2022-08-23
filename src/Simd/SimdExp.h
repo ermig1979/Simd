@@ -41,8 +41,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         class Exp
         {
@@ -204,7 +204,7 @@ namespace Simd
             return _mm_div_ps(_mm_sub_ps(exp, _1), _mm_add_ps(_1, exp));
         }
     }
-#endif //SIMD_SSE2_ENABLE   
+#endif //SIMD_SSE41_ENABLE   
 
 #ifdef SIMD_AVX2_ENABLE    
     namespace Avx2

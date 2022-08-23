@@ -28,26 +28,12 @@
 
 namespace Simd
 {
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
-        SIMD_INLINE float ExtractValue(__m128 a, int i)
-        {
-            float SIMD_ALIGNED(16) _a[4];
-            _mm_store_ps(_a, a);
-            return _a[i];
-        }
-
-        SIMD_INLINE float ExtractSum(__m128 a)
-        {
-            float SIMD_ALIGNED(16) _a[4];
-            _mm_store_ps(_a, a);
-            return _a[0] + _a[1] + _a[2] + _a[3];
-        }        
-        
         template <int index> SIMD_INLINE int ExtractInt8(__m128i a)
         {
-            return _mm_extract_epi16(_mm_srli_si128(a, index & 0x1), index >> 1) & 0xFF;
+            return _mm_extract_epi8(a, index);
         }
 
         template <int index> SIMD_INLINE int ExtractInt16(__m128i a)
@@ -57,7 +43,7 @@ namespace Simd
 
         template <int index> SIMD_INLINE int ExtractInt32(__m128i a)
         {
-            return _mm_cvtsi128_si32(_mm_srli_si128(a, 4 * index));
+            return _mm_extract_epi32(a, index);
         }
 
         SIMD_INLINE int ExtractInt32Sum(__m128i a)
@@ -82,12 +68,7 @@ namespace Simd
             _mm_store_si128((__m128i*)_a, a);
             return _a[0] + _a[1];
         }
-    }
-#endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
         SIMD_INLINE float ExtractSum(__m128 a)
         {
             return _mm_cvtss_f32(_mm_hadd_ps(_mm_hadd_ps(a, _mm_setzero_ps()), _mm_setzero_ps()));

@@ -796,7 +796,7 @@ namespace Test
         std::cout << "               In this case different implementations of each functions" << std::endl;
         std::cout << "               will be compared between themselves " << std::endl;
         std::cout << "               (for example a scalar implementation and implementations" << std::endl;
-        std::cout << "               with using of different SIMD instructions such as SSE2, " << std::endl;
+        std::cout << "               with using of different SIMD instructions such as SSE4.1, " << std::endl;
         std::cout << "               AVX2, and other). Also it can be: " << std::endl;
         std::cout << "               -m=c - creation of test data for cross-platform testing), " << std::endl;
         std::cout << "               -m=v - cross - platform testing with using of early " << std::endl;

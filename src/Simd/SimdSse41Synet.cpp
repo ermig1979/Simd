@@ -742,7 +742,7 @@ namespace Simd
 
         void SynetSoftmaxLayerForward21(const float* src, size_t outer, float* dst)
         {
-            Sse2::Exp exp;
+            Exp exp;
             size_t aligned = Simd::AlignLo(outer, F);
             size_t o = 0;
             for (; o < aligned; o += F)
@@ -775,7 +775,7 @@ namespace Simd
             }
         }
 
-        SIMD_INLINE void SynetSoftmaxLayerForward31(const Sse2::Exp& exp, __m128 buf[3])
+        SIMD_INLINE void SynetSoftmaxLayerForward31(const Exp& exp, __m128 buf[3])
         {
             __m128 max = _mm_max_ps(buf[0], _mm_max_ps(buf[1], buf[2]));
             buf[0] = exp.Exponent(_mm_sub_ps(buf[0], max));
@@ -789,7 +789,7 @@ namespace Simd
 
         void SynetSoftmaxLayerForward31(const float* src, size_t outer, float* dst)
         {
-            Sse2::Exp exp;
+            Exp exp;
             __m128 buf[3];
             size_t aligned = Simd::AlignLo(outer, F);
             for (size_t o = 0; o < aligned; o += F)
@@ -825,7 +825,7 @@ namespace Simd
                 SynetSoftmaxLayerForward31(src, outer, dst);
             else
             {
-                Sse2::Exp exp;
+                Exp exp;
                 size_t aligned = Simd::AlignLo(inner, F);
                 Array32f tmp(inner * 2);
                 const float* s;

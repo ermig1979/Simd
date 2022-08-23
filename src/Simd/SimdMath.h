@@ -258,9 +258,11 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
+        using namespace Sse2;
+
         SIMD_INLINE __m128 Square(__m128 value)
         {
             return _mm_mul_ps(value, value);
@@ -278,9 +280,26 @@ namespace Simd
             return _mm_mul_ps(_mm_rsqrt_ps(_mm_max_ps(value, _mm_set1_ps(0.00000001f))), value);
         }
 
+        SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
+        {
+            return _mm_blendv_epi8(negative, positive, mask);
+        }
+
         SIMD_INLINE __m128 Combine(__m128 mask, __m128 positive, __m128 negative)
         {
-            return _mm_or_ps(_mm_and_ps(mask, positive), _mm_andnot_ps(mask, negative));
+            return _mm_blendv_ps(negative, positive, mask);
+        }
+
+        template <bool abs> __m128i ConditionalAbs(__m128i a);
+
+        template <> SIMD_INLINE __m128i ConditionalAbs<true>(__m128i a)
+        {
+            return _mm_abs_epi16(a);
+        }
+
+        template <> SIMD_INLINE __m128i ConditionalAbs<false>(__m128i a)
+        {
+            return a;
         }
 
         template <bool condition> SIMD_INLINE __m128 Masked(const __m128& value, const __m128& mask);
@@ -353,7 +372,7 @@ namespace Simd
             return _mm_min_epi16(a, _mm_min_epi16(b, c));
         }
 
-        SIMD_INLINE void SortU8(__m128i & a, __m128i & b)
+        SIMD_INLINE void SortU8(__m128i& a, __m128i& b)
         {
             __m128i t = a;
             a = _mm_min_epu8(t, b);
@@ -388,149 +407,6 @@ namespace Simd
             return t;
         }
 
-        SIMD_INLINE __m128i HorizontalSum32(__m128i a)
-        {
-            return _mm_add_epi64(_mm_unpacklo_epi32(a, K_ZERO), _mm_unpackhi_epi32(a, K_ZERO));
-        }
-
-        SIMD_INLINE __m128i AbsDifferenceU8(__m128i a, __m128i b)
-        {
-            return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
-        }
-
-        SIMD_INLINE __m128i AbsDifferenceI16(__m128i a, __m128i b)
-        {
-            return _mm_sub_epi16(_mm_max_epi16(a, b), _mm_min_epi16(a, b));
-        }
-
-        SIMD_INLINE __m128i MulU8(__m128i a, __m128i b)
-        {
-            __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(a, K_ZERO), _mm_unpacklo_epi8(b, K_ZERO));
-            __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(a, K_ZERO), _mm_unpackhi_epi8(b, K_ZERO));
-            return _mm_packus_epi16(lo, hi);
-        }
-
-        SIMD_INLINE __m128i BinomialSum16(const __m128i & a, const __m128i & b, const __m128i & c)
-        {
-            return _mm_add_epi16(_mm_add_epi16(a, c), _mm_add_epi16(b, b));
-        }
-
-        SIMD_INLINE __m128i BinomialSum16(const __m128i & a, const __m128i & b, const __m128i & c, const __m128i & d)
-        {
-            return _mm_add_epi16(_mm_add_epi16(a, d), _mm_mullo_epi16(_mm_add_epi16(b, c), K16_0003));
-        }
-
-        SIMD_INLINE __m128i Combine(__m128i mask, __m128i positive, __m128i negative)
-        {
-            return _mm_or_si128(_mm_and_si128(mask, positive), _mm_andnot_si128(mask, negative));
-        }
-
-        template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
-
-        template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
-        {
-            return _mm_unpacklo_epi8(a, b);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
-        {
-            return _mm_unpackhi_epi8(a, b);
-        }
-
-        template <int index> __m128i U8To16(__m128i a);
-
-        template <> SIMD_INLINE __m128i U8To16<0>(__m128i a)
-        {
-            return _mm_and_si128(a, K16_00FF);
-        }
-
-        template <> SIMD_INLINE __m128i U8To16<1>(__m128i a)
-        {
-            return _mm_and_si128(_mm_srli_si128(a, 1), K16_00FF);
-        }
-
-        template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
-
-        template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
-        {
-            return _mm_unpacklo_epi16(a, b);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackU16<1>(__m128i a, __m128i b)
-        {
-            return _mm_unpackhi_epi16(a, b);
-        }
-
-        template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
-
-        template <> SIMD_INLINE __m128i UnpackI16<0>(__m128i a)
-        {
-            return _mm_srai_epi32(_mm_unpacklo_epi16(a, a), 16);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackI16<1>(__m128i a)
-        {
-            return _mm_srai_epi32(_mm_unpackhi_epi16(a, a), 16);
-        }
-
-        SIMD_INLINE __m128i DivideBy16(__m128i value)
-        {
-            return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
-        }
-
-        template <int index> SIMD_INLINE __m128 Broadcast(__m128 a)
-        {
-            return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), index * 0x55));
-        }
-
-        template<int imm> SIMD_INLINE __m128i Shuffle32i(__m128i lo, __m128i hi)
-        {
-            return _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(lo), _mm_castsi128_ps(hi), imm));
-        }
-
-        template<int imm> SIMD_INLINE __m128 Shuffle32f(__m128 a)
-        {
-            return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), imm));
-        }
-
-        SIMD_INLINE __m128i Average16(const __m128i & a, const __m128i & b, const __m128i & c, const __m128i & d)
-        {
-            return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(a, b), _mm_add_epi16(c, d)), K16_0002), 2);
-        }
-
-        SIMD_INLINE __m128i Merge16(const __m128i & even, __m128i odd)
-        {
-            return _mm_or_si128(_mm_slli_si128(odd, 1), even);
-        }
-    }
-#endif// SIMD_SSE2_ENABLE
-
-#ifdef SIMD_SSE41_ENABLE
-    namespace Sse41
-    {
-        using namespace Sse2;
-
-#if defined(_MSC_VER) && _MSC_VER >= 1700  && _MSC_VER < 1900 // Visual Studio 2012/2013 compiler bug     
-        using Sse2::RightNotZero32f;
-#endif
-
-        template <bool abs> __m128i ConditionalAbs(__m128i a);
-
-        template <> SIMD_INLINE __m128i ConditionalAbs<true>(__m128i a)
-        {
-            return _mm_abs_epi16(a);
-        }
-
-        template <> SIMD_INLINE __m128i ConditionalAbs<false>(__m128i a)
-        {
-            return a;
-        }
-
-        template<int part> SIMD_INLINE __m128i SubUnpackedU8(__m128i a, __m128i b)
-        {
-            return _mm_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
-        }
-
         template <int part> SIMD_INLINE __m128i UnpackI8(__m128i a);
 
         template <> SIMD_INLINE __m128i UnpackI8<0>(__m128i a)
@@ -558,6 +434,109 @@ namespace Simd
         template<int shift> SIMD_INLINE __m128 Alignr(const __m128 & s0, const __m128 & s4)
         {
             return _mm_castsi128_ps(_mm_alignr_epi8(_mm_castps_si128(s4), _mm_castps_si128(s0), shift * 4));
+        }
+
+        SIMD_INLINE __m128i HorizontalSum32(__m128i a)
+        {
+            return _mm_add_epi64(_mm_unpacklo_epi32(a, K_ZERO), _mm_unpackhi_epi32(a, K_ZERO));
+        }
+
+        SIMD_INLINE __m128i AbsDifferenceU8(__m128i a, __m128i b)
+        {
+            return _mm_sub_epi8(_mm_max_epu8(a, b), _mm_min_epu8(a, b));
+        }
+
+        SIMD_INLINE __m128i AbsDifferenceI16(__m128i a, __m128i b)
+        {
+            return _mm_sub_epi16(_mm_max_epi16(a, b), _mm_min_epi16(a, b));
+        }
+
+        SIMD_INLINE __m128i MulU8(__m128i a, __m128i b)
+        {
+            __m128i lo = _mm_mullo_epi16(_mm_unpacklo_epi8(a, K_ZERO), _mm_unpacklo_epi8(b, K_ZERO));
+            __m128i hi = _mm_mullo_epi16(_mm_unpackhi_epi8(a, K_ZERO), _mm_unpackhi_epi8(b, K_ZERO));
+            return _mm_packus_epi16(lo, hi);
+        }
+
+        SIMD_INLINE __m128i BinomialSum16(const __m128i& a, const __m128i& b, const __m128i& c)
+        {
+            return _mm_add_epi16(_mm_add_epi16(a, c), _mm_add_epi16(b, b));
+        }
+
+        SIMD_INLINE __m128i BinomialSum16(const __m128i& a, const __m128i& b, const __m128i& c, const __m128i& d)
+        {
+            return _mm_add_epi16(_mm_add_epi16(a, d), _mm_mullo_epi16(_mm_add_epi16(b, c), K16_0003));
+        }
+
+        template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
+
+        template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
+        {
+            return _mm_unpacklo_epi8(a, b);
+        }
+
+        template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
+        {
+            return _mm_unpackhi_epi8(a, b);
+        }
+
+        template<int part> SIMD_INLINE __m128i SubUnpackedU8(__m128i a, __m128i b)
+        {
+            return _mm_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
+        }
+
+        template <int index> __m128i U8To16(__m128i a);
+
+        template <> SIMD_INLINE __m128i U8To16<0>(__m128i a)
+        {
+            return _mm_and_si128(a, K16_00FF);
+        }
+
+        template <> SIMD_INLINE __m128i U8To16<1>(__m128i a)
+        {
+            return _mm_and_si128(_mm_srli_si128(a, 1), K16_00FF);
+        }
+
+        template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
+
+        template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
+        {
+            return _mm_unpacklo_epi16(a, b);
+        }
+
+        template <> SIMD_INLINE __m128i UnpackU16<1>(__m128i a, __m128i b)
+        {
+            return _mm_unpackhi_epi16(a, b);
+        }
+
+        SIMD_INLINE __m128i DivideBy16(__m128i value)
+        {
+            return _mm_srli_epi16(_mm_add_epi16(value, K16_0008), 4);
+        }
+
+        template <int index> SIMD_INLINE __m128 Broadcast(__m128 a)
+        {
+            return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), index * 0x55));
+        }
+
+        template<int imm> SIMD_INLINE __m128i Shuffle32i(__m128i lo, __m128i hi)
+        {
+            return _mm_castps_si128(_mm_shuffle_ps(_mm_castsi128_ps(lo), _mm_castsi128_ps(hi), imm));
+        }
+
+        template<int imm> SIMD_INLINE __m128 Shuffle32f(__m128 a)
+        {
+            return _mm_castsi128_ps(_mm_shuffle_epi32(_mm_castps_si128(a), imm));
+        }
+
+        SIMD_INLINE __m128i Average16(const __m128i& a, const __m128i& b, const __m128i& c, const __m128i& d)
+        {
+            return _mm_srli_epi16(_mm_add_epi16(_mm_add_epi16(_mm_add_epi16(a, b), _mm_add_epi16(c, d)), K16_0002), 2);
+        }
+
+        SIMD_INLINE __m128i Merge16(const __m128i& even, __m128i odd)
+        {
+            return _mm_or_si128(_mm_slli_si128(odd, 1), even);
         }
 
         SIMD_INLINE int TestZ(__m128 value)

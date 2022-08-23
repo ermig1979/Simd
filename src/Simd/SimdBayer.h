@@ -135,8 +135,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE
+    namespace Sse41
     {
         SIMD_INLINE void LoadBayerNose(const uint8_t * src, __m128i dst[3])
         {
@@ -237,7 +237,7 @@ namespace Simd
             d[5] = Merge16(_mm_avg_epu16(Get<6, 1>(s), Get<7, 1>(s)), Get<7, 1>(s));
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2

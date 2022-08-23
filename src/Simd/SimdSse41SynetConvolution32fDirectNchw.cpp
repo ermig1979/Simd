@@ -170,7 +170,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationElu>(__m128 value, const __m128 * params)
         {
-            return Sse2::Elu(value, params[0]);
+            return Elu(value, params[0]);
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const __m128 * params)
@@ -180,7 +180,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const __m128* params)
         {
-            return Sse2::Mish(value, params[0]);
+            return Mish(value, params[0]);
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHardSigmoid>(__m128 value, const __m128* params)
@@ -190,7 +190,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationSwish>(__m128 value, const __m128* params)
         {
-            return Sse2::Swish(value, params[0]);
+            return Swish(value, params[0]);
         }
 
         template<int kernel, int stride, ::SimdConvolutionActivationType type> 

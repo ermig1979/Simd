@@ -107,7 +107,7 @@ namespace Simd
         {
             static const __m128i SHUFFLE = SIMD_MM_SETR_EPI8(0x0, 0x1, 0x2, 0x4, 0x5, 0x6, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1);
             __m128i u8 = _mm256_castsi256_si128(PackI16ToU8(PackI32ToI16(val, K_ZERO), K_ZERO));
-            *((int64_t*)dst) = Sse2::ExtractInt64<0>(_mm_shuffle_epi8(u8, SHUFFLE));
+            *((int64_t*)dst) = Sse41::ExtractInt64<0>(_mm_shuffle_epi8(u8, SHUFFLE));
         }
 
         template <int N> SIMD_INLINE void BicubicInt(const uint8_t* src0, const uint8_t* src1, const uint8_t* src2, const uint8_t* src3, const int32_t* ix, const int8_t* ax, const __m256i* ay, uint8_t* dst)

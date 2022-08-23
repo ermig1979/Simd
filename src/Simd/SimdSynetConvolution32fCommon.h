@@ -130,8 +130,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         template<::SimdConvolutionActivationType type> SIMD_INLINE __m128 Activate(__m128 value, const float* params, size_t offset);
 
@@ -162,7 +162,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationElu>(__m128 value, const float* params, size_t offset)
         {
-            return Sse2::Elu(value, _mm_set1_ps(params[0]));
+            return Elu(value, _mm_set1_ps(params[0]));
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const float* params, size_t offset)
@@ -172,7 +172,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const float* params, size_t offset)
         {
-            return Sse2::Mish(value, _mm_set1_ps(params[0]));
+            return Mish(value, _mm_set1_ps(params[0]));
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHardSigmoid>(__m128 value, const float* params, size_t offset)
@@ -216,7 +216,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationElu>(__m128 value, const __m128 * params, size_t index)
         {
-            return Sse2::Elu(value, params[0]);
+            return Elu(value, params[0]);
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHswish>(__m128 value, const __m128 * params, size_t index)
@@ -226,7 +226,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationMish>(__m128 value, const __m128* params, size_t index)
         {
-            return Sse2::Mish(value, params[0]);
+            return Mish(value, params[0]);
         }
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationHardSigmoid>(__m128 value, const __m128* params, size_t index)
@@ -236,7 +236,7 @@ namespace Simd
 
         template<> SIMD_INLINE __m128 Activate<::SimdConvolutionActivationSwish>(__m128 value, const __m128* params, size_t index)
         {
-            return Sse2::Swish(value, params[0]);
+            return Swish(value, params[0]);
         }
 
         //---------------------------------------------------------------------
@@ -315,7 +315,7 @@ namespace Simd
             Term<term>::template Save<type, 2>(dst + 2 * F, val2, bias, params, tail);
         }
     }
-#endif//SIMD_SSE2_ENABLE
+#endif//SIMD_SSE41_ENABLE
 
 #ifdef SIMD_AVX_ENABLE    
     namespace Avx

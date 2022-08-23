@@ -283,8 +283,8 @@ namespace Simd
         }
     }
 
-#ifdef SIMD_SSE2_ENABLE    
-    namespace Sse2
+#ifdef SIMD_SSE41_ENABLE    
+    namespace Sse41
     {
         SIMD_INLINE __m128i AdjustY16(__m128i y16)
         {
@@ -429,12 +429,7 @@ namespace Simd
                 BgrToV16(_mm_unpacklo_epi8(b8, K_ZERO), _mm_unpacklo_epi8(g8, K_ZERO), _mm_unpacklo_epi8(r8, K_ZERO)),
                 BgrToV16(_mm_unpackhi_epi8(b8, K_ZERO), _mm_unpackhi_epi8(g8, K_ZERO), _mm_unpackhi_epi8(r8, K_ZERO)));
         }
-    }
-#endif// SIMD_SSE2_ENABLE
 
-#ifdef SIMD_SSE41_ENABLE    
-    namespace Sse41
-    {
         template <int index> __m128i InterleaveBgr(__m128i blue, __m128i green, __m128i red);
 
         template<> SIMD_INLINE __m128i InterleaveBgr<0>(__m128i blue, __m128i green, __m128i red)

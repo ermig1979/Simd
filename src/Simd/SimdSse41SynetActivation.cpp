@@ -34,7 +34,7 @@ namespace Simd
 #if defined(SIMD_SSE41_ENABLE) && defined(SIMD_SYNET_ENABLE)  
     namespace Sse41
     {
-        template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Sse2::Exp & exp, __m128 alpha, float * dst, size_t offset)
+        template<bool align> SIMD_INLINE void SynetElu32f(const float * src, const Exp & exp, __m128 alpha, float * dst, size_t offset)
         {
             Store<align>(dst + offset, exp.Elu(Load<align>(src + offset), alpha));
         }
@@ -45,7 +45,7 @@ namespace Simd
                 assert(Aligned(src) && Aligned(dst));
 
             __m128 _alpha = _mm_set1_ps(alpha[0]);
-            Sse2::Exp exp;
+            Exp exp;
             size_t sizeF = AlignLo(size, F);
             size_t sizeQF = AlignLo(size, QF);
             size_t i = 0;
@@ -148,7 +148,7 @@ namespace Simd
 
         template<bool align> SIMD_INLINE void SynetMish32f(const float* src, __m128 threshold, float* dst, size_t offset)
         {
-            Store<align>(dst + offset, Sse2::Mish(Load<align>(src + offset), threshold));
+            Store<align>(dst + offset, Mish(Load<align>(src + offset), threshold));
         }
 
         template<bool align> void SynetMish32f(const float* src, size_t size, const float* threshold, float* dst)
@@ -387,7 +387,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Sse2::Exp & exp, float* dst, size_t offset)
+        template<bool align> SIMD_INLINE void SynetSigmoid32f(const float* src, const Exp & exp, float* dst, size_t offset)
         {
             Store<align>(dst + offset, exp.Sigmoid(Load<align>(src + offset)));
         }
@@ -462,7 +462,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<bool align> SIMD_INLINE void SynetSwish32f(const float* src, const Sse2::Exp& exp, float* dst, size_t offset)
+        template<bool align> SIMD_INLINE void SynetSwish32f(const float* src, const Exp& exp, float* dst, size_t offset)
         {
             Store<align>(dst + offset, exp.Swish(Load<align>(src + offset)));
         }
@@ -499,7 +499,7 @@ namespace Simd
 
         //---------------------------------------------------------------------
 
-        template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Sse2::Exp& exp, float* dst, size_t offset)
+        template<bool align> SIMD_INLINE void SynetTanh32f(const float* src, const Exp& exp, float* dst, size_t offset)
         {
             Store<align>(dst + offset, exp.Tanh(Load<align>(src + offset)));
         }
