@@ -125,7 +125,92 @@ namespace Test
         return result;
     }
 
-    //-------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
+
+    namespace
+    {
+        struct FuncAB2
+        {
+            typedef void(*FuncPtr)(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride, 
+                const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+                size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
+            FuncPtr func;
+            String description;
+
+            FuncAB2(const FuncPtr& f, const String& d) : func(f), description(d) {}
+
+            void Call(const View& src0, const View& alpha0, const View& src1, const View& alpha1, const View& dstSrc, View& dstDst) const
+            {
+                Simd::Copy(dstSrc, dstDst);
+                TEST_PERFORMANCE_TEST(description);
+                func(src0.data, src0.stride, alpha0.data, alpha0.stride, src1.data, src1.stride, alpha1.data, alpha1.stride,
+                    dstDst.width, dstDst.height, dstDst.ChannelCount(), dstDst.data, dstDst.stride);
+            }
+        };
+    }
+
+#define FUNC_AB2(func) FuncAB2(func, #func)
+
+    bool AlphaBlending2xAutoTest(View::Format format, int width, int height, const FuncAB2& f1, const FuncAB2& f2)
+    {
+        bool result = true;
+
+        TEST_LOG_SS(Info, "Test " << f1.description << " & " << f2.description << " for size [" << width << "," << height << "].");
+
+        View s0(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(s0);
+        View a0(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(a0);
+        View s1(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(s1);
+        View a1(width, height, View::Gray8, NULL, TEST_ALIGN(width));
+        FillRandom(a1);
+        View b(width, height, format, NULL, TEST_ALIGN(width));
+        FillRandom(b);
+
+        View d1(width, height, format, NULL, TEST_ALIGN(width));
+        View d2(width, height, format, NULL, TEST_ALIGN(width));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f1.Call(s0, a0, s1, a1, b, d1));
+
+        TEST_EXECUTE_AT_LEAST_MIN_TIME(f2.Call(s0, a0, s1, a1, b, d2));
+
+        result = result && Compare(d1, d2, 0, true, 64);
+
+        return result;
+    }
+
+    bool AlphaBlending2xAutoTest(const FuncAB2& f1, const FuncAB2& f2)
+    {
+        bool result = true;
+
+        for (View::Format format = View::Gray8; format <= View::Bgra32; format = View::Format(format + 1))
+        {
+            FuncAB2 f1c = FuncAB2(f1.func, f1.description + ColorDescription(format));
+            FuncAB2 f2c = FuncAB2(f2.func, f2.description + ColorDescription(format));
+
+            result = result && AlphaBlending2xAutoTest(format, W, H, f1c, f2c);
+            result = result && AlphaBlending2xAutoTest(format, W + O, H - O, f1c, f2c);
+        }
+
+        return result;
+    }
+
+    bool AlphaBlending2xAutoTest()
+    {
+        bool result = true;
+
+        result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Base::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
+
+//#ifdef SIMD_SSE41_ENABLE
+//        if (Simd::Sse41::Enable && W >= Simd::Sse41::A)
+//            result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Sse41::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
+//#endif 
+
+        return result;
+    }
+
+    //---------------------------------------------------------------------------------------------
 
     namespace
     {

@@ -495,6 +495,14 @@ SIMD_API void SimdAlphaBlending(const uint8_t *src, size_t srcStride, size_t wid
         Base::AlphaBlending(src, srcStride, width, height, channelCount, alpha, alphaStride, dst, dstStride);
 }
 
+SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+    const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+    size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+{
+    SIMD_EMPTY();
+    Base::AlphaBlending2x(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+}
+
 SIMD_API void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
 {
     SIMD_EMPTY();

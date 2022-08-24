@@ -277,6 +277,39 @@ namespace Simd
 
     /*! @ingroup drawing
 
+        \fn void AlphaBlending2x(const View<A>& src0, const View<A>& alpha0, const View<A>& src1, const View<A>& alpha1, View<A>& dst)
+
+        \short Performs double alpha blending operation.
+
+        All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.
+
+        For every point:
+        \verbatim
+        tmp = (src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]))/255;
+        dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
+        \endverbatim
+
+        This function is used for image drawing.
+
+        \note This function is a C++ wrapper for function ::SimdAlphaBlending2x.
+
+        \param [in] src0 - the first foreground image.
+        \param [in] alpha0 - the first image with alpha channel.
+        \param [in] src1 - the second foreground image.
+        \param [in] alpha1 - the second image with alpha channel.
+        \param [in, out] dst - a background image.
+    */
+    template<template<class> class A> SIMD_INLINE void AlphaBlending2x(const View<A>& src0, const View<A>& alpha0, const View<A>& src1, const View<A>& alpha1, View<A>& dst)
+    {
+        assert(Compatible(src0, src1, dst) && Compatible(alpha0, alpha1) && EqualSize(dst, alpha0) && alpha0.format == View<A>::Gray8 && dst.ChannelSize() == 1);
+
+        SimdAlphaBlending2x(src0.data, src0.stride, alpha0.data, alpha0.stride, 
+            src1.data, src1.stride, alpha1.data, alpha1.stride,
+            dst.width, dst.height, dst.ChannelCount(), dst.data, dst.stride);
+    }
+
+    /*! @ingroup drawing
+
         \fn void AlphaBlending(const View<A>& src, uint8_t alpha, View<A>& dst)
 
         \short Performs alpha blending operation.

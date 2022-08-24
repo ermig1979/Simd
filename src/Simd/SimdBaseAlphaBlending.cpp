@@ -88,7 +88,67 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
+
+        template <size_t channelCount> void AlphaBlending2x(const uint8_t* src0, int alpha0, const uint8_t* src1, int alpha1, uint8_t* dst);
+
+        template <> SIMD_INLINE void AlphaBlending2x<1>(const uint8_t* src0, int alpha0, const uint8_t* src1, int alpha1, uint8_t* dst)
+        {
+            dst[0] = AlphaBlending(src1[0], AlphaBlending(src0[0], dst[0], alpha0), alpha1);
+        }
+
+        template <> SIMD_INLINE void AlphaBlending2x<2>(const uint8_t* src0, int alpha0, const uint8_t* src1, int alpha1, uint8_t* dst)
+        {
+            dst[0] = AlphaBlending(src1[0], AlphaBlending(src0[0], dst[0], alpha0), alpha1);
+            dst[1] = AlphaBlending(src1[1], AlphaBlending(src0[1], dst[1], alpha0), alpha1);
+        }
+
+        template <> SIMD_INLINE void AlphaBlending2x<3>(const uint8_t* src0, int alpha0, const uint8_t* src1, int alpha1, uint8_t* dst)
+        {
+            dst[0] = AlphaBlending(src1[0], AlphaBlending(src0[0], dst[0], alpha0), alpha1);
+            dst[1] = AlphaBlending(src1[1], AlphaBlending(src0[1], dst[1], alpha0), alpha1);
+            dst[2] = AlphaBlending(src1[2], AlphaBlending(src0[2], dst[2], alpha0), alpha1);
+        }
+
+        template <> SIMD_INLINE void AlphaBlending2x<4>(const uint8_t* src0, int alpha0, const uint8_t* src1, int alpha1, uint8_t* dst)
+        {
+            dst[0] = AlphaBlending(src1[0], AlphaBlending(src0[0], dst[0], alpha0), alpha1);
+            dst[1] = AlphaBlending(src1[1], AlphaBlending(src0[1], dst[1], alpha0), alpha1);
+            dst[2] = AlphaBlending(src1[2], AlphaBlending(src0[2], dst[2], alpha0), alpha1);
+            dst[3] = AlphaBlending(src1[3], AlphaBlending(src0[3], dst[3], alpha0), alpha1);
+        }
+
+        template <size_t channelCount> void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < width; ++col, offset += channelCount)
+                    AlphaBlending2x<channelCount>(src0 + offset, alpha0[col], src1 + offset, alpha1[col], dst + offset);
+                src0 += src0Stride;
+                alpha0 += alpha0Stride;
+                src1 += src1Stride;
+                alpha1 += alpha1Stride;
+                dst += dstStride;
+            }
+        }
+
+        void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            assert(channelCount >= 1 && channelCount <= 4);
+
+            switch (channelCount)
+            {
+            case 1: AlphaBlending2x<1>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 2: AlphaBlending2x<2>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 3: AlphaBlending2x<3>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 4: AlphaBlending2x<4>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            }
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         template <size_t channelCount> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t alpha, uint8_t* dst, size_t dstStride)
         {
@@ -114,7 +174,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         template <size_t channelCount> void AlphaFilling(uint8_t * dst, size_t dstStride, size_t width, size_t height, const uint8_t * channel, const uint8_t * alpha, size_t alphaStride)
         {
@@ -140,7 +200,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         void AlphaPremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {
@@ -153,7 +213,7 @@ namespace Simd
             }
         }
 
-        //---------------------------------------------------------------------
+        //-----------------------------------------------------------------------------------------
 
         void AlphaUnpremultiply(const uint8_t* src, size_t srcStride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
         {

@@ -1026,6 +1026,42 @@ extern "C"
 
     /*! @ingroup drawing
 
+        \fn void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride, const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
+
+        \short Performs double alpha blending operation.
+
+        All images must have the same width and height. Source and destination images must have the same format (8 bit per channel, for example GRAY8, UV16, BGR24 or BGRA32). Alphas must be 8-bit gray image.
+
+        For every point:
+        \verbatim
+        tmp = (src0[x, y, c]*alpha0[x, y] + dst[x, y, c]*(255 - alpha0[x, y]))/255;
+        dst[x, y, c] = (src1[x, y, c]*alpha1[x, y] + tmp*(255 - alpha1[x, y]))/255;
+        \endverbatim
+
+        This function is used for image drawing.
+
+        \note This function has a C++ wrapper Simd::AlphaBlending(const View<A>& src0, const View<A>& alpha0, const View<A>& src1, const View<A>& alpha1, View<A>& dst).
+
+        \param [in] src0 - a pointer to pixels data of the first foreground image.
+        \param [in] src0Stride - a row size of the first foreground image.
+        \param [in] alpha0 - a pointer to pixels data of image with the first alpha channel.
+        \param [in] alpha0Stride - a row size of the first alpha image.
+        \param [in] src1 - a pointer to pixels data of the second foreground image.
+        \param [in] src1Stride - a row size of the second foreground image.
+        \param [in] alpha1 - a pointer to pixels data of image with the second alpha channel.
+        \param [in] alpha1Stride - a row size of the second alpha image.
+        \param [in] width - an image width.
+        \param [in] height - an image height.
+        \param [in] channelCount - a channel count for foreground and background images (1 <= channelCount <= 4).
+        \param [in, out] dst - a pointer to pixels data of background image.
+        \param [in] dstStride - a row size of the background image.
+    */
+    SIMD_API void SimdAlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride, 
+        const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, 
+        size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
+
+    /*! @ingroup drawing
+
         \fn void SimdAlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height, size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride);
 
         \short Performs uniform alpha blending operation.
