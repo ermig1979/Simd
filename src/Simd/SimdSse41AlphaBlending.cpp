@@ -130,6 +130,122 @@ namespace Simd
         }
 
         //-----------------------------------------------------------------------------------------
+        
+        template <bool align, size_t channelCount> struct AlphaBlender2x
+        {
+            void operator()(const __m128i* src0, __m128i alpha0, const __m128i* src1, __m128i alpha1, __m128i* dst);
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 1>
+        {
+            SIMD_INLINE void operator()(const __m128i* src0, __m128i alpha0, const __m128i* src1, __m128i alpha1, __m128i* dst)
+            {
+                AlphaBlending2x<align>(src0, alpha0, src1, alpha1, dst);
+            }
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 2>
+        {
+            SIMD_INLINE void operator()(const __m128i* src0, __m128i alpha0, const __m128i* src1, __m128i alpha1, __m128i* dst)
+            {
+                AlphaBlending2x<align>(src0 + 0, _mm_unpacklo_epi8(alpha0, alpha0), src1 + 0, _mm_unpacklo_epi8(alpha1, alpha1), dst + 0);
+                AlphaBlending2x<align>(src0 + 1, _mm_unpackhi_epi8(alpha0, alpha0), src1 + 1, _mm_unpackhi_epi8(alpha1, alpha1), dst + 1);
+            }
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 3>
+        {
+            SIMD_INLINE void operator()(const __m128i* src0, __m128i alpha0, const __m128i* src1, __m128i alpha1, __m128i* dst)
+            {
+                AlphaBlending2x<align>(src0 + 0, _mm_shuffle_epi8(alpha0, K8_SHUFFLE_GRAY_TO_BGR0), src1 + 0, _mm_shuffle_epi8(alpha1, K8_SHUFFLE_GRAY_TO_BGR0), dst + 0);
+                AlphaBlending2x<align>(src0 + 1, _mm_shuffle_epi8(alpha0, K8_SHUFFLE_GRAY_TO_BGR1), src1 + 1, _mm_shuffle_epi8(alpha1, K8_SHUFFLE_GRAY_TO_BGR1), dst + 1);
+                AlphaBlending2x<align>(src0 + 2, _mm_shuffle_epi8(alpha0, K8_SHUFFLE_GRAY_TO_BGR2), src1 + 2, _mm_shuffle_epi8(alpha1, K8_SHUFFLE_GRAY_TO_BGR2), dst + 2);
+            }
+        };
+
+        template <bool align> struct AlphaBlender2x<align, 4>
+        {
+            SIMD_INLINE void operator()(const __m128i* src0, __m128i alpha0, const __m128i* src1, __m128i alpha1, __m128i* dst)
+            {
+                __m128i lo0 = _mm_unpacklo_epi8(alpha0, alpha0);
+                __m128i lo1 = _mm_unpacklo_epi8(alpha1, alpha1);
+                AlphaBlending2x<align>(src0 + 0, _mm_unpacklo_epi8(lo0, lo0), src1 + 0, _mm_unpacklo_epi8(lo1, lo1), dst + 0);
+                AlphaBlending2x<align>(src0 + 1, _mm_unpackhi_epi8(lo0, lo0), src1 + 1, _mm_unpackhi_epi8(lo1, lo1), dst + 1);
+                __m128i hi0 = _mm_unpackhi_epi8(alpha0, alpha0);
+                __m128i hi1 = _mm_unpackhi_epi8(alpha1, alpha1);
+                AlphaBlending2x<align>(src0 + 2, _mm_unpacklo_epi8(hi0, hi0), src1 + 2, _mm_unpacklo_epi8(hi1, hi1), dst + 2);
+                AlphaBlending2x<align>(src0 + 3, _mm_unpackhi_epi8(hi0, hi0), src1 + 3, _mm_unpackhi_epi8(hi1, hi1), dst + 3);
+            }
+        };
+
+        template <bool align, size_t channelCount> void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride, size_t width, size_t height, uint8_t* dst, size_t dstStride)
+        {
+            size_t alignedWidth = AlignLo(width, A);
+            __m128i tailMask = ShiftLeft(K_INV_ZERO, A - width + alignedWidth);
+            size_t step = channelCount * A;
+            for (size_t row = 0; row < height; ++row)
+            {
+                for (size_t col = 0, offset = 0; col < alignedWidth; col += A, offset += step)
+                {
+                    __m128i _alpha0 = Load<align>((__m128i*)(alpha0 + col));
+                    __m128i _alpha1 = Load<align>((__m128i*)(alpha1 + col));
+                    AlphaBlender2x<align, channelCount>()((__m128i*)(src0 + offset), _alpha0, 
+                        (__m128i*)(src1 + offset), _alpha1, (__m128i*)(dst + offset));
+                }
+                if (alignedWidth != width)
+                {
+                    size_t col = width - A, offset = col * channelCount;
+                    __m128i _alpha0 = _mm_and_si128(Load<false>((__m128i*)(alpha0 + col)), tailMask);
+                    __m128i _alpha1 = _mm_and_si128(Load<false>((__m128i*)(alpha1 + col)), tailMask);
+                    AlphaBlender2x<false, channelCount>()((__m128i*)(src0 + offset), _alpha0,
+                        (__m128i*)(src1 + offset), _alpha1, (__m128i*)(dst + offset));
+                }
+                src0 += src0Stride;
+                alpha0 += alpha0Stride;
+                src1 += src1Stride;
+                alpha1 += alpha1Stride;
+                dst += dstStride;
+            }
+        }
+
+        template <bool align> void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            assert(width >= A);
+            if (align)
+            {
+                assert(Aligned(src0) && Aligned(src0Stride));
+                assert(Aligned(alpha0) && Aligned(alpha0Stride));
+                assert(Aligned(src1) && Aligned(src1Stride));
+                assert(Aligned(alpha1) && Aligned(alpha1Stride));
+                assert(Aligned(dst) && Aligned(dstStride));
+            }
+
+            switch (channelCount)
+            {
+            case 1: AlphaBlending2x<align, 1>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 2: AlphaBlending2x<align, 2>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 3: AlphaBlending2x<align, 3>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            case 4: AlphaBlending2x<align, 4>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, dst, dstStride); break;
+            default:
+                assert(0);
+            }
+        }
+
+        void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride)
+        {
+            if (Aligned(src0) && Aligned(src0Stride) && Aligned(alpha0) && Aligned(alpha0Stride) && 
+                Aligned(src1) && Aligned(src1Stride) && Aligned(alpha1) && Aligned(alpha1Stride) && Aligned(dst) && Aligned(dstStride))
+                AlphaBlending2x<true>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+            else
+                AlphaBlending2x<false>(src0, src0Stride, alpha0, alpha0Stride, src1, src1Stride, alpha1, alpha1Stride, width, height, channelCount, dst, dstStride);
+        }
+
+        //-----------------------------------------------------------------------------------------
 
         template <bool align> void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride)
