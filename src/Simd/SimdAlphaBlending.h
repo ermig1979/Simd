@@ -109,7 +109,7 @@ namespace Simd
             return Divide16uBy255(_mm_mullo_epi16(value, alpha));
         }
     }
-#endif//SIMD_SSE41_ENABLE
+#endif
 
 #ifdef SIMD_AVX2_ENABLE
     namespace Avx2
@@ -123,8 +123,36 @@ namespace Simd
         {
             return _mm256_mulhi_epu16(_mm256_add_epi16(value, K16_0001), K16_0101);
         }
+
+        SIMD_INLINE __m256i AlphaBlending16i(__m256i src, __m256i dst, __m256i alpha)
+        {
+            return Divide16uBy255(_mm256_add_epi16(_mm256_mullo_epi16(src, alpha), _mm256_mullo_epi16(dst, _mm256_sub_epi16(K16_00FF, alpha))));
+        }
+
+        template <bool align> SIMD_INLINE void AlphaBlending(const __m256i* src, __m256i* dst, __m256i alpha)
+        {
+            __m256i _src = Load<align>(src);
+            __m256i _dst = Load<align>(dst);
+            __m256i lo = AlphaBlending16i(_mm256_unpacklo_epi8(_src, K_ZERO), _mm256_unpacklo_epi8(_dst, K_ZERO), _mm256_unpacklo_epi8(alpha, K_ZERO));
+            __m256i hi = AlphaBlending16i(_mm256_unpackhi_epi8(_src, K_ZERO), _mm256_unpackhi_epi8(_dst, K_ZERO), _mm256_unpackhi_epi8(alpha, K_ZERO));
+            Store<align>(dst, _mm256_packus_epi16(lo, hi));
+        }
+
+        template <bool align> SIMD_INLINE void AlphaBlending2x(const __m256i* src0, __m256i alpha0, const __m256i* src1, __m256i alpha1, __m256i* dst)
+        {
+            __m256i _dst = Load<align>(dst);
+            __m256i lo = _mm256_unpacklo_epi8(_dst, K_ZERO);
+            __m256i hi = _mm256_unpackhi_epi8(_dst, K_ZERO);
+            __m256i _src0 = Load<align>(src0);
+            lo = AlphaBlending16i(_mm256_unpacklo_epi8(_src0, K_ZERO), lo, _mm256_unpacklo_epi8(alpha0, K_ZERO));
+            hi = AlphaBlending16i(_mm256_unpackhi_epi8(_src0, K_ZERO), hi, _mm256_unpackhi_epi8(alpha0, K_ZERO));
+            __m256i _src1 = Load<align>(src1);
+            lo = AlphaBlending16i(_mm256_unpacklo_epi8(_src1, K_ZERO), lo, _mm256_unpacklo_epi8(alpha1, K_ZERO));
+            hi = AlphaBlending16i(_mm256_unpackhi_epi8(_src1, K_ZERO), hi, _mm256_unpackhi_epi8(alpha1, K_ZERO));
+            Store<align>(dst, _mm256_packus_epi16(lo, hi));
+        }
     }
-#endif //SIMD_AVX2_ENABLE
+#endif
 
 #ifdef SIMD_AVX512BW_ENABLE
     namespace Avx512bw
@@ -139,6 +167,6 @@ namespace Simd
             return _mm512_mulhi_epu16(_mm512_add_epi16(value, K16_0001), K16_0101);
         }
     }
-#endif //SIMD_AVX512BW_ENABLE
+#endif
 }
-#endif//__SimdAlphaBlending_h__
+#endif

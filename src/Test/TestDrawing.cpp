@@ -207,6 +207,11 @@ namespace Test
             result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Sse41::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
 #endif 
 
+#ifdef SIMD_AVX2_ENABLE
+        if (Simd::Avx2::Enable && W >= Simd::Avx2::A)
+            result = result && AlphaBlending2xAutoTest(FUNC_AB2(Simd::Avx2::AlphaBlending2x), FUNC_AB2(SimdAlphaBlending2x));
+#endif 
+
         return result;
     }
 

@@ -56,6 +56,10 @@ namespace Simd
         void AlphaBlending(const uint8_t *src, size_t srcStride, size_t width, size_t height, size_t channelCount,
             const uint8_t *alpha, size_t alphaStride, uint8_t *dst, size_t dstStride);
 
+        void AlphaBlending2x(const uint8_t* src0, size_t src0Stride, const uint8_t* alpha0, size_t alpha0Stride,
+            const uint8_t* src1, size_t src1Stride, const uint8_t* alpha1, size_t alpha1Stride,
+            size_t width, size_t height, size_t channelCount, uint8_t* dst, size_t dstStride);
+
         void AlphaBlendingUniform(const uint8_t* src, size_t srcStride, size_t width, size_t height,
             size_t channelCount, uint8_t alpha, uint8_t* dst, size_t dstStride);
 
