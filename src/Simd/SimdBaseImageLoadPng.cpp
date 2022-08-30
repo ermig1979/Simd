@@ -387,12 +387,6 @@ namespace Simd
             return PNG_MALLOC(size);
         }
 
-        struct PngContext
-        {
-            uint32_t width, height;
-            int channels, img_out_n;
-        };
-
         static uint8_t png__compute_y(int r, int g, int b)
         {
             return (uint8_t)(((r * 77) + (g * 150) + (29 * b)) >> 8);
@@ -400,6 +394,8 @@ namespace Simd
 
         static uint8_t* png__convert_format(uint8_t* data, int img_n, int req_comp, unsigned int x, unsigned int y)
         {
+            SIMD_PERF_FUNC();
+
             int i, j;
             uint8_t* good;
 
@@ -453,6 +449,8 @@ namespace Simd
 
         static uint16_t* png__convert_format16(uint16_t* data, int img_n, int req_comp, unsigned int x, unsigned int y)
         {
+            SIMD_PERF_FUNC();
+
             int i, j;
             uint16_t* good;
 
@@ -500,7 +498,8 @@ namespace Simd
 
         struct Png
         {
-            PngContext* s;
+            uint32_t width, height;
+            int channels, img_out_n;
             uint8_t * out;
             uint8_t depth;
         };
@@ -542,17 +541,16 @@ namespace Simd
         static int png__create_png_image_raw(Png* a, uint8_t* raw, uint32_t raw_len, int out_n, uint32_t x, uint32_t y, int depth, int color)
         {
             int bytes = (depth == 16 ? 2 : 1);
-            PngContext* s = a->s;
             uint32_t i, j, stride = x * out_n * bytes;
             uint32_t img_len, img_width_bytes;
             int k;
-            int img_n = s->channels; // copy it into a local for later
+            int img_n = a->channels; // copy it into a local for later
 
             int output_bytes = out_n * bytes;
             int filter_bytes = img_n * bytes;
             int width = x;
 
-            assert(out_n == s->channels || out_n == s->channels + 1);
+            assert(out_n == a->channels || out_n == a->channels + 1);
             a->out = (uint8_t*)png__malloc(x*y*output_bytes); // extra bytes to write off the end into
             if (!a->out) return PngError("outofmem", "Out of memory");
 
@@ -788,15 +786,17 @@ namespace Simd
 
         static int png__create_png_image(Png* a, uint8_t* image_data, uint32_t image_data_len, int out_n, int depth, int color, int interlaced)
         {
+            SIMD_PERF_FUNC();
+
             int bytes = (depth == 16 ? 2 : 1);
             int out_bytes = out_n * bytes;
             uint8_t* final;
             int p;
             if (!interlaced)
-                return png__create_png_image_raw(a, image_data, image_data_len, out_n, a->s->width, a->s->height, depth, color);
+                return png__create_png_image_raw(a, image_data, image_data_len, out_n, a->width, a->height, depth, color);
 
             // de-interlacing
-            final = (uint8_t*)png__malloc(a->s->width * a->s->height * out_bytes);
+            final = (uint8_t*)png__malloc(a->width * a->height * out_bytes);
             for (p = 0; p < 7; ++p) 
             {
                 int xorig[] = { 0,4,0,2,0,1,0 };
@@ -805,11 +805,11 @@ namespace Simd
                 int yspc[] = { 8,8,8,4,4,2,2 };
                 int i, j, x, y;
                 // pass1_x[4] = 0, pass1_x[5] = 1, pass1_x[12] = 1
-                x = (a->s->width - xorig[p] + xspc[p] - 1) / xspc[p];
-                y = (a->s->height - yorig[p] + yspc[p] - 1) / yspc[p];
+                x = (a->width - xorig[p] + xspc[p] - 1) / xspc[p];
+                y = (a->height - yorig[p] + yspc[p] - 1) / yspc[p];
                 if (x && y) 
                 {
-                    uint32_t img_len = ((((a->s->channels * x * depth) + 7) >> 3) + 1) * y;
+                    uint32_t img_len = ((((a->channels * x * depth) + 7) >> 3) + 1) * y;
                     if (!png__create_png_image_raw(a, image_data, image_data_len, out_n, x, y, depth, color))
                     {
                         PNG_FREE(final);
@@ -821,7 +821,7 @@ namespace Simd
                         {
                             int out_y = j * yspc[p] + yorig[p];
                             int out_x = i * xspc[p] + xorig[p];
-                            memcpy(final + out_y * a->s->width * out_bytes + out_x * out_bytes,
+                            memcpy(final + out_y * a->width * out_bytes + out_x * out_bytes,
                                 a->out + (j * x + i) * out_bytes, out_bytes);
                         }
                     }
@@ -835,69 +835,32 @@ namespace Simd
             return 1;
         }
 
-        static int png__compute_transparency(Png* z, uint8_t tc[3], int out_n)
+        template<class T> void ComputeTransparency(T * dst, size_t size, size_t out_n, T tc[3])
         {
-            PngContext* s = z->s;
-            uint32_t i, pixel_count = s->width * s->height;
-            uint8_t* p = z->out;
-
-            // compute color-based transparency, assuming we've
-            // already got 255 as the alpha value in the output
-            assert(out_n == 2 || out_n == 4);
-
-            if (out_n == 2) 
+            if (out_n == 2)
             {
-                for (i = 0; i < pixel_count; ++i) 
+                for (size_t i = 0; i < size; ++i)
                 {
-                    p[1] = (p[0] == tc[0] ? 0 : 255);
-                    p += 2;
+                    dst[1] = (dst[0] == tc[0] ? 0 : std::numeric_limits<T>::max());
+                    dst += 2;
                 }
             }
-            else 
+            else if (out_n == 4)
             {
-                for (i = 0; i < pixel_count; ++i) 
+                for (size_t i = 0; i < size; ++i)
                 {
-                    if (p[0] == tc[0] && p[1] == tc[1] && p[2] == tc[2])
-                        p[3] = 0;
-                    p += 4;
+                    if (dst[0] == tc[0] && dst[1] == tc[1] && dst[2] == tc[2])
+                        dst[3] = 0;
+                    dst += 4;
                 }
             }
-            return 1;
-        }
-
-        static int png__compute_transparency16(Png* z, uint16_t tc[3], int out_n)
-        {
-            PngContext* s = z->s;
-            uint32_t i, pixel_count = s->width * s->height;
-            uint16_t* p = (uint16_t*)z->out;
-
-            // compute color-based transparency, assuming we've
-            // already got 65535 as the alpha value in the output
-            assert(out_n == 2 || out_n == 4);
-
-            if (out_n == 2) 
-            {
-                for (i = 0; i < pixel_count; ++i)
-                {
-                    p[1] = (p[0] == tc[0] ? 0 : 65535);
-                    p += 2;
-                }
-            }
-            else 
-            {
-                for (i = 0; i < pixel_count; ++i)
-                {
-                    if (p[0] == tc[0] && p[1] == tc[1] && p[2] == tc[2])
-                        p[3] = 0;
-                    p += 4;
-                }
-            }
-            return 1;
+            else
+                assert(0);
         }
 
         static int png__expand_png_palette(Png* a, uint8_t* palette, int len, int pal_img_n)
         {
-            uint32_t i, pixel_count = a->s->width * a->s->height;
+            uint32_t i, pixel_count = a->width * a->height;
             uint8_t* p, * temp_out, * orig = a->out;
 
             p = (uint8_t*)png__malloc(pixel_count*pal_img_n);
@@ -962,76 +925,65 @@ namespace Simd
         bool ImagePngLoader::FromStream()
         {
             const int req_comp = 4;
-            PngContext context;
-            Png p;
-            p.s = &context;
-            Png* z = &p;
-
-            PngContext* s = z->s;
-
-            z->out = NULL;
 
             if (!ParseFile())
                 return false;
 
-            s->width = _width;
-            s->height = _height;
-            s->channels = _channels;
-            z->depth = _depth;
+            Png p;
+            p.out = NULL;
+            p.width = _width;
+            p.height = _height;
+            p.channels = _channels;
+            p.depth = _depth;
 
             InputMemoryStream zSrc = MergedDataStream();
             OutputMemoryStream zDst(AlignHi(size_t(_width) * _depth, 8) * _height * _channels + _height);
             if(!Zlib::Decode(zSrc, zDst, !_iPhone))
                 return false;
 
-            if ((req_comp == s->channels + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
-                s->img_out_n = s->channels + 1;
+            if ((req_comp == p.channels + 1 && req_comp != 3 && !_paletteChannels) || _hasTrans)
+                p.img_out_n = p.channels + 1;
             else
-                s->img_out_n = s->channels;
-            if (!png__create_png_image(z, zDst.Data(), (int)zDst.Size(), s->img_out_n, z->depth, _color, _interlace))
+                p.img_out_n = p.channels;
+            if (!png__create_png_image(&p, zDst.Data(), (int)zDst.Size(), p.img_out_n, p.depth, _color, _interlace))
                 return 0;
             if (_hasTrans) 
             {
-                if (z->depth == 16)
-                {
-                    if (!png__compute_transparency16(z, _tc16, s->img_out_n))
-                        return false;
-                }
+                if (p.depth == 16)
+                    ComputeTransparency((uint16_t*)p.out, p.width * p.height, p.img_out_n, _tc16);
+
                 else
-                {
-                    if (!png__compute_transparency(z, _tc, s->img_out_n))
-                        return false;
-                }
+                    ComputeTransparency(p.out, p.width * p.height, p.img_out_n, _tc);
             }
             if (_paletteChannels)
             {
-                s->channels = _paletteChannels; // record the actual colors we had
-                s->img_out_n = _paletteChannels;
+                p.channels = _paletteChannels; // record the actual colors we had
+                p.img_out_n = _paletteChannels;
                 if (req_comp >= 3) 
-                    s->img_out_n = req_comp;
-                if (!png__expand_png_palette(z, _palette.data, (int)_palette.size, s->img_out_n))
+                    p.img_out_n = req_comp;
+                if (!png__expand_png_palette(&p, _palette.data, (int)_palette.size, p.img_out_n))
                     return false;
             }
             else if (_hasTrans)
-                ++s->channels;
+                ++p.channels;
 
             if (!(p.depth <= 8 || p.depth == 16))
                 return false;
             uint8_t* data = p.out;
             p.out = NULL;
-            if (req_comp && req_comp != p.s->img_out_n)
+            if (req_comp && req_comp != p.img_out_n)
             {
                 if (p.depth <= 8)
-                    data = png__convert_format((uint8_t*)data, p.s->img_out_n, req_comp, _width, _height);
+                    data = png__convert_format((uint8_t*)data, p.img_out_n, req_comp, _width, _height);
                 else
-                    data = (uint8_t*)png__convert_format16((uint16_t*)data, p.s->img_out_n, req_comp, _width, _height);
-                p.s->img_out_n = req_comp;
+                    data = (uint8_t*)png__convert_format16((uint16_t*)data, p.img_out_n, req_comp, _width, _height);
+                p.img_out_n = req_comp;
                 if (data == NULL)
                     return false;
             }
             if (p.depth == 16)
             {
-                size_t size = context.width * context.height * req_comp;
+                size_t size = p.width * p.height * req_comp;
                 const uint16_t* src = (uint16_t*)data;
                 uint8_t* dst = (uint8_t*)PNG_MALLOC(size);
                 for (size_t i = 0; i < size; ++i)
@@ -1042,24 +994,24 @@ namespace Simd
             PNG_FREE(p.out);
             if (data)
             {
-                size_t stride = 4 * context.width;
-                _image.Recreate(context.width, context.height, (Image::Format)_param.format);
+                size_t stride = 4 * p.width;
+                _image.Recreate(p.width, p.height, (Image::Format)_param.format);
                 switch (_param.format)
                 {
                 case SimdPixelFormatGray8:
-                    Base::RgbaToGray(data, context.width, context.height, stride, _image.data, _image.stride);
+                    Base::RgbaToGray(data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgr24:
-                    Base::BgraToRgb(data, context.width, context.height, stride, _image.data, _image.stride);
+                    Base::BgraToRgb(data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatBgra32:
-                    Base::BgraToRgba(data, context.width, context.height, stride, _image.data, _image.stride);
+                    Base::BgraToRgba(data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgb24:
-                    Base::BgraToBgr(data, context.width, context.height, stride, _image.data, _image.stride);
+                    Base::BgraToBgr(data, p.width, p.height, stride, _image.data, _image.stride);
                     break;
                 case SimdPixelFormatRgba32:
-                    Base::Copy(data, stride, context.width, context.height, 4, _image.data, _image.stride);
+                    Base::Copy(data, stride, p.width, p.height, 4, _image.data, _image.stride);
                     break;
                 default: 
                     break;
