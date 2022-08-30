@@ -27,6 +27,7 @@
 #include "Simd/SimdResizerCommon.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdUpdate.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

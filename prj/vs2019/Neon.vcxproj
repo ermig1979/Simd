@@ -69,6 +69,7 @@
     <ClCompile Include="..\..\src\Simd\SimdNeonMeanFilter3x3.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonMedianFilter.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonNeural.cpp" />
+    <ClCompile Include="..\..\src\Simd\SimdNeonNeuralConvolution.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonOperation.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduce.cpp" />
     <ClCompile Include="..\..\src\Simd\SimdNeonReduceGray2x2.cpp" />
@@ -151,6 +152,7 @@
     <ClInclude Include="..\..\src\Simd\SimdMemory.h" />
     <ClInclude Include="..\..\src\Simd\SimdMemoryStream.h" />
     <ClInclude Include="..\..\src\Simd\SimdNeon.h" />
+    <ClInclude Include="..\..\src\Simd\SimdNeural.h" />
     <ClInclude Include="..\..\src\Simd\SimdParallel.hpp" />
     <ClInclude Include="..\..\src\Simd\SimdPerformance.h" />
     <ClInclude Include="..\..\src\Simd\SimdPoint.hpp" />

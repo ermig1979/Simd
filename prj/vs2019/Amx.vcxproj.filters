@@ -93,12 +93,30 @@
     <ClInclude Include="..\..\src\Simd\SimdTime.h">
       <Filter>Inc</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16Common.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdSynetMergedConvolution32f.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdUpdate.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Simd\SimdAmxCpu.cpp">
       <Filter>Amx</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Simd\SimdAmxSynetConvolution32fBf16.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Input.cpp">
+      <Filter>Amx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Simd\SimdAmxSynetMergedConvolution32fBf16Output.cpp">
       <Filter>Amx</Filter>
     </ClCompile>
   </ItemGroup>

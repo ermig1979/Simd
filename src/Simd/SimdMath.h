@@ -405,30 +405,6 @@ namespace Simd
             return t;
         }
 
-        template <int part> SIMD_INLINE __m128i UnpackI8(__m128i a);
-
-        template <> SIMD_INLINE __m128i UnpackI8<0>(__m128i a)
-        {
-            return _mm_cvtepi8_epi16(a);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackI8<1>(__m128i a)
-        {
-            return _mm_cvtepi8_epi16(_mm_srli_si128(a, 8));
-        }
-
-        template <int part> SIMD_INLINE __m128i UnpackI16(__m128i a);
-
-        template <> SIMD_INLINE __m128i UnpackI16<0>(__m128i a)
-        {
-            return _mm_cvtepi16_epi32(a);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackI16<1>(__m128i a)
-        {
-            return _mm_cvtepi16_epi32(_mm_srli_si128(a, 8));
-        }
-
         template<int shift> SIMD_INLINE __m128 Alignr(const __m128 & s0, const __m128 & s4)
         {
             return _mm_castsi128_ps(_mm_alignr_epi8(_mm_castps_si128(s4), _mm_castps_si128(s0), shift * 4));
@@ -466,23 +442,6 @@ namespace Simd
             return _mm_add_epi16(_mm_add_epi16(a, d), _mm_mullo_epi16(_mm_add_epi16(b, c), K16_0003));
         }
 
-        template <int part> SIMD_INLINE __m128i UnpackU8(__m128i a, __m128i b = K_ZERO);
-
-        template <> SIMD_INLINE __m128i UnpackU8<0>(__m128i a, __m128i b)
-        {
-            return _mm_unpacklo_epi8(a, b);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackU8<1>(__m128i a, __m128i b)
-        {
-            return _mm_unpackhi_epi8(a, b);
-        }
-
-        template<int part> SIMD_INLINE __m128i SubUnpackedU8(__m128i a, __m128i b)
-        {
-            return _mm_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
-        }
-
         template <int index> __m128i U8To16(__m128i a);
 
         template <> SIMD_INLINE __m128i U8To16<0>(__m128i a)
@@ -493,18 +452,6 @@ namespace Simd
         template <> SIMD_INLINE __m128i U8To16<1>(__m128i a)
         {
             return _mm_and_si128(_mm_srli_si128(a, 1), K16_00FF);
-        }
-
-        template <int part> SIMD_INLINE __m128i UnpackU16(__m128i a, __m128i b = K_ZERO);
-
-        template <> SIMD_INLINE __m128i UnpackU16<0>(__m128i a, __m128i b)
-        {
-            return _mm_unpacklo_epi16(a, b);
-        }
-
-        template <> SIMD_INLINE __m128i UnpackU16<1>(__m128i a, __m128i b)
-        {
-            return _mm_unpackhi_epi16(a, b);
         }
 
         SIMD_INLINE __m128i DivideBy16(__m128i value)
@@ -687,18 +634,6 @@ namespace Simd
             return a;
         }
 
-        template <int part> SIMD_INLINE __m256i UnpackU8(__m256i a, __m256i b = K_ZERO);
-
-        template <> SIMD_INLINE __m256i UnpackU8<0>(__m256i a, __m256i b)
-        {
-            return _mm256_unpacklo_epi8(a, b);
-        }
-
-        template <> SIMD_INLINE __m256i UnpackU8<1>(__m256i a, __m256i b)
-        {
-            return _mm256_unpackhi_epi8(a, b);
-        }
-
         template <int index> __m256i U8To16(__m256i a);
 
         template <> SIMD_INLINE __m256i U8To16<0>(__m256i a)
@@ -709,23 +644,6 @@ namespace Simd
         template <> SIMD_INLINE __m256i U8To16<1>(__m256i a)
         {
             return _mm256_and_si256(_mm256_srli_si256(a, 1), K16_00FF);
-        }
-
-        template<int part> SIMD_INLINE __m256i SubUnpackedU8(__m256i a, __m256i b)
-        {
-            return _mm256_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
-        }
-
-        template <int part> SIMD_INLINE __m256i UnpackU16(__m256i a, __m256i b = K_ZERO);
-
-        template <> SIMD_INLINE __m256i UnpackU16<0>(__m256i a, __m256i b)
-        {
-            return _mm256_unpacklo_epi16(a, b);
-        }
-
-        template <> SIMD_INLINE __m256i UnpackU16<1>(__m256i a, __m256i b)
-        {
-            return _mm256_unpackhi_epi16(a, b);
         }
 
         template<int shift> SIMD_INLINE __m256 Alignr(const __m256 & s0, const __m256 & s4)
@@ -1057,18 +975,6 @@ namespace Simd
             return _mm512_add_epi16(_mm512_add_epi16(a, c), _mm512_add_epi16(b, b));
         }
 
-        template <int part> SIMD_INLINE __m512i UnpackU8(__m512i a, __m512i b = K_ZERO);
-
-        template <> SIMD_INLINE __m512i UnpackU8<0>(__m512i a, __m512i b)
-        {
-            return _mm512_unpacklo_epi8(a, b);
-        }
-
-        template <> SIMD_INLINE __m512i UnpackU8<1>(__m512i a, __m512i b)
-        {
-            return _mm512_unpackhi_epi8(a, b);
-        }
-
         template <int index> __m512i U8To16(__m512i a);
 
         template <> SIMD_INLINE __m512i U8To16<0>(__m512i a)
@@ -1079,23 +985,6 @@ namespace Simd
         template <> SIMD_INLINE __m512i U8To16<1>(__m512i a)
         {
             return _mm512_shuffle_epi8(a, K8_SUFFLE_BGRA_TO_G0A0);
-        }
-
-        template <int part> SIMD_INLINE __m512i UnpackU16(__m512i a, __m512i b = K_ZERO);
-
-        template <> SIMD_INLINE __m512i UnpackU16<0>(__m512i a, __m512i b)
-        {
-            return _mm512_unpacklo_epi16(a, b);
-        }
-
-        template <> SIMD_INLINE __m512i UnpackU16<1>(__m512i a, __m512i b)
-        {
-            return _mm512_unpackhi_epi16(a, b);
-        }
-
-        SIMD_INLINE __m512i UnpackHalfU8(__m256i a, __m256i b = Avx2::K_ZERO)
-        {
-            return _mm512_unpacklo_epi8(_mm512_castsi256_si512(a), _mm512_castsi256_si512(b));
         }
 
         SIMD_INLINE __m512i AbsDifferenceU8(__m512i a, __m512i b)
@@ -1130,11 +1019,6 @@ namespace Simd
         SIMD_INLINE __m512i Permuted2Pack16iTo8u(__m512i lo, __m512i hi)
         {
             return _mm512_permutexvar_epi32(K32_PERMUTE_FOR_TWO_UNPACK, _mm512_packus_epi16(lo, hi));
-        }
-
-        template<int part> SIMD_INLINE __m512i SubUnpackedU8(__m512i a, __m512i b)
-        {
-            return _mm512_maddubs_epi16(UnpackU8<part>(a, b), K8_01_FF);
         }
 
         template <bool abs> __m512i ConditionalAbs(__m512i a);

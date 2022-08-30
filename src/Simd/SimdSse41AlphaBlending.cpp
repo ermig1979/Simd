@@ -23,6 +23,7 @@
 */
 #include "Simd/SimdAlphaBlending.h"
 #include "Simd/SimdMemory.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

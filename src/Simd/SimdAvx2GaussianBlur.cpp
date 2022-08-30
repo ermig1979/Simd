@@ -26,6 +26,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdGaussianBlur.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

@@ -24,6 +24,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdBase.h"
 #include "Simd/SimdArray.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

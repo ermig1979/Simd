@@ -26,6 +26,7 @@
 #include "Simd/SimdExtract.h"
 #include "Simd/SimdLoadBlock.h"
 #include "Simd/SimdStore.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

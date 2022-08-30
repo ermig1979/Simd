@@ -26,6 +26,7 @@
 #include "Simd/SimdImageSavePng.h"
 #include "Simd/SimdAvx512bw.h"
 #include "Simd/SimdExtract.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {        

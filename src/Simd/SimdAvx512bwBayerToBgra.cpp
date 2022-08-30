@@ -24,6 +24,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdMemory.h"
 #include "Simd/SimdBayer.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

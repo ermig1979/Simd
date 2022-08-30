@@ -26,6 +26,7 @@
 #include "Simd/SimdConversion.h"
 #include "Simd/SimdSet.h"
 #include "Simd/SimdAlphaBlending.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

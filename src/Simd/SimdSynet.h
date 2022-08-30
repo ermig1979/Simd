@@ -25,6 +25,7 @@
 #define __SimdSynet_h__
 
 #include "Simd/SimdMath.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

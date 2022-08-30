@@ -25,6 +25,7 @@
 #include "Simd/SimdStore.h"
 #include "Simd/SimdCompare.h"
 #include "Simd/SimdBase.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {

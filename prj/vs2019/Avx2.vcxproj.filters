@@ -422,9 +422,6 @@
     <ClInclude Include="..\..\src\Simd\SimdSet.h">
       <Filter>Inc</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Simd\SimdSse2.h">
-      <Filter>Inc</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSse41.h">
       <Filter>Inc</Filter>
     </ClInclude>
@@ -528,6 +525,12 @@
       <Filter>Inc</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Simd\SimdSynetConvolution32fBf16Common.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdInterleave.h">
+      <Filter>Inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Simd\SimdUnpack.h">
       <Filter>Inc</Filter>
     </ClInclude>
   </ItemGroup>

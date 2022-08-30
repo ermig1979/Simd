@@ -28,6 +28,7 @@
 #include "Simd/SimdPow.h"
 #include "Simd/SimdExp.h"
 #include "Simd/SimdNeural.h"
+#include "Simd/SimdUnpack.h"
 
 namespace Simd
 {
