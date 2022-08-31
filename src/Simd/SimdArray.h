@@ -96,6 +96,11 @@ namespace Simd
         {
             return size * sizeof(T);
         }
+
+        SIMD_INLINE bool Empty() const
+        {
+            return data == NULL;
+        }
     };
 
     typedef Array<int8_t> Array8i;

@@ -326,6 +326,7 @@ namespace Simd
 
     public:
         SIMD_INLINE OutputMemoryStream(size_t capacity = 0)
+            :_data(NULL)
         {
             Reset(false);
             if (capacity)

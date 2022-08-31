@@ -317,7 +317,7 @@ namespace Simd
         {
             template<bool align> static SIMD_INLINE void AddMultiplied(const float* src, size_t aligned, size_t partial, size_t full, float value, float* dst)
             {
-                AddMultiplied<align>(src, aligned, partial, full, value, dst);
+                Sse41::AddMultiplied<align>(src, aligned, partial, full, value, dst);
             }
         };
 

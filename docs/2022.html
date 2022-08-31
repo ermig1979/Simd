@@ -54,6 +54,8 @@
  <li>Error (possible negative output values) in AVX-512BW optimizations of function CosineDistancesMxNp16f.</li>
  <li>Error (possible negative output values) in AVX-512BW optimizations of function CosineDistancesMxNa16f.</li>
  <li>Error in AVX-512BW optimizations of function TransformImage.</li>
+ <li>Valgrind warning in OutputMemoryStream.</li>
+ <li>Memory leak in Base implementation of class ImagePngLoader.</li>
 </ul>
 <h5>Replacing</h5>
 <ul>
@@ -170,6 +172,7 @@
 <ul>
  <li>Uninitialized source array in VectorNormNp16fAutoTest.</li>
  <li>Uninitialized source array in CosineDistancesMxNp16fAutoTest.</li>
+ <li>Memory leak in ImageLoadFromMemorySpecialTest.</li>
 </ul>
 
 <h4>Infrastructure</h4>

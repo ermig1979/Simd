@@ -808,6 +808,10 @@ namespace Test
             SaveTestImage(dst2, file, 100, "_2");
         }
 
+        if (dst1.data)
+            Simd::Free(dst1.data);
+        if (dst2.data)
+            SimdFree(dst2.data);
         SimdFree(data);
 
         return result;
